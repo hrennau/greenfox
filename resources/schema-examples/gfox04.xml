@@ -10,7 +10,7 @@
             <folderContent files="summary.xml" includes="all"
                            msg="Result folder must contain file 'summary.xml'."/>
             <file path="summary.xml">
-                <xpath expr="//timestamp" matches="201911.*"/>                
+                <xpath expr="//timestamp" like="201911*"/>                
                 <xpath expr="//buildNumber" matches="${buildNumber}|20190502g"/>
             </file>
             

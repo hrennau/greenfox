@@ -27,6 +27,7 @@ declare function f:validateXPath($doc as element(), $xpath as element(gx:xpath),
     let $lt := $xpath/@lt
     let $le := $xpath/@le
     let $matches := $xpath/@matches
+    let $like := $xpath/@like
     let $flags := string($xpath/@flags)
     let $quantifier := 'all'
     
@@ -91,6 +92,20 @@ declare function f:validateXPath($doc as element(), $xpath as element(gx:xpath),
             else if ($quantifier eq 'some') then 
                 if (some $item in $exprValue satisfies matches($item, $matches, $flags)) then ()
                 else f:constructError_valueComparison($expr, $quantifier, $matches, 'matches', $exprValue)
+        ,
+        if (not($like)) then () else
+            let $regex :=
+                $like !
+                replace(., '\*', '.*') !
+                replace(., '\?', '.') !
+                concat('^', ., '$')
+            return                
+            if ($quantifier eq 'all') then 
+                if (every $item in $exprValue satisfies matches($item, $regex, 'i')) then ()
+                else f:constructError_valueComparison($expr, $quantifier, $regex, 'like', $exprValue)
+            else if ($quantifier eq 'some') then 
+                if (some $item in $exprValue satisfies matches($item, $regex, 'i')) then ()
+                else f:constructError_valueComparison($expr, $quantifier, $regex, 'like', $exprValue)
         ,
         ()
     )
