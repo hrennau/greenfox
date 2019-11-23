@@ -1,0 +1,4 @@
+<toolSettings toolName="greenfox">
+  <namespace func="http://www.greenfox.org/ns/xquery-functions" error="http://www.greenfox.org/ns/error" struct="http://www.greenfox.org/ns/structure"/>
+  <flavor>basex79</flavor>
+</toolSettings>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenFox xmlns="http://www.greenfox.org/ns/schema">
+    <context>
+        <field name="buildNumber" value="20191107a"/>
+    </context>
+    <domain path="${baseUri}" name="main">
+        <folder foxpath="output*">
+            
+            <!-- all output folders -->
+            <folderContent files="summary.xml" includes="all"
+                           msg="Result folder must contain file 'summary.xml'."/>
+            <file path="summary.xml">
+                <xpath expr="//timestamp" matches="201911.*"/>                
+                <xpath expr="//buildNumber" matches="${buildNumber}|20190502g"/>
+            </file>
+            
+            <!-- folders with anchor errors -->
+            <folder foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']">
+                <folderContent files="gibook.xml gi40.xml" includes="all"
+                    msg="If return code is not ERROR_ANCHOR, the files 'gibook.xml' and 'gi40.xml' are expected."/>
+            </folder>
+            
+            <!-- folders with XSD errors -->
+            <folder foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']">
+                <folderContent files="xsd-errors.xml" includes="all"
+                    msg="If return code ERROR_XSD, the file xsd-errors.xml is expected."/>
+                <file path="xsd-errors.xml">
+                    <xpath expr="//error" matches="'(wmf|emf)'"
+                           msg="XSD errors must have a message mentioning image format 'wmf' or 'emf'"/>
+                </file>
+            </folder>
+        </folder>
+    </domain>
+</greenFox>
