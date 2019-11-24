@@ -30,9 +30,22 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         return
             if ($path) then concat($contextPath, '/', $gxFile/@path)
             else f:evaluateFoxpath($foxpath, $contextPath)
-    for $filePath in $filePaths
+    let $instanceCount := count($filePaths)   
+    let $countErrors := i:validateInstanceCount($gxFile, $instanceCount)
+    let $instanceErrors :=        
+        for $filePath in $filePaths
+        return
+            f:validateFileInstance($filePath, $gxFile, $context)
+            
+    let $errors := ($countErrors, $instanceErrors)
     return
-        f:validateFileInstance($filePath, $gxFile, $context)
+        <gx:fileSetErrors>{
+            $gxFile/@id/attribute fileID {.},
+            $gxFile/@label/attribute fileLabel {.},
+            attribute count {count($errors)},
+            $errors
+        }</gx:fileSetErrors>[$errors]
+            
 };
 
 declare function f:validateFileInstance($filePath as xs:string, $gxFile as element(gx:file), $context as map(*)) 
@@ -56,6 +69,12 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             default return error()
     )
     return
-        <gx:fileErrors count="{count($errors)}" filePath="{$filePath}">{$errors}</gx:fileErrors>
+        <gx:fileErrors>{
+            $gxFile/@id/attribute fileID {.},
+            $gxFile/@label/attribute fileLabel {.},
+            attribute count {count($errors)},
+            attribute filePath {$filePath},
+            $errors
+        }</gx:fileErrors>
         [$errors]
 };

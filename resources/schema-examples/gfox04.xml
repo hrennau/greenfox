@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenFox xmlns="http://www.greenfox.org/ns/schema">
+<greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
     <context>
         <field name="buildNumber" value="20191107a"/>
     </context>
-    <domain path="${baseUri}" name="main">
-        <folder foxpath="output*">
+    <domain path="${baseUri}" label="main">
+        <folder foxpath="output*" maxCount="10">
             
             <!-- all output folders -->
             <folderContent files="summary.xml" includes="all"
                            msg="Result folder must contain file 'summary.xml'."/>
-            <file path="summary.xml">
+            <file path="summary.xml" minCount="1">
                 <xpath expr="//timestamp" like="201911*"/>                
-                <xpath expr="//buildNumber" matches="${buildNumber}|20190502g"/>
+                <xpath expr="//buildNumber" matches="${buildNumber}|20190502f"/>
+                <xpath expr="//gi/@fileName" notLike="*testt*"/>
             </file>
             
             <!-- folders with anchor errors -->
-            <folder foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']">
+            <folderSubset foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']" subsetLabel="withAnchorErrors" minCount="15">
                 <folderContent files="gibook.xml gi40.xml" includes="all"
                     msg="If return code is not ERROR_ANCHOR, the files 'gibook.xml' and 'gi40.xml' are expected."/>
-            </folder>
+            </folderSubset>
             
             <!-- folders with XSD errors -->
-            <folder foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']">
+            <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']" subsetLabel="withXsdErrors" maxCount="4">
                 <folderContent files="xsd-errors.xml" includes="all"
                     msg="If return code ERROR_XSD, the file xsd-errors.xml is expected."/>
                 <file path="xsd-errors.xml">
                     <xpath expr="//error" matches="'(wmf|emf)'"
                            msg="XSD errors must have a message mentioning image format 'wmf' or 'emf'"/>
                 </file>
-            </folder>
+            </folderSubset>
         </folder>
     </domain>
 </greenFox>

@@ -54,7 +54,8 @@ declare function f:validateOp($request as element())
         
     let $validationReport := i:validateSystem($gfox, $context)
     return
-        <z:validationReport countErrors="{count($validationReport//gx:error)}">{
+        <gx:validationReport countErrors="{count($validationReport//gx:error)}" validationTime="{current-dateTime()}">{
+           $gfox/@greenfoxURI,
            $validationReport
-        }</z:validationReport>
+        }</gx:validationReport>
 };        

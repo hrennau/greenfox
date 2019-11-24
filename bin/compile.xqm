@@ -37,10 +37,10 @@ declare function f:compileGfox($gxdoc as element(gx:greenFox), $externalContext 
                 map:entry($name, $value)
         )                
     )
-    return (
-        f:compileGfoxRC($gxdoc, $context, ()),
-        $context
-    )
+    let $gxdoc2 := f:compileGfoxRC($gxdoc, $context, ())
+    let $gxdoc3 := f:compileGfox_addIds($gxdoc2)
+    return
+        ($gxdoc3, $context)
 };
 
 (:~
@@ -167,4 +167,19 @@ declare function f:externalContext($params as xs:string?) as map(*) {
                       replace(., '^.*?=\s*', '')
             )
         )
+};
+
+declare function f:compileGfox_addIds($gfox as element(gx:greenFox)) {
+    copy $gfox_ := $gfox
+    modify
+        let $elems := ($gfox_//*) except ($gfox_/gx:context/descendant-or-self::*)
+        for $elem in $elems
+        group by $localName := local-name($elem)
+        return
+            for $e at $pos in $elem
+            let $id := concat($localName, '_', $pos)
+            where not($e/@id)
+            return
+                insert node attribute id {$id} as first into $e
+    return $gfox_                
 };

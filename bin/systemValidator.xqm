@@ -63,6 +63,12 @@ declare function f:validateDomain($gxDomain as element(gx:domain), $context as m
             default return error()
     return
         if (empty($errors)) then () else
-            <gx:domainErrors count="{count($errors/descendant-or-self::gx:error)}" domain="{$name}" domainPath="{$baseURI}">{$errors}</gx:domainErrors>
+            <gx:domainErrors>{
+                $gxDomain/@id/attribute domainID {.},
+                $gxDomain/@label/attribute domainLabel {.},
+                attribute count {count($errors/descendant-or-self::gx:error)},
+                attribute domainPath {$baseURI},
+                $errors
+            }</gx:domainErrors>
 };
 
