@@ -56,6 +56,8 @@ declare function f:validateOp($request as element())
     return
         <gx:validationReport countErrors="{count($validationReport//gx:error)}" validationTime="{current-dateTime()}">{
            $gfox/@greenfoxURI,
-           $validationReport
+           for $error in $validationReport//gx:error
+           order by $error/@id
+           return $error
         }</gx:validationReport>
 };        

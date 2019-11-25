@@ -38,7 +38,7 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         let $path := $gxFolder/@path
         let $foxpath := $gxFolder/@foxpath
         return
-            if ($path) then concat($contextPath, '/', $gxFolder/@path)
+            if ($path) then concat($contextPath, '/', $gxFolder/@path)[file:exists(.)]
             else i:evaluateFoxpath($foxpath, $contextPath)
     let $instanceCount := count($folderPaths)   
     let $countErrors := i:validateInstanceCount($gxFolder, $instanceCount)
@@ -48,11 +48,11 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
     let $subsetErrors :=
         for $gxFolderSubset in $gxFolder/gx:folderSubset
         let $subsetLabel := $gxFolderSubset/@subsetLabel
-        let $foxpath := trace($gxFolderSubset/@foxpath , 'SUBSET_FOLDER_FOXPATH: ')
-        let $subsetPaths := trace( (
+        let $foxpath := $gxFolderSubset/@foxpath
+        let $subsetPaths := (
             for $folderPath in $folderPaths
             return i:evaluateFoxpath($foxpath, $folderPath) 
-        )[. = $folderPaths]  , 'SUBSET_PATHS: ')
+        )[. = $folderPaths]
         let $subsetInstanceCount := count($subsetPaths)
         let $countErrors := i:validateInstanceCount($gxFolderSubset, $subsetInstanceCount)
         let $instanceErrors :=
@@ -125,7 +125,7 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
                     <gx:error class="folder">{
                         $folderContent/@id/attribute folderContentID {.},
                         $folderContent/@label/attribute folderContentLabel {.},
-                        attribute code {missing-files},
+                        attribute code {"missing-files"},
                         attribute folderPath {$folderPath},
                         attribute filePaths {$missingFiles},
                         attribute msg {$msgFolderContent}

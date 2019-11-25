@@ -9,10 +9,19 @@
             <!-- all output folders -->
             <folderContent files="summary.xml" includes="all"
                            msg="Result folder must contain file 'summary.xml'."/>
+            <file foxpath="*">
+                <lastModified min="2019-11-25T14:53"/>
+            </file>
             <file path="summary.xml" minCount="1">
                 <xpath expr="//timestamp" like="20191125-*"/>                
                 <xpath expr="//buildNumber" eq="${buildNumber}"/>
             </file>
+
+            <!-- folders with figures -->
+            <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" minCount="20">
+                <folderContent files="images.zip" includes="all"
+                    msg="If gibook contains figures, archive images.zip is expected."/>
+            </folderSubset>            
             
             <!-- folders with anchor errors -->
             <folderSubset foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']" subsetLabel="withoutAnchorErrors" minCount="12">

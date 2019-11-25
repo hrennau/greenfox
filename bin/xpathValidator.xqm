@@ -17,6 +17,10 @@ declare function f:validateXPath($doc as element(), $xpath as element(gx:xpath),
     let $constraintId := $xpath/@id
     let $constraintLabel := $xpath/@label
     
+    let $minCount := $xpath/@minCount
+    let $maxCount := $xpath/@maxCount
+    let $count := $xpath/@count
+    
     let $eq := $xpath/@eq   
     let $ne := $xpath/@ne
     let $gt := $xpath/@gt
@@ -35,7 +39,13 @@ declare function f:validateXPath($doc as element(), $xpath as element(gx:xpath),
         '': $doc
     }
     let $exprValue := xquery:eval($expr, $exprContext)
+    
     let $errors := (
+        (: count errors
+           ============ :)
+        if (empty($maxCount) or count($exprValue) le $maxCount/xs:integer(.)) then () else
+            f:constructError_countComparison($constraintId, $constraintLabel, $expr, $maxCount, $exprValue, ())
+        ,
         if (not($eq)) then () else
             if ($quantifier eq 'all') then 
                 if (every $item in $exprValue satisfies $item eq $eq) then ()
@@ -162,6 +172,28 @@ declare function f:constructError_valueComparison($constraintId as attribute()?,
         if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
     }</gx:error>                                                  
 };
+
+declare function f:constructError_countComparison($constraintId as attribute()?,
+                                                  $constraintLabel as attribute()?,
+                                                  $expr as xs:string, 
+                                                  $constraintAtt as attribute(), 
+                                                  $exprValue as item()*,
+                                                  $additionalAtts as attribute()*) 
+        as element(gx:error) {
+    <gx:error class="xpath">{
+        $constraintId,
+        $constraintLabel,
+        attribute expr {$expr},
+        $constraintAtt,
+        attribute actualCount {count($exprValue)},
+        if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},
+        $additionalAtts,        
+        if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
+    }</gx:error>                                                  
+};
+
+
+
 
 
 

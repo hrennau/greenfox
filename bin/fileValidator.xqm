@@ -17,7 +17,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "xpathValidator.xqm";
+    "xpathValidator.xqm",
+    "lastModifiedValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -28,7 +29,7 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         let $path := $gxFile/@path
         let $foxpath := $gxFile/@foxpath
         return
-            if ($path) then concat($contextPath, '/', $gxFile/@path)
+            if ($path) then concat($contextPath, '/', $gxFile/@path)[file:exists(.)]
             else f:evaluateFoxpath($foxpath, $contextPath)
     let $instanceCount := count($filePaths)   
     let $countErrors := i:validateInstanceCount($gxFile, $instanceCount)
@@ -66,6 +67,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         return
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateXPath($doc, $xpath, $context)
+            case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             default return error()
     )
     return
