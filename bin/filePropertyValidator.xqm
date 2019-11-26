@@ -17,16 +17,31 @@ declare function f:validateLastModified($filePath as xs:string, $lastModified as
     let $constraintId := $lastModified/@id
     let $constraintLabel := $lastModified/@label
     
-    let $min := $lastModified/@min/attribute minValue {.}
-    let $max := $lastModified/@max/attribute maxValue {.}
+    let $lt := $lastModified/@lt
+    let $gt := $lastModified/@gt
+    let $le := $lastModified/@le
+    let $ge := $lastModified/@ge
+    let $eq := $lastModified/@eq
     
     let $actValue := file:last-modified($filePath) ! string(.)
     
     let $errors := (
         (: count errors
            ============ :)
-        if (empty($min) or $actValue ge $min) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $min, $actValue, ())
+        if (empty($lt) or $actValue lt $lt) then () else
+            f:constructError_lastModified($constraintId, $constraintLabel, $lt, $actValue, ())
+        ,
+        if (empty($gt) or $actValue gt $gt) then () else
+            f:constructError_lastModified($constraintId, $constraintLabel, $gt, $actValue, ())
+        ,
+        if (empty($le) or $actValue le $le) then () else
+            f:constructError_lastModified($constraintId, $constraintLabel, $le, $actValue, ())
+        ,
+        if (empty($ge) or $actValue ge $ge) then () else
+            f:constructError_lastModified($constraintId, $constraintLabel, $ge, $actValue, ())
+        ,
+        if (empty($eq) or $actValue eq $eq) then () else
+            f:constructError_lastModified($constraintId, $constraintLabel, $eq, $actValue, ())
         ,
         ()
     )
@@ -42,14 +57,8 @@ declare function f:constructError_lastModified($constraintId as attribute()?,
                                                $actualValue as xs:string,
                                                $additionalAtts as attribute()*) 
         as element(gx:error) {
-    let $code :=
-        if ($constraint/local-name(.) eq 'minValue') then 'last-modified-too-early'
-        else if ($constraint/local-name(.) eq 'maxValue') then 'last-modified-too-late'
-        else error()
-    let $msg :=
-        if ($constraint/local-name(.) eq 'minValue') then 'Last-modified time before expected minimum value.'
-        else if ($constraint/local-name(.) eq 'maxValue') then 'Last-modified time after expected maximum value.'
-        else error()
+    let $code := 'last-modified-not-' || local-name($constraint)
+    let $msg := concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint)
     return
     
         <gx:error class="lastModified" code="{$code}">{

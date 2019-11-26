@@ -10,7 +10,7 @@
             <folderContent files="summary.xml" includes="all"
                            msg="Result folder must contain file 'summary.xml'."/>
             <file foxpath="*">
-                <lastModified min="2019-11-25T14:53"/>
+                <lastModified le="2019-11-25T15:03:05" ge="2019-11-25T14:52:16"/>
             </file>
             <file path="summary.xml" minCount="1">
                 <xpath expr="//timestamp" like="20191125-*"/>                
@@ -18,7 +18,7 @@
             </file>
 
             <!-- folders with figures -->
-            <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" minCount="20">
+            <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" maxCount="13">
                 <folderContent files="images.zip" includes="all"
                     msg="If gibook contains figures, archive images.zip is expected."/>
             </folderSubset>            

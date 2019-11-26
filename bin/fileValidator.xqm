@@ -18,7 +18,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "xpathValidator.xqm",
-    "lastModifiedValidator.xqm";
+    "filePropertyValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
