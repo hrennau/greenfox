@@ -51,7 +51,7 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
 
 declare function f:validateFileInstance($filePath as xs:string, $gxFile as element(gx:file), $context as map(*)) 
         as element()* {
-    (: let $_LOG := trace($filePath, 'FILE_PATH: ') :)
+    (: let $_LOG := trace($filePath, 'FILE_PATH: ') :) 
 
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
@@ -68,6 +68,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateXPath($doc, $xpath, $context)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
+            case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             default return error()
     )
     return

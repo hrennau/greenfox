@@ -51,6 +51,45 @@ declare function f:validateLastModified($filePath as xs:string, $lastModified as
         
 };
 
+declare function f:validateFileSize($filePath as xs:string, $fileSize as element(gx:fileSize), $context)
+        as element()* {
+    let $constraintId := $fileSize/@id
+    let $constraintLabel := $fileSize/@label
+    
+    let $lt := $fileSize/@lt
+    let $gt := $fileSize/@gt
+    let $le := $fileSize/@le
+    let $ge := $fileSize/@ge
+    let $eq := $fileSize/@eq
+    
+    let $actValue := file:size($filePath)
+    
+    let $errors := (
+        (: count errors
+           ============ :)
+        if (empty($lt) or $actValue lt $lt/xs:integer(.)) then () else
+            f:constructError_fileSize($constraintId, $constraintLabel, $lt, $actValue, ())
+        ,
+        if (empty($gt) or $actValue gt $gt/xs:integer(.)) then () else
+            f:constructError_fileSize($constraintId, $constraintLabel, $gt, $actValue, ())
+        ,
+        if (empty($le) or $actValue le $le/xs:integer(.)) then () else
+            f:constructError_fileSize($constraintId, $constraintLabel, $le, $actValue, ())
+        ,
+        if (empty($ge) or $actValue ge $ge/xs:integer(.)) then () else
+            f:constructError_fileSize($constraintId, $constraintLabel, $ge, $actValue, ())
+        ,
+        if (empty($eq) or $actValue eq $eq/xs:integer(.)) then () else
+            f:constructError_fileSize($constraintId, $constraintLabel, $eq, $actValue, ())
+        ,
+        ()
+    )
+    return
+        <gx:fileSizeErrors count="{count($errors)}">{$errors}</gx:fileSizeErrors>
+        [$errors]
+        
+};
+
 declare function f:constructError_lastModified($constraintId as attribute()?,
                                                $constraintLabel as attribute()?,
                                                $constraint as attribute(),
@@ -62,6 +101,26 @@ declare function f:constructError_lastModified($constraintId as attribute()?,
     return
     
         <gx:error class="lastModified" code="{$code}">{
+            $constraintId,
+            $constraintLabel,
+            $constraint,
+            attribute actValue {$actualValue},
+            attribute message {$msg},
+            $additionalAtts        
+        }</gx:error>                                                  
+};
+
+declare function f:constructError_fileSize($constraintId as attribute()?,
+                                           $constraintLabel as attribute()?,
+                                           $constraint as attribute(),
+                                           $actualValue as xs:integer,
+                                           $additionalAtts as attribute()*) 
+        as element(gx:error) {
+    let $code := 'file-size-not-' || local-name($constraint)
+    let $msg := concat('File size not ', local-name($constraint), ' check value = ', $constraint)
+    return
+    
+        <gx:error class="fileSize" code="{$code}">{
             $constraintId,
             $constraintLabel,
             $constraint,

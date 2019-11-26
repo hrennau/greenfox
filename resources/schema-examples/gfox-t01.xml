@@ -9,8 +9,9 @@
             <!-- all output folders -->
             <folderContent files="summary.xml" includes="all"
                            msg="Result folder must contain file 'summary.xml'."/>
+            
             <file foxpath="*">
-                <lastModified le="2019-11-25T15:03:05" ge="2019-11-25T14:52:16"/>
+                <lastModified ge="2019-11-25T14:52:16"/>
             </file>
             <file path="summary.xml" minCount="1">
                 <xpath expr="//timestamp" like="20191125-*"/>                
@@ -23,10 +24,13 @@
                     msg="If gibook contains figures, archive images.zip is expected."/>
             </folderSubset>            
             
-            <!-- folders with anchor errors -->
+            <!-- folders without anchor errors -->
             <folderSubset foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']" subsetLabel="withoutAnchorErrors" minCount="12">
                 <folderContent files="gibook.xml gi40.xml" includes="all"
                     msg="If return code is not ERROR_ANCHOR, the files 'gibook.xml' and 'gi40.xml' are expected."/>
+                <file path="gibook.xml">
+                    <fileSize gt="15000"/>
+                </file>
             </folderSubset>
             
             <!-- folders with XSD errors -->
@@ -39,7 +43,7 @@
                     <xpath expr="//error[not(@puMsg)]" maxCount="0"
                         msg="XSD errors must have a @puMsg attribute"/>
                 </file>
-            </folderSubset>
+            </folderSubset>           
         </folder>
     </domain>
 </greenFox>
