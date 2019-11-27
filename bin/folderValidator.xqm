@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : domainValidator.xqm - Document me!
+ : folderValidator.xqm - Document me!
  :
  : -------------------------------------------------------------------------
  :)
@@ -17,6 +17,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "expressionValueConstraint.xqm",
     "fileValidator.xqm",
     "foxpathEvaluator.xqm",
     "greenfoxUtil.xqm";
@@ -33,33 +34,37 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFolder($gxFolder as element(), $context as map(*)) 
         as element()* {
-    let $contextPath := $context?_contextPath
-    let $folderPaths :=
+    let $contextPath := trace($context?_contextPath , 'CONTEXT_PATH: ')
+    let $targetPaths :=
         let $path := $gxFolder/@path
         let $foxpath := $gxFolder/@foxpath
         return
-            if ($path) then concat($contextPath, '/', $gxFolder/@path)[file:exists(.)]
-            else i:evaluateFoxpath($foxpath, $contextPath)
-    let $instanceCount := count($folderPaths)   
-    let $countErrors := i:validateInstanceCount($gxFolder, $instanceCount)
+            if ($path) then concat($contextPath, '/', $gxFolder/@path)[file:exists(.)][file:is-dir(.)]
+            else 
+                let $value := i:evaluateFoxpath($foxpath, $contextPath)
+                return
+                    if ($value instance of element(errors)) then error()
+                    else $value
+    let $targetCount := count($targetPaths)   
+    let $targetCountErrors := i:validateTargetCount($gxFolder, $targetCount)
     let $instanceErrors :=
-        for $folderPath in $folderPaths
-        return f:validateFolderInstance($folderPath, $gxFolder, $context)
+        for $targetPath in $targetPaths
+        return f:validateFolderInstance($targetPath, $gxFolder, $context)
     let $subsetErrors :=
         for $gxFolderSubset in $gxFolder/gx:folderSubset
         let $subsetLabel := $gxFolderSubset/@subsetLabel
         let $foxpath := $gxFolderSubset/@foxpath
-        let $subsetPaths := (
-            for $folderPath in $folderPaths
-            return i:evaluateFoxpath($foxpath, $folderPath) 
-        )[. = $folderPaths]
-        let $subsetInstanceCount := count($subsetPaths)
-        let $countErrors := i:validateInstanceCount($gxFolderSubset, $subsetInstanceCount)
+        let $subsetTargetPaths := (
+            for $targetPath in $targetPaths
+            return i:evaluateFoxpath($foxpath, $targetPath) 
+        )[. = $targetPaths] => distinct-values()
+        let $subsetTargetCount := count($subsetTargetPaths)
+        let $targetCountErrors := i:validateTargetCount($gxFolderSubset, $subsetTargetCount)
         let $instanceErrors :=
-            for $subsetPath in $subsetPaths
-            return f:validateFolderInstance($subsetPath, $gxFolderSubset, $context)
-        return ($countErrors, $instanceErrors)
-    let $errors := ($countErrors, $instanceErrors, $subsetErrors)
+            for $subsetTargetPath in $subsetTargetPaths
+            return f:validateFolderInstance($subsetTargetPath, $gxFolderSubset, $context)
+        return ($targetCountErrors, $instanceErrors)
+    let $errors := ($targetCountErrors, $instanceErrors, $subsetErrors)
     return
         <gx:folderSetErrors>{
             $gxFolder/@id/attribute folderID {.},
@@ -74,17 +79,13 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $folderPath)
     
-    (: determine member files and folders :)
-    let $members := file:list($folderPath, true(), '*')
-    let $memberFiles := $members[file:is-file(concat($folderPath, '/', .))]
-    let $memberFolders := $members[file:is-dir(.)]
-
     (: perform validations :)
     let $errors := (
         (: validate - container members :)
         for $child in $gxFolder/*
         return
             typeswitch($child)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $context)
             case $file as element(gx:file) return i:validateFile($file, $context)
             case $folder as element(gx:folder) return i:validateFolder($folder, $context)
             case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
@@ -106,7 +107,8 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
         as element()* {
     (: determine expectations :)
     let $expectedFiles := $folderContent/@files/tokenize(.) 
-    let $includes := $folderContent/@includes/tokenize(.)
+    let $closed := ($folderContent/@closed, 'false')[1]
+    let $quant := ($folderContent/@quant, 'all')[1]
     let $msgFolderContent := $folderContent/@msg
     
     (: determine member files and folders :)
@@ -117,9 +119,9 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
     (: perform validations :)
     let $errors := (
         if (empty($expectedFiles)) then () else
-            (: validate - expected files (@includes=all) :)
-            if (not($includes = 'all')) then () 
-            else            
+            (: validate - missing files? :)
+            if ($quant = 'all')
+            then 
                 let $missingFiles := $expectedFiles[not(. = $memberFiles)]
                 return
                     <gx:error class="folder">{
@@ -131,9 +133,19 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
                         attribute msg {$msgFolderContent}
                     }</gx:error>
                     [exists($missingFiles)]
+            else if (exists($expectedFiles[. = $memberFiles])) then ()
+            else
+                <gx:error class="folder">{
+                    $folderContent/@id/attribute folderContentID {.},
+                    $folderContent/@label/attribute folderContentLabel {.},
+                    attribute code {"missing-some-of-expected-files"},
+                    attribute folderPath {$folderPath},
+                    attribute filePaths {$expectedFiles},
+                    attribute msg {$msgFolderContent}
+                }</gx:error>
             ,
-            (: validate - expected files (@includes=no-other) :)
-            if (not($includes = 'no-other')) then ()
+            (: validate - expected files? :)
+            if (not($closed = 'true')) then ()
             else
                 let $unexpectedFiles := $memberFiles[not(. = $expectedFiles)]
                 return

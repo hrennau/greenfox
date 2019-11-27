@@ -17,28 +17,28 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "xpathValidator.xqm",
-    "filePropertyValidator.xqm";
+    "expressionValueConstraint.xqm",
+    "filePropertiesConstraint.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
     let $contextPath := $context?_contextPath
-    let $filePaths :=
+    let $targetPaths :=
         let $path := $gxFile/@path
         let $foxpath := $gxFile/@foxpath
         return
-            if ($path) then concat($contextPath, '/', $gxFile/@path)[file:exists(.)]
+            if ($path) then concat($contextPath, '/', $gxFile/@path)[file:exists(.)][file:is-file(.)]
             else f:evaluateFoxpath($foxpath, $contextPath)
-    let $instanceCount := count($filePaths)   
-    let $countErrors := i:validateInstanceCount($gxFile, $instanceCount)
+    let $targetCount := count($targetPaths)   
+    let $targetCountErrors := i:validateTargetCount($gxFile, $targetCount)
     let $instanceErrors :=        
-        for $filePath in $filePaths
+        for $targetPath in $targetPaths
         return
-            f:validateFileInstance($filePath, $gxFile, $context)
+            f:validateFileInstance($targetPath, $gxFile, $context)
             
-    let $errors := ($countErrors, $instanceErrors)
+    let $errors := ($targetCountErrors, $instanceErrors)
     return
         <gx:fileSetErrors>{
             $gxFile/@id/attribute fileID {.},
@@ -66,7 +66,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         for $child in $gxFile/*
         return
             typeswitch($child)
-            case $xpath as element(gx:xpath) return i:validateXPath($doc, $xpath, $context)
+            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             default return error()

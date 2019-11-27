@@ -51,7 +51,7 @@ declare function f:validateSystem($gx as element(gx:greenFox), $context as map(*
  :)
 declare function f:validateDomain($gxDomain as element(gx:domain), $context as map(*))
         as element()* {
-    let $baseURI := $gxDomain/@path
+    let $baseURI := $gxDomain/@path/string()
     let $name := $gxDomain/@name
     let $context := map:put($context, '_contextPath', $baseURI)
     let $context := map:put($context, '_domainName', $name)

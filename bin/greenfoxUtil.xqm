@@ -22,13 +22,13 @@ declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates instance count constraints applying to a resource set.
+ : Validates the target count of a resource shape.
  :
- : @param shape the shape constraining the resource set
- : @instanceCount the number of instances belonging to the shape target
+ : @param shape a resource shape
+ : @targetCount the number of instances belonging to the target of the shape
  : @return elements signaling violations of the count constraints
  :) 
-declare function f:validateInstanceCount($shape as element(), $instanceCount as xs:integer)
+declare function f:validateTargetCount($shape as element(), $targetCount as xs:integer)
         as element()* {
     let $class := 
         let $lname := $shape/local-name(.)
@@ -42,30 +42,32 @@ declare function f:validateInstanceCount($shape as element(), $instanceCount as 
     let $minCount := $shape/@minCount/xs:integer(.)
     let $maxCount := $shape/@maxCount/xs:integer(.)
     let $countErrors := (
-        if (empty($count) or $instanceCount eq $count) then () else            
+        if (empty($count) or $targetCount eq $count) then () else            
             <gx:error class="{$class}">{ 
                       $shape/@id/attribute {$idAttName} {.},
                       $identAtt/attribute {$labelAttName} {.},
-                      attribute code {'unexpected-instance-count'},
+                      attribute code {'unexpected-target-count'},
                       attribute expectedCount {$count},
-                      attribute actualCount {$instanceCount}
+                      attribute actualCount {$targetCount}
             }</gx:error>,
-        if (empty($minCount) or $instanceCount ge $minCount) then () else            
+        if (empty($minCount) or $targetCount ge $minCount) then () else            
             <gx:error class="{$class}">{
                       $shape/@id/attribute {$idAttName} {.},
                       $identAtt/attribute {$labelAttName} {.},            
-                      attribute code {'too-small-instance-count'},
+                      attribute code {'too-small-target-count'},
                       attribute expectedMinCount {$minCount},
-                      attribute actualCount {$instanceCount}
+                      attribute actualCount {$targetCount}
             }</gx:error>,
-        if (empty($maxCount) or $instanceCount le $maxCount) then () else            
+        if (empty($maxCount) or $targetCount le $maxCount) then () else            
             <gx:error class="{$class}">{
                       $shape/@id/attribute {$idAttName} {.},
                       $identAtt/attribute {$labelAttName} {.},            
-                      attribute code {'too-large-instance-count'},
+                      attribute code {'too-large-target-count'},
                       attribute expectedMaxCount {$maxCount},
-                      attribute actualCount {$instanceCount}
+                      attribute actualCount {$targetCount}
             }</gx:error>
     )
     return $countErrors
 };
+
+

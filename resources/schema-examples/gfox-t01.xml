@@ -4,22 +4,23 @@
         <field name="buildNumber" value="20191125a"/>
     </context>
     <domain path="${baseUri}" label="main">
-        <folder foxpath="output*" count="13">
+        <folder foxpath="output*" count="15">
+            <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'WARNING_ANCHOR'))]" eq=""/>
             
             <!-- all output folders -->
-            <folderContent files="summary.xml" includes="all"
+            <folderContent files="summary.xml" quant="all"
                            msg="Result folder must contain file 'summary.xml'."/>
             
             <file foxpath="*">
-                <lastModified ge="2019-11-25T14:52:16"/>
+                <lastModified ge="2019-11-27"/>
             </file>
             <file path="summary.xml" minCount="1">
-                <xpath expr="//timestamp" like="20191125-*"/>                
+                <xpath expr="//timestamp" like="20191127-*"/>                
                 <xpath expr="//buildNumber" eq="${buildNumber}"/>
             </file>
 
             <!-- folders with figures -->
-            <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" maxCount="13">
+            <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" maxCount="15">
                 <folderContent files="images.zip" includes="all"
                     msg="If gibook contains figures, archive images.zip is expected."/>
             </folderSubset>            
@@ -29,12 +30,12 @@
                 <folderContent files="gibook.xml gi40.xml" includes="all"
                     msg="If return code is not ERROR_ANCHOR, the files 'gibook.xml' and 'gi40.xml' are expected."/>
                 <file path="gibook.xml">
-                    <fileSize gt="15000"/>
+                    <fileSize gt="13000"/>
                 </file>
             </folderSubset>
             
             <!-- folders with XSD errors -->
-            <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']" subsetLabel="withXsdErrors" minCount="4" maxCount="4">
+            <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']" subsetLabel="withXsdErrors" count="5">
                 <folderContent files="xsd-errors.xml" includes="all"
                     msg="If return code ERROR_XSD, the file xsd-errors.xml is expected."/>
                 <file path="xsd-errors.xml">

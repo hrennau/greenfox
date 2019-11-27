@@ -22,9 +22,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:evaluateFoxpath($foxpath as xs:string, $context as item()?)
         as item()* {
+    let $isContextUri := not($context instance of node())
     let $foxpathOptions := 
         map{    
-            'IS_CONTEXT_URI': true(),
+            'IS_CONTEXT_URI': $isContextUri,
             'FOXSTEP_SEPERATOR': '\\',
             'NODESTEP_SEPERATOR': '/'
         }
