@@ -5,6 +5,21 @@
     </context>
     <domain path="${baseUri}" label="main">
         <folder foxpath="output*" count="15">
+            
+            <folderName matches="output\.\d+"/>
+            
+            <file foxpath="*.zip">
+                <fileName eq="images.zip"/>
+            </file>
+
+            <file foxpath="*.docx">
+                <fileName eq="checkreport.docx"/>
+            </file>
+
+            <file foxpath="*.xml">
+                <fileName matches="^(gibook|gi40|.*-errors|.*-warnings|summary).xml$"/>
+            </file>
+            
             <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'ERROR_ANCHOR', 'WARNING_ANCHOR'))]" eq=""/>
             
             <!-- all output folders -->

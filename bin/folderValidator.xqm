@@ -89,6 +89,8 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             case $file as element(gx:file) return i:validateFile($file, $context)
             case $folder as element(gx:folder) return i:validateFolder($folder, $context)
             case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
+            case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
+            case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)            
             case element(gx:folderSubset) return ()
             default return error()
     )

@@ -90,6 +90,70 @@ declare function f:validateFileSize($filePath as xs:string, $fileSize as element
         
 };
 
+(:~
+ : Constraint component, constraining the file or folder name.
+ : The constraint element $fileName can be a <gx:fileName> or a <gx:folderName>.
+ :)
+declare function f:validateFileName($filePath as xs:string, $fileName as element(), $context)
+        as element()* {
+    let $constraintId := $fileName/@id
+    let $constraintLabel := $fileName/@label
+    
+    let $eq := $fileName/@eq
+    let $like := $fileName/@like
+    let $matches := $fileName/@matches
+    let $ne := $fileName/@ne
+    let $notLike := $fileName/@notLike
+    let $notMatches := $fileName/@notMatches
+    
+    let $actValue := file:name($filePath) ! string(.)
+    let $flags := string($fileName/@flags)
+    
+    let $errors := (
+        if (empty($eq) or $actValue eq $eq) then () else
+            f:constructError_fileName($constraintId, $constraintLabel, $eq, $actValue, ())
+        ,
+        if (empty($ne) or $actValue ne $ne) then () else
+            f:constructError_fileName($constraintId, $constraintLabel, $ne, $actValue, ())
+        ,
+        if (empty($matches) or matches($actValue, $matches, $flags)) then () else
+            f:constructError_fileName($constraintId, $constraintLabel, $matches, $actValue, ())
+        ,
+        if (empty($notMatches) or not(matches($actValue, $notMatches, $flags))) then () else
+            f:constructError_fileName($constraintId, $constraintLabel, $notMatches, $actValue, ())
+        ,
+        if (not($like)) then () else
+            let $useFlags :=
+                if ($flags[string()]) then $flags else 'i'
+            let $regex :=
+                $like !
+                replace(., '\*', '.*') !
+                replace(., '\?', '.') !
+                concat('^', ., '$')
+            return                
+                if (matches($actValue, $regex, $flags)) then () else
+                    f:constructError_fileName($constraintId, $constraintLabel, $like, $actValue, ())
+        ,
+        if (not($notLike)) then () else
+            let $useFlags :=
+                if ($flags[string()]) then $flags else 'i'
+            let $regex :=
+                $notLike !
+                replace(., '\*', '.*') !
+                replace(., '\?', '.') !
+                concat('^', ., '$')
+            return                
+                if (not(matches($actValue, $regex, $flags))) then () else
+                    f:constructError_fileName($constraintId, $constraintLabel, $notLike, $actValue, ())
+        ,        
+        ()
+    )
+    return
+        <gx:fileNameErrors count="{count($errors)}">{$errors}</gx:fileNameErrors>
+        [$errors]
+        
+};
+
 declare function f:constructError_lastModified($constraintId as attribute()?,
                                                $constraintLabel as attribute()?,
                                                $constraint as attribute(),
@@ -129,3 +193,28 @@ declare function f:constructError_fileSize($constraintId as attribute()?,
             $additionalAtts        
         }</gx:error>                                                  
 };
+
+declare function f:constructError_fileName($constraintId as attribute()?,
+                                           $constraintLabel as attribute()?,
+                                           $constraint as attribute(),
+                                           $actualValue as xs:string,
+                                           $additionalAtts as attribute()*) 
+        as element(gx:error) {
+    let $constraintName := local-name($constraint)
+    let $code := 'file-name-' || $constraintName
+    let $msg := concat('File name ',
+                    if ($constraintName eq 'matches') then 'does not match '
+                    else concat('not ', $constraintName, ' '),
+                    'check value = ', $constraint)
+    return
+    
+        <gx:error class="fileName" code="{$code}">{
+            $constraintId,
+            $constraintLabel,
+            $constraint,
+            attribute actValue {$actualValue},
+            attribute message {$msg},
+            $additionalAtts        
+        }</gx:error>                                                  
+};
+

@@ -69,6 +69,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
+            case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
             default return error()
     )
     return
