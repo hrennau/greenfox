@@ -34,12 +34,12 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFolder($gxFolder as element(), $context as map(*)) 
         as element()* {
-    let $contextPath := trace($context?_contextPath , 'CONTEXT_PATH: ')
+    let $contextPath := $context?_contextPath
     let $targetPaths :=
         let $path := $gxFolder/@path
         let $foxpath := $gxFolder/@foxpath
         return
-            if ($path) then concat($contextPath, '/', $gxFolder/@path)[file:exists(.)][file:is-dir(.)]
+            if ($path) then concat($contextPath, '\', $gxFolder/@path)[file:exists(.)][file:is-dir(.)]
             else 
                 let $value := i:evaluateFoxpath($foxpath, $contextPath)
                 return

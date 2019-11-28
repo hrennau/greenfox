@@ -26,7 +26,7 @@ declare function f:evaluateFoxpath($foxpath as xs:string, $context as item()?)
     let $foxpathOptions := 
         map{    
             'IS_CONTEXT_URI': $isContextUri,
-            'FOXSTEP_SEPERATOR': '\\',
+            'FOXSTEP_SEPERATOR': '\',
             'NODESTEP_SEPERATOR': '/'
         }
     let $foxpathContext := map{}
@@ -38,7 +38,7 @@ declare function f:parseFoxpath($foxpath as xs:string)
     let $foxpathOptions := 
         map{    
             'IS_CONTEXT_URI': true(),
-            'FOXSTEP_SEPERATOR': '\\',
+            'FOXSTEP_SEPERATOR': '\',
             'NODESTEP_SEPERATOR': '/'
         }
     return tt:parseFoxpath($foxpath, $foxpathOptions)

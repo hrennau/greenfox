@@ -24,6 +24,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateGreenFox($gfox as element(gx:greenFox)) 
         as element()* {
     let $errors := (
+    
         let $xpathExpressions := $gfox//gx:xpath/@expr
         for $expr in $xpathExpressions
         return
@@ -41,8 +42,9 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
                
         ,
         let $foxpathExpressions := $gfox//@foxpath
-        for $expr in $foxpathExpressions
+        for $expr in $foxpathExpressions        
         let $plan := f:parseFoxpath($expr)
+        
         return
             if ($plan/self::*:errors) then
                 <gx:error code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenFoxLocation(.)}">{

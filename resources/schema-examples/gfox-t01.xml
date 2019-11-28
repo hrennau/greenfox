@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
     <context>
-        <field name="buildNumber" value="20191125a"/>
+        <field name="buildNumber" value="20191128a-SNAPSHOT"/>
     </context>
     <domain path="${baseUri}" label="main">
         <folder foxpath="output*" count="15">
-            <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'WARNING_ANCHOR'))]" eq=""/>
+            <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'ERROR_ANCHOR', 'WARNING_ANCHOR'))]" eq=""/>
             
             <!-- all output folders -->
             <folderContent files="summary.xml" quant="all"
                            msg="Result folder must contain file 'summary.xml'."/>
             
             <file foxpath="*">
-                <lastModified ge="2019-11-27"/>
+                <lastModified ge="2019-11-28"/>
             </file>
             <file path="summary.xml" minCount="1">
-                <xpath expr="//timestamp" like="20191127-*"/>                
+                <xpath expr="//timestamp" like="20191128-*"/>                
                 <xpath expr="//buildNumber" eq="${buildNumber}"/>
             </file>
 
             <!-- folders with figures -->
             <folderSubset foxpath=".[gibook.xml//*:figure]" subsetLabel="withImages" maxCount="15">
-                <folderContent files="images.zip" includes="all"
+                <folderContent files="images.zip" quant="all"
                     msg="If gibook contains figures, archive images.zip is expected."/>
             </folderSubset>            
             
             <!-- folders without anchor errors -->
             <folderSubset foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']" subsetLabel="withoutAnchorErrors" minCount="12">
-                <folderContent files="gibook.xml gi40.xml" includes="all"
+                <folderContent files="gibook.xml gi40.xml" quant="all"
                     msg="If return code is not ERROR_ANCHOR, the files 'gibook.xml' and 'gi40.xml' are expected."/>
                 <file path="gibook.xml">
                     <fileSize gt="13000"/>
@@ -36,13 +36,11 @@
             
             <!-- folders with XSD errors -->
             <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']" subsetLabel="withXsdErrors" count="5">
-                <folderContent files="xsd-errors.xml" includes="all"
-                    msg="If return code ERROR_XSD, the file xsd-errors.xml is expected."/>
+                <folderContent files="xsd-errors.xml" quant="all"
+                               msg="If return code ERROR_XSD, the file xsd-errors.xml is expected."/>
                 <file path="xsd-errors.xml">
-                    <xpath expr="//error" matches="'(wmf|emf)'"
-                           msg="XSD errors must have a message mentioning image format 'wmf' or 'emf'"/>
-                    <xpath expr="//error[not(@puMsg)]" maxCount="0"
-                        msg="XSD errors must have a @puMsg attribute"/>
+                    <xpath expr="//error[not(@puMsg) and not(matches(., 'wurde beginnend mit Element .(l:)?table. gefunden.'))]" maxCount="0"
+                           msg="XSD errors must have a @puMsg attribute, or contain the text '{likst, paragraph}'"/>
                 </file>
             </folderSubset>           
         </folder>
