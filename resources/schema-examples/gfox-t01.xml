@@ -8,6 +8,11 @@
             
             <folderName matches="output\.\d+"/>
             
+            <folderContent files="summary.xml" quant="all"
+                msg="Result folder must contain file 'summary.xml'."/>
+            
+            <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'ERROR_ANCHOR', 'WARNING_ANCHOR'))]" eq=""/>
+            
             <file foxpath="*.zip">
                 <fileName eq="images.zip"/>
             </file>
@@ -19,12 +24,6 @@
             <file foxpath="*.xml">
                 <fileName matches="^(gibook|gi40|.*-errors|.*-warnings|summary).xml$"/>
             </file>
-            
-            <foxpath expr="summary.xml//returnCode[not(. = ('OK', 'ERROR_XSD', 'ERROR_ANCHOR', 'WARNING_ANCHOR'))]" eq=""/>
-            
-            <!-- all output folders -->
-            <folderContent files="summary.xml" quant="all"
-                           msg="Result folder must contain file 'summary.xml'."/>
             
             <file foxpath="*">
                 <lastModified ge="2019-11-28"/>

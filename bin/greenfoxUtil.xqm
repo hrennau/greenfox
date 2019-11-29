@@ -70,4 +70,21 @@ declare function f:validateTargetCount($shape as element(), $targetCount as xs:i
     return $countErrors
 };
 
+(:~
+ : Creates an augmented copy of an error element, adding specified attributes.
+ :
+ : @param error an error element
+ : @param atts attributes to be added
+ : @return augmented error element
+ :)
+declare function f:augmentErrorElement($error as element(gx:error), $atts as attribute()+, $position as xs:string?)
+        as element(gx:error) {
+    let $addedAttNames := $atts/node-name(.)        
+    let $curAtts := $error/@*[not(node-name(.) = $addedAttNames)]
+    return
+        element {node-name($error)} {
+            if ($position eq 'first') then ($atts, $curAtts) else ($curAtts, $atts),
+            $error/node()
+        }};        
+
 

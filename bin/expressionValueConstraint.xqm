@@ -53,6 +53,12 @@ declare function f:validateExpressionValue($constraint as element(),
         if (empty($maxCount) or count($exprValue) le $maxCount/xs:integer(.)) then () else
             f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $maxCount, $exprValue, ())
         ,
+        if (empty($minCount) or count($exprValue) ge $minCount/xs:integer(.)) then () else
+            f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $minCount, $exprValue, ())
+        ,
+        if (empty($count) or count($exprValue) eq $count/xs:integer(.)) then () else
+            f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $count, $exprValue, ())
+        ,
         if (not($eq)) then () else
             if ($quantifier eq 'all') then 
                 if (every $item in $exprValue satisfies $item = $eq) then ()
@@ -65,7 +71,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         if (not($ne)) then () else
             if ($quantifier eq 'all') then 
-                if (every $item in $exprValue satisfies $item ne $ne) then ()
+                if (every $item in $exprValue satisfies $item != $ne) then ()
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $ne, 'ne', $exprValue, ())
             else if ($quantifier eq 'some') then 
@@ -75,7 +81,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         if (not($gt)) then () else
             if ($quantifier eq 'all') then 
-                if (every $item in $exprValue satisfies $item gt $gt) then ()
+                if (every $item in $exprValue satisfies $item > $gt) then ()
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $gt, 'gt', $exprValue, ())
             else if ($quantifier eq 'some') then 
@@ -85,7 +91,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         if (not($lt)) then () else
             if ($quantifier eq 'all') then 
-                if (every $item in $exprValue satisfies $item lt $lt) then ()
+                if (every $item in $exprValue satisfies $item < $lt) then ()
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $lt, 'lt', $exprValue, ())
             else if ($quantifier eq 'some') then 
@@ -95,7 +101,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         if (not($ge)) then () else
             if ($quantifier eq 'all') then 
-                if (every $item in $exprValue satisfies $item ge $gt) then ()
+                if (every $item in $exprValue satisfies $item >= $gt) then ()
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $ge, 'ge', $exprValue, ())
             else if ($quantifier eq 'some') then 
@@ -105,7 +111,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         if (not($le)) then () else
             if ($quantifier eq 'all') then 
-                if (every $item in $exprValue satisfies $item le $gt) then ()
+                if (every $item in $exprValue satisfies $item <= $gt) then ()
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $le, 'le', $exprValue, ())
             else if ($quantifier eq 'some') then 
@@ -187,9 +193,9 @@ declare function f:constructError_valueComparison($exprLang as xs:string,
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
         as element(gx:error) {
-    <gx:error class="{$exprLang}">{
-        $constraintId,
-        $constraintLabel,
+    <gx:error constraintComp="{$exprLang}">{
+        $constraintId/attribute constraintID {.},
+        $constraintLabel/attribute constraintLabel {.},
         attribute expr {$expr},
         attribute quantifier {$quantifier},
         attribute valueExpected {$valueExpected},
@@ -209,9 +215,9 @@ declare function f:constructError_countComparison($exprLang as xs:string,
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
         as element(gx:error) {
-    <gx:error class="{$exprLang}">{
-        $constraintId,
-        $constraintLabel,
+    <gx:error constraintComp="{$exprLang}">{
+        $constraintId/attribute constraintID {.},
+        $constraintLabel/attribute constraintLabel {.},
         attribute expr {$expr},
         $constraintAtt,
         attribute actualCount {count($exprValue)},
