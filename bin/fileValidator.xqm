@@ -30,7 +30,7 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         let $foxpath := $gxFile/@foxpath
         return
             if ($path) then concat($contextPath, '\', $gxFile/@path)[file:exists(.)][file:is-file(.)]
-            else trace( f:evaluateFoxpath($foxpath, $contextPath) , 'FOXPATH_VALUE: ')
+            else f:evaluateFoxpath($foxpath, $contextPath)
     let $targetCount := count($targetPaths)   
     let $targetCountErrors := i:validateTargetCount($gxFile, $targetCount)
     let $instanceErrors :=        
@@ -63,7 +63,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     
     (: perform validations :)
     let $errors := (
-        for $child in $gxFile/*
+        for $child in $gxFile/*[not(@deactivated eq 'true')]
         let $raw :=
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)

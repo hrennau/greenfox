@@ -2,13 +2,34 @@
 <greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
     <context>
         <field name="revision" value="12"/>
+        <field name="folderPostfix" value=""/>"
+        <field name="fex" value=".edmx"/>
     </context>
     
     <domain path="\projects\sap\projects\odata" label="main">
-        <folder foxpath="services" count="1">
+        
+        <folder foxpath="services${folderPostfix}" count="1">
             
+            <file foxpath="*${fex}" minCount="100">
+                <!-- *** Constraint:
+                     Kind:      xpath
+                     Semantics: @Type on <Property> has a value starting with 'Edm.' 
+                 -->                
+                <xpath label="Only simple property types" count="0" deactivated="true"
+                    expr="//*:Property/@Type[not(starts-with(., 'Edm.'))] => distinct-values() => sort()"
+                />
+                
+                <!-- *** Constraint:
+                     Kind:      xpath
+                     Semantics: There are no occurrences of <EnumType>. 
+                 -->                
+                <xpath label="No enumeration types" eq="0" 
+                    expr="//*:EnumType/@Name => count()"
+                />            
+                
+            </file>
             
-            <file foxpath="*.edmx[//*:ComplexType]" count="23">
+            <file foxpath="*.${fex}[//*:ComplexType]" count="0">
                 
                 <!-- *** Constraint:
                      Kind:      xpath
@@ -18,14 +39,6 @@
 (for $ctypeName in //*:ComplexType/@Name => distinct-values()
  return //(* except *:ComplexType)/@*[matches(., '^(.*\.)?' || $ctypeName || '$')]/local-name(.)
 ) => distinct-values() => sort()" 
-                />
-
-                <!-- *** Constraint:
-                     Kind:      xpath
-                     Semantics: @Type on <Property> has a value starting with 'Edm.' 
-                 -->                
-                <xpath count="0" 
-                       expr="//*:Property/@Type[not(starts-with(., 'Edm.'))] => distinct-values() => sort()"
                 />
                 
             </file>
