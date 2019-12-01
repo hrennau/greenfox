@@ -2,9 +2,9 @@
 <greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
     <context>
         <field name="lastModified" value="2019-12-01"/>
-    </context>
-    
-    <domain path="\tt\greenfox\resources\example-system" label="system-abc">        
+    </context>    
+    <domain path="\tt\greenfox\resources\example-system" label="system-abc">    
+        
         <!-- *** Root folder containing the test system *** -->
         <folder foxpath="system-abc"> 
             <targetSize msg="Expecting exactly one folder 'system-abc" count="1"/>
@@ -30,8 +30,7 @@
                             let $expRootNameRS := ./local-name(*) ! replace(., 'RQ$', 'RS')
                             let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]/local-name(*)
                             return 
-                                $expRootNameRS = $actRootNameRS"                        
-                        />          
+                                $expRootNameRS = $actRootNameRS" />          
                     </file>
                 </folder>
                 
@@ -65,8 +64,7 @@
                             let $expRootNameRS := $jdoc/*/local-name(*) ! replace(., 'RQ$', 'RS')
                             let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]\json-doc(.)/*/local-name(*)
                             return 
-                                $expRootNameRS = $actRootNameRS"                        
-                        />                        
+                                $expRootNameRS = $actRootNameRS" />                        
                     </file>
                 </folder>               
                 
@@ -75,7 +73,8 @@
                     
                     <!-- *** JSON response message *** -->                    
                     <file foxpath="*" mediatype="json">
-                        <lastModified ge="${lastModified}" msg="Stale output file"/>
+                        <!-- *** Check - response not stale? *** -->
+                        <lastModified msg="Stale output file" ge="${lastModified}"/>
                         
                         <!-- *** Critical check - return code ok? *** -->                        
                         <xpath msg="Return code should be OK or NOTFOUND" expr="//*:returnCode" matches="^(OK|NOTFOUND)$"/>
