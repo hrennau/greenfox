@@ -148,7 +148,7 @@ declare function f:determineRequiredBindingsFoxpath($query as xs:string,
         as xs:string* {
     let $query := f:finalizeQuery($query, $candidateBindings)
     let $_DEBUG := file:write('DEBUG_QUERY.txt', $query)
-    let $tree := trace(f:parseFoxpath($query) , '# FOR_DET_REQ_BINDINGS_TREE: ')
+    let $tree := f:parseFoxpath($query)
     return (
         $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()
     )[. = $candidateBindings]

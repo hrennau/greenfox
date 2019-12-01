@@ -66,18 +66,18 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     let $components := $gxFile/*[not(@deactivated eq 'true')]
     let $mediatype := $gxFile/@mediatype 
     
-    let $requiredBindings := trace(
+    let $requiredBindings :=
         for $child in $components[self::gx:xpath, self::gx:foxpath]
         return (
             $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
             $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc'))
-            ) => distinct-values() => sort(), '### REQUIRED BINDINGS: ')
+            ) => distinct-values() => sort()
             
     let $jdoc :=
         if ($mediatype eq 'json' or $requiredBindings = 'json') then
         let $text := unparsed-text($filePath)
         return try {json:parse($text)} catch * {()}
-    let $xdoc := trace(
+    let $xdoc :=
         let $required := 
             $requiredBindings = 'doc'
             or
@@ -85,7 +85,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         return
             if (not($required)) then () 
             else if (doc-available($filePath)) then doc($filePath)
-            else () , 'XDOC: ')
+            else ()
     let $csvdoc := ()            
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     

@@ -1,73 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
     <context>
-        <field name="namespace" value="http://example.com/s1"/>
-        <field name="lastModified" value="2019-11-01"/>
+        <field name="lastModified" value="2019-12-01"/>
     </context>
     
     <domain path="\tt\greenfox\resources\example-system" label="system-abc">        
+        <!-- *** Root folder containing the test system *** -->
         <folder foxpath="system-abc"> 
-            <targetSize count="1" 
-                        msg="Expecting exactly one folder 'system-abc"/>
+            <targetSize msg="Expecting exactly one folder 'system-abc" count="1"/>
+            
+            <!-- *** Folder containing a single test *** -->
             <folder foxpath=".\\test-*[input][output][config]">
-                <targetSize count="2"/>
+                <targetSize msg="Test system without tests" minCount="1"/>
                 
-                <folder foxpath="input[*.xml]" deactivated="true">
+                <!-- ===================
+                      X M L   t e s t s 
+                     =================== -->
+                
+                <!-- *** XML input folder (containing request messages) *** -->
+                <folder foxpath="input[*.xml]">
+                    
+                    <!-- *** XML request message *** -->
                     <file foxpath="*">
-                        <targetSize minCount="1" 
-                                    msg="Input folder must contain at least one msg"/>
-                        <foxpath msg="For every input msg, there must be an output msg with corresponding root name"
-                                 eq="true"
-                                 expr="
-let $expFileNameRS := file-name(.) ! replace(., 'RQ.xml$', 'RS.xml')                            
-let $expRootNameRS := ./local-name(*) ! replace(., 'RQ$', 'RS')
-let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]/local-name(*)
-return 
-    $expRootNameRS = $actRootNameRS"                        
+                        <targetSize msg="Input folder without request msgs" minCount="1"/>
+                        
+                        <!-- Critical check - for each request a successful response ? -->
+                        <foxpath msg="Request without matching response" eq="true" expr="
+                            let $expFileNameRS := file-name(.) ! replace(., 'RQ.xml$', 'RS.xml')                            
+                            let $expRootNameRS := ./local-name(*) ! replace(., 'RQ$', 'RS')
+                            let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]/local-name(*)
+                            return 
+                                $expRootNameRS = $actRootNameRS"                        
                         />          
                     </file>
                 </folder>
                 
-                <folder foxpath="input[*.json]" deactivated="true">
-                    <file foxpath="*" mediatype="json">
-                        <targetSize minCount="1" 
-                            msg="Input folder must contain at least one msg"/>
-                        <xpath expr="/json/*/local-name(.)" matches="RQ" deactivated="true"/>
-                        <foxpath expr="$jdoc/json/*/local-name(.)" matches="RQ" deactivated="true"/>
-                        
-                        <foxpath msg="For every input msg, there must be an output msg with corresponding root name"
-                            eq="true"
-                            expr="
-let $expFileNameRS := file-name(.) ! replace(., 'RQ.json$', 'RS.json')                            
-let $expRootNameRS := $jdoc/*/local-name(*) ! replace(., 'RQ$', 'RS')
-let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]\json-doc(.)/*/local-name(*)
-return 
-    $expRootNameRS = $actRootNameRS"                        
-                        />          
-                        
-                    </file>
-                </folder>
-                
-                <folder foxpath="output[*.xml]" deactivated="true">
+                <!-- *** XML output folder (containing response messages) *** -->                
+                <folder foxpath="output[*.xml]">
+                    
+                    <!-- *** XML response message *** -->                    
                     <file foxpath="*">
-                        <lastModified ge="${lastModified}"
-                            msg="Output files must be newly written."/>
-                        <xpath expr="//*:returnCode" matches="OK|NOTFOUND"
-                            msg="Return code should be OK or NOTFOUND"/>
-                    </file>
-                </folder>
-
-                <folder foxpath="output[*.json]" deactivated="false">
-                    <file foxpath="*" mediatype="json">
-                        <lastModified ge="${lastModified}"
-                            msg="Output files must be newly written."/>
-                        <xpath expr="//*:returnCode" matches="^(OK|NOTFOUND)$"
-                            msg="Return code should be OK or NOTFOUND"/>
+                        <!-- *** Check - response not stale? *** -->
+                        <lastModified msg="Stale output file" ge="${lastModified}"/>
+                        
+                        <!-- *** Critical check - return code ok? *** -->
+                        <xpath msg="Return code indicates error" expr="//*:returnCode" matches="^(OK|NOTFOUND)$"/>
                     </file>
                 </folder>
                 
+                <!--  =====================
+                       J S O N   t e s t s 
+                      ===================== -->
+                
+                <!-- *** JSON input folder (containing request messages) *** -->                
+                <folder foxpath="input[*.json]">
+                    
+                    <!-- *** JSON request message *** -->                    
+                    <file foxpath="*" mediatype="json">
+                        <targetSize msg="Input folder without request msgs" minCount="1"/>
+                        
+                        <!-- *** Critical check - for each request a successful response ? *** -->
+                        <foxpath msg="Request without matching response" eq="true" expr="
+                            let $expFileNameRS := file-name(.) ! replace(., 'RQ.json$', 'RS.json')                            
+                            let $expRootNameRS := $jdoc/*/local-name(*) ! replace(., 'RQ$', 'RS')
+                            let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]\json-doc(.)/*/local-name(*)
+                            return 
+                                $expRootNameRS = $actRootNameRS"                        
+                        />                        
+                    </file>
+                </folder>               
+                
+                <!-- *** JSON output folder (containing response messages) *** -->
+                <folder foxpath="output[*.json]">
+                    
+                    <!-- *** JSON response message *** -->                    
+                    <file foxpath="*" mediatype="json">
+                        <lastModified ge="${lastModified}" msg="Stale output file"/>
+                        
+                        <!-- *** Critical check - return code ok? *** -->                        
+                        <xpath msg="Return code should be OK or NOTFOUND" expr="//*:returnCode" matches="^(OK|NOTFOUND)$"/>
+                    </file>
+                </folder>
             </folder>
         </folder>
-    </domain>
-    
+    </domain>    
 </greenFox>

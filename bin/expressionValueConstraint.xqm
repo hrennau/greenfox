@@ -20,14 +20,19 @@ declare function f:validateExpressionValue($constraint as element(),
                                            $contextItem as item()?,
                                            $context as map(*))
         as element()* {
-    let $exprLang := if ($constraint/self::gx:xpath) then 'xpath' 
-                     else if ($constraint/self::gx:foxpath) then 'foxpath'
-                     else error()
+    let $exprLang := 
+        if ($constraint/self::gx:xpath) then 'xpath' 
+        else if ($constraint/self::gx:foxpath) then 'foxpath'
+        else error()
     let $expr := $constraint/@expr
     let $exprValue :=
+    
+        (: XPath - a single map contains context item and external variables :)
         if ($constraint/self::gx:xpath) then
             let $exprContext := map:put($context, '', $contextItem)
-            return xquery:eval($expr, $exprContext)        
+            return xquery:eval($expr, $exprContext)
+            
+        (: foxpath - context item is one parameter, map with external variables another parameter :)            
         else
             let $exprContext := $context
             let $requiredBindings := map:keys($context)
@@ -66,6 +71,8 @@ declare function f:validateExpressionValue($constraint as element(),
         if (empty($count) or count($exprValue) eq $count/xs:integer(.)) then () else
             f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $count, $exprValue, ())
         ,
+        (: comparison errors
+           ================= :)
         if (not($eq)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item = $eq)) then ()
@@ -126,6 +133,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $le, $exprValue, ())
         ,
+        (: match errors
+           ============ :)
         if (not($matches)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies matches($item, $matches, $flags))) then ()
@@ -146,6 +155,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
                                                       $quantifier, $notMatches, $exprValue, attribute flags {$flags})
         ,
+        (: like errors
+           =========== :)
         if (not($like)) then () else
             let $useFlags :=
                 if ($flags[string()]) then $flags else 'i'

@@ -29,8 +29,8 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
         let $xpathExpressions := $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]/@expr
         for $expr in $xpathExpressions
         
-        let $requiredBindings := trace(i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc')) , '### REQUIRED_BINDINGS: ')        
-        let $augmentedExpr := trace( i:finalizeQuery($expr, $requiredBindings) , '### AUGMENTED_EXPR: ')
+        let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc'))        
+        let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
         
         return
             try {
