@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<getFooRQ xmlns="http://example.com/s1">
+    <fooID>123</fooID>
+</getFooRQ>

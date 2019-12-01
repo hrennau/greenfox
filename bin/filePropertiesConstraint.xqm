@@ -12,20 +12,35 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateLastModified($filePath as xs:string, $lastModified as element(gx:lastModified), $context)
+declare function f:validateLastModified($filePath as xs:string, $constraint as element(gx:lastModified), $context)
         as element()* {
-    let $constraintId := $lastModified/@id
-    let $constraintLabel := $lastModified/@label
+    let $constraintId := $constraint/@id
+    let $constraintLabel := $constraint/@label
     
-    let $lt := $lastModified/@lt
-    let $gt := $lastModified/@gt
-    let $le := $lastModified/@le
-    let $ge := $lastModified/@ge
-    let $eq := $lastModified/@eq
+    let $lt := $constraint/@lt
+    let $gt := $constraint/@gt
+    let $le := $constraint/@le
+    let $ge := $constraint/@ge
+    let $eq := $constraint/@eq
     
     let $actValue := file:last-modified($filePath) ! string(.)
     
-    let $errors := (
+    let $error := (
+        exists($lt) and $actValue >= $lt
+        or
+        exists($le) and $actValue > $le
+        or
+        exists($gt) and $actValue <= $gt
+        or 
+        exists($ge) and $actValue < $ge
+        or
+        exists($eq) and $actValue != $eq
+    )
+    where $error
+    return
+        f:constructError_lastModified($constraint, $actValue)
+(:        
+    (
         (: count errors
            ============ :)
         if (empty($lt) or $actValue lt $lt) then () else
@@ -46,9 +61,8 @@ declare function f:validateLastModified($filePath as xs:string, $lastModified as
         ()
     )
     return
-        <gx:lastModifiedErrors count="{count($errors)}">{$errors}</gx:lastModifiedErrors>
-        [$errors]
-        
+        $errors
+        :)
 };
 
 declare function f:validateFileSize($filePath as xs:string, $fileSize as element(gx:fileSize), $context)
@@ -154,23 +168,21 @@ declare function f:validateFileName($filePath as xs:string, $fileName as element
         
 };
 
-declare function f:constructError_lastModified($constraintId as attribute()?,
-                                               $constraintLabel as attribute()?,
-                                               $constraint as attribute(),
-                                               $actualValue as xs:string,
-                                               $additionalAtts as attribute()*) 
+declare function f:constructError_lastModified($constraint as element(gx:lastModified),
+                                               $actualValue as xs:string) 
         as element(gx:error) {
-    let $code := 'last-modified-not-' || local-name($constraint)
-    let $msg := concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint)
+    let $constraintParams := $constraint/(@lt, @le, @gt, @ge, @eq)          
+    let $msg := 
+        ($constraint/@msg,
+         concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint))[1]
     return
     
-        <gx:error class="lastModified" code="{$code}">{
-            $constraintId,
-            $constraintLabel,
-            $constraint,
-            attribute actValue {$actualValue},
-            attribute message {$msg},
-            $additionalAtts        
+        <gx:error constraintComp="lastModified">{
+            $constraint/@id/attribute constraintID {.},
+            $constraint/@label/attribute constraintLabel {.},
+            $constraintParams,
+            attribute actualValue {$actualValue},
+            attribute message {$msg}
         }</gx:error>                                                  
 };
 

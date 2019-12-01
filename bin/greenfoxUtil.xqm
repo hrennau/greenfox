@@ -28,8 +28,31 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @targetCount the number of instances belonging to the target of the shape
  : @return elements signaling violations of the count constraints
  :) 
-declare function f:validateTargetCount($shape as element(), $targetCount as xs:integer)
+declare function f:validateTargetCount($constraint as element(), $targetCount as xs:integer)
         as element()* {
+    let $constraintParams := $constraint/(@count, @minCount, @maxCount)  
+    
+    let $count := $constraint/@count/xs:integer(.)
+    let $minCount := $constraint/@minCount/xs:integer(.)
+    let $maxCount := $constraint/@maxCount/xs:integer(.)
+    let $error := (
+        exists($count) and $count ne $targetCount
+        or
+        exists($minCount) and $minCount gt $targetCount
+        or 
+        exists($maxCount) and $maxCount lt $targetCount
+    )
+    where $error    
+    return
+        let $msg := $constraint/@msg
+        return
+            <gx:error constraintComp="targetCount">{ 
+                $constraint/@id/attribute constraintID {.},
+                $constraintParams,
+                attribute actCount {$targetCount},
+                $msg
+            }</gx:error>
+(:    
     let $class := 
         let $lname := $shape/local-name(.)
         return concat($lname, if (contains($lname, 'Subset')) then 'Size' else 'SetSize')     
@@ -43,12 +66,11 @@ declare function f:validateTargetCount($shape as element(), $targetCount as xs:i
     let $maxCount := $shape/@maxCount/xs:integer(.)
     let $countErrors := (
         if (empty($count) or $targetCount eq $count) then () else            
-            <gx:error class="{$class}">{ 
-                      $shape/@id/attribute {$idAttName} {.},
-                      $identAtt/attribute {$labelAttName} {.},
-                      attribute code {'unexpected-target-count'},
-                      attribute expectedCount {$count},
-                      attribute actualCount {$targetCount}
+            <gx:error constraintComp="targetCount">{ 
+                      $constraint/@id/attribute constraintID {.},
+                      $params,
+                      attribute actCount {$targetCount},
+                      $msg
             }</gx:error>,
         if (empty($minCount) or $targetCount ge $minCount) then () else            
             <gx:error class="{$class}">{
@@ -68,6 +90,7 @@ declare function f:validateTargetCount($shape as element(), $targetCount as xs:i
             }</gx:error>
     )
     return $countErrors
+:)    
 };
 
 (:~

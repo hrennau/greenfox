@@ -30,9 +30,12 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         let $foxpath := $gxFile/@foxpath
         return
             if ($path) then concat($contextPath, '\', $gxFile/@path)[file:exists(.)][file:is-file(.)]
-            else f:evaluateFoxpath($foxpath, $contextPath)
+            else f:evaluateFoxpath($foxpath, $contextPath)[file:is-file(.)]
+            
+    (: check: targetSize :)
     let $targetCount := count($targetPaths)   
-    let $targetCountErrors := i:validateTargetCount($gxFile, $targetCount)
+    let $targetCountErrors := $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
+    
     let $instanceErrors :=        
         for $targetPath in $targetPaths
         return
@@ -67,12 +70,14 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         let $raw :=
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $context)            
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
+            case element(gx:targetSize) return ()
             default return error()
         return
-            $raw//gx:error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+            $raw/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
     )
     return
         <gx:fileErrors>{

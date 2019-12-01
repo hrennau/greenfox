@@ -41,12 +41,15 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         return
             if ($path) then concat($contextPath, '\', $gxFolder/@path)[file:exists(.)][file:is-dir(.)]
             else 
-                let $value := i:evaluateFoxpath($foxpath, $contextPath)
+                let $value := i:evaluateFoxpath($foxpath, $contextPath)[file:is-dir(.)]
                 return
                     if ($value instance of element(errors)) then error()
                     else $value
+                    
+    (: check: targetSize :)                    
     let $targetCount := count($targetPaths)   
-    let $targetCountErrors := i:validateTargetCount($gxFolder, $targetCount)
+    let $targetCountErrors := $gxFolder/gx:targetSize/i:validateTargetCount(., $targetCount)
+    
     let $instanceErrors :=
         for $targetPath in $targetPaths
         return f:validateFolderInstance($targetPath, $gxFolder, $context)
@@ -92,6 +95,7 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
             case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)            
             case element(gx:folderSubset) return ()
+            case element(gx:targetSize) return ()
             default return error()
     )
     return

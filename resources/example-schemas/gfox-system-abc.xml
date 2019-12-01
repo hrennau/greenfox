@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples">
+    <context>
+        <field name="namespace" value="http://example.com/s1"/>
+        <field name="lastModified" value="2019-11-01"/>
+    </context>
+    
+    <domain path="\tt\greenfox\resources\example-system" label="system-abc">        
+        <folder foxpath="system-abc"> 
+            <targetSize count="1" 
+                        msg="Expecting exactly one folder 'system-abc"/>
+            <folder foxpath=".\\test-*[input][output][config]">
+                <targetSize count="1"/>
+                
+                <folder foxpath="input">
+                    <file foxpath="*">
+                        <targetSize minCount="1" 
+                                    msg="Input folder must contain at least one msg"/>
+                        <foxpath msg="For every input msg, there must be an output msg with corresponding root name"
+                                 eq="true"
+                                 expr="
+let $expFileNameRS := file-name(.) ! replace(., 'RQ.xml$', 'RS.xml')                            
+let $expRootNameRS := ./local-name(*) ! replace(., 'RQ$', 'RS')
+let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]/local-name(*)
+return 
+    $expRootNameRS = $actRootNameRS"                        
+                        />          
+                    </file>
+                </folder>
+                <folder foxpath="output">
+                    <file foxpath="*">
+                        <lastModified ge="${lastModified}"
+                            msg="Output files must be newly written."/>
+                        <xpath expr="//*:returnCode" matches="OK|NOTFOUND"
+                            msg="Return code should be OK or NOTFOUND"/>
+                    </file>
+                </folder>
+                
+            </folder>
+        </folder>
+    </domain>
+    
+</greenFox>
