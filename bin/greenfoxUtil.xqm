@@ -154,4 +154,22 @@ declare function f:determineRequiredBindingsFoxpath($query as xs:string,
     )[. = $candidateBindings]
 };
 
+(:~
+ : Returns the regex and the flags string to be used when evaluating a `like` matching.
+ :
+ : @param like the pattern specified as `like`
+ : @param flags the flags to be used, if specified
+ : @return the regex string, followed by the flags string
+ :)
+declare function f:matchesLike($string as xs:string, $like as xs:string, $flags as xs:string?) as xs:boolean {
+    let $useFlags := ($flags[string()], 'i')[1]
+    let $regex :=
+        $like !
+        replace(., '\*', '.*') !
+        replace(., '\?', '.') !
+        concat('^', ., '$')
+    return matches($string, $regex, $useFlags)
+};
+
+
 

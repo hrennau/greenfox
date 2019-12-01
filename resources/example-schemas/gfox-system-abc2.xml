@@ -9,9 +9,44 @@
         <folder foxpath="system-abc"> 
             <targetSize msg="Expecting exactly one folder 'system-abc" count="1"/>
             
+            <!-- *** File consistency checks -->
+            <foxpath msg="getFoo*.xml OK but no fooValue" count="0" expr="
+                .\\getFooRS*.xml[//*:returnCode eq 'OK'][not(//*:fooValue)]"/>
+            
+            <foxpath msg="getFoo*.json OK but no fooValue" count="0" expr="
+                .\\getFooRS*.json\json-doc(.)[//*:returnCode eq 'OK'][not(//*:fooValue)]"/>
+
+            <foxpath msg="config with invalid return code" expr="
+                .\\msg-config.csv\csv-doc(., 'comma', 'yes')//returnCode">                
+                <some>
+                    <eq>OK</eq>
+                    <eq>NOFIND</eq>
+                    <like>ERROR_*</like>
+                </some>     
+
+            </foxpath>
+            
             <!-- *** Folder containing a single test *** -->
             <folder foxpath=".\\test-*[input][output][config]">
                 <targetSize msg="Test system without tests" minCount="1"/>
+                
+                <folder foxpath="config">
+                    <targetSize msg="Config folder missing." count="1"/>
+                    
+                    <file foxpath="msg-config.csv" mediatype="csv" csv.withHeader="yes">
+                        <targetSize msg="Config file missing" count="1"/>
+
+                        <!-- Check - configured return codes ok? -->
+                        <xpath expr="//returnCode">
+                            <some>
+                                <eq>OK</eq>
+                                <eq>NOFIND</eq>
+                                <like>ERROR_*</like>
+                            </some>                                
+                        </xpath>
+                        
+                    </file>
+                </folder>
                 
                 <!-- ===================
                       X M L   t e s t s 
@@ -24,13 +59,10 @@
                     <file foxpath="*">
                         <targetSize msg="Input folder without request msgs" minCount="1"/>
                         
-                        <!-- Critical check - for each request a successful response ? -->
-                        <foxpath msg="Request without matching response" eq="true" expr="
-                            let $expFileNameRS := file-name(.) ! replace(., 'RQ.xml$', 'RS.xml')                            
-                            let $expRootNameRS := ./local-name(*) ! replace(., 'RQ$', 'RS')
-                            let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]/local-name(*)
-                            return 
-                                $expRootNameRS = $actRootNameRS" />          
+                        <!-- Check - request with response ? -->
+                        <foxpath msg="Request without response" count="1" expr="
+                            let $expFileNameRS := file-name(.) ! replace(., 'RQ(\d*).xml$', 'RS$1.xml')    
+                            return ..\..\output\*[file-name(.) eq $expFileNameRS]" />
                     </file>
                 </folder>
                 
@@ -39,11 +71,17 @@
                     
                     <!-- *** XML response message *** -->                    
                     <file foxpath="*">
-                        <!-- *** Check - response not stale? *** -->
+                        <!-- *** Check - response fresh? *** -->
                         <lastModified msg="Stale output file" ge="${lastModified}"/>
                         
-                        <!-- *** Critical check - return code ok? *** -->
-                        <xpath msg="Error return code" expr="//*:returnCode" matches="^(OK|NOTFOUND)$"/>
+                        <!-- *** Check - return code ok? *** -->
+                        <foxpath msg="Return code != configured value" eq="true" expr="
+                            let $actReturnCode := doc(.)//*:returnCode
+                            let $expReturnCode :=
+                                let $fileName := file-name(.)
+                                let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                                return $cfgDoc//record[response eq $fileName]/returnCode                            
+                            return $actReturnCode = $expReturnCode"/>
                     </file>
                 </folder>
                 
@@ -58,13 +96,10 @@
                     <file foxpath="*" mediatype="json">
                         <targetSize msg="Input folder without request msgs" minCount="1"/>
                         
-                        <!-- *** Critical check - for each request a successful response ? *** -->
-                        <foxpath msg="Request without matching response" eq="true" expr="
-                            let $expFileNameRS := file-name(.) ! replace(., 'RQ.json$', 'RS.json')                            
-                            let $expRootNameRS := $jdoc/*/local-name(*) ! replace(., 'RQ$', 'RS')
-                            let $actRootNameRS := ..\..\output\*[file-name(.) eq $expFileNameRS]\json-doc(.)/*/local-name(*)
-                            return 
-                                $expRootNameRS = $actRootNameRS" />                        
+                        <!-- *** Check - request with response ? *** -->
+                        <foxpath msg="Request without response" count="1" expr="
+                            let $expFileNameRS := file-name(.) ! replace(., 'RQ(\d*).json$', 'RS$1.json')    
+                            return ..\..\output\*[file-name(.) eq $expFileNameRS]" />
                     </file>
                 </folder>               
                 
@@ -73,11 +108,17 @@
                     
                     <!-- *** JSON response message *** -->                    
                     <file foxpath="*" mediatype="json">
-                        <!-- *** Check - response not stale? *** -->
+                        <!-- *** Check - response fresh? *** -->
                         <lastModified msg="Stale output file" ge="${lastModified}"/>
                         
-                        <!-- *** Critical check - return code ok? *** -->                        
-                        <xpath msg="Error return code" expr="//*:returnCode" matches="^(OK|NOTFOUND)$"/>
+                        <!-- *** Check - return code ok? *** -->                        
+                        <foxpath msg="Return code != configured value" eq="true" expr="
+                            let $actReturnCode := json-doc(.)//*:returnCode
+                            let $expReturnCode :=
+                                let $fileName := file-name(.)
+                                let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                                return $cfgDoc//record[response eq $fileName]/returnCode                            
+                            return $actReturnCode = $expReturnCode"/>                        
                     </file>
                 </folder>
             </folder>

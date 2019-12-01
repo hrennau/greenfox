@@ -1,0 +1,6 @@
+{
+    "getFooRS": {
+        "returnCode": "NOFIND",
+        "fooID": 100
+    }
+}

@@ -28,6 +28,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "compile.xqm",
     "log.xqm",
+    "greenfoxEditUtil.xqm",
     "greenFoxValidator.xqm",
     "systemValidator.xqm";
     
@@ -53,11 +54,13 @@ declare function f:validateOp($request as element())
         if ($gfoxErrors) then $gfoxErrors else
         
     let $validationReport := i:validateSystem($gfox, $context)
-    return
+    let $validationReport :=
         <gx:validationReport countErrors="{count($validationReport//gx:error)}" validationTime="{current-dateTime()}">{
            $gfox/@greenfoxURI,
            for $error in $validationReport//gx:error
            order by $error/@id
            return $error
         }</gx:validationReport>
+    return
+        $validationReport/i:harmonizePrefixes(., $f:URI_GX, $f:PREFIX_GX) 
 };        

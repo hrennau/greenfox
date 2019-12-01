@@ -20,12 +20,13 @@ declare function f:validateExpressionValue($constraint as element(),
                                            $contextItem as item()?,
                                            $context as map(*))
         as element()* {
+    let $msg := $constraint/@msg
     let $exprLang := 
         if ($constraint/self::gx:xpath) then 'xpath' 
         else if ($constraint/self::gx:foxpath) then 'foxpath'
         else error()
     let $expr := $constraint/@expr
-    let $exprValue :=
+    let $exprValue := trace(
     
         (: XPath - a single map contains context item and external variables :)
         if ($constraint/self::gx:xpath) then
@@ -38,7 +39,7 @@ declare function f:validateExpressionValue($constraint as element(),
             let $requiredBindings := map:keys($context)
             let $exprAugmented := i:finalizeQuery($expr, $requiredBindings)
             return f:evaluateFoxpath($exprAugmented, $contextItem, $exprContext)
-
+, 'EXPR_VALUE: ')
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
@@ -59,6 +60,24 @@ declare function f:validateExpressionValue($constraint as element(),
     let $flags := string($constraint/@flags)
     let $quantifier := 'all'
     
+    let $errorsSome :=
+        if (not($constraint/gx:some)) then () else
+
+        let $ok := trace(
+            if ($quantifier eq 'all') then
+                every $item in $exprValue satisfies 
+                    some $alternative in $constraint/gx:some/* satisfies
+                        typeswitch($alternative)
+                        case element(gx:eq) return $item = $alternative
+                        case element(gx:ne) return $item != $alternative
+                        case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
+                        case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+                        default return error()                
+            else error(), 'SOME: ')
+        return
+            if ($ok) then () else
+                f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:some, $exprValue, ())
+                
     let $errors := (
         (: count errors
            ============ :)
@@ -76,147 +95,115 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($eq)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item = $eq)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $eq, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue = $gt) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $eq, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
         ,
         if (not($ne)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item != $ne)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $ne, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $ne, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue != $ne) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, 
-                                                      $expr, $quantifier, $ne, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $ne, $exprValue, ())
         ,
         if (not($gt)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item > $gt)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $gt, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $gt, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue > $gt) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $gt, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $gt, $exprValue, ())
         ,
         if (not($lt)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item < $lt)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $lt, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $lt, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue < $gt) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $lt, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $lt, $exprValue, ())
         ,
         if (not($ge)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item >= $gt)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $ge, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $ge, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue >= $gt) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $ge, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $ge, $exprValue, ())
         ,
         if (not($le)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item <= $gt)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $le, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $le, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue <= $gt) then () 
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $le, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $le, $exprValue, ())
         ,
         (: match errors
            ============ :)
         if (not($matches)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies matches($item, $matches, $flags))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $matches, $exprValue, attribute flags {$flags})
+                else f:constructError_valueComparison($constraint, $quantifier, $matches, $exprValue, attribute flags {$flags})
             else if ($quantifier eq 'some') then 
                 if (some $item in $exprValue satisfies matches($item, $matches, $flags)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $matches, $exprValue, attribute flags {$flags})
+                else f:constructError_valueComparison($constraint, $quantifier, $matches, $exprValue, attribute flags {$flags})
         ,
         if (not($notMatches)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies not(matches($item, $notMatches, $flags)))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $notMatches, $exprValue, attribute flags {$flags})
+                else f:constructError_valueComparison($constraint, $quantifier, $notMatches, $exprValue, attribute flags {$flags})
             else if ($quantifier eq 'some') then 
                 if (some $item in $exprValue satisfies not(matches($item, $notMatches, $flags))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $notMatches, $exprValue, attribute flags {$flags})
+                else f:constructError_valueComparison($constraint, $quantifier, $notMatches, $exprValue, attribute flags {$flags})
         ,
         (: like errors
            =========== :)
-        if (not($like)) then () else
-            let $useFlags :=
-                if ($flags[string()]) then $flags else 'i'
-            let $regex :=
-                $like !
-                replace(., '\*', '.*') !
-                replace(., '\?', '.') !
-                concat('^', ., '$')
-            return                
-            if ($quantifier eq 'all') then 
-                if (count($exprValue) and (every $item in $exprValue satisfies matches($item, $regex, $useFlags))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $like, $exprValue, attribute flags {$useFlags})
-            else if ($quantifier eq 'some') then 
-                if (some $item in $exprValue satisfies matches($item, $regex, $useFlags)) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $like, $exprValue, attribute flags {$useFlags})
+        if (not($like)) then () else           
+            let $useFlags := ($flags, 'i')[1] 
+            return
+                if ($quantifier eq 'all') then 
+                    if (count($exprValue) and (every $item in $exprValue satisfies i:matchesLike($item, $like, $useFlags))) then ()
+                    else f:constructError_valueComparison($constraint, $quantifier, $like, $exprValue, attribute flags {$useFlags})
+                else if ($quantifier eq 'some') then 
+                    if (some $item in $exprValue satisfies i:matchesLike($item, $like, $useFlags)) then ()
+                    else f:constructError_valueComparison($constraint, $quantifier, $like, $exprValue, attribute flags {$useFlags})
         ,
         if (not($notLike)) then () else
-            let $useFlags :=
-                if ($flags[string()]) then $flags else 'i'
-            let $regex :=
-                $notLike !
-                replace(., '\*', '.*') !
-                replace(., '\?', '.') !
-                concat('^', ., '$')
+            let $useFlags := ($flags, 'i')[1]        
             return                
-            if ($quantifier eq 'all') then 
-                if (count($exprValue) and (every $item in $exprValue satisfies not(matches($item, $regex, $useFlags)))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $notLike, $exprValue, attribute flags {$useFlags})
-            else if ($quantifier eq 'some') then 
-                if (some $item in $exprValue satisfies not(matches($item, $regex, $useFlags))) then ()
-                else f:constructError_valueComparison($exprLang, $constraintId, $constraintLabel, $expr, 
-                                                      $quantifier, $notLike, $exprValue, attribute flags {$useFlags})
+                if ($quantifier eq 'all') then 
+                    if (count($exprValue) and (every $item in $exprValue satisfies not(f:matchesLike($item, $notLike, $useFlags)))) then ()
+                    else f:constructError_valueComparison($constraint, $quantifier, $notLike, $exprValue, attribute flags {$useFlags})
+                else if ($quantifier eq 'some') then 
+                    if (some $item in $exprValue satisfies not(f:matchesLike    ($item, $notLike, $useFlags))) then ()
+                    else f:constructError_valueComparison($constraint, $quantifier, $notLike, $exprValue, attribute flags {$useFlags})
         ,
         ()
     )
     return
-        $errors        
+        ($errors, $errorsSome)        
 };
 
-declare function f:constructError_valueComparison($exprLang as xs:string,
-                                                  $constraintId as attribute()?,
-                                                  $constraintLabel as attribute()?,
-                                                  $expr as xs:string, 
+declare function f:constructError_valueComparison($constraint as element(),
                                                   $quantifier as xs:string, 
-                                                  $comparison as attribute(), 
+                                                  $comparison as node(), 
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
         as element(gx:error) {
-    <gx:error constraintComp="{$exprLang}">{
-        $constraintId/attribute constraintID {.},
-        $constraintLabel/attribute constraintLabel {.},
-        attribute expr {$expr},
+    <gx:error>{
+        $constraint/@msg,
+        attribute constraintComp {$constraint/local-name(.)},
+        $constraint/@id/attribute constraintID {.},
+        $constraint/@label/attribute constraintLabel {.},
+        $constraint/@expr/attribute expr {normalize-space(.)},
         attribute quantifier {$quantifier},
-        $comparison,
+        $comparison[$comparison/self::attribute()],
         if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},
         $additionalAtts,        
-        if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
+        if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>,
+        $comparison[$comparison/self::element()]
     }</gx:error>                                                  
 };
 
@@ -231,7 +218,7 @@ declare function f:constructError_countComparison($exprLang as xs:string,
     <gx:error constraintComp="{$exprLang}">{
         $constraintId/attribute constraintID {.},
         $constraintLabel/attribute constraintLabel {.},
-        attribute expr {$expr},
+        attribute expr {$expr ! normalize-space(.)},
         $constraintAtt,
         attribute actualCount {count($exprValue)},
         if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},

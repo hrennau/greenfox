@@ -73,6 +73,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc'))
             ) => distinct-values() => sort()
             
+    (: provide document :)            
     let $jdoc :=
         if ($mediatype eq 'json' or $requiredBindings = 'json') then
         let $text := unparsed-text($filePath)
@@ -86,7 +87,23 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             if (not($required)) then () 
             else if (doc-available($filePath)) then doc($filePath)
             else ()
-    let $csvdoc := ()            
+    let $csvdoc :=
+        if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then
+            let $separator := ($gxFile/@csv.separator, 'comma')[1]
+            let $withHeader := ($gxFile/@csv.withHeader, 'no')[1]
+            let $names := ($gxFile/@csv.names, 'direct')[1]
+            let $withQuotes := ($gxFile/@csv.withQuotes, 'yes')[1]
+            let $backslashes := ($gxFile/@csv.backslashes, 'no')[1]
+            let $options := map{
+                'separator': $separator,
+                'header': $withHeader,
+                'format': $names,
+                'quotes': $withQuotes,
+                'backslashes': $backslashes
+            }
+            let $text := unparsed-text($filePath)
+            return try {csv:parse($text, $options)} catch * {()}
+         else ()
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     
     let $exprContext := 
@@ -103,7 +120,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         for $child in $gxFile/*[not(@deactivated eq 'true')]
         let $raw :=
             typeswitch($child)
-            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)
+            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
