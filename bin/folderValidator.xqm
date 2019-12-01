@@ -35,6 +35,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateFolder($gxFolder as element(), $context as map(*)) 
         as element()* {
     let $contextPath := $context?_contextPath
+    let $components := $gxFolder/*[not(@deactivated eq 'true')]
+    let $navigationPath := $gxFolder/(@foxpath, @path)[1]
     let $targetPaths :=
         let $path := $gxFolder/@path
         let $foxpath := $gxFolder/@foxpath
@@ -48,13 +50,18 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
                     
     (: check: targetSize :)                    
     let $targetCount := count($targetPaths)   
-    let $targetCountErrors := $gxFolder/gx:targetSize/i:validateTargetCount(., $targetCount)
+    let $targetCountErrors := $components/self::gx:targetSize/i:validateTargetCount(., $targetCount)
+                              /i:augmentErrorElement(., (
+                                  attribute contextFilePath {$contextPath},
+                                  attribute navigationPath {$navigationPath}
+                              ), 'first')
+    
     
     let $instanceErrors :=
         for $targetPath in $targetPaths
         return f:validateFolderInstance($targetPath, $gxFolder, $context)
     let $subsetErrors :=
-        for $gxFolderSubset in $gxFolder/gx:folderSubset
+        for $gxFolderSubset in $components/self::gx:folderSubset
         let $subsetLabel := $gxFolderSubset/@subsetLabel
         let $foxpath := $gxFolderSubset/@foxpath
         let $subsetTargetPaths := (
@@ -81,14 +88,17 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
         as element()* {
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $folderPath)
+    let $components := $gxFolder/*[not(@deactivated eq 'true')]
+    
+    let $exprContext := map{}
     
     (: perform validations :)
     let $errors := (
         (: validate - container members :)
-        for $child in $gxFolder/*
+        for $child in $components
         return
             typeswitch($child)
-            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $context)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $exprContext)
             case $file as element(gx:file) return i:validateFile($file, $context)
             case $folder as element(gx:folder) return i:validateFolder($folder, $context)
             case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)

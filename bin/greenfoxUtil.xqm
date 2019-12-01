@@ -16,6 +16,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "foxpathEvaluator.xqm",
     "log.xqm" ;
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
@@ -108,6 +109,49 @@ declare function f:augmentErrorElement($error as element(gx:error), $atts as att
         element {node-name($error)} {
             if ($position eq 'first') then ($atts, $curAtts) else ($curAtts, $atts),
             $error/node()
-        }};        
+        }
+};
+
+(:~
+ : Augments an XPath or foxpath expression by adding a prolog containing
+ : (a) a namespace declaration for prefix 'gx', (b) external variable
+ : bindings for the given variable names.
+ :
+ : @param query the expression to be augmented
+ : @param contextNames the names of the external variables
+ : @return the augmented expression
+ :)
+declare function f:finalizeQuery($query as xs:string, $contextNames as xs:anyAtomicType*)
+        as xs:string {
+    let $prolog := ( 
+'declare namespace gx="http://www.greenfox.org/ns/schema";',
+for $contextName in $contextNames 
+let $varName := 
+    if ($contextName instance of xs:QName) then string-join((prefix-from-QName($contextName), local-name-from-QName($contextName)), ':')     
+    else $contextName
+    return concat('declare variable $', $varName, ' external;')
+    ) => string-join('&#xA;')
+    return concat($prolog, '&#xA;', $query)
+};
+
+declare function f:determineRequiredBindingsXPath($query as xs:string,
+                                                  $candidateBindings as xs:string*)
+        as xs:string* {
+    let $query := f:finalizeQuery($query, $candidateBindings)
+    let $_DEBUG := file:write('DEBUG_QUERY.txt', $query)
+    let $tree := xquery:parse($query)
+    return $tree//StaticVarRef/@var => distinct-values() => sort()
+};
+
+declare function f:determineRequiredBindingsFoxpath($query as xs:string,
+                                                    $candidateBindings as xs:string*)
+        as xs:string* {
+    let $query := f:finalizeQuery($query, $candidateBindings)
+    let $_DEBUG := file:write('DEBUG_QUERY.txt', $query)
+    let $tree := trace(f:parseFoxpath($query) , '# FOR_DET_REQ_BINDINGS_TREE: ')
+    return (
+        $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()
+    )[. = $candidateBindings]
+};
 
 

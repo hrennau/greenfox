@@ -17,7 +17,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "fileValidator.xqm";
+    "fileValidator.xqm",
+    "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -25,11 +26,15 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
         as element()* {
     let $errors := (
     
-        let $xpathExpressions := $gfox//gx:xpath/@expr
+        let $xpathExpressions := $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]/@expr
         for $expr in $xpathExpressions
+        
+        let $requiredBindings := trace(i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc')) , '### REQUIRED_BINDINGS: ')        
+        let $augmentedExpr := trace( i:finalizeQuery($expr, $requiredBindings) , '### AUGMENTED_EXPR: ')
+        
         return
             try {
-                let $plan := xquery:parse($expr)
+                let $plan := xquery:parse($augmentedExpr)
                 return ()
             } catch * {
                 <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenFoxLocation(.)}">{
@@ -41,7 +46,7 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
             }                
                
         ,
-        let $foxpathExpressions := $gfox//@foxpath
+        let $foxpathExpressions := $gfox/descendant-or-self::*[not(ancestor-or-self::*[@deactivated eq 'true'])]/@foxpath
         for $expr in $foxpathExpressions        
         let $plan := f:parseFoxpath($expr)
         

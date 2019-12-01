@@ -25,6 +25,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
     let $contextPath := $context?_contextPath
+    let $navigationPath := $gxFile/(@foxpath, @path)[1]
     let $targetPaths :=
         let $path := $gxFile/@path
         let $foxpath := $gxFile/@foxpath
@@ -35,6 +36,10 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
     let $targetCountErrors := $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
+        /i:augmentErrorElement(., (
+            attribute contextFilePath {$contextPath},
+            attribute navigationPath {$navigationPath}
+            ), 'first')
     
     let $instanceErrors :=        
         for $targetPath in $targetPaths
@@ -58,11 +63,40 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
 
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
+    let $components := $gxFile/*[not(@deactivated eq 'true')]
+    let $mediatype := $gxFile/@mediatype 
     
-    let $doc :=
-        if ($gxFile/gx:xpath) then
-            if (doc-available($filePath)) then doc($filePath)/* else ()
-        else ()
+    let $requiredBindings := trace(
+        for $child in $components[self::gx:xpath, self::gx:foxpath]
+        return (
+            $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
+            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc'))
+            ) => distinct-values() => sort(), '### REQUIRED BINDINGS: ')
+            
+    let $jdoc :=
+        if ($mediatype eq 'json' or $requiredBindings = 'json') then
+        let $text := unparsed-text($filePath)
+        return try {json:parse($text)} catch * {()}
+    let $xdoc := trace(
+        let $required := 
+            $requiredBindings = 'doc'
+            or
+            not($mediatype ne 'xml') and $components/self::gx:xpath
+        return
+            if (not($required)) then () 
+            else if (doc-available($filePath)) then doc($filePath)
+            else () , 'XDOC: ')
+    let $csvdoc := ()            
+    let $doc := ($xdoc, $jdoc, $csvdoc)[1]
+    
+    let $exprContext := 
+        map:merge((
+            if (not($requiredBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
+            if (not($requiredBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
+            if (not($requiredBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $jdoc),
+            if (not($requiredBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath)
+        ))
+    
     
     (: perform validations :)
     let $errors := (
@@ -70,7 +104,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         let $raw :=
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $context)
-            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $context)            
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)

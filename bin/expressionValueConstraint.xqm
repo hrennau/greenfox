@@ -9,12 +9,16 @@
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
-    
+
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "foxpathEvaluator.xqm",
+    "greenfoxUtil.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateExpressionValue($constraint as element(), 
                                            $contextItem as item()?,
-                                           $context as map(*)?)
+                                           $context as map(*))
         as element()* {
     let $exprLang := if ($constraint/self::gx:xpath) then 'xpath' 
                      else if ($constraint/self::gx:foxpath) then 'foxpath'
@@ -22,10 +26,13 @@ declare function f:validateExpressionValue($constraint as element(),
     let $expr := $constraint/@expr
     let $exprValue :=
         if ($constraint/self::gx:xpath) then
-            let $exprContext := map{'': $contextItem}
+            let $exprContext := map:put($context, '', $contextItem)
             return xquery:eval($expr, $exprContext)        
         else
-            f:evaluateFoxpath($expr, $contextItem)
+            let $exprContext := $context
+            let $requiredBindings := map:keys($context)
+            let $exprAugmented := i:finalizeQuery($expr, $requiredBindings)
+            return f:evaluateFoxpath($exprAugmented, $contextItem, $exprContext)
 
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label

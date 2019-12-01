@@ -1,0 +1,7 @@
+{
+    "getFooRS": {
+        "returnCode": "OK",
+        "fooID": 123,
+        "fooValue": "XXX"
+    }
+}

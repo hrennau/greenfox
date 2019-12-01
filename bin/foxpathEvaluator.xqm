@@ -22,6 +22,20 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:evaluateFoxpath($foxpath as xs:string, $context as item()?)
         as item()* {
+    f:evaluateFoxpath($foxpath, $context, ())
+};
+
+(:~
+ : Evaluates a foxpath expression.
+ :
+ : @param foxpath a foxpath expression
+ : @param context the context item
+ : @return the expression value
+ :)
+declare function f:evaluateFoxpath($foxpath as xs:string, 
+                                   $context as item()?, 
+                                   $externalVariableBindings as map(*)?)
+        as item()* {
     let $isContextUri := not($context instance of node())
     let $foxpathOptions := 
         map{    
@@ -29,8 +43,7 @@ declare function f:evaluateFoxpath($foxpath as xs:string, $context as item()?)
             'FOXSTEP_SEPERATOR': '\',
             'NODESTEP_SEPERATOR': '/'
         }
-    let $foxpathContext := map{}
-    return tt:resolveFoxpath($foxpath, $foxpathOptions, $context, $foxpathContext)
+    return tt:resolveFoxpath($foxpath, $foxpathOptions, $context, $externalVariableBindings)
 };
 
 declare function f:parseFoxpath($foxpath as xs:string)
