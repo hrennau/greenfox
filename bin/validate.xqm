@@ -57,9 +57,9 @@ declare function f:validateOp($request as element())
     let $validationReport := i:validateSystem($gfox, $context)
     let $validationReport :=
         <gx:validationReport countErrors="{count($validationReport//gx:error)}" 
-                             greenfoxSchema="{$gfoxSourceURI}" 
-                             validationTime="{current-dateTime()}">{
-           $gfox/@greenfoxURI,
+                             validationTime="{current-dateTime()}"
+                             greenfoxSchemaDoc="{$gfoxSourceURI}" 
+                             greenfoxSchemaURI="{$gfox/@greenfoxURI}">{
            for $error in $validationReport//gx:error
            order by $error/@id
            return $error
