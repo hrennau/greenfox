@@ -62,14 +62,22 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         return f:validateFolderInstance($targetPath, $gxFolder, $context)
     let $subsetErrors :=
         for $gxFolderSubset in $components/self::gx:folderSubset
+        let $subsetComponents := $gxFolderSubset/*[not(@deactivated eq 'true')]
         let $subsetLabel := $gxFolderSubset/@subsetLabel
         let $foxpath := $gxFolderSubset/@foxpath
+        let $subsetNavigationPath := $foxpath
+        
         let $subsetTargetPaths := (
             for $targetPath in $targetPaths
             return i:evaluateFoxpath($foxpath, $targetPath) 
         )[. = $targetPaths] => distinct-values()
-        let $subsetTargetCount := count($subsetTargetPaths)
-        let $targetCountErrors := i:validateTargetCount($gxFolderSubset, $subsetTargetCount)
+        let $subsetTargetCount := count($subsetTargetPaths)        
+        let $targetCountErrors := $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
+                                  /i:augmentErrorElement(., (
+                                      attribute contextFilePath {$contextPath},
+                                      attribute navigationPath {$subsetNavigationPath}
+                                  ), 'first')
+        
         let $instanceErrors :=
             for $subsetTargetPath in $subsetTargetPaths
             return f:validateFolderInstance($subsetTargetPath, $gxFolderSubset, $context)

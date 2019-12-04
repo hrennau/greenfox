@@ -39,30 +39,6 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     where $error
     return
         f:constructError_lastModified($constraint, $actValue)
-(:        
-    (
-        (: count errors
-           ============ :)
-        if (empty($lt) or $actValue lt $lt) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $lt, $actValue, ())
-        ,
-        if (empty($gt) or $actValue gt $gt) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $gt, $actValue, ())
-        ,
-        if (empty($le) or $actValue le $le) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $le, $actValue, ())
-        ,
-        if (empty($ge) or $actValue ge $ge) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $ge, $actValue, ())
-        ,
-        if (empty($eq) or $actValue eq $eq) then () else
-            f:constructError_lastModified($constraintId, $constraintLabel, $eq, $actValue, ())
-        ,
-        ()
-    )
-    return
-        $errors
-        :)
 };
 
 declare function f:validateFileSize($filePath as xs:string, $fileSize as element(gx:fileSize), $context)
@@ -99,9 +75,7 @@ declare function f:validateFileSize($filePath as xs:string, $fileSize as element
         ()
     )
     return
-        <gx:fileSizeErrors count="{count($errors)}">{$errors}</gx:fileSizeErrors>
-        [$errors]
-        
+        $errors        
 };
 
 (:~

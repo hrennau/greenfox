@@ -8,7 +8,7 @@
     </context>
     <domain path="${baseUri}" label="main">
         <folder foxpath=".\\output\output.${case}">
-            <targetSize msg="Not all 15 test results" count="15"/>
+            <targetSize msg="Output folder not found" count="1"/>
 
             <!-- Output files must be new -->
             <file foxpath="*">
@@ -28,21 +28,21 @@
 
             <!-- In case of anchor errors, result must consist of summary.xml, anchor-errors.xml, checkreport.docx -->
             <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_ANCHOR']" subsetLabel="withoutAnchorErrors"> 
-                <targetSize msg="Not 2 tests with anchor errors" count="2"/>
+                <!-- <targetSize msg="Not 2 tests with anchor errors" count="2"/> -->
                 <folderContent msg="Return code ERROR_ANCHOR, but not the expected folder content."
                                files="summary.xml anchor-errors.xml checkreport.docx" quant="all" closed="false"/>
             </folderSubset>
             
             <!-- Unless anchor error occurs, result must include gibook and gi40 -->
             <folderSubset foxpath=".[summary.xml//returnCode ne 'ERROR_ANCHOR']" subsetLabel="withoutAnchorErrors"> 
-                <targetSize msg="Not 13 tests without anchor errors" minCount="12"/>
+                <!-- <targetSize msg="Not 13 tests without anchor errors" minCount="12"/> -->
                 <folderContent msg="Return code not ERROR_ANCHOR, but not all files 'gibook.xml' and 'gi40.xml' found."
                                files="gibook.xml gi40.xml" quant="all"/>
             </folderSubset>
             
             <!-- folders with XSD errors -->
             <folderSubset foxpath=".[summary.xml//returnCode eq 'ERROR_XSD']" subsetLabel="withXsdErrors">
-                <targetSize msg="Not exactly four tests with XSD errors" count="5"/>
+                <!-- <targetSize msg="Not exactly four tests with XSD errors" count="4"/> -->
                 
                 <!-- XSD errors file -->
                 <file foxpath="xsd-errors.xml">

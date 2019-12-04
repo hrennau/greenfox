@@ -44,6 +44,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateOp($request as element())
         as element() {
     let $gfoxSource := tt:getParams($request, 'gfox')/* 
+    let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
     let $params := tt:getParams($request, 'params')
     let $gfoxAndContext := f:compileGfox($gfoxSource, i:externalContext($params))
     let $gfox := $gfoxAndContext[. instance of element()]
@@ -55,7 +56,9 @@ declare function f:validateOp($request as element())
         
     let $validationReport := i:validateSystem($gfox, $context)
     let $validationReport :=
-        <gx:validationReport countErrors="{count($validationReport//gx:error)}" validationTime="{current-dateTime()}">{
+        <gx:validationReport countErrors="{count($validationReport//gx:error)}" 
+                             greenfoxSchema="{$gfoxSourceURI}" 
+                             validationTime="{current-dateTime()}">{
            $gfox/@greenfoxURI,
            for $error in $validationReport//gx:error
            order by $error/@id

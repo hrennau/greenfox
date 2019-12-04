@@ -18,7 +18,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
-    "filePropertiesConstraint.xqm";
+    "filePropertiesConstraint.xqm",
+    "xsdValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -67,10 +68,11 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     let $mediatype := $gxFile/@mediatype 
     
     let $requiredBindings :=
-        for $child in $components[self::gx:xpath, self::gx:foxpath]
+        for $child in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
         return (
             $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
-            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc'))
+            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
+            $child/self::gx:xsdValid/i:determineRequiredBindingsFoxpath(@xsdFoxpath, ('this', 'doc', 'jdoc', 'csvdoc'))
             ) => distinct-values() => sort()
             
     (: provide document :)            
@@ -122,6 +124,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
+            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $exprContext)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)

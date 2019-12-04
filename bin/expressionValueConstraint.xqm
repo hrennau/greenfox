@@ -26,7 +26,7 @@ declare function f:validateExpressionValue($constraint as element(),
         else if ($constraint/self::gx:foxpath) then 'foxpath'
         else error()
     let $expr := $constraint/@expr
-    let $exprValue := trace(
+    let $exprValue :=
     
         (: XPath - a single map contains context item and external variables :)
         if ($constraint/self::gx:xpath) then
@@ -39,7 +39,7 @@ declare function f:validateExpressionValue($constraint as element(),
             let $requiredBindings := map:keys($context)
             let $exprAugmented := i:finalizeQuery($expr, $requiredBindings)
             return f:evaluateFoxpath($exprAugmented, $contextItem, $exprContext)
-, 'EXPR_VALUE: ')
+
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
@@ -82,13 +82,13 @@ declare function f:validateExpressionValue($constraint as element(),
         (: count errors
            ============ :)
         if (empty($maxCount) or count($exprValue) le $maxCount/xs:integer(.)) then () else
-            f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $maxCount, $exprValue, ())
+            f:constructError_countComparison($constraint, $maxCount, $exprValue, ())
         ,
         if (empty($minCount) or count($exprValue) ge $minCount/xs:integer(.)) then () else
-            f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $minCount, $exprValue, ())
+            f:constructError_countComparison($constraint, $minCount, $exprValue, ())
         ,
         if (empty($count) or count($exprValue) eq $count/xs:integer(.)) then () else
-            f:constructError_countComparison($exprLang, $constraintId, $constraintLabel, $expr, $count, $exprValue, ())
+            f:constructError_countComparison($constraint, $count, $exprValue, ())
         ,
         (: comparison errors
            ================= :)
@@ -207,23 +207,22 @@ declare function f:constructError_valueComparison($constraint as element(),
     }</gx:error>                                                  
 };
 
-declare function f:constructError_countComparison($exprLang as xs:string,
-                                                  $constraintId as attribute()?,
-                                                  $constraintLabel as attribute()?,
-                                                  $expr as xs:string, 
-                                                  $constraintAtt as attribute(), 
+declare function f:constructError_countComparison($constraint as element(),
+                                                  $comparison as node(), 
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
         as element(gx:error) {
-    <gx:error constraintComp="{$exprLang}">{
-        $constraintId/attribute constraintID {.},
-        $constraintLabel/attribute constraintLabel {.},
-        attribute expr {$expr ! normalize-space(.)},
-        $constraintAtt,
-        attribute actualCount {count($exprValue)},
+    <gx:error>{
+        $constraint/@msg,
+        attribute constraintComp {$constraint/local-name(.)},
+        $constraint/@id/attribute constraintID {.},
+        $constraint/@label/attribute constraintLabel {.},
+        $constraint/@expr/attribute expr {normalize-space(.)},
+        $comparison[$comparison/self::attribute()],
         if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},
         $additionalAtts,        
-        if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
+        if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>,
+        $comparison[$comparison/self::element()]
     }</gx:error>                                                  
 };
 
