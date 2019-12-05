@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.parsqube.de/ns/greenfox-schema/roli/t01">
+<greenFox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.parsqube.de/ns/greenfox-schema/roli/t01-singletest">
     <context>
         <field name="case" value="*"/>
         <field name="baseUri"/>

@@ -36,26 +36,35 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
             
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
-    let $targetCountErrors := $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
-        /i:augmentErrorElement(., (
-            attribute contextFilePath {$contextPath},
-            attribute navigationPath {$navigationPath}
-            ), 'first')
-    
-    let $instanceErrors :=        
+    let $targetCountPerceptions := 
+        let $constraint := $gxFile/gx:targetSize
+        return
+            if (not($constraint)) then () else
+            let $error :=
+                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
+                    /i:augmentErrorElement(., (
+                        attribute contextFilePath {$contextPath},
+                        attribute navigationPath {$navigationPath}
+                        ), 'first')
+            return
+                if ($error) then $error
+                else
+                    <gx:green>{
+                        attribute contextPath {$contextPath},
+                        attribute navigationPath {$navigationPath},
+                        attribute constraintComponent {$constraint/local-name()},
+                        $constraint/@id/attribute constraintID {.},
+                        $constraint/@label/attribute constraintLabel {.}
+                    }</gx:green>
+                
+    let $instancePerceptions :=        
         for $targetPath in $targetPaths
         return
             f:validateFileInstance($targetPath, $gxFile, $context)
             
-    let $errors := ($targetCountErrors, $instanceErrors)
+    let $perceptions := ($targetCountPerceptions, $instancePerceptions)
     return
-        <gx:fileSetErrors>{
-            $gxFile/@id/attribute fileID {.},
-            $gxFile/@label/attribute fileLabel {.},
-            attribute count {count($errors)},
-            $errors
-        }</gx:fileSetErrors>[$errors]
-            
+        $perceptions
 };
 
 declare function f:validateFileInstance($filePath as xs:string, $gxFile as element(gx:file), $context as map(*)) 
@@ -118,9 +127,9 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     
     
     (: perform validations :)
-    let $errors := (
-        for $child in $gxFile/*[not(@deactivated eq 'true')]
-        let $raw :=
+    let $perceptions := (
+        for $child in $components
+        let $error :=
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
@@ -131,15 +140,15 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             case element(gx:targetSize) return ()
             default return error()
         return
-            $raw/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+            if ($error) then $error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+            else
+                <gx:green>{
+                    attribute filePath {$filePath},
+                    attribute constraintComponent {$child/local-name(.)},
+                    $child/@id/attribute constraintID {.},
+                    $child/@label/attribute constraintLabel {.}
+                }</gx:green>
     )
     return
-        <gx:fileErrors>{
-            $gxFile/@id/attribute fileID {.},
-            $gxFile/@label/attribute fileLabel {.},
-            attribute count {count($errors)},
-            attribute filePath {$filePath},
-            $errors
-        }</gx:fileErrors>
-        [$errors]
+        $perceptions
 };

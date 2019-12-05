@@ -53,45 +53,6 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
                 attribute actCount {$targetCount},
                 $msg
             }</gx:error>
-(:    
-    let $class := 
-        let $lname := $shape/local-name(.)
-        return concat($lname, if (contains($lname, 'Subset')) then 'Size' else 'SetSize')     
-    let $idAttName := concat($shape/local-name(.), 'ID')
-    let $labelAttName := concat($shape/local-name(.), 'Label')
-    
-    let $identAtt :=
-        $shape/(@subsetLabel, @resourceSetLabel)
-    let $count := $shape/@count/xs:integer(.)
-    let $minCount := $shape/@minCount/xs:integer(.)
-    let $maxCount := $shape/@maxCount/xs:integer(.)
-    let $countErrors := (
-        if (empty($count) or $targetCount eq $count) then () else            
-            <gx:error constraintComp="targetCount">{ 
-                      $constraint/@id/attribute constraintID {.},
-                      $params,
-                      attribute actCount {$targetCount},
-                      $msg
-            }</gx:error>,
-        if (empty($minCount) or $targetCount ge $minCount) then () else            
-            <gx:error class="{$class}">{
-                      $shape/@id/attribute {$idAttName} {.},
-                      $identAtt/attribute {$labelAttName} {.},            
-                      attribute code {'too-small-target-count'},
-                      attribute expectedMinCount {$minCount},
-                      attribute actualCount {$targetCount}
-            }</gx:error>,
-        if (empty($maxCount) or $targetCount le $maxCount) then () else            
-            <gx:error class="{$class}">{
-                      $shape/@id/attribute {$idAttName} {.},
-                      $identAtt/attribute {$labelAttName} {.},            
-                      attribute code {'too-large-target-count'},
-                      attribute expectedMaxCount {$maxCount},
-                      attribute actualCount {$targetCount}
-            }</gx:error>
-    )
-    return $countErrors
-:)    
 };
 
 (:~
@@ -101,8 +62,8 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
  : @param atts attributes to be added
  : @return augmented error element
  :)
-declare function f:augmentErrorElement($error as element(gx:error), $atts as attribute()+, $position as xs:string?)
-        as element(gx:error) {
+declare function f:augmentErrorElement($error as element(), $atts as attribute()+, $position as xs:string?)
+        as element() {
     let $addedAttNames := $atts/node-name(.)        
     let $curAtts := $error/@*[not(node-name(.) = $addedAttNames)]
     return

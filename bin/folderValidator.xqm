@@ -50,17 +50,33 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
                     
     (: check: targetSize :)                    
     let $targetCount := count($targetPaths)   
-    let $targetCountErrors := $components/self::gx:targetSize/i:validateTargetCount(., $targetCount)
-                              /i:augmentErrorElement(., (
-                                  attribute contextFilePath {$contextPath},
-                                  attribute navigationPath {$navigationPath}
-                              ), 'first')
-    
-    
-    let $instanceErrors :=
+    let $targetCountPerceptions := 
+        let $constraint := $components/self::gx:targetSize
+        return
+            if (not($constraint)) then () else
+            let $errors :=    
+                $components/self::gx:targetSize                
+                                /i:validateTargetCount(., $targetCount)
+                                /i:augmentErrorElement(., (
+                                attribute contextFilePath {$contextPath},
+                                attribute navigationPath {$navigationPath}
+                                ), 'first')    
+            return
+                if ($errors) then $errors
+                else
+                    <gx:green>{
+                        attribute contextPath {$contextPath},
+                        attribute navigationPath {$navigationPath},
+                        attribute constraintComponent {$constraint/local-name()},
+                        $constraint/@id/attribute constraintID {.},
+                        $constraint/@label/attribute constraintLabel {.}
+                    }</gx:green>
+
+    let $instancePerceptions :=
         for $targetPath in $targetPaths
         return f:validateFolderInstance($targetPath, $gxFolder, $context)
-    let $subsetErrors :=
+        
+    let $subsetPerceptions :=
         for $gxFolderSubset in $components/self::gx:folderSubset
         let $subsetComponents := $gxFolderSubset/*[not(@deactivated eq 'true')]
         let $subsetLabel := $gxFolderSubset/@subsetLabel
@@ -72,24 +88,34 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
             return i:evaluateFoxpath($foxpath, $targetPath) 
         )[. = $targetPaths] => distinct-values()
         let $subsetTargetCount := count($subsetTargetPaths)        
-        let $targetCountErrors := $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
-                                  /i:augmentErrorElement(., (
-                                      attribute contextFilePath {$contextPath},
-                                      attribute navigationPath {$subsetNavigationPath}
-                                  ), 'first')
+        let $targetCountPerceptions := 
+            let $constraint := $subsetComponents/self::gx:targetSize   
+            return
+                if (not($constraint)) then () else
+                let $errors :=
+                    $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
+                                      /i:augmentErrorElement(., (
+                                          attribute contextFilePath {$contextPath},
+                                          attribute navigationPath {$subsetNavigationPath}
+                                      ), 'first')
+                return    
+                    if ($errors) then $errors
+                    else
+                        <gx:green>{
+                            attribute contextPath {$contextPath},
+                            attribute folderSubsetNavigationPath {$subsetNavigationPath},
+                            attribute constraintComponent {$constraint/local-name()},
+                            $constraint/@id/attribute constraintID {.},
+                            $constraint/@label/attribute constraintLabel {.}
+                        }</gx:green>
         
-        let $instanceErrors :=
+        let $instancePerceptions :=
             for $subsetTargetPath in $subsetTargetPaths
             return f:validateFolderInstance($subsetTargetPath, $gxFolderSubset, $context)
-        return ($targetCountErrors, $instanceErrors)
-    let $errors := ($targetCountErrors, $instanceErrors, $subsetErrors)
+        return ($targetCountPerceptions, $instancePerceptions)
+    let $perceptions := ($targetCountPerceptions, $instancePerceptions, $subsetPerceptions)
     return
-        <gx:folderSetErrors>{
-            $gxFolder/@id/attribute folderID {.},
-            $gxFolder/@label/attribute folderLabel {.},
-            attribute count {count($errors)},
-            $errors
-        }</gx:folderSetErrors>[$errors]
+        $perceptions
 };
 
 declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as element(), $context as map(*)) 
@@ -101,10 +127,11 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
     let $exprContext := map{}
     
     (: perform validations :)
-    let $errors := (
+    let $perceptions := (
         (: validate - container members :)
         for $child in $components
-        return
+        let $childIsShape := $child/(self::gx:file, self::gx:folder)
+        let $error :=
             typeswitch($child)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $exprContext)
             case $file as element(gx:file) return i:validateFile($file, $context)
@@ -115,16 +142,19 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             case element(gx:folderSubset) return ()
             case element(gx:targetSize) return ()
             default return error()
+        return
+            if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
+            else if ($childIsShape) then ()
+            else
+                <gx:green>{
+                    attribute folderPath {$folderPath},
+                    attribute constraintComponent {$child/local-name()},
+                    $child/@id/attribute constraintID {.},
+                    $child/@label/attribute constraintLabel {.}
+                }</gx:green>
     )
     return
-        <gx:folderErrors>{
-            $gxFolder/@id/attribute folderID {.},
-            $gxFolder/@label/attribute folderLabel {.},
-            attribute count {count($errors)},
-            attribute folderPath {$folderPath},
-            $errors
-        }</gx:folderErrors>
-        [$errors]
+        $perceptions
 };
 
 declare function f:validateFolderContent($folderPath as xs:string, $folderContent as element(gx:folderContent), $context as map(*)) 
@@ -181,7 +211,8 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
                         attribute filePaths {$unexpectedFiles}
                     }</gx:error>
                     [exists($unexpectedFiles)]    )
-    return $errors
+    return 
+        $errors
 };
 
 

@@ -22,7 +22,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateGreenFox($gfox as element(gx:greenFox)) 
+declare function f:validateGreenFox($gfox as element(gx:greenfox)) 
         as element()* {
     let $errors := (
     
@@ -37,7 +37,7 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
                 let $plan := xquery:parse($augmentedExpr)
                 return ()
             } catch * {
-                <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenFoxLocation(.)}">{
+                <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
                     $err:code ! attribute err:code {.},
                     $err:description ! attribute err:description {.},
                     $err:value ! attribute err:value {.},
@@ -52,7 +52,7 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
         
         return
             if ($plan/self::*:errors) then
-                <gx:error code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenFoxLocation(.)}">{
+                <gx:error code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
                     $plan
                 }</gx:error>
     )
@@ -60,7 +60,7 @@ declare function f:validateGreenFox($gfox as element(gx:greenFox))
         <gx:invalidGreenFox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenFox>[$errors]
 };
 
-declare function f:greenFoxLocation($node as node()) as xs:string {
+declare function f:greenfoxLocation($node as node()) as xs:string {
     (
         for $node in $node/ancestor-or-self::node()
         let $index := 1 + $node/count(preceding-sibling::*[node-name(.) eq $node/node-name(.)])

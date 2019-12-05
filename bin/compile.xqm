@@ -25,7 +25,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : reference are replaced with the referenced component, augmented with the
  : attributes and content elements of the referencing component.
  :)
-declare function f:compileGfox($gxdoc as element(gx:greenFox), $externalContext as map(*)) 
+declare function f:compileGfox($gxdoc as element(gx:greenfox), $externalContext as map(*)) 
         as item()+ {
     let $context := map:merge((
         $externalContext,
@@ -52,7 +52,7 @@ declare function f:compileGfox($gxdoc as element(gx:greenFox), $externalContext 
 declare function f:compileGfoxRC($n as node(), $context as map(*), $callContext as map(*)?) as node() {
     typeswitch($n)
     case document-node() return document {$n/node() ! f:compileGfoxRC(., $context, $callContext)}
-    case element(gx:greenFox) return
+    case element(gx:greenfox) return
         element {node-name($n)} {
             $n/@* ! f:compileGfoxRC(., $context, $callContext),
             if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
@@ -169,7 +169,7 @@ declare function f:externalContext($params as xs:string?) as map(*) {
         )
 };
 
-declare function f:compileGfox_addIds($gfox as element(gx:greenFox)) {
+declare function f:compileGfox_addIds($gfox as element(gx:greenfox)) {
     copy $gfox_ := $gfox
     modify
         let $elems := ($gfox_//*) except ($gfox_/gx:context/descendant-or-self::*)

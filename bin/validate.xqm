@@ -11,6 +11,8 @@
       <operation name="validate" type="node()" func="validateOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="params" type="xs:string?"/>
+         <param name="reportType" type="xs:string?" default="std"/>
+         <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>
     </operations>  
@@ -30,7 +32,8 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "log.xqm",
     "greenfoxEditUtil.xqm",
     "greenFoxValidator.xqm",
-    "systemValidator.xqm";
+    "systemValidator.xqm",
+    "validationReportWriter.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -46,6 +49,10 @@ declare function f:validateOp($request as element())
     let $gfoxSource := tt:getParams($request, 'gfox')/* 
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
     let $params := tt:getParams($request, 'params')
+    let $reportType := tt:getParams($request, 'reportType')
+    let $reportFormat := tt:getParams($request, 'format')
+    let $reportOptions := map{}
+    
     let $gfoxAndContext := f:compileGfox($gfoxSource, i:externalContext($params))
     let $gfox := $gfoxAndContext[. instance of element()]
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
@@ -54,16 +61,21 @@ declare function f:validateOp($request as element())
     return
         if ($gfoxErrors) then $gfoxErrors else
         
-    let $validationReport := i:validateSystem($gfox, $context)
+    let $perceptions := i:validateSystem($gfox, $context)
+    return
+        i:writeValidationReport($gfox, $perceptions, $reportType, $reportFormat, $reportOptions)
+        
+(:        
     let $validationReport :=
         <gx:validationReport countErrors="{count($validationReport//gx:error)}" 
                              validationTime="{current-dateTime()}"
                              greenfoxSchemaDoc="{$gfoxSourceURI}" 
                              greenfoxSchemaURI="{$gfox/@greenfoxURI}">{
-           for $error in $validationReport//gx:error
-           order by $error/@id
-           return $error
+           for $perception in $validationReport//(gx:error, gx:green)
+           order by $perception/@id
+           return $perception
         }</gx:validationReport>
     return
-        $validationReport/i:harmonizePrefixes(., $f:URI_GX, $f:PREFIX_GX) 
+        $validationReport/i:harmonizePrefixes(., $f:URI_GX, $f:PREFIX_GX)
+:)        
 };        

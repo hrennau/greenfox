@@ -29,12 +29,11 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param externalContext a context specified by the caller
  : @return validation errors, if any
  :)
-declare function f:validateSystem($gx as element(gx:greenFox), $context as map(*)) {
-    let $errors :=
+declare function f:validateSystem($gx as element(gx:greenfox), $context as map(*)) {
+    let $perceptions :=
         for $domain in $gx/gx:domain return f:validateDomain($domain, $context)
     return
-        <gx:errors count="{count($errors/descendant-or-self::gx:error)}">{$errors}</gx:errors>
-        [$errors]
+        $perceptions
 };
 
 (:~
@@ -55,20 +54,13 @@ declare function f:validateDomain($gxDomain as element(gx:domain), $context as m
     let $name := $gxDomain/@name
     let $context := map:put($context, '_contextPath', $baseURI)
     let $context := map:put($context, '_domainName', $name)
-    let $errors :=
+    let $perceptions :=
         for $component in $gxDomain/(* except gx:context)
         return
             typeswitch($component)
             case element(gx:folder) return f:validateFolder($component, $context)
             default return error()
     return
-        if (empty($errors)) then () else
-            <gx:domainErrors>{
-                $gxDomain/@id/attribute domainID {.},
-                $gxDomain/@label/attribute domainLabel {.},
-                attribute count {count($errors/descendant-or-self::gx:error)},
-                attribute domainPath {$baseURI},
-                $errors
-            }</gx:domainErrors>
+        $perceptions
 };
 
