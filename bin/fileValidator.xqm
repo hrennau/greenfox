@@ -76,24 +76,26 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     let $components := $gxFile/*[not(@deactivated eq 'true')]
     let $mediatype := $gxFile/@mediatype 
     
+    (: the required bindings are a subset of potential bindings :)
     let $requiredBindings :=
+        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain')
         for $child in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
         return (
-            $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
-            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, ('this', 'doc', 'jdoc', 'csvdoc')),
-            $child/self::gx:xsdValid/i:determineRequiredBindingsFoxpath(@xsdFoxpath, ('this', 'doc', 'jdoc', 'csvdoc'))
+            $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, $potentialBindings),            
+            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, $potentialBindings),
+            $child/self::gx:xsdValid/i:determineRequiredBindingsFoxpath(@xsdFoxpath, $potentialBindings),
+            $child/self::gx:xpath/@inFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings)
             ) => distinct-values() => sort()
-            
-    (: provide document :)            
+
+    (: provide required documents :)            
     let $jdoc :=
         if ($mediatype eq 'json' or $requiredBindings = 'json') then
         let $text := unparsed-text($filePath)
         return try {json:parse($text)} catch * {()}
     let $xdoc :=
         let $required := 
-            $requiredBindings = 'doc'
-            or
-            not($mediatype ne 'xml') and $components/self::gx:xpath
+            $requiredBindings = 'doc' or
+                not($mediatype ne 'xml') and $components/self::gx:xpath
         return
             if (not($required)) then () 
             else if (doc-available($filePath)) then doc($filePath)
@@ -117,12 +119,13 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
          else ()
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     
-    let $exprContext := 
+    let $exprContext :=
         map:merge((
             if (not($requiredBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
             if (not($requiredBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
             if (not($requiredBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $jdoc),
-            if (not($requiredBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath)
+            if (not($requiredBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
+            if (not($requiredBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath)
         ))
     
     

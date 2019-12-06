@@ -17,9 +17,9 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "expressionEvaluator.xqm",
     "expressionValueConstraint.xqm",
     "fileValidator.xqm",
-    "foxpathEvaluator.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";

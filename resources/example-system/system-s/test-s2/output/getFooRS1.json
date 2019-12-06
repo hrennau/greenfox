@@ -2,6 +2,6 @@
     "getFooRS": {
         "returnCode": "OK",
         "fooID": 100,
-        "fooValue": "foo-100"
+        "fooValue": "foo-100X"
     }
 }

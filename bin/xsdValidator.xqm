@@ -11,32 +11,49 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "foxpathEvaluator.xqm",
+    "expressionEvaluator.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $context)
+declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $exprContext as map(*))
         as element()* {
     let $_DEBUG := trace($filePath, '### XSD VALIDATOR FILE PATH: ') return
     
     if (not(doc-available($filePath))) then 
-        <gx:error msg="XSD validation requires XML file, but file is not XML"/>
-        else
+        <gx:error msg="XSD validation requires XML file, but file is not XML">{
+                  attribute constraintComponent {"xsdValid"},
+                  $constraint/@xsdFoxpath,
+                  $constraint/@id/attribute constraintID {.},
+                  $constraint/@label/attribute constraintLabel {.}
+        }</gx:error>
+    else
         
     let $doc := doc($filePath)
-    let $xsdFoxpath := $constraint/@xsdFoxpath
-    let $xsdPaths :=    
+    let $expr := $constraint/@xsdFoxpath
+    let $xsdPaths := 
+        let $value := f:evaluateFoxpath($expr, $filePath, $exprContext, true())
+(:        
         let $exprContext := $context
         let $requiredBindings := map:keys($context)
         let $exprAugmented := i:finalizeQuery($xsdFoxpath, $requiredBindings)
         let $value := f:evaluateFoxpath($exprAugmented, $filePath, $exprContext)
+:)        
         return (
-            for $v in $value
-            return
+            for $v in $value return
                 if (file:is-dir($v)) then file:list($v, false(), '*.xsd') ! concat($v, '/', .)
                 else $v
         )
+    return
+        if (empty($xsdPaths)) then
+            <gx:error msg="No XSDs found">{
+                      attribute constraintComponent {"xsdValid"},
+                      $constraint/@xsdFoxpath,
+                      $constraint/@id/attribute constraintID {.},
+                      $constraint/@label/attribute constraintLabel {.}
+            }</gx:error>
+        else
+        
     let $xsdRoots := 
         for $xsdPath in $xsdPaths
         return
@@ -47,9 +64,10 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
         if (some $xsdRoot in $xsdRoots satisfies 
             not($xsdRoot/descendant-or-self::xs:schema)) then 
                 <gx:error msg="xsdFoxpath yields non-XSD node">{
-                    $constraint/@xsdFoxpath,
-                    $constraint/@id,
-                    $constraint/@labed
+                  attribute constraintComponent {"xsdValid"},
+                  $constraint/@xsdFoxpath,
+                  $constraint/@id/attribute constraintID {.},
+                  $constraint/@label/attribute constraintLabel {.}
                 }</gx:error>
         else
 
@@ -65,12 +83,20 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     return
         (: _TO_DO_ - elaborate error elements in case of XSD match issues :)
         if (count($elementDecl) eq 0) then
-            <gx:error msg="{concat('No XSD element declaration found for this document; namespace=', $namespace, '; local name: ', $lname)}"
-                      xsdFoxpath="{$xsdFoxpath}"/>
+            <gx:error msg="{concat('No XSD element declaration found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
+                attribute constraintComponent {"xsdValid"},
+                $constraint/@xsdFoxpath,
+                $constraint/@id/attribute constraintID {.},
+                $constraint/@label/attribute constraintLabel {.}
+             }</gx:error>
                       
         else if (count($elementDecl) gt 1) then
-            <gx:error msg="{concat('More than 1 XSD element declarations found for this document; namespace=', $namespace, '; local name: ', $lname)}"
-                      xsdFoxpath="{$xsdFoxpath}"/>
+            <gx:error msg="{concat('More than 1 XSD element declarations found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
+                attribute constraintComponent {"xsdValid"},
+                $constraint/@xsdFoxpath,
+                $constraint/@id/attribute constraintID {.},
+                $constraint/@label/attribute constraintLabel {.}            
+            }</gx:error>
         else 
         
     let $schema := $elementDecl/base-uri(.)    
@@ -80,9 +106,11 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
         else
             <gx:error>{
                 $constraint/@msg,
-                $constraint/@id,
-                $constraint/@label,
-                attribute filePath {$filePath},
+                attribute constraintComponent {"xsdValid"},
+                attribute filePath {$filePath},                
+                $constraint/@xsdFoxpath,
+                $constraint/@id/attribute constraintID {.},
+                $constraint/@label/attribute constraintLabel {.},            
                 $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
             }</gx:error>
 };

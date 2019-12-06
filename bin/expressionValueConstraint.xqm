@@ -11,7 +11,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
 
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "foxpathEvaluator.xqm",
+    "expressionEvaluator.xqm",
     "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -33,12 +33,8 @@ declare function f:validateExpressionValue($constraint as element(),
             let $exprContext := map:put($context, '', $contextItem)
             return xquery:eval($expr, $exprContext)
             
-        (: foxpath - context item is one parameter, map with external variables another parameter :)            
         else
-            let $exprContext := $context
-            let $requiredBindings := map:keys($context)
-            let $exprAugmented := i:finalizeQuery($expr, $requiredBindings)
-            return f:evaluateFoxpath($exprAugmented, $contextItem, $exprContext)
+            f:evaluateFoxpath($expr, $contextItem, $context, true())
 
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
@@ -53,6 +49,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $ge := $constraint/@ge
     let $lt := $constraint/@lt
     let $le := $constraint/@le
+    let $inFoxpath := $constraint/@inFoxpath
     let $matches := $constraint/@matches
     let $notMatches := $constraint/@notMatches
     let $like := $constraint/@like
@@ -60,24 +57,44 @@ declare function f:validateExpressionValue($constraint as element(),
     let $flags := string($constraint/@flags)
     let $quantifier := 'all'
     
-    let $errorsSome :=
-        if (not($constraint/gx:some)) then () else
+    let $inFoxpathValue := 
+        if (not($inFoxpath)) then () else trace(
+            let $contextItem :=
+                if ($contextItem instance of xs:anyAtomicType) then $contextItem
+                else $contextItem/root()/base-uri(.)
+            return                
+                f:evaluateFoxpath($inFoxpath, $contextItem, $context, true())
+        , '### IN_FOXPATH_VALUE: ')
+    
+    let $errorsIn := (
+        if (not($constraint/gx:in)) then () else
 
         let $ok := trace(
             if ($quantifier eq 'all') then
                 every $item in $exprValue satisfies 
-                    some $alternative in $constraint/gx:some/* satisfies
+                    some $alternative in $constraint/gx:in/* satisfies
                         typeswitch($alternative)
                         case element(gx:eq) return $item = $alternative
                         case element(gx:ne) return $item != $alternative
                         case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
                         case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
                         default return error()                
-            else error(), 'SOME: ')
+            else error(), 'IN: ')
         return
             if ($ok) then () else
-                f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:some, $exprValue, ())
-                
+                f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:in, $exprValue, ())
+        ,
+        if (not($inFoxpath)) then () else
+        
+        let $ok :=
+            if ($quantifier eq 'all') then
+                every $item in $exprValue satisfies $item = $inFoxpathValue
+            else
+                some $item in $exprValue satisfies $item = $inFoxpathValue
+        return
+           if ($ok) then () else
+                f:constructError_valueComparison($constraint, $quantifier, $inFoxpath, $exprValue, ())                
+    )            
     let $errors := (
         (: count errors
            ============ :)
@@ -183,7 +200,7 @@ declare function f:validateExpressionValue($constraint as element(),
         ()
     )
     return
-        ($errors, $errorsSome)        
+        ($errors, $errorsIn)        
 };
 
 declare function f:constructError_valueComparison($constraint as element(),

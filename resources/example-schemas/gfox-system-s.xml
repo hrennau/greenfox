@@ -15,18 +15,8 @@
             
             <foxpath msg="getFoo*.json OK but contains no fooValue" count="0" expr="
                 .\\getFooRS*.json\json-doc(.)[//*:returnCode eq 'OK'][not(//*:fooValue)]"/>
-<!--
-            <foxpath msg="config with invalid return code" expr="
-                .\\msg-config.csv\csv-doc(., 'comma', 'yes')//returnCode">                
-                <some>
-                    <eq>OK</eq>
-                    <eq>NOFIND</eq>
-                    <like>ERROR_*</like>
-                </some>     
-
-            </foxpath>
--->     
-            <!-- *** XSD folder ready -->
+            
+            <!-- *** XSD folder -->
             <folder foxpath=".\\xsd">
                 <targetSize msg="No XSD folder found" count="1"/>
                 <file foxpath="*.xsd">
@@ -34,7 +24,7 @@
                 </file>
             </folder>                
             
-            <!-- *** Folder containing a test case *** -->
+            <!-- *** Test case folders *** -->
             <folder foxpath=".\\test-*[input][output][config]">
                 <targetSize msg="Test system without tests" minCount="1"/>
                 
@@ -46,11 +36,11 @@
 
                         <!-- Check - configured return codes ok? -->
                         <xpath msg="Config file contains unknown return code" expr="//returnCode">
-                            <some>
+                            <in>
                                 <eq>OK</eq>
                                 <eq>NOFIND</eq>
                                 <like>ERROR_*</like>
-                            </some>                                
+                            </in>                                
                         </xpath>
                         
                     </file>
@@ -80,7 +70,13 @@
                     <!-- *** XML response message *** -->                    
                     <file foxpath="*">
                         <!-- *** Check - response fresh? *** -->
-                        <lastModified msg="Stale output file" ge="${lastModified}"/>
+                        <lastModified msg="Stale output file" ge="${lastModified}"/>                        
+                        
+                        <xsdValid msg="Response msg not XSD valid" 
+                                  xsdFoxpath="$domain\system-s\resources\xsd\\*.xsd"/>
+                        
+                        <xpath msg="Unknown foo article number"
+                               expr="//*:fooValue" inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>
                         
                         <!-- *** Check - return code ok? *** -->
                         <foxpath msg="Return code != configured value" eq="true" expr="
@@ -118,7 +114,10 @@
                     <file foxpath="*" mediatype="json">
                         <!-- *** Check - response fresh? *** -->
                         <lastModified msg="Stale output file" ge="${lastModified}"/>
-                        
+
+                        <xpath msg="Unknown foo article number"
+                               expr="//fooValue" inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>                        
+
                         <!-- *** Check - return code ok? *** -->                        
                         <foxpath msg="Return code != configured value" eq="true" expr="
                             let $actReturnCode := json-doc(.)//*:returnCode

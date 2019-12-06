@@ -54,6 +54,7 @@ declare function f:validateDomain($gxDomain as element(gx:domain), $context as m
     let $name := $gxDomain/@name
     let $context := map:put($context, '_contextPath', $baseURI)
     let $context := map:put($context, '_domainName', $name)
+    let $context := map:put($context, '_domainPath', $baseURI)
     let $perceptions :=
         for $component in $gxDomain/(* except gx:context)
         return

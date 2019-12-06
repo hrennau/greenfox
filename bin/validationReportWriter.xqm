@@ -53,7 +53,7 @@ declare function f:writeValidationReport_raw(
         as item()* {
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
-    return    
+    let $report :=    
         <gx:validationReport countErrors="{count($perceptions/self::gx:error)}" 
                              validationTime="{current-dateTime()}"
                              greenfoxSchemaDoc="{$gfoxSourceURI}" 
@@ -61,7 +61,9 @@ declare function f:writeValidationReport_raw(
             for $perception in $perceptions
             order by $perception/@id
             return $perception
-        }</gx:validationReport>        
+        }</gx:validationReport>
+    return
+        $report/f:finalizeReport(.)
 };
 
 declare function f:writeValidationReport_std(
@@ -89,14 +91,24 @@ declare function f:writeValidationReport_std(
         let $other := $perceptions except ($red, $green)
         (: let $_DEBUG := trace($perception/name() , 'PERCEPTION_NAME: ') :)
         return
-            if ($red) then <gx:redResource>{$resourceIdentifierAtt, $perception}</gx:redResource>
-            else if ($yellow) then <gx:yellowResource>{$resourceIdentifierAtt, $perception}</gx:yellowResource> 
+            if ($red) then 
+                <gx:redResource>{
+                    $resourceIdentifierAtt, 
+                    $perception/self::gx:error,
+                    $perception/self::gx:yellow,
+                    $perception/self::gx:green
+                }</gx:redResource>
+            else if ($yellow) then 
+                <gx:yellowResource>{
+                    $resourceIdentifierAtt/self::gx:yellow, 
+                    $perception/self::gx:green
+                }</gx:yellowResource> 
             else if ($green) then <gx:greenResource>{$resourceIdentifierAtt, $perception}</gx:greenResource>
             else error()
     let $redResources := $resourceDescriptors/self::gx:redResource
     let $yellowResources := $resourceDescriptors/self::gx:yellowResource    
     let $greenResources := $resourceDescriptors/self::gx:greenResource
-    return
+    let $report :=
         <gx:validationReport countErrors="{count($perceptions/self::gx:error)}"
                              countWarnings="{count($perceptions/self::gx:yellow)}"
                              countRedResources="{count($redResources)}"
@@ -120,5 +132,28 @@ declare function f:writeValidationReport_std(
                 $greenResources
             }</gx:greenResources>
         }</gx:validationReport>
-    
+    return
+        $report/f:finalizeReport(.)
 };
+
+declare function f:finalizeReport($report as node()) as node() {
+    f:finalizeReportRC($report)
+};
+
+declare function f:finalizeReportRC($n as node()) as node()? {
+    typeswitch($n)
+    case document-node() return document {$n/node() ! f:finalizeReportRC(.)}
+    case element() return
+        let $normName := if (not($n/namespace-uri($n) eq $i:URI_GX)) then node-name($n)
+                         else QName($i:URI_GX, string-join(($i:PREFIX_GX, $n/local-name(.)), ':'))
+        return
+            element {$normName} {
+                $n/@* ! f:finalizeReportRC(.),
+                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
+                $n/node() ! f:finalizeReportRC(.)
+            }
+    case text() return
+        if ($n/../* and not($n/matches(., '\S'))) then () else $n
+    default return $n
+};
+
