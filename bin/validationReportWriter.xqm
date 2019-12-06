@@ -78,14 +78,16 @@ declare function f:writeValidationReport_std(
         let $resourceIdentifier := $perception/(@filePath, @folderPath, @contextPath)[1]
         let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
         group by $resourceIdentifier
-        let $resourceIdentifierAtt := 
+        let $resourceIdentifierAtt :=
             if (not($resourceIdentifier)) then () else
-                attribute {$resourceIdentifierType[1]} {$resourceIdentifier}
+                let $attName := if (file:is-file($resourceIdentifier)) then 'file' else 'folder'
+                return
+                    attribute {$attName} {$resourceIdentifier}
         let $red := $perception/self::gx:error
         let $yellow := $perception/self::gx:yellow
         let $green := $perception/self::gx:green
         let $other := $perceptions except ($red, $green)
-        let $_DEBUG := trace($perception/name() , 'PERCEPTION_NAME: ')
+        (: let $_DEBUG := trace($perception/name() , 'PERCEPTION_NAME: ') :)
         return
             if ($red) then <gx:redResource>{$resourceIdentifierAtt, $perception}</gx:redResource>
             else if ($yellow) then <gx:yellowResource>{$resourceIdentifierAtt, $perception}</gx:yellowResource> 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.com/s1" xmlns:t="http://example.com/s1" elementFormDefault="qualified"> 
+
+    <xs:element name="getFooRS" type="t:getFooRSType"/>
+    
+    <xs:complexType name="getFooRSType">
+        <xs:sequence>
+            <xs:element name="returnCode" type="xs:string"/>
+            <xs:element name="fooID" type="xs:string"/>
+            <xs:element name="fooValue" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

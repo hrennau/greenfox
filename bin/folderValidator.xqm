@@ -58,23 +58,21 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
                 $components/self::gx:targetSize                
                                 /i:validateTargetCount(., $targetCount)
                                 /i:augmentErrorElement(., (
-                                attribute contextFilePath {$contextPath},
+                                attribute contextPath {$contextPath},
                                 attribute navigationPath {$navigationPath}
                                 ), 'first')    
             return
                 if ($errors) then $errors
                 else
                     <gx:green>{
+                        attribute constraintComponent {$constraint/local-name()},                    
                         attribute contextPath {$contextPath},
                         attribute navigationPath {$navigationPath},
-                        attribute constraintComponent {$constraint/local-name()},
                         $constraint/@id/attribute constraintID {.},
                         $constraint/@label/attribute constraintLabel {.}
                     }</gx:green>
 
-    let $instancePerceptions :=
-        for $targetPath in $targetPaths
-        return f:validateFolderInstance($targetPath, $gxFolder, $context)
+    let $instancePerceptions := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
         
     let $subsetPerceptions :=
         for $gxFolderSubset in $components/self::gx:folderSubset
@@ -95,27 +93,26 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
                 let $errors :=
                     $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
                                       /i:augmentErrorElement(., (
-                                          attribute contextFilePath {$contextPath},
+                                          attribute contextPath {$contextPath},
                                           attribute navigationPath {$subsetNavigationPath}
                                       ), 'first')
                 return    
                     if ($errors) then $errors
                     else
                         <gx:green>{
+                            attribute constraintComponent {$constraint/local-name()},                        
                             attribute contextPath {$contextPath},
+                            attribute navigationPath {$navigationPath},
                             attribute folderSubsetNavigationPath {$subsetNavigationPath},
-                            attribute constraintComponent {$constraint/local-name()},
                             $constraint/@id/attribute constraintID {.},
                             $constraint/@label/attribute constraintLabel {.}
                         }</gx:green>
         
-        let $instancePerceptions :=
-            for $subsetTargetPath in $subsetTargetPaths
-            return f:validateFolderInstance($subsetTargetPath, $gxFolderSubset, $context)
+        let $instancePerceptions := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountPerceptions, $instancePerceptions)
     let $perceptions := ($targetCountPerceptions, $instancePerceptions, $subsetPerceptions)
-    return
-        $perceptions
+    return trace(
+        $perceptions , 'PERCEPTIONS: ') 
 };
 
 declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as element(), $context as map(*)) 
@@ -126,32 +123,33 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
     
     let $exprContext := map{}
     
-    (: perform validations :)
+    (: collect perceptions :)
     let $perceptions := (
-        (: validate - container members :)
-        for $child in $components
-        let $childIsShape := $child/(self::gx:file, self::gx:folder)
-        let $error :=
-            typeswitch($child)
-            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $exprContext)
-            case $file as element(gx:file) return i:validateFile($file, $context)
-            case $folder as element(gx:folder) return i:validateFolder($folder, $context)
-            case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
-            case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
-            case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)            
-            case element(gx:folderSubset) return ()
-            case element(gx:targetSize) return ()
-            default return error()
-        return
-            if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
-            else if ($childIsShape) then ()
-            else
-                <gx:green>{
-                    attribute folderPath {$folderPath},
-                    attribute constraintComponent {$child/local-name()},
-                    $child/@id/attribute constraintID {.},
-                    $child/@label/attribute constraintLabel {.}
-                }</gx:green>
+        (: validate - member resources :)
+        let $resourceShapePerceptions := (
+            $components/self::gx:file/i:validateFile(., $context),
+            $components/self::gx:folder/i:validateFolder(., $context)
+        )
+        (: validate - value shapes :)
+        let $valueShapePerceptions :=
+            for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
+            let $error :=
+                typeswitch($child)
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $exprContext)
+                case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
+                case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
+                case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)    
+                default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($child)))
+            return
+                if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
+                else
+                    <gx:green>{
+                        attribute constraintComponent {$child/local-name()},                    
+                        attribute folderPath {$folderPath},
+                        $child/@id/attribute constraintID {.},
+                        $child/@label/attribute constraintLabel {.}
+                    }</gx:green>
+        return ($resourceShapePerceptions, $valueShapePerceptions)                    
     )
     return
         $perceptions

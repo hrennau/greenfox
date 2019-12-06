@@ -43,16 +43,16 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
             let $error :=
                 $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
                     /i:augmentErrorElement(., (
-                        attribute contextFilePath {$contextPath},
+                        attribute contextPath {$contextPath},
                         attribute navigationPath {$navigationPath}
                         ), 'first')
             return
                 if ($error) then $error
                 else
                     <gx:green>{
+                        attribute constraintComponent {$constraint/local-name()},                    
                         attribute contextPath {$contextPath},
                         attribute navigationPath {$navigationPath},
-                        attribute constraintComponent {$constraint/local-name()},
                         $constraint/@id/attribute constraintID {.},
                         $constraint/@label/attribute constraintLabel {.}
                     }</gx:green>
@@ -128,7 +128,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     
     (: perform validations :)
     let $perceptions := (
-        for $child in $components
+        for $child in $components[not(self::gx:targetSize)]
         let $error :=
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
