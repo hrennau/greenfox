@@ -71,12 +71,15 @@
                     <file foxpath="*">
                         <!-- *** Check - response fresh? *** -->
                         <lastModified msg="Stale output file" ge="${lastModified}"/>                        
-                        
+
+                        <!-- *** Check - XSD valid? -->
                         <xsdValid msg="Response msg not XSD valid" 
                                   xsdFoxpath="$domain\system-s\resources\xsd\\*.xsd"/>
                         
+                        <!-- *** Check - known article number? -->                        
                         <xpath msg="Unknown foo article number"
-                               expr="//*:fooValue" inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>
+                               expr="//*:fooValue" 
+                               inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>
                         
                         <!-- *** Check - return code ok? *** -->
                         <foxpath msg="Return code != configured value" eq="true" expr="
@@ -115,6 +118,7 @@
                         <!-- *** Check - response fresh? *** -->
                         <lastModified msg="Stale output file" ge="${lastModified}"/>
 
+                        <!-- *** Check - known article number? -->
                         <xpath msg="Unknown foo article number"
                                expr="//fooValue" inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>                        
 
