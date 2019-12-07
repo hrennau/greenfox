@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test-plan>
+    <service>s1</service>
+    <namespace>http://example.com/s1</namespace>
+    <defaultReturnCode>OK</defaultReturnCode>
+</test-plan>

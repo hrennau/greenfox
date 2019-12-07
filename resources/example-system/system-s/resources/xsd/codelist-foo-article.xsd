@@ -7,7 +7,7 @@
         <xs:sequence>
             <xs:element name="returnCode" type="xs:string"/>
             <xs:element name="fooID" type="xs:string"/>
-            <xs:element name="fooValue" type="xs:string"/>
+            <xs:element name="fooValue" type="xs:string" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
     

@@ -90,20 +90,25 @@ declare function f:writeValidationReport_std(
         let $green := $perception/self::gx:green
         let $other := $perceptions except ($red, $green)
         (: let $_DEBUG := trace($perception/name() , 'PERCEPTION_NAME: ') :)
+        let $removeAtts :=('filePath', 'folderPath', 'contextPath')
         return
             if ($red) then 
                 <gx:redResource>{
                     $resourceIdentifierAtt, 
-                    $perception/self::gx:error,
-                    $perception/self::gx:yellow,
-                    $perception/self::gx:green
+                    $perception/self::gx:error/f:removeAtts(., $removeAtts),
+                    $perception/self::gx:yellow/f:removeAtts(., $removeAtts),
+                    $perception/self::gx:green/f:removeAtts(., $removeAtts)
                 }</gx:redResource>
             else if ($yellow) then 
                 <gx:yellowResource>{
-                    $resourceIdentifierAtt/self::gx:yellow, 
-                    $perception/self::gx:green
+                    $resourceIdentifierAtt/self::gx:yellow/f:removeAtts(., $removeAtts), 
+                    $perception/self::gx:green/f:removeAtts(., $removeAtts)
                 }</gx:yellowResource> 
-            else if ($green) then <gx:greenResource>{$resourceIdentifierAtt, $perception}</gx:greenResource>
+            else if ($green) then 
+                <gx:greenResource>{
+                    $resourceIdentifierAtt, 
+                    $perception/f:removeAtts(., $removeAtts)
+                }</gx:greenResource>
             else error()
     let $redResources := $resourceDescriptors/self::gx:redResource
     let $yellowResources := $resourceDescriptors/self::gx:yellowResource    
@@ -136,6 +141,14 @@ declare function f:writeValidationReport_std(
         $report/f:finalizeReport(.)
 };
 
+declare function f:removeAtts($elem as element(),
+                             $attName as xs:string+) 
+        as element() {
+    element {node-name($elem)} {
+        $elem/@*[not(local-name(.) = $attName)],
+        $elem/node()
+    }
+};
 declare function f:finalizeReport($report as node()) as node() {
     f:finalizeReportRC($report)
 };

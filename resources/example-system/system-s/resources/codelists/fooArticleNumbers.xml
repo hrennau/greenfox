@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Example code list; you can use any structure, as the codes are referenced by XPath -->
-<fooValues>
-    <fooValue>foo-100</fooValue>
-    <fooValue>foo-101</fooValue>    
-</fooValues>

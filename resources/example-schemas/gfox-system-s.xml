@@ -3,18 +3,11 @@
     <context>
         <field name="lastModified" value="2019-12-01"/>
     </context>    
-    <domain path="\tt\greenfox\resources\example-system" label="system-s">    
+    <domain path="\tt\greenfox\resources\example-system\system-s" label="system-s">    
         
         <!-- *** Root folder containing the test system *** -->
-        <folder foxpath="system-s"> 
+        <folder foxpath="."> 
             <targetSize msg="Expecting exactly one folder 'system-s" count="1"/>
-            
-            <!-- *** File sanity checks -->
-            <foxpath msg="getFoo*.xml OK but contains no fooValue" count="0" expr="
-                .\\getFooRS*.xml[//*:returnCode eq 'OK'][not(//*:fooValue)]"/>
-            
-            <foxpath msg="getFoo*.json OK but contains no fooValue" count="0" expr="
-                .\\getFooRS*.json\json-doc(.)[//*:returnCode eq 'OK'][not(//*:fooValue)]"/>
             
             <!-- *** XSD folder -->
             <folder foxpath=".\\xsd">
@@ -23,10 +16,16 @@
                     <targetSize msg="No XSDs found" minCount="1"/>
                 </file>
             </folder>                
+
+            <!-- *** Codelist folder -->
+            <folder foxpath=".\\codelists">
+                <targetSize msg="No codelist folder found" count="1"/>
+                <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
+            </folder>                
             
             <!-- *** Test case folders *** -->
             <folder foxpath=".\\test-*[input][output][config]">
-                <targetSize msg="Test system without tests" minCount="1"/>
+                <targetSize msg="System without test cases" minCount="1"/>
                 
                 <folder foxpath="config">
                     <targetSize msg="Config folder missing." count="1"/>
@@ -74,22 +73,29 @@
 
                         <!-- *** Check - XSD valid? -->
                         <xsdValid msg="Response msg not XSD valid" 
-                                  xsdFoxpath="$domain\system-s\resources\xsd\\*.xsd"/>
+                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>
                         
                         <!-- *** Check - known article number? -->                        
                         <xpath msg="Unknown foo article number"
                                expr="//*:fooValue" 
-                               inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>
+                               inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
+                        
+                        <!-- *** getFooRS - status OK, yet no foo values -->
+                        <xpath msg="getFoo*.xml OK but contains no fooValue" eq="true" 
+                               expr="if (*:getFooRS//*:returnCode eq 'OK') then exists(//*:fooValue) else true()"/>
                         
                         <!-- *** Check - return code ok? *** -->
-                        <foxpath msg="Return code != configured value" eq="true" expr="
+                        <foxpath msg="Return code not the configured value" eq="true" expr="
                             let $actReturnCode := doc(.)//*:returnCode
                             let $expReturnCode :=
-                                let $fileName := file-name(.)
-                                let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                                return $cfgDoc//record[response eq $fileName]/returnCode                            
+                            let $fileName := file-name(.)
+                            let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                            return $cfgDoc//record[response eq $fileName]/returnCode                            
                             return $actReturnCode = $expReturnCode"/>
+                        
                     </file>
+                    
+                    
                 </folder>
                 
                 <!--  =====================
@@ -120,16 +126,22 @@
 
                         <!-- *** Check - known article number? -->
                         <xpath msg="Unknown foo article number"
-                               expr="//fooValue" inFoxpath="$domain\\codelists\fooArticleNumbers.xml//fooValue"/>                        
+                               expr="//fooValue" 
+                               inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
 
+                        <!-- *** getFooRS - status OK, yet no foo values -->
+                        <xpath msg="getFoo*.xml OK but contains no fooValue" eq="true" 
+                            expr="if (json/*:getFooRS//*:returnCode eq 'OK') then exists(//*:fooValue) else true()"/>
+                        
                         <!-- *** Check - return code ok? *** -->                        
                         <foxpath msg="Return code != configured value" eq="true" expr="
                             let $actReturnCode := json-doc(.)//*:returnCode
                             let $expReturnCode :=
-                                let $fileName := file-name(.)
-                                let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                                return $cfgDoc//record[response eq $fileName]/returnCode                            
-                            return $actReturnCode = $expReturnCode"/>                        
+                            let $fileName := file-name(.)
+                            let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                            return $cfgDoc//record[response eq $fileName]/returnCode                            
+                            return $actReturnCode = $expReturnCode"/>    
+                        
                     </file>
                 </folder>
             </folder>

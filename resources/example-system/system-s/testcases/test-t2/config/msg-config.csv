@@ -1,4 +1,3 @@
 request,response,returnCode
 getFooRQ1.json,getFooRS1.json,OK
 getFooRQ2.json,getFooRS2.json,NOFIND
-getFooRQ3.json,getFooRS3.json,UNDEFINED

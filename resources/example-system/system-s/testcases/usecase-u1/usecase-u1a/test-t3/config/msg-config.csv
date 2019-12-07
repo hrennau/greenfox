@@ -1,0 +1,3 @@
+request,response,returnCode
+getFooRQ1.xml,getFooRS1.xml,OK
+getFooRQ2.xml,getFooRS2.xml,OK
