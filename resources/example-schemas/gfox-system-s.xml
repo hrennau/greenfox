@@ -78,7 +78,7 @@
                         <!-- *** Check - known article number? -->                        
                         <xpath msg="Unknown foo article number"
                                expr="//*:fooValue" 
-                               inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
+                                inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
                         
                         <!-- *** getFooRS - status OK, yet no foo values -->
                         <xpath msg="getFoo*.xml OK but contains no fooValue" eq="true" 
