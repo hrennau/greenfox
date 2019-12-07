@@ -31,7 +31,7 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
                                    $addVariableDeclarations as xs:boolean)
         as item()* {
     let $isContextUri := not($context instance of node())
-    let $_DEBUG := trace($externalVariableBindings, '§§§§§§§§§§§ E_V_B: ')
+    (: let $_DEBUG := trace($externalVariableBindings, '§§§§§§§§§§§ E_V_B: ') :)
     let $foxpathOptions := f:getFoxpathOptions($isContextUri)
     let $foxpathAugmented :=
         if (not($addVariableDeclarations)) then $foxpath

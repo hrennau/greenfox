@@ -20,6 +20,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionEvaluator.xqm",
     "expressionValueConstraint.xqm",
     "fileValidator.xqm",
+    "folderContentValidator.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -111,8 +112,8 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         let $instancePerceptions := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountPerceptions, $instancePerceptions)
     let $perceptions := ($targetCountPerceptions, $instancePerceptions, $subsetPerceptions)
-    return trace(
-        $perceptions , 'PERCEPTIONS: ') 
+    return
+        $perceptions 
 };
 
 declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as element(), $context as map(*)) 
@@ -155,6 +156,7 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
         $perceptions
 };
 
+(:
 declare function f:validateFolderContent($folderPath as xs:string, $folderContent as element(gx:folderContent), $context as map(*)) 
         as element()* {
     (: determine expectations :)
@@ -212,7 +214,7 @@ declare function f:validateFolderContent($folderPath as xs:string, $folderConten
     return 
         $errors
 };
-
+:)
 
 
 

@@ -58,18 +58,17 @@ declare function f:validateExpressionValue($constraint as element(),
     let $quantifier := 'all'
     
     let $inFoxpathValue := 
-        if (not($inFoxpath)) then () else trace(
+        if (not($inFoxpath)) then () else
             let $contextItem :=
                 if ($contextItem instance of xs:anyAtomicType) then $contextItem
                 else $contextItem/root()/base-uri(.)
             return                
                 f:evaluateFoxpath($inFoxpath, $contextItem, $context, true())
-        , '### IN_FOXPATH_VALUE: ')
     
     let $errorsIn := (
         if (not($constraint/gx:in)) then () else
 
-        let $ok := trace(
+        let $ok :=
             if ($quantifier eq 'all') then
                 every $item in $exprValue satisfies 
                     some $alternative in $constraint/gx:in/* satisfies
@@ -79,7 +78,7 @@ declare function f:validateExpressionValue($constraint as element(),
                         case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
                         case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
                         default return error()                
-            else error(), 'IN: ')
+            else error()
         return
             if ($ok) then () else
                 f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:in, $exprValue, ())

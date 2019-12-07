@@ -132,5 +132,52 @@ declare function f:matchesLike($string as xs:string, $like as xs:string, $flags 
     return matches($string, $regex, $useFlags)
 };
 
+(:~
+ : Transforms a glob pattern into a regex.
+ :
+ : @param pattern a glob pattern
+ : @return the equivalent regex
+ :)
+declare function f:glob2regex($pattern as xs:string)
+        as xs:string {
+    replace($pattern, '\*', '.*') 
+    ! replace(., '\?', '.')
+    ! concat('^', ., '$')
+};   
+
+(:~
+ : Transforms a concise occ specification into two numbers,
+ : minOccurs and maxOccurs. Infinity is represented by -1.
+ :
+ : Examples:
+ : ? => 0, 1
+ : * => 0, -1
+ : + => 1, -1
+ : 2 => 2
+ : 1-2 => 1, 2
+ : ,2  => 0, 2
+ : 3,  => 3, -1
+ :
+ : @param occ concise occurrence string
+ : @return two integer numbers, representing minOccurs and maxOccurs
+ :)
+declare function f:occ2minMax($occ as xs:string)
+        as xs:integer* {
+    if ($occ eq '?') then (0, 1)
+    else if ($occ eq '*') then (0, -1)
+    else if ($occ eq '+') then (1, -1)
+    else if (matches($occ, '^\d+$')) then xs:integer($occ)
+    else if (matches($occ, '^\s*\d*\s*-\s*\d*\s*$')) then
+        let $numbers := replace($occ, '^\s*(\d*)\s*-\s*(\d*)\s*$', '$1~$2')
+        let $number1 :=
+            let $str := substring-before($numbers, '~')
+            return if (not($str)) then 0 else xs:integer($str)
+        let $number2 :=
+            let $str := substring-after($numbers, '~')
+            return if (not($str)) then -1 else xs:integer($str)
+        return ($number1, $number2)
+    else ()
+};        
+
 
 
