@@ -88,9 +88,8 @@
                     <!-- *** Check - return code ok? *** -->
                     <foxpath msg="Return code not the configured value" eq="true" expr="
                         let $actReturnCode := $doc//*:returnCode
-                        let $expReturnCode :=
-                          ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')                            
-                          //record[response eq $fileName]/returnCode                                                        
+                        let $expReturnCode := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')                            
+                                              //record[response eq $fileName]/returnCode                                                        
                         return $actReturnCode = $expReturnCode"/>     
                     
                 </file>
