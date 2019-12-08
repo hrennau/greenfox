@@ -177,6 +177,30 @@ declare function f:occ2minMax($occ as xs:string)
             return if (not($str)) then -1 else xs:integer($str)
         return ($number1, $number2)
     else ()
+};    
+
+(:~
+ : Checks if the file at $filePath has one of a set of given mediatypes.
+ :
+ : @param mediatypes the mediatypes to check
+ : @param filePath a file path
+ : @return true if $filePath points at a file with one of the given mediatypes, false otherwise 
+ :)
+declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:string)
+        as xs:boolean {
+    if (not(file:is-file($filePath))) then false() else
+    
+    some $mediatype in $mediatypes satisfies (
+        if ($mediatype eq 'xml') then doc-available($filePath)
+        else if ($mediatype eq 'json') then
+            let $text := try {unparsed-text($filePath)} catch * {()}
+            return
+                if (not($text)) then false()
+                else if (not(substring($text, 1, 1) = ('{', '['))) then false()
+                else exists(try {json:parse($text)} catch * {()})
+        else
+            error(QName((), 'NOT_YET_IMPLEMENTED'), concat("Not yet implemented: check against mediatype '", $mediatype, "'")) 
+    )
 };        
 
 

@@ -2,5 +2,5 @@
 <getFooRS xmlns="http://example.com/s1">
     <returnCode>OK</returnCode>
     <fooID>302</fooID>
-    <fooValue>foo3022</fooValue>
+    <fooValue>foo302</fooValue>
 </getFooRS>

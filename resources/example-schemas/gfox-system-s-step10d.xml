@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+    </context>    
+    
+    <domain path="\tt\greenfox\resources\example-system\system-s" 
+            label="system-s">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="systemRootFolderShape">
+            
+            <!-- *** XSD folder shape -->
+            <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
+                <targetSize msg="No XSD folder found" count="1"/>
+                <file foxpath="*.xsd" id="xsdFileShape">
+                    <targetSize msg="No XSDs found" minCount="1"/>
+                </file>
+            </folder>                
+
+            <!-- *** Codelist folder shape -->
+            <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
+                <targetSize msg="No codelist folder found" count="1"/>
+                <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
+                <file foxpath="*[is-xml(.)]">
+                    <targetSize msg="No codelist files found" minCount="1"/>
+                </file>
+            </folder>                
+            
+            <!-- *** Testcase folder shape *** -->
+            <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
+                <targetSize msg="No testcase folders found" minCount="1"/>
+                <folderContent msg="Testcase contains member other than input, output, config, log-*." 
+                               closed="true">
+                    <memberFolders names="input, output, config"/>
+                    <memberFile name="log-" occ="*"/>
+                </folderContent>
+
+                <!-- *** msg config shape -->
+                <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
+                    <targetSize msg="Config file missing" count="1"/>
+                    
+                    <!-- Check - configured return codes ok? -->
+                    <xpath msg="Config file contains unknown return code" expr="//returnCode">
+                        <in>
+                            <eq>OK</eq>
+                            <eq>NOFIND</eq>
+                            <like>ERROR_*</like>
+                        </in>                                
+                    </xpath>                    
+                </file>
+                
+                <!-- *** Request file shape *** -->
+                <file foxpath="input\*" id="requestFileShape">
+                    <targetSize msg="Input folder without request msgs" minCount="1"/>
+                    
+                    <!-- Check - request with response ? -->
+                    <foxpath msg="Request without response" count="1" expr="
+                        let $expFileNameRS := file-name(.) ! replace(., '(.*)RQ(.*)\.(xml|json)$', '$1RS$2.$3')    
+                        return ..\..\output\*[file-name(.) eq $expFileNameRS]" />
+                </file>
+                
+                <!-- *** Response file shape *** -->                
+                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                    <targetSize msg="Output folder without request msgs" minCount="1"/>
+                    
+                    <!-- *** Check - response fresh? *** -->
+                    <lastModified msg="Stale output file" ge="${lastModified}"/>
+                    
+                    <!-- *** Check - schema valid? (only if XML) -->
+                    <ifMediatype eq="xml">
+                        <xsdValid msg="Response msg not XSD valid" 
+                            xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
+                    </ifMediatype>
+                    
+                    <!-- *** Check - known article number? -->
+                    <xpath msg="Unknown foo article number"
+                        expr="//*:fooValue" 
+                        inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
+                    
+                    <!-- *** getFooRS - status OK, yet no foo values -->
+                    <xpath msg="getFoo* with return code OK but without fooValue" eq="true" 
+                        expr="if (descendant::*:getFooRS//*:returnCode eq 'OK') then exists(//*:fooValue) else true()"/>
+                    
+                    <!-- *** Check - return code ok? *** -->
+                    <foxpath msg="Return code not the configured value" eq="true" expr="
+                        let $actReturnCode := $doc//*:returnCode
+                        let $expReturnCode :=
+                          ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')                            
+                          //record[response eq $fileName]/returnCode                                                        
+                        return $actReturnCode = $expReturnCode"/>     
+                    
+                </file>
+                
+            </folder>
+        </folder>
+    </domain>    
+</greenfox>

@@ -73,7 +73,13 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
 
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
-    let $components := $gxFile/*[not(@deactivated eq 'true')]
+    let $components :=
+        let $children := $gxFile/*[not(@deactivated eq 'true')]
+        return (
+            $children[not(self::gx:ifMediatype)],
+            $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
+                     /*[not(@deactivated eq 'true')]   
+        )    
     let $mediatype := $gxFile/@mediatype 
     
     (: the required bindings are a subset of potential bindings :)
@@ -88,18 +94,32 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             ) => distinct-values() => sort()
 
     (: provide required documents :)            
-    let $jdoc :=
-        if ($mediatype eq 'json' or $requiredBindings = 'json') then
-        let $text := unparsed-text($filePath)
-        return try {json:parse($text)} catch * {()}
     let $xdoc :=
         let $required := 
-            $requiredBindings = 'doc' or
-                not($mediatype ne 'xml') and $components/self::gx:xpath
+            $mediatype = ('xml', 'xml-or-json')
+            or
+            not($mediatype) and $components/self::gx:xpath
+            or
+            not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
         return
             if (not($required)) then () 
-            else if (doc-available($filePath)) then doc($filePath)
-            else ()
+            else if (not(doc-available($filePath))) then ()
+            else doc($filePath)
+    let $jdoc :=
+        if ($xdoc) then () else
+        
+        let $required :=
+            $mediatype = ('json', 'xml-or-json')
+            or 
+            not($mediatype) and $components/self::gx:xpath
+            or
+            not($mediatype = ('xml', 'csv')) and $requiredBindings = 'json'
+        return
+            if (not($required)) then ()
+            else
+                let $text := unparsed-text($filePath)
+                return try {json:parse($text)} catch * {()}
+           
     let $csvdoc :=
         if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then
             let $separator := ($gxFile/@csv.separator, 'comma')[1]
@@ -117,13 +137,13 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             let $text := unparsed-text($filePath)
             return try {csv:parse($text, $options)} catch * {()}
          else ()
-    let $doc := ($xdoc, $jdoc, $csvdoc)[1]
+    let $doc := trace( ($xdoc, $jdoc, $csvdoc)[1] , '###### DOC: ')
     
     let $exprContext :=
         map:merge((
             if (not($requiredBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
             if (not($requiredBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
-            if (not($requiredBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $jdoc),
+            if (not($requiredBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
             if (not($requiredBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
             if (not($requiredBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
             if (not($requiredBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
@@ -138,12 +158,13 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
-            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $exprContext)
+            case $xsdValid as element(gx:xsdValid) return 
+                i:xsdValidate($filePath, $xsdValid, $exprContext)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
             case element(gx:targetSize) return ()
-            default return error()
+            default return error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), concat('Unexpected shape or constraint element, name: ', $child/name()))
         return
             if ($error) then $error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
             else
