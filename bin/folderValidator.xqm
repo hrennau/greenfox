@@ -44,10 +44,10 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         return
             if ($path) then concat($contextPath, '\', $gxFolder/@path)[file:exists(.)][file:is-dir(.)]
             else 
+            (: _TO_DO_ if referenced, add variable bindings, e.g. for $domain :)
                 let $value := i:evaluateFoxpath($foxpath, $contextPath)[file:is-dir(.)]
                 return
-                    if ($value instance of element(errors)) then error()
-                    else $value
+                    $value
                     
     (: check: targetSize :)                    
     let $targetCount := count($targetPaths)   

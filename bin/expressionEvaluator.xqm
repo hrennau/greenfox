@@ -38,7 +38,7 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
         else
             let $requiredBindings := map:keys($externalVariableBindings)
             return i:finalizeQuery($foxpath, $requiredBindings)
-    return trace( tt:resolveFoxpath($foxpathAugmented, $foxpathOptions, $context, $externalVariableBindings) , '### FOXPATH_VALUES: ')
+    return tt:resolveFoxpath($foxpathAugmented, $foxpathOptions, $context, $externalVariableBindings)
 };
 
 (:~
