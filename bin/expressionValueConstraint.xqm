@@ -33,9 +33,9 @@ declare function f:validateExpressionValue($constraint as element(),
             let $exprContext := map:put($context, '', $contextItem)
             return xquery:eval($expr, $exprContext)
             
-        else
+        else trace(
             f:evaluateFoxpath($expr, $contextItem, $context, true())
-
+, '### EXPR_VALUE: ')
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
@@ -108,13 +108,13 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         (: comparison errors
            ================= :)
-        if (not($eq)) then () else
+        if (not($eq)) then () else trace(
             if ($quantifier eq 'all') then 
-                if (count($exprValue) and (every $item in $exprValue satisfies $item = $eq)) then ()
+                if (count($exprValue) and (every $item in $exprValue satisfies trace( $item = $eq, '### COMPARISON: '))) then ()
                 else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue = $gt) then () 
-                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
+                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())   , '### CHECK EQ: ')
         ,
         if (not($ne)) then () else
             if ($quantifier eq 'all') then 

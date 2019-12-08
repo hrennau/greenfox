@@ -57,9 +57,9 @@ declare function f:validateFolderContent($folderPath as xs:string, $constraint a
             
     let $errors_missingMembers :=
         for $d in $_constraint/*[not(@minOccurs eq '0')]
-        let $candMembers := trace( if ($d/self::gx:memberFile) then $memberFiles 
+        let $candMembers := if ($d/self::gx:memberFile) then $memberFiles 
                             else if ($d/self::gx:memberFolder) then $memberFolders 
-                            else $members , '### CAND_MEMBERS: ')                                 
+                            else $members                                 
         let $found := $candMembers[matches(., $d/@regex, 'i')]
         let $facet :=
             if (empty($found)) then 'missingMember'
@@ -100,7 +100,7 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                 attribute maxOccurs {$limits[2]}
             )
         }
-    return trace(
+    return
     
     <gx:folderContent>{
         $folderContent/@*,
@@ -128,6 +128,5 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                     }
             default return error()
     }</gx:folderContent>
-    , '*** FOLDER_CONTENT: ')
 };        
 

@@ -78,7 +78,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     
     (: the required bindings are a subset of potential bindings :)
     let $requiredBindings :=
-        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain')
+        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
         for $child in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
         return (
             $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, $potentialBindings),            
@@ -125,7 +125,9 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             if (not($requiredBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
             if (not($requiredBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $jdoc),
             if (not($requiredBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
-            if (not($requiredBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath)
+            if (not($requiredBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
+            if (not($requiredBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
+            if (not($requiredBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
         ))
     
     

@@ -65,6 +65,21 @@
                     <!-- *** Check - response fresh? *** -->
                     <lastModified msg="Stale output file" ge="${lastModified}"/>
                 </file>
+                
+                <!-- *** XML response message *** -->                    
+                <file foxpath="output\*.xml">
+                        
+                    <!-- *** Check - XSD valid? -->
+                    <xsdValid msg="Response msg not XSD valid" 
+                              xsdFoxpath="$domain\resources\xsd\\*.xsd"/>    
+                    
+                    <!-- *** Check - known article number? -->                        
+                    <xpath msg="Unknown foo article number"
+                           expr="//*:fooValue" 
+                           inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
+                  
+                </file>
+                
             </folder>
         </folder>
     </domain>    
