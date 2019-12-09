@@ -54,7 +54,7 @@
                 </file>
                 
                 <!-- *** Request file shape *** -->
-                <file foxpath="input\*" id="requestFileShape">
+                <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
                     <targetSize msg="Input folder without request msgs" minCount="1"/>
                     
                     <!-- Check - request with response ? -->
