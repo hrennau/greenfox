@@ -8,7 +8,7 @@
     </context>    
     
     <domain path="\tt\greenfox\resources\example-system\system-s" 
-            label="system-s">    
+            name="system-s">    
         
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="systemRootFolderShape">
@@ -69,11 +69,14 @@
                     
                     <!-- *** Check - response fresh? *** -->
                     <lastModified msg="Stale output file" ge="${lastModified}"/>
+
+                    <!-- *** Check - response non-empty? *** -->
+                    <fileSize msg="Empty output file" gt="0"/>
                     
                     <!-- *** Check - schema valid? (only if XML) -->
                     <ifMediatype eq="xml">
                         <xsdValid msg="Response msg not XSD valid" 
-                            xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
+                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
                     </ifMediatype>
                     
                     <!-- *** Check - known article number? -->
@@ -82,12 +85,6 @@
                            eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     
                     <!-- *** Check - return code ok? *** -->
-                    <!--
-                    <xpath msg="Return code not the configured value" 
-                           expr="//*:returnCode"
-                           inFoxpath="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                                      //record[response eq $fileName]/returnCode"/>   
-                                      -->
                     <foxpath msg="Return code not the configured value" 
                              expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
                                    //record[response eq $fileName]/returnCode"
