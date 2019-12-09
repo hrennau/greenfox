@@ -18,6 +18,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateExpressionValue($constraint as element(), 
                                            $contextItem as item()?,
+                                           $contextFilePath as xs:string,
+                                           $contextDoc as document-node()?,
                                            $context as map(*))
         as element()* {
     let $msg := $constraint/@msg
@@ -49,7 +51,9 @@ declare function f:validateExpressionValue($constraint as element(),
     let $ge := $constraint/@ge
     let $lt := $constraint/@lt
     let $le := $constraint/@le
-    let $inFoxpath := $constraint/@inFoxpath
+    let $eqFoxpath := $constraint/@eqFoxpath
+    let $containsXPath := $constraint/@containsXPath
+    let $eqXPath := $constraint/@eqXPath
     let $matches := $constraint/@matches
     let $notMatches := $constraint/@notMatches
     let $like := $constraint/@like
@@ -57,14 +61,24 @@ declare function f:validateExpressionValue($constraint as element(),
     let $flags := string($constraint/@flags)
     let $quantifier := 'all'
     
-    let $inFoxpathValue := 
-        if (not($inFoxpath)) then () else
-            let $contextItem :=
-                if ($contextItem instance of xs:anyAtomicType) then $contextItem
-                else $contextItem/root()/base-uri(.)
-            return                
-                f:evaluateFoxpath($inFoxpath, $contextItem, $context, true())
-    
+    let $eqFoxpathValue := 
+        if (not($eqFoxpath)) then () else
+            let $contextItem := $contextFilePath
+            return              
+                f:evaluateFoxpath($eqFoxpath, $contextItem, $context, true())
+
+    let $containsXPathValue := 
+        if (not($containsXPath)) then () else
+            let $contextItem := ($contextDoc, $contextItem)[1]
+            return  
+                f:evaluateXPath($containsXPath, $contextItem, $context, true())            
+
+    let $eqXPathValue := 
+        if (not($eqXPath)) then () else
+            let $contextItem := ($contextDoc, $contextItem)[1]
+            return
+                f:evaluateXPath($eqXPath, $contextItem, $context, true())            
+
     let $errorsIn := (
         if (not($constraint/gx:in)) then () else
 
@@ -83,16 +97,54 @@ declare function f:validateExpressionValue($constraint as element(),
             if ($ok) then () else
                 f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:in, $exprValue, ())
         ,
-        if (not($inFoxpath)) then () else
+        (: eqFoxpath
+           ========= :)
+        if (not($eqFoxpath)) then () else
         
         let $ok :=
             if ($quantifier eq 'all') then
-                every $item in $exprValue satisfies $item = $inFoxpathValue
+                every $item in $exprValue satisfies $item = $eqFoxpathValue
             else
-                some $item in $exprValue satisfies $item = $inFoxpathValue
+                some $item in $exprValue satisfies $item = $eqFoxpathValue
         return
            if ($ok) then () else
-                f:constructError_valueComparison($constraint, $quantifier, $inFoxpath, $exprValue, ())                
+                let $eqFoxpathValueRep := $eqFoxpathValue => distinct-values() => string-join(', ')
+                return
+                    f:constructError_valueComparison($constraint, $quantifier, $eqFoxpath, $exprValue, 
+                                                     attribute valueList {$eqFoxpathValueRep})          
+        ,                                             
+        (: containsXpath
+           ============= :)
+        if (not($containsXPath)) then () else
+        
+        let $ok :=
+            if ($quantifier eq 'all') then
+                every $item in $containsXPathValue satisfies $item = $exprValue
+            else
+                some $item in $containsXPathValue satisfies $item = $exprValue
+        return
+           if ($ok) then () else
+                let $containsXPathValueRep := $containsXPathValue => distinct-values() => string-join(', ')
+                return
+                    f:constructError_valueComparison($constraint, $quantifier, $containsXPath, $exprValue, 
+                                                     attribute valueList {$containsXPathValueRep})                
+        ,
+        (: eqXPath
+           ======= :)
+        if (not($eqXPath)) then () else
+        
+        let $ok :=
+            if ($quantifier eq 'all') then
+                every $item in $exprValue satisfies $item = $eqXPathValue
+            else
+                some $item in $exprValue satisfies $item = $eqXPathValue
+        return
+           if ($ok) then () else
+                let $eqXPathValueRep := $eqXPathValue => distinct-values() => string-join(', ')
+                return
+                    f:constructError_valueComparison($constraint, $quantifier, $eqXPath, $exprValue, 
+                                                     attribute valueList {$eqXPathValueRep})                
+        
     )            
     let $errors := (
         (: count errors

@@ -17,6 +17,32 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
+ : Evaluates an XPath expression.
+ :
+ : @param xpath an XPath expression
+ : @param contextItem the context item
+ : @param externalVariableBindings a map of variable bindings
+ : @param addVariableDeclarations if true, a prolog is added which declares the external variables
+ : @return the expression value
+ :)
+declare function f:evaluateXPath($xpath as xs:string, 
+                                 $contextItem as item()?, 
+                                 $externalVariableBindings as map(*)?,
+                                 $addVariableDeclarations as xs:boolean)
+        as item()* {
+    let $isContextUri := not($contextItem instance of node())
+    let $xpathAugmented :=
+        if (not($addVariableDeclarations)) then $xpath
+        else
+            let $requiredBindings := map:keys($externalVariableBindings)
+            return i:finalizeQuery($xpath, $requiredBindings)
+    let $externalVariableBindingsAugmented :=
+        if (not($addVariableDeclarations)) then $externalVariableBindings
+        else map:put($externalVariableBindings, '', $contextItem)
+    return xquery:eval($xpathAugmented, $externalVariableBindingsAugmented)
+};
+
+(:~
  : Evaluates a foxpath expression.
  :
  : @param foxpath a foxpath expression

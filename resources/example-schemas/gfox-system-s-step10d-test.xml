@@ -64,7 +64,7 @@
                 </file>
                 
                 <!-- *** Response file shape *** -->                
-                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                <file foxpath="output\*.json" mediatype="xml-or-json">
                     <targetSize msg="Output folder without request msgs" minCount="1"/>
                     
                     <!-- *** Check - response fresh? *** -->
@@ -78,8 +78,8 @@
                     
                     <!-- *** Check - known article number? -->
                     <xpath msg="Unknown foo article number"
-                        expr="//*:fooValue" 
-                        inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
+                           expr="//*:fooValue" 
+                           inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     
                     <!-- *** getFooRS - status OK, yet no foo values -->
                     <xpath msg="getFoo* with return code OK but without fooValue" eq="true" 
@@ -93,9 +93,10 @@
                         return $actReturnCode = $expReturnCode"/>     
 
                     <xpath msg="Return code not the configured value" 
-                        expr="//*:returnCode"
-                        inFoxpath="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                                   //record[response eq $fileName]/returnCode"/>                    
+                           expr="//*:returnCode"
+                           inFoxpath="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                                      //record[response eq $fileName]/returnCode/concat(., 'X')"/>
+                    
                 </file>
                 
             </folder>

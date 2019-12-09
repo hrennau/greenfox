@@ -90,7 +90,10 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, $potentialBindings),            
             $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, $potentialBindings),
             $child/self::gx:xsdValid/i:determineRequiredBindingsFoxpath(@xsdFoxpath, $potentialBindings),
-            $child/self::gx:xpath/@inFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings)
+            $child/self::gx:xpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+            $child/self::gx:xpath/@containsXpath/i:determineRequiredBindingsXPath(., $potentialBindings),
+            $child/self::gx:foxpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+            $child/self::gx:foxpath/@containsXPath/i:determineRequiredBindingsXPath(., $potentialBindings)
             ) => distinct-values() => sort()
 
     (: provide required documents :)            
@@ -156,8 +159,8 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
         for $child in $components[not(self::gx:targetSize)]
         let $error :=
             typeswitch($child)
-            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $exprContext)
-            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $exprContext)            
+            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $exprContext)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $exprContext)            
             case $xsdValid as element(gx:xsdValid) return 
                 i:xsdValidate($filePath, $xsdValid, $exprContext)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)

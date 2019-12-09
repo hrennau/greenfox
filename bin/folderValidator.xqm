@@ -136,7 +136,7 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
             let $error :=
                 typeswitch($child)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $exprContext)
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $exprContext)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)    
