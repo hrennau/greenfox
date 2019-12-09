@@ -36,7 +36,7 @@
                 <folderContent msg="Testcase contains member other than input, output, config, log-*." 
                                closed="true">
                     <memberFolders names="input, output, config"/>
-                    <memberFile name="log-" occ="*"/>
+                    <memberFiles names="log-" occ="*"/>
                 </folderContent>
 
                 <!-- *** msg config shape -->
