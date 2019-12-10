@@ -19,6 +19,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "filePropertiesConstraint.xqm",
+    "mediatypeConstraint.xqm",
     "xsdValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -140,7 +141,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             let $text := unparsed-text($filePath)
             return try {csv:parse($text, $options)} catch * {()}
          else ()
-    let $doc := trace( ($xdoc, $jdoc, $csvdoc)[1] , '###### DOC: ')
+    let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     
     let $exprContext :=
         map:merge((
@@ -166,6 +167,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
+            case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)            
             case element(gx:targetSize) return ()
             default return error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), concat('Unexpected shape or constraint element, name: ', $child/name()))
         return

@@ -160,13 +160,13 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         (: comparison errors
            ================= :)
-        if (not($eq)) then () else trace(
+        if (not($eq)) then () else
             if ($quantifier eq 'all') then 
-                if (count($exprValue) and (every $item in $exprValue satisfies trace( $item = $eq, '### COMPARISON: '))) then ()
+                if (count($exprValue) and (every $item in $exprValue satisfies $item = $eq)) then ()
                 else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
             else if ($quantifier eq 'some') then 
                 if ($exprValue = $gt) then () 
-                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())   , '### CHECK EQ: ')
+                else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
         ,
         if (not($ne)) then () else
             if ($quantifier eq 'all') then 
