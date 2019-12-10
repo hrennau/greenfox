@@ -23,21 +23,11 @@ declare function f:validateExpressionValue($constraint as element(),
                                            $context as map(*))
         as element()* {
     let $msg := $constraint/@msg
-    let $exprLang := 
-        if ($constraint/self::gx:xpath) then 'xpath' 
-        else if ($constraint/self::gx:foxpath) then 'foxpath'
-        else error()
+    let $exprLang := local-name($constraint)
     let $expr := $constraint/@expr
-    let $exprValue :=
-    
-        (: XPath - a single map contains context item and external variables :)
-        if ($constraint/self::gx:xpath) then
-            let $exprContext := map:put($context, '', $contextItem)
-            return xquery:eval($expr, $exprContext)
-            
-        else trace(
-            f:evaluateFoxpath($expr, $contextItem, $context, true())
-, '### EXPR_VALUE: ')
+    let $exprValue :=    
+        if ($constraint/self::gx:xpath) then i:evaluateXPath($expr, $contextItem, $context, true(), true())
+        else f:evaluateFoxpath($expr, $contextItem, $context, true())
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
@@ -71,13 +61,13 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($containsXPath)) then () else
             let $contextItem := ($contextDoc, $contextItem)[1]
             return  
-                f:evaluateXPath($containsXPath, $contextItem, $context, true())            
+                f:evaluateXPath($containsXPath, $contextItem, $context, true(), true())            
 
     let $eqXPathValue := 
         if (not($eqXPath)) then () else
             let $contextItem := ($contextDoc, $contextItem)[1]
             return
-                f:evaluateXPath($eqXPath, $contextItem, $context, true())            
+                f:evaluateXPath($eqXPath, $contextItem, $context, true(), true())            
 
     let $errorsIn := (
         if (not($constraint/gx:in)) then () else

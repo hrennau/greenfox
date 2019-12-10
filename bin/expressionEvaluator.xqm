@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : foxpathEvaluator.xqm - Document me!
+ : expressionEvaluator.xqm - functions for evaluating expressions
  :
  : -------------------------------------------------------------------------
  :)
@@ -22,24 +22,23 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param xpath an XPath expression
  : @param contextItem the context item
  : @param externalVariableBindings a map of variable bindings
- : @param addVariableDeclarations if true, a prolog is added which declares the external variables
+ : @param addVariableDeclarations if true, a prolog is added to the query which declares the external variables
+ : @param addContextItem if true, the context item is added to the context with key ''
  : @return the expression value
  :)
 declare function f:evaluateXPath($xpath as xs:string, 
                                  $contextItem as item()?, 
-                                 $externalVariableBindings as map(*)?,
-                                 $addVariableDeclarations as xs:boolean)
+                                 $context as map(*),
+                                 $addVariableDeclarations as xs:boolean,
+                                 $addContextItem as xs:boolean)
         as item()* {
-    let $isContextUri := not($contextItem instance of node())
-    let $xpathAugmented :=
+    let $xpathUsed :=
         if (not($addVariableDeclarations)) then $xpath
-        else
-            let $requiredBindings := map:keys($externalVariableBindings)
-            return i:finalizeQuery($xpath, $requiredBindings)
-    let $externalVariableBindingsAugmented :=
-        if (not($addVariableDeclarations)) then $externalVariableBindings
-        else map:put($externalVariableBindings, '', $contextItem)
-    return xquery:eval($xpathAugmented, $externalVariableBindingsAugmented)
+        else i:finalizeQuery($xpath, map:keys($context))
+    let $contextUsed :=
+        if (not($addContextItem)) then $context
+        else map:put($context, '', $contextItem)
+    return xquery:eval($xpathUsed, $contextUsed)
 };
 
 (:~
