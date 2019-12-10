@@ -166,7 +166,7 @@ declare function f:occ2minMax($occ as xs:string)
     if ($occ eq '?') then (0, 1)
     else if ($occ eq '*') then (0, -1)
     else if ($occ eq '+') then (1, -1)
-    else if (matches($occ, '^\d+$')) then xs:integer($occ)
+    else if (matches($occ, '^\d+$')) then xs:integer($occ) ! (., .)
     else if (matches($occ, '^\s*\d*\s*-\s*\d*\s*$')) then
         let $numbers := replace($occ, '^\s*(\d*)\s*-\s*(\d*)\s*$', '$1~$2')
         let $number1 :=

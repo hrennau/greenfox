@@ -1,148 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenfox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.parsqube.de/ns/greenfox-schema/examples/system-s">
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
     <context>
         <field name="lastModified" value="2019-12-01"/>
     </context>    
-    <domain path="\tt\greenfox\resources\example-system\system-s" label="system-s">    
+    
+    <domain path="\tt\greenfox\resources\example-system\system-s" 
+            name="system-s">    
         
-        <!-- *** Root folder containing the test system *** -->
-        <folder foxpath="."> 
-            <targetSize msg="Expecting exactly one folder 'system-s" count="1"/>
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="systemRootFolderShape">
             
-            <!-- *** XSD folder -->
-            <folder foxpath=".\\xsd">
+            <!-- *** XSD folder shape -->
+            <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
                 <targetSize msg="No XSD folder found" count="1"/>
-                <file foxpath="*.xsd">
+                <file foxpath="*.xsd" id="xsdFileShape">
                     <targetSize msg="No XSDs found" minCount="1"/>
                 </file>
             </folder>                
 
-            <!-- *** Codelist folder -->
-            <folder foxpath=".\\codelists">
+            <!-- *** Codelist folder shape -->
+            <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
                 <targetSize msg="No codelist folder found" count="1"/>
                 <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
+                <file foxpath="*[is-xml(.)]">
+                    <targetSize msg="No codelist files found" minCount="1"/>
+                </file>
             </folder>                
             
-            <!-- *** Test case folders *** -->
-            <folder foxpath=".\\test-*[input][output][config]">
-                <targetSize msg="System without test cases" minCount="1"/>
-                
-                <folder foxpath="config">
-                    <targetSize msg="Config folder missing." count="1"/>
-                    
-                    <file foxpath="msg-config.csv" mediatype="csv" csv.withHeader="yes">
-                        <targetSize msg="Config file missing" count="1"/>
+            <!-- *** Testcase folder shape *** -->
+            <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
+                <targetSize msg="No testcase folders found" minCount="1"/>
+                <folderContent msg="Testcase contains member other than input, output, config, log-*." 
+                               closed="true">
+                    <memberFolders names="input, output, config"/>
+                    <memberFiles names="log-" occ="*"/>
+                </folderContent>
 
-                        <!-- Check - configured return codes ok? -->
-                        <xpath msg="Config file contains unknown return code" expr="//returnCode">
-                            <in>
-                                <eq>OK</eq>
-                                <eq>NOFIND</eq>
-                                <like>ERROR_*</like>
-                            </in>                                
-                        </xpath>
-                        
-                    </file>
-                </folder>
-                
-                <!-- ===================
-                      X M L   t e s t s 
-                     =================== -->
-                
-                <!-- *** XML input folder (containing request messages) *** -->
-                <folder foxpath="input[*.xml]">
+                <!-- *** msg config shape -->
+                <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
+                    <targetSize msg="Config file missing" count="1"/>
                     
-                    <!-- *** XML request message *** -->
-                    <file foxpath="*">
-                        <targetSize msg="Input folder without request msgs" minCount="1"/>
-                        
-                        <!-- Check - request with response ? -->
-                        <foxpath msg="Request without response" count="1" expr="
-                            let $expFileNameRS := file-name(.) ! replace(., 'RQ(\d*).xml$', 'RS$1.xml')    
-                            return ..\..\output\*[file-name(.) eq $expFileNameRS]" />
-                    </file>
-                </folder>
+                    <!-- Check - configured return codes ok? -->
+                    <xpath msg="Config file contains unknown return code" expr="//returnCode">
+                        <in>
+                            <eq>OK</eq>
+                            <eq>NOFIND</eq>
+                            <like>ERROR_*</like>
+                        </in>                                
+                    </xpath>                    
+                </file>
                 
-                <!-- *** XML output folder (containing response messages) *** -->                
-                <folder foxpath="output[*.xml]">
+                <!-- *** Request file shape *** -->
+                <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
+                    <targetSize msg="Input folder without request msgs" minCount="1"/>
                     
-                    <!-- *** XML response message *** -->                    
-                    <file foxpath="*">
-                        <!-- *** Check - response fresh? *** -->
-                        <lastModified msg="Stale output file" ge="${lastModified}"/>                        
+                    <!-- Check - request with response ? -->
+                    <foxpath msg="Request without response"
+                        expr="..\..\output\*\file-name(.)"
+                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"/>                       
+                </file>
+                
+                <!-- *** Response file shape *** -->                
+                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                    <targetSize msg="Output folder without request msgs" minCount="1"/>
+                    
+                    <!-- *** Check - response fresh? *** -->
+                    <lastModified msg="Stale output file" ge="${lastModified}"/>
 
-                        <!-- *** Check - XSD valid? -->
+                    <!-- *** Check - response non-empty? *** -->
+                    <fileSize msg="Empty output file" gt="0"/>
+                    
+                    <!-- *** Check - schema valid? (only if XML) -->
+                    <ifMediatype eq="xml">
                         <xsdValid msg="Response msg not XSD valid" 
-                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>
-                        
-                        <!-- *** Check - known article number? -->                        
-                        <xpath msg="Unknown foo article number"
-                               expr="//*:fooValue" 
-                                inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
-                        
-                        <!-- *** getFooRS - status OK, yet no foo values -->
-                        <xpath msg="getFoo*.xml OK but contains no fooValue" eq="true" 
-                               expr="if (*:getFooRS//*:returnCode eq 'OK') then exists(//*:fooValue) else true()"/>
-                        
-                        <!-- *** Check - return code ok? *** -->
-                        <foxpath msg="Return code not the configured value" eq="true" expr="
-                            let $actReturnCode := doc(.)//*:returnCode
-                            let $expReturnCode := 
-                                let $fileName := file-name(.)
-                                let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')                            
-                                return $cfgDoc//record[response eq $fileName]/returnCode                                                        
-                            return $actReturnCode = $expReturnCode"/>                        
-                    </file>
+                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
+                    </ifMediatype>
                     
+                    <!-- *** Check - known article number? -->
+                    <xpath msg="Unknown foo article number"
+                           expr="//*:fooValue" 
+                           eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     
-                </folder>
+                    <!-- *** Check - return code ok? *** -->
+                    <foxpath msg="Return code not the configured value" 
+                             expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                                   //record[response eq $fileName]/returnCode"
+                             eqXPath="//*:returnCode"/>                    
+                </file>
                 
-                <!--  =====================
-                       J S O N   t e s t s 
-                      ===================== -->
-                
-                <!-- *** JSON input folder (containing request messages) *** -->                
-                <folder foxpath="input[*.json]">
-                    
-                    <!-- *** JSON request message *** -->                    
-                    <file foxpath="*" mediatype="json">
-                        <targetSize msg="Input folder without request msgs" minCount="1"/>
-                        
-                        <!-- *** Check - request with response ? *** -->
-                        <foxpath msg="Request without response" count="1" expr="
-                            let $expFileNameRS := file-name(.) ! replace(., 'RQ(\d*).json$', 'RS$1.json')    
-                            return ..\..\output\*[file-name(.) eq $expFileNameRS]" />
-                    </file>
-                </folder>               
-                
-                <!-- *** JSON output folder (containing response messages) *** -->
-                <folder foxpath="output[*.json]">
-                    
-                    <!-- *** JSON response message *** -->                    
-                    <file foxpath="*" mediatype="json">
-                        <!-- *** Check - response fresh? *** -->
-                        <lastModified msg="Stale output file" ge="${lastModified}"/>
-
-                        <!-- *** Check - known article number? -->
-                        <xpath msg="Unknown foo article number"
-                               expr="//fooValue" 
-                               inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
-
-                        <!-- *** getFooRS - status OK, yet no foo values -->
-                        <xpath msg="getFoo*.xml OK but contains no fooValue" eq="true" 
-                            expr="if (json/*:getFooRS//*:returnCode eq 'OK') then exists(//*:fooValue) else true()"/>
-                        
-                        <!-- *** Check - return code ok? *** -->                        
-                        <foxpath msg="Return code != configured value" eq="true" expr="
-                            let $actReturnCode := json-doc(.)//*:returnCode
-                            let $expReturnCode :=
-                            let $fileName := file-name(.)
-                            let $cfgDoc := ..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                            return $cfgDoc//record[response eq $fileName]/returnCode                            
-                            return $actReturnCode = $expReturnCode"/>    
-                        
-                    </file>
-                </folder>
             </folder>
         </folder>
     </domain>    
