@@ -64,7 +64,7 @@
                 </file>
                 
                 <!-- *** Response file shape *** -->                
-                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json" id="responseFileShape">
                     <targetSize msg="Output folder without request msgs" minCount="1"/>
                     
                     <!-- *** Check - response fresh? *** -->
@@ -81,6 +81,7 @@
                     
                     <!-- *** Check - known article number? -->
                     <xpath msg="Unknown foo article number"
+                           id="articleNumberValueShape"
                            expr="//*:fooValue" 
                            eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     

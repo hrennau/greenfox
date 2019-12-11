@@ -240,8 +240,10 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         ()
     )
+    let $allErrors := ($errors, $errorsIn)
     return
-        ($errors, $errorsIn)        
+        if ($allErrors) then $allErrors
+        else f:constructGreen_valueShape($constraint)
 };
 
 declare function f:constructError_valueComparison($constraint as element(),
@@ -252,6 +254,8 @@ declare function f:constructError_valueComparison($constraint as element(),
         as element(gx:error) {
     <gx:error>{
         $constraint/@msg,
+        $constraint/@resourceShapeID,
+        $constraint/@valueShapeID,
         attribute constraintComp {$constraint/local-name(.)},
         $constraint/@id/attribute constraintID {.},
         $constraint/@label/attribute constraintLabel {.},
@@ -272,6 +276,8 @@ declare function f:constructError_countComparison($constraint as element(),
         as element(gx:error) {
     <gx:error>{
         $constraint/@msg,
+        $constraint/@resourceShapeID,
+        $constraint/@valueShapeID,
         attribute constraintComp {$constraint/local-name(.)},
         $constraint/@id/attribute constraintID {.},
         $constraint/@label/attribute constraintLabel {.},
@@ -284,6 +290,17 @@ declare function f:constructError_countComparison($constraint as element(),
     }</gx:error>                                                  
 };
 
+declare function f:constructGreen_valueShape($constraint as element()) 
+        as element(gx:green) {
+    <gx:green>{
+        $constraint/@resourceShapeID,
+        $constraint/@valueShapeID,
+        attribute constraintComp {$constraint/local-name(.)},
+        $constraint/@id/attribute constraintID {.},
+        $constraint/@label/attribute constraintLabel {.},
+        $constraint/@expr/attribute expr {normalize-space(.)}
+    }</gx:green>                                                  
+};
 
 
 

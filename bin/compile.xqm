@@ -18,35 +18,70 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Compiles a quality descriptor and returns an augmented copy of the descriptor, plus
+ : Compiles a greenfox schema and returns an augmented copy of the descriptor, plus
  : a context map. The context map consists of the context map contained by the
- : quality descriptor, extended/overwritten by the name-value pairs supplied as
+ : schema, extended/overwritten by the name-value pairs supplied as
  : external context. In the augmented descriptor, components with a component
  : reference are replaced with the referenced component, augmented with the
  : attributes and content elements of the referencing component.
+ :
+ : @param gfox a greenfox schema
+ : @param externalContext a set of external variables
  :)
-declare function f:compileGfox($gxdoc as element(gx:greenfox), $externalContext as map(*)) 
+declare function f:compileGfox($gxdoc as element(gx:greenfox), 
+                               $externalContext as map(*)) 
         as item()+ {
-    let $context := map:merge((
-        $externalContext,
+    let $context := map:merge(
         for $field in $gxdoc/gx:context/gx:field
         let $name := $field/@name
-        let $value := $field/@value
+        let $value := ($externalContext($name), $field/@value)[1]
         return
-            if (map:contains($externalContext, $name)) then () else 
-                map:entry($name, $value)
-        )                
+            map:entry($name, $value) 
     )
-    let $gxdoc2 := f:compileGfoxRC($gxdoc, $context, ())
+    let $gxdoc2 := f:compileGfoxRC($gxdoc, $context)
     let $gxdoc3 := f:compileGfox_addIds($gxdoc2)
+    let $gxdoc4 := f:compileGfox_addIds2($gxdoc3)
     return
-        ($gxdoc3, $context)
+        ($gxdoc4, $context)
 };
 
 (:~
  : Recursive helper function of `f:compileGfox`.
  :
- : @param n a node of the quality descriptor currently processed.
+ : @param n a node of the greenfox schema currently processed.
+ : @param context a set of external variables
+ : @return the processing result
+ :)
+declare function f:compileGfoxRC($n as node(), $context as map(*)) as node() {
+    typeswitch($n)
+    case document-node() return document {$n/node() ! f:compileGfoxRC(., $context)}
+    
+    case element(gx:greenfox) return
+        element {node-name($n)} {
+            $n/@* ! f:compileGfoxRC(., $context),
+            if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
+            $n/node() ! f:compileGfoxRC(., $context) 
+        }
+    case element() return
+        element {node-name($n)} {
+            $n/@* ! f:compileGfoxRC(., $context),
+            $n/node() ! f:compileGfoxRC(., $context)            
+        }
+        
+    (: text - variable substitution :)
+    case text() return text {f:substituteVars($n, $context, ())}
+    
+    (: attribute - variable substitution :)
+    case attribute() return attribute {node-name($n)} {f:substituteVars($n, $context, ())}
+    
+    default return $n        
+};
+
+(:
+(:~
+ : Recursive helper function of `f:compileGfox`.
+ :
+ : @param n a node of the greenfox schema currently processed.
  : @return the processing result
  :)
 declare function f:compileGfoxRC($n as node(), $context as map(*), $callContext as map(*)?) as node() {
@@ -90,6 +125,7 @@ declare function f:compileGfoxRC($n as node(), $context as map(*), $callContext 
     case attribute() return attribute {node-name($n)} {f:substituteVars($n, $context, $callContext)}
     default return $n        
 };
+:)
 
 (:~
  : Inspects a component and returns another component which it references, or the original 
@@ -177,9 +213,59 @@ declare function f:compileGfox_addIds($gfox as element(gx:greenfox)) {
         group by $localName := local-name($elem)
         return
             for $e at $pos in $elem
-            let $id := concat($localName, '_', $pos)
-            where not($e/@id)
-            return
-                insert node attribute id {$id} as first into $e
+            let $idAtt := $e/@id
+            let $id := ($idAtt, concat($localName, '_', $pos))[1]
+            let $furtherAtts:= trace(
+                typeswitch($elem[1])
+                case element(gx:file) | element(gx:folder) return
+                    attribute resourceShapeID {$id}
+                case element(gx:xpath) | element(gx:foxpath) return
+                    attribute valueShapeID {$id}
+                default return () , 'FURTHER_ATTS: ')
+            return (
+                $idAtt/(delete node .),
+                insert node ($furtherAtts, attribute id {$id}) as first into $e                
+            )                
     return $gfox_                
 };
+
+declare function f:compileGfox_addIds2($gfox as element(gx:greenfox)) {
+    f:compileGfox_addIds2RC($gfox)
+};
+
+declare function f:compileGfox_addIds2RC($n as node()) {
+    typeswitch($n)
+    case element(gx:file) | element(gx:folder) return
+        element {node-name($n)} {
+            $n/@* ! f:compileGfox_addIds2RC(.),
+            $n/node() ! f:compileGfox_addIds2RC(.)
+        }
+    case element(gx:targetSize) return
+        let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][2]/@resourceShapeID
+        return
+            element {node-name($n)} {
+                $resourceShapeID,
+                $n/@* ! f:compileGfox_addIds2RC(.),
+                $n/node() ! f:compileGfox_addIds2RC(.)
+            }
+    case element() return
+        let $resourceShapeID :=
+            if ($n/(self::gx:xpath,
+                    self::gx:foxpath,
+                    self::gx:fileSize, 
+                    self::gx:lastModified, 
+                    self::gx:mediatype,
+                    self::gx:folderContent,
+                    self::gx:xsdValid
+               )) then  
+                $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
+            else ()                
+        return
+            element {node-name($n)} {
+                $resourceShapeID,
+                $n/@* ! f:compileGfox_addIds2RC(.),
+                $n/node() ! f:compileGfox_addIds2RC(.)
+            }
+    default return $n        
+};
+
