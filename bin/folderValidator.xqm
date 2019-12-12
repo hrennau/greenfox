@@ -54,24 +54,14 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
     let $targetCountPerceptions := 
         let $constraint := $components/self::gx:targetSize
         return
-            if (not($constraint)) then () else
-            let $errors :=    
+            if (not($constraint)) then ()
+            else    
                 $components/self::gx:targetSize                
                                 /i:validateTargetCount(., $targetCount)
                                 /i:augmentErrorElement(., (
                                 attribute contextPath {$contextPath},
                                 attribute navigationPath {$navigationPath}
-                                ), 'first')    
-            return
-                if ($errors) then $errors
-                else
-                    <gx:green>{
-                        attribute constraintComponent {$constraint/local-name()},                    
-                        attribute contextPath {$contextPath},
-                        attribute navigationPath {$navigationPath},
-                        $constraint/@id/attribute constraintID {.},
-                        $constraint/@label/attribute constraintLabel {.}
-                    }</gx:green>
+                                ), 'last')    
 
     let $instancePerceptions := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
         
@@ -90,24 +80,13 @@ declare function f:validateFolder($gxFolder as element(), $context as map(*))
         let $targetCountPerceptions := 
             let $constraint := $subsetComponents/self::gx:targetSize   
             return
-                if (not($constraint)) then () else
-                let $errors :=
+                if (not($constraint)) then ()
+                else
                     $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
                                       /i:augmentErrorElement(., (
                                           attribute contextPath {$contextPath},
                                           attribute navigationPath {$subsetNavigationPath}
-                                      ), 'first')
-                return    
-                    if ($errors) then $errors
-                    else
-                        <gx:green>{
-                            attribute constraintComponent {$constraint/local-name()},                        
-                            attribute contextPath {$contextPath},
-                            attribute navigationPath {$navigationPath},
-                            attribute folderSubsetNavigationPath {$subsetNavigationPath},
-                            $constraint/@id/attribute constraintID {.},
-                            $constraint/@label/attribute constraintLabel {.}
-                        }</gx:green>
+                                      ), 'last')
         
         let $instancePerceptions := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountPerceptions, $instancePerceptions)

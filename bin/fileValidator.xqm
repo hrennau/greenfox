@@ -40,23 +40,13 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     let $targetCountPerceptions := 
         let $constraint := $gxFile/gx:targetSize
         return
-            if (not($constraint)) then () else
-            let $error :=
+            if (not($constraint)) then ()
+            else
                 $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
                     /i:augmentErrorElement(., (
                         attribute contextPath {$contextPath},
                         attribute navigationPath {$navigationPath}
-                        ), 'first')
-            return
-                if ($error) then $error
-                else
-                    <gx:green>{
-                        attribute constraintComponent {$constraint/local-name()},                    
-                        attribute contextPath {$contextPath},
-                        attribute navigationPath {$navigationPath},
-                        $constraint/@id/attribute constraintID {.},
-                        $constraint/@label/attribute constraintLabel {.}
-                    }</gx:green>
+                        ), 'last')
                 
     let $instancePerceptions :=        
         for $targetPath in $targetPaths

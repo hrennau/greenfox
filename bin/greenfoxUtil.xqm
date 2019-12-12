@@ -43,16 +43,26 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
         or 
         exists($maxCount) and $maxCount lt $targetCount
     )
-    where $error    
     return
-        let $msg := $constraint/@msg
-        return
-            <gx:error constraintComp="targetCount">{ 
-                $constraint/@id/attribute constraintID {.},
-                $constraintParams,
-                attribute actCount {$targetCount},
-                $msg
-            }</gx:error>
+        if ($error) then
+            let $msg := $constraint/@msg
+            return
+                <gx:error>{ 
+                    attribute constraintComp {'targetSize'},
+                    $constraint/@resourceShapeID,
+                    $constraint/@id/attribute constraintID {.},
+                    $constraintParams,
+                    attribute actCount {$targetCount},
+                    $msg
+                }</gx:error>
+        else                
+            <gx:green>{
+                    attribute constraintComp {'targetSize'},
+                    $constraint/@resourceShapeID,
+                    $constraint/@id/attribute constraintID {.},
+                    $constraintParams,
+                    attribute actCount {$targetCount}
+            }</gx:green>
 };
 
 (:~
