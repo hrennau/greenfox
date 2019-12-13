@@ -42,7 +42,7 @@
                 <!-- *** msg config shape -->
                 <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
                     <targetSize msg="Config file missing" count="1"/>
-                    <mediatype eq="csv" csv.minColumnCount="3" csv.minRowCount="3" csv.separator="," csv.withHeader="yes"/>
+                    <mediatype eq="csv" csv.minColumnCount="3" csv.minRowCount="2" csv.separator="," csv.withHeader="yes"/>
                     
                     <!-- Check - configured return codes ok? -->
                     <xpath msg="Config file contains unknown return code" expr="//returnCode">
