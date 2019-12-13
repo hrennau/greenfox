@@ -115,7 +115,9 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
                 return try {json:parse($text)} catch * {()}
            
     let $csvdoc :=
-        if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then
+        if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then 
+            f:csvDoc($filePath, $gxFile)
+(:        
             let $separator := ($gxFile/@csv.separator, 'comma')[1]
             let $withHeader := ($gxFile/@csv.withHeader, 'no')[1]
             let $names := ($gxFile/@csv.names, 'direct')[1]
@@ -130,6 +132,7 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             }
             let $text := unparsed-text($filePath)
             return try {csv:parse($text, $options)} catch * {()}
+:)            
          else ()
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     
