@@ -214,17 +214,21 @@ declare function f:compileGfox_addIds($gfox as element(gx:greenfox)) {
         return
             for $e at $pos in $elem
             let $idAtt := $e/@id
-            let $id := ($idAtt, concat($localName, '_', $pos))[1]
-            let $furtherAtts:= trace(
+            let $idValue := ($idAtt, concat($localName, '_', $pos))[1]
+            let $idName :=
+                switch($localName)
+                case 'mediatype' return 'constraintID'
+                default return 'id'
+            let $furtherAtts:=
                 typeswitch($elem[1])
                 case element(gx:file) | element(gx:folder) return
-                    attribute resourceShapeID {$id}
+                    attribute resourceShapeID {$idValue}
                 case element(gx:xpath) | element(gx:foxpath) return
-                    attribute valueShapeID {$id}
-                default return () , 'FURTHER_ATTS: ')
+                    attribute valueShapeID {$idValue}
+                default return ()
             return (
                 $idAtt/(delete node .),
-                insert node ($furtherAtts, attribute id {$id}) as first into $e                
+                insert node ($furtherAtts, attribute {$idName} {$idValue}) as first into $e                
             )                
     return $gfox_                
 };
