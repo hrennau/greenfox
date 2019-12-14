@@ -21,7 +21,7 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
     let $eqItems := $constraint/@eq/tokenize(.)
     return (
         if (not($eq)) then () else 
-            let $doc :=
+            let $docEtc:=
                 for $mtype in $eqItems
                 return
                     switch($mtype)
@@ -39,39 +39,74 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                             else
                                 let $minColCount := $constraint/@csv.minColumnCount
                                 let $minRowCount := $constraint/@csv.minRowCount
+                                let $violationsEtc := (
+                                    if (not($minColCount)) then ()
+                                    else 
+                                        let $actMinColCount := min($try/*/*/count(*))
+                                        return
+                                            if ($minColCount <= $actMinColCount) then ()
+                                            else (
+                                                'csv.minColumnCount', 
+                                                attribute actualCsvColumnCount {$actMinColCount}
+                                            )
+                                         
+                                    ,
+                                    if (not($minRowCount)) then () 
+                                    else
+                                        let $rowCount := $try/*/* => count()
+                                        return
+                                            if ($minRowCount <= $rowCount) then ()
+                                            else (
+                                                'csv.minRowCount', 
+                                                attribute actualCsvRowCount {$rowCount}
+                                            )
+
+                                            
+                                )
                                 return
-                                    if (
-                                        (empty($minColCount) or $minColCount/xs:integer(.) <= min($try/*/*/count(*)))
-                                        and
-                                        (empty($minRowCount) or $minRowCount/xs:integer(.) <= $try/*/* => count())
-                                    ) then $try else ()
-                                
+                                    if (empty($violationsEtc)) then $try
+                                    else
+                                        let $violations := $violationsEtc[. instance of xs:string]
+                                        let $additionalAtts := $violationsEtc[. instance of attribute()]
+                                        return
+                                            f:validationResult_mediatype('red', $constraint, 'eq', $violations, $additionalAtts) 
                     default return 
                         error(QName((), 'NOT_YET_IMPLEMENTED'),
                             concat('Unexpected mediatype constraint value: ', $mtype))
             return
-                if ($doc) then f:validationResult_mediatype('green', $constraint, $eq, $constraint/(@csv.minColumnCount, @csv.minRowCount))
-                else f:validationResult_mediatype('red', $constraint, $eq, $constraint/(@csv.minColumnCount, @csv.minRowCount))
+                let $results := $docEtc/(self::gx:error, self::gx:yellow)
+                let $doc := $docEtc except $results
+                return 
+                    if ($results) then $results
+                    else if ($doc) then f:validationResult_mediatype('green', $constraint, 'eq', (), ())
+                    else f:validationResult_mediatype('red', $constraint, 'eq', (), ())
         ,
         ()
     )        
 };                    
                     
-                    
 declare function f:validationResult_mediatype($colour as xs:string,
                                               $constraint as element(gx:mediatype),
-                                              $property as attribute(),
+                                              $facet as xs:string,
+                                              $violations as xs:string*,
                                               $additionalAtts as attribute()*)
         as element() {
-    let $elemName := if ($colour eq 'red') then 'gx:error' else 'gx:green'        
-    let $constraintComponent := concat('mediatype-', $property/local-name(.))   
+    let $elemName := 
+        switch($colour)
+        case 'red' return 'gx:error'
+        default return concat('gx:', $colour)
+    let $constraintComponent := 'mediatype'   
     return
         element {$elemName}{
             $constraint/@msg,
             attribute constraintComp {$constraintComponent},
+            attribute constraintFacet {$facet},
+            $constraint/@resourceShapeID,
             $constraint/@constraintID,
             $constraint/@label/attribute constraintLabel {.},
-            $constraint/@*[starts-with(local-name(.), 'csv')],
-            $property
+            $constraint/(@* except (@resourceShapeID, @constraintID, @label)),
+            if (empty($violations)) then () else attribute violations {$violations},
+            $additionalAtts
         }        
 };
+
