@@ -47,7 +47,7 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                                             if ($minColCount <= $actMinColCount) then ()
                                             else (
                                                 'csv.minColumnCount', 
-                                                attribute actualCsvColumnCount {$actMinColCount}
+                                                attribute actualCsvMinColumnCount {$actMinColCount}
                                             )
                                          
                                     ,
