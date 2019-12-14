@@ -24,7 +24,7 @@
             <!-- *** Codelist folder shape -->
             <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
                 <targetSize msg="No codelist folder found" count="1"/>
-                <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
+                <foxpath id="codelistNames" expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
                 <file foxpath="*[is-xml(.)]">
                     <targetSize msg="No codelist files found" minCount="1"/>
                 </file>
@@ -43,6 +43,9 @@
                 <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
                     <targetSize msg="Config file missing" count="1"/>
                     <mediatype eq="csv" csv.minColumnCount="3" csv.minRowCount="2" csv.separator="," csv.withHeader="yes"/>
+
+                    <xpath msg="Unexpected column name" id="columnNamesValueShape" expr="/*/*[1]/*/local-name(.)" eq="returnCode">
+                    </xpath>
                     
                     <!-- Check - configured return codes ok? -->
                     <xpath msg="Config file contains unknown return code" expr="//returnCode">

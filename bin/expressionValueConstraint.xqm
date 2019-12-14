@@ -49,7 +49,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $like := $constraint/@like
     let $notLike := $constraint/@notLike
     let $flags := string($constraint/@flags)
-    let $quantifier := 'all'
+    let $quantifier := ($constraint/@quant, 'all')[1]
     
     let $eqFoxpathValue := 
         if (not($eqFoxpath)) then () else
@@ -150,6 +150,8 @@ declare function f:validateExpressionValue($constraint as element(),
         ,
         (: comparison errors
            ================= :)
+    if (not($eq)) then () else f:validateExpressionValue_eq($exprValue, $quantifier, $constraint)         
+(:           
         if (not($eq)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item = $eq)) then ()
@@ -157,6 +159,7 @@ declare function f:validateExpressionValue($constraint as element(),
             else if ($quantifier eq 'some') then 
                 if ($exprValue = $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $eq, $exprValue, ())
+:)                
         ,
         if (not($ne)) then () else
             if ($quantifier eq 'all') then 
@@ -244,6 +247,63 @@ declare function f:validateExpressionValue($constraint as element(),
     return
         if ($allErrors) then $allErrors
         else f:constructGreen_valueShape($constraint)
+};
+
+declare function f:validateExpressionValue_eq($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $eqAtt := $valueShape/@eq
+    let $eqElems := $valueShape/gx:eq
+    let $eq := ($eqAtt, $eqElems)
+    return
+    
+    if (not($eq)) then () else
+    
+    if ($quantifier eq 'all') then 
+        let $violations := $exprValue[not(. = $eq)]
+        return
+            if (empty($violations)) then () 
+            else f:validationResult_expression('red', $valueShape, $eq, (), $violations ! string(.) ! <gx:value>{.}</gx:value>)
+    else if ($quantifier eq 'some') then 
+        if ($exprValue = $eq) then () 
+        else f:validationResult_expression('red', $valueShape, $eq, (), ())        
+};        
+
+declare function f:validationResult_expression($colour as xs:string,
+                                               $valueShape as element(),
+                                               $constraint as node()*,
+                                               $additionalAtts as attribute()*,
+                                               $additionalElems as element()*)
+        as element() {
+    let $valueShapeKind := $valueShape/local-name(.)
+    let $expr := $valueShape/@expr/normalize-space(.)        
+    let $constraintComponent :=
+        typeswitch($constraint[1])
+        case element(gx:eq) | attribute(eq) return 'eq'
+        default return error()
+    let $valueShapeId := $valueShape/@valueShapeID
+    let $constraintId := concat($valueShapeId, '-', $constraintComponent)
+        
+        
+    let $elemName := 
+        switch($colour)
+        case 'red' return 'gx:error'
+        default return concat('gx:', $colour)
+    return
+        element {$elemName} {
+            $constraint/@msg,
+            attribute valueShapeKind {$valueShapeKind},
+            attribute constraintComp {$constraintComponent},
+            attribute valueShapeID {$valueShapeId},
+            attribute constraintID {$constraintId},
+            $valueShape/@label/attribute constraintLabel {.},
+            attribute expr {$expr},
+            $valueShape/(@* except (@resourceShapeID, @valueShapeID, @constraintID, @label, @expr, @id)),
+            $additionalAtts,
+            $additionalElems
+        }
+       
 };
 
 declare function f:constructError_valueComparison($constraint as element(),
