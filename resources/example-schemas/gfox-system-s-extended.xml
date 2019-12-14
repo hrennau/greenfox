@@ -44,11 +44,11 @@
                     <targetSize msg="Config file missing" count="1"/>
                     <mediatype eq="csv" csv.minColumnCount="3" csv.minRowCount="2" csv.separator="," csv.withHeader="yes"/>
 
-                    <xpath msg="Unexpected column name" id="columnNamesValueShape" expr="/*/*[1]/*/local-name(.)" eq="returnCode">
+                    <xpath msg="Unexpected column name" id="columnNamesValueShape" expr="/*/*[1]/*/local-name(.)" eq="returnCode" quant="some">
                     </xpath>
                     
                     <!-- Check - configured return codes ok? -->
-                    <xpath msg="Config file contains unknown return code" expr="//returnCode">
+                    <xpath msg="Config file contains unknown return code" expr="//returnCode" quant="all">
                         <in>
                             <eq>OK</eq>
                             <eq>NOFIND</eq>
