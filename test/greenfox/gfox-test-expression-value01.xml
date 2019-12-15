@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/expression-value01"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+    </context>    
+    
+    <domain path="\tt\greenfox\test\data\niem" 
+            name="expression-value01">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="dataFolderShape">
+            
+            <!-- *** XSD folder shape -->
+            <file foxpath=".\(niem-core.xsd, niem-core-manipulated.xsd)" id="niemCoreXsdShape">
+                <targetSize msg="niem-core XSD not found" count="2"/>
+                <!-- eq, ne - case OK -->                
+                <xpath expr="*/@targetNamespace" eq="http://release.niem.gov/niem/niem-core/4.0/"
+                       eqMsg="NOTOK: unexpected namespace"
+                       eqMsgOK="OK: expected namespace"/>
+                <xpath expr="*/@targetNamespace" ne="http://release.niem.gov/niem/niem-core/3.0/"
+                    neMsg="NOTOK: stale namespace"
+                    neMsgOK="OK: not any more old namespace"/>
+                <!-- in - case OK -->                
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    inMsg="NOTOK: unexpected LocalTerm"
+                    inMsgOK="OK: expected LocalTerm values">
+                    <in>
+                        <eq>GSM</eq>
+                        <eq>UTC</eq>
+                        <eq>UMTS</eq>
+                        <eq>SSN</eq>
+                        <eq>ISO</eq>
+                        <eq>Alpha3</eq>
+                        <eq>Alpha2</eq>
+                        <eq>2D</eq>
+                        <eq>3D</eq>
+                        <eq>IMEI</eq>
+                        <eq>DEA</eq>
+                        <eq>UTM</eq>
+                        <eq>ESN</eq>
+                        <eq>FIPS</eq>
+                        <eq>NANP</eq>
+                        <eq>GENC</eq>
+                        <eq>MAC</eq>                    
+                        <eq>CMV</eq>
+                    </in>
+                </xpath>
+            </file>            
+        </folder>
+    </domain>    
+</greenfox>
+
