@@ -37,11 +37,13 @@ declare function f:validateExpressionValue($constraint as element(),
     
     let $eq := $constraint/@eq   
     let $ne := $constraint/@ne
+    let $in := $constraint/gx:in
+    let $notin := $constraint/gx:notin
+    
     let $gt := $constraint/@gt
     let $ge := $constraint/@ge
     let $lt := $constraint/@lt
     let $le := $constraint/@le
-    let $in := $constraint/gx:in
     
     let $eqFoxpath := $constraint/@eqFoxpath
     let $containsXPath := $constraint/@containsXPath
@@ -144,6 +146,7 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($eq)) then () else f:validateExpressionValue_eq($exprValue, $quantifier, $constraint),    
         if (not($ne)) then () else f:validateExpressionValue_ne($exprValue, $quantifier, $constraint),
         if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint),
+        if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint),
         
         (: count errors
            ============ :)
@@ -344,6 +347,46 @@ declare function f:validateExpressionValue_in($exprValue as item()*,
         if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $in, (), ())
 };        
 
+declare function f:validateExpressionValue_notin($exprValue as item()*,
+                                                 $quantifier as xs:string,
+                                                 $valueShape as element())
+        as element() {
+    let $notin := $valueShape/gx:notin
+    return
+    
+    if (not($notin)) then () else
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[
+                some $alternative in $notin/* satisfies
+                    typeswitch($alternative)
+                        case element(gx:eq) return . = $alternative
+                        case element(gx:ne) return . != $alternative
+                        case element(gx:like) return i:matchesLike(., $alternative, $alternative/@flags)
+                        case element(gx:notLike) return not(i:matchesLike(., $alternative, $alternative/@flags))                        
+                        default return error()                
+            ]                    
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $notin, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then
+            let $conforms :=
+                some $item in $exprValue, $alternative in $notin/* satisfies not(
+                typeswitch($alternative)
+                    case element(gx:eq) return $item = $alternative
+                    case element(gx:ne) return $item != $alternative
+                    case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
+                    case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+                    default return error()
+                )
+            return
+                if ($conforms) then ()
+                else f:validationResult_expression('red', $valueShape, $notin, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $notin, (), ())
+};        
+
 
 declare function f:validationResult_expression($colour as xs:string,
                                                $valueShape as element(),
@@ -358,6 +401,7 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(eq) return 'eq'
         case attribute(ne) return 'ne'
         case element(gx:in) return 'in'
+        case element(gx:notin) return 'notin'
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraintComponent)

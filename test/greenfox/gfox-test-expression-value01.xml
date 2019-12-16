@@ -25,8 +25,8 @@
                     neMsgOK="OK: not any more old namespace"/>
                 <!-- in - case OK -->                
                 <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
-                    inMsg="NOTOK: unexpected LocalTerm"
-                    inMsgOK="OK: expected LocalTerm values">
+                    inMsg="NOTOK: unexpected LocalTerm - not in in list"
+                    inMsgOK="OK: expected LocalTerms - in in list">
                     <in>
                         <eq>GSM</eq>
                         <eq>UTC</eq>
@@ -48,6 +48,15 @@
                         <eq>CMV</eq>
                     </in>
                 </xpath>
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    notinMsg="NOTOK: unexpected LocalTerm - in notin list"
+                    notinMsgOK="OK: expected LocalTerms - not in notin list">
+                    <notin>
+                        <eq>ERROR</eq>
+                        <eq>FAILURE</eq>
+                    </notin>
+                </xpath>
+                        
             </file>            
         </folder>
     </domain>    
