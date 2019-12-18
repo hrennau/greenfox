@@ -16,6 +16,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "constants.xqm",
     "expressionEvaluator.xqm",
     "log.xqm" ;
     
@@ -236,7 +237,31 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
     }
     let $text := unparsed-text($filePath)
     return try {csv:parse($text, $options)} catch * {()}
-};        
+};   
+
+declare function f:castAs($s as xs:string, $type as xs:QName, $errorElemName as xs:QName?)
+        as item()? {
+    try {        
+        switch($type)
+        case QName($i:URI_XSD, 'integer') return $s cast as xs:integer 
+        case QName($i:URI_XSD, 'int') return $s cast as xs:int        
+        case QName($i:URI_XSD, 'decimal') return $s cast as xs:decimal
+        case QName($i:URI_XSD, 'long') return $s cast as xs:long
+        case QName($i:URI_XSD, 'short') return $s cast as xs:short
+        case QName($i:URI_XSD, 'dateTime') return $s cast as xs:dateTime
+        case QName($i:URI_XSD, 'duration') return $s cast as xs:duration
+        case QName($i:URI_XSD, 'dayTimeDuration') return $s cast as xs:dayTimeDuration
+        case QName($i:URI_XSD, 'boolean') return $s cast as xs:boolean
+        default return error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
+    } catch *:UNKNOWN_TYPE_NAME {error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
+    } catch * {
+        if (exists($errorElemName)) then 
+            element {$errorElemName} {
+                $s
+            }
+        else ()
+    }
+};      
 
 
 

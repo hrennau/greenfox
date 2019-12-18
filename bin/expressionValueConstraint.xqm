@@ -11,6 +11,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
 
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm";
 
@@ -147,6 +148,8 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($ne)) then () else f:validateExpressionValue_ne($exprValue, $quantifier, $constraint),
         if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint),
         if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint),
+        if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraint),
+        if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraint),
         
         (: count errors
            ============ :)
@@ -190,6 +193,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue > $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $gt, $exprValue, ())
         ,
+(:        
         if (not($lt)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item < $lt)) then ()
@@ -198,6 +202,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue < $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $lt, $exprValue, ())
         ,
+:)        
         if (not($ge)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item >= $gt)) then ()
@@ -206,6 +211,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue >= $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $ge, $exprValue, ())
         ,
+(:        
         if (not($le)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item <= $gt)) then ()
@@ -214,6 +220,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue <= $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $le, $exprValue, ())
         ,
+:)        
         (: match errors
            ============ :)
         if (not($matches)) then () else
@@ -387,6 +394,72 @@ declare function f:validateExpressionValue_notin($exprValue as item()*,
         if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $notin, (), ())
 };        
 
+(:
+declare function f:validateExpressionValue_lt($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $lt := $valueShape/@lt return    
+    if (not($lt)) then () else
+    
+    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
+    let $useLt := if (empty($useDatatype)) then $lt else i:castAs($lt, $useDatatype, ())
+    let $useItems := if (empty($useDatatype)) then $exprValue else 
+        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $useItems ! (
+                if (. instance of element(gx:error)) then .
+                else if (. >= $useLt) then .
+                else ())
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $lt, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($useItems < $useLt) then () 
+            else f:validationResult_expression('red', $valueShape, $lt, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $lt, (), ())
+};        
+:)
+
+declare function f:validateExpressionValue_cmp($exprValue as item()*,
+                                               $cmp as attribute(),
+                                               $quantifier as xs:string,
+                                               $valueShape as element())
+        as element() {
+    let $_DEBUG := trace($cmp, 'CMP: ')        
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(eq) return function($op1, $op2) {$op1 = $op2}        
+        case attribute(ne) return function($op1, $op2) {$op1 != $op2}        
+        case attribute(lt) return function($op1, $op2) {$op1 < $op2}
+        case attribute(le) return function($op1, $op2) {$op1 <= $op2}
+        case attribute(gt) return function($op1, $op2) {$op1 > $op2}
+        case attribute(ge) return function($op1, $op2) {$op1 >= $op2}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
+    
+    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
+    let $useCmp := if (empty($useDatatype)) then $cmp else i:castAs($cmp, $useDatatype, ())
+    let $useItems := if (empty($useDatatype)) then $exprValue else 
+        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $useItems ! (
+                if (. instance of element(gx:error)) then .
+                else if (not($cmpTrue(., $useCmp))) then trace(., concat('§§§§ NOT_CMPTRUE; USE_ITEM: ', ., ' ; USECMP: ', $useCmp, ': '))
+                else ())
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($cmpTrue, $useItems, $useCmp) then () 
+            else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $cmp, (), ())
+};        
 
 declare function f:validationResult_expression($colour as xs:string,
                                                $valueShape as element(),
@@ -402,6 +475,10 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(ne) return 'ne'
         case element(gx:in) return 'in'
         case element(gx:notin) return 'notin'
+        case attribute(lt) return 'lt'        
+        case attribute(le) return 'le'        
+        case attribute(gt) return 'gt'        
+        case attribute(ge) return 'ge'
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraintComponent)

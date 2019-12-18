@@ -19,14 +19,17 @@
                 <!-- eq, ne - case OK -->                
                 <xpath expr="*/@targetNamespace" eq="http://release.niem.gov/niem/niem-core/4.0/"
                        eqMsg="NOTOK: unexpected namespace"
-                       eqMsgOK="OK: expected namespace"/>
+                       eqMsgOK="OK: expected namespace"
+                       deactivated="false"/>
                 <xpath expr="*/@targetNamespace" ne="http://release.niem.gov/niem/niem-core/3.0/"
                     neMsg="NOTOK: stale namespace"
-                    neMsgOK="OK: not any more old namespace"/>
+                    neMsgOK="OK: not any more old namespace"
+                    deactivated="false"/>
                 <!-- in - case OK -->                
                 <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
                     inMsg="NOTOK: unexpected LocalTerm - not in in list"
-                    inMsgOK="OK: expected LocalTerms - in in list">
+                    inMsgOK="OK: expected LocalTerms - in in list"
+                    deactivated="false">
                     <in>
                         <eq>GSM</eq>
                         <eq>UTC</eq>
@@ -50,15 +53,42 @@
                 </xpath>
                 <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
                     notinMsg="NOTOK: unexpected LocalTerm - in notin list"
-                    notinMsgOK="OK: expected LocalTerms - not in notin list">
+                    notinMsgOK="OK: expected LocalTerms - not in notin list"
+                    deactivated="false">
                     <notin>
                         <eq>ERROR</eq>
                         <eq>FAILURE</eq>
                     </notin>
                 </xpath>
-                        
+
+                <xpath expr="xs:schema/@version"
+                    ltMsg="NOTOK: unexpected version not lt 2"
+                    ltMsgOK="OK: version lt 2"
+                    lt="2"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
+                <xpath expr="xs:schema//@minOccurs"
+                    ltMsg="NOTOK: unexpected minOccurs not lt 3"
+                    ltMsgOK="OK: minOccurs lt 3"
+                    lt="3"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
+
+                <xpath expr="xs:schema/@version"
+                    leMsg="NOTOK: unexpected version not le 2"
+                    leMsgOK="OK: version le 2"
+                    le="2"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
+                <xpath expr="xs:schema//@minOccurs"
+                    leMsg="NOTOK: unexpected minOccurs not le 3"
+                    leMsgOK="OK: minOccurs lt 3"
+                    le="3"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
+                
             </file>            
-        </folder>
+        </folder>   
     </domain>    
 </greenfox>
 
