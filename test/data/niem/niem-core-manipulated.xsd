@@ -52,7 +52,7 @@
       <xs:extension base="nc:AssociationType">
         <xs:sequence>
           <xs:element ref="nc:Activity" minOccurs="0X" maxOccurs="unbounded"/>
-          <xs:element ref="nc:Conveyance" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element ref="nc:Conveyance" minOccurs="-1" maxOccurs="unbounded"/>
           <xs:element ref="nc:ActivityConveyanceAssociationAugmentationPoint" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
       </xs:extension>

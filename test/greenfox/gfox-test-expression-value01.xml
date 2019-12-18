@@ -86,6 +86,19 @@
                     le="3"
                     useDatatype="xs:decimal"
                     deactivated="false"/>
+
+                <xpath expr="xs:schema//@minOccurs"
+                    gtMsg="NOTOK: version not > -0.01"
+                    gtMsgOK="OK: version > -0.01"
+                    gt="-0.01"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
+                <xpath expr="xs:schema//@minOccurs"
+                    geMsg="NOTOK: version not >= 0"
+                    geMsgOK="OK: version >= 0"
+                    ge="0"
+                    useDatatype="xs:decimal"
+                    deactivated="false"/>
                 
             </file>            
         </folder>   

@@ -150,6 +150,8 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint),
         if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraint),
         if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraint),
+        if (not($gt)) then () else f:validateExpressionValue_cmp($exprValue, $gt, $quantifier, $constraint),
+        if (not($ge)) then () else f:validateExpressionValue_cmp($exprValue, $ge, $quantifier, $constraint),
         
         (: count errors
            ============ :)
@@ -184,7 +186,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue != $ne) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $ne, $exprValue, ())
         ,
-:)        
+:)      
+(:
         if (not($gt)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item > $gt)) then ()
@@ -193,6 +196,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue > $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $gt, $exprValue, ())
         ,
+:)        
 (:        
         if (not($lt)) then () else
             if ($quantifier eq 'all') then 
@@ -202,7 +206,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue < $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $lt, $exprValue, ())
         ,
-:)        
+:)     
+(:
         if (not($ge)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies $item >= $gt)) then ()
@@ -211,6 +216,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 if ($exprValue >= $gt) then () 
                 else f:constructError_valueComparison($constraint, $quantifier, $ge, $exprValue, ())
         ,
+:)        
 (:        
         if (not($le)) then () else
             if ($quantifier eq 'all') then 
@@ -471,17 +477,17 @@ declare function f:validationResult_expression($colour as xs:string,
     let $expr := $valueShape/@expr/normalize-space(.)        
     let $constraintComponent :=
         typeswitch($constraint[1])
-        case attribute(eq) return 'eq'
-        case attribute(ne) return 'ne'
-        case element(gx:in) return 'in'
-        case element(gx:notin) return 'notin'
-        case attribute(lt) return 'lt'        
-        case attribute(le) return 'le'        
-        case attribute(gt) return 'gt'        
-        case attribute(ge) return 'ge'
+        case attribute(eq) return 'ExprValueEq'
+        case attribute(ne) return 'ExprValueNe'
+        case element(gx:in) return 'ExprValueIn'
+        case element(gx:notin) return 'ExprValueNotin'
+        case attribute(lt) return 'ExprValueLt'        
+        case attribute(le) return 'ExprValueLe'        
+        case attribute(gt) return 'ExprValueGt'        
+        case attribute(ge) return 'ExprValueGe'
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
-    let $constraintId := concat($valueShapeId, '-', $constraintComponent)
+    let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
         
     let $msg := trace(
         if ($colour eq 'green') then 
