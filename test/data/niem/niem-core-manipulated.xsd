@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <xs:schema targetNamespace="http://release.niem.gov/niem/niem-core/3.0/" version="2.1" xsi:schemaLocation="http://release.niem.gov/niem/appinfo/4.0/ ../../utility/appinfo/4.0/appinfo.xsd http://release.niem.gov/niem/conformanceTargets/3.0/ ../../utility/conformanceTargets/3.0/conformanceTargets.xsd" ct:conformanceTargets="http://reference.niem.gov/niem/specification/naming-and-design-rules/4.0/#ReferenceSchemaDocument" xmlns:fips_5-2="http://release.niem.gov/niem/codes/fips_5-2/4.0/" xmlns:hl7="http://release.niem.gov/niem/codes/hl7/4.0/" xmlns:can="http://release.niem.gov/niem/codes/canada_post/4.0/" xmlns:dod_jcs-pub2.0="http://release.niem.gov/niem/codes/dod_jcs-pub2.0/4.0/" xmlns:niem-xs="http://release.niem.gov/niem/proxy/xsd/4.0/" xmlns:structures="http://release.niem.gov/niem/structures/4.0/" xmlns:iso_3166="http://release.niem.gov/niem/codes/iso_3166-1/4.0/" xmlns:iso_639-3="http://release.niem.gov/niem/codes/iso_639-3/4.0/" xmlns:nga="http://release.niem.gov/niem/codes/nga_datum/4.0/" xmlns:occs="http://release.niem.gov/niem/codes/occs_facility/4.0/" xmlns:nc="http://release.niem.gov/niem/niem-core/4.0/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:usps="http://release.niem.gov/niem/codes/usps_states/4.0/" xmlns:unece="http://release.niem.gov/niem/codes/unece_rec20/4.0/" xmlns:iso_4217="http://release.niem.gov/niem/codes/iso_4217/4.0/" xmlns:dea="http://release.niem.gov/niem/codes/dea_ctlsub/4.0/" xmlns:ct="http://release.niem.gov/niem/conformanceTargets/3.0/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:cli="http://reference.niem.gov/niem/specification/code-lists/4.0/code-lists-instance/" xmlns:xCard="http://release.niem.gov/niem/codes/xCard/4.0/" xmlns:census="http://release.niem.gov/niem/codes/census_uscounty/4.0/" xmlns:commodity="http://release.niem.gov/niem/codes/census_commodity/4.0/" xmlns:dol="http://release.niem.gov/niem/codes/dol_soc/4.0/" xmlns:hazmat="http://release.niem.gov/niem/codes/dot_hazmat/4.0/" xmlns:appinfo="http://release.niem.gov/niem/appinfo/4.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <xs:annotation>
-    <xs:documentation>NIEM Core.</xs:documentation>
+    <xs:documentation> NIEM Core.</xs:documentation>
     <xs:appinfo>
       <appinfo:LocalTerm term="GSM" literal="Global System for Mobile communication"/>
       <appinfo:LocalTerm term="UTC" literal="Coordinated Universal Time"/>
@@ -11,7 +11,7 @@
       <appinfo:LocalTerm term="Alpha3" definition="Three-letter"/>
       <appinfo:LocalTerm term="Alpha2" definition="Two-letter"/>
       <appinfo:LocalTerm term="2D" literal="Two-dimensional"/>
-      <appinfo:LocalTerm term="4D" literal="Three-dimensional"/>
+      <appinfo:LocalTerm term="4D~" literal="Three-dimensional"/>
       <appinfo:LocalTerm term="IMEI" literal="International Mobile Equipment Identity"/>
       <appinfo:LocalTerm term="DEA" literal="Drug Enforcement Administration"/>
       <appinfo:LocalTerm term="UTM" literal="Universal Transverse Mercator"/>
@@ -43,8 +43,8 @@
   <xs:import schemaLocation="../../codes/nga_datum/4.0/nga_datum.xsd" namespace="http://release.niem.gov/niem/codes/nga_datum/4.0/"/>
   <xs:import schemaLocation="../../codes/fips_5-2/4.0/fips_5-2.xsd" namespace="http://release.niem.gov/niem/codes/fips_5-2/4.0/"/>
   <xs:import schemaLocation="../../proxy/xsd/4.0/xs.xsd" namespace="http://release.niem.gov/niem/proxy/xsd/4.0/"/>
-  <xs:import schemaLocation="../../codes/iso_3166-1/4.0/iso_3166.xsd" namespace="http://release.niem.gov/niem/codes/iso_3166-1/4.0/"/>
-  <xs:complexType name="ActivityConveyanceAssociationType">
+  <xs:import schemaLocation="http://www.foo.org/codes/iso_3166-1/4.0/iso_3166.xsd" namespace="http://release.niem.gov/niem/codes/iso_3166-1/4.0/"/>
+  <xs:complexType name="ActivityConveyanceAssociationTypeX">
     <xs:annotation>
       <xs:documentation>A data type for an association between an activity and a conveyance.</xs:documentation>
     </xs:annotation>

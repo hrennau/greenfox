@@ -144,14 +144,22 @@ declare function f:validateExpressionValue($constraint as element(),
         
     )            
     let $errors := (
+(:        
         if (not($eq)) then () else f:validateExpressionValue_eq($exprValue, $quantifier, $constraint),    
         if (not($ne)) then () else f:validateExpressionValue_ne($exprValue, $quantifier, $constraint),
+:)        
+        if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraint),    
+        if (not($ne)) then () else f:validateExpressionValue_cmp($exprValue, $ne, $quantifier, $constraint),
         if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint),
         if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint),
         if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraint),
         if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraint),
         if (not($gt)) then () else f:validateExpressionValue_cmp($exprValue, $gt, $quantifier, $constraint),
         if (not($ge)) then () else f:validateExpressionValue_cmp($exprValue, $ge, $quantifier, $constraint),
+        if (not($matches)) then () else f:validateExpressionValue_cmp($exprValue, $matches, $quantifier, $constraint),
+        if (not($notMatches)) then () else f:validateExpressionValue_cmp($exprValue, $notMatches, $quantifier, $constraint),
+        if (not($like)) then () else f:validateExpressionValue_cmp($exprValue, $like, $quantifier, $constraint),
+        if (not($notLike)) then () else f:validateExpressionValue_cmp($exprValue, $notLike, $quantifier, $constraint),
         
         (: count errors
            ============ :)
@@ -229,6 +237,7 @@ declare function f:validateExpressionValue($constraint as element(),
 :)        
         (: match errors
            ============ :)
+(:           
         if (not($matches)) then () else
             if ($quantifier eq 'all') then 
                 if (count($exprValue) and (every $item in $exprValue satisfies matches($item, $matches, $flags))) then ()
@@ -245,8 +254,10 @@ declare function f:validateExpressionValue($constraint as element(),
                 if (some $item in $exprValue satisfies not(matches($item, $notMatches, $flags))) then ()
                 else f:constructError_valueComparison($constraint, $quantifier, $notMatches, $exprValue, attribute flags {$flags})
         ,
+:)        
         (: like errors
            =========== :)
+(:           
         if (not($like)) then () else           
             let $useFlags := ($flags, 'i')[1] 
             return
@@ -267,59 +278,15 @@ declare function f:validateExpressionValue($constraint as element(),
                     if (some $item in $exprValue satisfies not(f:matchesLike    ($item, $notLike, $useFlags))) then ()
                     else f:constructError_valueComparison($constraint, $quantifier, $notLike, $exprValue, attribute flags {$useFlags})
         ,
+:)        
         ()
+       
     )
     let $allErrors := ($errors, $errorsIn)
     return
         if ($allErrors) then $allErrors
         else f:constructGreen_valueShape($constraint)
 };
-
-declare function f:validateExpressionValue_eq($exprValue as item()*,
-                                              $quantifier as xs:string,
-                                              $valueShape as element())
-        as element() {
-    let $eq := $valueShape/@eq
-    return
-    
-    if (not($eq)) then () else
-    
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $exprValue[not(. = $eq)]
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $eq, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($exprValue = $eq) then () 
-            else f:validationResult_expression('red', $valueShape, $eq, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $eq, (), ())
-};        
-
-declare function f:validateExpressionValue_ne($exprValue as item()*,
-                                              $quantifier as xs:string,
-                                              $valueShape as element())
-        as element() {
-    let $ne := $valueShape/@ne
-    return
-    
-    if (not($ne)) then () else
-    
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $exprValue[. = $ne]
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $ne, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($exprValue != $ne) then () 
-            else f:validationResult_expression('red', $valueShape, $ne, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $ne, (), ())
-};        
 
 declare function f:validateExpressionValue_in($exprValue as item()*,
                                               $quantifier as xs:string,
@@ -401,6 +368,53 @@ declare function f:validateExpressionValue_notin($exprValue as item()*,
 };        
 
 (:
+declare function f:validateExpressionValue_eq($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $eq := $valueShape/@eq
+    return
+    
+    if (not($eq)) then () else
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[not(. = $eq)]
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $eq, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($exprValue = $eq) then () 
+            else f:validationResult_expression('red', $valueShape, $eq, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $eq, (), ())
+};        
+
+declare function f:validateExpressionValue_ne($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $ne := $valueShape/@ne
+    return
+    
+    if (not($ne)) then () else
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[. = $ne]
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $ne, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($exprValue != $ne) then () 
+            else f:validationResult_expression('red', $valueShape, $ne, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $ne, (), ())
+};        
+:)
+(:
 declare function f:validateExpressionValue_lt($exprValue as item()*,
                                               $quantifier as xs:string,
                                               $valueShape as element())
@@ -435,7 +449,8 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
                                                $quantifier as xs:string,
                                                $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP: ')        
+    let $_DEBUG := trace($cmp, 'CMP: ')     
+    let $flags := string($valueShape/@flags)
     let $cmpTrue :=
         typeswitch($cmp)
         case attribute(eq) return function($op1, $op2) {$op1 = $op2}        
@@ -444,10 +459,18 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
         case attribute(le) return function($op1, $op2) {$op1 <= $op2}
         case attribute(gt) return function($op1, $op2) {$op1 > $op2}
         case attribute(ge) return function($op1, $op2) {$op1 >= $op2}
+        case attribute(matches) return function($op1, $op2) {matches($op1, $op2, $flags)}
+        case attribute(notMatches) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
+        case attribute(like) return function($op1, $op2) {matches($op1, $op2, $flags)}
+        case attribute(notLike) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
     
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
-    let $useCmp := if (empty($useDatatype)) then $cmp else i:castAs($cmp, $useDatatype, ())
+    let $useCmp :=
+        if ($cmp/self::attribute(like)) then $cmp/f:glob2regex(.)
+        else if ($cmp/self::attribute(notLike)) then $cmp/f:glob2regex(.)
+        else if (empty($useDatatype)) then $cmp 
+        else i:castAs($cmp, $useDatatype, ())
     let $useItems := if (empty($useDatatype)) then $exprValue else 
         $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
     let $errors :=
@@ -485,16 +508,20 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(le) return 'ExprValueLe'        
         case attribute(gt) return 'ExprValueGt'        
         case attribute(ge) return 'ExprValueGe'
+        case attribute(matches) return 'ExprValueMatches'
+        case attribute(notMatches) return 'ExprValueNotMatches'
+        case attribute(like) return 'ExprValueLike'        
+        case attribute(notLike) return 'ExprValueNotLike'
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
         
     let $msg := trace(
         if ($colour eq 'green') then 
-            let $msgName := concat($constraintComponent, 'MsgOK')
+            let $msgName := concat($constraint/local-name(.), 'MsgOK')
             return $valueShape/@*[local-name(.) eq $msgName]/attribute msg {.}
         else
-            let $msgName := concat($constraintComponent, 'Msg')
+            let $msgName := concat($constraint/local-name(.), 'Msg')
             return $valueShape/(@*[local-name(.) eq $msgName]/attribute msg {.}, @msg)[1]
     , '### MSG: ')
     let $elemName := 

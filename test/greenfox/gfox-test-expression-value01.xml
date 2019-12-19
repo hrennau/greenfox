@@ -99,7 +99,29 @@
                     ge="0"
                     useDatatype="xs:decimal"
                     deactivated="false"/>
-                
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    matchesMsg="NOTOK: local term with unexpected characters"
+                    matchesMsgOK="OK: local terms with expected characters"
+                    matches="^[a-z0-9]+$"
+                    flags="i"
+                    deactivated="false"/>
+                <xpath expr="xs:schema//xs:complexType/@name"
+                    notMatchesMsg="NOTOK: type name with suffix after 'Type'"
+                    notMatchesMsgOK="OK: type name without suffix after 'Type'"
+                    notMatches="Type.+$"
+                    deactivated="false"/>
+                <xpath expr="xs:schema/xs:annotation/xs:documentation"
+                    likeMsg="NOTOK: schema documentation does not starts with 'NIEM'"
+                    likeMsgOK="OK: schema documentation starts with 'NIEM'"
+                    like="niem*$"
+                    flags="i"
+                    deactivated="false"/>
+                <xpath expr="xs:schema//@schemaLocation"
+                    notLikeMsg="NOTOK: schema location starts with http:"
+                    notLikeMsgOK="OK: schema location does not start with http:"
+                    notLike="http:*"
+                    flags="i"
+                    deactivated="false"/>
             </file>            
         </folder>   
     </domain>    
