@@ -76,17 +76,8 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     (: the required bindings are a subset of potential bindings :)
     let $requiredBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        for $child in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
-        return (
-            $child/self::gx:xpath/i:determineRequiredBindingsXPath(@expr, $potentialBindings),            
-            $child/self::gx:foxpath/i:determineRequiredBindingsFoxpath(@expr, $potentialBindings),
-            $child/self::gx:xsdValid/i:determineRequiredBindingsFoxpath(@xsdFoxpath, $potentialBindings),
-            $child/self::gx:xpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-            $child/self::gx:xpath/@containsXpath/i:determineRequiredBindingsXPath(., $potentialBindings),
-            $child/self::gx:foxpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-            $child/self::gx:foxpath/@containsXPath/i:determineRequiredBindingsXPath(., $potentialBindings)
-            ) => distinct-values() => sort()
-
+        return f:getRequiredBindings($potentialBindings, $components)
+        
     (: provide required documents :)            
     let $xdoc :=
         let $required := 
@@ -117,22 +108,6 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
     let $csvdoc :=
         if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then 
             f:csvDoc($filePath, $gxFile)
-(:        
-            let $separator := ($gxFile/@csv.separator, 'comma')[1]
-            let $withHeader := ($gxFile/@csv.withHeader, 'no')[1]
-            let $names := ($gxFile/@csv.names, 'direct')[1]
-            let $withQuotes := ($gxFile/@csv.withQuotes, 'yes')[1]
-            let $backslashes := ($gxFile/@csv.backslashes, 'no')[1]
-            let $options := map{
-                'separator': $separator,
-                'header': $withHeader,
-                'format': $names,
-                'quotes': $withQuotes,
-                'backslashes': $backslashes
-            }
-            let $text := unparsed-text($filePath)
-            return try {csv:parse($text, $options)} catch * {()}
-:)            
          else ()
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]
     
@@ -146,7 +121,6 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             if (not($requiredBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
             if (not($requiredBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
         ))
-    
     
     (: perform validations :)
     let $perceptions := (

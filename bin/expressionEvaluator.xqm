@@ -91,4 +91,26 @@ declare function f:getFoxpathOptions($isContextUri as xs:boolean)
         'FOXSTEP_SEPERATOR': '\',
         'NODESTEP_SEPERATOR': '/'
     }        
+};     
+
+(:~
+ : Determins the required variable bindings, given a set of in-scope components specifying XPath and
+ : foxpath expressions.
+ :
+ : @param potentialBindings the variable names for which a binding may be required
+ : @param components components defining XPath and foxpath expressions
+ : @return the actually required variable bindngs
+ :)
+declare function f:getRequiredBindings($potentialBindings as xs:string*, $components as element()*)
+        as xs:string* {
+    for $component in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
+    return (
+        $component/self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),            
+        $component/self::gx:xpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        $component/self::gx:xpath/@containsXpath/i:determineRequiredBindingsXPath(., $potentialBindings),
+        $component/self::gx:foxpath/@expr/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        $component/self::gx:foxpath/@eqFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        $component/self::gx:foxpath/@containsXPath/i:determineRequiredBindingsXPath(., $potentialBindings),
+        $component/self::gx:xsdValid/@xsdFoxpath/i:determineRequiredBindingsFoxpath(., $potentialBindings)
+        ) => distinct-values() => sort()
 };        

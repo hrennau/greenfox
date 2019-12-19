@@ -261,7 +261,8 @@ declare function f:castAs($s as xs:string, $type as xs:QName, $errorElemName as 
             }
         else ()
     }
-};      
+};  
+
 
 
 
