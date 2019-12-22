@@ -263,6 +263,15 @@ declare function f:castAs($s as xs:string, $type as xs:QName, $errorElemName as 
     }
 };  
 
+declare function f:firstCharToLowerCase($s as xs:string?) as xs:string? {
+    if (not($s)) then $s else
+        lower-case(substring($s, 1, 1)) || substring($s, 2)
+};
+
+declare function f:firstCharToUpperCase($s as xs:string?) as xs:string? {
+    if (not($s)) then $s else
+        upper-case(substring($s, 1, 1)) || substring($s, 2)
+};
 
 
 

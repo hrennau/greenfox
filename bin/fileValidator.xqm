@@ -129,14 +129,14 @@ declare function f:validateFileInstance($filePath as xs:string, $gxFile as eleme
             typeswitch($child)
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $exprContext)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $exprContext)            
-            case $xsdValid as element(gx:xsdValid) return 
-                i:xsdValidate($filePath, $xsdValid, $exprContext)
+            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $exprContext)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
             case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)            
-            case element(gx:targetSize) return ()
-            default return error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), concat('Unexpected shape or constraint element, name: ', $child/name()))
+            case $targetSize as element(gx:targetSize) return ()
+            default return error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
+                                 concat('Unexpected shape or constraint element, name: ', $child/name()))
         return
             if ($error) then $error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
             else

@@ -161,8 +161,13 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($like)) then () else f:validateExpressionValue_cmp($exprValue, $like, $quantifier, $constraint),
         if (not($notLike)) then () else f:validateExpressionValue_cmp($exprValue, $notLike, $quantifier, $constraint),
         
+        if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraint),     
+        if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraint),
+        if (not($maxCount)) then () else f:validateExpressionValueCount($exprValue, $maxCount, $constraint),
+        
         (: count errors
            ============ :)
+(:           
         if (empty($maxCount) or count($exprValue) le $maxCount/xs:integer(.)) then () else
             f:constructError_countComparison($constraint, $maxCount, $exprValue, ())
         ,
@@ -172,6 +177,7 @@ declare function f:validateExpressionValue($constraint as element(),
         if (empty($count) or count($exprValue) eq $count/xs:integer(.)) then () else
             f:constructError_countComparison($constraint, $count, $exprValue, ())
         ,
+:)        
         (: comparison errors
            ================= :)
     (:           
@@ -446,7 +452,7 @@ declare function f:validateExpressionValue_lt($exprValue as item()*,
 
 declare function f:validateExpressionValue_cmp($exprValue as item()*,
                                                $cmp as attribute(),
-                                               $quantifier as xs:string,
+                                               $quantifier as xs:string,                                               
                                                $valueShape as element())
         as element() {
     let $_DEBUG := trace($cmp, 'CMP: ')     
@@ -488,6 +494,25 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
     return
         if ($errors) then $errors
         else f:validationResult_expression('green', $valueShape, $cmp, (), ())
+};        
+
+declare function f:validateExpressionValueCount($exprValue as item()*,
+                                                $cmp as attribute(),
+                                                $valueShape as element())
+        as element() {
+    let $_DEBUG := trace($cmp, 'COUNT CMP: ')    
+    let $count := count($exprValue)
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(count) return function($count, $cmp) {$count = $cmp}        
+        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
+        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
+    return        
+        if ($cmpTrue($count, $cmp)) then  
+            f:validationResult_expressionCount('green', $valueShape, $cmp, $count, (), ())
+        else 
+            f:validationResult_expressionCount('red', $valueShape, $cmp, $count, (), ())
 };        
 
 declare function f:validationResult_expression($colour as xs:string,
@@ -543,6 +568,54 @@ declare function f:validationResult_expression($colour as xs:string,
             $additionalElems
         }
        
+};
+
+declare function f:validationResult_expressionCount($colour as xs:string,
+                                                    $valueShape as element(),
+                                                    $constraint as node()*,
+                                                    $count as xs:integer,
+                                                    $additionalAtts as attribute()*,
+                                                    $additionalElems as element()*)
+        as element() {
+    let $valueShapeKind := $valueShape/local-name(.)
+    let $expr := $valueShape/@expr/normalize-space(.)        
+    let $constraintComponent :=
+        typeswitch($constraint[1])
+        case attribute(count) return 'ExprValueCount'
+        case attribute(minCount) return 'ExprValueMinCount'        
+        case attribute(maxCount) return 'ExprValueMaxCount'
+        default return error()
+    let $valueShapeId := $valueShape/@valueShapeID
+    let $constraintSuffix := $constraintComponent ! replace(., '^ExprValue', '') ! f:firstCharToLowerCase(.)
+    let $constraintId := concat($valueShapeId, '-', $constraintSuffix)
+    
+    let $msg := trace(
+        if ($colour eq 'green') then 
+            let $msgName := concat($constraint/local-name(.), 'MsgOK')
+            return $valueShape/@*[local-name(.) eq $msgName]/attribute msg {.}
+        else
+            let $msgName := concat($constraint/local-name(.), 'Msg')
+            return $valueShape/(@*[local-name(.) eq $msgName]/attribute msg {.}, @msg)[1]
+    , '### MSG: ')
+    let $elemName := 
+        switch($colour)
+        case 'red' return 'gx:error'
+        default return concat('gx:', $colour)
+    return
+        element {$elemName} {
+            $msg,
+            attribute valueShapeKind {$valueShapeKind},
+            attribute constraintComp {$constraintComponent},
+            attribute valueShapeID {$valueShapeId},
+            attribute constraintID {$constraintId},
+            attribute expr {$expr},
+            attribute actualCount {$count},
+            $constraint[self::attribute()],
+            $additionalAtts,
+            (: $valueShape/*, :)   (: may depend on 'verbosity' :)
+            $constraint[self::element()],
+            $additionalElems
+        }       
 };
 
 declare function f:constructError_valueComparison($constraint as element(),

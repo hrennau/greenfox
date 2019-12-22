@@ -25,15 +25,16 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateGreenFox($gfox as element(gx:greenfox)) 
         as element()* {
     let $errors := (
-    
         let $xpathExpressions := $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]/@expr
         for $expr in $xpathExpressions
-        
-        let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc'))        
-        let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
-        
+        (: let $_DEBUG := trace($expr, '_EXPR_: ') :)        
         return
             try {
+                (: _TO_DO_ - probably the determination of determining required bindings must be changed,
+                             looking for the syntax pattern of any variable variable binding; 
+                             reason: plans to introduce let clauses :)
+                let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc'))
+                let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
                 let $plan := xquery:parse($augmentedExpr)
                 return ()
             } catch * {

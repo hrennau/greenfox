@@ -122,6 +122,21 @@
                     notLike="http:*"
                     flags="i"
                     deactivated="false"/>
+                <xpath expr="xs:schema/xs:annotation/xs:documentation"
+                    countMsg="NOTOK: schema component has not one documentation item"
+                    countMsgOK="OK: schema component has one documentation item"
+                    count="1"
+                    deactivated="false"/>
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term[matches(., '^\dD$')]"
+                    minCountMsg="NOTOK: schema must have at least two iD local terms"
+                    minCountMsgOK="OK: schema has at least two iD local terms"
+                    minCount="2"
+                    deactivated="false"/>
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term[starts-with(., 'GSM')]"
+                    maxCountMsg="NOTOK: schema must not have more than one GSM local term"
+                    maxCountMsgOK="OK: schema has not more than one GSM local term"
+                    maxCount="1"
+                    deactivated="false"/>
             </file>            
         </folder>   
     </domain>    
