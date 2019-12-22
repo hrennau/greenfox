@@ -137,6 +137,20 @@
                     maxCountMsgOK="OK: schema has not more than one GSM local term"
                     maxCount="1"
                     deactivated="false"/>
+                
+                <xpath expr="//xs:complexType[@name eq 'ActivityDocumentAssociationType']/xs:annotation/xs:documentation/substring(., 1, 30)"
+                    eqXPathMsg="NOTOK: beginning of type docum text is not equal"
+                    eqXPathMsgOK="OK: beginning of type docum text is equal"
+                    eqXPath="//xs:complexType[@name eq 'ActivityFacilityAssociationType']/xs:annotation/xs:documentation/substring(., 1, 30)"
+                    deactivated="false"/>
+
+                <xpath expr="//xs:complexType[@name eq 'ActivityDocumentAssociationType']/descendant::xs:element[1]/@maxOccurs"
+                    eqXPathContext="#item"
+                    eqXPathMsg="NOTOK: maxOccurs not equal (context=#item)"
+                    eqXPathMsgOK="OK: maxOccurs equal (context=#item)"
+                    eqXPath="../../xs:element[2]/@maxOccurs"
+                    deactivated="false"/>
+                
             </file>            
         </folder>   
     </domain>    

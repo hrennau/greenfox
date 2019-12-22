@@ -68,7 +68,7 @@
       <xs:extension base="nc:AssociationType">
         <xs:sequence>
           <xs:element ref="nc:Activity" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element ref="nc:Document" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element ref="nc:Document" minOccurs="0" maxOccurs="2"/>
           <xs:element ref="nc:ActivityDocumentAssociationAugmentationPoint" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
       </xs:extension>
@@ -76,7 +76,7 @@
   </xs:complexType>
   <xs:complexType name="ActivityFacilityAssociationType">
     <xs:annotation>
-      <xs:documentation>A data type for an association between an activity and a facility.</xs:documentation>
+      <xs:documentation>XA data type for an association between an activity and a facility.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="nc:AssociationType">
