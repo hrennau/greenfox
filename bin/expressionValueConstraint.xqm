@@ -536,61 +536,53 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
         let $attName := local-name($cmp) || 'Context'
         return $valueShape/@*[local-name(.) eq $attName]
         
+    (: construction of comparison value - argument is the context item :)
+    let $getCmpValues := function($ctxtItem) {
+        let $cmpValue := i:evaluateXPath($cmp, $ctxtItem, $context, true(), true())
+        return
+            if (empty($useDatatype)) then $cmpValue 
+            else $cmpValue ! i:castAs(., $useDatatype, ())
+    }
     let $errors :=
         typeswitch($cmp)
         case attribute(eqXPath) return 
             if ($cmpContext eq '#item') then
                 if ($quantifier eq 'all') then
                     let $violations :=
-                        for $item in $useItems
-                        let $cmpValue := i:evaluateXPath($cmp, $item, $context, true(), true())
-                        let $useCmpValue :=
-                            if (empty($useDatatype)) then $cmpValue 
-                            else $cmpValue ! i:castAs(., $useDatatype, ())
-                        return
-                            $item[not(. = $useCmpValue)]
+                        for $useItem at $pos in $useItems
+                        let $item := $exprValue[$pos]
+                        return $item[
+                            $useItem/self::gx:error or
+                                not($useItem = $getCmpValues($item))]
                     return
                         if (empty($violations)) then () else
                             f:validationResult_expression('red', $valueShape, $cmp, (), 
                                 ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
                         
                 else if ($quantifier eq 'some') then
-                    if (
-                        some $item in $useItems satisfies
-                        let $cmpValue := i:evaluateXPath($cmp, $item, $context, true(), true())
-                        let $useCmpValue :=
-                            if (empty($useDatatype)) then $cmpValue 
-                            else $cmpValue ! i:castAs(., $useDatatype, ())
-                        return
-                            $item = $useCmpValue
-                    ) then ()
-                    else
-                        f:validationResult_expression('red', $valueShape, $cmp, (), 
-                            ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+                    let $matches :=
+                        for $useItem at $pos in $useItems[not(self::gx:error)]
+                        let $item := $exprValue[$pos]
+                        return $item[$useItem = $getCmpValues($item)]
+                    return
+                        if (exists($matches)) then ()
+                        else
+                            f:validationResult_expression('red', $valueShape, $cmp, (), 
+                                ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
                     
                 else error()                            
             else
-                let $cmpValue := trace(i:evaluateXPath($cmp, $contextItem, $context, true(), true()), 'CMP_VALUE: ')
-                let $useCmpValue :=
-                    if (empty($useDatatype)) then $cmpValue 
-                    else $cmpValue ! i:castAs(., $useDatatype, ())
+                let $useCmpValue := $getCmpValues($contextItem)
                 return
                     if ($quantifier eq 'all') then
-                        let $violations := $useItems ! (
-                            if (. instance of element(gx:error)) then .
-                            else if (not(. = $useCmpValue)) then .
-                            else ()
-                        )
+                        let $violations := $useItems[. instance of element(gx:error) or not(. = $useCmpValue)]
                         return
                             if (empty($violations)) then () 
                             else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
                     else if ($quantifier eq 'some') then
-                        let $cmpValue := i:evaluateXPath($cmp, $contextItem, $context, true(), true())
-                        let $useCmpValue :=
-                            if (empty($useDatatype)) then $cmpValue 
-                            else $cmpValue ! i:castAs(., $useDatatype, ())
+                        let $useCmpValue := $getCmpValues($contextItem)
                         return
-                            if ($useItems = $useCmpValue) then ()
+                            if ($useItems[not(. instance of element(gx:error)) and . = $useCmpValue]) then ()
                             else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
                     else error()                            
         default return error()                    
