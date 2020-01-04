@@ -239,7 +239,7 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
     return try {csv:parse($text, $options)} catch * {()}
 };   
 
-declare function f:castAs($s as xs:string, $type as xs:QName, $errorElemName as xs:QName?)
+declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemName as xs:QName?)
         as item()? {
     try {        
         switch($type)

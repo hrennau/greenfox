@@ -918,7 +918,7 @@
       <xs:extension base="structures:ObjectType">
         <xs:sequence>
           <xs:element ref="nc:DateRepresentation" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element ref="nc:DateAccuracyAbstract" minOccurs="0" maxOccurs="1"/>
+          <xs:element ref="nc:DateAccuracyAbstract" minOccurs="3" maxOccurs="1"/>
           <xs:element ref="nc:DateMarginOfErrorDuration" minOccurs="0" maxOccurs="1"/>
           <xs:element ref="nc:DateAugmentationPoint" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
@@ -1085,7 +1085,8 @@
       <xs:documentation>A data type for an angle measured in degrees between -90 and 90.</xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:decimal">
-      <xs:maxInclusive value="90">
+      <!-- <xs:maxInclusive value="90"> -->
+      <xs:maxInclusive value="-91">
         <xs:annotation>
           <xs:documentation>less than or equal to 90</xs:documentation>
         </xs:annotation>

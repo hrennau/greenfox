@@ -150,6 +150,38 @@
                     eqXPathMsgOK="OK: maxOccurs equal (context=#item)"
                     eqXPath="../../xs:element[2]/@maxOccurs"
                     deactivated="false"/>
+
+                <xpath expr="//@minOccurs"
+                    leXPathContext="#item"
+                    leXPathMsg="NOTOK: minOccurs not less-or-equal (context=#item)"
+                    leXPathMsgOK="OK: minOccurs less-or-equal (context=#item)"
+                    leXPath="(../@maxOccurs/replace(., 'unbounded', '99'), '99')[1] ! xs:integer(.)"
+                    useDatatype="xs:integer"
+                    deactivated="false"/>
+
+                <xpath expr="//@maxOccurs[../@minOccurs][. ne 'unbounded']"
+                    geXPathContext="#item"
+                    geXPathMsg="NOTOK: maxOccurs not greater-or-equal minOccurs (context=#item)"
+                    geXPathMsgOK="OK: maxOccurs greater-or-equal minOccurs (context=#item)"
+                    geXPath="../@minOccurs"
+                    useDatatype="xs:integer"
+                    deactivated="false"/>
+                
+                <xpath expr="//@maxOccurs[../@minOccurs][. ne 'unbounded']"
+                    gtXPathContext="#item"
+                    gtXPathMsg="NOTOK: maxOccurs not greater minOccurs (context=#item)"
+                    gtXPathMsgOK="OK: maxOccurs greater minOccurs (context=#item)"
+                    gtXPath="../@minOccurs/xs:integer(.) - 2"
+                    useDatatype="xs:integer"
+                    deactivated="false"/>
+
+                <xpath expr="//xs:minInclusive[../xs:maxInclusive]/@value"
+                    ltXPathContext="#item"
+                    ltXPathMsg="NOTOK: minInclusive not lt maxInclusive (context=#item)"
+                    ltXPathMsgOK="OK: minInclusive lt maxInclusive (context=#item)"
+                    ltXPath="../../xs:maxInclusive/@value"
+                    useDatatype="xs:integer"
+                    deactivated="false"/>
                 
             </file>            
         </folder>   
