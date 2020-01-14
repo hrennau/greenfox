@@ -51,19 +51,18 @@ declare function f:evaluateXPath($xpath as xs:string,
  : @return the expression value
  :)
 declare function f:evaluateFoxpath($foxpath as xs:string, 
-                                   $context as item()?, 
-                                   $externalVariableBindings as map(*)?,
+                                   $contextItem as item()?, 
+                                   $context as map(*)?,
                                    $addVariableDeclarations as xs:boolean)
         as item()* {
-    let $isContextUri := not($context instance of node())
-    (: let $_DEBUG := trace($externalVariableBindings, '§§§§§§§§§§§ E_V_B: ') :)
+    let $isContextUri := not($contextItem instance of node())
     let $foxpathOptions := f:getFoxpathOptions($isContextUri)
     let $foxpathAugmented :=
         if (not($addVariableDeclarations)) then $foxpath
         else
-            let $requiredBindings := map:keys($externalVariableBindings)
+            let $requiredBindings := map:keys($context)
             return i:finalizeQuery($foxpath, $requiredBindings)
-    return tt:resolveFoxpath($foxpathAugmented, $foxpathOptions, $context, $externalVariableBindings)
+    return tt:resolveFoxpath($foxpathAugmented, $foxpathOptions, $contextItem, $context)
 };
 
 (:~
