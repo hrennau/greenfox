@@ -23,12 +23,20 @@ declare function f:validateExpressionValue($constraint as element(),
                                            $contextDoc as document-node()?,
                                            $context as map(*))
         as element()* {
+(:        
+    let $_DEBUG := trace(typeswitch($contextItem) 
+                         case document-node() return 'DNODE' 
+                         case element() return 'ELEM' 
+                         default return 'OTHER', '_TYPE_CONTEXT_ITEM_0: ')
+:)                         
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
     let $expr := $constraint/@expr
     let $exprValue :=    
         if ($constraint/self::gx:xpath) then i:evaluateXPath($expr, $contextItem, $context, true(), true())
-        else f:evaluateFoxpath($expr, $contextItem, $context, true())
+        else if ($constraint/self::gx:foxpath) then  f:evaluateFoxpath($expr, $contextItem, $context, true())
+        else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraint/name(.)))
+        
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
@@ -47,6 +55,11 @@ declare function f:validateExpressionValue($constraint as element(),
     let $le := $constraint/@le
     
     let $eqFoxpath := $constraint/@eqFoxpath
+    let $ltFoxpath := $constraint/@ltFoxpath
+    let $leFoxpath := $constraint/@leFoxpath
+    let $gtFoxpath := $constraint/@gtFoxpath
+    let $geFoxpath := $constraint/@geFoxpath
+    
     let $containsXPath := $constraint/@containsXPath
     let $eqXPath := $constraint/@eqXPath
     let $leXPath := $constraint/@leXPath    
@@ -98,6 +111,7 @@ declare function f:validateExpressionValue($constraint as element(),
                 f:constructError_valueComparison($constraint, $quantifier, $constraint/gx:in, $exprValue, ())
         ,
 :)        
+(:
         (: eqFoxpath
            ========= :)
         if (not($eqFoxpath)) then () else
@@ -113,7 +127,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 return
                     f:constructError_valueComparison($constraint, $quantifier, $eqFoxpath, $exprValue, 
                                                      attribute valueList {$eqFoxpathValueRep})          
-        ,                                             
+:)        
+(:        ,                                             
         (: containsXpath
            ============= :)
         if (not($containsXPath)) then () else
@@ -128,7 +143,8 @@ declare function f:validateExpressionValue($constraint as element(),
                 let $containsXPathValueRep := $containsXPathValue => distinct-values() => string-join(', ')
                 return
                     f:constructError_valueComparison($constraint, $quantifier, $containsXPath, $exprValue, 
-                                                     attribute valueList {$containsXPathValueRep})                
+                                                     attribute valueList {$containsXPathValueRep})
+:)                                                     
 (:
         ,
         (: eqXPath
@@ -177,6 +193,20 @@ declare function f:validateExpressionValue($constraint as element(),
                                                                           $contextDoc, $context, $quantifier, $constraint),
         if (not($gtXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $gtXPath, $contextItem, $contextFilePath, 
                                                                           $contextDoc, $context, $quantifier, $constraint),
+        if (not($containsXPath)) then () else f:validateExpressionValue_containsXPath(
+                                                                          $exprValue, $containsXPath, $contextItem, $contextFilePath, 
+                                                                          $contextDoc, $context, $constraint),
+
+        if (not($eqFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $eqFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint),
+        if (not($ltFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $ltFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint),
+        if (not($leFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $leFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint),
+        if (not($gtFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $gtFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint),
+        if (not($geFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $geFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint),
 
         (: count errors
            ============ :)
@@ -307,6 +337,247 @@ declare function f:validateExpressionValue($constraint as element(),
         else f:constructGreen_valueShape($constraint)
 };
 
+(:
+declare function f:validateExpressionValue_eq($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $eq := $valueShape/@eq
+    return
+    
+    if (not($eq)) then () else
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[not(. = $eq)]
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $eq, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($exprValue = $eq) then () 
+            else f:validationResult_expression('red', $valueShape, $eq, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $eq, (), ())
+};        
+
+declare function f:validateExpressionValue_ne($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $ne := $valueShape/@ne
+    return
+    
+    if (not($ne)) then () else
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[. = $ne]
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $ne, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($exprValue != $ne) then () 
+            else f:validationResult_expression('red', $valueShape, $ne, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $ne, (), ())
+};        
+:)
+(:
+declare function f:validateExpressionValue_lt($exprValue as item()*,
+                                              $quantifier as xs:string,
+                                              $valueShape as element())
+        as element() {
+    let $lt := $valueShape/@lt return    
+    if (not($lt)) then () else
+    
+    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
+    let $useLt := if (empty($useDatatype)) then $lt else i:castAs($lt, $useDatatype, ())
+    let $useItems := if (empty($useDatatype)) then $exprValue else 
+        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $useItems ! (
+                if (. instance of element(gx:error)) then .
+                else if (. >= $useLt) then .
+                else ())
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $lt, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($useItems < $useLt) then () 
+            else f:validationResult_expression('red', $valueShape, $lt, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $lt, (), ())
+};        
+:)
+
+declare function f:validateExpressionValueCount($exprValue as item()*,
+                                                $cmp as attribute(),
+                                                $valueShape as element())
+        as element() {
+    let $_DEBUG := trace($cmp, 'COUNT_CMP: ')    
+    let $count := count($exprValue)
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(count) return function($count, $cmp) {$count = $cmp}        
+        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
+        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
+    return        
+        if ($cmpTrue($count, $cmp)) then  
+            f:validationResult_expressionCount('green', $valueShape, $cmp, $count, (), ())
+        else 
+            f:validationResult_expressionCount('red', $valueShape, $cmp, $count, (), ())
+};        
+
+declare function f:validateExpressionValue_cmp($exprValue as item()*,
+                                               $cmp as attribute(),
+                                               $quantifier as xs:string,                                               
+                                               $valueShape as element())
+        as element() {
+    let $_DEBUG := trace($cmp, 'CMP: ')     
+    let $flags := string($valueShape/@flags)
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(eq) return function($op1, $op2) {$op1 = $op2}        
+        case attribute(ne) return function($op1, $op2) {$op1 != $op2}        
+        case attribute(lt) return function($op1, $op2) {$op1 < $op2}
+        case attribute(le) return function($op1, $op2) {$op1 <= $op2}
+        case attribute(gt) return function($op1, $op2) {$op1 > $op2}
+        case attribute(ge) return function($op1, $op2) {$op1 >= $op2}
+        case attribute(matches) return function($op1, $op2) {matches($op1, $op2, $flags)}
+        case attribute(notMatches) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
+        case attribute(like) return function($op1, $op2) {matches($op1, $op2, $flags)}
+        case attribute(notLike) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
+    
+    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
+    let $useCmp :=
+        if ($cmp/self::attribute(like)) then $cmp/f:glob2regex(.)
+        else if ($cmp/self::attribute(notLike)) then $cmp/f:glob2regex(.)
+        else if (empty($useDatatype)) then $cmp 
+        else i:castAs($cmp, $useDatatype, ())
+    let $useItems := if (empty($useDatatype)) then $exprValue else 
+        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $useItems ! (
+                if (. instance of element(gx:error)) then .
+                else if (not($cmpTrue(., $useCmp))) then .
+                else ())
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+        else if ($quantifier eq 'some') then 
+            if ($cmpTrue, $useItems, $useCmp) then () 
+            else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $cmp, (), ())
+};        
+
+declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
+                                                   $cmp as attribute(),
+                                                   $contextItem as item()?,
+                                                   $contextFilePath as xs:string,
+                                                   $contextDoc as document-node()?,
+                                                   $context as map(*),
+                                                   $quantifier as xs:string,                                               
+                                                   $valueShape as element())
+        as element() {
+    let $_DEBUG := trace($cmp, 'CMP_EXPR: ')    
+    let $exprKind := $valueShape/local-name(.)
+    let $cmpExprKind := if (ends-with($cmp/local-name(.), 'Foxpath')) then 'foxpath' else 'xpath'
+    let $flags := string($valueShape/@flags)
+    
+    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
+        
+    let $cmpContext :=
+        let $attName := local-name($cmp) || 'Context'
+        return $valueShape/@*[local-name(.) eq $attName]
+
+    (: the check items :)
+    let $checkItems := if (empty($useDatatype)) then $exprValue else 
+        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
+        
+    (: construction of comparison value - argument is the context item :)
+    let $getCmpItems := function($ctxtItem) {
+        let $cmpValue := 
+            if ($cmpExprKind eq 'foxpath') then trace(i:evaluateFoxpath($cmp, $ctxtItem, $context, true()) , 'EVAL_FOXPATH: ')
+            else i:evaluateXPath($cmp, $ctxtItem, $context, true(), true())
+        return
+            if (empty($useDatatype)) then $cmpValue 
+            else $cmpValue ! i:castAs(., $useDatatype, ()) 
+    }
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(eqXPath) return function($op1, $op2) {$op1 = $op2}        
+        case attribute(neXPath) return function($op1, $op2) {$op1 != $op2}        
+        case attribute(ltXPath) return function($op1, $op2) {$op1 < $op2}
+        case attribute(leXPath) return function($op1, $op2) {$op1 <= $op2}
+        case attribute(gtXPath) return function($op1, $op2) {$op1 > $op2}
+        case attribute(geXPath) return function($op1, $op2) {$op1 >= $op2}
+        
+        case attribute(eqFoxpath) return function($op1, $op2) {$op1 = $op2}
+        case attribute(ltFoxpath) return function($op1, $op2) {$op1 < $op2}
+        case attribute(leFoxpath) return function($op1, $op2) {$op1 <= $op2}
+        case attribute(gtFoxpath) return function($op1, $op2) {$op1 > $op2}        
+        case attribute(geFoxpath) return function($op1, $op2) {$op1 >= $op2}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
+    
+    let $errors :=
+            (: re-evaluate cmp expression for each check item, using it as context item :)
+            if ($cmpContext eq '#item') then
+                if ($quantifier eq 'all') then
+                    let $violations :=
+                        for $checkItem at $pos in $checkItems
+                        let $item := $exprValue[$pos]
+                        return $item[
+                            $checkItem instance of element(gx:error) or not($cmpTrue($checkItem, $getCmpItems($item)))]
+                    return
+                        if (empty($violations)) then () else
+                            f:validationResult_expression('red', $valueShape, $cmp, (), 
+                                ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+                        
+                else if ($quantifier eq 'some') then
+                    let $matches :=
+                        for $checkItem at $pos in $checkItems[not(self::gx:error)]
+                        let $item := $exprValue[$pos]
+                        return $item[$cmpTrue($checkItem, $getCmpItems($item))]
+                    return
+                        if (exists($matches)) then ()
+                        else
+                            f:validationResult_expression('red', $valueShape, $cmp, (), 
+                                ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+                    
+                else error()                            
+            else
+                let $useContextItem := 
+                    let $_DEBUG := trace(concat($exprKind, '/', $cmpExprKind), 'EXPR_KIND / CMP_EXPR_KIND: ')
+                    return
+                    
+                    if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
+                    else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
+                    else $contextItem
+                let $cmpItems := $getCmpItems($useContextItem)
+                return
+                    if ($quantifier eq 'all') then
+                        let $violations := $checkItems[. instance of element(gx:error) or not($cmpTrue(., $cmpItems))]
+                        return
+                            if (empty($violations)) then () 
+                            else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
+                    else if ($quantifier eq 'some') then
+                        if ($checkItems[not(. instance of element(gx:error)) and $cmpTrue(., $cmpItems)]) then ()
+                        else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
+                    else error()                            
+    return
+        if ($errors) then $errors
+        else f:validationResult_expression('green', $valueShape, $cmp, (), ())
+};        
+
 declare function f:validateExpressionValue_in($exprValue as item()*,
                                               $quantifier as xs:string,
                                               $valueShape as element())
@@ -386,225 +657,35 @@ declare function f:validateExpressionValue_notin($exprValue as item()*,
         if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $notin, (), ())
 };        
 
-(:
-declare function f:validateExpressionValue_eq($exprValue as item()*,
-                                              $quantifier as xs:string,
-                                              $valueShape as element())
-        as element() {
-    let $eq := $valueShape/@eq
-    return
-    
-    if (not($eq)) then () else
-    
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $exprValue[not(. = $eq)]
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $eq, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($exprValue = $eq) then () 
-            else f:validationResult_expression('red', $valueShape, $eq, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $eq, (), ())
-};        
-
-declare function f:validateExpressionValue_ne($exprValue as item()*,
-                                              $quantifier as xs:string,
-                                              $valueShape as element())
-        as element() {
-    let $ne := $valueShape/@ne
-    return
-    
-    if (not($ne)) then () else
-    
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $exprValue[. = $ne]
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $ne, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($exprValue != $ne) then () 
-            else f:validationResult_expression('red', $valueShape, $ne, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $ne, (), ())
-};        
-:)
-(:
-declare function f:validateExpressionValue_lt($exprValue as item()*,
-                                              $quantifier as xs:string,
-                                              $valueShape as element())
-        as element() {
-    let $lt := $valueShape/@lt return    
-    if (not($lt)) then () else
-    
-    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
-    let $useLt := if (empty($useDatatype)) then $lt else i:castAs($lt, $useDatatype, ())
-    let $useItems := if (empty($useDatatype)) then $exprValue else 
-        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $useItems ! (
-                if (. instance of element(gx:error)) then .
-                else if (. >= $useLt) then .
-                else ())
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $lt, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($useItems < $useLt) then () 
-            else f:validationResult_expression('red', $valueShape, $lt, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $lt, (), ())
-};        
-:)
-
-declare function f:validateExpressionValue_cmp($exprValue as item()*,
-                                               $cmp as attribute(),
-                                               $quantifier as xs:string,                                               
-                                               $valueShape as element())
-        as element() {
-    let $_DEBUG := trace($cmp, 'CMP: ')     
-    let $flags := string($valueShape/@flags)
-    let $cmpTrue :=
-        typeswitch($cmp)
-        case attribute(eq) return function($op1, $op2) {$op1 = $op2}        
-        case attribute(ne) return function($op1, $op2) {$op1 != $op2}        
-        case attribute(lt) return function($op1, $op2) {$op1 < $op2}
-        case attribute(le) return function($op1, $op2) {$op1 <= $op2}
-        case attribute(gt) return function($op1, $op2) {$op1 > $op2}
-        case attribute(ge) return function($op1, $op2) {$op1 >= $op2}
-        case attribute(matches) return function($op1, $op2) {matches($op1, $op2, $flags)}
-        case attribute(notMatches) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
-        case attribute(like) return function($op1, $op2) {matches($op1, $op2, $flags)}
-        case attribute(notLike) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
-    
-    let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
-    let $useCmp :=
-        if ($cmp/self::attribute(like)) then $cmp/f:glob2regex(.)
-        else if ($cmp/self::attribute(notLike)) then $cmp/f:glob2regex(.)
-        else if (empty($useDatatype)) then $cmp 
-        else i:castAs($cmp, $useDatatype, ())
-    let $useItems := if (empty($useDatatype)) then $exprValue else 
-        $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
-    let $errors :=
-        if ($quantifier eq 'all') then 
-            let $violations := $useItems ! (
-                if (. instance of element(gx:error)) then .
-                else if (not($cmpTrue(., $useCmp))) then .
-                else ())
-            return
-                if (empty($violations)) then () 
-                else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-        else if ($quantifier eq 'some') then 
-            if ($cmpTrue, $useItems, $useCmp) then () 
-            else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-    return
-        if ($errors) then $errors
-        else f:validationResult_expression('green', $valueShape, $cmp, (), ())
-};        
-
-declare function f:validateExpressionValueCount($exprValue as item()*,
-                                                $cmp as attribute(),
-                                                $valueShape as element())
-        as element() {
-    let $_DEBUG := trace($cmp, 'COUNT_CMP: ')    
-    let $count := count($exprValue)
-    let $cmpTrue :=
-        typeswitch($cmp)
-        case attribute(count) return function($count, $cmp) {$count = $cmp}        
-        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
-        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
-    return        
-        if ($cmpTrue($count, $cmp)) then  
-            f:validationResult_expressionCount('green', $valueShape, $cmp, $count, (), ())
-        else 
-            f:validationResult_expressionCount('red', $valueShape, $cmp, $count, (), ())
-};        
-
-declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
-                                                   $cmp as attribute(),
-                                                   $contextItem as item()?,
-                                                   $contextFilePath as xs:string,
-                                                   $contextDoc as document-node()?,
-                                                   $context as map(*),
-                                                   $quantifier as xs:string,                                               
-                                                   $valueShape as element())
+declare function f:validateExpressionValue_containsXPath($exprValue as item()*,
+                                                         $cmp as attribute(),
+                                                         $contextItem as item()?,
+                                                         $contextFilePath as xs:string,
+                                                         $contextDoc as document-node()?,
+                                                         $context as map(*),
+                                                         $valueShape as element())
         as element() {
     let $_DEBUG := trace($cmp, 'CMP: ')     
     let $flags := string($valueShape/@flags)
     
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
         
-    let $cmpContext :=
-        let $attName := local-name($cmp) || 'Context'
-        return $valueShape/@*[local-name(.) eq $attName]
-
     (: the check items :)
     let $checkItems := if (empty($useDatatype)) then $exprValue else 
         $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:error'))
         
     (: construction of comparison value - argument is the context item :)
-    let $getCmpItems := function($ctxtItem) {
-        let $cmpValue := i:evaluateXPath($cmp, $ctxtItem, $context, true(), true())
-        return
-            if (empty($useDatatype)) then $cmpValue 
-            else $cmpValue ! i:castAs(., $useDatatype, ()) 
-    }
-    let $cmpTrue :=
-        typeswitch($cmp)
-        case attribute(eqXPath) return function($op1, $op2) {$op1 = $op2}        
-        case attribute(neXPath) return function($op1, $op2) {$op1 != $op2}        
-        case attribute(ltXPath) return function($op1, $op2) {$op1 < $op2}
-        case attribute(leXPath) return function($op1, $op2) {$op1 <= $op2}
-        case attribute(gtXPath) return function($op1, $op2) {$op1 > $op2}
-        case attribute(geXPath) return function($op1, $op2) {$op1 >= $op2}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
-    
+    let $cmpValue := i:evaluateXPath($cmp, $contextItem, $context, true(), true())    
+    let $cmpItems :=
+        if (empty($useDatatype)) then $cmpValue 
+        else $cmpValue ! i:castAs(., $useDatatype, ())
+        
+    (: identify errors :)
     let $errors :=
-            (: re-evaluate cmp expression for each check item, using it as context item :)
-            if ($cmpContext eq '#item') then
-                if ($quantifier eq 'all') then
-                    let $violations :=
-                        for $checkItem at $pos in $checkItems
-                        let $item := $exprValue[$pos]
-                        return $item[
-                            $checkItem instance of element(gx:error) or not($cmpTrue($checkItem, $getCmpItems($item)))]
-                    return
-                        if (empty($violations)) then () else
-                            f:validationResult_expression('red', $valueShape, $cmp, (), 
-                                ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-                        
-                else if ($quantifier eq 'some') then
-                    let $matches :=
-                        for $checkItem at $pos in $checkItems[not(self::gx:error)]
-                        let $item := $exprValue[$pos]
-                        return $item[$cmpTrue($checkItem, $getCmpItems($item))]
-                    return
-                        if (exists($matches)) then ()
-                        else
-                            f:validationResult_expression('red', $valueShape, $cmp, (), 
-                                ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-                    
-                else error()                            
-            else
-                let $cmpItems := $getCmpItems($contextItem)
-                return
-                    if ($quantifier eq 'all') then
-                        let $violations := $checkItems[. instance of element(gx:error) or not($cmpTrue(., $cmpItems))]
-                        return
-                            if (empty($violations)) then () 
-                            else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
-                    else if ($quantifier eq 'some') then
-                        if ($checkItems[not(. instance of element(gx:error)) and $cmpTrue(., $cmpItems)]) then ()
-                        else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>)
-                    else error()                            
+        let $violations := $cmpItems[. instance of element(gx:error) or not(. = $checkItems)]
+        return
+            if (empty($violations)) then () 
+            else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>)
     return
         if ($errors) then $errors
         else f:validationResult_expression('green', $valueShape, $cmp, (), ())
@@ -637,6 +718,12 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(ltXPath) return 'ExprValueLtXPath'
         case attribute(geXPath) return 'ExprValueGeXPath'
         case attribute(gtXPath) return 'ExprValueGtXPath'
+        case attribute(containsXPath) return 'ExprValueContainsXPath'
+        case attribute(eqFoxpath) return 'ExprValueEqFoxpath'
+        case attribute(ltFoxpath) return 'ExprValueLtFoxpath'
+        case attribute(leFoxpath) return 'ExprValueLeFoxpath'
+        case attribute(gtFoxpath) return 'ExprValueGtFoxpath'
+        case attribute(geFoxpath) return 'ExprValueGeFoxpath'
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
