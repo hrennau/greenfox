@@ -183,6 +183,43 @@
                     useDatatype="xs:integer"
                     deactivated="false"/>
                 
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm[@literal, @definition]/@term"
+                    containsXPathMsg="NOTOK: local terms with literal do not contain all local terms"
+                    containsXPathMsgOK="OK: local terms with literal contain all local terms"
+                    containsXPath="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    deactivated="false"/>
+                
+                <xpath expr="xs:schema/@version"
+                    eqFoxpathMsg="NOTOK: unexpected version, not eq shadow version"
+                    eqFoxpathMsgOK="OK: version eq shadow version"
+                    eqFoxpath="..\niem-core.xsd/xs:schema/@version"
+                    useDatatype="xs:decimal"                    
+                    deactivated="false"/>
+                <xpath expr="xs:schema/@version"
+                    ltFoxpathMsg="NOTOK: unexpected version, not lt incremented shadow version"
+                    ltFoxpathMsgOK="OK: version lt incremented shadow version"
+                    ltFoxpath="..\niem-core.xsd/xs:schema/@version/xs:decimal(.) + 1"
+                    useDatatype="xs:decimal"                    
+                    deactivated="false"/>
+                <xpath expr="xs:schema/@version"
+                    leFoxpathMsg="NOTOK: unexpected version, not le incremented shadow version"
+                    leFoxpathMsgOK="OK: version le incremented shadow version"
+                    leFoxpath="..\niem-core.xsd/xs:schema/@version/xs:decimal(.) + 0"
+                    useDatatype="xs:decimal"                    
+                    deactivated="false"/>
+                <xpath expr="xs:schema/@version"
+                    gtFoxpathMsg="NOTOK: unexpected version, not gt decremented shadow version"
+                    gtFoxpathMsgOK="OK: version gt decremented shadow version"
+                    gtFoxpath="..\niem-core.xsd/xs:schema/@version/xs:decimal(.) - 1"
+                    useDatatype="xs:decimal"                    
+                    deactivated="false"/>
+                <xpath expr="xs:schema/@version"
+                    geFoxpathMsg="NOTOK: unexpected version, not ge decremented shadow version"
+                    geFoxpathMsgOK="OK: version ge decremented shadow version"
+                    geFoxpath="..\niem-core.xsd/xs:schema/@version/xs:decimal(.) - 0"
+                    useDatatype="xs:decimal"                    
+                    deactivated="false"/>
+                
             </file>            
         </folder>   
     </domain>    

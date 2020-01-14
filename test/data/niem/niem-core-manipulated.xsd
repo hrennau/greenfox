@@ -21,7 +21,7 @@
       <appinfo:LocalTerm term="FIPS" literal="Federal Information Processing Standards"/>
       <appinfo:LocalTerm term="NANP" literal="North American Numbering Plan"/>
       <appinfo:LocalTerm term="GENC" literal="Geopolitical Entities, Names, and Codes"/>
-      <appinfo:LocalTerm term="MAC" literal="media access control address"/>
+      <appinfo:LocalTerm term="MAC" literalXXX="media access control address"/>
       <appinfo:LocalTerm term="ERROR" literal="Commercial Motor Vehicle"/>
     </xs:appinfo>
   </xs:annotation>
