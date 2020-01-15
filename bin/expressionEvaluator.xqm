@@ -60,8 +60,24 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
     let $foxpathAugmented :=
         if (not($addVariableDeclarations)) then $foxpath
         else
+        (:
             let $requiredBindings := map:keys($context)
             return i:finalizeQuery($foxpath, $requiredBindings)
+         :)
+
+            let $candidateBindings := map:keys($context)
+            let $requiredBindings := trace(i:determineRequiredBindingsFoxpath($foxpath, $candidateBindings) , '_REQ_BINDINGS: ')
+            return i:finalizeQuery($foxpath, $requiredBindings)
+    (: ensure that context keys are QNames :)            
+    let $context :=
+        if ($context instance of map(xs:QName, item()*)) then $context
+        else
+            map:merge(
+                for $key in map:keys($context)
+                let $value := $context($key)
+                let $storeKey := if ($key instance of xs:QName) then $key else QName((), $key)
+                return map:entry($storeKey, $value) 
+            )
     return tt:resolveFoxpath($foxpathAugmented, $foxpathOptions, $contextItem, $context)
 };
 

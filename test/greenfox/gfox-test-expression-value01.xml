@@ -219,6 +219,17 @@
                     geFoxpath="..\niem-core.xsd/xs:schema/@version/xs:decimal(.) - 0"
                     useDatatype="xs:decimal"                    
                     deactivated="false"/>
+                <xpath expr="xs:schema/xs:annotation/xs:appinfo/*:LocalTerm[@literal, @definition]/@term"
+                    containsFoxpathMsg="NOTOK: local terms with literal do not contain all local terms read via foxpath"
+                    containsFoxpathMsgOK="OK: local terms with literal contain all local terms read via foxpath"
+                    containsFoxpath="..\niem-core.xsd/xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    deactivated="false"/>
+                <foxpath expr="..\niem-core.xsd/xs:schema/xs:annotation/xs:appinfo/*:LocalTerm[@literal, @definition]/@term"
+                    containsFoxpathMsg="NOTOK: local terms with literal do not contain all local terms read via double foxpath"
+                    containsFoxpathMsgOK="OK: local terms with literal contain all local terms read via double foxpath"
+                    containsFoxpath="..\niem-core.xsd/xs:schema/xs:annotation/xs:appinfo/*:LocalTerm/@term"
+                    deactivated="false"/>
+                
                 
             </file>            
         </folder>   

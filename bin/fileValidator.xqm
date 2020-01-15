@@ -28,13 +28,14 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         as element()* {
     let $contextPath := $context?_contextPath
     let $navigationPath := $gxFile/(@foxpath, @path)[1]
-    let $targetPaths :=
+    let $targetPaths := f:getTargetPaths($gxFile, $context)
+(:    
         let $path := $gxFile/@path
         let $foxpath := $gxFile/@foxpath
         return
             if ($path) then concat($contextPath, '\', $gxFile/@path)[file:exists(.)][file:is-file(.)]
             else f:evaluateFoxpath($foxpath, $contextPath)[file:is-file(.)]
-            
+:)            
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
     let $targetCountPerceptions := 

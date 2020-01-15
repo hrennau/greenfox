@@ -50,8 +50,8 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
             return
                 <gx:error>{ 
                     attribute constraintComp {'targetSize'},
+                    $constraint/@id/attribute constraintID {.},                    
                     $constraint/@resourceShapeID,
-                    $constraint/@id/attribute constraintID {.},
                     $constraintParams,
                     attribute actCount {$targetCount},
                     $msg
@@ -59,8 +59,8 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
         else                
             <gx:green>{
                     attribute constraintComp {'targetSize'},
+                    $constraint/@id/attribute constraintID {.},                    
                     $constraint/@resourceShapeID,
-                    $constraint/@id/attribute constraintID {.},
                     $constraintParams,
                     attribute actCount {$targetCount}
             }</gx:green>
@@ -272,6 +272,30 @@ declare function f:firstCharToUpperCase($s as xs:string?) as xs:string? {
     if (not($s)) then $s else
         upper-case(substring($s, 1, 1)) || substring($s, 2)
 };
+
+(:~
+ : Returns the target paths of a resource shape.
+ :
+ : @param resourceShape a resource shape
+ : @param context a map of variable bindings
+ : @return the target paths :)
+declare function f:getTargetPaths($resourceShape as element(), $context as map(*))
+        as xs:string* {
+    let $isExpectedResourceKind :=
+        let $isDir := $resourceShape/self::gx:folder
+        return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
+    let $contextPath := $context?_contextPath        
+    let $targetPaths :=
+        let $path := $resourceShape/@path
+        let $foxpath := $resourceShape/@foxpath
+        return
+            if ($path) then concat($contextPath, '\', $resourceShape/@path)
+                            [file:exists(.)][$isExpectedResourceKind(.)]
+            else 
+                i:evaluateFoxpath($foxpath, $contextPath, $context, true())
+                [$isExpectedResourceKind(.)]
+    return $targetPaths        
+};        
 
 
 

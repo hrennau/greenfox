@@ -33,7 +33,7 @@ declare function f:validateGreenFox($gfox as element(gx:greenfox))
                 (: _TO_DO_ - probably the determination of determining required bindings must be changed,
                              looking for the syntax pattern of any variable variable binding; 
                              reason: plans to introduce let clauses :)
-                let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc'))
+                let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc', '_domainName', '_domainPath'))
                 let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
                 let $plan := xquery:parse($augmentedExpr)
                 return ()

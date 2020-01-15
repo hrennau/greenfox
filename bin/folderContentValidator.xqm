@@ -24,8 +24,13 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateFolderContent($folderPath as xs:string, $constraint as element(gx:folderContent), $context as map(*)) 
+declare function f:validateFolderContent($folderPath as xs:string, 
+                                         $constraint as element(gx:folderContent), 
+                                         $context as map(*)) 
         as element()* {
+        
+    let $D_DEBUG := trace($folderPath, '__FOLDER_PATH: ')        
+    
     (: determine expectations :)
     let $_constraint := f:validateFolderContent_compile($constraint)
     let $closed := $_constraint/@closed
@@ -48,40 +53,90 @@ declare function f:validateFolderContent($folderPath as xs:string, $constraint a
             <gx:error>{
                 $_constraint/@msg,
                 attribute constraintComponent {'folderContent'},
-                attribute facet {'unexpectedMember'},
                 $_constraint/@id/attribute constraintID {.},
                 $_constraint/@label/attribute constraintLabel {.},
+                attribute constraintFacet {'unexpectedMember'},
                 attribute member {$member}
             }</gx:error>
             
             
     let $errors_missingMembers :=
-        for $d in $_constraint/*[not(@minOccurs eq '0')]
+        for $d in $_constraint/*
         let $candMembers := if ($d/self::gx:memberFile) then $memberFiles 
                             else if ($d/self::gx:memberFolder) then $memberFolders 
                             else $members                                 
         let $found := $candMembers[matches(., $d/@regex, 'i')]
         let $facet :=
-            if (empty($found)) then 'missingMember'
+            if (empty($found)) then 
+                if ($d/@minOccurs eq '0') then ()
+                else 'missingMember'
+            else if ($d/@minOccurs/xs:integer(.) > count($found)) then 'tooFewMembers'                
             else if ($d/@maxOccurs/xs:integer(.) = -1) then ()
-            else if ($d/@maxOccurs/xs:integer(.) > count($found)) then 'tooManyMembers'
+            else if ($d/@maxOccurs/xs:integer(.) < count($found)) then 'tooManyMembers'            
             else ()
+               
         where $facet
+        let $facetEdited :=
+            if ($facet eq 'tooManyMembers' and $d/@maxOccurs eq '0') then 'excludedMember'
+            else $facet
+        let $memberName :=
+            if (count($found) eq 1) then $found
+            else $_constraint/@name
         return
             <gx:error>{
                 $_constraint/@msg,
                 attribute constraintComponent {'folderContent'},
-                attribute facet {$facet},
-                attribute memberName {$d/@glob},
-                if ($d/@maxOccurs = 1) then () else $d/@maxOccurs/attribute maxOccurs {.},
                 $_constraint/@id/attribute constraintID {.},
                 $_constraint/@label/attribute constraintLabel {.},
-                attribute member {$d/@name}
+                attribute constraintFacet {$facetEdited},
+                $d/@minOccurs[not(. eq '1')]/attribute minOccurs {.},
+                $d/@maxOccurs[not(. eq '1')]/attribute maxOccurs {.},
+                attribute member {$memberName}
             }</gx:error>
-    return (
-        $errors_missingMembers, 
-        $errors_unexpectedMembers
-    )    
+
+    let $errors_hash :=
+        for $d in $_constraint/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
+        let $candMembers := $memberFiles 
+        let $found := $candMembers[matches(., $d/@regex, 'i')]
+        for $file in $found
+        let $file := concat($folderPath, '/', $file) ! replace(., '\\', '/')
+        let $fileContent := file:read-binary($file)
+        for $hashExp in $d/(@md5, @sha1, @sha256)
+        let $hashKind := $hashExp/local-name(.)
+        let $rawHash :=
+            typeswitch($hashExp)
+            case attribute(md5) return hash:md5($fileContent)
+            case attribute(sha1) return hash:sha1($fileContent)
+            case attribute(sha256) return hash:sha256($fileContent)
+            default return error()
+        let $hash := string(xs:hexBinary($rawHash))
+        where ($hash ne $hashExp)
+        let $msg := (concat('Not expected ', $hashKind), $_constraint/@msg)[1]
+        let $actValueAtt := attribute {concat($hashKind, 'Found')} {$hash}
+        return
+            <gx:error>{
+                attribute msg {$msg},
+                attribute constraintComponent {'folderContent'},
+                $_constraint/@id/attribute constraintID {.},
+                $_constraint/@label/attribute constraintLabel {.},
+                attribute constraintFacet {$hashExp/local-name(.)},
+                $hashExp,
+                $actValueAtt,
+                attribute member {$file}
+            }</gx:error>
+
+    let $errors := ($errors_missingMembers, $errors_unexpectedMembers, $errors_hash)
+    return
+        if ($errors) then $errors
+        else $_constraint/
+            <gx:green>{
+                attribute constraintComponent {local-name()},
+                @id/attribute constraintID {.},
+                @label/attribute constraintLabel {.},
+                attribute folderPath {$folderPath}
+            }</gx:green>
+        
+    
 };
 
 declare function f:validateFolderContent_compile($folderContent as element(gx:folderContent))
@@ -109,13 +164,39 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
         for $member in $folderContent/*
         return
             typeswitch($member)
-            case element(gx:memberFile) | element(gx:memberFolder) return
-                element {node-name($member)} {
-                    $member/(@* except (@minOccurs, @maxOccurs, @occ)),
-                    $member/@name/attribute regex {i:glob2regex(.)},
-                    $minMaxOccurs($member)
-                }
-            case element(gx:memberFiles) | element(gx:memberFolders) return
+            case element(gx:memberFile) 
+                 | element(gx:memberFolder) 
+                 | element(gx:excludedMemberFile) 
+                 | element(gx:excludedMemberFolder) return
+                let $member :=
+                    if ($member/self::gx:excludedMemberFile, $member/self::gx:excludedMemberFolder) then
+                        let $lname := $member/local-name(.) ! replace(., 'excludedM', 'm')
+                        return
+                            element {concat('gx:', $lname)} {
+                                $member/(@* except @occ),
+                                attribute occ {0}
+                            }
+                    else $member
+                return
+                        element {node-name($member)} {
+                            $member/(@* except (@minOccurs, @maxOccurs, @occ)),
+                            $member/@name/attribute regex {i:glob2regex(.)},
+                            $minMaxOccurs($member)
+                        }
+            case element(gx:memberFiles) 
+                 | element(gx:memberFolders)
+                 | element(gx:excludedMemberFiles)
+                 | element(gx:excludedMemberFolders) return
+                let $member :=
+                    if ($member/self::gx:excludedMemberFiles, $member/self::gx:excludedMemberFolders) then
+                        let $lname := $member/local-name(.) ! replace(., 'excludedM', 'm')
+                        return
+                            element {concat('gx:', $lname)} {
+                                $member/(@* except @occ),
+                                attribute occ {0}
+                            }
+                    else $member
+                 
                 let $elemName := local-name($member) ! replace(., 's$', '')
                 for $name in tokenize($member/@names, ',\s*')
                 let $regex := i:glob2regex($name)

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+    </context>    
+    
+    <domain path="\projects\xsdbase\niem-4.2" 
+            name="niem-4.2">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="$_domainPath\." id="systemRootFolderShape">
+            <targetSize msg="No niem folder found" minCount="1"/>
+            <folderContent msg="Niem folder with unexpected content." 
+                closed="true">
+                <memberFolders names="csv, jsonld-context, niem"/>
+                <memberFiles names="distribution.txt, README.md"/>
+                <memberFile name="*change*" sha1="09F996E0D7A4C2EFFBBBC8F9497FF0A97CC53E38"/>
+                <memberFile name="*codes*" md5="EE86CFB0F7B88861A76FFE1137D759A5"/>
+                <memberFile name="niem-4.2.xlsx" sha256="69AEBB0DCEA978A23E349991A2C31EBD09C48850D8D568FCD12CE6944B0BC831"/>
+                <memberFiles names="~*"/>
+            </folderContent>
+        </folder>
+    </domain>    
+</greenfox>
