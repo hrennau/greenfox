@@ -96,34 +96,46 @@ declare function f:validateFolderContent($folderPath as xs:string,
 
     let $errors_hash :=
         for $d in $_constraint/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
+        let $name := $d/@name
         let $candMembers := $memberFiles 
         let $found := $candMembers[matches(., $d/@regex, 'i')]
-        for $file in $found
-        let $file := concat($folderPath, '/', $file) ! replace(., '\\', '/')
-        let $fileContent := file:read-binary($file)
+        
         for $hashExp in $d/(@md5, @sha1, @sha256)
         let $hashKind := $hashExp/local-name(.)
-        let $rawHash :=
-            typeswitch($hashExp)
-            case attribute(md5) return hash:md5($fileContent)
-            case attribute(sha1) return hash:sha1($fileContent)
-            case attribute(sha256) return hash:sha256($fileContent)
-            default return error()
-        let $hash := string(xs:hexBinary($rawHash))
-        where ($hash ne $hashExp)
-        let $msg := (concat('Not expected ', $hashKind), $_constraint/@msg)[1]
-        let $actValueAtt := attribute {concat($hashKind, 'Found')} {$hash}
+
+        let $hashes := 
+            for $file in $found
+            let $file := concat($folderPath, '/', $file) ! replace(., '\\', '/')
+            let $fileContent := file:read-binary($file)
+            let $rawHash :=
+                typeswitch($hashExp)
+                case attribute(md5) return hash:md5($fileContent)
+                case attribute(sha1) return hash:sha1($fileContent)
+                case attribute(sha256) return hash:sha256($fileContent)
+                default return error()
+            return
+                trace(string(xs:hexBinary($rawHash)) , 'HASH: ')
+
+        (: OK, if for every hash in the attribute value a matching file is found :)
+        for $hashExpItem in tokenize($hashExp)
+        let $ok := some $hash in $hashes satisfies $hash eq $hashExpItem
         return
-            <gx:error>{
-                attribute msg {$msg},
-                attribute constraintComponent {'folderContent'},
-                $_constraint/@id/attribute constraintID {.},
-                $_constraint/@label/attribute constraintLabel {.},
-                attribute constraintFacet {$hashExp/local-name(.)},
-                $hashExp,
-                $actValueAtt,
-                attribute member {$file}
-            }</gx:error>
+            if ($ok) then () else
+            
+            let $msg := (concat('Not expected ', $hashKind), $_constraint/@msg)[1]
+            let $actValueAtt := 
+                if (count($found) gt 1) then () else attribute {concat($hashKind, 'Found')} {$hashes}
+            return
+                <gx:error>{
+                    attribute msg {$msg},
+                    attribute constraintComponent {'folderContent'},
+                    $_constraint/@id/attribute constraintID {.},
+                    $_constraint/@label/attribute constraintLabel {.},
+                    attribute constraintFacet {$hashExp/local-name(.)},
+                    attribute {$hashExp/name()} {$hashExpItem},
+                    $actValueAtt,
+                    attribute member {$name}
+                }</gx:error>
 
     let $errors := ($errors_missingMembers, $errors_unexpectedMembers, $errors_hash)
     return
