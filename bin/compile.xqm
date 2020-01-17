@@ -58,12 +58,14 @@ declare function f:compileGfoxRC($n as node(), $context as map(*)) as node() {
     
     case element(gx:greenfox) return
         element {node-name($n)} {
+            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
             $n/@* ! f:compileGfoxRC(., $context),
             if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
             $n/node() ! f:compileGfoxRC(., $context) 
         }
     case element() return
         element {node-name($n)} {
+            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
             $n/@* ! f:compileGfoxRC(., $context),
             $n/node() ! f:compileGfoxRC(., $context)            
         }
@@ -241,6 +243,7 @@ declare function f:compileGfox_addIds2RC($n as node()) {
     typeswitch($n)
     case element(gx:file) | element(gx:folder) return
         element {node-name($n)} {
+            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
             $n/@* ! f:compileGfox_addIds2RC(.),
             $n/node() ! f:compileGfox_addIds2RC(.)
         }
@@ -248,6 +251,7 @@ declare function f:compileGfox_addIds2RC($n as node()) {
         let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][2]/@resourceShapeID
         return
             element {node-name($n)} {
+                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
                 $resourceShapeID,
                 $n/@* ! f:compileGfox_addIds2RC(.),
                 $n/node() ! f:compileGfox_addIds2RC(.)
@@ -266,6 +270,7 @@ declare function f:compileGfox_addIds2RC($n as node()) {
             else ()                
         return
             element {node-name($n)} {
+                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
                 $resourceShapeID,
                 $n/@* ! f:compileGfox_addIds2RC(.),
                 $n/node() ! f:compileGfox_addIds2RC(.)

@@ -60,6 +60,7 @@ declare function f:validateDomain($gxDomain as element(gx:domain), $context as m
         return
             typeswitch($component)
             case element(gx:folder) return f:validateFolder($component, $context)
+            case element(gx:constraintComponents) return ()
             default return error()
     return
         $perceptions

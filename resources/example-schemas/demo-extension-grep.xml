@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-extension-grep"
+          xmlns:ex="http://example.com"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+    </context>    
+
+    <constraintComponents>
+        <constraintComponent constraintElementName="ex:grep">
+            <param name="plain"></param>
+            <xpath><![CDATA[
+                    let $files := $this
+                    return
+                        some $file in $files satisfies
+                        let $lines := unparsed-text-lines($file)
+                        return
+                            some $line in $lines satisfies
+                                contains($line, $plain)
+                ]]></xpath>
+        </constraintComponent>
+    </constraintComponents>    
+    
+    <domain path="\projects\xsdbase\niem-4.2" 
+            name="niem-4.2">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="systemRootFolderShape">
+            <targetSize msg="No niem folder found" minCount="1"/>
+            <file foxpath="README.md">
+                <targetSize msg="README not found" minCount="1"/>    
+                <ex:grep plain="FBI"/>
+            </file>
+        </folder>
+    </domain>    
+</greenfox>
