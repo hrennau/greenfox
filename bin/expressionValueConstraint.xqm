@@ -21,7 +21,7 @@ declare function f:validateExpressionValue($constraint as element(),
                                            $contextItem as item()?,
                                            $contextFilePath as xs:string,
                                            $contextDoc as document-node()?,
-                                           $context as map(*))
+                                           $context as map(xs:string, item()*))
         as element()* {
 (:        
     let $_DEBUG := trace(typeswitch($contextItem) 
@@ -29,15 +29,19 @@ declare function f:validateExpressionValue($constraint as element(),
                          case element() return 'ELEM' 
                          default return 'OTHER', '_TYPE_CONTEXT_ITEM_0: ')
 :)                         
+    let $_DEBUG := trace(map:keys($context), 'VALIDATE_EXPR_VALUE, CONTEXT_KEYS: ')
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
-    let $expr := $constraint/@expr
+    let $expr := trace($constraint/@expr , 'EXPR: ')
+    let $evaluationContext := $context?_evaluationContext
     let $exprValue :=    
-        if ($constraint/self::gx:xpath) then i:evaluateXPath($expr, $contextItem, $context, true(), true())
-        else if ($constraint/self::gx:foxpath) then  f:evaluateFoxpath($expr, $contextItem, $context, true())
+        if ($constraint/self::gx:xpath) then 
+            i:evaluateXPath($expr, $contextItem, $evaluationContext, true(), true())
+        else if ($constraint/self::gx:foxpath) then  
+            f:evaluateFoxpath($expr, $contextItem, $evaluationContext, true())
         else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraint/name(.)))
         
-    let $constraintId := $constraint/@id
+    let $constraintId := trace($constraint/@id , 'CONSTRAINT_ID: ')
     let $constraintLabel := $constraint/@label
     
     let $minCount := $constraint/@minCount
@@ -77,19 +81,19 @@ declare function f:validateExpressionValue($constraint as element(),
     let $eqFoxpathValue := 
         if (not($eqFoxpath)) then () else
             let $contextItem := $contextFilePath
-            return f:evaluateFoxpath($eqFoxpath, $contextItem, $context, true())
+            return f:evaluateFoxpath($eqFoxpath, $contextItem, $evaluationContext, true())
 
     let $containsXPathValue := 
         if (not($containsXPath)) then () else
             let $contextItem := ($contextDoc, $contextItem)[1]
             return  
-                f:evaluateXPath($containsXPath, $contextItem, $context, true(), true())            
+                f:evaluateXPath($containsXPath, $contextItem, $evaluationContext, true(), true())            
 
     let $eqXPathValue := 
         if (not($eqXPath)) then () else
             let $contextItem := ($contextDoc, $contextItem)[1]
             return
-                f:evaluateXPath($eqXPath, $contextItem, $context, true(), true())            
+                f:evaluateXPath($eqXPath, $contextItem, $evaluationContext, true(), true())            
 
     let $errors := (
         if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraint),    
@@ -218,7 +222,8 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
                                                    $quantifier as xs:string,                                               
                                                    $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP_EXPR: ')    
+    let $_DEBUG := trace($cmp, 'CMP_EXPR: ')
+    let $evaluationContext := $context?_evaluationContext    
     let $exprKind := $valueShape/local-name(.)
     let $cmpExprKind := if (ends-with($cmp/local-name(.), 'Foxpath')) then 'foxpath' else 'xpath'
     let $flags := string($valueShape/@flags)
@@ -236,8 +241,9 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
     (: construction of comparison value - argument is the context item :)
     let $getCmpItems := function($ctxtItem) {
         let $cmpValue := 
-            if ($cmpExprKind eq 'foxpath') then trace(i:evaluateFoxpath($cmp, $ctxtItem, $context, true()) , 'EVAL_FOXPATH: ')
-            else i:evaluateXPath($cmp, $ctxtItem, $context, true(), true())
+            if ($cmpExprKind eq 'foxpath') then 
+                trace(i:evaluateFoxpath($cmp, $ctxtItem, $evaluationContext, true()) , 'EVAL_FOXPATH: ')
+            else i:evaluateXPath($cmp, $ctxtItem, $evaluationContext, true(), true())
         return
             if (empty($useDatatype)) then $cmpValue 
             else $cmpValue ! i:castAs(., $useDatatype, ()) 
@@ -317,7 +323,8 @@ declare function f:validateExpressionValue_containsExpressionValue(
                                                          $context as map(*),
                                                          $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP: ')     
+    let $_DEBUG := trace($cmp, 'CMP: ')   
+    let $evaluationContext := $context?_evaluationContext
     let $flags := string($valueShape/@flags)
     let $exprKind := $valueShape/local-name(.)
     let $cmpExprKind := if (ends-with($cmp/local-name(.), 'Foxpath')) then 'foxpath' else 'xpath'
@@ -335,8 +342,9 @@ declare function f:validateExpressionValue_containsExpressionValue(
         else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
         else $contextItem
     let $cmpValue := 
-        if ($cmpExprKind eq 'foxpath') then i:evaluateFoxpath($cmp, $useContextItem, $context, true())
-        else i:evaluateXPath($cmp, $useContextItem, $context, true(), true())
+        if ($cmpExprKind eq 'foxpath') then 
+            i:evaluateFoxpath($cmp, $useContextItem, $evaluationContext, true())
+        else i:evaluateXPath($cmp, $useContextItem, $evaluationContext, true(), true())
     let $cmpItems :=
             if (empty($useDatatype)) then $cmpValue 
             else $cmpValue ! i:castAs(., $useDatatype, ())

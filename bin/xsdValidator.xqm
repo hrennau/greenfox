@@ -16,7 +16,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $exprContext as map(*))
+declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $context as map(*))
         as element()* {
     let $_DEBUG := trace($filePath, '### XSD VALIDATOR FILE PATH: ') return
     
@@ -31,8 +31,10 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
         
     let $doc := doc($filePath)
     let $expr := $constraint/@xsdFoxpath
+    let $evaluationContext := $context?_evaluationContext
+    let $_DEBUG := trace($evaluationContext?domain, 'DOMAIN: ')
     let $xsdPaths := 
-        let $value := f:evaluateFoxpath($expr, $filePath, $exprContext, true())
+        let $value := f:evaluateFoxpath($expr, $filePath, $evaluationContext, true())
 (:        
         let $exprContext := $context
         let $requiredBindings := map:keys($context)

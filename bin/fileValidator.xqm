@@ -52,6 +52,14 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         $perceptions
 };
 
+(:~
+ : Validates a file against a file shape.
+ :
+ : @param filePath the file path
+ : @param gxFile the file shape
+ : @param context the evaluation context
+ : @return validation results
+ :)
 declare function f:validateFileInstance($filePath as xs:string, 
                                         $gxFile as element(gx:file), 
                                         $context as map(*)) 
@@ -79,25 +87,29 @@ declare function f:validateFileInstance($filePath as xs:string,
        only document obtained (if any) :)
     let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc)[1]
     
-    let $exprContext :=
-        map:merge((
-            if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $reqBindingsAndDocs?xdoc),
-            if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $reqBindingsAndDocs?jdoc),
-            if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $reqBindingsAndDocs?csvdoc),
-            if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
-            if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
-            if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
-            if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
-        ))
+    let $context := 
+        let $evaluationContext :=
+            map:merge((
+                $context?_evaluationContext,
+                if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $reqBindingsAndDocs?xdoc),
+                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $reqBindingsAndDocs?jdoc),
+                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $reqBindingsAndDocs?csvdoc),
+                if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
+                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
+                if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
+                if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
+            ))    
+        return map:put($context, '_evaluationContext', $evaluationContext)
     
+    let $_DEBUG := trace(map:keys($context?_evaluationContext), 'EVAL_CONTEXT_KEYS: ')
     (: perform validations :)
     let $perceptions := (
         for $child in $components[not(self::gx:targetSize)]
         let $error :=
             typeswitch($child)
-            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $exprContext)
-            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $exprContext)            
-            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $exprContext)
+            case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
+            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
@@ -147,7 +159,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
     (: the required bindings are a subset of potential bindings :)
     let $requiredBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        return f:getRequiredBindings($potentialBindings, $components)
+        let $_DEBUG := trace($filePath, '___FILE_PATH: ')
+        return trace( f:getRequiredBindings($potentialBindings, $components) , '___REQ_BINDINGS: ')
         
     let $xdoc :=
         let $required := 

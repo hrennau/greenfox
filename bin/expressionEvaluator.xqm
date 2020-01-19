@@ -21,14 +21,14 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : @param xpath an XPath expression
  : @param contextItem the context item
- : @param externalVariableBindings a map of variable bindings
+ : @param context the evaluation context
  : @param addVariableDeclarations if true, a prolog is added to the query which declares the external variables
  : @param addContextItem if true, the context item is added to the context with key ''
  : @return the expression value
  :)
 declare function f:evaluateXPath($xpath as xs:string, 
                                  $contextItem as item()?, 
-                                 $context as map(*),
+                                 $context as map(xs:QName, item()*),
                                  $addVariableDeclarations as xs:boolean,
                                  $addContextItem as xs:boolean)
         as item()* {
@@ -45,14 +45,14 @@ declare function f:evaluateXPath($xpath as xs:string,
  : Evaluates a foxpath expression.
  :
  : @param foxpath a foxpath expression
- : @param context the context item
- : @param externalVariableBindings a map of variable bindings
- : @param addVariableDeclarations if true, a prolog is added which declares the external variables
+ : @param contextItem the context item
+ : @param context the evaluation context
+ : @param addVariableDeclarations if true, a prolog is added to the query which declares the external variables
  : @return the expression value
  :)
 declare function f:evaluateFoxpath($foxpath as xs:string, 
                                    $contextItem as item()?, 
-                                   $context as map(*)?,
+                                   $context as map(xs:QName, item()*),
                                    $addVariableDeclarations as xs:boolean)
         as item()* {
     let $isContextUri := not($contextItem instance of node())
@@ -60,14 +60,12 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
     let $foxpathAugmented :=
         if (not($addVariableDeclarations)) then $foxpath
         else
-        (:
-            let $requiredBindings := map:keys($context)
+            let $candidateBindings := map:keys($context) ! ( 
+                if (. instance of xs:string or . instance of xs:untypedAtomic) then . 
+                else local-name-from-QName(.))
+            let $requiredBindings := i:determineRequiredBindingsFoxpath($foxpath, $candidateBindings)
             return i:finalizeQuery($foxpath, $requiredBindings)
-         :)
-
-            let $candidateBindings := map:keys($context)
-            let $requiredBindings := trace(i:determineRequiredBindingsFoxpath($foxpath, $candidateBindings) , '_REQ_BINDINGS: ')
-            return i:finalizeQuery($foxpath, $requiredBindings)
+            
     (: ensure that context keys are QNames :)            
     let $context :=
         if ($context instance of map(xs:QName, item()*)) then $context
@@ -88,9 +86,9 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
  : @param context the context item
  : @return the expression value
  :)
-declare function f:evaluateFoxpath($foxpath as xs:string, $context as item()?)
+declare function f:evaluateFoxpath($foxpath as xs:string, $contextItem as item()?)
         as item()* {
-    f:evaluateFoxpath($foxpath, $context, (), false())
+    f:evaluateFoxpath($foxpath, $contextItem, (), false())
 };
 
 declare function f:parseFoxpath($foxpath as xs:string)
@@ -142,8 +140,11 @@ let $varName :=
 declare function f:getRequiredBindings($potentialBindings as xs:string*, 
                                        $components as element()*)
         as xs:string* {
+    let $_DEBUG := trace($components/name(), 'COMP_NAMES: ')        
+    let $_DEBUG := trace($potentialBindings, '_POTENTIAL_BINDINGS: ')
     for $component in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
     return (
+        trace($component/self::gx:xsdValid/trace(@*[ends-with(name(), 'Foxpath')], '_FOXATTS: ')/i:determineRequiredBindingsFoxpath(., $potentialBindings), '_XSD_VALID_BINDINGS: '),    
         $component/self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:xpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:xpath/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
@@ -185,7 +186,10 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
         as xs:string* {
     let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
     let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
-    let $tree := tt:parseFoxpath($extendedExpr)
+    let $_DEBUG := trace($expr, '_EXPR: ')
+    let $_DEBUG := trace($extendedExpr, '_EXPR_EXTENDED: ')
+    let $tree := trace(f:parseFoxpath($extendedExpr) , '_TREE: ')
+    let $_CHECK := if ($tree/self::errors) then error() else ()
     return (
         $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()
     )[. = $candidateBindings]

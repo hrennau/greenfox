@@ -237,12 +237,13 @@ declare function f:firstCharToUpperCase($s as xs:string?) as xs:string? {
  : @param resourceShape a resource shape
  : @param context a map of variable bindings
  : @return the target paths :)
-declare function f:getTargetPaths($resourceShape as element(), $context as map(*))
+declare function f:getTargetPaths($resourceShape as element(), $context as map(xs:string, item()*))
         as xs:string* {
     let $isExpectedResourceKind :=
         let $isDir := $resourceShape/self::gx:folder
         return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
-    let $contextPath := $context?_contextPath        
+    let $contextPath := $context?_contextPath     
+    let $evaluationContext := $context?_evaluationContext
     let $targetPaths :=
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
@@ -250,7 +251,7 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(*
             if ($path) then concat($contextPath, '\', $resourceShape/@path)
                             [file:exists(.)][$isExpectedResourceKind(.)]
             else 
-                i:evaluateFoxpath($foxpath, $contextPath, $context, true())
+                i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())
                 [$isExpectedResourceKind(.)]
     return $targetPaths        
 };        

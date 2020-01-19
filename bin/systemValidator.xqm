@@ -29,7 +29,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param externalContext a context specified by the caller
  : @return validation errors, if any
  :)
-declare function f:validateSystem($gx as element(gx:greenfox), $context as map(*)) {
+declare function f:validateSystem($gx as element(gx:greenfox), $context as map(xs:string, item()*)) {
     let $perceptions :=
         for $domain in $gx/gx:domain return f:validateDomain($domain, $context)
     return
@@ -45,16 +45,28 @@ declare function f:validateSystem($gx as element(gx:greenfox), $context as map(*
  : top-level.
  :
  : @param gxDomain quality descriptor of a domain
- : @param context a map representing name-value pairs available during validation
+ : @param context a map representing an initial set of name-value pairs available during validation
  : @return validation errors, if any
  :)
-declare function f:validateDomain($gxDomain as element(gx:domain), $context as map(*))
+declare function f:validateDomain($gxDomain as element(gx:domain), 
+                                  $context as map(xs:string, item()*))
         as element()* {
     let $baseURI := $gxDomain/@path/string()
-    let $name := $gxDomain/@name
-    let $context := map:put($context, '_contextPath', $baseURI)
-    let $context := map:put($context, '_domainName', $name)
-    let $context := map:put($context, '_domainPath', $baseURI)
+    let $name := $gxDomain/@name/string()
+    
+    let $evaluationContext :=
+        map:merge((
+            map:entry(QName((), 'domain'), $name),
+            map:entry(QName((), 'domainPath'), $baseURI)
+        ))
+    let $context := 
+        map:merge((
+            $context,
+            map:entry('_contextPath', $baseURI),
+            map:entry('_domainName', $name),
+            map:entry('_domainPath', $baseURI),
+            map:entry('_evaluationContext', $evaluationContext)
+        ))            
     let $perceptions :=
         for $component in $gxDomain/(* except gx:context)
         return

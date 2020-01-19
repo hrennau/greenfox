@@ -33,7 +33,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the validation context
  : @return errors found
  :)
-declare function f:validateFolder($gxFolder as element(), $context as map(*)) 
+declare function f:validateFolder($gxFolder as element(), $context as map(xs:string, item()*)) 
         as element()* {
     let $_DEBUG := trace($context, '_CONTEXT: ')
     let $contextPath := $context?_contextPath
@@ -96,8 +96,6 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
     let $context := map:put($context, '_contextPath', $folderPath)
     let $components := $gxFolder/*[not(@deactivated eq 'true')]
     
-    let $exprContext := map{}
-    
     (: collect perceptions :)
     let $perceptions := (
         (: validate - member resources :)
@@ -110,7 +108,7 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
             let $error :=
                 typeswitch($child)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $exprContext)
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)    

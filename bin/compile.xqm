@@ -29,11 +29,11 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param externalContext a set of external variables
  :)
 declare function f:compileGfox($gxdoc as element(gx:greenfox), 
-                               $externalContext as map(*)) 
+                               $externalContext as map(xs:string, item()*)) 
         as item()+ {
     let $context := map:merge(
         for $field in $gxdoc/gx:context/gx:field
-        let $name := $field/@name
+        let $name := $field/@name/string()
         let $value := ($externalContext($name), $field/@value)[1]
         return
             map:entry($name, $value) 
@@ -52,7 +52,7 @@ declare function f:compileGfox($gxdoc as element(gx:greenfox),
  : @param context a set of external variables
  : @return the processing result
  :)
-declare function f:compileGfoxRC($n as node(), $context as map(*)) as node() {
+declare function f:compileGfoxRC($n as node(), $context as map(xs:string, item()*)) as node() {
     typeswitch($n)
     case document-node() return document {$n/node() ! f:compileGfoxRC(., $context)}
     
@@ -159,7 +159,10 @@ declare function f:compileGfox_resolveReference($gxComponent as element()) as el
  : @param callContext a second context
  : @return a copy of the string with all variable references replaced with variable values
  :)
-declare function f:substituteVars($s as xs:string?, $context as map(*), $callContext as map(*)?) as xs:string? {
+declare function f:substituteVars($s as xs:string?, 
+                                  $context as map(xs:string, item()*), 
+                                  $callContext as map(xs:string, item()*)?) 
+        as xs:string? {
     let $s2 := f:substituteVarsAux($s, $context, '\$')
     return
         if (empty($callContext)) then $s2    
@@ -174,7 +177,7 @@ declare function f:substituteVars($s as xs:string?, $context as map(*), $callCon
  : @param callContext a second context
  : @return a copy of the string with all variable references replaced with variable values
  :) 
-declare function f:substituteVarsAux($s as xs:string?, $context as map(*), $prefixChar as xs:string) as xs:string? {
+declare function f:substituteVarsAux($s as xs:string?, $context as map(xs:string, item()*), $prefixChar as xs:string) as xs:string? {
     let $sep := codepoints-to-string(30000)
     let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), concat('$1', $sep, '$2', $sep, '$3'))
     return
@@ -196,7 +199,7 @@ declare function f:substituteVarsAux($s as xs:string?, $context as map(*), $pref
  : @param params a string containing concatenated name-value pairs
  : @return a map expressing the pairs a key-value pairs
  :)
-declare function f:externalContext($params as xs:string?) as map(*) {
+declare function f:externalContext($params as xs:string?) as map(xs:string, item()*) {
     let $nvpairs := tokenize($params, '\s*;\s*')
     return
         map:merge(
