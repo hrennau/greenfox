@@ -53,29 +53,17 @@ declare function f:validateOp($request as element())
     let $reportFormat := tt:getParams($request, 'format')
     let $reportOptions := map{}
     
-    let $gfoxAndContext := f:compileGfox($gfoxSource, i:externalContext($params))
+    let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params))
     let $gfox := $gfoxAndContext[. instance of element()]
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
-    let $context := $gfoxAndContext[. instance of map(*)]
-    let $gfoxErrors := f:validateGreenFox($gfox)
+    let $context := trace($gfoxAndContext[. instance of map(*)], '___CONTEXT: ')
+    let $gfoxErrors := f:validateGreenfox($gfox)
     return
         if ($gfoxErrors) then $gfoxErrors else
         
-    let $perceptions := i:validateSystem($gfox, $context)
-    return
-        i:writeValidationReport($gfox, $perceptions, $reportType, $reportFormat, $reportOptions)
-        
-(:        
-    let $validationReport :=
-        <gx:validationReport countErrors="{count($validationReport//gx:error)}" 
-                             validationTime="{current-dateTime()}"
-                             greenfoxSchemaDoc="{$gfoxSourceURI}" 
-                             greenfoxSchemaURI="{$gfox/@greenfoxURI}">{
-           for $perception in $validationReport//(gx:error, gx:green)
-           order by $perception/@id
-           return $perception
-        }</gx:validationReport>
-    return
-        $validationReport/i:harmonizePrefixes(., $f:URI_GX, $f:PREFIX_GX)
-:)        
+    let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
+    return $report
+    (:
+        i:writeValidationReport($gfox, $context, $perceptions, $reportType, $reportFormat, $reportOptions)
+        :)
 };        

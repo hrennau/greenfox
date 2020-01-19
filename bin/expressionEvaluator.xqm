@@ -142,16 +142,18 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
         as xs:string* {
     let $_DEBUG := trace($components/name(), 'COMP_NAMES: ')        
     let $_DEBUG := trace($potentialBindings, '_POTENTIAL_BINDINGS: ')
-    for $component in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid]
+    for $component in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid, self::gx:constraintComponent]
+    let $potentialBindings_params := $component/self::gx:constraintComponent/gx:param/@name/string()
+    let $potentialBindings := trace(($potentialBindings, $potentialBindings_params) , '_POTENTIAL_BINDINGS2: ')
     return (
-        trace($component/self::gx:xsdValid/trace(@*[ends-with(name(), 'Foxpath')], '_FOXATTS: ')/i:determineRequiredBindingsFoxpath(., $potentialBindings), '_XSD_VALID_BINDINGS: '),    
+        $component/self::gx:xsdValid/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),    
         $component/self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:xpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:xpath/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
         $component/self::gx:foxpath/@expr/i:determineRequiredBindingsFoxpath(., $potentialBindings),
         $component/self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        $component/gx:xpath/i:determineRequiredBindingsXPath(., $potentialBindings),        
+        trace($component/gx:xpath, 'XPATH_CHILD: ')/i:determineRequiredBindingsXPath(trace(., 'XPATH_TEXT: '), $potentialBindings),        
         $component/gx:foxpath/i:determineRequiredBindingsXPath(., $potentialBindings)
         ) => distinct-values() => sort()
 };        
@@ -186,9 +188,7 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
         as xs:string* {
     let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
     let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
-    let $_DEBUG := trace($expr, '_EXPR: ')
-    let $_DEBUG := trace($extendedExpr, '_EXPR_EXTENDED: ')
-    let $tree := trace(f:parseFoxpath($extendedExpr) , '_TREE: ')
+    let $tree := f:parseFoxpath($extendedExpr)
     let $_CHECK := if ($tree/self::errors) then error() else ()
     return (
         $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()

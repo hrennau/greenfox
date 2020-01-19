@@ -29,7 +29,6 @@ declare function f:validateExpressionValue($constraint as element(),
                          case element() return 'ELEM' 
                          default return 'OTHER', '_TYPE_CONTEXT_ITEM_0: ')
 :)                         
-    let $_DEBUG := trace(map:keys($context), 'VALIDATE_EXPR_VALUE, CONTEXT_KEYS: ')
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
     let $expr := trace($constraint/@expr , 'EXPR: ')
@@ -41,7 +40,7 @@ declare function f:validateExpressionValue($constraint as element(),
             f:evaluateFoxpath($expr, $contextItem, $evaluationContext, true())
         else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraint/name(.)))
         
-    let $constraintId := trace($constraint/@id , 'CONSTRAINT_ID: ')
+    let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
     
     let $minCount := $constraint/@minCount
@@ -152,7 +151,6 @@ declare function f:validateExpressionValueCount($exprValue as item()*,
                                                 $cmp as attribute(),
                                                 $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'COUNT_CMP: ')    
     let $count := count($exprValue)
     let $cmpTrue :=
         typeswitch($cmp)
@@ -242,7 +240,7 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
     let $getCmpItems := function($ctxtItem) {
         let $cmpValue := 
             if ($cmpExprKind eq 'foxpath') then 
-                trace(i:evaluateFoxpath($cmp, $ctxtItem, $evaluationContext, true()) , 'EVAL_FOXPATH: ')
+                i:evaluateFoxpath($cmp, $ctxtItem, $evaluationContext, true())
             else i:evaluateXPath($cmp, $ctxtItem, $evaluationContext, true(), true())
         return
             if (empty($useDatatype)) then $cmpValue 
@@ -292,9 +290,6 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
                 else error()                            
             else
                 let $useContextItem := 
-                    let $_DEBUG := trace(concat($exprKind, '/', $cmpExprKind), 'EXPR_KIND / CMP_EXPR_KIND: ')
-                    return
-                    
                     if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
                     else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
                     else $contextItem

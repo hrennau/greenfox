@@ -18,8 +18,6 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $context as map(*))
         as element()* {
-    let $_DEBUG := trace($filePath, '### XSD VALIDATOR FILE PATH: ') return
-    
     if (not(doc-available($filePath))) then 
         <gx:error msg="XSD validation requires XML file, but file is not XML">{
                   attribute constraintComponent {"xsdValid"},
@@ -32,7 +30,6 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     let $doc := doc($filePath)
     let $expr := $constraint/@xsdFoxpath
     let $evaluationContext := $context?_evaluationContext
-    let $_DEBUG := trace($evaluationContext?domain, 'DOMAIN: ')
     let $xsdPaths := 
         let $value := f:evaluateFoxpath($expr, $filePath, $evaluationContext, true())
 (:        

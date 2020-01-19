@@ -76,14 +76,14 @@
                     <!-- *** Check - schema valid? (only if XML) -->
                     <ifMediatype eq="xml">
                         <xsdValid msg="Response msg not XSD valid" 
-                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
+                                  xsdFoxpath="$domainPath\resources\xsd\\*.xsd"/>  
                     </ifMediatype>
                     
                     <!-- *** Check - known article number? -->
                     <xpath msg="Unknown foo article number"
                            id="articleNumberValueShape"
                            expr="//*:fooValue" 
-                           eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
+                           eqFoxpath="$domainPath\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     
                     <!-- *** Check - return code ok? *** -->
                     <foxpath msg="Return code not the configured value" 

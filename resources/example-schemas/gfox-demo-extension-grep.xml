@@ -31,7 +31,10 @@
             <targetSize msg="No niem folder found" minCount="1"/>
             <file foxpath="README.md">
                 <targetSize msg="README not found" minCount="1"/>    
-                <ex:grep plain="FBI"/>
+                <ex:grep msg="File does not contain string 'FBI'."
+                         msgOk="File contains string 'FBI'.">
+                    <param name="plain">FBI</param>
+                </ex:grep>
             </file>
         </folder>
     </domain>    

@@ -22,7 +22,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateGreenFox($gfox as element(gx:greenfox)) 
+declare function f:validateGreenfox($gfox as element(gx:greenfox)) 
         as element()* {
     let $errors := (
         let $xpathExpressions := $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]/@expr

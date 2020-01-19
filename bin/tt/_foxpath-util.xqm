@@ -1,6 +1,6 @@
 module namespace f="http://www.ttools.org/xquery-functions";
 
-declare variable $f:DEBUG := 'tree'; 
+declare variable $f:DEBUG := ''; 
 declare variable $f:DG :=
     for $item in tokenize(normalize-space($f:DEBUG), ' ') 
     return concat('^', replace($item, '\*', '.*'), '$');

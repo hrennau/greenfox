@@ -21,19 +21,31 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates a system. The quality descriptor is compiled and the compiled form is used
- : to validate all domains. The function returns any errors, wrapped in an `errors`
- : element.
+ : Validates a file system tree against a greenfox schema.
  :
- : @param gx a quality descriptor
- : @param externalContext a context specified by the caller
+ : @param gx a compiled greenfox schema
+ : @param context a set of name-value pairs providing an environment for validation
+ : @param reportType type of validation report
+ : @param format format of validation report
+ : @param options options contolling validation and the writing of the validation report
  : @return validation errors, if any
  :)
-declare function f:validateSystem($gx as element(gx:greenfox), $context as map(xs:string, item()*)) {
-    let $perceptions :=
-        for $domain in $gx/gx:domain return f:validateDomain($domain, $context)
+declare function f:validateSystem($gfox as element(gx:greenfox), 
+                                  $context as map(xs:string, item()*),
+                                  $reportType as xs:string, 
+                                  $reportFormat as xs:string,
+                                  $options as map(*))
+        as element() {
+    let $domains := $gfox/gx:domain
+    return if (count($domains) gt 1) then error(QName((), 'NOT_YET_IMPLEMENTED'), 
+        concat('Concurrently a schema must not contain more than one domain; #domains found: ', count($domains)))
+    else
+    
+    for $domain in $gfox/gx:domain    
+    let $perceptions := f:validateDomain($domain, $context)
+    let $report := i:writeValidationReport($gfox, $domain, $context, $perceptions, $reportType, $reportFormat, $options)
     return
-        $perceptions
+        $report
 };
 
 (:~

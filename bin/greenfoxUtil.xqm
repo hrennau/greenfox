@@ -232,6 +232,21 @@ declare function f:firstCharToUpperCase($s as xs:string?) as xs:string? {
 };
 
 (:~
+ : Maps a qualified name to a URI.
+ :
+ : @param qname a qualified name
+ : @return a URI representation of the qualified name
+ :)
+declare function f:qnameToURI($qname as xs:QName?) as xs:string {
+    if (empty($qname)) then () else
+    
+    let $lname := local-name-from-QName($qname)
+    let $uri := namespace-uri-from-QName($qname)
+    let $sep := '#'[not(matches($uri, '[#/]$'))]
+    return $uri || $sep || $lname
+};
+
+(:~
  : Returns the target paths of a resource shape.
  :
  : @param resourceShape a resource shape

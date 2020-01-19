@@ -27,25 +27,29 @@ declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Document me!
+ : Writes a validation report.
  :
  : @param request the operation request
  : @return a report describing ...
  :) 
 declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
+                                         $domain as element(gx:domain),
+                                         $context as map(xs:string, item()*),
                                          $perceptions as element()*, 
                                          $reportType as xs:string, 
                                          $format as xs:string,
                                          $options as map(*))
         as item()* {
     switch($reportType)
-    case "raw" return f:writeValidationReport_raw($gfox, $perceptions, $reportType, $format, $options)
-    case "std" return f:writeValidationReport_std($gfox, $perceptions, $reportType, $format, $options)
+    case "raw" return f:writeValidationReport_raw($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
+    case "std" return f:writeValidationReport_std($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
     default return error()
 };
 
 declare function f:writeValidationReport_raw(
                                         $gfox as element(gx:greenfox)+,
+                                        $domain as element(gx:domain),                                        
+                                        $context as map(xs:string, item()*),                                        
                                         $perceptions as element()*, 
                                         $reportType as xs:string, 
                                         $format as xs:string,
@@ -54,7 +58,8 @@ declare function f:writeValidationReport_raw(
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
     let $report :=    
-        <gx:validationReport countErrors="{count($perceptions/self::gx:error)}" 
+        <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
+                             countErrors="{count($perceptions/self::gx:error)}" 
                              validationTime="{current-dateTime()}"
                              greenfoxSchemaDoc="{$gfoxSourceURI}" 
                              greenfoxSchemaURI="{$gfoxSchemaURI}">{
@@ -68,6 +73,8 @@ declare function f:writeValidationReport_raw(
 
 declare function f:writeValidationReport_std(
                                         $gfox as element(gx:greenfox)+,
+                                        $domain as element(gx:domain),                                        
+                                        $context as map(xs:string, item()*),                                        
                                         $perceptions as element()*, 
                                         $reportType as xs:string, 
                                         $format as xs:string,
@@ -114,7 +121,8 @@ declare function f:writeValidationReport_std(
     let $yellowResources := $resourceDescriptors/self::gx:yellowResource    
     let $greenResources := $resourceDescriptors/self::gx:greenResource
     let $report :=
-        <gx:validationReport countErrors="{count($perceptions/self::gx:error)}"
+        <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
+                             countErrors="{count($perceptions/self::gx:error)}"
                              countWarnings="{count($perceptions/self::gx:yellow)}"
                              countRedResources="{count($redResources)}"
                              countYellowResources="{count($yellowResources)}"                             
@@ -168,5 +176,13 @@ declare function f:finalizeReportRC($n as node()) as node()? {
     case text() return
         if ($n/../* and not($n/matches(., '\S'))) then () else $n
     default return $n
+};
+
+(:~
+ : Returns a string describing the domain.
+ :)
+declare function f:getDomainDescriptor($domain as element(gx:domain))
+        as xs:string {
+    $domain/@path/replace(., '\\', '/')        
 };
 

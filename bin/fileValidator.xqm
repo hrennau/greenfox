@@ -18,6 +18,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
+    "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
     "mediatypeConstraint.xqm",
     "xsdValidator.xqm";
@@ -74,14 +75,23 @@ declare function f:validateFileInstance($filePath as xs:string,
             $children[not(self::gx:ifMediatype)],
             $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
                      /*[not(@deactivated eq 'true')]   
-        )    
-    let $extensionConstraints := $gxFile/ancestor::gx:greenfox/gx:constraintComponents/gx:constraintComponent
-    let $extensionConstraintNames := trace( $extensionConstraints/@constraintElementName/resolve-QName(., ..) , 
-                                     'EXTENSION_CONSTRAINT_NAMES: ')
+        )
+    (: Subset of the constraints which are extension constraint definitions :)
+    let $extensionConstraints := f:getExtensionConstraints($components)     
+    (: Extension constraint components needed already now in order to analyze
+       if the contain references to xdoc, jdoc, csvdoc :)
+    let $extensionConstraintComponents := f:getExtensionConstraintComponents($components)
     
-    (: the required bindings are a subset of potential bindings :)
-    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, $gxFile, $components)
+    (: Required bindings are a subset of potential bindings :)
+    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, $gxFile, ($components, $extensionConstraintComponents))
     let $reqBindings := $reqBindingsAndDocs?requiredBindings
+    (: If expressions reference documents, these are stored in a map :)
+    let $reqDocs := 
+        map:merge((
+            $reqBindingsAndDocs?xdoc ! map:entry('xdoc', .),
+            $reqBindingsAndDocs?jdoc ! map:entry('jdoc', .),
+            $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .)
+        ))        
     
     (: the document types are mutually exclusive - $doc is the 
        only document obtained (if any) :)
@@ -101,7 +111,6 @@ declare function f:validateFileInstance($filePath as xs:string,
             ))    
         return map:put($context, '_evaluationContext', $evaluationContext)
     
-    let $_DEBUG := trace(map:keys($context?_evaluationContext), 'EVAL_CONTEXT_KEYS: ')
     (: perform validations :)
     let $perceptions := (
         for $child in $components[not(self::gx:targetSize)]
@@ -116,7 +125,8 @@ declare function f:validateFileInstance($filePath as xs:string,
             case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)            
             case $targetSize as element(gx:targetSize) return ()
             default return 
-                if ($child/self::*[node-name(.) = $extensionConstraintNames]) then trace((), 'EXTENSION_CONSTRAINT_ENCOUNTERED ')
+                if ($child intersect $extensionConstraints) then 
+                    f:validateExtensionConstraint($child, $filePath, $filePath, $reqDocs, $context)
                 else            
                     error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
                           concat('Unexpected shape or constraint element, name: ', $child/name()))
