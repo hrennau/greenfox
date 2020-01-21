@@ -29,14 +29,17 @@ declare function f:validateExtensionConstraint($constraint as element(),
                                             
         as element()* {
     let $constraintComponent := f:getExtensionConstraintComponents($constraint)        
-    let $constraintElemName := trace($constraint/@constraintElementName, '###CONSTRAINT_ELEM_NAME: ')
-    let $paramNames := trace($constraint/gx:param/@name, '###CONSTRAINT_PARAM: ')
-    let $evaluationContext := trace($context?_evaluationContext, '###ECONTEXT: ')
+    let $constraintElemName := $constraint/@constraintElementName
+    let $paramNames := $constraint/gx:param/@name
+    let $evaluationContext := $context?_evaluationContext
     
     let $reqBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        return trace( f:getRequiredBindings($potentialBindings, $constraintComponent) , '___EXTENSION_CONSTRAINT_REQ_BINDINGS: ')
+        return f:getRequiredBindings($potentialBindings, $constraintComponent)
 
+    let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $constraint/gx:param)  
+(:
     let $context := 
         let $evaluationContext :=
             map:merge((
@@ -53,11 +56,13 @@ declare function f:validateExtensionConstraint($constraint as element(),
                 for $param in $constraint/gx:param return $param/map:entry(QName('', @name), string(.)) 
             ))    
         return map:put($context, '_evaluationContext', $evaluationContext)
-    
+:)
+
     let $xpath := $constraintComponent/gx:xpath
     let $foxpath := $constraintComponent/gx:foxpath
     let $exprValue := 
         if ($xpath) then f:evaluateXPath($xpath, $contextItem, $context?_evaluationContext, true(), true())
+        else if ($foxpath) then f:evaluateFoxpath($xpath, $contextItem, $context?_evaluationContext, true())
         else error()
     let $isValidAndErrors := if (empty($exprValue)) then true()
                              else if ($exprValue instance of xs:boolean) then $exprValue

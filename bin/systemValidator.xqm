@@ -68,8 +68,8 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
     
     let $evaluationContext :=
         map:merge((
-            map:entry(QName((), 'domain'), $name),
-            map:entry(QName((), 'domainPath'), $baseURI)
+            map:entry(QName((), 'domain'), $baseURI),
+            map:entry(QName((), 'domainName'), $name)
         ))
     let $context := 
         map:merge((

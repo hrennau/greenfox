@@ -21,6 +21,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "fileValidator.xqm",
     "folderContentValidator.xqm",
+    "greenfoxTarget.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -52,12 +53,13 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
             if (not($constraint)) then ()
             else    
                 $components/self::gx:targetSize                
-                                /i:validateTargetCount(., $targetCount)
+                                /i:validateTargetCount(., $targetCount, $contextPathLabel, $navigationPath)
+(:                                
                                 /i:augmentErrorElement(., (
                                     attribute contextPath {$contextPathLabel},
                                     attribute navigationPath {$navigationPath}
                                 ), 'last')    
-
+:)
     let $instancePerceptions := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
         
     let $subsetPerceptions :=
@@ -77,12 +79,13 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
             return
                 if (not($constraint)) then ()
                 else
-                    $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount)
+                    $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount, $contextPath, $subsetNavigationPath)
+(:                    
                                       /i:augmentErrorElement(., (
                                           attribute contextPath {$contextPath},
                                           attribute navigationPath {$subsetNavigationPath}
                                       ), 'last')
-        
+:)        
         let $instancePerceptions := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountPerceptions, $instancePerceptions)
     let $perceptions := ($targetCountPerceptions, $instancePerceptions, $subsetPerceptions)

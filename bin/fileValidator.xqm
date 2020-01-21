@@ -20,6 +20,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
+    "greenfoxTarget.xqm",    
     "mediatypeConstraint.xqm",
     "xsdValidator.xqm";
     
@@ -37,12 +38,13 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         return
             if (not($constraint)) then ()
             else
-                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount)
+                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount, $contextPath, $navigationPath)
+(:                
                     /i:augmentErrorElement(., (
                         attribute contextPath {$contextPath},
                         attribute navigationPath {$navigationPath}
                         ), 'last')
-                
+:)                
     let $instancePerceptions :=        
         for $targetPath in $targetPaths
         return
@@ -97,6 +99,10 @@ declare function f:validateFileInstance($filePath as xs:string,
        only document obtained (if any) :)
     let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc)[1]
     
+    let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, ())  
+    
+(:    
     let $context := 
         let $evaluationContext :=
             map:merge((
@@ -110,7 +116,7 @@ declare function f:validateFileInstance($filePath as xs:string,
                 if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
             ))    
         return map:put($context, '_evaluationContext', $evaluationContext)
-    
+:)    
     (: perform validations :)
     let $perceptions := (
         for $child in $components[not(self::gx:targetSize)]

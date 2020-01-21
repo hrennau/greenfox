@@ -195,3 +195,45 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
     )[. = $candidateBindings]
 };
 
+(:~
+ : Updates the context so that it contains an evulation context as required for
+ : an expression with known required bindings.
+ :
+ : @param reqBindings the names of variables referenced by the expression
+ : @param context the context
+ : @param filePath file path of a file or folder currently processed
+ : @param xdoc an XML document
+ : @param jdoc an XML document representing a JSON document
+ : @param csvdoc an XML document representing a CSV record
+ : @return the updated context, containing the new evaluation context implied 
+ :   by the required bindings and the values to be bound to them 
+ :)
+declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
+                                            $reqBindings as xs:string*,
+                                            $filePath as xs:string,
+                                            $xdoc as document-node()?,
+                                            $jdoc as document-node()?,
+                                            $csvdoc as document-node()?,
+                                            $params as element(gx:param)*)
+        as map(xs:string, item()*) {
+    let $doc := ($xdoc, $jdoc, $csvdoc)[1]        
+    let $context := 
+        let $evaluationContext :=
+            map:merge((
+                $context?_evaluationContext,
+                if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
+                if (not($reqBindings = 'xdoc')) then () else map:entry(QName('', 'xdoc'), $xdoc),
+                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
+                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
+                if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
+                if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
+                if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
+                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
+                (: _TO_DO_ Support datatypes (xs:integer, ...) :)
+                $params ! map:entry(QName('', @name), string(.))                
+            ))    
+        return map:put($context, '_evaluationContext', $evaluationContext)
+    return $context        
+};        
+                                            
+

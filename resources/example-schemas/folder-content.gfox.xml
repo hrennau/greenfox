@@ -11,10 +11,9 @@
             name="niem-4.2">    
         
         <!-- *** System root folder shape *** -->
-        <folder foxpath="$_domainPath\." id="systemRootFolderShape">
+        <folder foxpath="$domain" id="systemRootFolderShape">
             <targetSize msg="No niem folder found" minCount="1"/>
-            <folderContent msg="Niem folder with unexpected content." 
-                closed="true">
+            <folderContent msg="Niem folder with unexpected content." closed="true">
                 <memberFolders names="csv, jsonld-context, niem"/>
                 <memberFiles names="distribution.txt, README.md"/>
                 <memberFile name="*change*" sha1="09F996E0D7A4C2EFFBBBC8F9497FF0A97CC53E38"/>

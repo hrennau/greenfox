@@ -23,6 +23,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:
 (:~
  : Validates the target count of a resource shape.
  :
@@ -65,6 +66,7 @@ declare function f:validateTargetCount($constraint as element(), $targetCount as
                     attribute actCount {$targetCount}
             }</gx:green>
 };
+:)
 
 (:~
  : Creates an augmented copy of an error element, adding specified attributes.
@@ -221,11 +223,25 @@ declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemN
     }
 };  
 
+(:~
+ : Returns a copy of a given string in which the first character is set
+ : to lowercase.
+ :
+ : @param s a string
+ : @return the edited string
+ :)
 declare function f:firstCharToLowerCase($s as xs:string?) as xs:string? {
     if (not($s)) then $s else
         lower-case(substring($s, 1, 1)) || substring($s, 2)
 };
 
+(:~
+ : Returns a copy of a given string in which the first character is set
+ : to uppercase.
+ :
+ : @param s a string
+ : @return the edited string
+ :)
 declare function f:firstCharToUpperCase($s as xs:string?) as xs:string? {
     if (not($s)) then $s else
         upper-case(substring($s, 1, 1)) || substring($s, 2)
@@ -246,10 +262,16 @@ declare function f:qnameToURI($qname as xs:QName?) as xs:string {
     return $uri || $sep || $lname
 };
 
+(:
 (:~
  : Returns the target paths of a resource shape.
  :
- : @param resourceShape a resource shape
+ : The target is identified either by a path (@path)
+ : or by a foxpath expression (@foxpath). The path is
+ : appended to the context path. The foxpath is
+ : evaluated.
+ :
+ : @param resourceShape a file or folder shape
  : @param context a map of variable bindings
  : @return the target paths :)
 declare function f:getTargetPaths($resourceShape as element(), $context as map(xs:string, item()*))
@@ -263,13 +285,15 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
         return
-            if ($path) then concat($contextPath, '\', $resourceShape/@path)
-                            [file:exists(.)][$isExpectedResourceKind(.)]
+            if ($path) then 
+                concat($contextPath, '\', $resourceShape/@path)
+                [file:exists(.)]
+                [$isExpectedResourceKind(.)]
             else 
                 i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())
                 [$isExpectedResourceKind(.)]
     return $targetPaths        
 };        
-
+:)
 
 
