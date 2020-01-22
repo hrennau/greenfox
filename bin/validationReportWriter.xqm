@@ -84,7 +84,7 @@ declare function f:writeValidationReport_std(
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
         for $perception in $perceptions        
-        let $resourceIdentifier := $perception/(@filePath, @folderPath, @contextPath)[1]
+        let $resourceIdentifier := $perception/(@filePath, @folderPath)[1]
         let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
         group by $resourceIdentifier
         let $resourceIdentifierAtt :=
@@ -96,8 +96,7 @@ declare function f:writeValidationReport_std(
         let $yellow := $perception/self::gx:yellow
         let $green := $perception/self::gx:green
         let $other := $perceptions except ($red, $green)
-        (: let $_DEBUG := trace($perception/name() , 'PERCEPTION_NAME: ') :)
-        let $removeAtts :=('filePath', 'folderPath', 'contextPath')
+        let $removeAtts :=('filePath', 'folderPath')
         return
             if ($red) then 
                 <gx:redResource>{

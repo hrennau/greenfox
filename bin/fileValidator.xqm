@@ -29,30 +29,25 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
     let $contextPath := $context?_contextPath
-    let $navigationPath := $gxFile/(@foxpath, @path)[1]
+    let $targetDecl := $gxFile/(@foxpath, @path)[1]
     let $targetPaths := f:getTargetPaths($gxFile, $context)
+    
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
-    let $targetCountPerceptions := 
+    let $targetCountResults := 
         let $constraint := $gxFile/gx:targetSize
         return
             if (not($constraint)) then ()
             else
-                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount, $contextPath, $navigationPath)
-(:                
-                    /i:augmentErrorElement(., (
-                        attribute contextPath {$contextPath},
-                        attribute navigationPath {$navigationPath}
-                        ), 'last')
-:)                
-    let $instancePerceptions :=        
+                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount, $contextPath, $targetDecl)
+    let $instanceResults :=        
         for $targetPath in $targetPaths
         return
             f:validateFileInstance($targetPath, $gxFile, $context)
             
-    let $perceptions := ($targetCountPerceptions, $instancePerceptions)
+    let $results := ($targetCountResults, $instanceResults)
     return
-        $perceptions
+        $results
 };
 
 (:~
@@ -118,7 +113,7 @@ declare function f:validateFileInstance($filePath as xs:string,
         return map:put($context, '_evaluationContext', $evaluationContext)
 :)    
     (: perform validations :)
-    let $perceptions := (
+    let $results := (
         for $child in $components[not(self::gx:targetSize)]
         let $error :=
             typeswitch($child)
@@ -147,7 +142,7 @@ declare function f:validateFileInstance($filePath as xs:string,
                 }</gx:green>
     )
     return
-        $perceptions
+        $results
 };
 
 (:~

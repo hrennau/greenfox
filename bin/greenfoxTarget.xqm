@@ -110,7 +110,7 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
                                                $constraintComp as xs:string,
                                                $condition as attribute(),
                                                $actCount as xs:integer,
-                                               $contextPath as xs:string,
+                                               $targetContextPath as xs:string,
                                                $navigationSpec as attribute())
         as element() {
     let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:error'
@@ -119,17 +119,18 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
         else if ($colour eq 'green') then $constraint/@msgOK
         else $constraint/@msg
     let $navigationAtt :=
-        let $name := 'navigation' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
+        let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
         return attribute {$name} {$navigationSpec}
     return
         element {$elemName} {
             $useMsg,
+            attribute filePath {$targetContextPath},
             attribute constraintComp {$constraintComp},
             $constraint/@id/attribute constraintID {. || '-' || $condition/local-name(.)},                    
             $constraint/@resourceShapeID,
             $condition,
             attribute actCount {$actCount},
-            attribute contextPath {$contextPath},
+            attribute targetContextPath {$targetContextPath},
             $navigationAtt
         }
 };

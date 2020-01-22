@@ -201,7 +201,8 @@ declare function f:compileGreenfox_addIds2RC($n as node()) {
             $n/node() ! f:compileGreenfox_addIds2RC(.)
         }
     case element(gx:targetSize) return
-        let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][2]/@resourceShapeID
+        (: let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][2]/@resourceShapeID :)
+        let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
         return
             element {node-name($n)} {
                 in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
