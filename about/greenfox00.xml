@@ -88,6 +88,170 @@
             should give a first impression of how the language can be used.</para>
     </section>
     <section>
+        <title>Getting started with greenfox</title>
+        <para>This section illustrates the development of a greenfox schema designed for validating
+            a file system tree against a set of expections. Such a validation can also be viewed as
+            validation of the system “behind” the file system tree, represented by its
+            contents.</para>
+        <section>
+            <title>The system – system S</title>
+            <para>Consider <emphasis role="bold">system S</emphasis> – an imaginary system which is
+                a collection of web services. We are going to validate a <emphasis role="ital">file
+                    system representation</emphasis> which is essentially a set of test results,
+                accompanied by resources supporting validation (XSDs, codelists and data about
+                expected response messages). The following listing shows a file system tree which is
+                a representation of system S, as observed at a certain point in time:</para>
+            <programlisting><![CDATA[
+system-s
+. resources
+. . codelists
+. . . codelist-foo-article.xml
+. . xsd
+. . . schema-foo-article.xsd
+. testcases
+. . test-t1
+. . . config
+. . . . msg-config.xml
+. . . input
+. . . . getFooRQ*.xml
+. . . output
+. . . . getFooRS*.xml
+. . +test-t2   (contents: see test-t1)
+. . usecases
+. . . usecase-u1
+. . . . usecase-u1a
+. . . . . +test-t3   (contents: see test-t1)]]></programlisting>
+            <para>The concrete file system tree must be distinguished from the expected file system
+                tree, which is described by the following rules.</para>
+            <table xml:id="table-1">
+                <title>Rules defining "validity" of the considered file system.</title>
+                <titleabbrev xml:id="table-1-shorttitle">Validity rules</titleabbrev>
+                <tgroup cols="3">
+                    <colspec colname="c1" colnum="1" colwidth="2*"/>
+                    <colspec colname="c2" colnum="2" colwidth="4*"/>
+                    <colspec colname="c3" colnum="3" colwidth="11*"/>
+                    <thead>
+                        <row>
+                            <entry align="left">File or folder</entry>
+                            <entry align="left">File path</entry>
+                            <entry align="left">Expectation</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">resources/codelists</entry>
+                            <entry align="left">Contains one or more codelist files</entry>
+                        </row>
+                        <row>
+                            <entry align="left">file</entry>
+                            <entry align="left">resources/codelists/*</entry>
+                            <entry align="left">A codelist file; name not constrained; must be an
+                                XML document containing <code>&lt;codelist></code> elements with a
+                                @name attribute and <code>&lt;entry></code> children</entry>
+                        </row>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">resources/xsd</entry>
+                            <entry align="left">Contains one or more XSDs describing services
+                                messages</entry>
+                        </row>
+                        <row>
+                            <entry align="left">file</entry>
+                            <entry align="left">resources/xsd/*</entry>
+                            <entry align="left">An XSD schema file; name not constrained</entry>
+                        </row>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">.//test-*</entry>
+                            <entry align="left">A test case folder, containing <code>input</code>,
+                                    <code>xoutput</code> and <code>config</code> folders; apart from
+                                these only optional <code>log-*</code> files are allowed </entry>
+                        </row>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">.//test-*/config</entry>
+                            <entry align="left">Test case config folder, containing file
+                                    <code>msg-config.csv</code></entry>
+                        </row>
+                        <row>
+                            <entry align="left">file</entry>
+                            <entry align="left">.//test-*/config/msg-config.csv</entry>
+                            <entry align="left">A CSV file with three columns: request file name,
+                                response file name, expected return code</entry>
+                        </row>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">.//test-*/input</entry>
+                            <entry align="left">Test case input folder, containg request
+                                messages</entry>
+                        </row>
+                        <row>
+                            <entry align="left">file</entry>
+                            <entry align="left">.//test-*/input/*</entry>
+                            <entry align="left">A file representing a request message; name
+                                extension <code>.xml</code> or <code>.json</code>; mediatype
+                                corresponding to name extension</entry>
+                        </row>
+                        <row>
+                            <entry align="left">folder</entry>
+                            <entry align="left">.//test-*/output</entry>
+                            <entry align="left">Test case output folder, containing response
+                                messages</entry>
+                        </row>
+                        <row>
+                            <entry align="left">file</entry>
+                            <entry align="left">.//test-*/output/*</entry>
+                            <entry align="left">A file representing a response message; name
+                                extension <code>.xml</code> or <code>.json</code>; mediatype
+                                corresponding to name extension</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>The number and location of testcase folders (<code>test-*</code>) are
+                unconstrained. This means that the testcase folders may be grouped and wrapped in
+                any way, although they must not be nested. So the use of a <code>testcases</code>
+                folder wrapping all testcase folders - and the use of <code>usecase*</code> folders
+                adding additional substructure - is allowed, but must not be expected. The placing
+                of XSDs in folder <code>resources/xsd</code>, on the other hand, is obligatory, and
+                likewise the placing of codelist documents in folder
+                    <code>resources/codelists</code>. The names of XSD and codelist files are not
+                constrained. </para>
+            <para>Structural expectations include also a conditional constraint:</para>
+            <itemizedlist spacing="compact">
+                <listitem>
+                    <para>For every request message, there must be a response message with a name
+                        obtained by replacing in the request file name <code>RQ</code> with
+                            <code>RS</code> (e.g. <code>getFooRQ.*</code> and
+                            <code>getFooRS.*</code>)</para>
+                </listitem>
+            </itemizedlist>
+            <para>Besides the structural expectations, there are also content-related expectations: </para>
+            <itemizedlist spacing="compact">
+                <listitem>
+                    <para>For every response message in XML format, there is exactly one XSD against
+                        which it can be validated</para>
+                </listitem>
+                <listitem>
+                    <para>Every response message in XML format is valid against the appropriate
+                        XSD</para>
+                </listitem>
+                <listitem>
+                    <para>Response message items (XML elements or JSON fields) with name
+                            <code>fooValue</code> must be found in the codelist with name
+                            <code>foo-article</code></para>
+                </listitem>
+                <listitem>
+                    <para>Response message return codes must be as configured by the corresponding
+                        row in <code>msg-config.csv</code> (applies to XML and JSON responses
+                        alike)</para>
+                </listitem>
+            </itemizedlist>
+
+        </section>
+    </section>
+    <section>
         <title>RDFe example</title>
         <para>This section introduces RDFe by building an example in several steps.</para>
         <section>
@@ -128,9 +292,9 @@
             </itemizedlist>
             <para>The details are outlined in the table below. Within XPath expressions, variable
                 $drug references the XML element representing the resource.</para>
-            <table xml:id="table-1">
+            <table xml:id="table-101">
                 <title>A simple model deriving RDF resource descriptions from XML data.</title>
-                <titleabbrev xml:id="table-1-shorttitle"
+                <titleabbrev xml:id="table-101-shorttitle"
                     >Example-mappings-property-xpath</titleabbrev>
                 <tgroup cols="3">
                     <colspec colname="c1" colnum="1" colwidth="2*"/>
