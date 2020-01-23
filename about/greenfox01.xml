@@ -258,62 +258,95 @@ system-s
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
           xmlns="http://www.greenfox.org/ns/schema">
     
-    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">    
+  <domain path="\tt\greenfox\resources\example-system\system-s" 
+          name="system-s">    
         
-        <!-- *** System root folder shape *** -->
-        <folder foxpath="." id="systemRootFolderShape">
+      <!-- *** System root folder shape *** -->
+      <folder foxpath="." id="systemRootFolderShape">
             
-            <!-- *** XSD folder shape -->
-            <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
-                <targetSize msg="No XSD folder found" count="1"/>
+        <!-- *** XSD folder shape -->
+        <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
+            <targetSize msg="No XSD folder found" count="1"/>
                 <file foxpath="*.xsd" id="xsdFileShape">
-                    <targetSize msg="No XSDs found" minCount="1"/>
-                </file>
-            </folder>                
+                <targetSize msg="No XSDs found" minCount="1"/>
+            </file>
+        </folder>                
 
-            <!-- *** Codelist folder shape -->
-            <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
-                <targetSize msg="No codelist folder found" count="1"/>
-                <file foxpath="*[is-xml(.)]" id="codelistFileShape">
-                    <targetSize msg="No codelist files found" minCount="1"/>
-                </file>
-            </folder>                
-            
-        </folder>
-    </domain>    
+        <!-- *** Codelist folder shape -->
+        <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
+            <targetSize msg="No codelist folder found" count="1"/>
+            <file foxpath="*[is-xml(.)]" id="codelistFileShape">
+                <targetSize msg="No codelist files found" minCount="1"/>
+            </file>
+        </folder          
+      </folder>                
+  </domain>    
 </greenfox>]]></programlisting>
-            <para>The &lt;domain> element represents the root folder of a file system tree to be
-                validated. Its file path is specified by the mandatory @path attribute.</para>
-            <para>A <code>&lt;folder></code> element represents the set of folders matching its
-                target declaration, which is here a foxpath expression, given by a @foxpath
-                attribute. Foxpath [2] [3] [4] is an extended version of XPath 3.0 which supports
-                file system navigation, node tree navigation and a mixing of file system and node
-                tree navigation within a single path expression. Note that file system navigaton
-                steps are connected by a backslash operator, rather than a slash, which is used for
-                node tree navigation steps. The foxpath expression is evaluated in the context of a
-                folder selected by the target declaration of the <emphasis role="ital"
+            <para>The <code>&lt;domain></code> element represents the root folder of a file system
+                tree to be validated. The folder is identified by a mandatory @path
+                attribute.</para>
+            <para>A <code>&lt;folder></code> element describes a set of folders selected by a target
+                declaration. Here, the target declaration is a foxpath expression, given by a
+                @foxpath attribute. Foxpath [2] [3] [4] is an extended version of XPath 3.0 which
+                supports file system navigation, node tree navigation and a mixing of file system
+                and node tree navigation within a single path expression. Note that file system
+                navigaton steps are connected by a backslash operator, rather than a slash, which is
+                used for node tree navigation steps. The foxpath expression is evaluated in the
+                context of a folder selected by the target declaration of the <emphasis role="ital"
                     >containing</emphasis>
                 <code>&lt;folder></code> element (or <code>&lt;domain></code>, if there is no
-                containing &lt;folder>). Evaluation “in the context of a folder” means that the
-                initial context item is the file path of that folder, so that relative file system
-                path expressions are resolved in this context (see [3], [4] for details). For
+                containing <code>&lt;folder></code>). Evaluation “in the context of a folder” means
+                that the initial context item is the file path of that folder, so that relative file
+                system path expressions are resolved in this context (see [3], [4] for details). For
                 example, the expression</para>
-            <programlisting>.\\resources\xsd</programlisting>
-            <para>resolves to the xsd folders contained by a <code>resources</code> folder found at
-                any depth under the context folder, which is <code>…\system-s</code>. Similarly, a
-                    <code>&lt;file></code> element represents the set of files selected by its
-                target declaration, which is here a foxpath expression evaluated in the context of a
+            <programlisting>  .\\resources\xsd</programlisting>
+            <para>resolves to the <code>xsd</code> folders contained by a <code>resources</code>
+                folder found at any depth under the context folder, <code>system-s</code>.
+                Similarly, a <code>&lt;file></code> element describes the set of files selected by
+                its target declaration, which is a foxpath expression evaluated in the context of a
                 folder selected by the parent <code>&lt;folder></code>’s target declaration. </para>
             <para>A <code>&lt;folder></code> element represents a <emphasis role="bold">folder
                     shape</emphasis>, which is a set of <emphasis role="bold">constraints</emphasis>
                 applying to a <emphasis role="bold">target</emphasis>. The target is a (possibly
-                empty) set of folders, selected by a target declaration, e.g. a foxpath expression.
-                The constraints of a folder shape are declared by child elements of the shape
-                element.</para>
-            <para>Likewise, a <code>&lt;file></code> element represents a <code>file shape</code>,
-                defining a set of constraints applying to a target, which is a set of files selected
-                by a target declaration. Folder shapes and file shapes are collectively called
-                    <emphasis role="bold">resource shapes</emphasis>.</para>
+                empty) set of folders, selected by a <emphasis role="bold">target
+                    declaration</emphasis>, e.g. a foxpath expression. The constraints of a folder
+                shape are declared by child elements of the shape element.</para>
+            <para>Likewise, a <code>&lt;file></code> element represents a <emphasis role="bold">file
+                    shape</emphasis>, defining a set of constraints applying to a target, which is a
+                set of files selected by a target declaration. Folder shapes and file shapes are
+                collectively called <emphasis role="bold">resource shapes</emphasis>.</para>
+            <para>The expected number of folders or files belonging to the target of a shape can be
+                expressed by declaring a <emphasis role="bold">constraint</emphasis>. A constraint
+                has a kind (identified by the <emphasis role="bold">constraint component
+                    IRI</emphasis>) and a set of arguments passed to the <emphasis role="bold"
+                    >constraint parameters</emphasis>. For every kind of constraint, a
+                characteristic set of mandatory and optional constraint parameters is defined in
+                terms of name, type and cardinality. In a schema document, a constraint is either
+                declared by a <emphasis role="ital">constraint element</emphasis> or by <emphasis
+                    role="ital">constraint attributes</emphasis> attached to an element representing
+                a set of constraints or a shape. Here, we declare a <code>TargetSize</code>
+                constraint, which is represented by a <code>&lt;targetSize></code> child element of
+                a file or folder shape. The element has three optional attributes, @minCount,
+                @maxCount and @count, representing three different constraints. A constraint can be
+                thought of as a function which consumes constraint parameter values and a <emphasis
+                    role="ital">resource value</emphasis>, which represents the resource being
+                validated; and which returns a validation result. Here, the resource value is the
+                number of target resources selected, and the constraint parameter
+                    <code>minCount</code> is set to the value “1”. If the constraint is violated,
+                the validation result is a <code>&lt;gx:red></code> element which contains the
+                message (if any) specified by @msg on the constraint element, along with a set of
+                information items identifying the violating resource (@filePath), the constraint
+                (@constraintComp and @constraintID) and its parameter values (@minCount). Example
+                result:</para>
+            <programlisting><![CDATA[
+<gx:red msg="No XSDs found"             
+    filePath="C:/tt/greenfox/resources/example-system/system-s/resources/xsd"
+    constraintComp="targetMinCount" 
+    constraintID="TargetSize_2-minCount" 
+    resourceShapeID="xsdFileShape" 
+    minCount="1" 
+    actCount="0" 
+    targetFoxpath="*.xsd"/>]]></programlisting>
         </section>
     </section>
     <section>
