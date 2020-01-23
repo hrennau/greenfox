@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : folderContentValidator.xqm - Document me!
+ : folderContentValidator.xqm - functions for validating folder content
  :
  : -------------------------------------------------------------------------
  :)
@@ -30,6 +30,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
         as element()* {
         
     let $D_DEBUG := trace($folderPath, '__FOLDER_PATH: ')        
+    let $folderPathDisplay := replace($folderPath, '\\', '/')
     
     (: determine expectations :)
     let $_constraint := f:validateFolderContent_compile($constraint)
@@ -41,24 +42,43 @@ declare function f:validateFolderContent($folderPath as xs:string,
     let $memberFiles := $members[file:is-file(concat($folderPath, '/', .))]
     let $memberFolders := $members[not(. = $memberFiles)]
 
-    let $errors_unexpectedMembers :=
+    let $results_folderContentClosed :=
         if (not($_constraint/@closed eq 'true')) then () else
         
-        for $member in $members
-        let $descriptors := $_constraint/(gx:member, if ($member = $memberFiles) then gx:memberFile else gx:memberFolder)
-        let $expected := 
-            some $d in $descriptors satisfies matches($member, $d/@regex, 'i')
-        where not($expected)
+        let $unexpectedMembers :=
+            for $member in $members
+            let $descriptors := $_constraint/(gx:member, 
+                if ($member = $memberFiles) then gx:memberFile else gx:memberFolder)
+            let $expected := 
+                some $d in $descriptors satisfies matches($member, $d/@regex, 'i')
+            where not($expected)
+            return $member
         return
-            <gx:error>{
-                $_constraint/@msg,
-                attribute constraintComponent {'folderContent'},
-                $_constraint/@id/attribute constraintID {.},
-                $_constraint/@label/attribute constraintLabel {.},
-                attribute constraintFacet {'unexpectedMember'},
-                attribute member {$member}
-            }</gx:error>
-            
+            if (exists($unexpectedMembers)) then
+                <gx:error>{
+                    $_constraint/@msg,
+                    attribute constraintComp {'folderContentClosed'},
+                    $_constraint/@id/attribute constraintID {.},
+                    $_constraint/@label/attribute constraintLabel {.},
+                    $constraint/@resourceShapeID,
+                    attribute filePath {$folderPathDisplay},
+                    <gx:resources>{
+                        for $name in $unexpectedMembers
+                        let $path := concat($folderPath, '/', $name)
+                        let $kind := if (file:is-dir($path)) then 'folder' else 'file'
+                        return
+                            <gx:resource name="{$name}" kind="{$kind}"/>
+                    }</gx:resources>
+                }</gx:error>
+            else            
+                <gx:green>{
+                    $_constraint/@msgOK,
+                    attribute constraintComp {'folderContentClosed'},
+                    $_constraint/@id/attribute constraintID {.},
+                    $_constraint/@label/attribute constraintLabel {.},
+                    $constraint/@resourceShapeID,
+                    attribute filePath {$folderPathDisplay}
+                }</gx:green>
             
     let $errors_missingMembers :=
         for $d in $_constraint/*
@@ -137,7 +157,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                     attribute member {$name}
                 }</gx:error>
 
-    let $errors := ($errors_missingMembers, $errors_unexpectedMembers, $errors_hash)
+    let $errors := ($results_folderContentClosed, $errors_missingMembers, $errors_hash)
     return
         if ($errors) then $errors
         else $_constraint/

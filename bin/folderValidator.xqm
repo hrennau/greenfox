@@ -76,12 +76,6 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
                 if (not($constraint)) then ()
                 else
                     $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount, $contextPath, $subsetTargetDecl)
-(:                    
-                                      /i:augmentErrorElement(., (
-                                          attribute contextPath {$contextPath},
-                                          attribute navigationPath {$subsetNavigationPath}
-                                      ), 'last')
-:)        
         let $instanceResults := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountResults, $instanceResults)
     let $results := ($targetCountResults, $instanceResults, $subsetResults)
@@ -89,7 +83,12 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
         $results 
 };
 
-declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as element(), $context as map(*)) 
+(:~
+ : Validates a folder instance against the folder shape.
+ :)
+declare function f:validateFolderInstance($folderPath as xs:string, 
+                                          $gxFolder as element(), 
+                                          $context as map(*)) 
         as element()* {
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $folderPath)
@@ -107,10 +106,10 @@ declare function f:validateFolderInstance($folderPath as xs:string, $gxFolder as
             for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
             let $error :=
                 typeswitch($child)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
-                case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)    
+                case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)                
                 default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($child)))
             return
                 if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
