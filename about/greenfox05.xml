@@ -682,6 +682,318 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
 
     </section>
     <section>
+        <title>Information model</title>
+        <para>This section describes the information model underlying the operations of
+            greenfox.</para>
+        <section>
+            <title>Part 1: resource model</title>
+            <para>A <emphasis role="bold">file system tree</emphasis> is a tree whose nodes are file
+                system resources – folders and files.</para>
+            <para>A <emphasis role="bold">file system resource</emphasis> has an identity, resource
+                properties, derived resource properties and resource values.</para>
+            <para>The <emphasis role="bold">resource identity</emphasis> of a file system resource
+                can be expressed by a combination of file system identity and a file path locating
+                the resource within the file system.</para>
+            <para>A <emphasis role="bold">resource property</emphasis> has a name and a value which
+                can be represented by an XDM value.</para>
+            <para>A <emphasis role="bold">derived resource property</emphasis> is a property of a
+                resource property value, or of a derived resource property value, which can be
+                represented by an XDM value.</para>
+            <para>A <emphasis role="bold">resource value</emphasis> is the XDM value of an
+                expression evaluated in the context of a resource property or derived resource
+                property.</para>
+            <section>
+                <title>Folder resources</title>
+                <para>A folder has the following <emphasis role="bold">resource
+                        properties</emphasis>.</para>
+                <table xml:id="table-102">
+                    <title>Resource properties of a folder resource, as currently evaluated by
+                        greenfox. More properties may be added, e.g. representing access
+                        rights.</title>
+                    <titleabbrev xml:id="table-102-shorttitle">Folder resource
+                        properties</titleabbrev>
+                    <tgroup cols="3">
+                        <colspec colname="c1" colnum="1" colwidth="3*"/>
+                        <colspec colname="c2" colnum="2" colwidth="4*"/>
+                        <colspec colname="c3" colnum="3" colwidth="11*"/>
+                        <thead>
+                            <row>
+                                <entry align="left">Property name</entry>
+                                <entry align="left">Value type</entry>
+                                <entry align="left">Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry align="left">[name]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">The folder name; optional – the file system root
+                                    folder does not have a name</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[parent]</entry>
+                                <entry align="left">Folder resource</entry>
+                                <entry align="left">The XDM representation of resource identity is
+                                    its file path</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[children]</entry>
+                                <entry align="left">Folder and file resources</entry>
+                                <entry align="left">The XDM representation of resource identity is
+                                    its file path</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[last-modified]</entry>
+                                <entry align="left"><code>xsd:dateTime</code></entry>
+                                <entry align="left">May be out of sync when comparing values of
+                                    resources from different machines</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <para>A folder has the following <emphasis role="bold">derived resource
+                        properties</emphasis>.</para>
+                <table xml:id="table-103">
+                    <title>Derived resource properties of a folder resource, as currently evaluated
+                        by greenfox.</title>
+                    <titleabbrev xml:id="table-103-shorttitle">Derived folder resource
+                        properties</titleabbrev>
+                    <tgroup cols="3">
+                        <colspec colname="c1" colnum="1" colwidth="3*"/>
+                        <colspec colname="c2" colnum="2" colwidth="4*"/>
+                        <colspec colname="c3" colnum="3" colwidth="11*"/>
+                        <thead>
+                            <row>
+                                <entry align="left">Property name</entry>
+                                <entry align="left">Value type</entry>
+                                <entry align="left">Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry align="left">[filepath]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">The names of all ancestor folders and the folder
+                                    itself, separated by a slash</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[foxpath-value]</entry>
+                                <entry align="left">Mapping: foxpath expression string => XDM value </entry>
+                                <entry align="left">A mapping of foxpath expressions to an XDM
+                                    value, which is the value obtained by evaluating the expression
+                                    in the context of the resource folder’s [filepath] value</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <para><emphasis role="bold">Resource values</emphasis> are obtained by applying
+                    [foxpath-value] to the text of a foxpath expression.</para>
+            </section>
+            <section>
+                <title>File resources</title>
+                <para>A file has the following <emphasis role="bold">resource
+                    properties</emphasis>.</para>
+                <table xml:id="table-104">
+                    <title>Resource properties of a file resource, as currently evaluated by
+                        greenfox. More properties may be added, e.g. representing access
+                        rights.</title>
+                    <titleabbrev xml:id="table-104-shorttitle">Folder resource
+                        properties</titleabbrev>
+                    <tgroup cols="3">
+                        <colspec colname="c1" colnum="1" colwidth="3*"/>
+                        <colspec colname="c2" colnum="2" colwidth="4*"/>
+                        <colspec colname="c3" colnum="3" colwidth="11*"/>
+                        <thead>
+                            <row>
+                                <entry align="left">Property name</entry>
+                                <entry align="left">Value type</entry>
+                                <entry align="left">Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry align="left">[name]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">Mandatory – a file must have a name</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[parent]</entry>
+                                <entry align="left">Folder resource</entry>
+                                <entry align="left">The XDM representation of resource identity is
+                                    its file path</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[last-modified]</entry>
+                                <entry align="left"><code>xsd:dateTime</code></entry>
+                                <entry align="left">May be out of sync when comparing values of
+                                    resources from different machines</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[size]</entry>
+                                <entry align="left"><code>xsd:integer</code></entry>
+                                <entry align="left">File size, in bytes</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[sha1]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">SHA-1 hash value of file contents</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[sha256]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">SHA-256 hash value of file contents</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[md5]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">MD5 hash value of file contents</entry>
+                            </row>
+
+                            <row>
+                                <entry align="left">[text]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">The text content of the file (empty if not a
+                                    text file)</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[encoding]</entry>
+                                <entry align="left"><code>xsd:anyURI</code></entry>
+                                <entry align="left">The encoding of the text content of the file
+                                    (empty if not a text file)</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[octets]</entry>
+                                <entry align="left"><code>xsd:base64Binary</code></entry>
+                                <entry align="left">The binary file content</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[xmldoc]</entry>
+                                <entry align="left"><code>document-node()</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[jsondoc-basex]</entry>
+                                <entry align="left"><code>document-node()</code></entry>
+                                <entry align="left">The result of parsing [text] into a JSON
+                                    document represented by a document-node in accordance with the
+                                    rules defined by BaseX documentation</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[jsondoc-w3c]</entry>
+                                <entry align="left"><code>document-node()</code></entry>
+                                <entry align="left">The result of parsing [text] into a JSON
+                                    document represented by a document-node in accordance with XPath
+                                    function <code>fn:json-to-xml</code></entry>
+                            </row>
+                            <row>
+                                <entry align="left">[htmldoc]</entry>
+                                <entry align="left"><code>document-node()</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document represented by a document-node in accordance with the
+                                    rules defined by TagSoup documentation</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[csvdoc]</entry>
+                                <entry align="left"><code>document-node()</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document represented by a document-node, as controlled by the
+                                    CSV parsing parameter values derived from a file shape, in
+                                    accordance with the rules defined by BaseX documentation
+                                </entry>
+                            </row>
+                            <row>
+                                <entry align="left">[csvdocs]</entry>
+                                <entry align="left">Mapping: csv-parse-parameters => document-node() </entry>
+                                <entry align="left">The mapping result is a CSV document represented
+                                    by a document-node as controlled by given CSV parsing parameter
+                                    values, in accordance with the rules defined by BaseX
+                                    documentation </entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <para>A file has the following <emphasis role="bold">derived resource
+                        properties</emphasis>.</para>
+                <table xml:id="table-105">
+                    <title>Derived resource properties of a file resource, as currently evaluated
+                        by greenfox.</title>
+                    <titleabbrev xml:id="table-105-shorttitle">Derived folder resource
+                        properties</titleabbrev>
+                    <tgroup cols="3">
+                        <colspec colname="c1" colnum="1" colwidth="5*"/>
+                        <colspec colname="c2" colnum="2" colwidth="5*"/>
+                        <colspec colname="c3" colnum="3" colwidth="11*"/>
+                        <thead>
+                            <row>
+                                <entry align="left">Property name</entry>
+                                <entry align="left">Value type</entry>
+                                <entry align="left">Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry align="left">[filepath]</entry>
+                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left">The names of all ancestor folders and the folder
+                                    itself, separated by a slash</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[xmldoc.xpath]</entry>
+                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
+                                <entry align="left">A mapping of XPath expressions to an XDM value,
+                                    which is the value obtained by evaluating the expression in the
+                                    context of [xmldoc]</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[jsondoc-basex.xpath]</entry>
+                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
+                                <entry align="left">A mapping of XPath expressions to an XDM value,
+                                    which is the value obtained by evaluating the expression in the
+                                    context of [jsondoc-basex]</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[jsondoc-w3c.xpath]</entry>
+                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
+                                <entry align="left">A mapping of XPath expressions to an XDM value,
+                                    which is the value obtained by evaluating the expression in the
+                                    context of [jsondoc-w3c]</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[htmldoc.xpath]</entry>
+                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
+                                <entry align="left">A mapping of XPath expressions to an XDM value,
+                                    which is the value obtained by evaluating the expression in the
+                                    context of [htmldoc]</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[csvdoc.xpath]</entry>
+                                <entry align="left">Mapping: ( csv-parse-parameters, XPath
+                                    expression string ) => XDM value </entry>
+                                <entry align="left">A mapping of CSV parsing parameter values and an
+                                    XPath expression to an XDM value, which is the value obtained by
+                                    evaluating the expression in the context of a document node from
+                                    [csv-docs], obtained for the parsing parameter values</entry>
+                            </row>
+                            <row>
+                                <entry align="left">[foxpath-value]</entry>
+                                <entry align="left">Mapping: foxpath expression string => XDM value </entry>
+                                <entry align="left">A mapping of foxpath expressions to an XDM
+                                    value, which is the value obtained by evaluating the expression
+                                    in the context of [filepath]</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <para><emphasis role="bold">Resource values</emphasis> are obtained by applying
+                    [foxpath-value] to the text of a foxpath expression, or one of the mappings
+                    [*-xpath] to the text of an XPath expression.</para>
+                <para>For information about CSV parsing parameters, see [x], section
+                        <code>#wiki/CSV_Module</code>.</para>
+            </section>
+        </section>
+    </section>
+    <section>
         <title>RDFe example</title>
         <para>This section introduces RDFe by building an example in several steps.</para>
         <section>
