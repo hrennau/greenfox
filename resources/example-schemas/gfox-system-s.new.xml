@@ -24,7 +24,11 @@
             <!-- *** Codelist folder shape -->
             <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
                 <targetSize msg="No codelist folder found" count="1"/>
-                <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
+                
+                <!-- Check - folder contains codelists? -->
+                <foxpath expr="*.xml/codelist[entry/@code[string()]]/@name" 
+                         minCoutMsg="Codelist folder without codelists"
+                         minCount="1"/>
                 <file foxpath="*[is-xml(.)]">
                     <targetSize msg="No codelist files found" minCount="1"/>
                 </file>
@@ -33,18 +37,19 @@
             <!-- *** Testcase folder shape *** -->
             <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
                 <targetSize msg="No testcase folders found" minCount="1"/>
-                <folderContent msg="Testcase contains member other than input, output, config, log-*." 
+                <folderContent closedMsg="Testcase contains member other than input, output, config, log-*." 
                                closed="true">
                     <memberFolders names="input, output, config"/>
-                    <memberFiles names="log-" occ="*"/>
+                    <memberFiles names="log-*" count="*"/>
                 </folderContent>
 
                 <!-- *** msg config shape -->
                 <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
                     <targetSize msg="Config file missing" count="1"/>
                     
-                    <!-- Check - configured return codes ok? -->
-                    <xpath msg="Config file contains unknown return code" expr="//returnCode">
+                    <!-- Check - configured return codes expected? -->
+                    <xpath expr="//returnCode"
+                           inMsg="Config file contains unknown return code">
                         <in>
                             <eq>OK</eq>
                             <eq>NOFIND</eq>
@@ -58,9 +63,9 @@
                     <targetSize msg="Input folder without request msgs" minCount="1"/>
                     
                     <!-- Check - request with response ? -->
-                    <foxpath msg="Request without response"
-                        expr="..\..\output\*\file-name(.)"
-                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"/>                       
+                    <foxpath containsXPathMsg="Request without response"
+                             expr="..\..\output\*\file-name(.)"
+                             containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"/>                       
                 </file>
                 
                 <!-- *** Response file shape *** -->                
@@ -80,13 +85,13 @@
                     </ifMediatype>
                     
                     <!-- *** Check - known article number? -->
-                    <xpath msg="Unknown foo article number"
+                    <xpath eqFoxpathMsg="Unknown foo article number"
                            id="articleNumberValueShape"
                            expr="//*:fooValue" 
                            eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
                     
                     <!-- *** Check - return code ok? *** -->
-                    <foxpath msg="Return code not the configured value" 
+                    <foxpath eqXPathMsg="Return code not the configured value" 
                              expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
                                    //record[response eq $fileName]/returnCode"
                              eqXPath="//*:returnCode"/>                    

@@ -19,7 +19,7 @@
                 <memberFile name="*change*" sha1="09F996E0D7A4C2EFFBBBC8F9497FF0A97CC53E38"/>
                 <memberFile name="*codes*" md5="EE86CFB0F7B88861A76FFE1137D759A5"/>
                 <memberFile name="niem-4.2.xlsx" sha256="69AEBB0DCEA978A23E349991A2C31EBD09C48850D8D568FCD12CE6944B0BC831"/>
-                <memberFiles names="*.xlsx" minCount="3" maxCount="100" md5="EE86CFB0F7B88861A76FFE1137D759A5 43F8088C8B1CE9B46CCFB1C428AD998B"/>
+                <memberFiles names="*.xlsx" minCount="3" maxCount="10" md5="EE86CFB0F7B88861A76FFE1137D759A5 43F8088C8B1CE9B46CCFB1C428AD998B"/>
                 <memberFiles names="~*"/>
             </folderContent>
         </folder>

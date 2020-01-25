@@ -33,7 +33,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
     let $folderPathDisplay := replace($folderPath, '\\', '/')
     
     (: determine expectations :)
-    let $_constraint := f:validateFolderContent_compile($constraint)
+    let $_constraint := trace(f:validateFolderContent_compile($constraint) , '_COMPILED: ')
     let $closed := $_constraint/@closed
     let $msgFolderContent := $_constraint/@msg
 
@@ -80,40 +80,56 @@ declare function f:validateFolderContent($folderPath as xs:string,
                     attribute filePath {$folderPathDisplay}
                 }</gx:green>
             
-    let $errors_missingMembers :=
+    let $results_cardinality :=
         for $d in $_constraint/*
-        let $candMembers := if ($d/self::gx:memberFile) then $memberFiles 
-                            else if ($d/self::gx:memberFolder) then $memberFolders 
-                            else $members                                 
-        let $found := $candMembers[matches(., $d/@regex, 'i')]
-        let $facet :=
-            if (empty($found)) then 
-                if ($d/@minOccurs eq '0') then ()
-                else 'missingMember'
-            else if ($d/@minOccurs/xs:integer(.) > count($found)) then 'tooFewMembers'                
-            else if ($d/@maxOccurs/xs:integer(.) = -1) then ()
-            else if ($d/@maxOccurs/xs:integer(.) < count($found)) then 'tooManyMembers'            
+        let $minCount := $d/@minCount/number(.)
+        let $maxCount := $d/@maxCount/number(.)
+        let $candMembers := 
+            if ($d/self::gx:memberFile) then $memberFiles 
+            else if ($d/self::gx:memberFolder) then $memberFolders 
+            else $members   
+        let $resourceKind :=            
+            if ($d/self::gx:memberFile) then 'file' 
+            else if ($d/self::gx:memberFolder) then 'folder' 
             else ()
-               
-        where $facet
-        let $facetEdited :=
-            if ($facet eq 'tooManyMembers' and $d/@maxOccurs eq '0') then 'excludedMember'
-            else $facet
-        let $memberName :=
-            if (count($found) eq 1) then $found
-            else $_constraint/@name
-        return
-            <gx:error>{
-                $_constraint/@msg,
-                attribute constraintComponent {'folderContent'},
-                $_constraint/@id/attribute constraintID {.},
-                $_constraint/@label/attribute constraintLabel {.},
-                attribute constraintFacet {$facetEdited},
-                $d/@minOccurs[not(. eq '1')]/attribute minOccurs {.},
-                $d/@maxOccurs[not(. eq '1')]/attribute maxOccurs {.},
-                attribute member {$memberName}
-            }</gx:error>
-
+        let $found := $candMembers[matches(., $d/@regex, 'i')]
+        let $count := count($found)
+        let $result_minCount :=
+            if ($minCount eq 0) then () 
+            else
+                let $ok := $count ge $minCount
+                let $elemName := if ($ok) then 'gx:green' else 'gx:error'
+                let $msg := if ($ok) then $_constraint/@msgOK else $_constraint/@msg
+                return
+                    element {$elemName} {
+                        $msg,
+                        attribute constraintComponent {'folderContentMinCount'},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        attribute minCount {$d/@minCount},
+                        attribute actCount {$count},
+                        attribute resourceName {$d/@name},
+                        $resourceKind ! attribute resourceKind {.}
+                    }                            
+        let $result_maxCount :=
+            if ($maxCount eq -1) then () 
+            else
+                let $ok := $count le $maxCount
+                let $elemName := if ($ok) then 'gx:green' else 'gx:error'
+                let $msg := if ($ok) then $_constraint/@msgOK else $_constraint/@msg
+                return
+                    element {$elemName} {
+                        $msg,
+                        attribute constraintComponent {'folderContentMaxCount'},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        attribute maxCount {$d/@maxCount},
+                        attribute actCount {$count},
+                        attribute resourceName {$d/@name},
+                        $resourceKind ! attribute resourceKind {.}
+                    }                            
+        return ($result_minCount, $result_maxCount)
+        
     let $errors_hash :=
         for $d in $_constraint/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
         let $name := $d/@name
@@ -157,7 +173,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                     attribute member {$name}
                 }</gx:error>
 
-    let $errors := ($results_folderContentClosed, $errors_missingMembers, $errors_hash)
+    let $errors := ($results_folderContentClosed, $results_cardinality, $errors_hash)
     return
         if ($errors) then $errors
         else $_constraint/
@@ -174,17 +190,17 @@ declare function f:validateFolderContent($folderPath as xs:string,
 declare function f:validateFolderContent_compile($folderContent as element(gx:folderContent))
         as element(gx:folderContent) {
         
-    let $minMaxOccurs :=
+    let $minMaxCount :=
         function($elem) {
             let $limits :=
-                if ($elem/@occ) then $elem/@occ/i:occ2minMax(.)
+                if ($elem/@count) then $elem/@count/i:occ2minMax(.)
                 else (
-                    ($elem/@minOccurs, 1)[1] ! xs:integer(.),
-                    ($elem/@maxOccurs, -1)[1] ! xs:integer(.) 
+                    ($elem/@minCount, 1)[1] ! xs:integer(.),
+                    ($elem/@maxCount, 1)[1] ! xs:integer(.) 
                 )
             return (
-                attribute minOccurs {$limits[1]},
-                attribute maxOccurs {$limits[2]}
+                attribute minCount {$limits[1]},
+                attribute maxCount {$limits[2]}
             )
         }
     return
@@ -205,15 +221,15 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                         let $lname := $member/local-name(.) ! replace(., 'excludedM', 'm')
                         return
                             element {concat('gx:', $lname)} {
-                                $member/(@* except @occ),
-                                attribute occ {0}
+                                $member/(@* except (@count, @minCount, @maxCount)),
+                                attribute count {0}
                             }
                     else $member
                 return
                         element {node-name($member)} {
-                            $member/(@* except (@minOccurs, @maxOccurs, @occ)),
+                            $member/(@* except (@count, @minCount, @maxCount)),
                             $member/@name/attribute regex {i:glob2regex(.)},
-                            $minMaxOccurs($member)
+                            $minMaxCount($member)
                         }
             case element(gx:memberFiles) 
                  | element(gx:memberFolders)
@@ -224,8 +240,8 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                         let $lname := $member/local-name(.) ! replace(., 'excludedM', 'm')
                         return
                             element {concat('gx:', $lname)} {
-                                $member/(@* except @occ),
-                                attribute occ {0}
+                                $member/(@* except (@count, @minCount, @maxCount)),
+                                attribute count {0}
                             }
                     else $member
                  
@@ -234,10 +250,10 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                 let $regex := i:glob2regex($name)
                 return
                     element {concat('gx:', $elemName)} {
-                        $member/(@* except (@names, @minOccurs, @maxOccurs, @occ)),
+                        $member/(@* except (@names, @minCount, @maxCount, @count)),
                         attribute name {$name},
                         attribute regex {$regex},
-                        $minMaxOccurs($member)
+                        $minMaxCount($member)
                     }
             default return error()
     }</gx:folderContent>
