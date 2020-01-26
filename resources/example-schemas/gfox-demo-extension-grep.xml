@@ -10,6 +10,14 @@
 
     <constraintComponents>
         <constraintComponent constraintElementName="ex:grep">
+            <param name="pattern"></param>
+            <param name="flags"></param>
+            <xpath><![CDATA[
+exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
+            ]]></xpath>
+        </constraintComponent>
+        
+        <constraintComponent constraintElementName="ex:grepXXX">
             <param name="plain"></param>
             <xpath><![CDATA[
                     let $files := $this
@@ -21,6 +29,7 @@
                                 contains($line, $plain)
                 ]]></xpath>
         </constraintComponent>
+        
     </constraintComponents>    
     
     <domain path="\projects\xsdbase\niem-4.2" 
@@ -33,7 +42,8 @@
                 <targetSize msg="README not found" minCount="1"/>    
                 <ex:grep msg="File does not contain string 'FBI'."
                          msgOk="File contains string 'FBI'.">
-                    <param name="plain">FBI</param>
+                    <param name="pattern">fbIx?</param>
+                    <param name="flags">i</param>
                 </ex:grep>
             </file>
         </folder>
