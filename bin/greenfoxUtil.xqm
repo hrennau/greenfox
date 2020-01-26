@@ -23,50 +23,37 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-(:
 (:~
- : Validates the target count of a resource shape.
+ : Returns the text of an error message. The message name is the concatenation
+ : of a prefix and the substring 'Msg' - for example 'minCountMsg'.
  :
- : @param shape a resource shape
- : @targetCount the number of instances belonging to the target of the shape
- : @return elements signaling violations of the count constraints
- :) 
-declare function f:validateTargetCount($constraint as element(), $targetCount as xs:integer)
-        as element()* {
-    let $constraintParams := $constraint/(@count, @minCount, @maxCount)  
-    
-    let $count := $constraint/@count/xs:integer(.)
-    let $minCount := $constraint/@minCount/xs:integer(.)
-    let $maxCount := $constraint/@maxCount/xs:integer(.)
-    let $error := (
-        exists($count) and $count ne $targetCount
-        or
-        exists($minCount) and $minCount gt $targetCount
-        or 
-        exists($maxCount) and $maxCount lt $targetCount
-    )
-    return
-        if ($error) then
-            let $msg := $constraint/@msg
-            return
-                <gx:error>{ 
-                    attribute constraintComp {'targetSize'},
-                    $constraint/@id/attribute constraintID {.},                    
-                    $constraint/@resourceShapeID,
-                    $constraintParams,
-                    attribute actCount {$targetCount},
-                    $msg
-                }</gx:error>
-        else                
-            <gx:green>{
-                    attribute constraintComp {'targetSize'},
-                    $constraint/@id/attribute constraintID {.},                    
-                    $constraint/@resourceShapeID,
-                    $constraintParams,
-                    attribute actCount {$targetCount}
-            }</gx:green>
+ : @param elems one or more elements which may contain the message attribute
+ : @param msgNamePrefix the first part of the message attribute name
+ : @param defaultMsg a default message, in case there is no explicit message
+ : @return the first message text found, checking the elements in order
+ :)
+declare function f:getErrorMsg($elems as element()+, 
+                               $msgNamePrefix as xs:string,
+                               $defaultMsg as xs:string?)
+        as xs:string? {
+    ($elems/@*[local-name(.) eq concat($msgNamePrefix, 'Msg')], $defaultMsg)[1]        
 };
-:)
+
+(:~
+ : Returns the text of an OK message. The message name is the concatenation
+ : of a prefix and the substring 'MsgOK' - for example 'minCountMsgOK'.
+ :
+ : @param elems one or more elements which may contain the message attribute
+ : @msgNamePrefix the first part of the message attribute name
+ : @param defaultMsg a default message, in case there is no explicit message 
+ : @return the first message text found, checking the elements in order
+ :)
+declare function f:getOkMsg($elems as element()+, 
+                            $msgNamePrefix as xs:string,
+                            $defaultMsg as xs:string?)                            
+        as xs:string? {
+    ($elems/@*[local-name(.) eq concat($msgNamePrefix, 'MsgOK')], $defaultMsg)[1]        
+};
 
 (:~
  : Creates an augmented copy of an error element, adding specified attributes.

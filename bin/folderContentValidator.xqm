@@ -55,30 +55,34 @@ declare function f:validateFolderContent($folderPath as xs:string,
             return $member
         return
             if (exists($unexpectedMembers)) then
-                <gx:error>{
-                    $_constraint/@msg,
-                    attribute constraintComp {'folderContentClosed'},
-                    $_constraint/@id/attribute constraintID {.},
-                    $_constraint/@label/attribute constraintLabel {.},
-                    $constraint/@resourceShapeID,
-                    attribute filePath {$folderPathDisplay},
-                    <gx:resources>{
-                        for $name in $unexpectedMembers
-                        let $path := concat($folderPath, '/', $name)
-                        let $kind := if (file:is-dir($path)) then 'folder' else 'file'
-                        return
-                            <gx:resource name="{$name}" kind="{$kind}"/>
-                    }</gx:resources>
-                }</gx:error>
+                let $msg := i:getErrorMsg($constraint, 'closed', 'Unexpected folder contents.')
+                return                            
+                    <gx:error>{
+                        $msg ! attribute msg {.},
+                        attribute constraintComp {'folderContentClosed'},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        $constraint/@resourceShapeID,
+                        attribute filePath {$folderPathDisplay},
+                        <gx:resources>{
+                            for $name in $unexpectedMembers
+                            let $path := concat($folderPath, '/', $name)
+                            let $kind := if (file:is-dir($path)) then 'folder' else 'file'
+                            return
+                                <gx:resource name="{$name}" kind="{$kind}"/>
+                        }</gx:resources>
+                    }</gx:error>
             else            
-                <gx:green>{
-                    $_constraint/@msgOK,
-                    attribute constraintComp {'folderContentClosed'},
-                    $_constraint/@id/attribute constraintID {.},
-                    $_constraint/@label/attribute constraintLabel {.},
-                    $constraint/@resourceShapeID,
-                    attribute filePath {$folderPathDisplay}
-                }</gx:green>
+                let $msg := i:getOkMsg($constraint, 'closed', 'No unexpected folder contents.')
+                return                            
+                    <gx:green>{
+                        $msg ! attribute msg {.},
+                        attribute constraintComp {'folderContentClosed'},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        $constraint/@resourceShapeID,
+                        attribute filePath {$folderPathDisplay}
+                    }</gx:green>
             
     let $results_cardinality :=
         for $d in $_constraint/*
@@ -99,10 +103,11 @@ declare function f:validateFolderContent($folderPath as xs:string,
             else
                 let $ok := $count ge $minCount
                 let $elemName := if ($ok) then 'gx:green' else 'gx:error'
-                let $msg := if ($ok) then $_constraint/@msgOK else $_constraint/@msg
+                let $msg := if ($ok) then $d/i:getOkMsg((., ..), 'minCount', ())
+                            else $d/i:getErrorMsg((., ..), 'minCount', ())
                 return
                     element {$elemName} {
-                        $msg,
+                        $msg ! attribute msg {.},
                         attribute constraintComponent {'folderContentMinCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
@@ -116,10 +121,11 @@ declare function f:validateFolderContent($folderPath as xs:string,
             else
                 let $ok := $count le $maxCount
                 let $elemName := if ($ok) then 'gx:green' else 'gx:error'
-                let $msg := if ($ok) then $_constraint/@msgOK else $_constraint/@msg
+                let $msg := if ($ok) then $d/i:getOkMsg((., ..), 'maxCount', ())
+                            else $d/i:getErrorMsg((., ..), 'maxCount', ())
                 return
                     element {$elemName} {
-                        $msg,
+                        $msg ! attribute msg {.},
                         attribute constraintComponent {'folderContentMaxCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
@@ -130,7 +136,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                     }                            
         return ($result_minCount, $result_maxCount)
         
-    let $errors_hash :=
+    let $results_hash :=
         for $d in $_constraint/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
         let $name := $d/@name
         let $candMembers := $memberFiles 
@@ -139,41 +145,55 @@ declare function f:validateFolderContent($folderPath as xs:string,
         for $hashExp in $d/(@md5, @sha1, @sha256)
         let $hashKind := $hashExp/local-name(.)
 
-        let $hashes := 
-            for $file in $found
-            let $file := concat($folderPath, '/', $file) ! replace(., '\\', '/')
-            let $fileContent := file:read-binary($file)
-            let $rawHash :=
-                typeswitch($hashExp)
-                case attribute(md5) return hash:md5($fileContent)
-                case attribute(sha1) return hash:sha1($fileContent)
-                case attribute(sha256) return hash:sha256($fileContent)
-                default return error()
-            return
-                trace(string(xs:hexBinary($rawHash)) , 'HASH: ')
-
+        let $hashesMap := 
+            map:merge(
+                for $file in $found
+                let $filePath := concat($folderPath, '/', $file) ! replace(., '\\', '/')
+                let $fileContent := file:read-binary($filePath)
+                let $rawHash :=
+                    typeswitch($hashExp)
+                    case attribute(md5) return hash:md5($fileContent)
+                    case attribute(sha1) return hash:sha1($fileContent)
+                    case attribute(sha256) return hash:sha256($fileContent)
+                    default return error()
+                return
+                    map:entry(string(xs:hexBinary($rawHash)), $filePath)
+            )
+        let $hashes := map:keys($hashesMap)
+        
         (: OK, if for every hash in the attribute value a matching file is found :)
         for $hashExpItem in tokenize($hashExp)
-        let $ok := some $hash in $hashes satisfies $hash eq $hashExpItem
+        let $constraintComponent := concat('folderContent-', $hashExp/local-name(.))
+        let $file := $hashesMap($hashExpItem)
         return
-            if ($ok) then () else
-            
-            let $msg := (concat('Not expected ', $hashKind), $_constraint/@msg)[1]
-            let $actValueAtt := 
-                if (count($found) gt 1) then () else attribute {concat($hashKind, 'Found')} {$hashes}
-            return
-                <gx:error>{
-                    attribute msg {$msg},
-                    attribute constraintComponent {'folderContent'},
-                    $_constraint/@id/attribute constraintID {.},
-                    $_constraint/@label/attribute constraintLabel {.},
-                    attribute constraintFacet {$hashExp/local-name(.)},
-                    attribute {$hashExp/name()} {$hashExpItem},
-                    $actValueAtt,
-                    attribute member {$name}
-                }</gx:error>
+            if ($file) then
+                let $msg := i:getOkMsg(($d, $d/..), $hashKind, 
+                            concat('Expected ', $hashKind, ' value found.'))
+                return
+                    <gx:green>{
+                        $msg ! attribute msg {.},
+                        attribute constraintComponent {$constraintComponent},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        attribute {$hashExp/name()} {$hashExpItem}
+                    }</gx:green>
+            else            
+                let $msg := i:getErrorMsg(($d, $d/..), $hashKind, 
+                            concat('Not expected  ', $hashKind, ' value.'))
+                let $actValueAtt := 
+                    if (count($found) gt 1) then () else attribute {concat($hashKind, 'Found')} {$hashes[1]}
+                return
+                    <gx:error>{
+                        $msg ! attribute msg {.},
+                        attribute constraintComponent {$constraintComponent},
+                        $_constraint/@id/attribute constraintID {.},
+                        $_constraint/@label/attribute constraintLabel {.},
+                        attribute {$hashExp/name()} {$hashExpItem},
+                        $actValueAtt,
+                        attribute resourceName {$name}
+                    }</gx:error>
 
-    let $errors := ($results_folderContentClosed, $results_cardinality, $errors_hash)
+    let $errors := ($results_folderContentClosed, $results_cardinality, $results_hash)
     return
         if ($errors) then $errors
         else $_constraint/
