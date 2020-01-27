@@ -1602,6 +1602,158 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                         <entry align="left">Common view: non-trivial validation requires mapping
                             resources to values</entry>
                     </row>
+                    <row>
+                        <entry align="left"><para>Mapping resource to value:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>XPath expression</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Foxpath expression</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left"><para>Mapping resource to property:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>SPARQL property path</para>
+                                </listitem>
+                            </itemizedlist></entry>
+                        <entry align="left">Common view: the mapping of a resource to a value is an
+                            expression</entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Value shape:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>XPath shape</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Foxpath shape</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">Property shape</entry>
+                        <entry align="left">Common view: usefulness of an entity combining a
+                                <emphasis role="ital">single</emphasis> mapping of the focus
+                            resource to a value with a <emphasis role="ital">set of
+                                constraints</emphasis> for that value</entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Constraint declaration</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Constraint component</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Constraint parameters</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left"><para>Constraint declaration</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Constraint component</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Constraint parameters</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">Common view: a constraint declaration can be thought of
+                            as a function call</entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Constraint component</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Signature</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Mapping semantic</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left"><para>Constraint component</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Signature</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Mapping semantic</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">Common view: a constraint component can be thought of as
+                            a library function</entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Validation report</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Constraint violations</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Constraint passes</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Observations</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left"><para>Validation report</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Constraint violations</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">Common view: a result is an RDF resource; difference: in
+                            greenfox also successful constraint checks produce results (“green
+                            results”); difference: in greenfox also observations can be produced,
+                            results unrelated to constraint checking (“blue results”) </entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Extension language:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>XPath/XQuery expression</para>
+                                </listitem>
+                                <listitem>
+                                    <para>foxpath expression</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left"><para>Extension language:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>SPARQL SELECT queries</para>
+                                </listitem>
+                                <listitem>
+                                    <para>SPARQL ASK queries</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">Common view: extension of functionality is based on an
+                            expression language for mapping resources to values and values to a
+                            result</entry>
+                    </row>
+                    <row>
+                        <entry align="left"><para>Mediatype integration:</para>
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Common data model</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Common navigation model</para>
+                                </listitem>
+                            </itemizedlist>
+                        </entry>
+                        <entry align="left">-</entry>
+                        <entry align="left">Difference: in contrast to SHACL, greenfox faces a
+                            heterogeneous collection of validation targets, calling for integration
+                            concepts</entry>
+                    </row>
                 </tbody>
             </tgroup>
         </table>
