@@ -116,14 +116,16 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
     let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:error'
     let $useMsg :=
         if ($msg) then $msg
-        else if ($colour eq 'green') then $constraint/@msgOK
-        else $constraint/@msg
+        else if ($colour eq 'green') then 
+            $constraint/i:getOkMsg($constraint, $condition/local-name(.), ())
+        else 
+            $constraint/i:getErrorMsg($constraint, $condition/local-name(.), ())
     let $navigationAtt :=
         let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
         return attribute {$name} {$navigationSpec}
     return
         element {$elemName} {
-            $useMsg,
+            $useMsg ! attribute msg {.},
             attribute filePath {$targetContextPath},
             attribute constraintComp {$constraintComp},
             $constraint/@id/attribute constraintID {. || '-' || $condition/local-name(.)},                    

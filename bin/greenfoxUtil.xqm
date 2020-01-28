@@ -36,7 +36,7 @@ declare function f:getErrorMsg($elems as element()+,
                                $msgNamePrefix as xs:string,
                                $defaultMsg as xs:string?)
         as xs:string? {
-    ($elems/@*[local-name(.) eq concat($msgNamePrefix, 'Msg')], $defaultMsg)[1]        
+    ($elems/(@*[local-name(.) eq concat($msgNamePrefix, 'Msg')], @msg)[1], $defaultMsg)[1]        
 };
 
 (:~
@@ -52,7 +52,7 @@ declare function f:getOkMsg($elems as element()+,
                             $msgNamePrefix as xs:string,
                             $defaultMsg as xs:string?)                            
         as xs:string? {
-    ($elems/@*[local-name(.) eq concat($msgNamePrefix, 'MsgOK')], $defaultMsg)[1]        
+    ($elems/(@*[local-name(.) eq concat($msgNamePrefix, 'MsgOK')], @msgOK)[1], $defaultMsg)[1]        
 };
 
 (:~

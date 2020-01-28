@@ -108,7 +108,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     element {$elemName} {
                         $msg ! attribute msg {.},
-                        attribute constraintComponent {'folderContentMinCount'},
+                        attribute constraintComp {'folderContentMinCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute minCount {$d/@minCount},
@@ -126,7 +126,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     element {$elemName} {
                         $msg ! attribute msg {.},
-                        attribute constraintComponent {'folderContentMaxCount'},
+                        attribute constraintComp {'folderContentMaxCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute maxCount {$d/@maxCount},
@@ -163,7 +163,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
         
         (: OK, if for every hash in the attribute value a matching file is found :)
         for $hashExpItem in tokenize($hashExp)
-        let $constraintComponent := concat('folderContent-', $hashExp/local-name(.))
+        let $constraintComponent := concat('FolderContent-', $hashExp/local-name(.))
         let $file := $hashesMap($hashExpItem)
         return
             if ($file) then
@@ -172,7 +172,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     <gx:green>{
                         $msg ! attribute msg {.},
-                        attribute constraintComponent {$constraintComponent},
+                        attribute constraintComp {$constraintComponent},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute {$hashExp/name()} {$hashExpItem}
@@ -185,7 +185,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     <gx:error>{
                         $msg ! attribute msg {.},
-                        attribute constraintComponent {$constraintComponent},
+                        attribute constraintComp {$constraintComponent},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute {$hashExp/name()} {$hashExpItem},
@@ -198,7 +198,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
         if ($errors) then $errors
         else $_constraint/
             <gx:green>{
-                attribute constraintComponent {local-name()},
+                attribute constraintComp {local-name()},
                 @id/attribute constraintID {.},
                 @label/attribute constraintLabel {.},
                 attribute folderPath {$folderPath}
