@@ -31,7 +31,7 @@ declare function f:validateExpressionValue($constraint as element(),
 :)                         
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
-    let $expr := trace($constraint/@expr , 'EXPR: ')
+    let $expr := $constraint/@expr
     let $evaluationContext := $context?_evaluationContext
     let $exprValue :=    
         if ($constraint/self::gx:xpath) then 
@@ -170,7 +170,7 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
                                                $quantifier as xs:string,                                               
                                                $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP: ')     
+    (: let $_DEBUG := trace($cmp, 'CMP: ') :)     
     let $flags := string($valueShape/@flags)
     let $cmpTrue :=
         typeswitch($cmp)
@@ -220,7 +220,7 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
                                                    $quantifier as xs:string,                                               
                                                    $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP_EXPR: ')
+    (: let $_DEBUG := trace($cmp, 'CMP_EXPR: ') :)
     let $evaluationContext := $context?_evaluationContext    
     let $exprKind := $valueShape/local-name(.)
     let $cmpExprKind := if (ends-with($cmp/local-name(.), 'Foxpath')) then 'foxpath' else 'xpath'
@@ -318,7 +318,7 @@ declare function f:validateExpressionValue_containsExpressionValue(
                                                          $context as map(*),
                                                          $valueShape as element())
         as element() {
-    let $_DEBUG := trace($cmp, 'CMP: ')   
+    (: let $_DEBUG := trace($cmp, 'CMP: ') :)   
     let $evaluationContext := $context?_evaluationContext
     let $flags := string($valueShape/@flags)
     let $exprKind := $valueShape/local-name(.)
@@ -332,7 +332,7 @@ declare function f:validateExpressionValue_containsExpressionValue(
         
     (: construction of comparison value - argument is the context item :)
     let $useContextItem := 
-        let $_DEBUG := trace(concat($exprKind, '/', $cmpExprKind), 'EXPR_KIND / CMP_EXPR_KIND: ') return
+        let $_DEBUG := concat($exprKind, '/', $cmpExprKind) return
         if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
         else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
         else $contextItem
@@ -374,7 +374,7 @@ declare function f:validateExpressionValue_in($exprValue as item()*,
                         case element(gx:ne) return . != $alternative
                         case element(gx:like) return i:matchesLike(., $alternative, $alternative/@flags)
                         case element(gx:notLike) return not(i:matchesLike(., $alternative, $alternative/@flags))                        
-                        default return error()                
+                        default return error(QName((), 'ILLFORMED_GREENFOX_SCHEMA'), concat("Unexpected child of 'in': ", name($alternative)))                
             )]                    
             return
                 if (empty($violations)) then () 
@@ -474,20 +474,16 @@ declare function f:validationResult_expression($colour as xs:string,
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
         
-    let $msg :=
-        if ($colour eq 'green') then 
-            let $msgName := concat($constraint/local-name(.), 'MsgOK')
-            return $valueShape/@*[local-name(.) eq $msgName]/attribute msg {.}
-        else
-            let $msgName := concat($constraint/local-name(.), 'Msg')
-            return $valueShape/(@*[local-name(.) eq $msgName]/attribute msg {.}, @msg)[1]
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($valueShape, $constraint/local-name(.), ())
+        else i:getErrorMsg($valueShape, $constraint/local-name(.), ())
     let $elemName := 
         switch($colour)
         case 'red' return 'gx:error'
         default return concat('gx:', $colour)
     return
         element {$elemName} {
-            $msg,
+            $msg ! attribute msg {.},
             attribute valueShapeKind {$valueShapeKind},
             attribute constraintComp {$constraintComponent},
             attribute valueShapeID {$valueShapeId},

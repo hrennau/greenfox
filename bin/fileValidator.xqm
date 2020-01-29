@@ -170,8 +170,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
     (: the required bindings are a subset of potential bindings :)
     let $requiredBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        let $_DEBUG := trace($filePath, '___FILE_PATH: ')
-        return trace( f:getRequiredBindings($potentialBindings, $components) , '___REQ_BINDINGS: ')
+        return f:getRequiredBindings($potentialBindings, $components)
         
     let $xdoc :=
         let $required := 

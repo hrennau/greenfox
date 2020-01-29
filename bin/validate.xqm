@@ -56,7 +56,7 @@ declare function f:validateOp($request as element())
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params))
     let $gfox := $gfoxAndContext[. instance of element()]
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
-    let $context := trace($gfoxAndContext[. instance of map(*)], '___CONTEXT: ')
+    let $context := $gfoxAndContext[. instance of map(*)]
     let $gfoxErrors := f:validateGreenfox($gfox)
     return
         if ($gfoxErrors) then $gfoxErrors else

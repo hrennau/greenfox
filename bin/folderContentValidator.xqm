@@ -29,11 +29,12 @@ declare function f:validateFolderContent($folderPath as xs:string,
                                          $context as map(*)) 
         as element()* {
         
-    let $D_DEBUG := trace($folderPath, '__FOLDER_PATH: ')        
+    (: let $D_DEBUG := trace($folderPath, '__FOLDER_PATH: ') :)        
     let $folderPathDisplay := replace($folderPath, '\\', '/')
     
     (: determine expectations :)
-    let $_constraint := trace(f:validateFolderContent_compile($constraint) , '_COMPILED: ')
+    let $_constraint := f:validateFolderContent_compile($constraint)
+    (: let $_DEBUG := trace($_constraint, '_COMPILED: ') :)
     let $closed := $_constraint/@closed
     let $msgFolderContent := $_constraint/@msg
 
@@ -59,7 +60,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return                            
                     <gx:error>{
                         $msg ! attribute msg {.},
-                        attribute constraintComp {'folderContentClosed'},
+                        attribute constraintComp {'FolderContentClosed'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         $constraint/@resourceShapeID,
@@ -77,7 +78,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return                            
                     <gx:green>{
                         $msg ! attribute msg {.},
-                        attribute constraintComp {'folderContentClosed'},
+                        attribute constraintComp {'FolderContentClosed'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         $constraint/@resourceShapeID,
@@ -108,11 +109,11 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     element {$elemName} {
                         $msg ! attribute msg {.},
-                        attribute constraintComp {'folderContentMinCount'},
+                        attribute constraintComp {'FolderContentMinCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute minCount {$d/@minCount},
-                        attribute actCount {$count},
+                        attribute valueCount {$count},
                         attribute resourceName {$d/@name},
                         $resourceKind ! attribute resourceKind {.}
                     }                            
@@ -126,11 +127,11 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 return
                     element {$elemName} {
                         $msg ! attribute msg {.},
-                        attribute constraintComp {'folderContentMaxCount'},
+                        attribute constraintComp {'FolderContentMaxCount'},
                         $_constraint/@id/attribute constraintID {.},
                         $_constraint/@label/attribute constraintLabel {.},
                         attribute maxCount {$d/@maxCount},
-                        attribute actCount {$count},
+                        attribute valueCount {$count},
                         attribute resourceName {$d/@name},
                         $resourceKind ! attribute resourceKind {.}
                     }                            

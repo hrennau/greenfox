@@ -131,7 +131,7 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
             $constraint/@id/attribute constraintID {. || '-' || $condition/local-name(.)},                    
             $constraint/@resourceShapeID,
             $condition,
-            attribute actCount {$actCount},
+            attribute valueCount {$actCount},
             attribute targetContextPath {$targetContextPath},
             $navigationAtt
         }

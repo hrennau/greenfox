@@ -36,7 +36,6 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFolder($gxFolder as element(), $context as map(xs:string, item()*)) 
         as element()* {
-    let $_DEBUG := trace($context, '_CONTEXT: ')
     let $contextPath := $context?_contextPath
     let $components := $gxFolder/*[not(@deactivated eq 'true')]
     let $targetDecl := $gxFolder/(@foxpath, @path)[1]

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <!-- *** External context *** -->
+    <context>
+        <field name="domain" value="\tt\greenfox\resources\example-schemas"/>
+        <field name="gfox" value="gfox-system-s.xml"/>
+    </context>    
+    
+    <domain path="${domain}" 
+        name="schema-schemas">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="schemasFolderShape">
+            <targetSize msg="No schemas folder found" minCount="1"/>
+            <file foxpath="${gfox}">
+                <targetSize msg="system-s schema not found" minCount="1"/>
+
+                <xpath description="Validates top-level elements"
+                    expr="*:greenfox/*/local-name(.)"
+                    inMsg="Unexpected top-level element; expected names: context, domain, folder"
+                    inMsgOK="OK - top-level element names"
+                    deactivated="false">
+                    <in>
+                        <eq>context</eq>
+                        <eq>constraintComponents</eq>
+                        <eq>domain</eq>
+                        <eq>folder</eq>
+                        <eq>file</eq>
+                    </in>                    
+                </xpath>                
+
+                <xpath description="Validates content of top-level element 'constrainComponents'"
+                    expr="*:greenfox/*:constraintComponents/*/local-name(.)"
+                    eq="constraintComponent"
+                    eqMsg="Unexpected child element in 'constraintComponents' element; only 'constraintComponent' children allowed"
+                    eqMsgOK="OK - 'constraintComponents element: child element names"
+                    deactivated="false"/>                
+                
+                <xpath description="Validates content of top-level element 'context'"
+                    expr="*:greenfox/*:context/*/local-name(.)"
+                    eq="field"
+                    eqMsg="Unexpected child element in 'context' element; only 'field' children allowed"
+                    eqMsgOK="OK - 'context' element: child element names"
+                    deactivated="false"/>
+
+                <xpath description="Validates attribute names at 'folder' elements"
+                    expr="*:greenfox//*:folder/@*/name()"
+                    inMsg="Unexpected attribute on 'folder' element; expected names: foxpath, id"
+                    inMsgOK="OK - 'folder' element: attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>foxpath</eq>
+                        <eq>id</eq>
+                    </in>
+                </xpath>               
+
+                <xpath description="Validates content of 'folder' elements"
+                    expr="*:greenfox//*:folder/*/local-name(.)"
+                    inMsg="Unexpected child element in 'folder' element; expected names: targetSize, file, folder, folderContent, foxpath"
+                    inMsgOK="OK - 'folder' element: child element names"
+                    deactivated="false">
+                    <in>
+                        <eq>targetSize</eq>
+                        <eq>file</eq>
+                        <eq>folder</eq>
+                        <eq>folderContent</eq>
+                        <eq>foxpath</eq>
+                    </in>
+                </xpath>
+
+                <xpath description="Validates attribute names at 'targetSize' elements"
+                    expr="*:greenfox//*:targetSize/@*/name()"
+                    inMsg="Unexpected attribute on 'targetSizefolder' element; 
+                           expected names: id, count, minCount, maxCount, msg, msgOK, minCountMsg, minCountMsgOK, maxCountMsg, maxCountMsgOK"
+                    inMsgOK="OK - 'targetSize' element: attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>id</eq>
+                        <eq>count</eq>
+                        <eq>minCount</eq>
+                        <eq>maxCount</eq>
+                        <eq>msg</eq>
+                        <eq>msgOK</eq>
+                        <eq>minCountMsg</eq>
+                        <eq>minCountMsgOK</eq>
+                        <eq>maxCountMsg</eq>
+                        <eq>maxCountMsgOK</eq>                        
+                    </in>
+                </xpath>
+                
+                <xpath description="Validates content of 'targetSize' elements"
+                    expr="*:greenfox//*:targetSize/*"
+                    maxCount="0"
+                    maxCountMsg="Unexpected child element found in 'targetSize' element - 'targetSize' must be empty"
+                    maxCountMsgOK="OK - 'targetSize' element: empty"
+                    deactivated="false"/>
+                
+            </file>
+        </folder>
+    </domain>    
+</greenfox>
+

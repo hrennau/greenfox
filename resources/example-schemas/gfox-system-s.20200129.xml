@@ -1,104 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
-    xmlns="http://www.greenfox.org/ns/schema">
+          xmlns="http://www.greenfox.org/ns/schema">
 
     <!-- *** External context *** -->
     <context>
         <field name="lastModified" value="2019-12-01"/>
-    </context>
-
-    <!-- *** System file tree *** -->
-    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">
-
+    </context>    
+    
+    <domain path="\tt\greenfox\resources\example-system\system-s" 
+            name="system-s">    
+        
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="systemRootFolderShape">
-
+            
             <!-- *** XSD folder shape -->
             <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
                 <targetSize msg="No XSD folder found" count="1"/>
                 <file foxpath="*.xsd" id="xsdFileShape">
                     <targetSize msg="No XSDs found" minCount="1"/>
                 </file>
-            </folder>
+            </folder>                
 
             <!-- *** Codelist folder shape -->
             <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
                 <targetSize msg="No codelist folder found" count="1"/>
-
-                <!-- # Check - folder contains codelists? -->
-                <foxpath expr="*.xml/codelist[entry/@code[string()]]/@name"
-                    msg="Codelist folder without codelists" minCount="1"/>
+                <foxpath expr="*.xml/codelist[entry/@code/string()]/@name" minCount="1"/>
                 <file foxpath="*[is-xml(.)]">
                     <targetSize msg="No codelist files found" minCount="1"/>
                 </file>
-            </folder>
-
+            </folder>                
+            
             <!-- *** Testcase folder shape *** -->
             <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
                 <targetSize msg="No testcase folders found" minCount="1"/>
-                <!-- # Check - test folder content ok? -->
-                <folderContent
-                    closedMsg="Testcase contains member other than input, output, config, log-*."
-                    closed="true">
+                <folderContent msg="Testcase contains member other than input, output, config, log-*." 
+                               closed="true">
                     <memberFolders names="input, output, config"/>
                     <memberFiles names="log-*" count="*"/>
                 </folderContent>
 
-                <!-- *** msg config shape *** -->
-                <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator=","
-                    csv.withHeader="yes" id="msgConfigFileShape">
+                <!-- *** msg config shape -->
+                <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes" id="msgConfigFileShape">
                     <targetSize msg="Config file missing" count="1"/>
-
-                    <!-- Check - configured return codes expected? -->
-                    <xpath expr="//returnCode" inMsg="Config file contains unknown return code">
+                    
+                    <!-- Check - configured return codes ok? -->
+                    <xpath msg="Config file contains unknown return code" expr="//returnCode">
                         <in>
                             <eq>OK</eq>
                             <eq>NOFIND</eq>
                             <like>ERROR_*</like>
-                        </in>
-                    </xpath>
+                        </in>                                
+                    </xpath>                    
                 </file>
-
+                
                 <!-- *** Request file shape *** -->
                 <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
                     <targetSize msg="Input folder without request msgs" minCount="1"/>
-
+                    
                     <!-- Check - request with response ? -->
-                    <foxpath containsXPathMsg="Request without response"
+                    <foxpath msg="Request without response"
                         expr="..\..\output\*\file-name(.)"
-                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"/>
+                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"/>                       
                 </file>
-
-                <!-- *** Response file shape *** -->
-                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json"
-                    id="responseFileShape">
+                
+                <!-- *** Response file shape *** -->                
+                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json" id="responseFileShape">
                     <targetSize msg="Output folder without request msgs" minCount="1"/>
-
+                    
                     <!-- *** Check - response fresh? *** -->
                     <lastModified msg="Stale output file" ge="${lastModified}"/>
 
                     <!-- *** Check - response non-empty? *** -->
                     <fileSize msg="Empty output file" gt="0"/>
-
+                    
                     <!-- *** Check - schema valid? (only if XML) -->
                     <ifMediatype eq="xml">
-                        <xsdValid msg="Response msg not XSD valid"
-                            xsdFoxpath="$domain\resources\xsd\\*.xsd"/>
+                        <xsdValid msg="Response msg not XSD valid" 
+                                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
                     </ifMediatype>
-
+                    
                     <!-- *** Check - known article number? -->
-                    <xpath eqFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"
-                        expr="//*:fooValue"
-                        eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
-
+                    <xpath msg="Unknown foo article number"
+                           id="articleNumberValueShape"
+                           expr="//*:fooValue" 
+                           eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>                        
+                    
                     <!-- *** Check - return code ok? *** -->
-                    <foxpath eqXPathMsg="Return code not the configured value"
-                        expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                    <foxpath msg="Return code not the configured value" 
+                             expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
                                    //record[response eq $fileName]/returnCode"
-                        eqXPath="//*:returnCode"/>
+                             eqXPath="//*:returnCode"/>                    
                 </file>
-
+                
             </folder>
         </folder>
-    </domain>
+    </domain>    
 </greenfox>
