@@ -67,7 +67,7 @@ declare function f:validateTargetCount($constraint as element(),
         let $ok := $value eq $targetCount
         let $colour := if ($ok) then 'green' else 'error'
         return
-            f:constructResult_targetCount($constraint, $colour, (), 'targetCount', $condition, 
+            f:constructResult_targetCount($constraint, $colour, (), 'TargetCount', $condition, 
                 $targetCount, $contextPath, $navigationSpec)
         ,
         let $condition := $constraint/@minCount
@@ -77,7 +77,7 @@ declare function f:validateTargetCount($constraint as element(),
         let $ok := $value le $targetCount
         let $colour := if ($ok) then 'green' else 'error'
         return
-            f:constructResult_targetCount($constraint, $colour, (), 'targetMinCount', $condition, 
+            f:constructResult_targetCount($constraint, $colour, (), 'TargetMinCount', $condition, 
                 $targetCount, $contextPath, $navigationSpec)
         ,        
         let $condition := $constraint/@maxCount
@@ -87,7 +87,7 @@ declare function f:validateTargetCount($constraint as element(),
         let $ok := $value ge $targetCount
         let $colour := if ($ok) then 'green' else 'error'
         return
-            f:constructResult_targetCount($constraint, $colour, (), 'targetMaxCount', $condition, 
+            f:constructResult_targetCount($constraint, $colour, (), 'TargetMaxCount', $condition, 
                 $targetCount, $contextPath, $navigationSpec)
     )
     return $results

@@ -376,10 +376,10 @@ system-s
             <para>We proceed with a file shape which targets the <code>msg-config.csv</code> file in
                 the <code>config</code> folder of the test case:</para>
             <programlisting>&lt;!-- *** msg config file shape *** -->
-  &lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">config\msg-config.csv</emphasis>" id="msgConfigFileShape" ...>
-    &lt;targetSize msg="Config file missing" count="1"/>
-    ...
-  &lt;/file></programlisting>
+&lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">config\msg-config.csv</emphasis>" id="msgConfigFileShape" ...>
+  &lt;targetSize msg="Config file missing" count="1"/>
+  ...
+&lt;/file></programlisting>
             <para>The <code>TargetCount</code> constraint makes this file mandatory, but we want to
                 be more specific: to constrain the <emphasis role="ital">file contents</emphasis>.
                 The file must be a CSV file, and the third column (which according to the header row
@@ -447,11 +447,13 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             <programlisting><!-- *** Request file shape *** -->
 &lt;<emphasis role="bold">file</emphasis> foxpath="input\(*.xml, *.json)" id="requestFileShape">
   ...
-  <!-- # Check - request with response ? -->
+  &lt;!-- # Check - request with response ? -->
   &lt;<emphasis role="bold">foxpath</emphasis> expr="<emphasis role="bold">..\..\output\*\file-name(.)</emphasis>"
-      containsXPath="$fileName ! 
+      <emphasis role="bold">containsXPath</emphasis>="$fileName ! 
                      replace(., '(.*)RQ(.*)$', '$1RS$2')"
-      containsXPathMsg="Request without response"</programlisting>
+      containsXPathMsg="Request without response"
+  ...
+&lt;file></programlisting>
             <para>A Foxpath value shape combines a foxpath expression (@expr) with a set of
                 constraints. The expression maps the focus resource to a value, which is validated
                 against all constraints. Here we have an expression which maps the focus resource to
@@ -481,7 +483,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
     ...
     &lt;!-- # Check - folder contains codelists? -->
     &lt;<emphasis role="bold">foxpath</emphasis> expr="<emphasis role="bold">*.xml/codelist[entry]/@name</emphasis>"  
-             minCount="1"
+             <emphasis role="bold">minCount</emphasis>="1"
              minCoutMsg="Codelist folder without codelists"
     ...
 &lt;/folder></programlisting>
@@ -493,44 +495,45 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             <para>Now we turn to the <emphasis role="ital">response message files</emphasis>. They
                 must be “fresh”, that is, have a timestamp of last modification which is after a
                 limit timestamp provided by a call parameter of the system validation. This is
-                accomplised by a <code>lastModified</code> constraint, which references the
-                parameter value. Besides, response files must not be empty (<code>fileSize</code>
+                accomplised by a <code>LastModified</code> constraint, which references the
+                parameter value. Besides, response files must not be empty (<code>FileSize</code>
                 constraint):</para>
-            <programlisting><![CDATA[<!-- *** Response file shape *** -->                
-<file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+            <programlisting>&lt;!-- *** Response file shape *** -->                
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
     ...                    
-    <!-- *** Check - response fresh? *** -->
-    <lastModified ge="${lastModified}"
-                  geMsg="Stale output file"/>
+    &lt;!-- # Check - response fresh? *** -->
+    &lt;<emphasis role="bold">lastModified</emphasis> ge="${lastModified}"
+                  geMsg="Stale output file"
 
-    <!-- *** Check - response non-empty? *** -->
-    <fileSize gt="0" 
-              gtMsg="Empty output file"/>
+    &lt;!-- # Check - response non-empty? *** -->
+    &lt;<emphasis role="bold">fileSize</emphasis> gt="0" 
+              gtMsg="Empty output file"
     ...
-</file>]]></programlisting>
-            <para>The placeholder <code>${lastModified}</code> is substituted by the value passed to
-                the greenfox processor as input parameter and declared in the schema as a <emphasis
-                    role="ital">context parameter</emphasis>:</para>
-            <programlisting><![CDATA[<greenfox ... >
-  <!-- *** External context *** -->
-  <context>
-    <field name="lastModified"/>
-  </context>    
+&lt;/file></programlisting>
+            <para>The placeholder <code>${lastModified}</code> is substituted with the value passed
+                to the greenfox processor as input parameter and declared in the schema as a
+                    <emphasis role="ital">context parameter</emphasis>:</para>
+            <programlisting>&lt;<emphasis role="bold">greenfox</emphasis> ... >
+  &lt;!-- *** External context *** -->
+  &lt;<emphasis role="bold">context</emphasis>>
+    &lt;<emphasis role="bold">field</emphasis> name="lastModified"
+  &lt;/context>    
   ...
-</greenfox>]]></programlisting>
+&lt;/greenfox></programlisting>
             <para>We have several expecations related to the contents of response files. If the
                 response is an XML document (rather than JSON), it must be valid valid against some
-                XSD found in the XSD folder. XSD validation is triggered by an <code>xsdValid</code>
+                XSD found in the XSD folder. XSD validation is triggered by an <code>XSDValid</code>
                 constraint, with a foxpath expression locating the XSD(s) to be used:</para>
-            <programlisting><![CDATA[<!-- *** Response file shape *** -->                
-<file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+            <programlisting>&lt;!-- *** Response file shape *** -->                
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" <emphasis role="bold">mediatype="xml-or-json</emphasis>">
     ...
-    <!-- *** Check - schema valid? (only if XML) -->
-    <ifMediatype eq="xml">
-        <xsdValid msg="Response msg not XSD valid" 
-                  xsdFoxpath="$domain\resources\xsd\\*.xsd"/>  
-    </ifMediatype>
-</file>]]></programlisting>
+    &lt;!-- # Check - schema valid? (only if XML) -->
+    &lt;<emphasis role="bold">ifMediatype</emphasis> eq="xml">
+        &lt;<emphasis role="bold">xsdValid</emphasis> msg="Response msg not XSD valid" 
+                  xsdFoxpath="<emphasis role="bold">$domain\resources\xsd\\*.xsd</emphasis>"/>  
+    &lt;/ifMediatype>
+    ...
+&lt;/file></programlisting>
             <para>It is not necessary to specify an individual XSD – the greenfox processor inspects
                 all XSDs matching the expression and selects for each file to be validated the
                 appropriate XSD. This is achieved by comparing name and namespace of the root
@@ -541,19 +544,17 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 foxpath expression and which provides the file path of the domain folder. </para>
             <para>The next condition to be checked is that certain values from the response
                 (selected by XPath <code>//*:fooValue</code>) are found in a particular codelist.
-                Here we use an XPath value shape which contains an <code>ExprValueEqFoxpath</code>
-                constraint, represented by the @eqFoxpath attribute:</para>
-            <programlisting><![CDATA[<!-- *** Response file shape *** -->                
-<file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                Here we use an XPath value shape with an <code>ExprValueEqFoxpath</code> constraint,
+                represented by the @eqFoxpath attribute:</para>
+            <programlisting>&lt;!-- *** Response file shape *** -->                
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" <emphasis role="bold">mediatype="xml-or-json</emphasis>">
     ...
-   <!-- *** Check - known article number? -->
-   <xpath expr="//*:fooValue"
-          eqFoxpathMsg="Unknown foo article number"   
-          eqFoxpath="$domain\\codelists\*.xml
-                     /codelist[@name eq 'foo-article']/entry/@code"/>
- 
-   </xpath>
-</file>]]></programlisting>
+   &lt;!-- # Check - known article number? -->
+   &lt;<emphasis role="bold">xpath</emphasis> expr="//*:fooValue"
+          <emphasis role="bold">eqFoxpath</emphasis>="$domain\\codelists\*.xml
+                     /codelist[@name eq 'foo-article']/entry/@code"
+          eqFoxpathMsg="Unknown foo article number"/>
+&lt;/file></programlisting>
             <para>As always with an XPath value shape, the XPath expression (@expr) selects the
                 content items to be checked. The <code>ExprValueEqFoxpath</code> constraint works as
                 follows: it evaluates the foxpath expression provided by constraint parameter
@@ -581,20 +582,19 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 navigation leading to the CSV file, then drilling down into the file and fetching
                 the item of interest. The value against which to compare is retrieved by a trivial
                 XPath expression (@eqXPath):</para>
-            <programlisting><![CDATA[<!-- *** Response file shape *** -->                
-<file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+            <programlisting>&lt;!-- *** Response file shape *** -->                
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
     ...
-    <!-- *** Check - return code expected? *** -->
-    <foxpath expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+    &lt;!-- # Check - return code expected? *** -->
+    &lt;<emphasis role="bold">foxpath</emphasis> expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
                    //record[response eq $fileName]/returnCode"
+             <emphasis role="bold">eqXPath</emphasis>="//*:returnCode"
              eqXPathMsg="Return code not the configured value"                   
-             eqXPath="//*:returnCode"/>
-    </foxpath>
-</file>]]></programlisting>
+&lt;/file></programlisting>
             <para>The complete schema is shown in the appendix A1. To summarize, we have developed a
                 schema which constrains the presence and contents of folders, the presence and
                 contents of files, and relationships between contents of different files, in some
-                cases belonging to different mediatypes. The devlopment of the schema demanded
+                cases belonging to different mediatypes. The development of the schema demanded
                 familiarity with XPath, but no programming skills beyond that. </para>
         </section>
     </section>

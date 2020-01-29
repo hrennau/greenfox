@@ -26,8 +26,10 @@
                 <targetSize msg="No codelist folder found" count="1"/>
 
                 <!-- # Check - folder contains codelists? -->
-                <foxpath expr="*.xml/codelist[entry/@code[string()]]/@name"
-                    msg="Codelist folder without codelists" minCount="1"/>
+                <foxpath 
+                    expr="*.xml/codelist[entry/@code[string()]]/@name"
+                    minCount="1"
+                    minCountMsg="Codelist folder without codelists"/>
                 <file foxpath="*[is-xml(.)]">
                     <targetSize msg="No codelist files found" minCount="1"/>
                 </file>
@@ -49,8 +51,9 @@
                     csv.withHeader="yes" id="msgConfigFileShape">
                     <targetSize msg="Config file missing" count="1"/>
 
-                    <!-- Check - configured return codes expected? -->
-                    <xpath expr="//returnCode" inMsg="Config file contains unknown return code">
+                    <!-- # Check - configured return codes expected? -->
+                    <xpath expr="//returnCode" 
+                           inMsg="Config file contains unknown return code">
                         <in>
                             <eq>OK</eq>
                             <eq>NOFIND</eq>
@@ -63,8 +66,9 @@
                 <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
                     <targetSize msg="Input folder without request msgs" minCount="1"/>
 
-                    <!-- Check - request with response ? -->
-                    <foxpath expr="..\..\output\*\file-name(.)"
+                    <!-- # Check - request with response ? -->
+                    <foxpath 
+                        expr="..\..\output\*\file-name(.)"
                         containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
                         containsXPathMsg="Request without response"/>
                 </file>
@@ -74,28 +78,31 @@
                     id="responseFileShape">
                     <targetSize msg="Output folder without request msgs" minCount="1"/>
 
-                    <!-- *** Check - response fresh? *** -->
+                    <!-- # Check - response fresh? *** -->
                     <lastModified msg="Stale output file" ge="${lastModified}"/>
 
-                    <!-- *** Check - response non-empty? *** -->
+                    <!-- # Check - response non-empty? *** -->
                     <fileSize msg="Empty output file" gt="0"/>
 
-                    <!-- *** Check - schema valid? (only if XML) -->
+                    <!-- # Check - schema valid? (only if XML) -->
                     <ifMediatype eq="xml">
                         <xsdValid msg="Response msg not XSD valid"
                             xsdFoxpath="$domain\resources\xsd\\*.xsd"/>
                     </ifMediatype>
 
-                    <!-- *** Check - known article number? -->
-                    <xpath eqFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"
+                    <!-- # Check - known article number? -->
+                    <xpath 
                         expr="//*:fooValue"
-                        eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"/>
+                        eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"
+                        eqFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"/>
 
-                    <!-- *** Check - return code ok? *** -->
-                    <foxpath eqXPathMsg="Return code not the configured value"
+                    <!-- # Check - return code ok? *** -->
+                    <foxpath 
                         expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
                                    //record[response eq $fileName]/returnCode"
-                        eqXPath="//*:returnCode"/>
+                        eqXPath="//*:returnCode"                                   
+                        eqXPathMsg="Return code not the configured value"/>                                   
+
                 </file>
 
             </folder>
