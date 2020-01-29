@@ -147,9 +147,10 @@ system-s
                         <row>
                             <entry align="left">file</entry>
                             <entry align="left">resources/codelists/*</entry>
-                            <entry align="left">A codelist file; name not constrained; must be an
-                                XML document containing <code>&lt;codelist></code> elements with a
-                                @name attribute and <code>&lt;entry></code> children</entry>
+                            <entry align="left">A <emphasis role="bold">codelist file</emphasis>;
+                                name not constrained; must be an XML document containing
+                                    <code>&lt;codelist></code> elements with a @name attribute and
+                                    <code>&lt;entry></code> children</entry>
                         </row>
                         <row>
                             <entry align="left">folder</entry>
@@ -160,13 +161,14 @@ system-s
                         <row>
                             <entry align="left">file</entry>
                             <entry align="left">resources/xsd/*</entry>
-                            <entry align="left">An XSD schema file; name not constrained</entry>
+                            <entry align="left">An <emphasis role="bold">XSD schema file</emphasis>;
+                                name not constrained</entry>
                         </row>
                         <row>
                             <entry align="left">folder</entry>
                             <entry align="left">.//test-*</entry>
                             <entry align="left">A test case folder, containing <code>input</code>,
-                                    <code>xoutput</code> and <code>config</code> folders; apart from
+                                    <code>output</code> and <code>config</code> folders; apart from
                                 these only optional <code>log-*</code> files are allowed </entry>
                         </row>
                         <row>
@@ -178,7 +180,8 @@ system-s
                         <row>
                             <entry align="left">file</entry>
                             <entry align="left">.//test-*/config/msg-config.csv</entry>
-                            <entry align="left">A CSV file with three columns: request file name,
+                            <entry align="left">A <emphasis role="bold">message configuration
+                                    file</emphasis>; CSV file with three columns: request file name,
                                 response file name, expected return code</entry>
                         </row>
                         <row>
@@ -190,9 +193,10 @@ system-s
                         <row>
                             <entry align="left">file</entry>
                             <entry align="left">.//test-*/input/*</entry>
-                            <entry align="left">A file representing a request message; name
-                                extension <code>.xml</code> or <code>.json</code>; mediatype
-                                corresponding to name extension</entry>
+                            <entry align="left">A <emphasis role="bold">request message
+                                    file</emphasis>; name extension <code>.xml</code> or
+                                    <code>.json</code>; mediatype corresponding to name
+                                extension</entry>
                         </row>
                         <row>
                             <entry align="left">folder</entry>
@@ -203,9 +207,10 @@ system-s
                         <row>
                             <entry align="left">file</entry>
                             <entry align="left">.//test-*/output/*</entry>
-                            <entry align="left">A file representing a response message; name
-                                extension <code>.xml</code> or <code>.json</code>; mediatype
-                                corresponding to name extension</entry>
+                            <entry align="left">A <emphasis role="bold">response message
+                                    file</emphasis>; name extension <code>.xml</code> or
+                                    <code>.json</code>; mediatype corresponding to name
+                                extension</entry>
                         </row>
                     </tbody>
                 </tgroup>
@@ -219,16 +224,18 @@ system-s
                 likewise the placing of codelist documents in folder
                     <code>resources/codelists</code>. The names of XSD and codelist files are not
                 constrained. </para>
-            <para>Structural expectations include also a conditional constraint:</para>
+            <para>Apart from these static constraints, the presence of some files implies the
+                presence of other files:</para>
             <itemizedlist spacing="compact">
                 <listitem>
                     <para>For every request message, there must be a response message with a name
-                        obtained by replacing in the request file name <code>RQ</code> with
-                            <code>RS</code> (e.g. <code>getFooRQ.*</code> and
-                            <code>getFooRS.*</code>)</para>
+                        derived from the request file name (replacing substring <code>RQ</code> with
+                            <code>RS</code>).</para>
                 </listitem>
             </itemizedlist>
-            <para>Besides the structural expectations, there are also content-related expectations: </para>
+            <para>Expectations are not limited to the presence of files and folders - they include
+                details of file contents, in some cases relating the contents of different files
+                with different mediatypes: </para>
             <itemizedlist spacing="compact">
                 <listitem>
                     <para>For every response message in XML format, there is exactly one XSD against
@@ -239,14 +246,13 @@ system-s
                         XSD</para>
                 </listitem>
                 <listitem>
-                    <para>Response message items (XML elements or JSON fields) with name
-                            <code>fooValue</code> must be found in the codelist with name
-                            <code>foo-article</code></para>
+                    <para>Response message items (XML elements or JSON fields) with a particular
+                        name (e.g. <code>fooValue</code>) must be found in the appropriate XML
+                        codelist discovered in a set of codelist files</para>
                 </listitem>
                 <listitem>
-                    <para>Response message return codes must be as configured by the corresponding
-                        row in <code>msg-config.csv</code> (applies to XML and JSON responses
-                        alike)</para>
+                    <para>Response message return codes (contained by XML and JSON documents) must
+                        be as configured by the corresponding row in a CSV table</para>
                 </listitem>
             </itemizedlist>
         </section>
