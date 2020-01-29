@@ -58,8 +58,8 @@ declare function f:validateExtensionConstraint($constraint as element(),
         return map:put($context, '_evaluationContext', $evaluationContext)
 :)
 
-    let $xpath := $constraintComponent/gx:xpath
-    let $foxpath := $constraintComponent/gx:foxpath
+    let $xpath := $constraintComponent/gx:xpathExpr
+    let $foxpath := $constraintComponent/gx:foxpathExpr
     let $exprValue := 
         if ($xpath) then f:evaluateXPath($xpath, $contextItem, $context?_evaluationContext, true(), true())
         else if ($foxpath) then f:evaluateFoxpath($xpath, $contextItem, $context?_evaluationContext, true())

@@ -143,11 +143,11 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
     (:
     let $_DEBUG := trace($components/name(), 'COMP_NAMES: ')        
     let $_DEBUG := trace($potentialBindings, '_POTENTIAL_BINDINGS: ')
-    :)    
+     :)    
     for $component in $components[self::gx:xpath, self::gx:foxpath, self::gx:xsdValid, self::gx:constraintComponent]
     let $potentialBindings_params := $component/self::gx:constraintComponent/gx:param/@name/string()
     let $potentialBindings := ($potentialBindings, $potentialBindings_params)
-    return (
+    let $reqBindings := (
         $component/self::gx:xsdValid/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),    
         $component/self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:xpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
@@ -155,9 +155,12 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
         $component/self::gx:foxpath/@expr/i:determineRequiredBindingsFoxpath(., $potentialBindings),
         $component/self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
         $component/self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        $component/gx:xpath/i:determineRequiredBindingsXPath(., $potentialBindings),        
-        $component/gx:foxpath/i:determineRequiredBindingsXPath(., $potentialBindings)
+        $component/gx:xpathExpr/i:determineRequiredBindingsXPath(., $potentialBindings),        
+        $component/gx:foxpathExpr/i:determineRequiredBindingsXPath(., $potentialBindings),
+        $component/self::gx:xpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .),
+        $component/self::gx:foxpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .)
         ) => distinct-values() => sort()
+    return $reqBindings        
 };        
 
 (:~

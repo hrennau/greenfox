@@ -56,6 +56,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $le := $constraint/@le    
     let $in := $constraint/gx:in
     let $notin := $constraint/gx:notin
+    let $contains := $constraint/gx:contains
     let $matches := $constraint/@matches
     let $notMatches := $constraint/@notMatches
     let $like := $constraint/@like
@@ -95,11 +96,12 @@ declare function f:validateExpressionValue($constraint as element(),
             return
                 f:evaluateXPath($eqXPath, $contextItem, $evaluationContext, true(), true())            
 
-    let $errors := (
+    let $results := (
         if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraint),    
         if (not($ne)) then () else f:validateExpressionValue_cmp($exprValue, $ne, $quantifier, $constraint),
         if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint),
         if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint),
+        if (not($contains)) then () else f:validateExpressionValue_contains($exprValue, $quantifier, $constraint),
         if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraint),
         if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraint),
         if (not($gt)) then () else f:validateExpressionValue_cmp($exprValue, $gt, $quantifier, $constraint),
@@ -144,10 +146,38 @@ declare function f:validateExpressionValue($constraint as element(),
 
        
     )
-    return
-        if ($errors) then $errors
-        else f:constructGreen_valueShape($constraint)
+    let $furtherResults :=
+        for $xpath in $constraint/gx:xpath
+        for $exprValueItem in $exprValue
+        (: let $_DEBUG := trace($exprValueItem, 'EXPR_VALUE_ITEM: ') :)
+        return
+            i:validateExpressionValue($xpath, $exprValueItem, $contextFilePath, $contextDoc, $context)
+    return (
+        $results,
+        $furtherResults
+    )
 };
+
+declare function f:validateExpressionValue_contains($exprValue as item()*,
+                                                    $quantifier as xs:string,
+                                                    $valueShape as element())
+        as element() {
+    (: let $_DEBUG := trace($exprValue, '_EXPR_VALUE: ') :)
+    let $contains := $valueShape/gx:contains        
+    let $values := $contains/string()
+    let $violations :=
+        if ($quantifier eq 'all') then $values[not(. = $exprValue)] 
+        else if ($values = $exprValue) then ()
+        else $values
+    return
+        if (exists($violations)) then 
+            let $useViolations := if ($quantifier eq 'some') then () else $violations
+            return
+                f:validationResult_expression('red', $valueShape, $contains, (), ($useViolations ! <gx:value>{.}</gx:value>))
+        else 
+            f:validationResult_expression('green', $valueShape, $contains, (), ())
+};        
+
 
 declare function f:validateExpressionValueCount($exprValue as item()*,
                                                 $cmp as attribute(),
@@ -447,13 +477,15 @@ declare function f:validationResult_expression($colour as xs:string,
                                                $additionalElems as element()*)
         as element() {
     let $exprLang := $valueShape/local-name(.)
-    let $expr := $valueShape/@expr/normalize-space(.)        
+    let $expr := $valueShape/@expr/normalize-space(.)    
+    let $constraint1 := $constraint[1]    
     let $constraintConfig :=
-        typeswitch($constraint[1])
+        typeswitch($constraint1)
         case attribute(eq) return map{'constraintComp': 'ExprValueEq', 'atts': ('eq', 'useDatatype')}
         case attribute(ne) return map{'constraintComp': 'ExprValueNe', 'atts': ('ne', 'useDatatype')}
         case element(gx:in) return map{'constraintComp': 'ExprValueIn', 'atts': ('useDatatype')}
         case element(gx:notin) return map{'constraintComp': 'ExprValueNotin', 'atts': ('useDatatype')}
+        case element(gx:contains) return map{'constraintComp': 'ExprValueContains', 'atts': ('useDatatype')}
         case attribute(lt) return map{'constraintComp': 'ExprValueLt', 'atts': ('lt', 'useDatatype')}        
         case attribute(le) return map{'constraintComp': 'ExprValueLe', 'atts': ('le', 'useDatatype')}        
         case attribute(gt) return map{'constraintComp': 'ExprValueGt', 'atts': ('gt', 'useDatatype')}        
@@ -477,11 +509,11 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype')}
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
-    let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
+    let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
         
     let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($valueShape, $constraint/local-name(.), ())
-        else i:getErrorMsg($valueShape, $constraint/local-name(.), ())
+        if ($colour eq 'green') then i:getOkMsg($valueShape, $constraint1/local-name(.), ())
+        else i:getErrorMsg($valueShape, $constraint1/local-name(.), ())
     let $elemName := 
         switch($colour)
         case 'red' return 'gx:error'
@@ -541,7 +573,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
             attribute valueShapeID {$valueShapeId},            
             attribute exprLang {$exprLang},
             attribute expr {$expr},
-            attribute actualCount {$count},
+            attribute valueCount {$count},
             $constraint[self::attribute()],
             $additionalAtts,
             (: $valueShape/*, :)   (: may depend on 'verbosity' :)

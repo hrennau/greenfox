@@ -17,9 +17,21 @@
             <file foxpath="${gfox}">
                 <targetSize msg="system-s schema not found" minCount="1"/>
 
+                <!-- check generic attributes 
+                     ======================== -->
+                <!-- check @id -->
+                <xpath description="Validates the @id attributes "
+                    expr="*:greenfox//@id"
+                    datatype="NCName"
+                    datatypeMsg="Invalid @id - value must be an NCName"
+                    datatypeMsgOK="OK - @id attributes: no values which are not NCNames"
+                    deactivated="false"/>
+                
+                <!-- check <greenfox>
+                     ================ -->                
                 <xpath description="Validates top-level elements"
                     expr="*:greenfox/*/local-name(.)"
-                    inMsg="Unexpected top-level element; expected names: context, domain, folder"
+                    inMsg="Unexpected top-level element; expected names: context, constraintComponents, domain, folder, file"
                     inMsgOK="OK - top-level element names"
                     deactivated="false">
                     <in>
@@ -31,21 +43,105 @@
                     </in>                    
                 </xpath>                
 
-                <xpath description="Validates content of top-level element 'constrainComponents'"
+                <!-- check <context>
+                     =============== -->                
+                <!-- <context> - check attribute names -->
+                <xpath description="Validates the absence of attributes in top-level element 'context'"
+                    expr="*:greenfox/*:context/@*"
+                    maxCount="0"
+                    maxCountMsg="Unexpected attributes in 'context' element - no attributes allowed"
+                    maxCountMsgOK="OK - 'context' element: no attributes"
+                    deactivated="false"/>
+                
+                <!-- <context> - check child element names -->
+                <xpath description="Validates element names in top-level element 'context'"
+                    expr="*:greenfox/*:context/*/local-name(.)"
+                    eq="field"
+                    eqMsg="Unexpected child element in 'context' element; only 'field' children allowed"
+                    eqMsgOK="OK - 'context' element: no unexpected child element names"
+                    deactivated="false"/>
+                
+                <!-- check <field>
+                     ============= -->                
+                <!-- <field> - check attribute names -->
+                <xpath description="Validates the attribute names in 'field' elements"
+                    expr="*:greenfox/*:context/*:field/@*/local-name(.)"
+                    inMsg="Unexpected attributes in 'field' element; expected names: name, value"
+                    inMsgOK="OK - 'field' element: no unexpected attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>name</eq>   
+                        <eq>value</eq>
+                    </in>
+                </xpath>
+                
+                <!-- <field> - check @name: type must be NCName -->
+                <xpath description="Validates the @name attribute in 'field' elements"
+                    expr="*:greenfox/*:context/*:field/@name"
+                    datatype="NCName"
+                    datatypeMsg="Unexpected datatype of @name in 'field' element; expected type is 'NCName'"
+                    datatypeMsgOK="OK - 'field' element: no @name with type ne NCName"
+                    deactivated="false"/>
+                
+                <!-- <field> - check mandatory attributes -->
+                <xpath description="Validates 'field' elements, presence of mandatory attributes"
+                    expr="*:greenfox/*:context/*:field"
+                    deactivated="false">
+                    
+                    <xpath description="Validates an individual 'field' element, presence of mandatory attributes"
+                        expr="@*/local-name(.)"
+                        containsMsg="Missing mandatory attribute 'name'"
+                        containsMsgOK="OK - 'field' element has mandatory 'name' attribute"
+                        deactivated="false">
+                        <contains>name</contains>
+                    </xpath>
+                    
+                </xpath>                
+                
+                <!-- check <constraintComponents>
+                     ============================ -->                
+                <xpath description="Validates content of top-level element 'constraintComponents'"
                     expr="*:greenfox/*:constraintComponents/*/local-name(.)"
                     eq="constraintComponent"
                     eqMsg="Unexpected child element in 'constraintComponents' element; only 'constraintComponent' children allowed"
                     eqMsgOK="OK - 'constraintComponents element: child element names"
                     deactivated="false"/>                
-                
-                <xpath description="Validates content of top-level element 'context'"
-                    expr="*:greenfox/*:context/*/local-name(.)"
-                    eq="field"
-                    eqMsg="Unexpected child element in 'context' element; only 'field' children allowed"
-                    eqMsgOK="OK - 'context' element: child element names"
-                    deactivated="false"/>
 
-                <xpath description="Validates attribute names at 'folder' elements"
+                <!-- check <domain>
+                     ============== -->                
+                <!-- <domain> - check attribute names -->
+                <xpath description="Validates the attribute names in 'domain' elements"
+                    expr="*:greenfox/*:domain/@*/local-name(.)"
+                    inMsg="Unexpected attributes in 'domain' element; expected attribute names: path, name"
+                    inMsgOK="OK - 'domain' element: no unexpected attributes"
+                    deactivated="false">
+                    <in>
+                        <eq>path</eq>
+                        <eq>name</eq>
+                    </in>
+                </xpath>
+                
+                
+                <!-- <domain> - check mandatory attribute names -->
+                <xpath description="Validates 'domain' elements, presence of mandatory attributes"
+                    expr="*:greenfox/*:domain"
+                    deactivated="false">
+                    
+                    <xpath description="Validates an individual 'domain' element, presence of mandatory attributes"
+                        expr="@*/local-name(.)"
+                        containsMsg="Missing mandatory attribute(s)"
+                        containsMsgOK="OK - 'domain' element has mandatory attributes ('path' and 'name')"
+                        deactivated="false">
+                        <contains>path</contains>                        
+                        <contains>name</contains>
+                    </xpath>
+                    
+                </xpath>                
+                
+                <!-- check <folder>
+                     ============== -->     
+                <!-- <folder> - check attribute names -->
+                <xpath description="Validates the attribute names in 'folder' elements"
                     expr="*:greenfox//*:folder/@*/name()"
                     inMsg="Unexpected attribute on 'folder' element; expected names: foxpath, id"
                     inMsgOK="OK - 'folder' element: attribute names"
@@ -56,6 +152,7 @@
                     </in>
                 </xpath>               
 
+                <!-- <folder> - check child element names -->
                 <xpath description="Validates content of 'folder' elements"
                     expr="*:greenfox//*:folder/*/local-name(.)"
                     inMsg="Unexpected child element in 'folder' element; expected names: targetSize, file, folder, folderContent, foxpath"
@@ -70,6 +167,23 @@
                     </in>
                 </xpath>
 
+                <!-- <folder> (under domain) - check mandatory attribute names -->
+                <xpath description="Validates 'folder' elements, presence of mandatory attributes"
+                    expr="*:greenfox/*:domain//*:folder"
+                    deactivated="false">
+                    
+                    <xpath description="Validates an individual 'folder' element, presence of mandatory attributes"
+                        expr="@*/local-name(.)"
+                        quant="some"
+                        containsMsg="Missing mandatory attribute (one of 'foxpath', 'path')"
+                        containsMsgOK="OK - 'folder' element has mandatory attributes (one of 'foxpath', 'path')"
+                        deactivated="false">
+                        <contains>foxpath</contains>                        
+                        <contains>path</contains>
+                    </xpath>
+                    
+                </xpath>                
+                
                 <!-- check <targetSize>
                      ================== -->                
                 <!-- <targetSize> - check attribute names -->
@@ -92,6 +206,21 @@
                         <eq>maxCountMsgOK</eq>                        
                     </in>
                 </xpath>
+
+                <!-- <targetSize> - check mandatory attributes -->
+                <xpath description="Validates 'targetSize' elements, presence of mandatory attributes"
+                    expr="*:greenfox//*:targetSize">
+                    
+                    <xpath expr="@*/local-name(.)"
+                        quant="some"                        
+                        containsMsg="Validates an individual 'targetSize' elements, must contains at least one attribute from 'minCount', 'maxCount', 'count'"
+                        containsMsgOK="OK - 'targetSize' has at least one attribute from 'minCount', 'maxCount', 'count'">
+                        <contains>minCount</contains>                                                    
+                        <contains>maxCount</contains>
+                        <contains>count</contains>
+                    </xpath>
+                </xpath>
+                
                 
                 <!-- <targetSize> - check attribute values -->
                 <xpath description="Check attribute values, 'minCount'"
@@ -133,6 +262,25 @@
                         <eq>closedMsgOK</eq>
                     </in>
                 </xpath>
+                
+                <!-- check <file>
+                     ============ -->     
+                <!-- <file> - check attribute names -->
+                <xpath description="Validates the attribute names in 'file' elements"
+                    expr="*:greenfox//*:file/@*/name()"
+                    inMsg="Unexpected attribute in 'file' element; expected names: foxpath, id"
+                    inMsgOK="OK - 'file' element: no unexpected attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>foxpath</eq>
+                        <eq>id</eq>
+                        <eq>mediatype</eq>
+                        <eq>csv.separator</eq>
+                        <eq>csv.withHeader</eq>
+                    </in>
+                </xpath>               
+                
+                
                 
             </file>
         </folder>

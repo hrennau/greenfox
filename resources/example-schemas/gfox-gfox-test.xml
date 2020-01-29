@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <!-- *** External context *** -->
+    <context>
+        <field name="domain" value="\tt\greenfox\resources\example-schemas"/>
+        <field name="gfox" value="gfox-system-s.xml"/>
+    </context>    
+    
+    <domain path="${domain}" 
+        name="schema-schemas">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="schemasFolderShape">
+            <targetSize msg="No schemas folder found" minCount="1"/>
+            <file foxpath="${gfox}">
+                <targetSize msg="system-s schema not found" minCount="1"/>
+
+                <xpath description="Validates 'field' elements, presence of mandatory attributes"
+                    expr="*:greenfox/*:context/*:field"
+                    minCount="1"                    
+                    deactivated="false">
+
+                    <xpath description="Validates an individual 'field' element, presence of mandatory attributes"
+                        expr="@*/local-name(.)"
+                        containsMsg="Missing mandatory attribute(s)"
+                        containsMsgOK="OK - 'field' element has mandatory attribute(s)"
+                        deactivated="false">
+                        <contains>name</contains>
+                        </xpath>
+                    
+                </xpath>
+                
+            </file>
+        </folder>
+    </domain>    
+</greenfox>
+

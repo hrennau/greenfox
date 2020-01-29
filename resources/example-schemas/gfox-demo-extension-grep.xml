@@ -12,14 +12,14 @@
         <constraintComponent constraintElementName="ex:grep">
             <param name="pattern"></param>
             <param name="flags"></param>
-            <xpath><![CDATA[
+            <xpathExpr><![CDATA[
 exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
-            ]]></xpath>
+            ]]></xpathExpr>
         </constraintComponent>
         
         <constraintComponent constraintElementName="ex:grepXXX">
             <param name="plain"></param>
-            <xpath><![CDATA[
+            <xpathExpr><![CDATA[
                     let $files := $this
                     return
                         some $file in $files satisfies
@@ -27,7 +27,7 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                         return
                             some $line in $lines satisfies
                                 contains($line, $plain)
-                ]]></xpath>
+                ]]></xpathExpr>
         </constraintComponent>
         
     </constraintComponents>    

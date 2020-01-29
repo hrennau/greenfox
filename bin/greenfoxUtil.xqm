@@ -201,6 +201,7 @@ declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemN
         case QName($i:URI_XSD, 'duration') return $s cast as xs:duration
         case QName($i:URI_XSD, 'dayTimeDuration') return $s cast as xs:dayTimeDuration
         case QName($i:URI_XSD, 'boolean') return $s cast as xs:boolean
+        case QName($i:URI_XSD, 'NCName') return $s cast as xs:NCName        
         default return error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
     } catch *:UNKNOWN_TYPE_NAME {error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
     } catch * {
