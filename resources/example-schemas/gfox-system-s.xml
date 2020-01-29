@@ -66,7 +66,7 @@
                 <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
                     <targetSize msg="Input folder without request msgs" minCount="1"/>
 
-                    <!-- # Check - request with response ? -->
+                        <!-- # Check - request with response ? -->
                     <foxpath 
                         expr="..\..\output\*\file-name(.)"
                         containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"

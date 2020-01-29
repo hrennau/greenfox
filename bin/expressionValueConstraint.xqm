@@ -46,6 +46,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $minCount := $constraint/@minCount
     let $maxCount := $constraint/@maxCount
     let $count := $constraint/@count
+    let $datatype := $constraint/@datatype
     
     let $eq := $constraint/@eq   
     let $ne := $constraint/@ne    
@@ -110,6 +111,7 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraint),     
         if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraint),
         if (not($maxCount)) then () else f:validateExpressionValueCount($exprValue, $maxCount, $constraint),
+        if (not($datatype)) then () else f:validateExpressionValue_cmp($exprValue, $datatype, $quantifier, $constraint),
 
         if (not($eqXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $eqXPath, $contextItem, $contextFilePath, 
                                                                           $contextDoc, $context, $quantifier, $constraint),
@@ -184,12 +186,14 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
         case attribute(notMatches) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
         case attribute(like) return function($op1, $op2) {matches($op1, $op2, $flags)}
         case attribute(notLike) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
+        case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}        
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
     
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
     let $useCmp :=
         if ($cmp/self::attribute(like)) then $cmp/f:glob2regex(.)
         else if ($cmp/self::attribute(notLike)) then $cmp/f:glob2regex(.)
+        else if ($cmp/self::attribute(datatype)) then $cmp        
         else if (empty($useDatatype)) then $cmp 
         else i:castAs($cmp, $useDatatype, ())
     let $useItems := if (empty($useDatatype)) then $exprValue else 
@@ -442,34 +446,35 @@ declare function f:validationResult_expression($colour as xs:string,
                                                $additionalAtts as attribute()*,
                                                $additionalElems as element()*)
         as element() {
-    let $valueShapeKind := $valueShape/local-name(.)
+    let $exprLang := $valueShape/local-name(.)
     let $expr := $valueShape/@expr/normalize-space(.)        
-    let $constraintComponent :=
+    let $constraintConfig :=
         typeswitch($constraint[1])
-        case attribute(eq) return 'ExprValueEq'
-        case attribute(ne) return 'ExprValueNe'
-        case element(gx:in) return 'ExprValueIn'
-        case element(gx:notin) return 'ExprValueNotin'
-        case attribute(lt) return 'ExprValueLt'        
-        case attribute(le) return 'ExprValueLe'        
-        case attribute(gt) return 'ExprValueGt'        
-        case attribute(ge) return 'ExprValueGe'
-        case attribute(matches) return 'ExprValueMatches'
-        case attribute(notMatches) return 'ExprValueNotMatches'
-        case attribute(like) return 'ExprValueLike'        
-        case attribute(notLike) return 'ExprValueNotLike'
-        case attribute(eqXPath) return 'ExprValueEqXPath'
-        case attribute(leXPath) return 'ExprValueLeXPath'
-        case attribute(ltXPath) return 'ExprValueLtXPath'
-        case attribute(geXPath) return 'ExprValueGeXPath'
-        case attribute(gtXPath) return 'ExprValueGtXPath'
-        case attribute(containsXPath) return 'ExprValueContainsXPath'
-        case attribute(containsFoxpath) return 'ExprValueContainsFoxpath'
-        case attribute(eqFoxpath) return 'ExprValueEqFoxpath'
-        case attribute(ltFoxpath) return 'ExprValueLtFoxpath'
-        case attribute(leFoxpath) return 'ExprValueLeFoxpath'
-        case attribute(gtFoxpath) return 'ExprValueGtFoxpath'
-        case attribute(geFoxpath) return 'ExprValueGeFoxpath'
+        case attribute(eq) return map{'constraintComp': 'ExprValueEq', 'atts': ('eq', 'useDatatype')}
+        case attribute(ne) return map{'constraintComp': 'ExprValueNe', 'atts': ('ne', 'useDatatype')}
+        case element(gx:in) return map{'constraintComp': 'ExprValueIn', 'atts': ('useDatatype')}
+        case element(gx:notin) return map{'constraintComp': 'ExprValueNotin', 'atts': ('useDatatype')}
+        case attribute(lt) return map{'constraintComp': 'ExprValueLt', 'atts': ('lt', 'useDatatype')}        
+        case attribute(le) return map{'constraintComp': 'ExprValueLe', 'atts': ('le', 'useDatatype')}        
+        case attribute(gt) return map{'constraintComp': 'ExprValueGt', 'atts': ('gt', 'useDatatype')}        
+        case attribute(ge) return map{'constraintComp': 'ExprValueGe', 'atts': ('ge', 'useDatatype')}
+        case attribute(datatype) return map{'constraintComp': 'ExprValueDatatype', 'atts': ('datatype', 'useDatatype')}
+        case attribute(matches) return map{'constraintComp': 'ExprValueMatches', 'atts': ('matches', 'useDatatype')}
+        case attribute(notMatches) return map{'constraintComp': 'ExprValueNotMatches', 'atts': ('notMatches', 'useDatatype')}
+        case attribute(like) return map{'constraintComp': 'ExprValueLike', 'atts': ('like', 'useDatatype')}        
+        case attribute(notLike) return map{'constraintComp': 'ExprValueNotLike', 'atts': ('notLike', 'useDatatype')}
+        case attribute(eqXPath) return map{'constraintComp': 'ExprValueEqXPath', 'atts': ('eqXPath', 'useDatatype')}
+        case attribute(leXPath) return map{'constraintComp': 'ExprValueLeXPath', 'atts': ('leXPath', 'useDatatype')}
+        case attribute(ltXPath) return map{'constraintComp': 'ExprValueLtXPath', 'atts': ('ltXPath', 'useDatatype')}
+        case attribute(geXPath) return map{'constraintComp': 'ExprValueGeXPath', 'atts': ('geXPath', 'useDatatype')}
+        case attribute(gtXPath) return map{'constraintComp': 'ExprValueGtXPath', 'atts': ('gtXPath', 'useDatatype')}
+        case attribute(containsXPath) return map{'constraintComp': 'ExprValueContainsXPath', 'atts': ('containsXPath', 'useDatatype')}
+        case attribute(containsFoxpath) return map{'constraintComp': 'ExprValueContainsFoxpath', 'atts': ('containsFoxpath', 'useDatatype')}
+        case attribute(eqFoxpath) return map{'constraintComp': 'ExprValueEqFoxpath', 'atts': ('eqFoxpath', 'useDatatype')}
+        case attribute(ltFoxpath) return map{'constraintComp': 'ExprValueLtFoxpath', 'atts': ('ltFoxpath', 'useDatatype')}
+        case attribute(leFoxpath) return map{'constraintComp': 'ExprValueLeFoxpath', 'atts': ('leFoxpath', 'useDatatype')}
+        case attribute(gtFoxpath) return map{'constraintComp': 'ExprValueGtFoxpath', 'atts': ('gtFoxpath', 'useDatatype')}
+        case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype')}
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint/local-name(.))
@@ -484,13 +489,13 @@ declare function f:validationResult_expression($colour as xs:string,
     return
         element {$elemName} {
             $msg ! attribute msg {.},
-            attribute valueShapeKind {$valueShapeKind},
-            attribute constraintComp {$constraintComponent},
-            attribute valueShapeID {$valueShapeId},
+            attribute constraintComp {$constraintConfig?constraintComp},
             attribute constraintID {$constraintId},
+            attribute valueShapeID {$valueShapeId},            
             $valueShape/@label/attribute constraintLabel {.},
+            attribute exprLang {$exprLang},
             attribute expr {$expr},
-            $valueShape/(@* except (@resourceShapeID, @valueShapeID, @constraintID, @label, @expr, @id, @msg))[not(matches(local-name(.), 'Msg(OK)?$'))],
+            $valueShape/@*[local-name(.) = $constraintConfig?atts],
             $additionalAtts,
             (: $valueShape/*, :)   (: may depend on 'verbosity' :)
             $additionalElems
@@ -505,7 +510,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
                                                     $additionalAtts as attribute()*,
                                                     $additionalElems as element()*)
         as element() {
-    let $valueShapeKind := $valueShape/local-name(.)
+    let $exprLang := $valueShape/local-name(.)
     let $expr := $valueShape/@expr/normalize-space(.)        
     let $constraintComponent :=
         typeswitch($constraint[1])
@@ -531,10 +536,10 @@ declare function f:validationResult_expressionCount($colour as xs:string,
     return
         element {$elemName} {
             $msg,
-            attribute valueShapeKind {$valueShapeKind},
             attribute constraintComp {$constraintComponent},
-            attribute valueShapeID {$valueShapeId},
             attribute constraintID {$constraintId},
+            attribute valueShapeID {$valueShapeId},            
+            attribute exprLang {$exprLang},
             attribute expr {$expr},
             attribute actualCount {$count},
             $constraint[self::attribute()],

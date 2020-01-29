@@ -70,11 +70,14 @@
                     </in>
                 </xpath>
 
+                <!-- check <targetSize>
+                     ================== -->                
+                <!-- <targetSize> - check attribute names -->
                 <xpath description="Validates attribute names at 'targetSize' elements"
                     expr="*:greenfox//*:targetSize/@*/name()"
                     inMsg="Unexpected attribute on 'targetSizefolder' element; 
                            expected names: id, count, minCount, maxCount, msg, msgOK, minCountMsg, minCountMsgOK, maxCountMsg, maxCountMsgOK"
-                    inMsgOK="OK - 'targetSize' element: attribute names"
+                    inMsgOK="OK - 'targetSize' element: no unexpected attribute names"
                     deactivated="false">
                     <in>
                         <eq>id</eq>
@@ -90,12 +93,46 @@
                     </in>
                 </xpath>
                 
+                <!-- <targetSize> - check attribute values -->
+                <xpath description="Check attribute values, 'minCount'"
+                    expr="*:greenfox//*:targetSize/@minCount"
+                    datatype="integer"
+                    datatypeMsg="Element 'targetSize', attributes 'minCount' must have integer values"
+                    datatypeMsgOK="OK - 'targetSize' element: no @minCount atts with non-integer type"
+                    ge="0"
+                    geMsg="Element 'targetSize', attributes 'minCount' must be ge 0"
+                    geMsgOK="OK - 'targetSize' element: no @minCount atts lt 0"/>
+                 />
+                <xpath description="Check attribute values, 'maxCount, count"
+                    expr="*:greenfox//*:targetSize/(@maxCount, @count)"
+                    matches="^\d+|\*$"
+                    matchesMsg="Element 'targetSize', attributes 'maxCount' and 'count' must have integer values or be '*'"
+                    matchesMsgOK="OK - 'targetSize' element: no @maxCount or @count atts with non-integer values ne '*'"
+                />
+                
+                <!-- <targetSize> - check empty content -->
                 <xpath description="Validates content of 'targetSize' elements"
                     expr="*:greenfox//*:targetSize/*"
                     maxCount="0"
                     maxCountMsg="Unexpected child element found in 'targetSize' element - 'targetSize' must be empty"
                     maxCountMsgOK="OK - 'targetSize' element: empty"
                     deactivated="false"/>
+
+                <!-- check <folderContent>
+                     ===================== -->                
+                <!-- <folderContent> - check attribute names -->
+                <xpath description="Validates attribute names at 'folderContent' elements"
+                    expr="*:greenfox//*:folderContent/@*/name()"
+                    inMsg="Unexpected attribute on 'folderContent' element; expected names: id, closed"
+                    inMsgOK="OK - 'folderContent' element: no unexpected attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>id</eq>
+                        <eq>closed</eq>
+                        <eq>closedMsg</eq>
+                        <eq>closedMsgOK</eq>
+                    </in>
+                </xpath>
                 
             </file>
         </folder>

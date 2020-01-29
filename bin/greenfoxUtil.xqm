@@ -212,6 +212,11 @@ declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemN
     }
 };  
 
+declare function f:castableAs($s as xs:anyAtomicType, $type as xs:QName)
+        as xs:boolean {
+    exists(f:castAs($s, $type, ()))        
+};
+
 (:~
  : Returns a copy of a given string in which the first character is set
  : to lowercase.
