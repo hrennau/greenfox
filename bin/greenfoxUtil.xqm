@@ -257,6 +257,22 @@ declare function f:qnameToURI($qname as xs:QName?) as xs:string {
     return $uri || $sep || $lname
 };
 
+(:~
+ : Returns the data path of a given node. Only local names
+ : are considered. A suffix indicating the ([i]) is added
+ : unless the one-based index is 1.
+ :
+ : @param n the node
+ : @return the data path string
+ :)
+declare function f:datapath($n as node()) as xs:string {
+    (
+    for $node in $n/ancestor-or-self::node()
+    let $index := 1 + $node/preceding-sibling::*[local-name(.) eq $node/local-name(.)] => count()
+    return $node/concat(self::attribute()/'@', local-name(.)) || concat('[', $index, ']')[$index ne 1]
+    ) => string-join('/')
+};
+
 (:
 (:~
  : Returns the target paths of a resource shape.
