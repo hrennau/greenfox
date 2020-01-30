@@ -33,9 +33,10 @@ declare function f:validateExpressionValue($constraint as element(),
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
             trace($contextItem/f:datapath(.), '_FOCUS_NODE: ')
         else ()
-    let $contextInfo := map:merge(
+    let $contextInfo := map:merge((
+        $contextFilePath ! map:entry('filePath', .),
         $focusPath ! map:entry('focusPath', .)
-    )
+    ))
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
     let $expr := $constraint/@expr
@@ -525,6 +526,7 @@ declare function f:validationResult_expression($colour as xs:string,
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?focusPath ! attribute focusNode {.}
         
     let $msg := 
@@ -541,6 +543,7 @@ declare function f:validationResult_expression($colour as xs:string,
             attribute constraintID {$constraintId},
             attribute valueShapeID {$valueShapeId},            
             $valueShape/@label/attribute constraintLabel {.},
+            $filePath,
             $focusNode,
             attribute exprLang {$exprLang},
             attribute expr {$expr},
@@ -571,6 +574,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintSuffix := $constraintComponent ! replace(., '^ExprValue', '') ! f:firstCharToLowerCase(.)
     let $constraintId := concat($valueShapeId, '-', $constraintSuffix)
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?focusPath ! attribute focusNode {.}
     
     let $msg :=
@@ -590,6 +594,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
             attribute constraintComp {$constraintComponent},
             attribute constraintID {$constraintId},
             attribute valueShapeID {$valueShapeId},  
+            $filePath,
             $focusNode,
             attribute exprLang {$exprLang},
             attribute expr {$expr},

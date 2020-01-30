@@ -20,6 +20,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
+    "focusNodeValidator.xqm",
     "greenfoxTarget.xqm",    
     "mediatypeConstraint.xqm",
     "xsdValidator.xqm";
@@ -120,6 +121,7 @@ declare function f:validateFileInstance($filePath as xs:string,
             case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
             case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
+            case $focusNode as element(gx:focusNode) return i:validateFocusNode($focusNode, $doc, $filePath, $doc, $context)            
             case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
             case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
             case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
