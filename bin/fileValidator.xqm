@@ -76,8 +76,9 @@ declare function f:validateFileInstance($filePath as xs:string,
         )
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($components)     
+    
     (: Extension constraint components needed already now in order to analyze
-       if the contain references to xdoc, jdoc, csvdoc :)
+       if they contain references to xdoc, jdoc, csvdoc :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($components)
     
     (: Required bindings are a subset of potential bindings :)
@@ -98,21 +99,6 @@ declare function f:validateFileInstance($filePath as xs:string,
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, ())  
     
-(:    
-    let $context := 
-        let $evaluationContext :=
-            map:merge((
-                $context?_evaluationContext,
-                if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $reqBindingsAndDocs?xdoc),
-                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $reqBindingsAndDocs?jdoc),
-                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $reqBindingsAndDocs?csvdoc),
-                if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
-                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
-                if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
-                if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
-            ))    
-        return map:put($context, '_evaluationContext', $evaluationContext)
-:)    
     (: perform validations :)
     let $results := (
         for $child in $components[not(self::gx:targetSize)]
@@ -129,7 +115,7 @@ declare function f:validateFileInstance($filePath as xs:string,
             case $targetSize as element(gx:targetSize) return ()
             default return 
                 if ($child intersect $extensionConstraints) then 
-                    f:validateExtensionConstraint($child, $filePath, $filePath, $reqDocs, $context)
+                    f:validateExtensionConstraint($child, ($doc, $filePath)[1], $filePath, $doc, $context)
                 else            
                     error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
                           concat('Unexpected shape or constraint element, name: ', $child/name()))

@@ -31,11 +31,11 @@ declare function f:validateExpressionValue($constraint as element(),
 :)           
     let $focusPath :=
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
-            trace($contextItem/f:datapath(.), '_FOCUS_NODE: ')
+            $contextItem/f:datapath(.)
         else ()
     let $contextInfo := map:merge((
         $contextFilePath ! map:entry('filePath', .),
-        $focusPath ! map:entry('focusPath', .)
+        $focusPath ! map:entry('nodePath', .)
     ))
     let $msg := $constraint/@msg
     let $exprLang := local-name($constraint)
@@ -157,7 +157,6 @@ declare function f:validateExpressionValue($constraint as element(),
     let $furtherResults :=
         for $xpath in $constraint/gx:xpath
         for $exprValueItem in $exprValue
-        (: let $_DEBUG := trace($exprValueItem, 'EXPR_VALUE_ITEM: ') :)
         return
             i:validateExpressionValue($xpath, $exprValueItem, $contextFilePath, $contextDoc, $context)
     return (
@@ -171,7 +170,6 @@ declare function f:validateExpressionValue_contains($exprValue as item()*,
                                                     $valueShape as element(),
                                                     $contextInfo as map(xs:string, item()*))
         as element() {
-    (: let $_DEBUG := trace($exprValue, '_EXPR_VALUE: ') :)
     let $contains := $valueShape/gx:contains        
     let $values := $contains/string()
     let $violations :=
@@ -527,7 +525,7 @@ declare function f:validationResult_expression($colour as xs:string,
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?focusPath ! attribute focusNode {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
         
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($valueShape, $constraint1/local-name(.), ())
@@ -575,7 +573,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
     let $constraintSuffix := $constraintComponent ! replace(., '^ExprValue', '') ! f:firstCharToLowerCase(.)
     let $constraintId := concat($valueShapeId, '-', $constraintSuffix)
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?focusPath ! attribute focusNode {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePathe {.}
     
     let $msg :=
         if ($colour eq 'green') then 

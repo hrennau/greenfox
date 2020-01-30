@@ -221,7 +221,12 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $csvdoc as document-node()?,
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
-    let $doc := ($xdoc, $jdoc, $csvdoc)[1]        
+    let $doc := ($xdoc, $jdoc, $csvdoc)[1]    
+    let $reqDocs := map:merge((
+        $xdoc ! map:entry('xdoc', .),
+        $jdoc ! map:entry('jdoc', .),
+        $csvdoc ! map:entry('csvdoc', .),
+        $doc ! map:entry('doc', .)))
     let $context := 
         let $evaluationContext :=
             map:merge((
@@ -237,7 +242,8 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                 (: _TO_DO_ Support datatypes (xs:integer, ...) :)
                 $params ! map:entry(QName('', @name), string(.))                
             ))    
-        return map:put($context, '_evaluationContext', $evaluationContext)
+        return map:put($context, '_evaluationContext', $evaluationContext) !
+               map:put(., '_reqDocs', $reqDocs)
     return $context        
 };        
                                             

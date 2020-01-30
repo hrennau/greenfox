@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
-    xmlns="http://www.greenfox.org/ns/schema">
+    xmlns="http://www.greenfox.org/ns/schema"
+    xmlns:ex="http://example.com/ns">
     
     <!-- *** External context *** -->
     <context>
         <field name="domain" value="\tt\greenfox\resources\example-schemas"/>
         <field name="gfox" value="gfox-system-s.xml"/>
     </context>    
+
+    <!-- *** Constraint component *** -->
+    <constraintComponents>
+        <constraintComponent constraintElementName="ex:allowedAtts">
+            <param name="attNames"></param>
+            <xpathExpr><![CDATA[
+@*/local-name(.)[not(. = tokenize($attNames))]
+            ]]></xpathExpr>
+        </constraintComponent>
+        <constraintComponent constraintElementName="ex:mandatoryAtts">
+            <param name="attNames"></param>
+            <xpathExpr><![CDATA[
+let $atts := @*/local-name(.) return tokenize($attNames)[not(. = $atts)]
+            ]]></xpathExpr>
+        </constraintComponent>
+        
+    </constraintComponents>
+    
     
     <domain path="${domain}" 
         name="schema-schemas">    
+        
         
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="schemasFolderShape">
@@ -67,6 +87,13 @@
                      ============= -->   
                 <focusNode xpath="*:greenfox/*:context/*:field">
                     <!-- check attribute names and mandatory attributs -->
+
+                    <ex:allowedAtts
+                        msg="Unexpected attributes in 'field' element; expected: name, value"
+                        msgOK="OK - 'field' element: no unexpected attributes">
+                        <param name="attNames">name value</param>
+                    </ex:allowedAtts>
+                    
                     <xpath description="Validates the attribute names in 'field' elements"
                         expr="@*/local-name(.)"
                         inMsg="Unexpected attributes in 'field' element; expected names: name, value"
@@ -102,13 +129,24 @@
                 <!-- check <domain>
                      ============== -->                
                 <focusNode xpath="*:greenfox/*:domain">
-                    <!-- check attribute names, mandatory atts -->                    
+                    <!-- check attribute names, mandatory atts -->    
+                    <ex:allowedAtts
+                        msg="Unexpected attributes in 'domain' element; expected: path, name"
+                        msgOK="OK - 'domain' element: no unexpected attributes">
+                        <param name="attNames">path name</param>
+                    </ex:allowedAtts>
+                    <ex:mandatoryAtts
+                        msg="Missing mandatory attributes in 'domain' element; expected: path, name"
+                        msgOK="OK - 'domain' element: with mandatory attributes ('path' and 'name')">
+                        <param name="attNames">path name</param>
+                    </ex:mandatoryAtts>
+                    <!--
                     <xpath description="Validates the attribute names in 'domain' elements"
                         expr="@*/local-name(.)"
                         inMsg="Unexpected attributes in 'domain' element; expected attribute names: path, name"
                         inMsgOK="OK - 'domain' element: no unexpected attributes"
                         containsMsg="Missing mandatory attribute(s)"
-                        containsMsgOK="OK - 'domain' element has mandatory attributes ('path' and 'name')"
+                        containsMsgOK="OK - 'domain' element: with mandatory attributes ('path' and 'name')"
                         deactivated="false">
                         <in>
                             <eq>path</eq>
@@ -117,6 +155,7 @@
                         <contains>path</contains>                        
                         <contains>name</contains>
                     </xpath>
+                    -->
                     <xpath description="Validates the @path value"
                         expr="@path"
                         matches="\\"

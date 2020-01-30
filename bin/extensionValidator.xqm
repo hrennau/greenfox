@@ -24,7 +24,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateExtensionConstraint($constraint as element(), 
                                                $contextItem as item()?,
                                                $contextFilePath as xs:string,
-                                               $reqDocs as map(xs:string, document-node()?),
+                                               $contextDoc as document-node()?,
                                                $context as map(xs:string, item()*))
                                             
         as element()* {
@@ -32,6 +32,7 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $constraintElemName := $constraint/@constraintElementName
     let $paramNames := $constraint/gx:param/@name
     let $evaluationContext := $context?_evaluationContext
+    let $reqDocs := $context?_reqDocs
     
     let $reqBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
@@ -39,24 +40,6 @@ declare function f:validateExtensionConstraint($constraint as element(),
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $constraint/gx:param)  
-(:
-    let $context := 
-        let $evaluationContext :=
-            map:merge((
-                $context?_evaluationContext,
-                if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $reqDocs?xdoc),
-                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $reqDocs?jdoc),
-                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $reqDocs?csvdoc),
-                if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $contextItem),
-                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
-                if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $contextFilePath),
-                if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($contextFilePath, '.*[\\/]', '')),
-                (: Add parameter bindings :)
-                (: _TO_DO_ Support datatypes (xs:integer, ...) :)
-                for $param in $constraint/gx:param return $param/map:entry(QName('', @name), string(.)) 
-            ))    
-        return map:put($context, '_evaluationContext', $evaluationContext)
-:)
 
     let $xpath := $constraintComponent/gx:xpathExpr
     let $foxpath := $constraintComponent/gx:foxpathExpr
@@ -70,26 +53,30 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $isValid := $isValidAndErrors[1]
     let $errorValues := tail($isValidAndErrors)
     
-    let $msg := $constraint/@msg
-    let $msgOk := $constraint/@msgOk
+    let $msg := $constraint/@msg/string(.)
+    let $msgOk := $constraint/@msgOK/string(.)
+    let $nodePath := if (not($contextItem instance of node())) then () else $contextItem/i:datapath(.)
+    
     let $constraintIdentAtts := (
-        'ExtensionConstraintComponent' ! attribute constraintComponent {.},
-        $constraint/local-name(.) ! attribute extensionComponentKindName {.},
-        $constraint/node-name(.) ! i:qnameToURI(.) ! attribute extensionComponentKindURI {.},
+        'ExtensionConstraint' ! attribute constraintComp {.},
+        $constraint/local-name(.) ! attribute extensionConstraintName {.},
+        $constraint/node-name(.) ! i:qnameToURI(.) ! attribute extensionConstraintIRI {.},
         $constraint/@id/attribute constraintComponentID {.},
         $constraint/@label/attribute constraintLabel {.}
     )        
     return
         if ($isValid) then
             <gx:green>{
-                $msgOk,
+                $msgOk ! attribute msg {.},
                 $constraintIdentAtts,
+                $nodePath ! attribute nodePath {.},
                 $constraint/gx:param/<gx:param>{@*, node()}</gx:param>               
             }</gx:green>
         else
             <gx:error>{
-                $msg,
+                $msg ! attribute msg {.},
                 $constraintIdentAtts,
+                $nodePath ! attribute nodePath {.},                
                 $constraint/gx:param/<gx:param>{@*, node()}</gx:param>,
                 $errorValues ! <gx:value>{.}</gx:value>                
             }</gx:error>

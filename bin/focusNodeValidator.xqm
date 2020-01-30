@@ -13,6 +13,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
+    "extensionValidator.xqm",
     "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -36,6 +37,16 @@ declare function f:validateFocusNode($focusNodeShape as element(),
     let $xpath := $focusNodeShape/@xpath
     let $foxpath := $focusNodeShape/@foxpath
     
+    let $components :=
+        let $children := $focusNodeShape/*[not(@deactivated eq 'true')]
+        return (
+            $children[not(self::gx:ifMediatype)],
+            $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $contextFilePath)]
+                     /*[not(@deactivated eq 'true')]   
+        )
+    (: Subset of the constraints which are extension constraint definitions :)
+    let $extensionConstraints := f:getExtensionConstraints($components)     
+    
     let $evaluationContext := $context?_evaluationContext
     let $exprValue :=    
         if ($xpath) then 
@@ -47,22 +58,22 @@ declare function f:validateFocusNode($focusNodeShape as element(),
     let $results :=
         (: for every item of the expression value :)
         for $exprValueItem in $exprValue
-        return (
-            (: for every XPath shape :)
-            for $xpathShape in $focusNodeShape/gx:xpath
-            return
+        for $component in $components
+        return
+            typeswitch($component)
+            
+            case $xpathShape as element(gx:xpath) return
                 i:validateExpressionValue($xpathShape, $exprValueItem, $contextFilePath, $contextDoc, $context)
-            ,                
-            (: for every Foxpath shape :)
-            for $foxpathShape in $focusNodeShape/gx:foxpath
-            return
+            case $foxpathShape as element(gx:foxpath) return
                 i:validateExpressionValue($foxpathShape, $exprValueItem, $contextFilePath, $contextDoc, $context)
-            ,
-            (: for every child focus shape :)
-            for $focus in $focusNodeShape/gx:focusNode
-            return
-                i:validateFocusNode($focus, $exprValueItem, $contextFilePath, $contextDoc, $context)
-        )
+            case $focusNode as element(gx:focusNode) return                
+                i:validateFocusNode($focusNode, $exprValueItem, $contextFilePath, $contextDoc, $context)
+            default return 
+                if ($component intersect $extensionConstraints) then
+                    f:validateExtensionConstraint($component, $exprValueItem, $contextFilePath, $contextDoc, $context)
+                else            
+                    error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
+                          concat('Unexpected shape or constraint element, name: ', $component/name()))
     return
         $results
 };
