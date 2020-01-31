@@ -122,6 +122,7 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
             $constraint/i:getErrorMsg($constraint, $condition/local-name(.), ())
     let $navigationAtt :=
         let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
+        let $name := if (contains($name, 'Xpath')) then replace($name, 'Xpath', 'XPath') else $name
         return attribute {$name} {$navigationSpec}
     return
         element {$elemName} {

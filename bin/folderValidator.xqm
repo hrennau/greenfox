@@ -114,7 +114,7 @@ declare function f:validateFolderInstance($folderPath as xs:string,
                 if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
                 else
                     <gx:green>{
-                        attribute constraintComponent {$child/local-name()},                    
+                        attribute constraintComp {$child/local-name()},                    
                         $child/@id/attribute constraintID {.},
                         $child/@label/attribute constraintLabel {.},
                         attribute folderPath {$folderPath}

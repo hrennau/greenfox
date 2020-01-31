@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-extension-grep"
           xmlns:ex="http://example.com"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <!-- *** External context *** -->
@@ -9,12 +10,19 @@
     </context>    
 
     <constraintComponents>
+        
         <constraintComponent constraintElementName="ex:grep">
-            <param name="pattern"></param>
-            <param name="flags"></param>
-            <xpathExpr><![CDATA[
-exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
-            ]]></xpathExpr>
+            <param name="pattern" type="xs:string"></param>
+            <param name="flags" type="xs:string?"></param>
+            <xpathExpr>exists(unparsed-text-lines(.)[matches(., $pattern, $flags)])</xpathExpr>
+        </constraintComponent>
+
+        <constraintComponent constraintElementName="ex:grepYYY">
+            <param name="pattern" type="xs:string"></param>
+            <param name="flags" type="xs:string?"></param>
+            <xpathExpr>
+                exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
+            </xpathExpr>
         </constraintComponent>
         
         <constraintComponent constraintElementName="ex:grepXXX">
@@ -40,11 +48,15 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
             <targetSize msg="No niem folder found" minCount="1"/>
             <file foxpath="README.md">
                 <targetSize msg="README not found" minCount="1"/>    
-                <ex:grep msg="File does not contain string 'FBI'."
-                         msgOk="File contains string 'FBI'.">
+                <ex:grep pattern="fbIx?" flags="i"
+                         msg="File does not contain string '$pattern'."
+                         msgOK="File contains string '$pattern'."/>                    
+<!--                
                     <param name="pattern">fbIx?</param>
                     <param name="flags">i</param>
-                </ex:grep>
+                </ex:grep>                    
+-->                    
+
             </file>
         </folder>
     </domain>    

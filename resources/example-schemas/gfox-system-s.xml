@@ -12,32 +12,31 @@
 
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="systemRootFolderShape">
-
-            <!-- *** XSD folder shape -->
+            <!-- *** XSD folder shape *** -->
             <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
-                <targetSize msg="No XSD folder found" count="1"/>
+                <targetSize countMsg="No XSD folder found" count="1"/>
                 <file foxpath="*.xsd" id="xsdFileShape">
-                    <targetSize msg="No XSDs found" minCount="1"/>
+                    <targetSize minCountMsg="No XSDs found" minCount="1"/>
                 </file>
             </folder>
 
-            <!-- *** Codelist folder shape -->
+            <!-- *** Codelist folder shape *** -->
             <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
-                <targetSize msg="No codelist folder found" count="1"/>
+                <targetSize countMsg="No codelist folder found" count="1"/>
 
                 <!-- # Check - folder contains codelists? -->
                 <foxpath 
                     expr="*.xml/codelist[entry/@code[string()]]/@name"
                     minCount="1"
                     minCountMsg="Codelist folder without codelists"/>
-                <file foxpath="*[is-xml(.)]">
-                    <targetSize msg="No codelist files found" minCount="1"/>
+                <file foxpath="*[is-xml(.)]" id="codelistFileShape">
+                    <targetSize minCountMsg="No codelist files found" minCount="1"/>
                 </file>
             </folder>
 
             <!-- *** Testcase folder shape *** -->
             <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
-                <targetSize msg="No testcase folders found" minCount="1"/>
+                <targetSize minCountMsg="No testcase folders found" minCount="1"/>
                 <!-- # Check - test folder content ok? -->
                 <folderContent
                     closedMsg="Testcase contains member other than input, output, config, log-*."
@@ -47,9 +46,9 @@
                 </folderContent>
 
                 <!-- *** msg config shape *** -->
-                <file foxpath="config\msg-config.csv" mediatype="csv" csv.separator=","
-                    csv.withHeader="yes" id="msgConfigFileShape">
-                    <targetSize msg="Config file missing" count="1"/>
+                <file foxpath="config\msg-config.csv" id="msgConfigFileShape"
+                      mediatype="csv" csv.separator="," csv.withHeader="yes">
+                    <targetSize countMsg="Config file missing" count="1"/>
 
                     <!-- # Check - configured return codes expected? -->
                     <xpath expr="//returnCode" 
@@ -64,9 +63,9 @@
 
                 <!-- *** Request file shape *** -->
                 <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
-                    <targetSize msg="Input folder without request msgs" minCount="1"/>
+                    <targetSize minCountMsg="Input folder without request msgs" minCount="1"/>
 
-                        <!-- # Check - request with response ? -->
+                        <!-- # Check - request with response? -->
                     <foxpath 
                         expr="..\..\output\*\file-name(.)"
                         containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
@@ -74,20 +73,21 @@
                 </file>
 
                 <!-- *** Response file shape *** -->
-                <file foxpath="output\(*.xml, *.json)" mediatype="xml-or-json"
-                    id="responseFileShape">
-                    <targetSize msg="Output folder without request msgs" minCount="1"/>
+                <file foxpath="output\(*.xml, *.json)" id="responseFileShape"
+                      mediatype="xml-or-json">
+                    <targetSize minCountMsg="Output folder without request msgs" minCount="1"/>
 
-                    <!-- # Check - response fresh? *** -->
-                    <lastModified msg="Stale output file" ge="${lastModified}"/>
+                    <!-- # Check - response fresh? -->
+                    <lastModified geMsg="Stale output file" ge="${lastModified}"/>
 
-                    <!-- # Check - response non-empty? *** -->
-                    <fileSize msg="Empty output file" gt="0"/>
+                    <!-- # Check - response non-empty? -->
+                    <fileSize gtMsg="Empty output file" gt="0"/>
 
                     <!-- # Check - schema valid? (only if XML) -->
                     <ifMediatype eq="xml">
-                        <xsdValid msg="Response msg not XSD valid"
-                            xsdFoxpath="$domain\resources\xsd\\*.xsd"/>
+                        <xsdValid xsdFoxpath="$domain\resources\xsd\\*.xsd"
+                                  msg="Response msg not XSD valid"/>
+                                  
                     </ifMediatype>
 
                     <!-- # Check - known article number? -->
@@ -96,10 +96,10 @@
                         eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"
                         eqFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"/>
 
-                    <!-- # Check - return code ok? *** -->
+                    <!-- # Check - return code ok? -->
                     <foxpath 
                         expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                                   //record[response eq $fileName]/returnCode"
+                              //record[response eq $fileName]/returnCode"
                         eqXPath="//*:returnCode"                                   
                         eqXPathMsg="Return code not the configured value"/>                                   
 

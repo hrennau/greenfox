@@ -25,37 +25,13 @@
 let $atts := @*/local-name(.) return tokenize($attNames)[not(. = $atts)]
             ]]></xpathExpr>
         </constraintComponent>
-
-        <constraintComponent constraintElementName="ex:xoneAtts">
-            <param name="attNames"></param>
-            <xpathExpr><![CDATA[
-let $atts := @*/local-name(.)[. = tokenize($attNames)]
-return
-    if (count($atts) eq 1) then ()
-    else if (count($atts) lt 1) then false()
-    else $atts
-            ]]></xpathExpr>
-        </constraintComponent>
-
-        <constraintComponent constraintElementName="ex:oneOrMoreAtts">
-            <param name="attNames"></param>
-            <xpathExpr><![CDATA[
-0 < count(@*/local-name(.)[. = tokenize($attNames)])
-            ]]></xpathExpr>
-        </constraintComponent>
-        
-        <constraintComponent constraintElementName="ex:allowedElems">
-            <param name="elemNames"></param>
-            <xpathExpr><![CDATA[
-*/local-name(.)[not(. = tokenize($elemNames))]
-            ]]></xpathExpr>
-        </constraintComponent>
         
     </constraintComponents>
     
     
     <domain path="${domain}" 
-        name="schema-schemas">            
+        name="schema-schemas">    
+        
         
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="schemasFolderShape">
@@ -160,10 +136,6 @@ return
                 <!-- check <domain>
                      ============== -->                
                 <focusNode xpath="*:greenfox/*:domain">
-                    <targetSize minCount="1" 
-                                minCountMsg="No domain"
-                                minCountMsgOK="OK - domain found"/>
-                    
                     <!-- check attribute names, mandatory atts -->    
                     <ex:allowedAtts
                         attNames="path name"
@@ -174,6 +146,22 @@ return
                         msg="Missing mandatory attributes in 'domain' element; expected: path, name"
                         msgOK="OK - 'domain' element: with mandatory attributes ('path' and 'name')"/>
                     
+                    <!--
+                    <xpath description="Validates the attribute names in 'domain' elements"
+                        expr="@*/local-name(.)"
+                        inMsg="Unexpected attributes in 'domain' element; expected attribute names: path, name"
+                        inMsgOK="OK - 'domain' element: no unexpected attributes"
+                        containsMsg="Missing mandatory attribute(s)"
+                        containsMsgOK="OK - 'domain' element: with mandatory attributes ('path' and 'name')"
+                        deactivated="false">
+                        <in>
+                            <eq>path</eq>
+                            <eq>name</eq>
+                        </in>
+                        <contains>path</contains>                        
+                        <contains>name</contains>
+                    </xpath>
+                    -->
                     <xpath description="Validates the @path value"
                         expr="@path"
                         matches="\\"
@@ -187,77 +175,129 @@ return
                 </focusNode>
                 
                 <!-- check <folder>
-                     ============== -->  
-                <focusNode xpath="//*:folder">
+                     ============== -->     
+                <!-- <folder> - check attribute names -->
+                <xpath description="Validates the attribute names in 'folder' elements"
+                    expr="*:greenfox//*:folder/@*/name()"
+                    inMsg="Unexpected attribute on 'folder' element; expected names: foxpath, id"
+                    inMsgOK="OK - 'folder' element: attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>foxpath</eq>
+                        <eq>id</eq>
+                    </in>
+                </xpath>               
 
-                    <!-- attribute names -->
-                    <ex:allowedAtts
-                        attNames="foxpath path id"
-                        msg="Unexpected attributes in 'folder' element; expected: foxpath, path, id"
-                        msgOK="OK - 'folder' element: no unexpected attributes"/>
-                    <!-- mandatory attributes -->
-                    <ex:xoneAtts
-                        attNames="foxpath path"
-                        msg="A 'folder' shape must exactly one of these attributes: foxpath, path"
-                        msgOK="OK - 'folder' element: has foxpath or path"/>
-                    <!-- element names -->
-                    <ex:allowedElems
-                        elemNames="targetSize file folder folderContent foxpath"
-                        msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
-                        msgOK="OK - 'folder' element: no unexpected elements"/>
+                <!-- <folder> - check child element names -->
+                <xpath description="Validates content of 'folder' elements"
+                    expr="*:greenfox//*:folder/*/local-name(.)"
+                    inMsg="Unexpected child element in 'folder' element; expected names: targetSize, file, folder, folderContent, foxpath"
+                    inMsgOK="OK - 'folder' element: child element names"
+                    deactivated="false">
+                    <in>
+                        <eq>targetSize</eq>
+                        <eq>file</eq>
+                        <eq>folder</eq>
+                        <eq>folderContent</eq>
+                        <eq>foxpath</eq>
+                    </in>
+                </xpath>
 
-                </focusNode>
+                <!-- <folder> (under domain) - check mandatory attribute names -->
+                <xpath description="Validates 'folder' elements, presence of mandatory attributes"
+                    expr="*:greenfox/*:domain//*:folder"
+                    deactivated="false">
+                    
+                    <xpath description="Validates an individual 'folder' element, presence of mandatory attributes"
+                        expr="@*/local-name(.)"
+                        quant="some"
+                        containsMsg="Missing mandatory attribute (one of 'foxpath', 'path')"
+                        containsMsgOK="OK - 'folder' element has mandatory attributes (one of 'foxpath', 'path')"
+                        deactivated="false">
+                        <contains>foxpath</contains>                        
+                        <contains>path</contains>
+                    </xpath>
+                    
+                </xpath>                
                 
                 <!-- check <targetSize>
-                     ================== -->    
-                <focusNode xpath="//*:targetSize">
+                     ================== -->                
+                <!-- <targetSize> - check attribute names -->
+                <xpath description="Validates attribute names at 'targetSize' elements"
+                    expr="*:greenfox//*:targetSize/@*/name()"
+                    inMsg="Unexpected attribute on 'targetSizefolder' element; 
+                           expected names: id, count, minCount, maxCount, msg, msgOK, minCountMsg, minCountMsgOK, maxCountMsg, maxCountMsgOK"
+                    inMsgOK="OK - 'targetSize' element: no unexpected attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>id</eq>
+                        <eq>count</eq>
+                        <eq>minCount</eq>
+                        <eq>maxCount</eq>
+                        <eq>msg</eq>
+                        <eq>msgOK</eq>
+                        <eq>minCountMsg</eq>
+                        <eq>minCountMsgOK</eq>
+                        <eq>maxCountMsg</eq>
+                        <eq>maxCountMsgOK</eq>                        
+                    </in>
+                </xpath>
+
+                <!-- <targetSize> - check mandatory attributes -->
+                <xpath description="Validates 'targetSize' elements, presence of mandatory attributes"
+                    expr="*:greenfox//*:targetSize">
                     
-                    <!-- attribute names -->
-                    <ex:allowedAtts
-                        attNames="count minCount maxCount countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id"
-                        msg="Unexpected attributes in 'targetSize' element; expected: $attNames"
-                        msgOK="OK - 'folder' element: no unexpected attributes"/>
-                    <!-- mandatory attributes -->
-                    <ex:oneOrMoreAtts
-                        attNames="minCount maxCount count"
-                        msg="A 'targetSize' shape must contains at least one of these attributes: $attNames"
-                        msgOK="OK - 'targetSize' element: has at least one of these attributes: $attNames"/>
+                    <xpath expr="@*/local-name(.)"
+                        quant="some"                        
+                        containsMsg="Validates an individual 'targetSize' elements, must contains at least one attribute from 'minCount', 'maxCount', 'count'"
+                        containsMsgOK="OK - 'targetSize' has at least one attribute from 'minCount', 'maxCount', 'count'">
+                        <contains>minCount</contains>                                                    
+                        <contains>maxCount</contains>
+                        <contains>count</contains>
+                    </xpath>
+                </xpath>
                 
-                    <!-- check value @minCount -->
-                    <xpath description="Check attribute values, 'minCount'"
-                        expr="@minCount"
-                        datatype="integer"
-                        datatypeMsg="Element 'targetSize', attributes 'minCount' must have integer values"
-                        datatypeMsgOK="OK - 'targetSize' element: no @minCount atts with non-integer type"
-                        ge="0"
-                        geMsg="Element 'targetSize', attributes 'minCount' must be ge 0"
-                        geMsgOK="OK - 'targetSize' element: no @minCount atts lt 0"/>
-                     />
-                     <!-- check values @maxCount, @count -->
-                    <xpath description="Check attribute values, 'maxCount, count"
-                        expr="(@maxCount, @count)"
-                        matches="^\d+|\*$"
-                        matchesMsg="Element 'targetSize', attributes 'maxCount' and 'count' must have integer values or be '*'"
-                        matchesMsgOK="OK - 'targetSize' element: no @maxCount or @count atts with non-integer values ne '*'"/>
                 
-                    <!-- check empty content -->
-                    <xpath description="Validates content of 'targetSize' elements"
-                        expr="*"
-                        maxCount="0"
-                        maxCountMsg="Unexpected child element found in 'targetSize' element - 'targetSize' must be empty"
-                        maxCountMsgOK="OK - 'targetSize' element: empty"
-                        deactivated="false"/>
-                </focusNode>
+                <!-- <targetSize> - check attribute values -->
+                <xpath description="Check attribute values, 'minCount'"
+                    expr="*:greenfox//*:targetSize/@minCount"
+                    datatype="integer"
+                    datatypeMsg="Element 'targetSize', attributes 'minCount' must have integer values"
+                    datatypeMsgOK="OK - 'targetSize' element: no @minCount atts with non-integer type"
+                    ge="0"
+                    geMsg="Element 'targetSize', attributes 'minCount' must be ge 0"
+                    geMsgOK="OK - 'targetSize' element: no @minCount atts lt 0"/>
+                 />
+                <xpath description="Check attribute values, 'maxCount, count"
+                    expr="*:greenfox//*:targetSize/(@maxCount, @count)"
+                    matches="^\d+|\*$"
+                    matchesMsg="Element 'targetSize', attributes 'maxCount' and 'count' must have integer values or be '*'"
+                    matchesMsgOK="OK - 'targetSize' element: no @maxCount or @count atts with non-integer values ne '*'"
+                />
                 
+                <!-- <targetSize> - check empty content -->
+                <xpath description="Validates content of 'targetSize' elements"
+                    expr="*:greenfox//*:targetSize/*"
+                    maxCount="0"
+                    maxCountMsg="Unexpected child element found in 'targetSize' element - 'targetSize' must be empty"
+                    maxCountMsgOK="OK - 'targetSize' element: empty"
+                    deactivated="false"/>
+
                 <!-- check <folderContent>
                      ===================== -->                
-                <focusNode xpath="*:greenfox//*:folderContent">
-                    <!-- attribute names -->
-                    <ex:allowedAtts
-                        attNames="id closed closedMsg closedMsgOK"
-                        msg="Unexpected attributes in 'folderContent' element; expected: $attNames"
-                        msgOK="OK - 'folderContent' element: no unexpected attributes"/>
-                </focusNode>
+                <!-- <folderContent> - check attribute names -->
+                <xpath description="Validates attribute names at 'folderContent' elements"
+                    expr="*:greenfox//*:folderContent/@*/name()"
+                    inMsg="Unexpected attribute on 'folderContent' element; expected names: id, closed"
+                    inMsgOK="OK - 'folderContent' element: no unexpected attribute names"
+                    deactivated="false">
+                    <in>
+                        <eq>id</eq>
+                        <eq>closed</eq>
+                        <eq>closedMsg</eq>
+                        <eq>closedMsgOK</eq>
+                    </in>
+                </xpath>
                 
                 <!-- check <file>
                      ============ -->     

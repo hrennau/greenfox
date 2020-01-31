@@ -74,7 +74,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                         }</gx:resources>
                     }</gx:error>
             else            
-                let $msg := i:getOkMsg($constraint, 'closed', 'No unexpected folder contents.')
+                let $msg := i:getOkMsg($constraint, 'closed', ())
                 return                            
                     <gx:green>{
                         $msg ! attribute msg {.},

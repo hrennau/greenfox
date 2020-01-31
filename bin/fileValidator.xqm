@@ -35,12 +35,7 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
-    let $targetCountResults := 
-        let $constraint := $gxFile/gx:targetSize
-        return
-            if (not($constraint)) then ()
-            else
-                $gxFile/gx:targetSize/i:validateTargetCount(., $targetCount, $contextPath, $targetDecl)
+    let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetCount, $contextPath, $targetDecl)
     let $instanceResults :=        
         for $targetPath in $targetPaths
         return
@@ -124,7 +119,7 @@ declare function f:validateFileInstance($filePath as xs:string,
             else
                 <gx:green>{
                     attribute filePath {$filePath},
-                    attribute constraintComponent {$child/local-name(.)},
+                    attribute constraintComp {$child/local-name(.)},
                     $child/@id/attribute constraintID {.},
                     $child/@label/attribute constraintLabel {.}
                 }</gx:green>

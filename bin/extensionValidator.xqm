@@ -29,17 +29,27 @@ declare function f:validateExtensionConstraint($constraint as element(),
                                             
         as element()* {
     let $constraintComponent := f:getExtensionConstraintComponents($constraint)        
-    let $constraintElemName := $constraint/@constraintElementName
-    let $paramNames := $constraint/gx:param/@name
+    let $constraintElemName := $constraintComponent/@constraintElementName
+    let $paramNames := $constraintComponent/gx:param/@name
     let $evaluationContext := $context?_evaluationContext
     let $reqDocs := $context?_reqDocs
+    
+    let $useParams :=
+        let $paramNamesElemStyle := $constraint/gx:param/@name
+        let $atts := $constraint/@*
+        return (
+            $constraint/gx:param,
+            for $paramName in $paramNames[not(. = $paramNamesElemStyle)]
+            let $attValue := $atts[local-name(.) eq $paramName]
+            return $attValue ! <gx:param name="{$paramName}">{string(.)}</gx:param>
+    )
     
     let $reqBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
         return f:getRequiredBindings($potentialBindings, $constraintComponent)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $constraint/gx:param)  
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $useParams)  
 
     let $xpath := $constraintComponent/gx:xpathExpr
     let $foxpath := $constraintComponent/gx:foxpathExpr
@@ -53,8 +63,8 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $isValid := $isValidAndErrors[1]
     let $errorValues := tail($isValidAndErrors)
     
-    let $msg := $constraint/@msg/string(.)
-    let $msgOk := $constraint/@msgOK/string(.)
+    let $msg := $constraint/@msg/f:editMsg(., $useParams)
+    let $msgOk := $constraint/@msgOK/f:editMsg(., $useParams)
     let $nodePath := if (not($contextItem instance of node())) then () else $contextItem/i:datapath(.)
     
     let $constraintIdentAtts := (
@@ -64,20 +74,28 @@ declare function f:validateExtensionConstraint($constraint as element(),
         $constraint/@id/attribute constraintComponentID {.},
         $constraint/@label/attribute constraintLabel {.}
     )        
+    let $paramAttsAndElems := (
+        $constraint/@*[local-name(.) = $paramNames],
+        $constraint/gx:param
+    )
+    let $paramAtts := $paramAttsAndElems[. instance of attribute()]
+    let $paramElems := $paramAttsAndElems[. instance of element()]
     return
         if ($isValid) then
             <gx:green>{
                 $msgOk ! attribute msg {.},
                 $constraintIdentAtts,
                 $nodePath ! attribute nodePath {.},
-                $constraint/gx:param/<gx:param>{@*, node()}</gx:param>               
+                $paramAtts,
+                $paramElems
             }</gx:green>
         else
             <gx:error>{
                 $msg ! attribute msg {.},
                 $constraintIdentAtts,
                 $nodePath ! attribute nodePath {.},                
-                $constraint/gx:param/<gx:param>{@*, node()}</gx:param>,
+                $paramAtts,
+                $paramElems,
                 $errorValues ! <gx:value>{.}</gx:value>                
             }</gx:error>
 };  
@@ -114,3 +132,28 @@ declare function f:getExtensionConstraintComponents($constraints as element()*) 
 declare function f:getExtensionConstraints($constraints as element()*) as element()* {
     $constraints/self::*[not(namespace-uri(.) eq $f:URI_GX)]
 };
+
+(:~
+ : Edits a message, replacing occurrences of $foo with the parameter value
+ : of parameter $foo.
+ :
+ : @param msg the message
+ : @param params parameters available for substituting variable references
+ : @return the edited message
+ :)
+declare function f:editMsg($msg as xs:string?, $params as element(gx:param)*)
+        as xs:string? {
+    if (not($msg) or not(contains($msg, '$'))) then $msg else
+    
+    let $parts := replace($msg, '^(.*?)\$(\i\c*)(.*)', '$1~~~$2~~~$3')[not(. eq $msg)] ! tokenize(., '~~~')
+    return
+        if (empty($parts)) then $msg else
+        let $param := $params[@name eq $parts[2]]
+        return
+            concat(
+                $parts[1],
+                if (not($param)) then concat('$', $parts[2]) else $param/string(),
+                $parts[3] ! f:editMsg(., $params)
+            )
+};
+

@@ -641,8 +641,8 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                         declaration</emphasis> which selects a set of focus resources</para>
             </listitem>
             <listitem>
-                <para>A target declaration can be a resource name, a relative file path or a foxpath
-                    expression</para>
+                <para>A target declaration of a resource shape can be a resource name, a relative
+                    file path or a foxpath expression</para>
             </listitem>
             <listitem>
                 <para>Constraints can apply to <emphasis role="bold">resource properties</emphasis>
@@ -650,12 +650,14 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             </listitem>
             <listitem>
                 <para>Constraints can apply to a <emphasis role="bold">resource value</emphasis>,
-                    which is a value to which the resource is mapped by an expression</para>
+                    which is a value to which the resource is mapped by an expression, or by a chain
+                    of expression.</para>
             </listitem>
             <listitem>
                 <para>A <emphasis role="bold">value shape</emphasis> combines an expression mapping
-                    the focus resource to a resource value, and a set of constraints against which
-                    to validate the resource value</para>
+                    the focus resource to a resource value, or a resource value to another resource
+                    value, and a set of constraints against which to validate the resource
+                    value</para>
             </listitem>
             <listitem>
                 <para>The expression used by a value shape may be an <emphasis role="bold">XPath
@@ -664,13 +666,18 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             </listitem>
             <listitem>
                 <para>The <emphasis role="bold">foxpath context item</emphasis> used by a value
-                    shape is the file path of the focus resource</para>
+                    shape mapping a focus resource to a resource value is the file path of the focus
+                    resource. The foxpath context item used by a value shape mapping a preceding
+                    resource value to another resource value is a single item of the preceding
+                    resource value. </para>
             </listitem>
             <listitem>
                 <para>The <emphasis role="bold">XPath context item</emphasis> used by a value shape
-                    is the root of an XDM node tree representing the content of the focus resource,
-                    or the file path of the focus resource if an XDM node tree could not be
-                    constructed</para>
+                    mapping a focus resource to a resource value is the root of an XDM node tree
+                    representing the content of the focus resource, or the file path of the focus
+                    resource if an XDM node tree could not be constructed. The XPath context item
+                    used by a value shape mapping a preceding resource value to another resource
+                    value is a single item of the preceding resource value.</para>
             </listitem>
             <listitem>
                 <para><emphasis role="bold">XDM node tree representations</emphasis> of file
@@ -710,16 +717,16 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 resource property value, or of a derived resource property value, which can be
                 represented by an XDM value.</para>
             <para>A <emphasis role="bold">resource value</emphasis> is the XDM value of an
-                expression evaluated in the context of a resource property or derived resource
-                property.</para>
+                expression evaluated in the context of a resource property, or of a derived resource
+                property, or of a resource value.</para>
             <section>
                 <title>Folder resources</title>
-                <para>A folder has the following <emphasis role="bold">resource
-                        properties</emphasis>.</para>
+                <para>The table below summarizes the <emphasis role="bold">resource
+                        properties</emphasis> of a folder resource, as currently evaluated by
+                    greenfox. More properties may be added in the future, e.g. representing access
+                    rights.</para>
                 <table xml:id="table-102">
-                    <title>Resource properties of a folder resource, as currently evaluated by
-                        greenfox. More properties may be added, e.g. representing access
-                        rights.</title>
+                    <title>Resource properties of a folder resource.</title>
                     <titleabbrev xml:id="table-102-shorttitle">Folder resource
                         properties</titleabbrev>
                     <tgroup cols="3">
@@ -764,8 +771,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 <para>A folder has the following <emphasis role="bold">derived resource
                         properties</emphasis>.</para>
                 <table xml:id="table-103">
-                    <title>Derived resource properties of a folder resource, as currently evaluated
-                        by greenfox.</title>
+                    <title>Derived resource properties of a folder resource.</title>
                     <titleabbrev xml:id="table-103-shorttitle">Derived folder resource
                         properties</titleabbrev>
                     <tgroup cols="3">
@@ -801,13 +807,11 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             </section>
             <section>
                 <title>File resources</title>
-                <para>A file has the following <emphasis role="bold">resource
-                    properties</emphasis>.</para>
+                <para>A file has the following <emphasis role="bold">resource properties</emphasis>,
+                    as currently evaluated by greenfox.</para>
                 <table xml:id="table-104">
-                    <title>Resource properties of a file resource, as currently evaluated by
-                        greenfox. More properties may be added, e.g. representing access
-                        rights.</title>
-                    <titleabbrev xml:id="table-104-shorttitle">Folder resource
+                    <title>Resource properties of a file resource.</title>
+                    <titleabbrev xml:id="table-104-shorttitle">File resource
                         properties</titleabbrev>
                     <tgroup cols="3">
                         <colspec colname="c1" colnum="1" colwidth="3*"/>
@@ -924,10 +928,9 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                     </tgroup>
                 </table>
                 <para>A file has the following <emphasis role="bold">derived resource
-                        properties</emphasis>.</para>
+                        properties</emphasis>, as currently evaluated by greenfox.</para>
                 <table xml:id="table-105">
-                    <title>Derived resource properties of a file resource, as currently evaluated by
-                        greenfox.</title>
+                    <title>Derived resource properties of a file resource.</title>
                     <titleabbrev xml:id="table-105-shorttitle">Derived folder resource
                         properties</titleabbrev>
                     <tgroup cols="3">
@@ -1013,13 +1016,16 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 applicable to a file system resource. It has an optional target declaration.</para>
             <para>A <emphasis role="bold">target declaration</emphasis> specifies the selection of a
                 target.</para>
-            <para>A <emphasis role="bold">target</emphasis> is a set of focus resources.</para>
+            <para>A <emphasis role="bold">target</emphasis> is a set of focus resources, or a focus
+                value.</para>
             <para>A <emphasis role="bold">focus resource</emphasis> is a resource to be validated
                 against a resource shape.</para>
+            <para>A <emphasis role="bold">focus value</emphasis> is a resource value to be validated
+                against a value shape.</para>
             <para>A resource shape is a <emphasis role="bold">folder shape</emphasis> or a <emphasis
                     role="bold">file shape</emphasis>.</para>
-            <para>A <emphasis role="bold">value shape</emphasis> is a mapping of a focus resource to
-                a resource value and a set of constraints.</para>
+            <para>A <emphasis role="bold">value shape</emphasis> is a mapping of a focus resource,
+                or of a resource value, to a resource value and a set of constraints.</para>
             <para>A <emphasis role="bold">constraint</emphasis> maps a resource property or a
                 resource value to a validation result.</para>
             <para>A constraint is declared by a shape. It identifies a constraint component and
@@ -1131,19 +1137,19 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                         <entry align="left">Shapes library</entry>
                         <entry align="left">A collection of shapes without target declaration, which
                             can be referenced by other shapes</entry>
-                        <entry align="left"><code>gx:shapesLib</code></entry>
+                        <entry align="left"><code>gx:shapes</code></entry>
                     </row>
                     <row>
                         <entry align="left">Constraints library</entry>
                         <entry align="left">A collection of constraint declaration nodes, which can
                             be referenced by shapes</entry>
-                        <entry align="left"><code>gx:constraintsLib</code></entry>
+                        <entry align="left"><code>gx:constraints</code></entry>
                     </row>
                     <row>
                         <entry align="left">Constraint components library</entry>
                         <entry align="left">A collection of constraint component definitions, for
                             which constraints can be declared</entry>
-                        <entry align="left"><code>gx:contraint-ComponentsLib/*</code></entry>
+                        <entry align="left"><code>gx:contraint-Components/*</code></entry>
                     </row>
                     <row>
                         <entry align="left">Constraint component definition</entry>
@@ -1176,6 +1182,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                         <entry align="left">
                             <para><code>gx:xpath</code></para>
                             <para><code>gx:foxpath</code></para>
+                            <para><code>gx:focusNode</code></para>
                         </entry>
                     </row>
                     <row>
@@ -1213,82 +1220,12 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
         <title>Schema language extension</title>
         <para>This section describes <emphasis role="bold">user-defined constraint
                 components</emphasis>. Such components are defined within a greenfox schema by a
-                <code>gx:constraintComponent</code> element. They can be used like built-in
-            constraint components, observing syntax rules implied by the details of the component
-            defining element.</para>
-        <para>The extension model is based on the simple conceptual framework organizing
-            greenfox:</para>
-        <itemizedlist spacing="compact">
-            <listitem>
-                <para>File system validation can be decomposed into smallest units which are the
-                    validation of a single resource against a single constraint</para>
-            </listitem>
-            <listitem>
-                <para>A constraint resembles a function call, where the “function” is a constraint
-                    component and the “function parameters” are the constraint parameters</para>
-            </listitem>
-            <listitem>
-                <para>A constraint is declared by an XML element whose name, attributes and content
-                    identify the constraint component and supply the parameter values (possibly
-                    along with the details of other constraints)</para>
-            </listitem>
-            <listitem>
-                <para>The location of the constraint element implies the value input:</para>
-                <itemizedlist spacing="compact">
-                    <listitem>
-                        <para>If the element is a value shape element, or a child of a value shape
-                            element, the test value is the resource value produced by the expression
-                            of the value shape</para>
-                    </listitem>
-                    <listitem>
-                        <para>If it is a child element of a resource shape element, the test value
-                            is a resource property</para>
-                    </listitem>
-                </itemizedlist>
-            </listitem>
-        </itemizedlist>
-        <para>These rules imply a simple model how to define <emphasis role="bold">new constraint
-                components</emphasis>. The definition of a new constraint component
-            comprises:</para>
-        <itemizedlist spacing="compact">
-            <listitem>
-                <para><emphasis role="ital">Specifies the signature</emphasis> of the constraint
-                    component – component name, parameter names and types</para>
-            </listitem>
-            <listitem>
-                <para><emphasis role="ital">Specifies the semantics</emphasis> of the constraint
-                    component – the rules how the test value plus the parameter values are mapped
-                    to</para>
-                <itemizedlist spacing="compact">
-                    <listitem>
-                        <para>A boolean result (signaling pass or failure)</para>
-                    </listitem>
-                    <listitem>
-                        <para>Details of the validation result</para>
-                    </listitem>
-                </itemizedlist>
-            </listitem>
-            <listitem>
-                <para><emphasis role="ital">Specifies the XML representation</emphasis> of a
-                    constraint – element and attribute names and their mapping to constraint
-                    parameters</para>
-            </listitem>
-            <listitem>
-                <para><emphasis role="ital">Provides an implementation</emphasis> of the
-                    semantics</para>
-            </listitem>
-        </itemizedlist>
-        <para>The XML representaton of a constraint is one of the following: <itemizedlist
-                spacing="compact">
-                <listitem>
-                    <para>a set of attributes which must be attached to a value shape</para>
-                </listitem>
-                <listitem>
-                    <para>an element which must be a child element of a specified set of shape
-                        elements (e.g. must be a child of a <code>&lt;file></code> element)</para>
-                </listitem>
-            </itemizedlist>
-        </para>
+                <code>gx:constraintComponent</code> element, which specifies the constraint
+            component name, declares the constraint parameters and provides an implementation. The
+            implementation is an XPath or a foxpath expression, which accesses the parameter values
+            as pre-bound variables. User-defined constraint components are used like built-in
+            components: a constraint is declared by an element with attributes (or child elements)
+            providing the parameter values and optional messages.</para>
         <para>As an illustrative example, consider the creation of a new constraint component
             characterized as follows.</para>
         <para><emphasis role="bold">Constraint component IRI</emphasis>: <code>ex:grep</code></para>
@@ -1327,45 +1264,26 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 </tbody>
             </tgroup>
         </informaltable>
-        <para><emphasis role="bold">XML syntax</emphasis>:</para>
-        <itemizedlist spacing="compact">
-            <listitem>
-                <para>Syntax style: constraint element</para>
-            </listitem>
-            <listitem>
-                <para>element name: <code>ex:grep</code></para>
-            </listitem>
-            <listitem>
-                <para>parameter mapping:</para>
-                <itemizedlist spacing="compact">
-                    <listitem>
-                        <para>parameter $regex - attribute @regex</para>
-                    </listitem>
-                    <listitem>
-                        <para>parameter $flags – attribute @flags</para>
-                    </listitem>
-                </itemizedlist>
-            </listitem>
-            <listitem>
-                <para>child elements: -</para>
-            </listitem>
-        </itemizedlist>
         <para><emphasis role="bold">Semantics</emphasis>:</para>
         <para>"A constraint is satisfied if the focus resource is a text file containing a line
             matching regular expression <code>$regex</code>, as controlled by the regex evaluation
                 <code>flags</code> given by $flags (e.g. case-insensitively)"</para>
         <para>The <emphasis role="bold">implementation</emphasis> may be provided by the following
-            element, which must be a child element of
-            <code>gx:constraintComponentsLib</code>:</para>
-        <programlisting><![CDATA[<constraintComponent constraintElementName="ex:grep">
-    <param name="pattern"></param>
-    <param name="flags"></param>
-    <xpath><![CDATA[
-exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
-    ]]>]]<![CDATA[></xpath>
-</constraintComponent>]]></programlisting>
-        <para>Note in the expression text the use of a variable $this. It is always bound to the
-            file path of the focus resource.</para>
+            element, which must be a child element of <code>gx:constraintComponents</code>:</para>
+        <programlisting>&lt;<emphasis role="bold">constraintComponent</emphasis> constraintElementName="<emphasis role="bold">ex:grep</emphasis>">
+    &lt;param name="<emphasis role="bold">pattern</emphasis>" type="xs:string"/>
+    &lt;param name="<emphasis role="bold">flags</emphasis>" type="xs:string?"/>
+    &lt;<emphasis role="bold">xpathExpr</emphasis>>
+        <emphasis role="ital">exists(unparsed-text-lines(.)[matches(., $pattern, $flags)])</emphasis>
+    &lt;/xpathExpr>
+&lt;/constraintComponent>
+</programlisting>
+        <para>The constraint can be used like this:</para>
+        <programlisting>&lt;<emphasis role="bold">ex:grep </emphasis><emphasis role="bold">pattern</emphasis>="fbIx?" <emphasis role="bold">flags</emphasis>="i"
+         msg="File does not contain string '$pattern'."
+         msgOK="File contains string '$pattern'."/></programlisting>
+        <para>Note the variable references in the message text, which are replaced by parameter
+            values.</para>
     </section>
     <section>
         <title>Validation results</title>
@@ -1399,8 +1317,8 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                                 (“green values”)</para>
                         </listitem>
                         <listitem>
-                            <para>o for each observation, which is a result triggered by a value
-                                shape in order to record a resource value not related to constraint
+                            <para>for each observation, which is a result triggered by a value shape
+                                in order to record a resource value not related to constraint
                                 checking (“blue values”)</para>
                         </listitem>
                     </itemizedlist>
@@ -1470,6 +1388,117 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
         <title>Appendix A1: greenfox schema for system S</title>
         <para>This appendix lists the complete schema developed in section “Getting started with
             greenfox”.</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
+    xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+    </context>
+
+    <!-- *** System file tree *** -->
+    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">
+
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="." id="systemRootFolderShape">
+            <!-- *** XSD folder shape *** -->
+            <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
+                <targetSize countMsg="No XSD folder found" count="1"/>
+                <file foxpath="*.xsd" id="xsdFileShape">
+                    <targetSize minCountMsg="No XSDs found" minCount="1"/>
+                </file>
+            </folder>
+
+            <!-- *** Codelist folder shape *** -->
+            <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
+                <targetSize countMsg="No codelist folder found" count="1"/>
+
+                <!-- # Check - folder contains codelists? -->
+                <foxpath 
+                    expr="*.xml/codelist[entry/@code[string()]]/@name"
+                    minCount="1"
+                    minCountMsg="Codelist folder without codelists"/>
+                <file foxpath="*[is-xml(.)]" id="codelistFileShape">
+                    <targetSize minCountMsg="No codelist files found" minCount="1"/>
+                </file>
+            </folder>
+
+            <!-- *** Testcase folder shape *** -->
+            <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
+                <targetSize minCountMsg="No testcase folders found" minCount="1"/>
+                <!-- # Check - test folder content ok? -->
+                <folderContent
+                    closedMsg="Testcase contains member other than input, output, config, log-*."
+                    closed="true">
+                    <memberFolders names="input, output, config"/>
+                    <memberFiles names="log-*" count="*"/>
+                </folderContent>
+
+                <!-- *** msg config shape *** -->
+                <file foxpath="config\msg-config.csv" id="msgConfigFileShape"
+                      mediatype="csv" csv.separator="," csv.withHeader="yes">
+                    <targetSize countMsg="Config file missing" count="1"/>
+
+                    <!-- # Check - configured return codes expected? -->
+                    <xpath expr="//returnCode" 
+                           inMsg="Config file contains unknown return code">
+                        <in>
+                            <eq>OK</eq>
+                            <eq>NOFIND</eq>
+                            <like>ERROR_*</like>
+                        </in>
+                    </xpath>
+                </file>
+
+                <!-- *** Request file shape *** -->
+                <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
+                    <targetSize minCountMsg="Input folder without request msgs" minCount="1"/>
+
+                        <!-- # Check - request with response? -->
+                    <foxpath 
+                        expr="..\..\output\*\file-name(.)"
+                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
+                        containsXPathMsg="Request without response"/>
+                </file>
+
+                <!-- *** Response file shape *** -->
+                <file foxpath="output\(*.xml, *.json)" id="responseFileShape"
+                      mediatype="xml-or-json">
+                    <targetSize minCountMsg="Output folder without request msgs" minCount="1"/>
+
+                    <!-- # Check - response fresh? -->
+                    <lastModified geMsg="Stale output file" ge="${lastModified}"/>
+
+                    <!-- # Check - response non-empty? -->
+                    <fileSize gtMsg="Empty output file" gt="0"/>
+
+                    <!-- # Check - schema valid? (only if XML) -->
+                    <ifMediatype eq="xml">
+                        <xsdValid xsdFoxpath="$domain\resources\xsd\\*.xsd"
+                                  msg="Response msg not XSD valid"/>
+                                  
+                    </ifMediatype>
+
+                    <!-- # Check - known article number? -->
+                    <xpath 
+                        expr="//*:fooValue"
+                        eqFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"
+                        eqFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"/>
+
+                    <!-- # Check - return code ok? -->
+                    <foxpath 
+                        expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                              //record[response eq $fileName]/returnCode"
+                        eqXPath="//*:returnCode"                                   
+                        eqXPathMsg="Return code not the configured value"/>                                   
+
+                </file>
+
+            </folder>
+        </folder>
+    </domain>
+</greenfox>]]></programlisting>
     </appendix>
     <appendix xml:id="appendix-alignment-greenfox-shacl">
         <title>Appendix A2: Alignment of key concepts between greenfox and SHACL</title>
@@ -1849,6 +1878,13 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                         <entry align="left"><code>@filePath</code></entry>
                     </row>
                     <row>
+                        <entry align="left"><code>gx:focusNode</code></entry>
+                        <entry align="left">XPath of a node within an XDM node tree representing the
+                            contents of a file resource</entry>
+                        <entry align="left"><code>sh:focusNode</code></entry>
+                        <entry align="left"><code>@nodePath</code></entry>
+                    </row>
+                    <row>
                         <entry align="left"><code>gx:xpath</code></entry>
                         <entry align="left">The XPath expression of a value shape</entry>
                         <entry align="left"><code>sh:resultPath</code></entry>
@@ -1869,6 +1905,13 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                                 <code>value</code></para><para>A value consisting of several items
                                 is represented by a sequence of &lt;value> child
                             elements</para></entry>
+                    </row>
+                    <row>
+                        <entry align="left"><code>gx:valueCount</code></entry>
+                        <entry align="left">Number of resources in a target, or of resource value
+                            items, causing a violation</entry>
+                        <entry align="left">-</entry>
+                        <entry align="left"><para><code>@valueCount</code></para></entry>
                     </row>
                     <row>
                         <entry align="left"><code>gx:sourceShape</code></entry>
@@ -1906,177 +1949,16 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
         <biblioentry xml:id="basex">
             <abbrev>1</abbrev>
             <title>BaseX</title>
-            <date>2019</date>
+            <date>2020</date>
             <publisher>
                 <publishername>BaseX GmbH</publishername>
             </publisher>
             <biblioid class="uri">http:// basex.org</biblioid>
         </biblioentry>
-        <biblioentry xml:id="drugbank">
+        <biblioentry xml:id="foxpath">
             <abbrev>2</abbrev>
-            <title>DrugBank 5.0: a major update to the DrugBank database for 2018.</title>
-            <date>2017</date>
-            <authorgroup>
-                <author>
-                    <personname>
-                        <firstname>DS</firstname>
-                        <surname>Wishart</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>YD</firstname>
-                        <surname>Feunang</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>AC</firstname>
-                        <surname>Guo</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>EJ</firstname>
-                        <surname>Lo</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>A</firstname>
-                        <surname>Marcu</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>JR</firstname>
-                        <surname>Grant</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>T</firstname>
-                        <surname>Sajed</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>D</firstname>
-                        <surname>Johnson</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>C</firstname>
-                        <surname>Li</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>Z</firstname>
-                        <surname>Sayeeda</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>N</firstname>
-                        <surname>Assempour</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>I</firstname>
-                        <surname>Iynkkaran</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>Y</firstname>
-                        <surname>Liu</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>A</firstname>
-                        <surname>Maciejewski</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>N</firstname>
-                        <surname>Gale</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>A</firstname>
-                        <surname>Wilson</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>L</firstname>
-                        <surname>Chin</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>R</firstname>
-                        <surname>Cummings</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>D</firstname>
-                        <surname>Le</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>A</firstname>
-                        <surname>Pon</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>C</firstname>
-                        <surname>Knox</surname>
-                    </personname>
-                </author>
-                <author>
-                    <personname>
-                        <firstname>M</firstname>
-                        <surname>Wilson</surname>
-                    </personname>
-                </author>
-            </authorgroup>
-            <publisher>
-                <publishername>Nucleic Acids Res. 2017 Nov 8.</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.drugbank.ca/</biblioid>
-            <biblioid class="doi">10.1093/nar/gkx1037</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="graphql">
-            <abbrev>3</abbrev>
-            <title>GraphQL</title>
-            <date>2017</date>
-            <publisher>
-                <publishername>Facebook Inc.</publishername>
-            </publisher>
-            <biblioid class="uri">http://graphql.org/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="jsonld">
-            <abbrev>4</abbrev>
-            <title>JSON-LD 1.0. A JSON-based Serialization for Linked Data</title>
-            <date>2014</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/json-ld/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="location-trees">
-            <abbrev>5</abbrev>
-            <title>Location trees enable XSD based tool development.</title>
+            <title>FOXpath - an expression language for selecting files and folders.</title>
+            <date>2016</date>
             <authorgroup>
                 <author>
                     <personname>
@@ -2085,32 +1967,28 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                     </personname>
                 </author>
             </authorgroup>
-            <date>2017</date>
+            <biblioid class="uri">http://www.balisage.net/Proceedings/vol17/html/
+                Rennau01/BalisageVol17-Rennau01.html</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="foxpath2">
+            <abbrev>3</abbrev>
+            <title>FOXpath navigation of physical, virtual and literal file systems.</title>
+            <date>2016</date>
+            <authorgroup>
+                <author>
+                    <personname>
+                        <firstname>Hans-Juergen</firstname>
+                        <surname>Rennau</surname>
+                    </personname>
+                </author>
+            </authorgroup>
             <biblioid class="uri"
-                >http://xmllondon.com/2017/xmllondon-2017-proceedings.pdf</biblioid>
+                >https://archive.xmlprague.cz/2017/files/xmlprague-2017-proceedings.pdf</biblioid>
         </biblioentry>
-        <biblioentry xml:id="rdfa">
-            <abbrev>6</abbrev>
-            <title>RDFa Core 1.1 – Third Edition.</title>
-            <date>2015</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/rdfa-core/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="turtle">
-            <abbrev>7</abbrev>
-            <title>RDF 1.1 Turtle</title>
-            <date>2014</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/turtle/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="shax">
-            <abbrev>8</abbrev>
-            <title>A SHAX processor, transforming SHAX models into SHACL, XSD and JSON
-                Schema.</title>
+        <biblioentry xml:id="foxpath3">
+            <abbrev>4</abbrev>
+            <title>foxpath - an extended version of XPath 3.0 supporting file system
+                navigation.</title>
             <authorgroup>
                 <author>
                     <personname>
@@ -2122,45 +2000,10 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
             <date>2017</date>
             <biblioid class="uri">https://github.com/hrennau/shax</biblioid>
         </biblioentry>
-        <biblioentry xml:id="xpath31">
-            <abbrev>9</abbrev>
-            <title>XML Path Language (XPath) 3.1</title>
-            <date>2017</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/xpath-31/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="xpathfunctions31">
-            <abbrev>10</abbrev>
-            <title>XPath and XQuery Functions and Operators 3.1</title>
-            <date>2017</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/xpath-functions-31/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="xdm31">
-            <abbrev>11</abbrev>
-            <title>XQuery and XPath Data Model 3.1</title>
-            <date>2017</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/xpath-datamodel-31/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="xquery31">
-            <abbrev>12</abbrev>
-            <title>XQuery 3.1: An XML Query Language</title>
-            <date>2017</date>
-            <publisher>
-                <publishername>World Wide Web Consortium (W3C)</publishername>
-            </publisher>
-            <biblioid class="uri">https://www.w3.org/TR/xquery-31/</biblioid>
-        </biblioentry>
-        <biblioentry xml:id="xsdplus">
-            <abbrev>13</abbrev>
-            <title>xsdplus - a toolkit for XSD based tool development</title>
+        <biblioentry xml:id="greenfox">
+            <abbrev>5</abbrev>
+            <title>Greenfox - a schema language for validating file system contents and, by
+                implication, real-world systems.</title>
             <authorgroup>
                 <author>
                     <personname>
@@ -2169,8 +2012,35 @@ exists($this ! unparsed-text-lines(.)[matches(., $pattern, $flags)])
                     </personname>
                 </author>
             </authorgroup>
+            <date>2020</date>
+            <biblioid class="uri">https://github.com/hrennau/greenfox</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="xpath31">
+            <abbrev>6</abbrev>
+            <title>XML Path Language (XPath) 3.1</title>
             <date>2017</date>
-            <biblioid class="uri">https://github.com/hrennau/xsdplus</biblioid>
+            <publisher>
+                <publishername>World Wide Web Consortium (W3C)</publishername>
+            </publisher>
+            <biblioid class="uri">https://www.w3.org/TR/xpath-31/</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="xpathfunctions31">
+            <abbrev>7</abbrev>
+            <title>XPath and XQuery Functions and Operators 3.1</title>
+            <date>2017</date>
+            <publisher>
+                <publishername>World Wide Web Consortium (W3C)</publishername>
+            </publisher>
+            <biblioid class="uri">https://www.w3.org/TR/xpath-functions-31/</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="xquery31">
+            <abbrev>8</abbrev>
+            <title>XQuery 3.1: An XML Query Language</title>
+            <date>2017</date>
+            <publisher>
+                <publishername>World Wide Web Consortium (W3C)</publishername>
+            </publisher>
+            <biblioid class="uri">https://www.w3.org/TR/xquery-31/</biblioid>
         </biblioentry>
     </bibliography>
 </article>
