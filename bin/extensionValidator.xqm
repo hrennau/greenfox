@@ -152,7 +152,7 @@ declare function f:editMsg($msg as xs:string?, $params as element(gx:param)*)
         return
             concat(
                 $parts[1],
-                if (not($param)) then concat('$', $parts[2]) else $param/string(),
+                if (not($param)) then concat('$', $parts[2]) else $param/normalize-space(.),
                 $parts[3] ! f:editMsg(., $params)
             )
 };
