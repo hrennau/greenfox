@@ -25,25 +25,45 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateGreenfox($gfox as element(gx:greenfox)) 
         as element()* {
     let $errors := (
-        let $xpathExpressions := $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]/@expr
+        let $xpathExpressions := (
+            for $xpath in $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            return $xpath/(
+                @expr,
+                @*[matches(local-name(.), 'XPath$', 'i')]
+            ),             
+            for $foxpath in $gfox//gx:foxpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            return $foxpath/(
+                @*[matches(local-name(.), 'XPath$', 'i')]
+            ),             
+            $gfox//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
+            $gfox//gx:constraintComponent/gx:xpathExpr
+        )
+        
+        let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', '_domainName', '_domainPath')
         for $expr in $xpathExpressions
-        (: let $_DEBUG := trace($expr, '_EXPR_: ') :)        
+        let $potentialBindings := 
+            if ($expr/self::gx:xpathExpr) then
+                let $paramNames := 
+                $expr/parent::gx:constraintComponent/gx:param/@name
+                return (
+                    ($potentialBindings_base, $paramNames) => distinct-values()
+                )
+            else $potentialBindings_base
         return
             try {
-                (: _TO_DO_ - probably the determination of determining required bindings must be changed,
-                             looking for the syntax pattern of any variable variable binding; 
-                             reason: plans to introduce let clauses :)
-                let $requiredBindings := i:determineRequiredBindingsXPath($expr, ('this', 'doc', 'jdoc', 'csvdoc', '_domainName', '_domainPath'))
+                let $requiredBindings := i:determineRequiredBindingsXPath($expr, $potentialBindings)
                 let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
                 let $plan := xquery:parse($augmentedExpr)
                 return ()
             } catch * {
-                <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
-                    $err:code ! attribute err:code {.},
-                    $err:description ! attribute err:description {.},
-                    $err:value ! attribute err:value {.},
-                    ()
-                }</gx:error>
+                let $exprDisp := normalize-space($expr)
+                return
+                    <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$exprDisp}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
+                        $err:code ! attribute err:code {.},
+                        $err:description ! attribute err:description {.},
+                        $err:value ! attribute err:value {.},
+                        ()
+                    }</gx:error>
             }                
                
         ,
@@ -58,7 +78,7 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
                 }</gx:error>
     )
     return
-        <gx:invalidGreenFox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenFox>[$errors]
+        <gx:invalidGreenfox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenfox>[$errors]
 };
 
 declare function f:greenfoxLocation($node as node()) as xs:string {
