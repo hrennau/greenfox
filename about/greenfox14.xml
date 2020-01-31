@@ -66,15 +66,18 @@
             immediately useful. It must at the same time serve as a <emphasis role="ital"
                 >framework</emphasis>, within which current capabilities, future extensions and
             third-party contributions are uniform parts of a coherent whole. The approach we took is
-            a generalization of the key concepts underlying SHACL [x], a validation language for RDF
-            data. These concepts serve as the building blocks of a simple metamodel of validation,
-            which offers guidance for extension work.</para>
+            a generalization of the key concepts underlying SHACL <xref linkend="shacl"/>, a
+            validation language for RDF data. These concepts serve as the building blocks of a
+            simple metamodel of validation, which offers guidance for extension work.</para>
         <para>Validation relies on the key operations of navigation and comparison. File system
             validation must accomplish them in the face of divers mediatypes and the necessity to
             combine navigation within as well as between resources. In response to this challenge,
-            greenfox is based on a <emphasis role="ital">unified data model</emphasis> (XDM) [x] and
-            a <emphasis role="ital">unified navigation model</emphasis> (foxpath/XPath) [x] [x] [x]
-            [x] built upon it. </para>
+            greenfox is based on a <emphasis role="ital">unified data model</emphasis> (XDM) <xref
+                linkend="shacl"/> and a <emphasis role="ital">unified navigation model</emphasis>
+            (foxpath/XPath) <xref linkend="foxpath"/>
+            <xref linkend="foxpath2"/>
+            <xref linkend="foxpath3"/>, <xref linkend="xpath31"/>
+            <xref linkend="xquery31"/> built upon it. </para>
         <para>Validation produces results, and the more complex the system, the more important it
             may become to produce results in a form which combines maximum precision with optimal
             conditions for integration with other resources. This goal is best served by a <emphasis
@@ -295,18 +298,20 @@ system-s
                 identified by a mandatory @path attribute.</para>
             <para>A <code>&lt;folder></code> element describes a set of folders selected by a
                     <emphasis role="ital">target declaration</emphasis>. Here, the target
-                declaration is a foxpath expression, given by a @foxpath attribute. Foxpath [x] [x]
-                [x] is an extended version of XPath 3.0 which supports file system navigation, node
-                tree navigation and a mixing of file system and node tree navigation within a single
-                path expression. Note that file system navigaton steps are connected by a backslash
-                operator, rather than a slash, which is used for node tree navigation steps. The
-                foxpath expression is evaluated in the context of a folder selected by the target
-                declaration of the <emphasis role="ital">containing</emphasis>
+                declaration is a foxpath expression, given by a @foxpath attribute. Foxpath <xref
+                    linkend="foxpath"/>
+                <xref linkend="foxpath2"/> is an extended version of XPath 3.0 which supports file
+                system navigation, node tree navigation and a mixing of file system and node tree
+                navigation within a single path expression. Note that file system navigaton steps
+                are connected by a backslash operator, rather than a slash, which is used for node
+                tree navigation steps. The foxpath expression is evaluated in the context of a
+                folder selected by the target declaration of the <emphasis role="ital"
+                    >containing</emphasis>
                 <code>&lt;folder></code> element (or <code>&lt;domain></code>, if there is no
                 containing <code>&lt;folder></code>). Evaluation “in the context of a folder” means
                 that the initial context item is the file path of that folder, so that relative file
-                system path expressions are resolved in this context (see [x], [x] for details). For
-                example, the expression</para>
+                system path expressions are resolved in this context (see <xref linkend="foxpath"/>
+                for details). For example, the expression</para>
             <programlisting>  .\\resources\xsd</programlisting>
             <para>resolves to the <code>xsd</code> folders contained by a <code>resources</code>
                 folder found at any depth under the context folder, which here is
@@ -1001,8 +1006,8 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 <para><emphasis role="bold">Resource values</emphasis> are obtained by applying
                     [foxpath-value] to the text of a foxpath expression, or one of the mappings
                     [*-xpath] to the text of an XPath expression.</para>
-                <para>For information about CSV parsing parameters, see [x], section
-                        <code>#wiki/CSV_Module</code>.</para>
+                <para>For information about CSV parsing parameters, see <xref linkend="basex"/>,
+                    section <code>#wiki/CSV_Module</code>.</para>
             </section>
         </section>
         <section>
@@ -1326,8 +1331,9 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             </itemizedlist>
             <para>The <emphasis role="bold">red validation report</emphasis> is an RDF graph
                 obtained by removing from the white validation report all green and blue result
-                values. Note that the validation report defined by the SHACL language [x]
-                corresponds to the red validation report defined by greenfox.</para>
+                values. Note that the validation report defined by the SHACL language <xref
+                    linkend="shacl"/> corresponds to the red validation report defined by
+                greenfox.</para>
             <para>The <emphasis role="bold">canonical XML representation</emphasis> of a white or
                 red validation report is an XML document with a
                     <code>&lt;gx:validationReport></code> root element, which has for each
@@ -1370,13 +1376,13 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
     </section>
     <section>
         <title>Implementation</title>
-        <para>An implementation of a greenfox processor is available on github [x]. The processor is
-            provided as a command line tool (<code>greenfox.bat</code>, <code>greenfox.sh</code>).
-            Example call:</para>
+        <para>An implementation of a greenfox processor is available on github <xref
+                linkend="greenfox"/>. The processor is provided as a command line tool
+                (<code>greenfox.bat</code>, <code>greenfox.sh</code>). Example call:</para>
         <programlisting>greenfox "val?gfox=/projects/greenfox/examples/gfox-system-s.xml,
       domain=/projects/greenfox/examples/system-s"</programlisting>
-        <para>The implementation is written in XQuery and requires the use of the BaseX [x] XQuery
-            processor. </para>
+        <para>The implementation is written in XQuery and requires the use of the BaseX <xref
+                linkend="basex"/> XQuery processor. </para>
     </section>
     <section>
         <title>Discussion</title>
@@ -2015,8 +2021,26 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             <date>2020</date>
             <biblioid class="uri">https://github.com/hrennau/greenfox</biblioid>
         </biblioentry>
-        <biblioentry xml:id="xpath31">
+        <biblioentry xml:id="shacl">
             <abbrev>6</abbrev>
+            <title>Shapes Constraint Language (SHACL)</title>
+            <date>2017</date>
+            <publisher>
+                <publishername>World Wide Web Consortium (W3C)</publishername>
+            </publisher>
+            <biblioid class="uri">https://www.w3.org/TR/shacl/</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="xdm31">
+            <abbrev>7</abbrev>
+            <title>XQuery and XPath Data Model 3.1</title>
+            <date>2017</date>
+            <publisher>
+                <publishername>World Wide Web Consortium (W3C)</publishername>
+            </publisher>
+            <biblioid class="uri">https://www.w3.org/TR/xpath-datamodel-31/</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="xpath31">
+            <abbrev>8</abbrev>
             <title>XML Path Language (XPath) 3.1</title>
             <date>2017</date>
             <publisher>
@@ -2025,7 +2049,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             <biblioid class="uri">https://www.w3.org/TR/xpath-31/</biblioid>
         </biblioentry>
         <biblioentry xml:id="xpathfunctions31">
-            <abbrev>7</abbrev>
+            <abbrev>9</abbrev>
             <title>XPath and XQuery Functions and Operators 3.1</title>
             <date>2017</date>
             <publisher>
@@ -2034,7 +2058,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
             <biblioid class="uri">https://www.w3.org/TR/xpath-functions-31/</biblioid>
         </biblioentry>
         <biblioentry xml:id="xquery31">
-            <abbrev>8</abbrev>
+            <abbrev>10</abbrev>
             <title>XQuery 3.1: An XML Query Language</title>
             <date>2017</date>
             <publisher>
