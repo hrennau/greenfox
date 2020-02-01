@@ -151,7 +151,7 @@ declare function f:constructError_lastModified($constraint as element(gx:lastMod
          concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint))[1]
     return
     
-        <gx:error constraintComp="lastModified">{
+        <gx:error constraintComp="LastModified">{
             $constraint/@id/attribute constraintID {.},
             $constraint/@label/attribute constraintLabel {.},
             $constraintParams,
@@ -166,15 +166,15 @@ declare function f:constructError_fileSize($constraintId as attribute()?,
                                            $actualValue as xs:integer,
                                            $additionalAtts as attribute()*) 
         as element(gx:error) {
-    let $code := 'file-size-not-' || local-name($constraint)
+    let $constraintComp := 'FileSize' || f:firstCharToUpperCase($constraint/local-name(.))
     let $msg := concat('File size not ', local-name($constraint), ' check value = ', $constraint)
     return
     
-        <gx:error class="fileSize" code="{$code}">{
+        <gx:error>{
+            attribute constraintComp {$constraintComp},
             $constraintId,
             $constraintLabel,
-            $constraint,
-            attribute actValue {$actualValue},
+            attribute value {$actualValue},
             attribute message {$msg},
             $additionalAtts        
         }</gx:error>                                                  
