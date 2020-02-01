@@ -29,17 +29,17 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
             for $xpath in $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
             return $xpath/(
                 @expr,
-                @*[matches(local-name(.), 'XPath$', 'i')]
+                @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
             for $foxpath in $gfox//gx:foxpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
             return $foxpath/(
-                @*[matches(local-name(.), 'XPath$', 'i')]
+                @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
             $gfox//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
             $gfox//gx:constraintComponent/gx:xpathExpr
         )
         
-        let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', '_domainName', '_domainPath')
+        let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
         for $expr in $xpathExpressions
         let $potentialBindings := 
             if ($expr/self::gx:xpathExpr) then

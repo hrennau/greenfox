@@ -14,33 +14,39 @@
         <folder foxpath="." id="systemRootFolderShape">
             <!-- *** XSD folder shape *** -->
             <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
-                <targetSize countMsg="No XSD folder found" count="1"/>
+                <targetSize count="1" 
+                            countMsg="No XSD folder found"/>
                 <file foxpath="*.xsd" id="xsdFileShape">
-                    <targetSize minCountMsg="No XSDs found" minCount="1"/>
+                    <targetSize minCount="1" 
+                                minCountMsg="No XSDs found" />
                 </file>
             </folder>
 
             <!-- *** Codelist folder shape *** -->
             <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
-                <targetSize countMsg="No codelist folder found" count="1"/>
+                <targetSize count="1" 
+                            countMsg="No codelist folder found"/>
 
                 <!-- # Check - folder contains codelists? -->
                 <foxpath 
-                    expr="*.xml/codelist[entry/@code[string()]]/@name"
+                    expr="*.xml/codelist[entry]/@name"
                     minCount="1"
                     minCountMsg="Codelist folder without codelists"/>
                 <file foxpath="*[is-xml(.)]" id="codelistFileShape">
-                    <targetSize minCountMsg="No codelist files found" minCount="1"/>
+                    <targetSize minCount="1" 
+                                minCountMsg="No codelist files found"/>
                 </file>
             </folder>
 
             <!-- *** Testcase folder shape *** -->
             <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
-                <targetSize minCountMsg="No testcase folders found" minCount="1"/>
+                <targetSize minCount="1"
+                            minCountMsg="No testcase folders found"/>
+                
                 <!-- # Check - test folder content ok? -->
                 <folderContent
-                    closedMsg="Testcase contains member other than input, output, config, log-*."
-                    closed="true">
+                    closed="true"
+                    closedMsg="Testcase contains member other than input, output, config, log-*.">
                     <memberFolders names="input, output, config"/>
                     <memberFiles names="log-*" count="*"/>
                 </folderContent>

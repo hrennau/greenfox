@@ -80,6 +80,15 @@ return
 
                 <!-- check <greenfox>
                      ================ -->
+                <focusNode xpath="*:greenfox">
+                    <targetSize count="1" 
+                                countMsg="No 'greenfox' root element"/>
+                    <xpath expr="namespace-uri(.)"
+                           eq="http://www.greenfox.org/ns/schema"
+                           eqMsg="Greenfox element has incorrect namespace; should be: http://www.greenfox.org/ns/schema-examples/system-s"
+                           eqMsgOK="Greenfox element has correct namespace"/>
+                </focusNode>
+                
                 <xpath description="Validates top-level elements" expr="*:greenfox/*/local-name(.)"
                     inMsg="Unexpected top-level element; expected names: context, constraintComponents, domain, folder, file"
                     inMsgOK="OK - top-level element names" deactivated="false">
@@ -182,15 +191,23 @@ return
                     <ex:allowedAtts attNames="foxpath path id"
                         msg="Unexpected attributes in 'folder' element; expected: foxpath, path, id"
                         msgOK="OK - 'folder' element: no unexpected attributes"/>
+                    
                     <!-- mandatory attributes -->
                     <ex:xoneAtts attNames="foxpath path"
                         msg="A 'folder' shape must exactly one of these attributes: foxpath, path"
                         msgOK="OK - 'folder' element: has foxpath or path"/>
+                    
                     <!-- element names -->
                     <ex:allowedElems elemNames="targetSize file folder folderContent foxpath"
                         msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
                         msgOK="OK - 'folder' element: no unexpected elements"/>
-
+                    
+                    <!-- @foxpath must not start with \ -->
+                    <xpath expr="@foxpath"
+                           notMatches="^\\"
+                           notMatchesMsg="A foxpath expression on 'folder' must be relative, must not start with a backslash"
+                           notMatchesMsgOK="OK - 'folder' @foxpath does not start with a backslash"/>
+                    
                 </focusNode>
 
                 <!-- check <targetSize>
