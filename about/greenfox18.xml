@@ -337,7 +337,10 @@ system-s
                 applying to a <emphasis role="bold">target</emphasis>. The target is a (possibly
                 empty) set of folders, selected by a <emphasis role="bold">target
                     declaration</emphasis>, e.g. a foxpath expression. The constraints of a folder
-                shape are declared by child elements of the shape element.</para>
+                shape are declared by child elements of the shape element. Every folder in the
+                target is tested against every constraint in the shape. When a folder is tested
+                against a constraint, it is said to be the <emphasis role="bold">focus
+                    resource</emphasis> of the constraint.</para>
             <para>Likewise, a <code>&lt;file></code> element represents a <emphasis role="bold">file
                     shape</emphasis>, defining a set of constraints applying to a target, which is a
                 set of files selected by a target declaration. Folder shapes and file shapes are
@@ -370,20 +373,21 @@ system-s
     constraintID="TargetSize_2-minCount" 
     resourceShapeID="xsdFileShape" 
     minCount="1" 
-    actCount="0" 
-    targetFoxpath="*.xsd"</programlisting>
+    valueCount="0" 
+    targetFoxpath="*.xsd"/></programlisting>
             <para>In a second step we extend our schema with a folder shape whose target consists of
                     <emphasis role="ital">all testcase folders in the system</emphasis>:</para>
             <programlisting>&lt;!-- *** Testcase folder shape *** -->
 &lt;<emphasis role="bold">folder</emphasis> foxpath="<emphasis role="bold">.\\test-*[input][output][config]</emphasis>" id="testcaseFolderShape">
-  &lt;<emphasis role="bold">targetSize</emphasis> msg="No testcase folders found" minCount="1"
+  &lt;<emphasis role="bold">targetSize</emphasis> minCount="1" 
+              minCountMsg="No testcase folders found">
   
   &lt;!-- # Check - test folder content ok? -->
   &lt;<emphasis role="bold">folderContent</emphasis> 
-       closedMsg="Testcase member(s) other than input/output/config, log-*." 
-       closed="true">
+       closed="true"
+       closedMsg="Testcase member(s) other than input/output/config, log-*.">
     &lt;memberFolders names="input, output, config"/>
-    &lt;memberFiles names="log-*" minCount="0" maxCount="*"/>
+    &lt;memberFile name="log-*" count="*"/>
   &lt;/folderContent>
     …
 &lt;/folder></programlisting>
@@ -391,35 +395,34 @@ system-s
                 folder (<code>system-s</code>), matching the name pattern <code>test-*</code> and
                 having (at least) three members <code>input</code>, <code>output</code> and
                     <code>config</code>. The <code>TargetMinCount</code> constraint checks that the
-                system contains at least one such folder. The <code>&lt;folderContent></code>
-                element declares several constraints which are checked for each folder in the
-                target, thus for each testcase folder. There must be three subfolders
-                    <code>input</code>, <code>output</code> and <code>config</code>, and there may
-                be any number of <code>log-*</code> elements. Any additional members are disallowed
-                    (<code>FolderContentClosed</code> constraint).</para>
+                system contains at least one such folder. The contents of these testcase folders are
+                subject to several constraints defined by the <code>&lt;folderContent></code>
+                element. There must be three subfolders <code>input</code>, <code>output</code> and
+                    <code>config</code>, and there may be any number of <code>log-*</code> elements,
+                but not any other members (<code>FolderContentClosed</code> constraint).</para>
             <para>We proceed with a file shape which targets the <code>msg-config.csv</code> file in
                 the <code>config</code> folder of the test case:</para>
             <programlisting>&lt;!-- *** msg config file shape *** -->
 &lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">config\msg-config.csv</emphasis>" id="msgConfigFileShape" ...>
-  &lt;targetSize msg="Config file missing" count="1"/>
+  &lt;targetSize count="1" 
+              countMsg="Config file missing"/>
   ...
 &lt;/file></programlisting>
             <para>The <code>TargetCount</code> constraint makes this file mandatory, but we want to
                 be more specific: to constrain the <emphasis role="ital">file contents</emphasis>.
                 The file must be a CSV file, and the third column (which according to the header row
-                is called <code>returnCode</code>) must contain a value which is <code>OK</code> or
-                    <code>NOFIND</code> or matches the pattern <code>ERROR_*</code>. We add
-                attributes to the <code>&lt;file></code> element which specify how to <emphasis
-                    role="bold">parse the CSV file into an XML representation</emphasis>
-                (@mediatype, @csv.separator, @csv.header). As with other non-XML mediatypes (e.g.
-                JSON or HTML), an XML view enables us to leverage XPath and <emphasis role="ital"
-                    >express</emphasis> a selection of content items, preparing the data material
-                for meaningful and fine-grained validation. </para>
+                is called <code>returnCode</code>) must contain a value which is "OK" or "NOFIND" or
+                matches the pattern "ERROR_*". We add attributes to the <code>&lt;file></code>
+                element which specify how to <emphasis role="bold">parse the CSV file into an XML
+                    representation</emphasis> (@mediatype, @csv.separator, @csv.header). As with
+                other non-XML mediatypes (e.g. JSON or HTML), an XML view enables us to leverage
+                XPath and <emphasis role="ital">express</emphasis> a selection of content items,
+                preparing the data material for fine-grained validation. </para>
             <para>We add to the file shape an <code>&lt;xpath></code> element which describes a
                     <emphasis role="ital">selection</emphasis> of content items and defines a
                     <emphasis role="ital">constrait</emphasis> which these items must satisfy
                 (expressed by the <code>&lt;in></code> child element): </para>
-            <programlisting>&lt;!-- *** msg config file shape -->
+            <programlisting>&lt;!-- *** msg config file shape *** -->
 &lt;<emphasis role="bold">file</emphasis> foxpath="config\msg-config.csv" id="msgConfigFileShape" 
       <emphasis role="bold">mediatype</emphasis>="csv" <emphasis role="bold">csv.separator</emphasis>="," <emphasis role="bold">csv.withHeader</emphasis>="yes">
   ...
@@ -450,42 +453,57 @@ getFooRQ3.xml,getFooRS3.xml,ERROR_SYSTEM]]></programlisting>
 getFooRQ1.xml,getFooRS1.xml,OK
 getFooRQ2.xml,getFooRS2.xml,NOFIND
 getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
+            <para>The second example would produce the following validation result, identify
+                resource and constraint, describing the constraint and exposing the offending
+                value:</para>
+            <programlisting>&lt;<emphasis role="bold">gx:red</emphasis> msg="Config file contains unknown return code"             
+    filePath="C:/tt/greenfox/resources/example-system/system-s/resources/xsd"
+    constraintComp="ExprValueIn" 
+    constraintID="xpath_1-in" 
+    valueShapeID="xpath_1" 
+    exprLang="xpath"
+    expr="//returnCode">
+    <emphasis role="bold">&lt;gx:value></emphasis>ERROR-SYSTEM&lt;/gx:value>
+&lt;/red></programlisting>
             <para>According to the conceptual framework of greenfox, the <code>&lt;xpath></code>
                 element does not, as one might expect, represent a constraint, but a <emphasis
                     role="bold">value shape</emphasis>. A value shape is a container combining a
                 single <emphasis role="bold">value mapper</emphasis> with a set of constraints: the
-                value mapper maps the focus resource to a value (“resource value”), which is
-                validated against each one of the constraints. Greenfox supports two kinds of value
-                mapper – XPath expression and foxpath expression, and accordingly there are two
-                variants of a value shape – <emphasis role="bold">XPath value shape</emphasis>
-                (represented by an <code>&lt;xpath></code> element) and <emphasis role="bold"
-                    >Foxpath value shape</emphasis> (<code>&lt;foxpath></code>). See section “Schema
-                building blocks” for detailed information about value shapes.</para>
+                value mapper maps the focus resource to a value - called a <emphasis role="bold"
+                    >resource value</emphasis> - which is validated against each one of the
+                constraints. Greenfox supports two kinds of value mapper – XPath expression and
+                foxpath expression, and accordingly there are two variants of a value shape –
+                    <emphasis role="bold">XPath value shape</emphasis> (represented by an
+                    <code>&lt;xpath></code> element) and <emphasis role="bold">Foxpath value
+                    shape</emphasis> (<code>&lt;foxpath></code>). See <xref
+                    linkend="schema-building-blocks"/> for more information about value
+                shapes.</para>
             <para>Now we are going to check <emphasis role="ital">request message files</emphasis>:
                 for each such file, there must be a response file in the <code>output</code> folder,
                 with a name derived from the request file name (replacing the last occurrence of
                 substring “RQ” with “RS”). This is a constraint which does not depend on file
                 contents, but on file system contents found “around” the focus resource. A check
-                requires navigation of the file system, rather than file contents. We solve the
-                problem with a Foxpath value shape:</para>
-            <programlisting><!-- *** Request file shape *** -->
-&lt;<emphasis role="bold">file</emphasis> foxpath="input\(*.xml, *.json)" id="requestFileShape">
+                requires <emphasis role="bold">navigation of the file system</emphasis>, rather than
+                file contents. We solve the problem with a Foxpath value shape:</para>
+            <programlisting>&lt;!-- *** Request file shape *** -->
+&lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">input\(*.xml, *.json)</emphasis>" id="requestFileShape">
   ...
   &lt;!-- # Check - request with response ? -->
-  &lt;<emphasis role="bold">foxpath</emphasis> expr="<emphasis role="bold">..\..\output\*\file-name(.)</emphasis>"
-      <emphasis role="bold">containsXPath</emphasis>="$fileName ! 
-                     replace(., '(.*)RQ(.*)$', '$1RS$2')"
+  &lt;<emphasis role="bold">foxpath</emphasis> 
+      <emphasis role="bold">expr</emphasis>="..\..\output\*\file-name(.)"
+      <emphasis role="bold">containsXPath</emphasis>=
+           "$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
       containsXPathMsg="Request without response"
   ...
 &lt;file></programlisting>
             <para>A Foxpath value shape combines a foxpath expression (@expr) with a set of
-                constraints. The expression maps the focus resource to a value, which is validated
-                against all constraints. Here we have an expression which maps the focus resource to
-                a list of file names found in the <code>output</code> folder. A single constraint,
-                represented by the @containsXPath attribute, requires the expression value to
-                contain the value of an XPath expression, which maps the request file name to the
-                response file name. The constraint is satisfied if and only if the response file is
-                present in the <code>output</code> folder.</para>
+                constraints. The expression maps the focus resource to a resource value, which is
+                validated against all constraints. Here we have an expression which maps the focus
+                resource to a list of file names found in the <code>output</code> folder. A single
+                constraint, represented by the @containsXPath attribute, requires the foxpath
+                expression value to contain the value of an XPath expression, which maps the request
+                file name to the response file name. The constraint is satisfied if and only if the
+                response file is present in the <code>output</code> folder.</para>
             <para>As with XPath value shapes, it is important to be aware of the evaluation context.
                 We have already seen that in an XPath value shape the initial context item is the
                     <emphasis role="ital">document node</emphasis> obtained by parsing the text of
@@ -493,29 +511,30 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 context item is the <emphasis role="ital">file path</emphasis> of the focus
                 resource, which here is the file path of a request file. The foxpath expression
                 starts with two steps along the parent axis (<code>..\..</code>) which lead to the
-                enclosing <code>testcase</code> folder, from which navigation to the response files
-                and their mapping to file names is trivial: </para>
+                enclosing testcase folder, from which navigation to the response files and their
+                mapping to file names is trivial: </para>
             <programlisting><![CDATA[  ..\..\output\*\file-name(.)]]></programlisting>
             <para>A Foxpath value shape does not require the focus resource to be parsed into a
                 document, as the context is a file path, rather than a document node. Therefore, a
                 Foxpath value shape can also be used in a folder shape. We use this possibility in
-                order to constrain the <code>codelists</code> folder to contain
-                    <code>&lt;codelist></code> elements with a @name attribute and at least one
-                    <code>&lt;entry></code> child:</para>
+                order to constrain the <code>codelists</code> folder to contain non-empty
+                    <code>&lt;codelist></code> elements with unique names:</para>
             <programlisting><!-- *** Codelist folder shape -->
-&lt;<emphasis role="bold">folder</emphasis> foxpath=".\\resources\codelists" id="codelistFolderShape">
+&lt;<emphasis role="bold">folder</emphasis> foxpath="<emphasis role="bold">.\\resources\codelists</emphasis>" id="codelistFolderShape">
     ...
     &lt;!-- # Check - folder contains codelists? -->
-    &lt;<emphasis role="bold">foxpath</emphasis> expr="<emphasis role="bold">*.xml/codelist[entry]/@name</emphasis>"  
+    &lt;<emphasis role="bold">foxpath</emphasis> expr="<emphasis role="bold">.\*.xml//codelist[entry]/@name</emphasis>"  
              <emphasis role="bold">minCount</emphasis>="1"
              minCoutMsg="Codelist folder without codelists"
+             <emphasis role="bold">itemsUnique</emphasis>="true"
+             itemsUniqueMsg="Codelist names must be unique"/>
     ...
 &lt;/folder></programlisting>
-            <para>Note the aggregative view enabled by the foxpath language: we do not bother with
-                individual files but perform a “mixed” navigation, starting with file system
-                navigation to all *.xml files, continuing within their collected content (<code>…
-                    /codelist[entry]/@name</code>), arriving at @name attributes on non-empty
-                    <code>&lt;codelist></code> elements.</para>
+            <para>Note the unified view of file system contents offered by the foxpath language: a
+                single expression starts with file system navigation, visiting all <code>.xml</code>
+                files in the current folder, enters their XML content and selects the @name
+                attributes of non-empty <code>codelist</code> elements, which may occur at any depth
+                inside the content trees.</para>
             <para>Now we turn to the <emphasis role="ital">response message files</emphasis>. They
                 must be “fresh”, that is, have a timestamp of last modification which is after a
                 limit timestamp provided by a call parameter of the system validation. This is
@@ -523,13 +542,13 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 parameter value. Besides, response files must not be empty (<code>FileSize</code>
                 constraint):</para>
             <programlisting>&lt;!-- *** Response file shape *** -->                
-&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+&lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">output\(*.xml, *.json)</emphasis>" mediatype="xml-or-json">
     ...                    
-    &lt;!-- # Check - response fresh? *** -->
+    &lt;!-- # Check - response fresh? -->
     &lt;<emphasis role="bold">lastModified</emphasis> ge="${lastModified}"
                   geMsg="Stale output file"
 
-    &lt;!-- # Check - response non-empty? *** -->
+    &lt;!-- # Check - response non-empty? -->
     &lt;<emphasis role="bold">fileSize</emphasis> gt="0" 
               gtMsg="Empty output file"
     ...
@@ -545,11 +564,11 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
   ...
 &lt;/greenfox></programlisting>
             <para>We have several expecations related to the contents of response files. If the
-                response is an XML document (rather than JSON), it must be valid valid against some
-                XSD found in the XSD folder. XSD validation is triggered by an <code>XSDValid</code>
+                response is an XML document (rather than JSON), it must be valid against some XSD
+                found in the XSD folder. XSD validation is triggered by an <code>XSDValid</code>
                 constraint, with a foxpath expression locating the XSD(s) to be used:</para>
             <programlisting>&lt;!-- *** Response file shape *** -->                
-&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" <emphasis role="bold">mediatype="xml-or-json</emphasis>">
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="<emphasis role="bold">xml-or-json</emphasis>">
     ...
     &lt;!-- # Check - schema valid? (only if XML) -->
     &lt;<emphasis role="bold">ifMediatype</emphasis> eq="xml">
@@ -568,25 +587,25 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 foxpath expression and which provides the file path of the domain folder. </para>
             <para>The next condition to be checked is that certain values from the response
                 (selected by XPath <code>//*:fooValue</code>) are found in a particular codelist.
-                Here we use an XPath value shape with an <code>ExprValueEqFoxpath</code> constraint,
-                represented by the @eqFoxpath attribute:</para>
+                Here we use an XPath value shape with an <code>ExprValueInFoxpath</code> constraint,
+                represented by the @inFoxpath attribute:</para>
             <programlisting>&lt;!-- *** Response file shape *** -->                
-&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" <emphasis role="bold">mediatype="xml-or-json</emphasis>">
+&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="<emphasis role="bold">xml-or-json</emphasis>">
     ...
    &lt;!-- # Check - known article number? -->
    &lt;<emphasis role="bold">xpath</emphasis> expr="//*:fooValue"
-          <emphasis role="bold">eqFoxpath</emphasis>="$domain\\codelists\*.xml
+          <emphasis role="bold">inFoxpath</emphasis>="$domain\\codelists\*.xml
                      /codelist[@name eq 'foo-article']/entry/@code"
-          eqFoxpathMsg="Unknown foo article number"/>
+          inFoxpathMsg="Unknown foo article number"/>
 &lt;/file></programlisting>
             <para>As always with an XPath value shape, the XPath expression (@expr) selects the
-                content items to be checked. The <code>ExprValueEqFoxpath</code> constraint works as
+                content items to be checked. The <code>ExprValueInFoxpath</code> constraint works as
                 follows: it evaluates the foxpath expression provided by constraint parameter
-                    <code>eqFoxpath</code> and checks that every item of the value to be checked
-                also occurs in the value of the foxpath expression. As here the foxpath expression
-                returns all entries of the appropriate codelist, the constraint is satisfied if and
-                only if every <code>fooValue</code> element in the response contains a string found
-                in the codelist.</para>
+                @inFoxpath and checks that every item of the value to be checked also occurs in the
+                value of the foxpath expression. As here the foxpath expression returns all entries
+                of the appropriate codelist, the constraint is satisfied if and only if every
+                    <code>&lt;fooValue></code> element in the response contains a string found in
+                the codelist.</para>
             <para>Note that this value shape works properly for both, XML and JSON responses. Due to
                 the @mediatype annotation on the file shape, which is set to
                     <code>xml-or-json</code>, the greenfox processor first attempts to parse the
@@ -607,7 +626,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 the item of interest. The value against which to compare is retrieved by a trivial
                 XPath expression (@eqXPath):</para>
             <programlisting>&lt;!-- *** Response file shape *** -->                
-&lt;<emphasis role="bold">file</emphasis> foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+&lt;<emphasis role="bold">file</emphasis> foxpath="<emphasis role="bold">output\(*.xml, *.json)</emphasis>" mediatype="xml-or-json">
     ...
     &lt;!-- # Check - return code expected? *** -->
     &lt;<emphasis role="bold">foxpath</emphasis> expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
@@ -1107,7 +1126,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                     parameter</emphasis>s. </para>
         </section>
     </section>
-    <section>
+    <section xml:id="schema-building-blocks">
         <title>Schema building blocks</title>
         <para>This section summarizes the <emphasis role="bold">building blocks</emphasis> of a
             greenfox schema. Building blocks are the parts of which a serialized schema is composed.
@@ -1482,7 +1501,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
 
 
     <appendix xml:id="appendix-greenfox-schema-s1">
-        <title>Appendix A1: greenfox schema for system S</title>
+        <title>Appendix A1: greenfox schema "system S"</title>
         <para>This appendix lists the complete schema developed in section “Getting started with
             greenfox”.</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -1521,7 +1540,10 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                <foxpath 
                   expr="*.xml/codelist[entry]/@name"
                   minCount="1"
-                  minCountMsg="Codelist folder without codelists"/>
+                  minCountMsg="Codelist folder without codelists"
+                  itemsUnique="true"
+                  itemsUniqueMsg="Codelist names must be unique"/>
+                  
                <file foxpath="*[is-xml(.)]" id="codelistFileShape">
                   <targetSize minCount="1"
                               minCountMsg="No codelist files found"/>
@@ -1540,7 +1562,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                   closedMsg="Testcase contains member other than 
                              input, output, config, log-*.">
                   <memberFolders names="input, output, config"/>
-                  <memberFiles names="log-*" count="*"/>
+                  <memberFile name="log-*" count="*"/>
                </folderContent>
 
                <!-- *** msg config shape *** -->
@@ -1570,8 +1592,8 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                   <!-- # Check - request with response? -->
                   <foxpath 
                      expr="..\..\output\*\file-name(.)"
-                     containsXPath="$fileName ! 
-                                    replace(., '(.*)RQ(.*)$', '$1RS$2')"
+                     containsXPath=
+                          "$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
                      containsXPathMsg="Request without response"/>
                </file>
 
@@ -1601,9 +1623,9 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                   <!-- # Check - known article number? -->
                   <xpath 
                      expr="//*:fooValue"
-                     eqFoxpath="$domain\\codelists\*.xml
+                     inFoxpath="$domain\\codelists\*.xml
                                 /codelist[@name eq 'foo-article']/entry/@code"
-                     eqFoxpathMsg="Unknown foo article number" 
+                     inFoxpathMsg="Unknown foo article number" 
                      id="articleNumberValueShape"/>
 
                   <!-- # Check - return code ok? -->
