@@ -55,6 +55,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $maxCount := $constraint/@maxCount
     let $count := $constraint/@count
     let $datatype := $constraint/@datatype
+    let $itemsUnique := $constraint/@itemsUnique
     
     let $eq := $constraint/@eq   
     let $ne := $constraint/@ne    
@@ -74,14 +75,16 @@ declare function f:validateExpressionValue($constraint as element(),
     let $ltFoxpath := $constraint/@ltFoxpath
     let $leFoxpath := $constraint/@leFoxpath
     let $gtFoxpath := $constraint/@gtFoxpath
-    let $geFoxpath := $constraint/@geFoxpath    
+    let $geFoxpath := $constraint/@geFoxpath
+    let $inFoxpath := $constraint/@inFoxpath
     let $containsFoxpath := $constraint/@containsFoxpath    
     
     let $eqXPath := $constraint/@eqXPath
-    let $leXPath := $constraint/@leXPath    
     let $ltXPath := $constraint/@ltXPath
-    let $geXPath := $constraint/@geXPath
+    let $leXPath := $constraint/@leXPath    
     let $gtXPath := $constraint/@gtXPath
+    let $geXPath := $constraint/@geXPath    
+    let $inXPath := $constraint/@inXPath
     let $containsXPath := $constraint/@containsXPath    
     
     let $flags := string($constraint/@flags)
@@ -133,6 +136,8 @@ declare function f:validateExpressionValue($constraint as element(),
                                                                           $contextDoc, $context, $quantifier, $constraint, $contextInfo),
         if (not($gtXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $gtXPath, $contextItem, $contextFilePath, 
                                                                           $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+        if (not($inXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $inXPath, $contextItem, $contextFilePath, 
+                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
         if (not($containsXPath)) then () else f:validateExpressionValue_containsExpressionValue(
                                                                           $exprValue, $containsXPath, $contextItem, $contextFilePath, 
                                                                           $contextDoc, $context, $constraint, $contextInfo),
@@ -147,9 +152,13 @@ declare function f:validateExpressionValue($constraint as element(),
                                                                             $contextDoc, $context, $quantifier, $constraint, $contextInfo),
         if (not($geFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $geFoxpath, $contextItem, $contextFilePath, 
                                                                             $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+        if (not($inFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $inFoxpath, $contextItem, $contextFilePath, 
+                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
         if (not($containsFoxpath)) then () else f:validateExpressionValue_containsExpressionValue(
                                                                           $exprValue, $containsFoxpath, $contextItem, $contextFilePath, 
                                                                           $contextDoc, $context, $constraint, $contextInfo),
+        if (not($itemsUnique/boolean(.))) then () else f:validateExpressionValue_itemsUnique($exprValue, $itemsUnique, $constraint, $contextInfo),   
+        
         ()                                                                          
 
        
@@ -183,6 +192,25 @@ declare function f:validateExpressionValue_contains($exprValue as item()*,
                 f:validationResult_expression('red', $valueShape, $contains, (), ($useViolations ! <gx:value>{.}</gx:value>), $contextInfo)
         else 
             f:validationResult_expression('green', $valueShape, $contains, (), (), $contextInfo)
+};        
+
+declare function f:validateExpressionValue_itemsUnique($exprValue as item()*,
+                                                       $itemsUnique as attribute(),
+                                                       $valueShape as element(),
+                                                       $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $violations :=
+        if (count($exprValue) eq count(distinct-values($exprValue))) then ()
+        else
+            for $item in $exprValue
+            group by $value := $item
+            where count($item) gt 1
+            return $item[1]
+    return
+        if (exists($violations)) then 
+            f:validationResult_expression('red', $valueShape, $itemsUnique, (), ($violations ! <gx:value>{.}</gx:value>), $contextInfo)
+        else 
+            f:validationResult_expression('green', $valueShape, $itemsUnique, (), (), $contextInfo)
 };        
 
 
@@ -298,12 +326,14 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
         case attribute(leXPath) return function($op1, $op2) {$op1 <= $op2}
         case attribute(gtXPath) return function($op1, $op2) {$op1 > $op2}
         case attribute(geXPath) return function($op1, $op2) {$op1 >= $op2}
+        case attribute(inXPath) return function($op1, $op2) {$op1 = $op2}
         
         case attribute(eqFoxpath) return function($op1, $op2) {$op1 = $op2}
         case attribute(ltFoxpath) return function($op1, $op2) {$op1 < $op2}
         case attribute(leFoxpath) return function($op1, $op2) {$op1 <= $op2}
         case attribute(gtFoxpath) return function($op1, $op2) {$op1 > $op2}        
         case attribute(geFoxpath) return function($op1, $op2) {$op1 >= $op2}
+        case attribute(inFoxpath) return function($op1, $op2) {$op1 = $op2}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
     
     let $errors :=
@@ -514,6 +544,7 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(ltXPath) return map{'constraintComp': 'ExprValueLtXPath', 'atts': ('ltXPath', 'useDatatype')}
         case attribute(geXPath) return map{'constraintComp': 'ExprValueGeXPath', 'atts': ('geXPath', 'useDatatype')}
         case attribute(gtXPath) return map{'constraintComp': 'ExprValueGtXPath', 'atts': ('gtXPath', 'useDatatype')}
+        case attribute(inXPath) return map{'constraintComp': 'ExprValueInXPath', 'atts': ('inXPath', 'useDatatype')}        
         case attribute(containsXPath) return map{'constraintComp': 'ExprValueContainsXPath', 'atts': ('containsXPath', 'useDatatype')}
         case attribute(containsFoxpath) return map{'constraintComp': 'ExprValueContainsFoxpath', 'atts': ('containsFoxpath', 'useDatatype')}
         case attribute(eqFoxpath) return map{'constraintComp': 'ExprValueEqFoxpath', 'atts': ('eqFoxpath', 'useDatatype')}
@@ -521,6 +552,8 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(leFoxpath) return map{'constraintComp': 'ExprValueLeFoxpath', 'atts': ('leFoxpath', 'useDatatype')}
         case attribute(gtFoxpath) return map{'constraintComp': 'ExprValueGtFoxpath', 'atts': ('gtFoxpath', 'useDatatype')}
         case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype')}
+        case attribute(inFoxpath) return map{'constraintComp': 'ExprValueInFoxpath', 'atts': ('inFoxpath', 'useDatatype')}        
+        case attribute(itemsUnique) return map{'constraintComp': 'ExprValueItemsUnique', 'atts': ('itemsUnique')}
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
