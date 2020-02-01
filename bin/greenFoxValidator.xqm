@@ -36,18 +36,17 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
                 @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
             $gfox//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
-            $gfox//gx:constraintComponent/gx:xpathExpr
+            $gfox//gx:constraintComponent/(@validatorXPath, gx:validatorXPath)
         )
         
         let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
         for $expr in $xpathExpressions
         let $potentialBindings := 
-            if ($expr/self::gx:xpathExpr) then
+            if ($expr/(self::gx:validatorXPath, self::attribute(validatorXPath))) then
                 let $paramNames := 
-                $expr/parent::gx:constraintComponent/gx:param/@name
-                return (
+                    $expr/parent::gx:constraintComponent/gx:param/@name
+                return
                     ($potentialBindings_base, $paramNames) => distinct-values()
-                )
             else $potentialBindings_base
         return
             try {

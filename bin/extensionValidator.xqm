@@ -51,8 +51,8 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $useParams)  
 
-    let $xpath := $constraintComponent/gx:xpathExpr
-    let $foxpath := $constraintComponent/gx:foxpathExpr
+    let $xpath := $constraintComponent/(@validatorXPath, gx:validatorXPath)[1]
+    let $foxpath := $constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)[1]
     let $exprValue := 
         if ($xpath) then f:evaluateXPath($xpath, $contextItem, $context?_evaluationContext, true(), true())
         else if ($foxpath) then f:evaluateFoxpath($xpath, $contextItem, $context?_evaluationContext, true())
