@@ -1000,7 +1000,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
         <section>
             <title>Part 2: schema model</title>
             <para>File system validation is a mapping of a file system tree and a greenfox schema to
-                a set of greenfox validation results.</para>
+                a set of validation results.</para>
             <para>A <emphasis role="bold">greenfox schema</emphasis> is a set of shapes.</para>
             <para>A <emphasis role="bold">shape</emphasis> is a resource shape or a value
                 shape.</para>
@@ -1012,29 +1012,32 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 value.</para>
             <para>A <emphasis role="bold">focus resource</emphasis> is a resource to be validated
                 against a resource shape.</para>
-            <para>A <emphasis role="bold">focus value</emphasis> is a resource value to be validated
-                against a value shape.</para>
+            <para>A <emphasis role="bold">focus value</emphasis> is a resource value providing a
+                context in which to evaluate value shapes (rather than in the context of a
+                resource's file path or node tree representation). A focus value is typically a set
+                of nodes selected from the resource's node tree representation.</para>
             <para>A resource shape is a <emphasis role="bold">folder shape</emphasis> or a <emphasis
                     role="bold">file shape</emphasis>.</para>
             <para>A <emphasis role="bold">value shape</emphasis> is a mapping of a focus resource,
-                or of a resource value, to a resource value and a set of constraints.</para>
+                or of a resource value, to a resource value and a set of constraints which apply to
+                the value.</para>
             <para>A <emphasis role="bold">constraint</emphasis> maps a resource property or a
                 resource value to a validation result.</para>
-            <para>A constraint is declared by a shape. It identifies a constraint component and
-                assigns values to the constraint parameters.</para>
+            <para>A constraint is defined by a <emphasis role="bold">constraint
+                    declaration</emphasis>.</para>
+            <para>A constraint declaration is provided by a shape. It identifies a constraint
+                component and assigns values to the constraint parameters.</para>
             <para>A <emphasis role="bold">constraint component</emphasis> is a set of constraint
                 parameter definitions and a validator.</para>
-            <para>A <emphasis role="bold">constraint parameter</emphasis> is defined by the
-                specification of a constraint component. The definition includes a name, a type, the
-                value semantics and whether the parameter is mandatory or optional.</para>
+            <para>A <emphasis role="bold">constraint parameter definition</emphasis> specifies a
+                name, a type, a cardinality range and value semantics.</para>
             <para>A <emphasis role="bold">validator</emphasis> is a set of rules how a resource
-                property or a resource value and the arguments bound to the constraint parameters
-                are mapped to a validation result.</para>
-            <para>A <emphasis role="bold">validation result</emphasis> is a boolean value signaling
-                conformance of a resource property or a resource value against a constraint,
-                accompanied by additional information identifying the resource and the constraint,
-                as well as further items of information with names and semantics as prescribed by
-                the constraint component.</para>
+                property or a resource value and the values of the constraint parameters are mapped
+                to a validation result.</para>
+            <para>A <emphasis role="bold">validation result</emphasis> describes the outcome of
+                validating a resource against a constraint. It contains a boolean value signaling
+                conformance, an identification of the resource and the constraint, constraint
+                parameter values and optional details about the violation.</para>
         </section>
         <section>
             <title>Part 3: validation model</title>
