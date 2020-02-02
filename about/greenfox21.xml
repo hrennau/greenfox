@@ -760,7 +760,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 represented by an XDM value.</para>
             <para>A <emphasis role="bold">resource value</emphasis> is the XDM value of an
                 expression evaluated in the context of a resource property, or of a derived resource
-                property, or of a resource value.</para>
+                property, or of an item from another resource value.</para>
             <section>
                 <title>Folder resources</title>
                 <para>The table below summarizes the <emphasis role="bold">resource
@@ -785,7 +785,7 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                         <tbody>
                             <row>
                                 <entry align="left">[name]</entry>
-                                <entry align="left"><code>xsd:string</code></entry>
+                                <entry align="left"><code>xsd:string?</code></entry>
                                 <entry align="left">The folder name; optional – the file system root
                                     folder does not have a name</entry>
                             </row>
@@ -834,18 +834,15 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                                 <entry align="left">The names of all ancestor folders and the folder
                                     itself, separated by a slash</entry>
                             </row>
-                            <row>
-                                <entry align="left">[foxpath-value]</entry>
-                                <entry align="left">Mapping: foxpath expression string => XDM value </entry>
-                                <entry align="left">A mapping of foxpath expressions to an XDM
-                                    value, which is the value obtained by evaluating the expression
-                                    in the context of the resource folder’s [filepath] value</entry>
-                            </row>
                         </tbody>
                     </tgroup>
                 </table>
-                <para><emphasis role="bold">Resource values</emphasis> are obtained by applying
-                    [foxpath-value] to the text of a foxpath expression.</para>
+                <para><emphasis role="bold">Resource values</emphasis> of a folder are obtained by
+                    evaluating a foxpath expression in the context of [filepath]. They can also be
+                    obtained by evaluating an XPath or a foxpath expression in the context of an
+                    item taken from another resource value. See <xref
+                        linkend="appendix-expression-chains"/> for implications of this recursive
+                    definition.</para>
             </section>
             <section>
                 <title>File resources</title>
@@ -907,64 +904,20 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
 
                             <row>
                                 <entry align="left">[text]</entry>
-                                <entry align="left"><code>xsd:string</code></entry>
-                                <entry align="left">The text content of the file (empty if not a
-                                    text file)</entry>
+                                <entry align="left"><code>xsd:string?</code></entry>
+                                <entry align="left">The text content of the file (empty sequence if
+                                    not a text file)</entry>
                             </row>
                             <row>
                                 <entry align="left">[encoding]</entry>
-                                <entry align="left"><code>xsd:anyURI</code></entry>
+                                <entry align="left"><code>xsd:string?</code></entry>
                                 <entry align="left">The encoding of the text content of the file
-                                    (empty if not a text file)</entry>
+                                    (empty sequence if not a text file)</entry>
                             </row>
                             <row>
                                 <entry align="left">[octets]</entry>
-                                <entry align="left"><code>xsd:base64Binary</code></entry>
+                                <entry align="left"><code>xsd:base64-Binary</code></entry>
                                 <entry align="left">The binary file content</entry>
-                            </row>
-                            <row>
-                                <entry align="left">[xmldoc]</entry>
-                                <entry align="left"><code>document-node()</code></entry>
-                                <entry align="left">The result of parsing [text] into an XML
-                                    document</entry>
-                            </row>
-                            <row>
-                                <entry align="left">[jsondoc-basex]</entry>
-                                <entry align="left"><code>document-node()</code></entry>
-                                <entry align="left">The result of parsing [text] into a JSON
-                                    document represented by a document-node in accordance with the
-                                    rules defined by BaseX documentation</entry>
-                            </row>
-                            <row>
-                                <entry align="left">[jsondoc-w3c]</entry>
-                                <entry align="left"><code>document-node()</code></entry>
-                                <entry align="left">The result of parsing [text] into a JSON
-                                    document represented by a document-node in accordance with XPath
-                                    function <code>fn:json-to-xml</code></entry>
-                            </row>
-                            <row>
-                                <entry align="left">[htmldoc]</entry>
-                                <entry align="left"><code>document-node()</code></entry>
-                                <entry align="left">The result of parsing [text] into an XML
-                                    document represented by a document-node in accordance with the
-                                    rules defined by TagSoup documentation</entry>
-                            </row>
-                            <row>
-                                <entry align="left">[csvdoc]</entry>
-                                <entry align="left"><code>document-node()</code></entry>
-                                <entry align="left">The result of parsing [text] into an XML
-                                    document represented by a document-node, as controlled by the
-                                    CSV parsing parameter values derived from a file shape, in
-                                    accordance with the rules defined by BaseX documentation
-                                </entry>
-                            </row>
-                            <row>
-                                <entry align="left">[csvdocs]</entry>
-                                <entry align="left">Mapping: csv-parse-parameters => document-node() </entry>
-                                <entry align="left">The mapping result is a CSV document represented
-                                    by a document-node as controlled by given CSV parsing parameter
-                                    values, in accordance with the rules defined by BaseX
-                                    documentation </entry>
                             </row>
                         </tbody>
                     </tgroup>
@@ -994,57 +947,54 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                                     itself, separated by a slash</entry>
                             </row>
                             <row>
-                                <entry align="left">[xmldoc.xpath]</entry>
-                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
-                                <entry align="left">A mapping of XPath expressions to an XDM value,
-                                    which is the value obtained by evaluating the expression in the
-                                    context of [xmldoc]</entry>
+                                <entry align="left">[xmldoc]</entry>
+                                <entry align="left"><code>document-node()?</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document</entry>
                             </row>
                             <row>
-                                <entry align="left">[jsondoc-basex.xpath]</entry>
-                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
-                                <entry align="left">A mapping of XPath expressions to an XDM value,
-                                    which is the value obtained by evaluating the expression in the
-                                    context of [jsondoc-basex]</entry>
+                                <entry align="left">[jsondoc-basex]</entry>
+                                <entry align="left"><code>document-node()?</code></entry>
+                                <entry align="left">The result of parsing [text] into a JSON
+                                    document represented by a document node in accordance with the
+                                    rules defined by BaseX documentation</entry>
                             </row>
                             <row>
-                                <entry align="left">[jsondoc-w3c.xpath]</entry>
-                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
-                                <entry align="left">A mapping of XPath expressions to an XDM value,
-                                    which is the value obtained by evaluating the expression in the
-                                    context of [jsondoc-w3c]</entry>
+                                <entry align="left">[jsondoc-w3c]</entry>
+                                <entry align="left"><code>document-node()?</code></entry>
+                                <entry align="left">The result of parsing [text] into a JSON
+                                    document represented by a document node in accordance with XPath
+                                    function <code>fn:json-to-xml</code></entry>
                             </row>
                             <row>
-                                <entry align="left">[htmldoc.xpath]</entry>
-                                <entry align="left">Mapping: XPath expression string => XDM value </entry>
-                                <entry align="left">A mapping of XPath expressions to an XDM value,
-                                    which is the value obtained by evaluating the expression in the
-                                    context of [htmldoc]</entry>
+                                <entry align="left">[htmldoc]</entry>
+                                <entry align="left"><code>document-node()?</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document represented by a document node in accordance with the
+                                    rules defined by TagSoup documentation</entry>
                             </row>
                             <row>
-                                <entry align="left">[csvdoc.xpath]</entry>
-                                <entry align="left">Mapping: ( csv-parse-parameters, XPath
-                                    expression string ) => XDM value </entry>
-                                <entry align="left">A mapping of CSV parsing parameter values and an
-                                    XPath expression to an XDM value, which is the value obtained by
-                                    evaluating the expression in the context of a document node from
-                                    [csv-docs], obtained for the parsing parameter values</entry>
-                            </row>
-                            <row>
-                                <entry align="left">[foxpath-value]</entry>
-                                <entry align="left">Mapping: foxpath expression string => XDM value </entry>
-                                <entry align="left">A mapping of foxpath expressions to an XDM
-                                    value, which is the value obtained by evaluating the expression
-                                    in the context of [filepath]</entry>
+                                <entry align="left">[csvdoc]</entry>
+                                <entry align="left"><code>document-node()?</code></entry>
+                                <entry align="left">The result of parsing [text] into an XML
+                                    document represented by a document node, as controlled by the
+                                    CSV parsing parameter values derived from a file shape, in
+                                    accordance with the rules defined by BaseX documentation
+                                </entry>
                             </row>
                         </tbody>
                     </tgroup>
                 </table>
-                <para><emphasis role="bold">Resource values</emphasis> are obtained by applying
-                    [foxpath-value] to the text of a foxpath expression, or one of the mappings
-                    [*-xpath] to the text of an XPath expression.</para>
+                <para><emphasis role="bold">Resource values</emphasis> of a file are obtained by
+                    evaluating a foxpath expression in the context of [filepath], or evaluating an
+                    XPath expression in the context of a [*doc] or [*doc-*] property. They can also
+                    be obtained by evaluating an XPath or a foxpath expression in the context of an
+                    item taken from another resource value. See <xref
+                        linkend="appendix-expression-chains"/> for implications of this recursive
+                    definition.</para>
                 <para>For information about CSV parsing parameters, see <xref linkend="basex"/>,
                     section <code>#wiki/CSV_Module</code>.</para>
+
             </section>
         </section>
         <section>
@@ -2090,6 +2040,21 @@ getFooRQ3.xml,getFooRS3.xml,ERROR-SYSTEM]]></programlisting>
                 </tbody>
             </tgroup>
         </table>
+
+    </appendix>
+    <appendix xml:id="appendix-expression-chains">
+        <title>Note on the generation of resource values by expression chains</title>
+        <para> The recursive definition of <emphasis role="bold">resource values</emphasis> allows
+            the construction of resource values through <emphasis role="bold">chains of
+                expressions</emphasis>. When a chain is used, for each combination of items from all
+            expressions except the last one is mapped to a distinct resource value, which itself may
+            have zero, one or more items. As an example, consider a first expression mapping a
+            folder to a sequence of files, a second expression mapping each file to all
+                <code>&lt;row></code> elements found in its node tree representation, and a final
+            expression mapping each <code>&lt;row></code> element to its <code>&lt;col></code> child
+            elements. This chain generates one resource value for each combination of file and row,
+            consisting of zero, one or more <code>&lt;col></code> elements. These values are
+            resource values of the folder to which the expression chain was applied.</para>
 
     </appendix>
     <bibliography>
