@@ -44,9 +44,9 @@ declare function f:validateExtensionConstraint($constraint as element(),
             return $attValue ! <gx:param name="{$paramName}">{string(.)}</gx:param>
     )
     
-    let $reqBindings :=
+    let $reqBindings := trace(
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        return f:getRequiredBindings($potentialBindings, $constraintComponent)
+        return f:getRequiredBindings($potentialBindings, $constraintComponent) , '____REQ_BINDINGS: ')
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $useParams)  

@@ -159,7 +159,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         let $required := 
             $mediatype = ('xml', 'xml-or-json')
             or
-            not($mediatype) and $components/self::gx:xpath
+            not($mediatype) and $components/(self::gx:xpath, @validatorXPath, gx:validatorXPath) 
             or
             $components/self::gx:foxpath/@*[ends-with(name(.), 'XPath')]
             or
