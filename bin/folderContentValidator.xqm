@@ -217,7 +217,7 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
                 if ($elem/@count) then $elem/@count/i:occ2minMax(.)
                 else (
                     ($elem/@minCount, 1)[1] ! xs:integer(.),
-                    ($elem/@maxCount, 1)[1] ! xs:integer(.) 
+                    ($elem/@maxCount/replace(., '\*', '-1'), 1)[1] ! xs:integer(.) 
                 )
             return (
                 attribute minCount {$limits[1]},
