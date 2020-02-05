@@ -91,7 +91,6 @@ declare function f:validateFileInstance($filePath as xs:string,
     (: the document types are mutually exclusive - $doc is the 
        only document obtained (if any) :)
     let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc, $reqBindingsAndDocs?htmldoc)[1]
-    
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())  
     
@@ -117,6 +116,7 @@ declare function f:validateFileInstance($filePath as xs:string,
                           concat('Unexpected shape or constraint element, name: ', $child/name()))
         return
             if ($error) then $error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+            else if ($child/self::gx:focusNode) then ()
             else
                 <gx:green>{
                     attribute filePath {$filePath},
@@ -160,7 +160,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         let $required := 
             $mediatype = ('xml', 'xml-or-json')
             or
-            not($mediatype) and $components/(self::gx:xpath, @validatorXPath, gx:validatorXPath) 
+            not($mediatype) and $components/(self::gx:xpath, @validatorXPath, gx:validatorXPath, descendant-or-self::gx:focusNode//(@xpath, gx:xpath))    
             or
             $components/self::gx:foxpath/@*[ends-with(name(.), 'XPath')]
             or

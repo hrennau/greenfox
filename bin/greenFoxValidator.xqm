@@ -88,10 +88,9 @@ declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
         as element(gx:invalidSchema)? {
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)        
     let $metaGfoxSource := doc('../metaschema/gfox-gfox.xml')/*
-    let $metaDomain := file:path-to-native($gfoxSourceURI) 
-    let $metaGfoxName := $gfoxSourceURI ! replace(., '.*/', '')
+    let $paramGfox := file:path-to-native($gfoxSourceURI) 
     
-    let $metaContextSource := map{'domain': $metaDomain, 'gfox': $metaGfoxName}
+    let $metaContextSource := map{'gfox': $paramGfox}
     let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, $metaContextSource)
     let $metaGfox := $metaGfoxAndContext[. instance of element()]
     let $metaContext := $metaGfoxAndContext[. instance of map(*)]

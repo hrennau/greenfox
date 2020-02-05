@@ -36,7 +36,6 @@ declare function f:validateFocusNode($focusNodeShape as element(),
         as element()* {
     let $xpath := $focusNodeShape/@xpath
     let $foxpath := $focusNodeShape/@foxpath
-    
     let $components :=
         let $children := $focusNodeShape/*[not(@deactivated eq 'true')]
         return (
@@ -54,7 +53,6 @@ declare function f:validateFocusNode($focusNodeShape as element(),
         else if ($foxpath) then  
             f:evaluateFoxpath($foxpath, $contextItem, $evaluationContext, true())
         else error(QName((), 'SCHEMA_ERROR'), 'Missing expression')
-
     let $results :=
         (: for every item of the expression value :)
         for $exprValueItem in $exprValue
