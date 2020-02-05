@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Example demonstrating the validation of JSON files using XPath.
+<!-- Example demonstrating the validation of CSV files using XPath.
      In the example, the following ExprValue* constraints are used:
         * ExprValueCount
         * ExprValueEq
@@ -22,17 +22,19 @@
     <domain path="\programme\Oxygen XML Editor 19" name="oxygen19">    
         
         <!-- *** dita package.json *** -->
-        <file foxpath=".\\reveal.js-2.6.2\package.json" id="jsonFileShape"
-              mediatype="json">
-            <targetSize msg="Dita package json not found" count="1"/>
-            <xpath expr="//version"
-                   count="1"
-                   countMsg="Not one version found"
-                   eq="2.6.2"
-                   eqMsg="Not the expected version (2.6.2)"/>
-            <xpath expr="//*/local-name(.)"
-                   notMatches="_[^_]"
-                   notMatchesMsg="JSON name not an NCName"/>
+        <file foxpath="samples\import\text\sample.csv" id="csvFileShape"
+              mediatype="csv" csv.withHeader="yes">
+            <targetSize msg="CSV file not found" count="1"/>
+            <xpath expr="//Breeding"
+                   inMsg="Breeding property unexpected">
+                <in>
+                    <eq>Easy</eq>
+                    <eq>Medium</eq>
+                    <eq>Difficult</eq>
+                    <eq>Hard</eq>
+                    <like>Breed in*</like>
+                </in>
+            </xpath>
         </file>
     </domain>    
 </greenfox>

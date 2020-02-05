@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example demonstrating the validation of HTML files using XPath.
+     In the example, the following ExprValue* constraint is used:
+        * ExprValueLike
+
+        Note the use of @quant="some". It ensures that only at least
+        one item of the test value must satisfy the condition. Without 
+        the attribute, the default quantifier "all" would be assumed, 
+        meaning that all values must satisfy the condition.
+     
+        TIP.
+        To test this schema, you would need an Oxygen installation and adapt the
+        file path of the domain, perhaps also the file path of the html file.
+-->        
+    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="domain" value="/programme/Oxygen XML Editor 19"/>
+    </context>    
+    
+    <!-- File system tree = Oxygen installation -->
+    <domain path="\programme\Oxygen XML Editor 19" name="oxygen19">    
+        
+        <!-- *** jats userguide.html *** -->
+        <file foxpath="frameworks\jats\lib\xslt\jats-preview-xslt\userguide.html" 
+              id="htmlFileShape"
+              mediatype="html">
+            <targetSize msg="Userguide not found" count="1"/>
+            
+            <xpath expr="//@href"
+                   quant="some"
+                   like="https://github.com/NCBITools/*"
+                   likeMsg="Must contain a link to github.com/NCBITools/..."/>
+        </file>
+    </domain>    
+</greenfox>
