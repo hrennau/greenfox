@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : validate.xqm - Document me!
+ : validate.xqm - validates a file system tree against a greenfox schema.
  :
  : -------------------------------------------------------------------------
  :)
@@ -11,7 +11,7 @@
       <operation name="validate" type="node()" func="validateOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="params" type="xs:string?"/>
-         <param name="reportType" type="xs:string?" default="std"/>
+         <param name="reportType" type="xs:string?" default="std, white, whiteTree, redTree"/>
          <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>
@@ -39,7 +39,7 @@ declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Document me!
+ : Implements the operation 'validate'.
  :
  : @param request the operation request
  : @return a report describing ...
@@ -58,12 +58,38 @@ declare function f:validateOp($request as element())
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
     let $context := $gfoxAndContext[. instance of map(*)]
     let $gfoxErrors := f:validateGreenfox($gfox)
-    return
-        if ($gfoxErrors) then $gfoxErrors else
-        
+    return if ($gfoxErrors) then $gfoxErrors else
+
+    let $invalidSchemaReport := i:metaValidateSchema($gfoxSource)
+    return if ($invalidSchemaReport) then $invalidSchemaReport else
+    
     let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
     return $report
-    (:
-        i:writeValidationReport($gfox, $context, $perceptions, $reportType, $reportFormat, $reportOptions)
-        :)
 };        
+
+(:
+(:~
+ : Validates the input schema against the greenfox meta schema.
+ :
+ :)
+declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
+        as element(gx:invalidSchema)? {
+    let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)        
+    let $metaGfoxSource := doc('../metaschema/gfox-gfox.xml')/*
+    let $metaDomain := file:path-to-native($gfoxSourceURI) 
+    let $metaGfoxName := $gfoxSourceURI ! replace(., '.*/', '')
+    
+    let $metaContextSource := map{'domain': $metaDomain, 'gfox': $metaGfoxName}
+    let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, $metaContextSource)
+    let $metaGfox := $metaGfoxAndContext[. instance of element()]
+    let $metaContext := $metaGfoxAndContext[. instance of map(*)]
+    let $metaReportType := 'redTree'
+    let $metaReportFormat := 'xml'
+    let $metaReportOptions := map{}
+    let $metaReport := i:validateSystem($metaGfox, $metaContext, $metaReportType, $metaReportFormat, $metaReportOptions)   
+    return
+        if ($metaReport//(gx:error, gx:red)) then 
+            <gx:invalidSchema schemaURI="{$gfoxSourceURI}">{$metaReport}</gx:invalidSchema> 
+        else ()        
+};
+:)

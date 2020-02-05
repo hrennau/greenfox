@@ -42,7 +42,9 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
         as item()* {
     switch($reportType)
     case "raw" return f:writeValidationReport_raw($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
+    case "whiteTree" return f:writeValidationReport_std($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
     case "std" return f:writeValidationReport_std($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
+    case "redTree" return f:writeValidationReport_redTree($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
     default return error()
 };
 
@@ -147,6 +149,71 @@ declare function f:writeValidationReport_std(
     return
         $report/f:finalizeReport(.)
 };
+
+(:~
+ : Writes a 'redTree' report.
+ :
+ :)
+declare function f:writeValidationReport_redTree(
+                                        $gfox as element(gx:greenfox)+,
+                                        $domain as element(gx:domain),                                        
+                                        $context as map(xs:string, item()*),                                        
+                                        $perceptions as element()*, 
+                                        $reportType as xs:string, 
+                                        $format as xs:string,
+                                        $options as map(*))
+        as element() {
+    let $options := map{}
+    let $whiteTree := f:writeValidationReport_std($gfox, $domain, $context, $perceptions, 'std', 'xml', $options)        
+    let $redTree := f:whiteTreeToRedTree($whiteTree, $options)
+    return $redTree
+};
+
+(:~
+ : Transforms a 'whiteTree' tree report into a 'redTree' report.
+ :
+ : @param whiteTree a 'whiteTree' report
+ : @param options options controlling the report
+ : @return the 'redTree' report
+ :) 
+declare function f:whiteTreeToRedTree($whiteTree as element(gx:validationReport), 
+                                      $options as map(*))
+        as element(gx:validationReport) {
+    f:whiteTreeToRedTreeRC($whiteTree, $options)        
+};
+
+(:~
+ : Recursive helper function of 'f:whiteTreeToRedTree'.
+ :
+ : @param n as node from the 'whiteTree' report
+ : @param options options controlling the report
+ : @return the representation of the node in the 'redTree' report
+ :)
+declare function f:whiteTreeToRedTreeRC($n as node(), $options as map(*))
+        as node()* {
+    typeswitch($n)
+    case document-node() return
+        document {$n ! f:whiteTreeToRedTreeRC(., $options)}
+    case element(gx:green) return ()        
+    case element(gx:greenResources) return ()
+
+    case element(gx:yellowResources) | element(gx:redResources) return 
+        if (not($n//(gx:yellow, gx:red, gx:error))) then ()
+        else
+            element {node-name($n)} {
+                $n/@* ! f:whiteTreeToRedTreeRC(., $options),
+                $n/node() ! f:whiteTreeToRedTreeRC(., $options)            
+            }
+
+    case element() return
+        element {node-name($n)} {
+            $n/@* ! f:whiteTreeToRedTreeRC(., $options),
+            $n/node() ! f:whiteTreeToRedTreeRC(., $options)            
+        }
+    case attribute(reportType) return attribute reportType {'redTree'}        
+    default return $n        
+};
+
 
 declare function f:removeAtts($elem as element(),
                              $attName as xs:string+) 

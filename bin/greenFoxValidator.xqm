@@ -80,6 +80,31 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
         <gx:invalidGreenfox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenfox>[$errors]
 };
 
+(:~
+ : Validates the input schema against the greenfox meta schema.
+ :
+ :)
+declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
+        as element(gx:invalidSchema)? {
+    let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)        
+    let $metaGfoxSource := doc('../metaschema/gfox-gfox.xml')/*
+    let $metaDomain := file:path-to-native($gfoxSourceURI) 
+    let $metaGfoxName := $gfoxSourceURI ! replace(., '.*/', '')
+    
+    let $metaContextSource := map{'domain': $metaDomain, 'gfox': $metaGfoxName}
+    let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, $metaContextSource)
+    let $metaGfox := $metaGfoxAndContext[. instance of element()]
+    let $metaContext := $metaGfoxAndContext[. instance of map(*)]
+    let $metaReportType := 'redTree'
+    let $metaReportFormat := 'xml'
+    let $metaReportOptions := map{}
+    let $metaReport := i:validateSystem($metaGfox, $metaContext, $metaReportType, $metaReportFormat, $metaReportOptions)   
+    return
+        if ($metaReport//(gx:error, gx:red)) then 
+            <gx:invalidSchema schemaURI="{$gfoxSourceURI}">{$metaReport}</gx:invalidSchema> 
+        else ()        
+};
+
 declare function f:greenfoxLocation($node as node()) as xs:string {
     (
         for $node in $node/ancestor-or-self::node()

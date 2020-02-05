@@ -38,7 +38,7 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
         as element() {
     let $domains := $gfox/gx:domain
     return if (count($domains) gt 1) then error(QName((), 'NOT_YET_IMPLEMENTED'), 
-        concat('Concurrently a schema must not contain more than one domain; #domains found: ', count($domains)))
+        concat('Currently a schema must not contain more than one domain; #domains found: ', count($domains)))
     else
     
     for $domain in $gfox/gx:domain    
