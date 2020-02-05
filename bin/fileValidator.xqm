@@ -84,15 +84,16 @@ declare function f:validateFileInstance($filePath as xs:string,
         map:merge((
             $reqBindingsAndDocs?xdoc ! map:entry('xdoc', .),
             $reqBindingsAndDocs?jdoc ! map:entry('jdoc', .),
-            $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .)
+            $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .),
+            $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .)
         ))        
     
     (: the document types are mutually exclusive - $doc is the 
        only document obtained (if any) :)
-    let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc)[1]
+    let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc, $reqBindingsAndDocs?htmldoc)[1]
     
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, ())  
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())  
     
     (: perform validations :)
     let $results := (
@@ -185,6 +186,23 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                 let $text := unparsed-text($filePath)
                 return try {json:parse($text)} catch * {()}
            
+    let $htmldoc :=
+        if ($xdoc or $jdoc) then () else
+        
+        let $required :=
+            $mediatype = ('html', 'xml-or-html')
+            or 
+            not($mediatype) and $components/self::gx:xpath
+            or
+            $components/self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')]
+            or
+            not($mediatype = ('xml', 'csv', 'json')) and $requiredBindings = 'html'
+        return
+            if (not($required)) then ()
+            else
+                let $text := unparsed-text($filePath)
+                return try {html:parse($text)} catch * {()}
+           
     let $csvdoc :=
         if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then 
             f:csvDoc($filePath, $gxFile)
@@ -197,6 +215,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             map:entry('requiredBindings', $requiredBindings),
             $xdoc ! map:entry('xdoc', .),
             $jdoc ! map:entry('jdoc', .),
-            $csvdoc ! map:entry('csvdoc', .)
+            $csvdoc ! map:entry('csvdoc', .),
+            $htmldoc ! map:entry('htmldoc', .)
         ))
 };        

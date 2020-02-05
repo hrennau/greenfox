@@ -275,7 +275,7 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
                 if (empty($violations)) then () 
                 else f:validationResult_expression('red', $valueShape, $cmp, (), ($violations => distinct-values()) ! <gx:value>{.}</gx:value>, $contextInfo)
         else if ($quantifier eq 'some') then 
-            if ($cmpTrue, $useItems, $useCmp) then () 
+            if (exists($useItems[$cmpTrue(., $useCmp)]))  then () 
             else f:validationResult_expression('red', $valueShape, $cmp, (), ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, $contextInfo)
     return
         if ($errors) then $errors

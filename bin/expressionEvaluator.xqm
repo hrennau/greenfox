@@ -220,6 +220,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $xdoc as document-node()?,
                                             $jdoc as document-node()?,
                                             $csvdoc as document-node()?,
+                                            $htmldoc as document-node()?,
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
     let $doc := ($xdoc, $jdoc, $csvdoc)[1]    
