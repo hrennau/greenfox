@@ -377,7 +377,7 @@ return
                 <!-- <file> - check attribute names -->
                 <xpath description="Validates the attribute names in 'file' elements"
                     expr="*:greenfox//*:file/@*/name()"
-                    inMsg="Unexpected attribute in 'file' element; expected names: foxpath, id"
+                    inMsg="Unexpected attribute in 'file' element; expected names: foxpath, id, mediatype, csv.separator, csv.withHeader"
                     inMsgOK="OK - 'file' element: no unexpected attribute names" deactivated="false">
                     <in>
                         <eq>foxpath</eq>
