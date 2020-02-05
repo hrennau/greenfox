@@ -25,25 +25,18 @@
     
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
           xmlns="http://www.greenfox.org/ns/schema">
-
-    <!-- *** External context *** -->
-    <context>
-        <field name="domain" value="/programme/Oxygen XML Editor 19"/>
-    </context>    
-    
     <!-- File system tree = Oxygen installation -->
-    <domain path="\programme\Oxygen XML Editor 19" name="oxygen19">    
+    <domain path="\programme\Oxygen XML Editor 19" name="oxygen19">   
         
         <!-- *** Oxygen folder "xmlschema" *** -->
         <folder foxpath=".\frameworks\xmlschema" id="xmlschemaFolderShape">
             <targetSize msg="No xmlschema folder found" minCount="1"/>
-            <folderContent closed="true"
+            <folderContent closed="true" ignoredMembers="*.html"
                            closedMsg="xmlschema folder with unexpected content.">
                 <memberFolders names="dtd, templates, xsd"/>
                 <memberFile name="*.css" 
                             minCount="5" minCountMsg="Not enough css files" 
                             maxCount="7" maxCountMsg="Too many css files"/>
-                <memberFile name="*.html" count="*"/>
                 <memberFile name="catalog.xml" minCountMsg="Missing catalog file"/>
                 <memberFile name="xmlschema.jar" minCountMsg="Missing jar file"
                             md5="BD509F9C80642BC03856B1DF169D0EA3" 

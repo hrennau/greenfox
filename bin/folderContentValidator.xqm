@@ -48,7 +48,9 @@ declare function f:validateFolderContent($folderPath as xs:string,
         
         let $unexpectedMembers :=
             for $member in $members
-            let $descriptors := $_constraint/(gx:member, 
+            let $descriptors := $_constraint/(
+                gx:member, 
+                gx:ignoreMember,
                 if ($member = $memberFiles) then gx:memberFile else gx:memberFolder)
             let $expected := 
                 some $d in $descriptors satisfies matches($member, $d/@regex, 'i')
@@ -86,7 +88,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                     }</gx:green>
             
     let $results_cardinality :=
-        for $d in $_constraint/*
+        for $d in $_constraint/(* except gx:ignoreMember)
         let $minCount := $d/@minCount/number(.)
         let $maxCount := $d/@maxCount/number(.)
         let $candMembers := 
@@ -229,7 +231,10 @@ declare function f:validateFolderContent_compile($folderContent as element(gx:fo
     <gx:folderContent>{
         $folderContent/@*,
         if ($folderContent/@closed) then () else attribute closed {'false'},
-        
+        for $ign in $folderContent/@ignoredMembers/tokenize(., ',\s*')
+        return
+            <gx:ignoreMember name="{$ign}" regex="{i:glob2regex($ign)}"/>
+        ,
         for $member in $folderContent/*
         return
             typeswitch($member)

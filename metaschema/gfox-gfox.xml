@@ -228,7 +228,7 @@ return
             <focusNode xpath="*:greenfox//*:folderContent">
 
                 <!-- attribute names -->
-                <ex:allowedAtts attNames="id closed closedMsg closedMsgOK"
+                <ex:allowedAtts attNames="id closed closedMsg closedMsgOK ignoredMembers"
                     msg="Unexpected attributes in 'folderContent' element; expected: $attNames"
                     msgOK="OK - 'folderContent' element: no unexpected attributes"/>
 
