@@ -390,6 +390,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
+                            empty emptyMsg emptyMsgOK                    
                             count countMsg countMsgOK
                             minCount minCountMsg minCountMsgOK
                             maxCount maxCountMsg maxCountMsgOK
@@ -441,6 +442,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
+                        empty emptyMsg emptyMsgOK
                         count countMsg countMsgOK
                         minCount minCountMsg minCountMsgOK
                         maxCount maxCountMsg maxCountMsgOK

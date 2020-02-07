@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
+          xmlns="http://www.greenfox.org/ns/schema">
+    
+    <!-- *** System file tree *** -->
+    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">
+               
+        <!-- *** Any folder in the domain *** -->
+        <folder foxpath=".\\*[is-dir(.)]" id="goodFolderShape">
+                    
+            <!-- # Check - files non-empty -->
+            <foxpath expr="*[is-file()][file-size(.) eq 0]"
+                     empty="true" emptyMsg="Empty files"/>
+            <!-- # Check - .xml well-formed -->
+            <foxpath expr="*.xml[not(is-xml(.))]"
+                     empty="true" emptyMsg="Invalid XML files"/>
+            <!-- # Check - .json well-formed -->
+            <foxpath expr="*.json[not(is-json(.))]"
+                     empty="true" emptyMsg="Invalid JSON files"/>
+        </folder>                    
+    </domain>
+</greenfox>
+
