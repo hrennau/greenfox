@@ -57,12 +57,12 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
             } catch * {
                 let $exprDisp := normalize-space($expr)
                 return
-                    <gx:error code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$exprDisp}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
+                    <gx:red code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$exprDisp}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
                         $err:code ! attribute err:code {.},
                         $err:description ! attribute err:description {.},
                         $err:value ! attribute err:value {.},
                         ()
-                    }</gx:error>
+                    }</gx:red>
             }                
                
         ,
@@ -72,9 +72,9 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
         
         return
             if ($plan/self::*:errors) then
-                <gx:error code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
+                <gx:red code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
                     $plan
-                }</gx:error>
+                }</gx:red>
     )
     return
         <gx:invalidGreenfox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenfox>[$errors]
@@ -99,7 +99,7 @@ declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
     let $metaReportOptions := map{}
     let $metaReport := i:validateSystem($metaGfox, $metaContext, $metaReportType, $metaReportFormat, $metaReportOptions)   
     return
-        if ($metaReport//(gx:error, gx:red)) then 
+        if ($metaReport//gx:red) then 
             <gx:invalidSchema schemaURI="{$gfoxSourceURI}">{$metaReport}</gx:invalidSchema> 
         else ()        
 };

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<airports>
+    <airport href="airport-cgn.xml"/>
+    <airport>
+        <code>DUS</code>
+    </airport>
+    <airport href="airport-jfk.xml">
+        <code>JFK</code>
+    </airport>
+</airports>

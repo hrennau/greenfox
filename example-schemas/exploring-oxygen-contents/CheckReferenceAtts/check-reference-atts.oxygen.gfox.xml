@@ -9,7 +9,7 @@
         file path as well as (probably) details of the folder contents.
 -->        
     
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-reference-atts"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <!-- *** External context *** -->
@@ -22,7 +22,7 @@
         
         <!-- *** schematron files *** -->
         <file foxpath=".\\*.sch" id="schematronFileShape">
-            <targetSize msg="Not enough schematron files found" minCount="80"/>
+            <targetSize msg="Too few schematron files" minCount="80"/>
             <xpath expr="/*/@queryBinding"
                    eq="xslt2"
                    eqMsg="Query binding must be xslt2"/>

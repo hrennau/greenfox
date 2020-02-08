@@ -41,6 +41,13 @@ declare function f:evaluateXPath($xpath as xs:string,
     return xquery:eval($xpathUsed, $contextUsed)
 };
 
+declare function f:evaluateSimpleXPath($xpath as xs:string, 
+                                       $contextItem as item()?)
+        as item()* {
+    xquery:eval($xpath, map{'': $contextItem})        
+};
+
+
 (:~
  : Evaluates a foxpath expression.
  :

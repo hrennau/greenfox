@@ -30,8 +30,8 @@ declare function f:constructError_valueComparison($class as xs:string,
                                                   $cmpExpected as xs:string, 
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
-        as element(gx:error) {
-    <gx:error class="{$class}">{
+        as element(gx:red) {
+    <gx:red class="{$class}">{
         $constraintId,
         $constraintLabel,
         attribute expr {$expr},
@@ -42,7 +42,7 @@ declare function f:constructError_valueComparison($class as xs:string,
         if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},
         $additionalAtts,        
         if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
-    }</gx:error>                                                  
+    }</gx:red>                                                  
 };
 
 declare function f:constructError_countComparison($class as xs:string,
@@ -52,8 +52,8 @@ declare function f:constructError_countComparison($class as xs:string,
                                                   $constraintAtt as attribute(), 
                                                   $exprValue as item()*,
                                                   $additionalAtts as attribute()*) 
-        as element(gx:error) {
-    <gx:error class="{$class}">{
+        as element(gx:red) {
+    <gx:red class="{$class}">{
         $constraintId,
         $constraintLabel,
         attribute expr {$expr},
@@ -62,5 +62,5 @@ declare function f:constructError_countComparison($class as xs:string,
         if (count($exprValue) gt 1) then () else attribute actualValue {$exprValue},
         $additionalAtts,        
         if (count($exprValue) le 1) then () else $exprValue ! <gx:actualValue>{string(.)}</gx:actualValue>
-    }</gx:error>                                                  
+    }</gx:red>                                                  
 };

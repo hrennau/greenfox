@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Checks that file links in a catalog can be resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+    xmlns="http://www.greenfox.org/ns/schema">
+    <!-- File system tree = Oxygen installation -->
+    <domain path="\programme\Oxygen XML Editor 19" name="oxygen19">   
+        
+        <!-- *** Folder "xmlschema", catalog file *** -->
+        <file foxpath=".\frameworks\xmlschema\catalog.xml" id="catalogFileShape">
+            <targetSize countMsg="Catalog file not found" count="1"/>
+            <!-- Links must be resolvable -->
+            <foxpath expr="$doc//@uri[not(resolve-link(.))]"
+                     empty="true"
+                     emptyMsg="Links found which cannot be resolved"/>
+        </file>
+    </domain>    
+</greenfox>
+

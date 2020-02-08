@@ -113,7 +113,7 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
                                                $targetContextPath as xs:string,
                                                $navigationSpec as attribute())
         as element() {
-    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:error'
+    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
     let $useMsg :=
         if ($msg) then $msg
         else if ($colour eq 'green') then 

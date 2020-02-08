@@ -424,7 +424,8 @@ return
                     containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
                     inMsg inMsgOK
                     notInMsg notInMsgOK
-                    containsMsg containsMsgOK"
+                    containsMsg containsMsgOK
+                    reporterXPath"
                     msg="Unexpected attributes in 'xpath' element"
                     msgOK="OK - 'xpath' element: no unexpected attributes"/>
                 
@@ -481,8 +482,9 @@ return
                     containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
                     inMsg inMsgOK
                     notInMsg notInMsgOK
-                    containsMsg containsMsgOK"
-                        msg="Unexpected attributes in 'xpath' element"
+                    containsMsg containsMsgOK
+                    reporterXPath"                    
+                    msg="Unexpected attributes in 'xpath' element"
                     msgOK="OK - 'xpath' element: no unexpected attributes"/>
 
                 <!-- mandatory attributes -->

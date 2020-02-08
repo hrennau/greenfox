@@ -60,7 +60,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
             if (exists($unexpectedMembers)) then
                 let $msg := i:getErrorMsg($constraint, 'closed', 'Unexpected folder contents.')
                 return                            
-                    <gx:error>{
+                    <gx:red>{
                         $msg ! attribute msg {.},
                         attribute constraintComp {'FolderContentClosed'},
                         $_constraint/@id/attribute constraintID {.},
@@ -74,7 +74,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                             return
                                 <gx:resource name="{$name}" kind="{$kind}"/>
                         }</gx:resources>
-                    }</gx:error>
+                    }</gx:red>
             else            
                 let $msg := i:getOkMsg($constraint, 'closed', ())
                 return                            
@@ -105,7 +105,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
             if ($minCount eq 0) then () 
             else
                 let $ok := $count ge $minCount
-                let $elemName := if ($ok) then 'gx:green' else 'gx:error'
+                let $elemName := if ($ok) then 'gx:green' else 'gx:red'
                 let $msg := if ($ok) then $d/i:getOkMsg((., ..), 'minCount', ())
                             else $d/i:getErrorMsg((., ..), 'minCount', ())
                 return
@@ -123,7 +123,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
             if ($maxCount eq -1) then () 
             else
                 let $ok := $count le $maxCount
-                let $elemName := if ($ok) then 'gx:green' else 'gx:error'
+                let $elemName := if ($ok) then 'gx:green' else 'gx:red'
                 let $msg := if ($ok) then $d/i:getOkMsg((., ..), 'maxCount', ())
                             else $d/i:getErrorMsg((., ..), 'maxCount', ())
                 return
@@ -186,7 +186,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                 let $actValueAtt := 
                     if (count($found) gt 1) then () else attribute {concat($hashKind, 'Found')} {$hashes[1]}
                 return
-                    <gx:error>{
+                    <gx:red>{
                         $msg ! attribute msg {.},
                         attribute constraintComp {$constraintComponent},
                         $_constraint/@id/attribute constraintID {.},
@@ -194,7 +194,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
                         attribute {$hashExp/name()} {$hashExpItem},
                         $actValueAtt,
                         attribute resourceName {$name}
-                    }</gx:error>
+                    }</gx:red>
 
     let $errors := ($results_folderContentClosed, $results_cardinality, $results_hash)
     return

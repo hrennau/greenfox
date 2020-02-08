@@ -90,14 +90,14 @@ declare function f:validateExtensionConstraint($constraint as element(),
                 $paramElems
             }</gx:green>
         else
-            <gx:error>{
+            <gx:red>{
                 $msg ! attribute msg {.},
                 $constraintIdentAtts,
                 $nodePath ! attribute nodePath {.},                
                 $paramAtts,
                 $paramElems,
                 $errorValues ! <gx:value>{.}</gx:value>                
-            }</gx:error>
+            }</gx:red>
 };  
 
 (:~

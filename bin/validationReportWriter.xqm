@@ -63,11 +63,11 @@ declare function f:writeValidationReport_raw(
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
     let $useResults := 
         if ($reportType eq 'white') then $results 
-        else if ($reportType eq 'red') then $results[self::gx:red, self::gx:yellow, self::gx:error]
+        else if ($reportType eq 'red') then $results[self::gx:red, self::gx:yellow]
         else error()
     let $report :=    
         <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
-                             countErrors="{count($results/(self::gx:red, self::gx:error))}" 
+                             countErrors="{count($results/(self::gx:red, self::gx:red))}" 
                              validationTime="{current-dateTime()}"
                              greenfoxDocumentURI="{$gfoxSourceURI}" 
                              greenfoxSchemaURI="{$gfoxSchemaURI}"
@@ -109,7 +109,7 @@ declare function f:writeValidationReport_whiteTree(
                 let $attName := if (file:is-file($resourceIdentifier)) then 'file' else 'folder'
                 return
                     attribute {$attName} {$resourceIdentifier}
-        let $red := $result/(self::gx:red, self::gx:error)
+        let $red := $result/(self::gx:red, self::gx:red)
         let $yellow := $result/self::gx:yellow
         let $green := $result/self::gx:green
         let $other := $result except ($red, $green)
@@ -118,7 +118,7 @@ declare function f:writeValidationReport_whiteTree(
             if ($red) then 
                 <gx:redResource>{
                     $resourceIdentifierAtt, 
-                    $result/self::gx:error/f:removeAtts(., $removeAtts),
+                    $result/self::gx:red/f:removeAtts(., $removeAtts),
                     $result/self::gx:yellow/f:removeAtts(., $removeAtts),
                     $result/self::gx:green/f:removeAtts(., $removeAtts)
                 }</gx:redResource>
@@ -138,7 +138,7 @@ declare function f:writeValidationReport_whiteTree(
     let $greenResources := $resourceDescriptors/self::gx:greenResource
     let $report :=
         <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
-                             countErrors="{count($results/self::gx:error)}"
+                             countErrors="{count($results/self::gx:red)}"
                              countWarnings="{count($results/self::gx:yellow)}"
                              countRedResources="{count($redResources)}"
                              countYellowResources="{count($yellowResources)}"                             
@@ -213,7 +213,7 @@ declare function f:whiteTreeToRedTreeRC($n as node(), $options as map(*))
     case element(gx:greenResources) return ()
 
     case element(gx:yellowResources) | element(gx:redResources) return 
-        if (not($n//(gx:yellow, gx:red, gx:error))) then ()
+        if (not($n//(gx:yellow, gx:red))) then ()
         else
             element {node-name($n)} {
                 $n/@* ! f:whiteTreeToRedTreeRC(., $options),

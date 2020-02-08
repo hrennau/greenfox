@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-checking01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/check-links01"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <!-- *** NIEM 4.2 *** -->

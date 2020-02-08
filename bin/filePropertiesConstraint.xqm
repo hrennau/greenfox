@@ -144,20 +144,20 @@ declare function f:validateFileName($filePath as xs:string, $fileName as element
 
 declare function f:constructError_lastModified($constraint as element(gx:lastModified),
                                                $actualValue as xs:string) 
-        as element(gx:error) {
+        as element(gx:red) {
     let $constraintParams := $constraint/(@lt, @le, @gt, @ge, @eq)          
     let $msg := 
         ($constraint/@msg,
          concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint))[1]
     return
     
-        <gx:error constraintComp="LastModified">{
+        <gx:red constraintComp="LastModified">{
             $constraint/@id/attribute constraintID {.},
             $constraint/@label/attribute constraintLabel {.},
             $constraintParams,
             attribute actualValue {$actualValue},
             attribute message {$msg}
-        }</gx:error>                                                  
+        }</gx:red>                                                  
 };
 
 declare function f:constructError_fileSize($constraintId as attribute()?,
@@ -165,19 +165,19 @@ declare function f:constructError_fileSize($constraintId as attribute()?,
                                            $constraint as attribute(),
                                            $actualValue as xs:integer,
                                            $additionalAtts as attribute()*) 
-        as element(gx:error) {
+        as element(gx:red) {
     let $constraintComp := 'FileSize' || f:firstCharToUpperCase($constraint/local-name(.))
     let $msg := concat('File size not ', local-name($constraint), ' check value = ', $constraint)
     return
     
-        <gx:error>{
+        <gx:red>{
             attribute constraintComp {$constraintComp},
             $constraintId,
             $constraintLabel,
             attribute value {$actualValue},
             attribute message {$msg},
             $additionalAtts        
-        }</gx:error>                                                  
+        }</gx:red>                                                  
 };
 
 declare function f:constructError_fileName($constraintId as attribute()?,
@@ -185,7 +185,7 @@ declare function f:constructError_fileName($constraintId as attribute()?,
                                            $constraint as attribute(),
                                            $actualValue as xs:string,
                                            $additionalAtts as attribute()*) 
-        as element(gx:error) {
+        as element(gx:red) {
     let $constraintName := local-name($constraint)
     let $code := 'file-name-' || $constraintName
     let $msg := concat('File name ',
@@ -194,13 +194,13 @@ declare function f:constructError_fileName($constraintId as attribute()?,
                     'check value = ', $constraint)
     return
     
-        <gx:error class="fileName" code="{$code}">{
+        <gx:red class="fileName" code="{$code}">{
             $constraintId,
             $constraintLabel,
             $constraint,
             attribute actValue {$actualValue},
             attribute message {$msg},
             $additionalAtts        
-        }</gx:error>                                                  
+        }</gx:red>                                                  
 };
 

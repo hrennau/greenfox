@@ -19,12 +19,12 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $context as map(*))
         as element()* {
     if (not(doc-available($filePath))) then 
-        <gx:error msg="XSD validation requires XML file, but file is not XML">{
+        <gx:red msg="XSD validation requires XML file, but file is not XML">{
                   attribute constraintComponent {"xsdValid"},
                   $constraint/@xsdFoxpath,
                   $constraint/@id/attribute constraintID {.},
                   $constraint/@label/attribute constraintLabel {.}
-        }</gx:error>
+        }</gx:red>
     else
         
     let $doc := doc($filePath)
@@ -45,12 +45,12 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
         )
     return
         if (empty($xsdPaths)) then
-            <gx:error msg="No XSDs found">{
+            <gx:red msg="No XSDs found">{
                       attribute constraintComponent {"xsdValid"},
                       $constraint/@xsdFoxpath,
                       $constraint/@id/attribute constraintID {.},
                       $constraint/@label/attribute constraintLabel {.}
-            }</gx:error>
+            }</gx:red>
         else
         
     let $xsdRoots := 
@@ -62,12 +62,12 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     return
         if (some $xsdRoot in $xsdRoots satisfies 
             not($xsdRoot/descendant-or-self::xs:schema)) then 
-                <gx:error msg="xsdFoxpath yields non-XSD node">{
+                <gx:red msg="xsdFoxpath yields non-XSD node">{
                   attribute constraintComponent {"xsdValid"},
                   $constraint/@xsdFoxpath,
                   $constraint/@id/attribute constraintID {.},
                   $constraint/@label/attribute constraintLabel {.}
-                }</gx:error>
+                }</gx:red>
         else
 
     let $rootElem := $doc/*
@@ -82,20 +82,20 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     return
         (: _TO_DO_ - elaborate error elements in case of XSD match issues :)
         if (count($elementDecl) eq 0) then
-            <gx:error msg="{concat('No XSD element declaration found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
+            <gx:red msg="{concat('No XSD element declaration found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
                 attribute constraintComponent {"xsdValid"},
                 $constraint/@xsdFoxpath,
                 $constraint/@id/attribute constraintID {.},
                 $constraint/@label/attribute constraintLabel {.}
-             }</gx:error>
+             }</gx:red>
                       
         else if (count($elementDecl) gt 1) then
-            <gx:error msg="{concat('More than 1 XSD element declarations found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
+            <gx:red msg="{concat('More than 1 XSD element declarations found for this document; namespace=', $namespace, '; local name: ', $lname)}">{
                 attribute constraintComponent {"xsdValid"},
                 $constraint/@xsdFoxpath,
                 $constraint/@id/attribute constraintID {.},
                 $constraint/@label/attribute constraintLabel {.}            
-            }</gx:error>
+            }</gx:red>
         else 
         
     let $schema := $elementDecl/base-uri(.)    
@@ -103,7 +103,7 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     return
         if ($report//status eq 'valid') then ()
         else
-            <gx:error>{
+            <gx:red>{
                 $constraint/@msg,
                 attribute constraintComponent {"xsdValid"},
                 attribute filePath {$filePath},                
@@ -111,7 +111,7 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
                 $constraint/@id/attribute constraintID {.},
                 $constraint/@label/attribute constraintLabel {.},            
                 $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
-            }</gx:error>
+            }</gx:red>
 };
 
 

@@ -74,7 +74,7 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                         error(QName((), 'NOT_YET_IMPLEMENTED'),
                             concat('Unexpected mediatype constraint value: ', $mtype))
             return
-                let $results := $docEtc/(self::gx:error, self::gx:yellow)
+                let $results := $docEtc/(self::gx:red, self::gx:yellow)
                 let $doc := $docEtc except $results
                 return 
                     if ($results) then $results
@@ -93,7 +93,7 @@ declare function f:validationResult_mediatype($colour as xs:string,
         as element() {
     let $elemName := 
         switch($colour)
-        case 'red' return 'gx:error'
+        case 'red' return 'gx:red'
         default return concat('gx:', $colour)
     let $constraintComponent := 'mediatype'   
     return

@@ -268,8 +268,13 @@ declare function f:qnameToURI($qname as xs:QName?) as xs:string {
 declare function f:datapath($n as node()) as xs:string {
     (
     for $node in $n/ancestor-or-self::node()
-    let $index := 1 + $node/preceding-sibling::*[local-name(.) eq $node/local-name(.)] => count()
-    return $node/concat(self::attribute()/'@', local-name(.)) || concat('[', $index, ']')[$index ne 1]
+    let $index := 
+        typeswitch($node)
+        case element() return
+            let $raw := 1 + $node/preceding-sibling::*[local-name(.) eq $node/local-name(.)] => count()
+            return if ($raw eq 1 and count($node/../*) eq 1) then () else $raw ! concat('[', ., ']')
+        default return ()            
+    return $node/concat(self::attribute()/'@', local-name(.)) || $index
     ) => string-join('/')
 };
 

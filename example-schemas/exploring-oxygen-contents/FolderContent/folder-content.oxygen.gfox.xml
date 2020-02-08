@@ -12,12 +12,6 @@
         may be provided by the caller: 
             ..., params=gfox=/path/to/oxygen
             
-        Note the <memberFile> element for *.html:
-            <memberFile name="*.html" count="*"/>
-        As @count is *, any number of matching files would be accepted, including 0.
-        The element is nevertheless meaningful because of the Closed constraint:
-        *.html files are not required, but accepted content.
-        
         TIP.
         To test this schema, you would need an Oxygen installation and adapt the
         file path as well as (probably) details of the folder contents.
