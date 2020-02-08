@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<getFooRS xmlns="http://example.com/s1">
+    <returnCode>OK</returnCode>
+    <fooID>101</fooID>
+    <fooValue>foo101</fooValue>
+</getFooRS>
