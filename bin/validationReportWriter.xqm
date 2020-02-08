@@ -35,49 +35,64 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
                                          $domain as element(gx:domain),
                                          $context as map(xs:string, item()*),
-                                         $perceptions as element()*, 
+                                         $results as element()*, 
                                          $reportType as xs:string, 
                                          $format as xs:string,
                                          $options as map(*))
         as item()* {
     switch($reportType)
-    case "raw" return f:writeValidationReport_raw($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
-    case "whiteTree" return f:writeValidationReport_std($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
-    case "std" return f:writeValidationReport_std($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
-    case "redTree" return f:writeValidationReport_redTree($gfox, $domain, $context, $perceptions, $reportType, $format, $options)
-    default return error()
+    case "white" return f:writeValidationReport_raw($reportType, $gfox, $domain, $context, $results, $format, $options)
+    case "red" return f:writeValidationReport_raw($reportType, $gfox, $domain, $context, $results, $format, $options)
+    case "whiteTree" return f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "redTree" return f:writeValidationReport_redTree($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "std" return f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, $reportType, $format, $options)    
+    default return error(QName((), 'INVALID_ARG'), concat('Unexpected validation report type: ', "'", $reportType, "'",
+        '; value must be one of: raw, whiteTree, redTree.'))
 };
 
 declare function f:writeValidationReport_raw(
+                                        $reportType as xs:string,
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
                                         $context as map(xs:string, item()*),                                        
-                                        $perceptions as element()*, 
-                                        $reportType as xs:string, 
+                                        $results as element()*, 
                                         $format as xs:string,
                                         $options as map(*))
         as item()* {
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
+    let $useResults := 
+        if ($reportType eq 'white') then $results 
+        else if ($reportType eq 'red') then $results[self::gx:red, self::gx:yellow, self::gx:error]
+        else error()
     let $report :=    
         <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
-                             countErrors="{count($perceptions/self::gx:error)}" 
+                             countErrors="{count($results/(self::gx:red, self::gx:error))}" 
                              validationTime="{current-dateTime()}"
-                             greenfoxSchemaDoc="{$gfoxSourceURI}" 
-                             greenfoxSchemaURI="{$gfoxSchemaURI}">{
-            for $perception in $perceptions
-            order by $perception/@id
-            return $perception
+                             greenfoxDocumentURI="{$gfoxSourceURI}" 
+                             greenfoxSchemaURI="{$gfoxSchemaURI}"
+                             reportType="{$reportType}"
+                             reportMediatype="application/xml">{
+            for $result in $useResults
+            order by 
+                switch ($result/local-name(.)) 
+                        case 'red' return 1
+                        case 'error' return 1
+                        case 'yellow' return 2 
+                        case 'green' return 3 
+                        default return 4,
+                $result/(@filePath, @folderPath)[1]                        
+            return $result
         }</gx:validationReport>
     return
         $report/f:finalizeReport(.)
 };
 
-declare function f:writeValidationReport_std(
+declare function f:writeValidationReport_whiteTree(
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
                                         $context as map(xs:string, item()*),                                        
-                                        $perceptions as element()*, 
+                                        $results as element()*, 
                                         $reportType as xs:string, 
                                         $format as xs:string,
                                         $options as map(*))
@@ -85,8 +100,8 @@ declare function f:writeValidationReport_std(
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
-        for $perception in $perceptions        
-        let $resourceIdentifier := $perception/(@filePath, @folderPath)[1]
+        for $result in $results        
+        let $resourceIdentifier := $result/(@filePath, @folderPath)[1]
         let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
         group by $resourceIdentifier
         let $resourceIdentifierAtt :=
@@ -94,28 +109,28 @@ declare function f:writeValidationReport_std(
                 let $attName := if (file:is-file($resourceIdentifier)) then 'file' else 'folder'
                 return
                     attribute {$attName} {$resourceIdentifier}
-        let $red := $perception/self::gx:error
-        let $yellow := $perception/self::gx:yellow
-        let $green := $perception/self::gx:green
-        let $other := $perceptions except ($red, $green)
+        let $red := $result/(self::gx:red, self::gx:error)
+        let $yellow := $result/self::gx:yellow
+        let $green := $result/self::gx:green
+        let $other := $result except ($red, $green)
         let $removeAtts :=('filePath', 'folderPath')
         return
             if ($red) then 
                 <gx:redResource>{
                     $resourceIdentifierAtt, 
-                    $perception/self::gx:error/f:removeAtts(., $removeAtts),
-                    $perception/self::gx:yellow/f:removeAtts(., $removeAtts),
-                    $perception/self::gx:green/f:removeAtts(., $removeAtts)
+                    $result/self::gx:error/f:removeAtts(., $removeAtts),
+                    $result/self::gx:yellow/f:removeAtts(., $removeAtts),
+                    $result/self::gx:green/f:removeAtts(., $removeAtts)
                 }</gx:redResource>
             else if ($yellow) then 
                 <gx:yellowResource>{
                     $resourceIdentifierAtt/self::gx:yellow/f:removeAtts(., $removeAtts), 
-                    $perception/self::gx:green/f:removeAtts(., $removeAtts)
+                    $result/self::gx:green/f:removeAtts(., $removeAtts)
                 }</gx:yellowResource> 
             else if ($green) then 
                 <gx:greenResource>{
                     $resourceIdentifierAtt, 
-                    $perception/f:removeAtts(., $removeAtts)
+                    $result/f:removeAtts(., $removeAtts)
                 }</gx:greenResource>
             else error()
     let $redResources := $resourceDescriptors/self::gx:redResource
@@ -123,16 +138,16 @@ declare function f:writeValidationReport_std(
     let $greenResources := $resourceDescriptors/self::gx:greenResource
     let $report :=
         <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
-                             countErrors="{count($perceptions/self::gx:error)}"
-                             countWarnings="{count($perceptions/self::gx:yellow)}"
+                             countErrors="{count($results/self::gx:error)}"
+                             countWarnings="{count($results/self::gx:yellow)}"
                              countRedResources="{count($redResources)}"
                              countYellowResources="{count($yellowResources)}"                             
                              countGreenResources="{count($greenResources)}"
                              validationTime="{current-dateTime()}"
-                             greenfoxSchemaDoc="{$gfoxSourceURI}" 
+                             greenfoxDocumentURI="{$gfoxSourceURI}" 
                              greenfoxSchemaURI="{$gfoxSchemaURI}"
                              reportType="{$reportType}"
-                             reportFormat="{$format}">{
+                             reportMediatype="application/xml">{
             <gx:redResources>{
                 attribute count {count($redResources)},
                 $redResources
@@ -158,13 +173,13 @@ declare function f:writeValidationReport_redTree(
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
                                         $context as map(xs:string, item()*),                                        
-                                        $perceptions as element()*, 
+                                        $results as element()*, 
                                         $reportType as xs:string, 
                                         $format as xs:string,
                                         $options as map(*))
         as element() {
     let $options := map{}
-    let $whiteTree := f:writeValidationReport_std($gfox, $domain, $context, $perceptions, 'std', 'xml', $options)        
+    let $whiteTree := f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, 'redTree', 'xml', $options)        
     let $redTree := f:whiteTreeToRedTree($whiteTree, $options)
     return $redTree
 };

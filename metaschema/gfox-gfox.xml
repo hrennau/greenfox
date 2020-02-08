@@ -390,39 +390,44 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
-                            empty emptyMsg emptyMsgOK                    
-                            count countMsg countMsgOK
-                            minCount minCountMsg minCountMsgOK
-                            maxCount maxCountMsg maxCountMsgOK
-                            itemsUnique itemsUniqueMsg itemsUniqueMsgOK
-                            datatype datatypeMsg datatypeMsgOK
-                            eq eqMsg eqMsgOK 
-                            ne neMsg neMsgOK 
-                            gt gtMsg gtMsgOK 
-                            ge geMsg geMsgOK
-                            lt ltMsg ltMsgOK 
-                            le leMsg leMsgOK
-                            matches matchesMsg matchesMsgOK
-                            notMatches notMatchesMsg notMatchesMsgOK
-                            like likeMsg likeMsgOK
-                            notLike notLikeMsg notLikeMsgOK
-                            eqFoxpath eqFoxpathMsg eqFoxpathMsgOK
-                            ltFoxpath ltFoxpathMsg ltFoxpathMsgOK
-                            leFoxpath leFoxpathMsg leFoxpathMsgOK
-                            gtFoxpath gtFoxpathMsg gtFoxpathMsgOK
-                            geFoxpath geFoxpathMsg geFoxpathMsgOK
-                            containsFoxpath containsFoxpathMsg containsFoxpathMsgOK
-                            eqXPath eqXPathMsg eqXPathMsgOK
-                            ltXPath ltXPathMsg ltXPathMsgOK
-                            leXPath leXPathMsg leXPathMsgOK
-                            gtXPath gtXPathMsg gtXPathMsgOK
-                            geXPath geXPathMsg geXPathMsgOK
-                            containsXPath containsXPathMsg containsXPathMsgOK
-                            inMsg inMsgOK
-                            inFoxpath inFoxpathMsg"
+                    empty emptyMsg emptyMsgOK
+                    count countMsg countMsgOK
+                    minCount minCountMsg minCountMsgOK
+                    maxCount maxCountMsg maxCountMsgOK
+                    itemsUnique itemsUniqueMsg itemsUniqueMsgOK
+                    datatype datatypeMsg datatypeMsgOK
+                    eq eqMsg eqMsgOK 
+                    ne neMsg neMsgOK 
+                    gt gtMsg gtMsgOK 
+                    ge geMsg geMsgOK
+                    lt ltMsg ltMsgOK 
+                    le leMsg leMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
+                    neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
+                    ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
+                    leFoxpath leFoxpathContext leFoxpathMsg leFoxpathMsgOK
+                    gtFoxpath gtFoxpathContext gtFoxpathMsg gtFoxpathMsgOK
+                    geFoxpath geFoxpathContext geFoxpathMsg geFoxpathMsgOK
+                    inFoxpath inFoxpathContext inFoxpathMsg inFoxpathMsgOK
+                    containsFoxpath containsFoxpathContext containsFoxpathMsg containsFoxpathMsgOK
+                    eqXPath eqXPathContext eqXPathMsg eqXPathMsgOK
+                    neXPath neXPathContext neXPathMsg neXPathMsgOK
+                    ltXPath ltXPathContext ltXPathMsg ltXPathMsgOK
+                    leXPath leXPathContext leXPathMsg leXPathMsgOK
+                    gtXPath gtXPathContext gtXPathMsg gtXPathMsgOK
+                    geXPath geXPathContext geXPathMsg geXPathMsgOK
+                    inXPath inXPathContext inXPathMsg inXPathMsgOK
+                    containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
+                    inMsg inMsgOK
+                    notInMsg notInMsgOK
+                    containsMsg containsMsgOK"
                     msg="Unexpected attributes in 'xpath' element"
                     msgOK="OK - 'xpath' element: no unexpected attributes"/>
-
+                
                 <!-- mandatory attributes -->
                 <ex:mandatoryAtts attNames="expr" msg="An 'xpath' shape must have an expr attribute"
                     msgOK="OK - 'xpath' element: has expr attribute"/>
@@ -442,37 +447,42 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
-                        empty emptyMsg emptyMsgOK
-                        count countMsg countMsgOK
-                        minCount minCountMsg minCountMsgOK
-                        maxCount maxCountMsg maxCountMsgOK
-                        itemsUnique itemsUniqueMsg itemsUniqueMsgOK
-                        datatype datatypeMsg datatypeMsgOK
-                        eq eqMsg eqMsgOK 
-                        ne neMsg neMsgOK 
-                        gt gtMsg gtMsgOK 
-                        ge geMsg geMsgOK
-                        lt ltMsg ltMsgOK 
-                        le leMsg leMsgOK
-                        matches matchesMsg matchesMsgOK
-                        notMatches notMatchesMsg notMatchesMsgOK
-                        like likeMsg likeMsgOK
-                        notLike notLikeMsg notLikeMsgOK
-                        eqFoxpath eqFoxpathMsg eqFoxpathMsgOK
-                        ltFoxpath ltFoxpathMsg ltFoxpathMsgOK
-                        leFoxpath leFoxpathMsg leFoxpathMsgOK
-                        gtFoxpath gtFoxpathMsg gtFoxpathMsgOK
-                        geFoxpath geFoxpathMsg geFoxpathMsgOK
-                        containsFoxpath containsFoxpathMsg containsFoxpathMsgOK
-                        eqXPath eqXPathMsg eqXPathMsgOK
-                        ltXPath ltXPathMsg ltXPathMsgOK
-                        leXPath leXPathMsg leXPathMsgOK
-                        gtXPath gtXPathMsg gtXPathMsgOK
-                        geXPath geXPathMsg geXPathMsgOK
-                        containsXPath containsXPathMsg containsXPathMsgOK
-                        inMsg inMsgOK
-                        inFoxpath inFoxpathMsg"
-                    msg="Unexpected attributes in 'xpath' element"
+                    empty emptyMsg emptyMsgOK
+                    count countMsg countMsgOK
+                    minCount minCountMsg minCountMsgOK
+                    maxCount maxCountMsg maxCountMsgOK
+                    itemsUnique itemsUniqueMsg itemsUniqueMsgOK
+                    datatype datatypeMsg datatypeMsgOK
+                    eq eqMsg eqMsgOK 
+                    ne neMsg neMsgOK 
+                    gt gtMsg gtMsgOK 
+                    ge geMsg geMsgOK
+                    lt ltMsg ltMsgOK 
+                    le leMsg leMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
+                    neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
+                    ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
+                    leFoxpath leFoxpathContext leFoxpathMsg leFoxpathMsgOK
+                    gtFoxpath gtFoxpathContext gtFoxpathMsg gtFoxpathMsgOK
+                    geFoxpath geFoxpathContext geFoxpathMsg geFoxpathMsgOK
+                    inFoxpath inFoxpathContext inFoxpathMsg inFoxpathMsgOK
+                    containsFoxpath containsFoxpathContext containsFoxpathMsg containsFoxpathMsgOK
+                    eqXPath eqXPathContext eqXPathMsg eqXPathMsgOK
+                    neXPath neXPathContext neXPathMsg neXPathMsgOK
+                    ltXPath ltXPathContext ltXPathMsg ltXPathMsgOK
+                    leXPath leXPathContext leXPathMsg leXPathMsgOK
+                    gtXPath gtXPathContext gtXPathMsg gtXPathMsgOK
+                    geXPath geXPathContext geXPathMsg geXPathMsgOK
+                    inXPath inXPathContext inXPathMsg inXPathMsgOK
+                    containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
+                    inMsg inMsgOK
+                    notInMsg notInMsgOK
+                    containsMsg containsMsgOK"
+                        msg="Unexpected attributes in 'xpath' element"
                     msgOK="OK - 'xpath' element: no unexpected attributes"/>
 
                 <!-- mandatory attributes -->

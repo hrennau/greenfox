@@ -11,7 +11,7 @@
       <operation name="validate" type="node()" func="validateOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="params" type="xs:string?"/>
-         <param name="reportType" type="xs:string?" default="std, white, whiteTree, redTree"/>
+         <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
          <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>

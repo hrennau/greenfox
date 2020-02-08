@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-02-07T21:53:01.313+01:00 
+ : @version 2020-02-08T14:32:16.26+01:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -81,7 +81,7 @@ declare variable $toolScheme :=
     <operation name="validate" type="node()" func="validateOp" mod="validate.xqm" namespace="http://www.greenfox.org/ns/xquery-functions">
       <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
       <param name="params" type="xs:string?"/>
-      <param name="reportType" type="xs:string?" default="std, white, whiteTree, redTree"/>
+      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
       <param name="format" type="xs:string?" default="xml"/>
       <pgroup name="input" minOccurs="1"/>
     </operation>
