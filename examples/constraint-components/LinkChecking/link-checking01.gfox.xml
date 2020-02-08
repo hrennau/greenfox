@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-checking01"
+          xmlns="http://www.greenfox.org/ns/schema">
+    
+    <!-- *** NIEM 4.2 *** -->
+    <domain path="\projects\xsdbase\niem-4.2" name="niem-4.2">
+               
+        <!-- *** XSD shape *** -->
+        <file foxpath=".\\*.xsd" id="xsdShape" mediatype="xml">
+            <targetSize minCount="100" minCountMsg="Not as many XSDs as expected"/>
+            <!-- Include can be resolved and have the same target namespace -->
+            <foxpath expr="//xs:include/@schemaLocation/resolve-link(., 'xml')
+                           /xs:schema/string(@targetNamespace)"
+                     eqXPath="/xs:schema/string(@targetNamespace)"
+                     eqXPathMsg="Chameleons not allowed, 
+                        included schema must have same tns as including one"/>
+            <!-- Imports can be resolved and have a different target namespace -->            
+            <foxpath expr="//xs:import/@schemaLocation/resolve-link(., 'xml')
+                           /xs:schema/string(@targetNamespace)"
+                     neXPath="/xs:schema/string(@targetNamespace)"
+                     neXPathMsg="Imported schemas must have a different tns"/>
+            
+        </file>
+    </domain>
+</greenfox>
+
