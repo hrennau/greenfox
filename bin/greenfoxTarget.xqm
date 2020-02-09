@@ -70,7 +70,7 @@ declare function f:validateTargetCount($constraint as element(),
         let $colour := if ($ok) then 'green' else 'red'
         return
             f:constructResult_targetCount($constraint, $colour, (), 'TargetCount', $condition, 
-                $targetCount, $contextPath, $navigationSpec)
+                $targetItems, $contextPath, $navigationSpec)
         ,
         let $condition := $constraint/@minCount
         return if (not($condition)) then () else
@@ -80,7 +80,7 @@ declare function f:validateTargetCount($constraint as element(),
         let $colour := if ($ok) then 'green' else 'red'
         return
             f:constructResult_targetCount($constraint, $colour, (), 'TargetMinCount', $condition, 
-                $targetCount, $contextPath, $navigationSpec)
+                $targetItems, $contextPath, $navigationSpec)
         ,        
         let $condition := $constraint/@maxCount
         return if (not($condition)) then () else

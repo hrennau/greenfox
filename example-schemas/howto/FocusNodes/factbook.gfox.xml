@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Checks that file links in a catalog can be resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/factbook"
+    xmlns="http://www.greenfox.org/ns/schema">
+
+    <domain path="\tt\greenfox\example-data" name="greenfox-example-data">
+
+        <folder foxpath="factbook" id="factbookFolderShape">
+            <targetSize msg="No factbook folder found" minCount="1"/>
+
+            <!-- *** Catalog file *** -->
+            <file foxpath="factbook.xml" id="factbookFileShape">
+                <targetSize countMsg="No factbook file found" count="1"/>
+                <focusNode xpath="/mondial/country">
+                    <xpath expr="@capital" eqXPath=".//city/@id"
+                           eqXPathMsg="Country capital must reference a city element contained."/>
+                    <focusNode xpath="province">
+                        <xpath expr="@capital" eqXPath="city/@id"
+                               eqXPathMsg="Province capital must reference a city element contained."/>
+                        <focusNode xpath="city">
+                            <xpath expr="@country" eqXPath="ancestor::country/@id"
+                                   eqXPathMsg="City must reference containing country"/>
+                            <xpath expr="name" minCount="1"
+                                   minCountMsg="City must have at least one name child"/>
+                        </focusNode>
+                    </focusNode>
+                </focusNode>
+            </file>
+        </folder>
+    </domain>
+
+
+
+</greenfox>

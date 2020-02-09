@@ -41,15 +41,16 @@
                     md5="BD509F9C80642BC03856B1DF169D0EA3" md5Msg="Not expected MD5"/>
                 <memberFile name="xmlschema.framework"/>
             </folderContent>
+            
             <!-- *** Catalog file *** -->
             <file foxpath="catalog.xml" id="catalogFileShape">
                 <targetSize countMsg="Catalog file not found" count="1"/>
-                <lastModified lt="2020-01-01" 
+                <lastModified lt="2020-01-01"
                               ltMsg="Must be older than 2020-01-01"/>
-                <xpath expr="//*/namespace-uri(.)"
+                <xpath expr="//*/namespace-uri(.) => distinct-values()"
                        eq="urn:oasis:names:tc:entity:xmlns:xml:catalog"
                        eqMsg="Unexpected namespace."/>
-                <xpath expr="//@uri"
+                <xpath expr="//@uri => distinct-values()"
                        like="dtd/*.dtd|xsd/*.xsd"
                        likeMsg="Unexpected URI"/>
             </file>

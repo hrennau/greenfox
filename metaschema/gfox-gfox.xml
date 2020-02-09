@@ -10,7 +10,7 @@
     <!-- *** Constraint components *** -->
     <constraintComponents>
 
-        <!-- Constraint component: all attributes are allowed -->
+        <!-- Constraint component: all attributes present are allowed -->
         <constraintComponent constraintElementName="ex:allowedAtts"
             validatorXPath="@*/local-name(.)[not(. = tokenize($attNames))]">
             <param name="attNames"/>
@@ -44,7 +44,7 @@ return
             <param name="attNames"/>
         </constraintComponent>
 
-        <!-- Constraint component: all elements are allowed -->
+        <!-- Constraint component: all elements present are allowed -->
         <constraintComponent constraintElementName="ex:allowedElems"
             validatorXPath="*/local-name(.)[not(. = tokenize($elemNames))]">
             <param name="elemNames"/>
@@ -226,6 +226,28 @@ return
             </focusNode>
 
             <!-- ========================================
+                    <lastModified>
+                 ======================================== -->
+            
+            <focusNode xpath="*:greenfox//*:lastModified">
+                <!-- attribute names -->
+                <ex:allowedAtts 
+                    attNames="id 
+                              eq eqMsg eqMsgOK
+                              lt ltMsg ltMsgOK
+                              le leMsg leMsgOK
+                              gt gtMsg gtMsgOK
+                              ge geMsg gtMsgOK"
+                    msg="Unexpected attributes in 'lastModified' element; expected: $attNames"
+                    msgOK="OK - 'lastModified' element: no unexpected attributes"/>
+                <ex:oneOrMoreAtts
+                    attNames="eq lt le gt ge"
+                    msg="One of these attributes expected: $attNames"
+                    msgOK="OK - 'lastModified' element: required attributes found"/>
+                
+            </focusNode>
+            
+            <!-- ========================================
                     <folderContent>
                  ======================================== -->
 
@@ -380,7 +402,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize xpath foxpath lastModified fileSize focusNode ifMediatype"
+                    elemNames="targetSize xpath foxpath lastModified fileSize focusNode ifMediatype grep"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
@@ -510,12 +532,6 @@ return
             </focusNode>
 
             <!-- ========================================
-                    <lastUpdate>
-                 ======================================== -->
-            <focusNode xpath="//*:lastUpdate">
-            </focusNode>
-
-            <!-- ========================================
                     <ifMediatype>
                  ======================================== -->
             <focusNode xpath="//*:ifMediatype">
@@ -534,6 +550,17 @@ return
                 <ex:mandatoryAtts attNames="xsdFoxpath"
                     msg="An 'xsdValid' constraint must have an 'xsdFoxpath' attribute"
                     msgOK="OK - 'xsdValid' element: has 'xsdFoxpath' attribute"/>
+            </focusNode>
+            
+            
+            <focusNode xpath="//*:focusNode">
+                <ex:allowedAtts attNames="id xpath"
+                    msg="Unexpected attributes in 'focusNode' element; expected: $attNames"
+                    msgOK="OK - 'focusNode' element: no unexpected attributes"/>
+                <ex:xoneAtts attNames="xpath foxpath"
+                    msg="A 'focusNode' element must have either an xpath attribute or a foxpath attribute"
+                    msgOK="OK - 'focusNode' has xpath or foxpath attribute"/>
+                
             </focusNode>
             
         </file>
