@@ -54,7 +54,7 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
             if (not($constraint)) then ()
             else    
                 $components/self::gx:targetSize                
-                                /i:validateTargetCount(., $targetCount, $contextPathLabel, $targetDecl)
+                                /i:validateTargetCount(., $targetPaths, $contextPathLabel, $targetDecl)
     let $instanceResults := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
         
     let $subsetResults :=

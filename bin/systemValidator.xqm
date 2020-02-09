@@ -16,6 +16,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "constants.xqm",
     "folderValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -86,7 +87,11 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
             case element(gx:folder) return f:validateFolder($component, $context)
             case element(gx:file) return f:validateFile($component, $context)
             case element(gx:constraintComponents) return ()
-            default return error()
+            default return error(QName($i:URI_GX, 'UNEXPEDTED_SCHEMA_CONTENTS'), 
+                concat('Unexpected folder contents; component name: ', $component/name(.),
+                '; the error SHOULD have been detected by schema validation ',
+                'against the greenfox metaschema; ',
+                'the creation of a github issue would be much appreciated.'))
     return
         $perceptions
 };

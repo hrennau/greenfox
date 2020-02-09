@@ -278,6 +278,27 @@ declare function f:datapath($n as node()) as xs:string {
     ) => string-join('/')
 };
 
+declare function f:addDefaultNamespace($doc as node(), $uri as xs:string, $options as map(*)?) as node() {
+    f:addDefaultNamespaceRC($doc, $uri, $options)
+};
+
+declare function f:addDefaultNamespaceRC($n as node(), $uri as xs:string, $options as map(*)?) as node() {
+    typeswitch($n)
+    case document-node() return document {$n/node() ! f:addDefaultNamespaceRC(., $uri, $options)}
+    case element() return
+        let $useName :=    
+            let $namespace := namespace-uri($n)
+            return
+                if ($namespace eq $uri) then QName($uri, local-name($n))
+                else node-name($n)
+        return
+            element {$useName} {
+                $n/@* ! f:addDefaultNamespaceRC(., $uri, $options),
+                $n/node() ! f:addDefaultNamespaceRC(., $uri, $options)
+            }
+    default return $n            
+};
+
 (:
 (:~
  : Returns the target paths of a resource shape.

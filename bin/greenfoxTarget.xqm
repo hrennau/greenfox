@@ -11,6 +11,7 @@ module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "greenfoxUtil.xqm",
+    "validationResult.xqm",
     "log.xqm" ;
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -48,24 +49,25 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
 };        
 
 (:~
- : Validates the target count of a resource shape.
+ : Validates the target count of a resource shape or a focus node.
  :
  : @param constraint definition of a target constraint
  : @targetCount the number of focus resources belonging to the target of the shape
  : @return validation results describing conformance to or violations of target count constraints
  :) 
 declare function f:validateTargetCount($constraint as element(), 
-                                       $targetCount as xs:integer,
+                                       $targetItems as item()*,
                                        $contextPath as xs:string,
                                        $navigationSpec as attribute())
         as element()* {
+    let $targetCount := count($targetItems)        
     let $results := (
         let $condition := $constraint/@count
         return if (not($condition)) then () else
         
         let $value := $condition/xs:integer(.)
         let $ok := $value eq $targetCount
-        let $colour := if ($ok) then 'green' else 'error'
+        let $colour := if ($ok) then 'green' else 'red'
         return
             f:constructResult_targetCount($constraint, $colour, (), 'TargetCount', $condition, 
                 $targetCount, $contextPath, $navigationSpec)
@@ -75,7 +77,7 @@ declare function f:validateTargetCount($constraint as element(),
         
         let $value := $condition/xs:integer(.)
         let $ok := $value le $targetCount
-        let $colour := if ($ok) then 'green' else 'error'
+        let $colour := if ($ok) then 'green' else 'red'
         return
             f:constructResult_targetCount($constraint, $colour, (), 'TargetMinCount', $condition, 
                 $targetCount, $contextPath, $navigationSpec)
@@ -85,10 +87,10 @@ declare function f:validateTargetCount($constraint as element(),
         
         let $value := $condition/xs:integer(.)
         let $ok := $value ge $targetCount
-        let $colour := if ($ok) then 'green' else 'error'
+        let $colour := if ($ok) then 'green' else 'red'
         return
             f:constructResult_targetCount($constraint, $colour, (), 'TargetMaxCount', $condition, 
-                $targetCount, $contextPath, $navigationSpec)
+                $targetItems, $contextPath, $navigationSpec)
     )
     return $results
 };
@@ -97,7 +99,7 @@ declare function f:validateTargetCount($constraint as element(),
  : Constructs results for constraints targetCount, targetMinCount, targetMaxCount.
  :
  : @param constraint element defining the constraint
- : @param colour the kind of results - green or error
+ : @param colour the kind of results - green or red
  : @param msg a message overriding the message read from the constraint element
  : @param constraintComp string identifying the constraint component
  : @param condition an attribute specifying a condition (e.g. @minCount=...)
@@ -109,10 +111,11 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
                                                $msg as attribute()?,
                                                $constraintComp as xs:string,
                                                $condition as attribute(),
-                                               $actCount as xs:integer,
+                                               $targetItems as item()*,
                                                $targetContextPath as xs:string,
                                                $navigationSpec as attribute())
         as element() {
+    let $actCount := count($targetItems)        
     let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
     let $useMsg :=
         if ($msg) then $msg
@@ -124,6 +127,9 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
         let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
         let $name := if (contains($name, 'Xpath')) then replace($name, 'Xpath', 'XPath') else $name
         return attribute {$name} {$navigationSpec}
+    let $values :=
+        if (not($colour = ('red', 'yellow'))) then ()
+        else i:validationResultValues($targetItems, $constraint)
     return
         element {$elemName} {
             $useMsg ! attribute msg {.},
@@ -134,6 +140,7 @@ declare function f:constructResult_targetCount($constraint as element(gx:targetS
             $condition,
             attribute valueCount {$actCount},
             attribute targetContextPath {$targetContextPath},
-            $navigationAtt
+            $navigationAtt,
+            $values
         }
 };

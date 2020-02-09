@@ -7,7 +7,8 @@
     <airport>
         <code>DUS</code>
     </airport>
-    <airport href="airport-fra">
-        <code>DUS</code>
+    <airport href="airport-fra.xml">
+        <code>FRA</code>
     </airport>
+    <airport href="user-extensions/user-extension-dus/airport-dus.xml"/>
 </airports>

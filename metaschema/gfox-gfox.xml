@@ -170,12 +170,16 @@ return
 
                 <!-- check attribute names, mandatory atts -->
                 <ex:allowedAtts attNames="path name"
-                    msg="Unexpected attributes in 'domain' element; expected: path, name"
+                    msg="Unexpected attributes in 'domain' element; expected: 'path' and 'name'"
                     msgOK="OK - 'domain' element: no unexpected attributes"/>
                 <ex:mandatoryAtts attNames="path name"
-                    msg="Missing mandatory attributes in 'domain' element; expected: path, name"
-                    msgOK="OK - 'domain' element: with mandatory attributes ('path' and 'name')"/>
+                    msg="Missing mandatory attributes in 'domain' element; expected: 'path' and 'name'"
+                    msgOK="OK - 'domain' element: with mandatory attributes"/>
 
+                <ex:allowedElems elemNames="folder file"
+                    msg="Unexpected content of the 'domain' element; expected: only 'folder' and 'file' elements"
+                    msgOK="OK - 'domain' element: no unexpected child elements"/>
+                
                 <xpath description="Validates the @path value" expr="@path" matches="\\|\{.*\}"
                     matchesMsg="Path value must use backslashes, reference external variables"
                     matchesMsgOK="OK - 'domain' element: @path uses backslashes" notMatches="/"

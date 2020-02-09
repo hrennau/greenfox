@@ -35,7 +35,7 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     
     (: check: targetSize :)
     let $targetCount := count($targetPaths)   
-    let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetCount, $contextPath, $targetDecl)
+    let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
     let $instanceResults :=        
         for $targetPath in $targetPaths
         return

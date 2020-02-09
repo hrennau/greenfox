@@ -9,7 +9,11 @@
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
-    
+
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "greenfoxUtil.xqm",
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateLastModified($filePath as xs:string, $constraint as element(gx:lastModified), $context)
@@ -25,20 +29,20 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     
     let $actValue := file:last-modified($filePath) ! string(.)
     
-    let $error := (
-        exists($lt) and $actValue >= $lt
-        or
-        exists($le) and $actValue > $le
-        or
-        exists($gt) and $actValue <= $gt
-        or 
-        exists($ge) and $actValue < $ge
-        or
-        exists($eq) and $actValue != $eq
-    )
-    where $error
-    return
-        f:constructError_lastModified($constraint, $actValue)
+    let $results := 
+        for $facet in ($lt, $gt, $le, $ge, $eq)
+        let $violation :=
+            switch($facet/local-name(.))
+            case 'lt' return $actValue >= $facet
+            case 'le' return $actValue > $facet
+            case 'gt' return $actValue <= $facet
+            case 'ge' return $actValue < $facet
+            case 'eq' return $actValue = $facet
+            default return error()
+        let $colour := if ($violation) then 'red' else 'green'
+        return   
+            f:constructError_lastModified($colour, $constraint, $facet, $actValue)
+    return $results                        
 };
 
 declare function f:validateFileSize($filePath as xs:string, $fileSize as element(gx:fileSize), $context)
@@ -142,21 +146,28 @@ declare function f:validateFileName($filePath as xs:string, $fileName as element
         
 };
 
-declare function f:constructError_lastModified($constraint as element(gx:lastModified),
+declare function f:constructError_lastModified($colour as xs:string,
+                                               $constraintElem as element(gx:lastModified),
+                                               $constraint as attribute(),
                                                $actualValue as xs:string) 
         as element(gx:red) {
-    let $constraintParams := $constraint/(@lt, @le, @gt, @ge, @eq)          
     let $msg := 
-        ($constraint/@msg,
-         concat('Last-modified time not ', local-name($constraint), ' check value = ', $constraint))[1]
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraint/local-name(.), concat('Last modified should be ', local-name($constraint), ' ', $constraint))
+    let $values := i:validationResultValues($actualValue, $constraintElem)
+    let $constraintComp := 'LastModified' || f:firstCharToUpperCase($constraint/local-name(.))
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
     return
     
-        <gx:red constraintComp="LastModified">{
-            $constraint/@id/attribute constraintID {.},
-            $constraint/@label/attribute constraintLabel {.},
-            $constraintParams,
-            attribute actualValue {$actualValue},
-            attribute message {$msg}
+        <gx:red>{
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            (: $constraintElem/@label/attribute constraintLabel {.}, :)
+            $constraint,
+            $values
         }</gx:red>                                                  
 };
 

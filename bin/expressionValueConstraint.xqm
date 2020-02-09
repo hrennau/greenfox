@@ -319,12 +319,12 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
             return
                 if (empty($violations)) then () 
                 else f:validationResult_expression('red', $valueShape, $cmp, $exprValue,
-                                                   $resultAdditionalAtts, ($violations => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                   $resultAdditionalAtts, i:validationResultValues($violations, $valueShape),                                           
                                                    $contextInfo, $resultOptions)
         else if ($quantifier eq 'some') then 
             if (exists($useItems[$cmpTrue(., $useCmp)]))  then () 
             else f:validationResult_expression('red', $valueShape, $cmp, $exprValue,
-                                                $resultAdditionalAtts, ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                $resultAdditionalAtts, i:validationResultValues($exprValue, $valueShape), 
                                                 $contextInfo, $resultOptions)
     return
         if ($errors) then $errors

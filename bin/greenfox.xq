@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-02-08T14:32:16.26+01:00 
+ : @version 2020-02-09T11:50:11.266+01:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -11,6 +11,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_request.xqm";
 
 import module namespace a1="http://www.greenfox.org/ns/xquery-functions" at
+    "greenfoxTemplates.xqm",
     "validate.xqm";
 
 declare namespace m="http://www.greenfox.org/ns/xquery-functions";
@@ -77,6 +78,19 @@ declare variable $toolScheme :=
     </operation>
     <operation name="_nodlSample" type="node()" func="nodlSample" mod="tt/_pcollection.xqm" namespace="http://www.ttools.org/xquery-functions">
       <param name="model" type="xs:string?" fct_values="xml, sql, mongo" default="xml"/>
+    </operation>
+    <operation name="template" type="node()" func="templateOp" mod="greenfoxTemplates.xqm" namespace="http://www.greenfox.org/ns/xquery-functions">
+      <param name="domain" type="xs:string?" pgroup="input"/>
+      <param name="folder" type="xs:string?" pgroup="input"/>
+      <param name="folder2" type="xs:string?"/>
+      <param name="file" type="xs:string?" pgroup="input"/>
+      <param name="file2" type="xs:string?" pgroup="input"/>
+      <param name="empty" type="xs:string*" fct_values="folder, folder2, file, file2"/>
+      <param name="mfolder" type="xs:string?"/>
+      <param name="mfolder2" type="xs:string?"/>
+      <param name="mfile" type="xs:string?"/>
+      <param name="mfile2" type="xs:string?"/>
+      <pgroup name="input" minOccurs="1"/>
     </operation>
     <operation name="validate" type="node()" func="validateOp" mod="validate.xqm" namespace="http://www.greenfox.org/ns/xquery-functions">
       <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
@@ -233,6 +247,17 @@ declare function m:execOperation__nodlSample($request as element())
 };
      
 (:~
+ : Executes operation 'template'.
+ :
+ : @param request the request element
+ : @return the operation result
+ :)
+declare function m:execOperation_template($request as element())
+        as node() {
+    a1:templateOp($request)        
+};
+     
+(:~
  : Executes operation 'validate'.
  :
  : @param request the request element
@@ -278,6 +303,7 @@ declare function m:execOperation($req as element())
         else if ($opName eq '_copyNcat') then m:execOperation__copyNcat($req)
         else if ($opName eq '_deleteNcat') then m:execOperation__deleteNcat($req)
         else if ($opName eq '_nodlSample') then m:execOperation__nodlSample($req)
+        else if ($opName eq 'template') then m:execOperation_template($req)
         else if ($opName eq 'validate') then m:execOperation_validate($req)
         else if ($opName eq '_help') then m:execOperation__help($req)
         else
