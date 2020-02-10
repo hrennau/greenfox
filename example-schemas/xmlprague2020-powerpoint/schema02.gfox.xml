@@ -45,7 +45,7 @@
             <!-- *** Catalog file *** -->
             <file foxpath="catalog.xml" id="catalogFileShape">
                 <targetSize countMsg="Catalog file not found" count="1"/>
-                <lastModified lt="2020-01-01"
+                <lastModified gt="2020-01-01"
                               ltMsg="Must be older than 2020-01-01"/>
                 <xpath expr="//*/namespace-uri(.) => distinct-values()"
                        eq="urn:oasis:names:tc:entity:xmlns:xml:catalog"
