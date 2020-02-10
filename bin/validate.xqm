@@ -28,6 +28,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "constants.xqm",
     "compile.xqm",
     "log.xqm",
     "greenfoxEditUtil.xqm",
@@ -47,6 +48,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateOp($request as element())
         as element() {
     let $gfoxSource := tt:getParams($request, 'gfox')/* 
+    return
+        if (not($gfoxSource/self::element(gx:greenfox))) then
+            f:raiseError_notGreenfoxSchema($gfoxSource) else
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
     let $params := tt:getParams($request, 'params')
     let $reportType := tt:getParams($request, 'reportType')
@@ -65,4 +69,25 @@ declare function f:validateOp($request as element())
     
     let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
     return $report
+};        
+
+(:~
+ : Raises an error in response to a schema which does not have
+ : the expected root element name.
+ :
+ : @param elem root element of what should be a greenfox schema
+ : @return throws an error with diagnostic message
+ :)
+declare function f:raiseError_notGreenfoxSchema($elem as element())
+        as empty-sequence() {
+    let $namespace := $elem/namespace-uri(.)
+    let $lname := $elem/local-name(.)
+    let $msgParts := (
+        if ($lname ne 'greenfox') then
+            'the local name must be "greenfox", but is: "' || $lname || '";' else (),
+        if ($namespace ne $i:URI_GX) then
+            concat('the namespace URI must be "', $i:URI_GX, '", but is: "' || $namespace || '";') else ()
+    )
+    let $msg := string-join(('Not a greenfox schema;', $msgParts, 'aborted.'), ' ')                    
+    return error(QName('', 'INVALID_ARG'), $msg)        
 };        
