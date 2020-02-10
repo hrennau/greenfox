@@ -37,7 +37,7 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             case 'le' return $actValue > $facet
             case 'gt' return $actValue <= $facet
             case 'ge' return $actValue < $facet
-            case 'eq' return $actValue = $facet
+            case 'eq' return $actValue != $facet
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
         return   
@@ -150,7 +150,8 @@ declare function f:constructError_lastModified($colour as xs:string,
                                                $constraintElem as element(gx:lastModified),
                                                $constraint as attribute(),
                                                $actualValue as xs:string) 
-        as element(gx:red) {
+        as element() {
+    let $elemName := 'gx:' || $colour        
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
         else i:getErrorMsg($constraintElem, $constraint/local-name(.), concat('Last modified should be ', local-name($constraint), ' ', $constraint))
@@ -160,7 +161,7 @@ declare function f:constructError_lastModified($colour as xs:string,
     let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
     return
     
-        <gx:red>{
+        element {$elemName} {
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
@@ -168,7 +169,7 @@ declare function f:constructError_lastModified($colour as xs:string,
             (: $constraintElem/@label/attribute constraintLabel {.}, :)
             $constraint,
             $values
-        }</gx:red>                                                  
+        }                                          
 };
 
 declare function f:constructError_fileSize($constraintId as attribute()?,
