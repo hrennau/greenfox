@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint component FileSize...
+    
+    Constraint component:
+    * FileSizeGt
+    * FileSizeLt
+    
+    Validation catches 
+    * empty files (with size "0").
+    * files larger 1000
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath=".\\*" id="anyFileShape">
+                <fileSize gt="0" gtMsg="Empty files not allowed"
+                          le="1000" leMsg="Files larger 1000 not allowed"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

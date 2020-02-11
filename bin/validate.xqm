@@ -10,6 +10,7 @@
    <operations>
       <operation name="validate" type="node()" func="validateOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
+         <param name="domain" type="xs:string?"/>
          <param name="params" type="xs:string?"/>
          <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
          <param name="format" type="xs:string?" default="xml"/>
@@ -47,6 +48,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :) 
 declare function f:validateOp($request as element())
         as element() {
+    let $domain := tt:getParams($request, 'domain')
+    return
+        if ($domain and not(file:exists($domain))) then
+            error(QName((), 'DOMAIN_NOT_FOUND'),
+                concat("Domain folder not found: '", $domain, "'; aborted.'"))
+        else
+        
     let $gfoxSource := tt:getParams($request, 'gfox')/* 
     return
         if (not($gfoxSource/self::element(gx:greenfox))) then
@@ -57,7 +65,7 @@ declare function f:validateOp($request as element())
     let $reportFormat := tt:getParams($request, 'format')
     let $reportOptions := map{}
     
-    let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params))
+    let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params, $domain))
     let $gfox := $gfoxAndContext[. instance of element()]
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
     let $context := $gfoxAndContext[. instance of map(*)]

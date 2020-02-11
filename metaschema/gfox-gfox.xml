@@ -237,8 +237,10 @@ return
                               lt ltMsg ltMsgOK
                               le leMsg leMsgOK
                               gt gtMsg gtMsgOK
-                              ge geMsg gtMsgOK"
-                    msg="Unexpected attributes in 'lastModified' element; expected: $attNames"
+                              ge geMsg gtMsgOK
+                              matches matchesMsg matchesMsgOK
+                              like likeMsg likeMsgOK"
+                    msg="Unexpected attributes in 'lastModified' element."
                     msgOK="OK - 'lastModified' element: no unexpected attributes"/>
                 <ex:oneOrMoreAtts
                     attNames="eq lt le gt ge"

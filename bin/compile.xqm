@@ -147,17 +147,27 @@ declare function f:substituteVarsAux($s as xs:string?, $context as map(xs:string
  : Maps the value of a string to a set of name-value pairs.
  :
  : @param params a string containing concatenated name-value pairs
+ : @param domain the domain folder
  : @return a map expressing the pairs a key-value pairs
  :)
-declare function f:externalContext($params as xs:string?) as map(xs:string, item()*) {
+declare function f:externalContext($params as xs:string?, $domain as xs:string?) as map(xs:string, item()*) {
     let $nvpairs := tokenize($params, '\s*;\s*')
-    return
+    let $raw :=
         map:merge(
             $nvpairs ! 
             map:entry(replace(., '\s*=.*', ''), 
                       replace(., '^.*?=\s*', '')
             )
         )
+    return
+        if ($domain) then
+            if (map:contains($raw, 'domain')) then
+                error(QName((), 'INVALID_ARG'),
+                    "When using params with a 'domain' field, you must not ',
+                     use the 'domain' parameter; aborted.'") 
+            else
+                trace(map:put($raw, 'domain', $domain) , '_CONTEXT: ')
+        else $raw        
 };
 
 declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {

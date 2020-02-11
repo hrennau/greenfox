@@ -26,8 +26,42 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     let $le := $constraint/@le
     let $ge := $constraint/@ge
     let $eq := $constraint/@eq
+    let $like := $constraint/@like
+    let $matches := $constraint/@matches
     
+    let $regexLike := $like/f:glob2regex(.)
     let $actValue := file:last-modified($filePath) ! string(.)
+    
+    let $results := 
+        for $facet in ($lt, $gt, $le, $ge, $eq, $like, $matches)
+        let $violation :=
+            switch($facet/local-name(.))
+            case 'lt' return $actValue >= $facet
+            case 'le' return $actValue > $facet
+            case 'gt' return $actValue <= $facet
+            case 'ge' return $actValue < $facet
+            case 'eq' return $actValue != $facet
+            case 'matches' return not(matches($actValue, $matches))
+            case 'like' return not(matches($actValue, $regexLike))
+            default return error()
+        let $colour := if ($violation) then 'red' else 'green'
+        return   
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
+    return $results                        
+};
+
+declare function f:validateFileSize($filePath as xs:string, $constraint as element(gx:fileSize), $context)
+        as element()* {
+    let $constraintId := $constraint/@id
+    let $constraintLabel := $constraint/@label
+    
+    let $lt := $constraint/@lt
+    let $gt := $constraint/@gt
+    let $le := $constraint/@le
+    let $ge := $constraint/@ge
+    let $eq := $constraint/@eq
+    
+    let $actValue := file:size($filePath)
     
     let $results := 
         for $facet in ($lt, $gt, $le, $ge, $eq)
@@ -41,45 +75,8 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
         return   
-            f:constructError_lastModified($colour, $constraint, $facet, $actValue)
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
     return $results                        
-};
-
-declare function f:validateFileSize($filePath as xs:string, $fileSize as element(gx:fileSize), $context)
-        as element()* {
-    let $constraintId := $fileSize/@id
-    let $constraintLabel := $fileSize/@label
-    
-    let $lt := $fileSize/@lt
-    let $gt := $fileSize/@gt
-    let $le := $fileSize/@le
-    let $ge := $fileSize/@ge
-    let $eq := $fileSize/@eq
-    
-    let $actValue := file:size($filePath)
-    
-    let $errors := (
-        (: count errors
-           ============ :)
-        if (empty($lt) or $actValue lt $lt/xs:integer(.)) then () else
-            f:constructError_fileSize($constraintId, $constraintLabel, $lt, $actValue, ())
-        ,
-        if (empty($gt) or $actValue gt $gt/xs:integer(.)) then () else
-            f:constructError_fileSize($constraintId, $constraintLabel, $gt, $actValue, ())
-        ,
-        if (empty($le) or $actValue le $le/xs:integer(.)) then () else
-            f:constructError_fileSize($constraintId, $constraintLabel, $le, $actValue, ())
-        ,
-        if (empty($ge) or $actValue ge $ge/xs:integer(.)) then () else
-            f:constructError_fileSize($constraintId, $constraintLabel, $ge, $actValue, ())
-        ,
-        if (empty($eq) or $actValue eq $eq/xs:integer(.)) then () else
-            f:constructError_fileSize($constraintId, $constraintLabel, $eq, $actValue, ())
-        ,
-        ()
-    )
-    return
-        $errors        
 };
 
 (:~
@@ -146,6 +143,36 @@ declare function f:validateFileName($filePath as xs:string, $fileName as element
         
 };
 
+declare function f:constructError_fileProperties($colour as xs:string,
+                                                 $constraintElem as element(),
+                                                 $constraint as attribute(),
+                                                 $actualValue as item()) 
+        as element() {
+    let $constraintComp :=
+        $constraintElem/f:firstCharToUpperCase(local-name(.)) ||
+        $constraint/f:firstCharToUpperCase(local-name(.))
+        
+    let $elemName := 'gx:' || $colour    
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraint/local-name(.), concat('Last modified should be ', local-name($constraint), ' ', $constraint))
+    let $values := i:validationResultValues($actualValue, $constraintElem)
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
+    return
+    
+        element {$elemName} {
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            (: $constraintElem/@label/attribute constraintLabel {.}, :)
+            $constraint,
+            $values
+        }                                          
+};
+
+(:
 declare function f:constructError_lastModified($colour as xs:string,
                                                $constraintElem as element(gx:lastModified),
                                                $constraint as attribute(),
@@ -171,7 +198,8 @@ declare function f:constructError_lastModified($colour as xs:string,
             $values
         }                                          
 };
-
+:)
+(:
 declare function f:constructError_fileSize($constraintId as attribute()?,
                                            $constraintLabel as attribute()?,
                                            $constraint as attribute(),
@@ -191,6 +219,7 @@ declare function f:constructError_fileSize($constraintId as attribute()?,
             $additionalAtts        
         }</gx:red>                                                  
 };
+:)
 
 declare function f:constructError_fileName($constraintId as attribute()?,
                                            $constraintLabel as attribute()?,
