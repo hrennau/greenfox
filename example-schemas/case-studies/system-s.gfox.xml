@@ -5,10 +5,11 @@
     <!-- *** External context *** -->
     <context>
         <field name="lastModified" value="2019-12-01"/>
+        <field name="domain"/>
     </context>
 
     <!-- *** System file tree *** -->
-    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">
+    <domain path="${domain}" name="system-s">
 
         <!-- *** System root folder shape *** -->
         <folder foxpath="." id="systemRootFolderShape">
