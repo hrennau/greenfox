@@ -1,3 +1,0 @@
-request,response,returnCode
-getFooRQ1.json,getFooRS1.json,OK
-getFooRQ2.json,getFooRS2.json,NOFIND

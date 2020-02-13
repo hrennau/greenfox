@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<getFooRS xmlns="http://example.com/s1">
-    <returnCode>NOFIND</returnCode>
-    <fooID>102</fooID>
-</getFooRS>
