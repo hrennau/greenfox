@@ -72,6 +72,10 @@ declare function f:validateExpressionValue($constraint as element(),
     let $like := $constraint/@like
     let $notLike := $constraint/@notLike
     
+    let $length := $constraint/@length
+    let $minLength := $constraint/@minLength
+    let $maxLength := $constraint/@maxLength    
+    
     let $eqFoxpath := $constraint/@eqFoxpath
     let $neFoxpath := $constraint/@neFoxpath
     let $ltFoxpath := $constraint/@ltFoxpath
@@ -124,6 +128,9 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($notMatches)) then () else f:validateExpressionValue_cmp($exprValue, $notMatches, $quantifier, $constraint, $contextInfo),
         if (not($like)) then () else f:validateExpressionValue_cmp($exprValue, $like, $quantifier, $constraint, $contextInfo),
         if (not($notLike)) then () else f:validateExpressionValue_cmp($exprValue, $notLike, $quantifier, $constraint, $contextInfo),
+        if (not($length)) then () else f:validateExpressionValue_cmp($exprValue, $length, $quantifier, $constraint, $contextInfo),
+        if (not($minLength)) then () else f:validateExpressionValue_cmp($exprValue, $minLength, $quantifier, $constraint, $contextInfo),
+        if (not($maxLength)) then () else f:validateExpressionValue_cmp($exprValue, $maxLength, $quantifier, $constraint, $contextInfo),        
         if (not($empty)) then () else f:validateExpressionValueCount($exprValue, $empty, $constraint, $contextInfo),
         if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraint, $contextInfo),     
         if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraint, $contextInfo),
@@ -298,8 +305,12 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
         case attribute(notMatches) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
         case attribute(like) return function($op1, $op2) {matches($op1, $op2, $flags)}
         case attribute(notLike) return function($op1, $op2) {not(matches($op1, $op2, $flags))}
-        case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}        
+        case attribute(length) return function($op1, $op2) {string-length($op1) = $op2}
+        case attribute(minLength) return function($op1, $op2) {string-length($op1) >= $op2}        
+        case attribute(maxLength) return function($op1, $op2) {string-length($op1) <= $op2}        
+        case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}       
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
+        
     
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
     let $useCmp :=
@@ -637,6 +648,9 @@ declare function f:validationResult_expression($colour as xs:string,
         case attribute(notMatches) return map{'constraintComp': 'ExprValueNotMatches', 'atts': ('notMatches', 'useDatatype')}
         case attribute(like) return map{'constraintComp': 'ExprValueLike', 'atts': ('like', 'useDatatype')}        
         case attribute(notLike) return map{'constraintComp': 'ExprValueNotLike', 'atts': ('notLike', 'useDatatype')}
+        case attribute(length) return map{'constraintComp': 'ExprValueLength', 'atts': ('length')}
+        case attribute(minLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('minLength')}        
+        case attribute(maxLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('maxLength')}        
         case attribute(eqXPath) return map{'constraintComp': 'ExprValueEqXPath', 'atts': ('eqXPath', 'useDatatype')}
         case attribute(neXPath) return map{'constraintComp': 'ExprValueNeXPath', 'atts': ('neXPath', 'useDatatype')}
         case attribute(leXPath) return map{'constraintComp': 'ExprValueLeXPath', 'atts': ('leXPath', 'useDatatype')}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates constraint component: 
+    * ExprValueMinLength
+    * ExprValueMaxLength
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+   
+            <file foxpath="airport*" id="airportFileShape">
+                <xpath expr="//code"
+                       minLength="3"
+                       minLengthMsg="Airport codes must have at least three letters"
+                       maxLength="4"
+                       maxLengthMsg="Airport codes must have at most four letters"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

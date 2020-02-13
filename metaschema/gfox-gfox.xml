@@ -435,6 +435,9 @@ return
                     notMatches notMatchesMsg notMatchesMsgOK
                     like likeMsg likeMsgOK
                     notLike notLikeMsg notLikeMsgOK
+                    length lengthMsg lengthMsgOK
+                    minLength minLengthMsg minLengthMsgOK
+                    maxLength maxLengthMsg maxLengthMsgOK                    
                     eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
                     neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
                     ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
@@ -493,6 +496,9 @@ return
                     notMatches notMatchesMsg notMatchesMsgOK
                     like likeMsg likeMsgOK
                     notLike notLikeMsg notLikeMsgOK
+                    length lengthMsg lengthMsgOK
+                    minLength minLengthMsg minLengthMsgOK
+                    maxLength maxLengthMsg maxLengthMsgOK                    
                     eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
                     neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
                     ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
