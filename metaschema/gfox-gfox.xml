@@ -420,7 +420,8 @@ return
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
-                    count countMsg countMsgOK
+                    exists existsMsg existsMsgOK
+                    count countMsg countMsgOK                    
                     minCount minCountMsg minCountMsgOK
                     maxCount maxCountMsg maxCountMsgOK
                     itemsUnique itemsUniqueMsg itemsUniqueMsgOK
@@ -481,6 +482,7 @@ return
                 <ex:allowedAtts
                     attNames="id label expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
+                    exists existsMsg existsMsgOK
                     count countMsg countMsgOK
                     minCount minCountMsg minCountMsgOK
                     maxCount maxCountMsg maxCountMsgOK

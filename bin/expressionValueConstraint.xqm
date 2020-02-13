@@ -52,6 +52,7 @@ declare function f:validateExpressionValue($constraint as element(),
     let $constraintLabel := $constraint/@label
     
     let $empty := $constraint/@empty
+    let $exists := $constraint/@exists
     let $minCount := $constraint/@minCount
     let $maxCount := $constraint/@maxCount
     let $count := $constraint/@count
@@ -132,6 +133,7 @@ declare function f:validateExpressionValue($constraint as element(),
         if (not($minLength)) then () else f:validateExpressionValue_cmp($exprValue, $minLength, $quantifier, $constraint, $contextInfo),
         if (not($maxLength)) then () else f:validateExpressionValue_cmp($exprValue, $maxLength, $quantifier, $constraint, $contextInfo),        
         if (not($empty)) then () else f:validateExpressionValueCount($exprValue, $empty, $constraint, $contextInfo),
+        if (not($exists)) then () else f:validateExpressionValueCount($exprValue, $exists, $constraint, $contextInfo),
         if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraint, $contextInfo),     
         if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraint, $contextInfo),
         if (not($maxCount)) then () else f:validateExpressionValueCount($exprValue, $maxCount, $constraint, $contextInfo),
@@ -248,8 +250,6 @@ declare function f:validateExpressionValueCount($exprValue as item()*,
                                                 $valueShape as element(),
                                                 $contextInfo as map(xs:string, item()*))
         as element()? {
-    if ($cmp/self::attribute(empty) eq 'false') then () else
-    
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
     
@@ -259,22 +259,18 @@ declare function f:validateExpressionValueCount($exprValue as item()*,
         case attribute(count) return function($count, $cmp) {$count = $cmp}        
         case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
         case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
-        case attribute(empty) return function($count, $cmp) {$count = 0}        
+        case attribute(empty) return function($count, $cmp) {if ($cmp eq 'true') then $count = 0 else $count gt 0}        
+        case attribute(exists) return function($count, $cmp) {if ($cmp eq 'true') then $count gt 0 else $count eq 0}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
     return        
         if ($cmpTrue($count, $cmp)) then  
             f:validationResult_expressionCount('green', $valueShape, $cmp, $count, $exprValue, 
                                                $resultAdditionalAtts, (), $contextInfo, $resultOptions)
-        (: YOGI :)                                               
         else 
             let $values := 
-                if ($cmp/self::attribute(empty)) then f:extractValues($exprValue, $valueShape)
-(:                
-                    $exprValue[. instance of xs:anyAtomicType or 
-                               . instance of attribute() or 
-                               . instance of element() and not(*) and string(.)] 
-                    ! <gx:value>{string(.)}</gx:value>
-:)                    
+                if ($cmp/self::attribute(empty) eq 'true' or 
+                    $cmp/self::attribute(exists) eq 'false')
+                then f:extractValues($exprValue, $valueShape)
                 else ()
             return
                 f:validationResult_expressionCount('red', $valueShape, $cmp, $count, $exprValue, 
@@ -722,8 +718,8 @@ declare function f:validationResult_expressionCount($colour as xs:string,
         case attribute(count) return map{'constraintComp': 'ExprValueCount', 'atts': ('count')}
         case attribute(minCount) return map{'constraintComp': 'ExprValueCount', 'atts': ('minCount')}
         case attribute(maxCount) return map{'constraintComp': 'ExprValueCount', 'atts': ('maxCount')}
-        case attribute(empty) return map{'constraintComp': 'ExprValueEmpty', 'atts': ()}
-        case attribute(exists) return map{'constraintComp': 'ExprValueExists', 'atts': ()}
+        case attribute(empty) return map{'constraintComp': 'ExprValueEmpty', 'atts': ('empty')}
+        case attribute(exists) return map{'constraintComp': 'ExprValueEmpty', 'atts': ('exists')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
