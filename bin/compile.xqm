@@ -166,7 +166,7 @@ declare function f:externalContext($params as xs:string?, $domain as xs:string?)
                     "When using params with a 'domain' field, you must not ',
                      use the 'domain' parameter; aborted.'") 
             else
-                trace(map:put($raw, 'domain', $domain) , '_CONTEXT: ')
+                map:put($raw, 'domain', $domain)
         else $raw        
 };
 

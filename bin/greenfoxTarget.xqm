@@ -32,8 +32,13 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
     let $isExpectedResourceKind :=
         let $isDir := $resourceShape/self::gx:folder
         return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
-    let $contextPath := $context?_contextPath     
+    let $contextPath := $context?_contextPath  
+    
+    (: _TO_DO_ cleanup - adhoc addition of $filePath and $fileName :)
     let $evaluationContext := $context?_evaluationContext
+    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $contextPath)
+    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
+    
     let $targetPaths :=
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath

@@ -100,7 +100,7 @@ declare function f:validateFolderInstance($folderPath as xs:string,
             $components/self::gx:file/i:validateFile(., $context),
             $components/self::gx:folder/i:validateFolder(., $context)
         )
-        (: validate - value shapes :)
+        (: validate - constraints and value shapes :)
         let $valueShapeResults :=
             for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
             let $error :=
