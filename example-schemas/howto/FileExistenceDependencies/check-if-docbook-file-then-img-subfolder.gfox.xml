@@ -19,7 +19,7 @@
                <!-- docbook with images --> 
                <file foxpath=".[//docbook:imagedata]">
                  ...
-                 <folder foxpath="..\img">
+                 <folder foxpath="..\img[is-dir(.)]">
                    <targetSize countMsg="No img subfolder" 
                                count="1"/>
                  </folder>
