@@ -13,15 +13,15 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_reportAssistent.xqm",
     "tt/_errorAssistent.xqm",
     "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+    "tt/_nameFilter.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
     "focusNodeValidator.xqm",
-    "greenfoxTarget.xqm",    
+    "greenfoxTarget.xqm",
+    "linkConstraint.xqm",    
     "mediatypeConstraint.xqm",
     "xsdValidator.xqm";
     
@@ -109,6 +109,7 @@ declare function f:validateFileInstance($filePath as xs:string,
                 typeswitch($child)
                 case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
                 case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
+                case $links as element(gx:links) return i:validateLinks($links, $doc, $filePath, $doc, $context)                
                 case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
                 case $focusNode as element(gx:focusNode) return i:validateFocusNode($focusNode, $doc, $filePath, $doc, $context)            
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
@@ -169,7 +170,10 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         let $required := 
             $mediatype = ('xml', 'xml-or-json')
             or
-            not($mediatype) and $components/(self::gx:xpath, @validatorXPath, gx:validatorXPath, descendant-or-self::gx:focusNode//(@xpath, gx:xpath))    
+            not($mediatype) and $components/(
+                self::gx:xpath, self::gx:links, 
+                @validatorXPath, gx:validatorXPath, 
+                descendant-or-self::gx:focusNode//(@xpath, gx:xpath, gx:links))    
             or
             $components/self::gx:foxpath/@*[ends-with(name(.), 'XPath')]
             or

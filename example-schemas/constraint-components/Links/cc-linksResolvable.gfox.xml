@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint component LinksResolvable. The constraint is 
+    violated if any links selected by a given expression cannot be resolved. The
+    optional @mediatype attribute further constrains the link target to have the
+    specified mediatype (xml, json, text). The optional attributes @minCount,
+    @maxCount, @count constraint the number of items returned by the expression
+    producing the links.    
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath=".\\*[//@href]" id="airportsFileShape">
+                <links xpath="//@href" mediatype="xml"
+                       minCount="1"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

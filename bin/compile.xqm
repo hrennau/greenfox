@@ -188,7 +188,7 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
                 typeswitch($elem[1])
                 case element(gx:file) | element(gx:folder) return
                     attribute resourceShapeID {$idValue}
-                case element(gx:xpath) | element(gx:foxpath) return
+                case element(gx:xpath) | element(gx:foxpath) | element(gx:links) return
                     attribute valueShapeID {$idValue}
                 default return ()
             return (
@@ -228,7 +228,8 @@ declare function f:compileGreenfox_addIds2RC($n as node()) {
                     self::gx:lastModified, 
                     self::gx:mediatype,
                     self::gx:folderContent,
-                    self::gx:xsdValid
+                    self::gx:xsdValid,
+                    self::gx:links
                )) then  
                 $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
             else ()                
