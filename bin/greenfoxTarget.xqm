@@ -42,16 +42,47 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
     let $targetPaths :=
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
+        let $linkTargets := $resourceShape/@linkXPath
         return
             if ($path) then 
                 concat($contextPath, '\', $resourceShape/@path)
                 [file:exists(.)]
                 [$isExpectedResourceKind(.)]
-            else 
+            else if ($foxpath) then
                 i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())
                 [$isExpectedResourceKind(.)]
+            else if ($linkTargets) then
+                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $context)
+                [$isExpectedResourceKind(.)]                
     return $targetPaths        
 };        
+
+(:~
+ : Evaluates the target paths when these are links
+ :
+ : @param xpath XPath expression producing the links values
+ : @param contextPath file path of the context item
+ : @param context evaluation context
+ : @return the target paths corresponding to the link targets
+ :)
+declare function f:getTargetPaths_linkTargets($xpath as xs:string, 
+                                              $contextPath as xs:string, 
+                                              $context as map(xs:string, item()*))
+        as xs:string* {
+    let $evaluationContext := $context?_evaluationContext
+    let $doc :=
+        if (not(doc-available($contextPath))) then () else doc($contextPath)
+    return
+        if (not($doc)) then () else
+        
+        let $exprValue := i:evaluateXPath($xpath, $doc, $evaluationContext, true(), true())
+        return
+            for $item in $exprValue
+            return
+                if ($item instance of node()) then resolve-uri($item, $item/ancestor-or-self::*[1]/base-uri(.))
+                else ()
+};
+
 
 (:~
  : Validates the target count of a resource shape or a focus node.
