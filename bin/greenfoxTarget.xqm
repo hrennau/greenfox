@@ -29,9 +29,11 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return the target paths :)
 declare function f:getTargetPaths($resourceShape as element(), $context as map(xs:string, item()*))
         as xs:string* {
-    let $isExpectedResourceKind :=
+    let $isExpectedResourceKind := if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+    (:
         let $isDir := $resourceShape/self::gx:folder
         return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
+:)        
     let $contextPath := $context?_contextPath  
     
     (: _TO_DO_ cleanup - adhoc addition of $filePath and $fileName :)
@@ -43,33 +45,58 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
         let $linkTargets := $resourceShape/@linkXPath
-        return
+        return (
             if ($path) then 
-                concat($contextPath, '\', $resourceShape/@path)
-                [file:exists(.)]
-                [$isExpectedResourceKind(.)]
+                f:getTargetPaths_path($path, $contextPath)
             else if ($foxpath) then
-                i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())
-                [$isExpectedResourceKind(.)]
+                f:getTargetPaths_foxpath($foxpath, $contextPath, $evaluationContext)
             else if ($linkTargets) then
-                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $context)
-                [$isExpectedResourceKind(.)]                
+                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $evaluationContext)
+        ) [$isExpectedResourceKind(.)]                 
     return $targetPaths        
 };        
 
 (:~
- : Evaluates the target paths when these are links
+ : Evaluates the target path given by a plain path expression.
+ :
+ : @param path plain path expression
+ : @param contextPath file path of the context item
+ : @return the target path
+ :)
+declare function f:getTargetPaths_path($path as xs:string, 
+                                       $contextPath as xs:string)
+        as xs:string* {
+    concat($contextPath, '\', $path)[file:exists(.)]        
+};
+
+(:~
+ : Evaluates the target paths which are the items of a foxpath
+ : expression value.
+ :
+ : @param foxpath foxpath expression producing the target paths
+ : @param contextPath file path of the context item
+ : @param evaluationContext XPath evaluation context
+ : @return the target paths corresponding to the link targets
+ :)
+declare function f:getTargetPaths_foxpath($foxpath as xs:string, 
+                                          $contextPath as xs:string,
+                                          $evaluationContext as map(xs:QName, item()*))
+        as xs:string* {
+    i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())        
+};
+
+(:~
+ : Evaluates the target paths which are link targets.
  :
  : @param xpath XPath expression producing the links values
  : @param contextPath file path of the context item
- : @param context evaluation context
+ : @param evaluationContext XPath evaluation context
  : @return the target paths corresponding to the link targets
  :)
 declare function f:getTargetPaths_linkTargets($xpath as xs:string, 
                                               $contextPath as xs:string, 
-                                              $context as map(xs:string, item()*))
+                                              $evaluationContext as map(xs:QName, item()*))
         as xs:string* {
-    let $evaluationContext := $context?_evaluationContext
     let $doc :=
         if (not(doc-available($contextPath))) then () else doc($contextPath)
     return
@@ -79,8 +106,10 @@ declare function f:getTargetPaths_linkTargets($xpath as xs:string,
         return
             for $item in $exprValue
             return
-                if ($item instance of node()) then resolve-uri($item, $item/ancestor-or-self::*[1]/base-uri(.))
-                else ()
+                if ($item instance of node()) then 
+                    resolve-uri($item, $item/ancestor-or-self::*[1]/base-uri(.))
+                else 
+                    string($item)
 };
 
 
