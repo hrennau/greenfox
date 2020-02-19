@@ -45,6 +45,7 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
         let $linkTargets := $resourceShape/@linkXPath
+        let $recursiveLinkTargets := $resourceShape/@recursiveLinkXPath
         return (
             if ($path) then 
                 f:getTargetPaths_path($path, $contextPath)
@@ -52,6 +53,9 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
                 f:getTargetPaths_foxpath($foxpath, $contextPath, $evaluationContext)
             else if ($linkTargets) then
                 f:getTargetPaths_linkTargets($linkTargets, $contextPath, $evaluationContext)
+            else if ($recursiveLinkTargets) then
+                f:getTargetPaths_recursiveLinkTargets($recursiveLinkTargets, $contextPath, $evaluationContext)
+            else error()
         ) [$isExpectedResourceKind(.)]                 
     return $targetPaths        
 };        
@@ -110,6 +114,44 @@ declare function f:getTargetPaths_linkTargets($xpath as xs:string,
                     resolve-uri($item, $item/ancestor-or-self::*[1]/base-uri(.))
                 else 
                     string($item)
+};
+
+(:~
+ : Evaluates the target paths which are recursive link targets. The path producing
+ : expression is recursively applied to the documents obtained by resolving the links.
+ :
+ : @param xpath XPath expression producing the links values
+ : @param contextPath file path of the context item
+ : @param evaluationContext XPath evaluation context
+ : @return the target paths corresponding to the link targets
+ :)
+declare function f:getTargetPaths_recursiveLinkTargets($xpath as xs:string, 
+                                                       $contextPath as xs:string, 
+                                                       $evaluationContext as map(xs:QName, item()*))
+        as xs:string* {
+    f:getTargetPaths_recursiveLinkTargetsRC($xpath, $contextPath, $evaluationContext, ())        
+};
+
+(:~
+ : Recursive helper function of `getTargetPaths_recursiveLinkTargets`.
+ :
+ : @param xpath XPath expression producing the links values
+ : @param contextPath file path of the context item
+ : @param evaluationContext XPath evaluation context
+ : @param sofar the paths already found
+ : @return the target paths corresponding to the link targets
+ :)
+declare function f:getTargetPaths_recursiveLinkTargetsRC($xpath as xs:string, 
+                                                         $contextPath as xs:string, 
+                                                         $evaluationContext as map(xs:QName, item()*),
+                                                         $sofar as xs:string*)
+        as xs:string* {
+    let $newPaths := f:getTargetPaths_linkTargets($xpath, $contextPath, $evaluationContext)[not(. = $sofar)]
+    let $newSofar := ($sofar, $newPaths)
+    let $newPathsR :=
+        $newPaths ! 
+        f:getTargetPaths_recursiveLinkTargetsRC($xpath, ., $evaluationContext, $newSofar) [not(. = $newSofar)]
+    return ($sofar, $newPaths, $newPathsR) => distinct-values() => sort()           
 };
 
 

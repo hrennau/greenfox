@@ -395,12 +395,12 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description foxpath path linkXPath mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description foxpath path linkXPath recursiveLinkXPath mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
-                <ex:xoneAtts attNames="foxpath path linkXPath"
-                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXPath"
+                <ex:xoneAtts attNames="foxpath path linkXPath recursiveLinkXPath"
+                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXPath, recursiveLinkXPath"
                     msgOK="OK - 'file' element: has foxpath or path or linkXPath"/>
 
                 <!-- element names -->

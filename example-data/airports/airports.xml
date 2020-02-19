@@ -4,6 +4,7 @@
         <code>JFK</code>
     </airport>
     <airport href="airport-cgn.xml"/>
+    <airport href="airport-man.xml"/>
     <airport>
         <code>MUN</code>
     </airport>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder path="OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
+            <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>            
+            <file foxpath=".\OTA_AirAvailRQ.xsd" id="airAvailFileShape">
+                <file recursiveLinkXPath="/xs:schema/xs:include/@schemaLocation" id="xsdFileShape">
+                    <targetSize minCount="70" minCountMsg="Not expected number of link targets"/>
+                    <xpath expr="/xs:schema/@targetNamespace"
+                           exists="true"
+                           existsMsg="Missing tns"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>

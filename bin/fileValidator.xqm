@@ -30,7 +30,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
     let $contextPath := $context?_contextPath
-    let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath)[1]
+    let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath, @recursiveLinkXPath)[1]
     let $targetPaths := f:getTargetPaths($gxFile, $context)
     
     (: check: targetSize :)
