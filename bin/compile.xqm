@@ -166,8 +166,20 @@ declare function f:externalContext($params as xs:string?, $domain as xs:string?)
                     "When using params with a 'domain' field, you must not ',
                      use the 'domain' parameter; aborted.'") 
             else
-                map:put($raw, 'domain', $domain)
-        else $raw        
+                let $useDomain := $domain ! file:path-to-native(.) ! replace(., '[/\\]$', '')
+                return
+                    map:put($raw, 'domain', $useDomain)
+        else 
+            let $domainFromContext := map:get($raw, 'domain')
+            return
+                if ($domainFromContext) then
+                    let $useDomain := 
+                        try {$domainFromContext ! file:path-to-native(.) ! replace(., '[/\\]$', '')}
+                        catch * {()}
+                    return
+                        map:put($raw, 'domain', ($useDomain, $domainFromContext)[1])
+                else
+                    $raw
 };
 
 declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {

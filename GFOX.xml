@@ -1,0 +1,96 @@
+<greenfox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s" xml:base="file:///C:/tt/greenfox/example-schemas/case-studies/system-s.gfox.xml">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="lastModified" value="2019-12-01"/>
+        <field name="domain"/>
+    </context>
+
+    <!-- *** System file tree *** -->
+    <domain id="domain_1" path="C:\tt\greenfox\example-data\system-s" name="system-s">
+
+        <!-- *** System root folder shape *** -->
+        <folder resourceShapeID="systemRootFolderShape" id="systemRootFolderShape" foxpath=".">
+            <!-- *** XSD folder shape *** -->
+            <folder resourceShapeID="xsdFolderShape" id="xsdFolderShape" foxpath=".\\resources\xsd">
+                <targetSize resourceShapeID="xsdFolderShape" id="targetSize_1" count="1" countMsg="No XSD folder found"/>
+                <file resourceShapeID="xsdFileShape" id="xsdFileShape" foxpath="*.xsd">
+                    <targetSize resourceShapeID="xsdFileShape" id="targetSize_2" minCount="1" minCountMsg="No XSDs found"/>
+                </file>
+            </folder>
+
+            <!-- *** Codelist folder shape *** -->
+            <folder resourceShapeID="codelistFolderShape" id="codelistFolderShape" foxpath=".\\resources\codelists">
+                <targetSize resourceShapeID="codelistFolderShape" id="targetSize_3" count="1" countMsg="No codelist folder found"/>
+
+                <!-- # Check - folder contains codelists? -->
+                <foxpath resourceShapeID="codelistFolderShape" valueShapeID="foxpath_1" id="foxpath_1" expr="*.xml//codelist[entry]/@name" minCount="1" minCountMsg="Codelist folder without codelists" itemsUnique="true" itemsUniqueMsg="Codelist names must be unique"/>
+                <file resourceShapeID="codelistFileShape" id="codelistFileShape" foxpath="*[is-xml(.)]">
+                    <targetSize resourceShapeID="codelistFileShape" id="targetSize_4" minCount="1" minCountMsg="No codelist files found"/>
+                </file>
+            </folder>
+
+            <!-- *** Testcase folder shape *** -->
+            <folder resourceShapeID="testcaseFolderShape" id="testcaseFolderShape" foxpath=".\\test-*[input][output][config]">
+                <targetSize resourceShapeID="testcaseFolderShape" id="targetSize_5" minCount="1" minCountMsg="No testcase folders found"/>
+                
+                <!-- # Check - test folder content ok? -->
+                <folderContent resourceShapeID="testcaseFolderShape" id="folderContent_1" closed="true" closedMsg="Testcase contains member other than input, output, config, log-*.">
+                    <memberFolders id="memberFolders_1" names="input, output, config"/>
+                    <memberFile id="memberFile_1" name="log-*" count="*"/>
+                </folderContent>
+
+                <!-- *** msg config shape *** -->
+                <file resourceShapeID="msgConfigFileShape" id="msgConfigFileShape" foxpath="config\msg-config.csv" mediatype="csv" csv.separator="," csv.withHeader="yes">
+                    <targetSize resourceShapeID="msgConfigFileShape" id="targetSize_6" count="1" countMsg="Config file missing"/>
+
+                    <!-- # Check - configured return codes expected? -->
+                    <xpath resourceShapeID="msgConfigFileShape" valueShapeID="xpath_1" id="xpath_1" expr="//returnCode" minCount="1" minCountMsg="The message config file must contain at least one return code" inMsg="Config file contains unknown return code">
+                        <in id="in_1">
+                            <eq id="eq_1">OK</eq>
+                            <eq id="eq_2">NOFIND</eq>
+                            <like id="like_1">ERROR_*</like>
+                        </in>
+                    </xpath>
+                    
+                    <focusNode id="focusNode_1" xpath="/*/*">
+                        <targetSize resourceShapeID="msgConfigFileShape" id="targetSize_7" minCount="1" minCountMsg="Message config file must contain at least one row"/>
+                        <xpath resourceShapeID="msgConfigFileShape" valueShapeID="xpath_2" id="xpath_2" expr="*" count="3" countMsg="Every row must have three columns"/>                        
+                    </focusNode>
+                </file>
+
+                <!-- *** Request file shape *** -->
+                <file resourceShapeID="requestFileShape" id="requestFileShape" foxpath="input\(*.xml, *.json)">
+                    <targetSize resourceShapeID="requestFileShape" id="targetSize_8" minCountMsg="Input folder without request msgs" minCount="1"/>
+
+                        <!-- # Check - request with response? -->
+                    <foxpath resourceShapeID="requestFileShape" valueShapeID="foxpath_2" id="foxpath_2" expr="..\..\output\*\file-name(.)" containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')" containsXPathMsg="Request without response"/>
+                </file>
+
+                <!-- *** Response file shape *** -->
+                <file resourceShapeID="responseFileShape" id="responseFileShape" foxpath="output\(*.xml, *.json)" mediatype="xml-or-json">
+                    <targetSize resourceShapeID="responseFileShape" id="targetSize_9" minCountMsg="Output folder without request msgs" minCount="1"/>
+
+                    <!-- # Check - response fresh? -->
+                    <lastModified resourceShapeID="responseFileShape" id="lastModified_1" geMsg="Stale output file" ge="2019-12-01"/>
+
+                    <!-- # Check - response non-empty? -->
+                    <fileSize resourceShapeID="responseFileShape" id="fileSize_1" gtMsg="Empty output file" gt="0"/>
+
+                    <!-- # Check - schema valid? (only if XML) -->
+                    <ifMediatype id="ifMediatype_1" eq="xml">
+                        <xsdValid resourceShapeID="responseFileShape" id="xsdValid_1" xsdFoxpath="$domain\resources\xsd\\*.xsd" msg="Response msg not XSD valid"/>                                  
+                    </ifMediatype>
+
+                    <!-- # Check - known article number? -->
+                    <xpath resourceShapeID="responseFileShape" valueShapeID="articleNumberValueShape" id="articleNumberValueShape" expr="//*:fooValue" inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code" inFoxpathMsg="Unknown foo article number"/>
+
+                    <!-- # Check - return code ok? -->
+                    <foxpath resourceShapeID="responseFileShape" valueShapeID="foxpath_3" id="foxpath_3" expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')                               //record[response eq $fileName]/returnCode" eqXPath="//*:returnCode" eqXPathMsg="Return code not the configured value"/>                                   
+
+                </file>
+
+            </folder>
+        </folder>
+    </domain>
+</greenfox>
