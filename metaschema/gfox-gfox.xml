@@ -545,7 +545,7 @@ return
                 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="id description label xpath mediatype
+                    attNames="id description label xpath mediatype recursive
                     count countMsg countMsgOK
                     minCount minCountMsg minCountMsgOK
                     maxCount maxCountMsg maxCountMsgOK

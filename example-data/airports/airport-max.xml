@@ -3,5 +3,5 @@
     <airport>
         <code>MAX</code>
     </airport>
-    <moreAirports href="airports.xml"/>
+    <moreAirports href="airports.xmlx"/>
 </airports>
