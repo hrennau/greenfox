@@ -418,7 +418,8 @@ return
 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="id description label expr msg quant flags useDatatype
+                    attNames="id description deactivated label 
+                    expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
                     exists existsMsg existsMsgOK
                     count countMsg countMsgOK                    
@@ -480,7 +481,8 @@ return
 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="id label expr msg quant flags useDatatype
+                    attNames="id description deactivated label 
+                    expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
                     exists existsMsg existsMsgOK
                     count countMsg countMsgOK

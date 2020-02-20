@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-02-13T18:25:58.784+01:00 
+ : @version 2020-02-20T09:12:05.139+01:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -83,8 +83,8 @@ declare variable $toolScheme :=
       <param name="domain" type="xs:string?" pgroup="input"/>
       <param name="folder" type="xs:string?" pgroup="input"/>
       <param name="folder2" type="xs:string?"/>
-      <param name="file" type="xs:string?" pgroup="input"/>
-      <param name="file2" type="xs:string?" pgroup="input"/>
+      <param name="file" type="xs:string*" sep="SC" pgroup="input"/>
+      <param name="file2" type="xs:string*" sep="SC" pgroup="input"/>
       <param name="empty" type="xs:string*" fct_values="folder, folder2, file, file2"/>
       <param name="mfolder" type="xs:string?"/>
       <param name="mfolder2" type="xs:string?"/>
