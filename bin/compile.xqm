@@ -12,41 +12,49 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_reportAssistent.xqm",
     "tt/_errorAssistent.xqm",
     "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+    "tt/_nameFilter.xqm";    
+    
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "constants.xqm",
+    "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Compiles a greenfox schema and returns an augmented copy of the descriptor, plus
+ : Compiles a greenfox schema and returns an augmented copy of the schema, plus
  : a context map. The context map consists of the context map contained by the
  : schema, extended/overwritten by the name-value pairs supplied as
- : external context. In the augmented descriptor, components with a component
+ : external context. In the augmented schema, components with a component
  : reference are replaced with the referenced component, augmented with the
  : attributes and content elements of the referencing component.
  :
  : @param gfox a greenfox schema
- : @param externalContext a set of external variables
+ : @param externalContext a set of externally provided name-value pairs
+ : @return the augmented schema
  :)
-declare function f:compileGreenfox($gxdoc as element(gx:greenfox), 
+declare function f:compileGreenfox($gfox as element(gx:greenfox), 
                                    $externalContext as map(xs:string, item()*)) 
         as item()+ {
+        
+    (: merge context contents with externally supplied name-value pairs :)
     let $context := map:merge(
-        for $field in $gxdoc/gx:context/gx:field
+        for $field in $gfox/gx:context/gx:field
         let $name := $field/@name/string()
         let $value := ($externalContext($name), $field/@value)[1]
         return
             map:entry($name, $value) 
     )
-    let $gxdoc2 := f:compileGreenfoxRC($gxdoc, $context)
-    let $gxdoc3 := f:compileGreenfox_addIds($gxdoc2)
-    let $gxdoc4 := f:compileGreenfox_addIds2($gxdoc3)
+    let $gfox2 := f:compileGreenfoxRC($gfox, $context)
+    let $gfox3 := f:compileGreenfox_addIds($gfox2)
+    let $gfox4 := f:compileGreenfox_addIds2($gfox3)
     return
-        ($gxdoc4, $context)
+        ($gfox4, $context)
 };
 
 (:~
- : Recursive helper function of `f:compileGreenfox`.
+ : Recursive helper function of `f:compileGreenfox`. Changes:
+ : (a) add @xml:base to the root element
+ : (b) text nodes and attributes: variable substitution
  :
  : @param n a node of the greenfox schema currently processed.
  : @param context a set of external variables
@@ -56,21 +64,24 @@ declare function f:compileGreenfoxRC($n as node(), $context as map(xs:string, it
     typeswitch($n)
     case document-node() return document {$n/node() ! f:compileGreenfoxRC(., $context)}
     
+    (: Copies the root element, adds an @xml:base if not yet present :)
     case element(gx:greenfox) return
         element {node-name($n)} {
-            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
+            i:copyNamespaceNodes($n),
             $n/@* ! f:compileGreenfoxRC(., $context),
             if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
             $n/node() ! f:compileGreenfoxRC(., $context) 
         }
+        
+    (: Copies the element :)
     case element() return
         element {node-name($n)} {
-            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
+            i:copyNamespaceNodes($n),
             $n/@* ! f:compileGreenfoxRC(., $context),
             $n/node() ! f:compileGreenfoxRC(., $context)            
         }
         
-    (: text - variable substitution :)
+    (: text node - variable substitution :)
     case text() return text {f:substituteVars($n, $context, ())}
     
     (: attribute - variable substitution :)
@@ -80,11 +91,11 @@ declare function f:compileGreenfoxRC($n as node(), $context as map(xs:string, it
 };
 
 (:~
- : Inspects a component and returns another component which it references, or the original 
- : component if it does not reference another component. A reference is expressed by an 
- : @ref attribute. The referenced component is the checklib element with an @id attribute 
- : matching the value of @ref and with a local name matching the local name of the 
- : referencing component.
+ : Inspects a component and returns another component which it references, 
+ : or the original component if it does not reference another component. 
+ : A reference is expressed by an @ref attribute. The referenced component 
+ : is the checklib element with an @id attribute matching the value of @ref 
+ : and with a local name matching the local name of the referencing component.
  :
  : @param gxComponent a component possibly referencing another component
  : @return the original component, if it does not have a reference, or the
@@ -94,7 +105,7 @@ declare function f:compileGreenfox_resolveReference($gxComponent as element()) a
     if (not($gxComponent/@ref)) then $gxComponent else
     
     let $gxname := local-name($gxComponent)
-    let $target := $gxComponent/root()//gx:checklib/*[$gxname eq local-name(.)][@id eq $gxComponent/@ref]
+    let $target := $gxComponent/root()//gx:checklib/*[local-name(.) eq $gxname][@id eq $gxComponent/@ref]
     return
         $target
 };
@@ -124,14 +135,17 @@ declare function f:substituteVars($s as xs:string?,
  :
  : @param s a string
  : @param context a context which is a map associating key strings with value strings
- : @param callContext a second context
+ : @param prefixChar character signalling a variable reference 
  : @return a copy of the string with all variable references replaced with variable values
  :) 
-declare function f:substituteVarsAux($s as xs:string?, $context as map(xs:string, item()*), $prefixChar as xs:string) as xs:string? {
+declare function f:substituteVarsAux($s as xs:string?, 
+                                     $context as map(xs:string, item()*), 
+                                     $prefixChar as xs:string) as xs:string? {
     let $sep := codepoints-to-string(30000)
-    let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), concat('$1', $sep, '$2', $sep, '$3'))
+    let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), 
+                              concat('$1', $sep, '$2', $sep, '$3'))
     return
-        if ($parts eq $s) then $s
+        if ($parts eq $s) then $s   (: no matches :)
         else
             let $partStrings := tokenize($parts, $sep)
             let $prefix := $partStrings[1]
@@ -140,46 +154,48 @@ declare function f:substituteVarsAux($s as xs:string?, $context as map(xs:string
             let $varName := $varRef ! substring(., 3) ! substring(., 1, string-length(.) - 1)
             let $varValue := $context($varName)            
             return
-                concat($prefix, ($varValue, $varRef)[1], $postfix ! f:substituteVarsAux(., $context, $prefixChar))                
+                concat($prefix, ($varValue, $varRef)[1], 
+                       $postfix ! f:substituteVarsAux(., $context, $prefixChar))                
 };
 
 (:~
  : Maps the value of a string to a set of name-value pairs.
+ : If $domain is supplied, the name-value pair 'domain'-$domain
+ : is added.
  :
  : @param params a string containing concatenated name-value pairs
  : @param domain the domain folder
  : @return a map expressing the pairs a key-value pairs
  :)
-declare function f:externalContext($params as xs:string?, $domain as xs:string?) as map(xs:string, item()*) {
-    let $nvpairs := tokenize($params, '\s*;\s*')
-    let $raw :=
+declare function f:externalContext($params as xs:string?, 
+                                   $domain as xs:string?) 
+        as map(xs:string, item()*) {
+    let $nvpairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
+    let $prelim :=
         map:merge(
             $nvpairs ! 
             map:entry(replace(., '\s*=.*', ''), 
-                      replace(., '^.*?=\s*', '')
-            )
+                      replace(., '^.*?=\s*', ''))
         )
     return
         if ($domain) then
-            if (map:contains($raw, 'domain')) then
+            if (map:contains($prelim, 'domain')) then
                 error(QName((), 'INVALID_ARG'),
                     "When using params with a 'domain' field, you must not ',
                      use the 'domain' parameter; aborted.'") 
             else
-                let $useDomain := $domain ! file:path-to-native(.) ! replace(., '[/\\]$', '')
+                let $domainNormalized := f:normalizeFilepath($domain) 
                 return
-                    map:put($raw, 'domain', $useDomain)
+                    map:put($prelim, 'domain', $domainNormalized)
         else 
-            let $domainFromContext := map:get($raw, 'domain')
+            let $domainFromContext := map:get($prelim, 'domain')
             return
                 if ($domainFromContext) then
-                    let $useDomain := 
-                        try {$domainFromContext ! file:path-to-native(.) ! replace(., '[/\\]$', '')}
-                        catch * {()}
+                    let $domainNormalized := f:normalizeFilepath($domainFromContext)
                     return
-                        map:put($raw, 'domain', ($useDomain, $domainFromContext)[1])
+                        map:put($prelim, 'domain', ($domainNormalized, $domainFromContext)[1])
                 else
-                    $raw
+                    $prelim
 };
 
 declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {

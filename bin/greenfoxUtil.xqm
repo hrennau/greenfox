@@ -299,38 +299,33 @@ declare function f:addDefaultNamespaceRC($n as node(), $uri as xs:string, $optio
     default return $n            
 };
 
-(:
 (:~
- : Returns the target paths of a resource shape.
+ : Returns a copy of the namespace nodes found in an
+ : element. Typically used when copying an element,
+ : making sure that the copy has the same namespace
+ : nodes as the source.
  :
- : The target is identified either by a path (@path)
- : or by a foxpath expression (@foxpath). The path is
- : appended to the context path. The foxpath is
- : evaluated.
- :
- : @param resourceShape a file or folder shape
- : @param context a map of variable bindings
- : @return the target paths :)
-declare function f:getTargetPaths($resourceShape as element(), $context as map(xs:string, item()*))
-        as xs:string* {
-    let $isExpectedResourceKind :=
-        let $isDir := $resourceShape/self::gx:folder
-        return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
-    let $contextPath := $context?_contextPath     
-    let $evaluationContext := $context?_evaluationContext
-    let $targetPaths :=
-        let $path := $resourceShape/@path
-        let $foxpath := $resourceShape/@foxpath
-        return
-            if ($path) then 
-                concat($contextPath, '\', $resourceShape/@path)
-                [file:exists(.)]
-                [$isExpectedResourceKind(.)]
-            else 
-                i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())
-                [$isExpectedResourceKind(.)]
-    return $targetPaths        
+ : @param elem an element node
+ : @return copy of the namespace nodes
+ :)
+declare function f:copyNamespaceNodes($elem as element())
+        as namespace-node()* {
+    in-scope-prefixes($elem)[string()] ! namespace {.} {namespace-uri-for-prefix(., $elem)}        
 };        
-:)
 
-
+(:~
+ : Normalizes a given file path. If the file path does not
+ : exist, the empty sequence is returned.
+ :
+ : Normalization means (a) resolving a relative path to an
+ : absolute path, replacing slashes with backward slashes.
+ :
+ : @path a file path
+ : @return normalized file path, or the empty sequence if the file path does not exist
+ :)
+declare function f:normalizeFilepath($path as xs:string)
+        as xs:string? {
+    try {
+        $path ! file:path-to-native(.) ! replace(., '[/\\]$', '')
+    } catch * {()}
+};        
