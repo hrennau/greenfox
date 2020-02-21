@@ -48,54 +48,74 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :) 
 declare function f:validateOp($request as element())
         as element() {
-    let $domain := tt:getParams($request, 'domain')
-    return
-        if ($domain and not(file:exists($domain))) then
-            error(QName((), 'DOMAIN_NOT_FOUND'),
-                concat("Domain folder not found: '", $domain, "'; aborted.'"))
-        else
         
-    let $gfoxSource := tt:getParams($request, 'gfox')/* 
-    return
-        if (not($gfoxSource/self::element(gx:greenfox))) then
-            f:raiseError_notGreenfoxSchema($gfoxSource) else
+    (: Preliminary checks :)        
+    let $domain := tt:getParams($request, 'domain')
+    let $gfoxSource := tt:getParams($request, 'gfox')/*    
+    let $_CHECK := f:check_domainExists($domain)
+    let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)    
+    
+    (: Collect parameters :)
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
     let $params := tt:getParams($request, 'params')
     let $reportType := tt:getParams($request, 'reportType')
     let $reportFormat := tt:getParams($request, 'format')
     let $reportOptions := map{}
-    
+
+    (: Compile greenfox schema :)
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params, $domain))
     let $gfox := $gfoxAndContext[. instance of element()]
-    let $_LOG := f:logFile($gfox, 'GFOX.xml')
     let $context := $gfoxAndContext[. instance of map(*)]
+    let $_LOG := f:logFile($gfox, 'GFOX.xml')
+    
+    (: Validate greenfox schema :)
     let $gfoxErrors := f:validateGreenfox($gfox)
     return if ($gfoxErrors) then $gfoxErrors else
 
+    (: Validate greenfox schema against meta schema :)
     let $invalidSchemaReport := i:metaValidateSchema($gfoxSource)
     return if ($invalidSchemaReport) then $invalidSchemaReport else
     
+    (: Validate system :)
     let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
     return $report
 };        
 
 (:~
- : Raises an error in response to a schema which does not have
- : the expected root element name.
+ : Checks if the domain folder exists, raises an error otherwise.
+ :
+ : @param domain the domain folder
+ : @return throws an error with diagnostic message
+ :)
+declare function f:check_domainExists($domain as xs:string?)
+        as empty-sequence() {
+    if (not($domain) or file:exists($domain)) then () else    
+
+    let $errorCode := 'DOMAIN_NOT_FOUND'
+    let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
+    return error(QName((), $errorCode), $msg)
+};
+
+(:~
+ : Checks if the greenfox schema has the expected root element, raises
+ : an error otherwise.
  :
  : @param elem root element of what should be a greenfox schema
  : @return throws an error with diagnostic message
  :)
-declare function f:raiseError_notGreenfoxSchema($elem as element())
+declare function f:check_greenfoxSchemaRoot($gfox as element())
         as empty-sequence() {
-    let $namespace := $elem/namespace-uri(.)
-    let $lname := $elem/local-name(.)
+    if ($gfox/self::element(gx:greenfox)) then () else
+        
+    let $namespace := $gfox/namespace-uri(.)
+    let $lname := $gfox/local-name(.)
     let $msgParts := (
         if ($lname ne 'greenfox') then
             'the local name must be "greenfox", but is: "' || $lname || '";' else (),
         if ($namespace ne $i:URI_GX) then
             concat('the namespace URI must be "', $i:URI_GX, '", but is: "' || $namespace || '";') else ()
     )
+    let $errorCode := 'INVALID_ARG'
     let $msg := string-join(('Not a greenfox schema;', $msgParts, 'aborted.'), ' ')                    
-    return error(QName('', 'INVALID_ARG'), $msg)        
+    return error(QName('', $errorCode), $msg)        
 };        

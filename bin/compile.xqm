@@ -312,7 +312,7 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
 
 (: ============================================================================
  :
- :     f u n c t i o n s    t e m p o r a r i l y    n o t    u s e d
+ :     f u n c t i o n s    c u r r e n t l y    n o t    u s e d
  :
  : ============================================================================ :)
 
