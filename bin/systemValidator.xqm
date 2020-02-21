@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : domainValidator.xqm - Document me!
+ : systemValidator.xqm - functions validating a file system tree against a greenfox schema
  :
  : -------------------------------------------------------------------------
  :)
@@ -24,12 +24,12 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Validates a file system tree against a greenfox schema.
  :
- : @param gx a compiled greenfox schema
+ : @param gfox a compiled greenfox schema
  : @param context a set of name-value pairs providing an environment for validation
  : @param reportType type of validation report
  : @param format format of validation report
  : @param options options contolling validation and the writing of the validation report
- : @return validation errors, if any
+ : @return validation report
  :)
 declare function f:validateSystem($gfox as element(gx:greenfox), 
                                   $context as map(xs:string, item()*),
@@ -38,28 +38,36 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
                                   $options as map(*))
         as element() {
     let $domains := $gfox/gx:domain
+    
+    (: Initial check - only one domain allowed :)
     return if (count($domains) gt 1) then error(QName((), 'NOT_YET_IMPLEMENTED'), 
-        concat('Currently a schema must not contain more than one domain; #domains found: ', count($domains)))
+        concat('Currently a schema must not contain more than one domain; ',
+               '#domains found: ', count($domains)))
     else
     
-    for $domain in $gfox/gx:domain    
-    let $perceptions := f:validateDomain($domain, $context)
-    let $report := i:writeValidationReport($gfox, $domain, $context, $perceptions, $reportType, $reportFormat, $options)
+    for $domain in $domains
+    
+    (: Collect validation results :)
+    let $results := f:validateDomain($domain, $context)
+    
+    (: Construct validation report :)
+    let $report := i:writeValidationReport($gfox, $domain, $context, $results, 
+                                           $reportType, $reportFormat, $options)
     return
         $report
 };
 
 (:~
- : Validates a domain. The validation context is reinitialized by setting _contextPath
- : to a base URI and _domainName to a domain name.
+ : Validates a domain. Initializes the evaluation context (providing expression 
+ : variables) and reinitializes the processing context (accessible to processing 
+ : code). 
  :
- : Feature at risk: currently, the top-level descriptors are expected to be
- : folder descriptors - this may change, allowing any descriptors to be
- : top-level.
+ : Evaluation context: domain, domainName.
+ : Processing context: _contextPath, _domain, _domainName, _evaluationContext. 
  :
- : @param gxDomain quality descriptor of a domain
+ : @param gxDomain domain element
  : @param context a map representing an initial set of name-value pairs available during validation
- : @return validation errors, if any
+ : @return validation results
  :)
 declare function f:validateDomain($gxDomain as element(gx:domain), 
                                   $context as map(xs:string, item()*))
@@ -67,25 +75,34 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
     let $baseURI := $gxDomain/@path/string()
     let $name := $gxDomain/@name/string()
     
+    (: Evaluation context, containing entries available as 
+       external variables to XPath and foxpath expressions;
+       initial entries: domain, domainName:)
     let $evaluationContext :=
         map:merge((
             map:entry(QName((), 'domain'), $baseURI),
             map:entry(QName((), 'domainName'), $name)
         ))
+        
+    (: Processing context, containing entries available to
+       the processing code; initial entries:
+       _contextPath, _domain, _domainName, _evaluationContext :)
     let $context := 
         map:merge((
             $context,
             map:entry('_contextPath', $baseURI),
-            map:entry('_domainName', $name),
-            map:entry('_domainPath', $baseURI),
+            map:entry('_domain', $baseURI),
+            map:entry('_domainName', $name),            
             map:entry('_evaluationContext', $evaluationContext)
-        ))            
-    let $perceptions :=
-        for $component in $gxDomain/(* except gx:context)
+        ))   
+        
+    let $results :=
+        for $component in $gxDomain/*
         return
             typeswitch($component)
             case element(gx:folder) return f:validateFolder($component, $context)
             case element(gx:file) return f:validateFile($component, $context)
+            case element(gx:context) return ()
             case element(gx:constraintComponents) return ()
             default return error(QName($i:URI_GX, 'UNEXPEDTED_SCHEMA_CONTENTS'), 
                 concat('Unexpected folder contents; component name: ', $component/name(.),
@@ -93,6 +110,6 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
                 'against the greenfox metaschema; ',
                 'the creation of a github issue would be much appreciated.'))
     return
-        $perceptions
+        $results
 };
 

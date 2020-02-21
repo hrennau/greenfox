@@ -247,7 +247,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                 if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
                 if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
                 if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
-                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domainPath),
+                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain),
                 (: _TO_DO_ Support datatypes (xs:integer, ...) :)
                 $params ! map:entry(QName('', @name), string(.))                
             ))    
