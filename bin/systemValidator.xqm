@@ -63,7 +63,7 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
  : code). 
  :
  : Evaluation context: domain, domainName.
- : Processing context: _contextPath, _domain, _domainName, _evaluationContext. 
+ : Processing context: _domain, _domainName, _contextPath, _evaluationContext. 
  :
  : @param gxDomain domain element
  : @param context a map representing an initial set of name-value pairs available during validation
@@ -86,13 +86,13 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
         
     (: Processing context, containing entries available to
        the processing code; initial entries:
-       _contextPath, _domain, _domainName, _evaluationContext :)
+       _domain, _domainName, _contextPath,  _evaluationContext :)
     let $context := 
         map:merge((
             $context,
-            map:entry('_contextPath', $baseURI),
             map:entry('_domain', $baseURI),
-            map:entry('_domainName', $name),            
+            map:entry('_domainName', $name),
+            map:entry('_contextPath', $baseURI),            
             map:entry('_evaluationContext', $evaluationContext)
         ))   
         
