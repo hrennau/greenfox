@@ -1,8 +1,12 @@
 (:
  : -------------------------------------------------------------------------
  :
- : compile.xqm - Document me!
+ : compile.xqm - functions compiling a greenfox schema, producing an augmented copy.
  :
+ : Changes:
+ : - variable substitution (using the `context` element)
+ : - add @xml:base to the root element
+ : - add id attributes: @id, @valueShapeID, @resourceShapeID :
  : -------------------------------------------------------------------------
  :)
  
@@ -20,6 +24,12 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(: ============================================================================
+ :
+ :     f u n c t i o n    c o m p i l i n g    t h e    s c h e m a
+ :
+ : ============================================================================ :)
+
 (:~
  : Compiles a greenfox schema and returns an augmented copy of the schema, plus
  : a context map. The context map consists of the context map contained by the
@@ -36,7 +46,7 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
                                    $externalContext as map(xs:string, item()*)) 
         as item()+ {
         
-    (: merge context contents with externally supplied name-value pairs :)
+    (: Merge context contents with externally supplied name-value pairs :)
     let $context := map:merge(
         for $field in $gfox/gx:context/gx:field
         let $name := $field/@name/string()
@@ -44,41 +54,94 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
         return
             map:entry($name, $value) 
     )
-    let $gfox2 := f:compileGreenfoxRC($gfox, $context)
+    (: Perform variable substitution :)
+    let $gfox2 := f:substituteVariablesRC($gfox, $context)
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
-    let $gfox4 := f:compileGreenfox_addIds2($gfox3)
+    let $gfox4 := f:compileGreenfox_addResourceShapeIds($gfox3)
     return
         ($gfox4, $context)
 };
 
+(: ============================================================================
+ :
+ :     f u n c t i o n    c r e a t i n g    e x t e r n a l    c o n t e x t
+ :
+ : ============================================================================ :)
+
 (:~
- : Recursive helper function of `f:compileGreenfox`. Changes:
- : (a) add @xml:base to the root element
+ : Maps the value of a string to a set of name-value pairs.
+ : If $domain is supplied, the name-value pair 'domain'-$domain
+ : is added.
+ :
+ : @param params a string containing concatenated name-value pairs
+ : @param domain the domain folder
+ : @return a map expressing the pairs a key-value pairs
+ :)
+declare function f:externalContext($params as xs:string?, 
+                                   $domain as xs:string?) 
+        as map(xs:string, item()*) {
+    let $nvpairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
+    let $prelim :=
+        map:merge(
+            $nvpairs ! 
+            map:entry(replace(., '\s*=.*', ''), 
+                      replace(., '^.*?=\s*', ''))
+        )
+    return
+        if ($domain) then
+            if (map:contains($prelim, 'domain')) then
+                error(QName((), 'INVALID_ARG'),
+                    "When using params with a 'domain' field, you must not ',
+                     use the 'domain' parameter; aborted.'") 
+            else
+                let $domainNormalized := f:normalizeFilepath($domain) 
+                return
+                    map:put($prelim, 'domain', $domainNormalized)
+        else 
+            let $domainFromContext := map:get($prelim, 'domain')
+            return
+                if ($domainFromContext) then
+                    let $domainNormalized := f:normalizeFilepath($domainFromContext)
+                    return
+                        map:put($prelim, 'domain', ($domainNormalized, $domainFromContext)[1])
+                else
+                    $prelim
+};
+
+(: ============================================================================
+ :
+ :     f u n c t i o n s    s u b s t i t u t i n g    v a r i a b l e    r e f e r e n c e s
+ :
+ : ============================================================================ :)
+ 
+ (:~
+ : Returns an augmented copy of a greenfox schema. Changes:
+ : (a) @xml:base added to the root element
  : (b) text nodes and attributes: variable substitution
  :
  : @param n a node of the greenfox schema currently processed.
  : @param context a set of external variables
  : @return the processing result
  :)
-declare function f:compileGreenfoxRC($n as node(), $context as map(xs:string, item()*)) as node() {
+declare function f:substituteVariablesRC($n as node(), $context as map(xs:string, item()*)) as node() {
     typeswitch($n)
-    case document-node() return document {$n/node() ! f:compileGreenfoxRC(., $context)}
+    case document-node() return document {$n/node() ! f:substituteVariablesRC(., $context)}
     
     (: Copies the root element, adds an @xml:base if not yet present :)
     case element(gx:greenfox) return
         element {node-name($n)} {
             i:copyNamespaceNodes($n),
-            $n/@* ! f:compileGreenfoxRC(., $context),
+            $n/@* ! f:substituteVariablesRC(., $context),
             if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
-            $n/node() ! f:compileGreenfoxRC(., $context) 
+            $n/node() ! f:substituteVariablesRC(., $context) 
         }
         
     (: Copies the element :)
     case element() return
         element {node-name($n)} {
             i:copyNamespaceNodes($n),
-            $n/@* ! f:compileGreenfoxRC(., $context),
-            $n/node() ! f:compileGreenfoxRC(., $context)            
+            $n/@* ! f:substituteVariablesRC(., $context),
+            $n/node() ! f:substituteVariablesRC(., $context)            
         }
         
     (: text node - variable substitution :)
@@ -88,26 +151,6 @@ declare function f:compileGreenfoxRC($n as node(), $context as map(xs:string, it
     case attribute() return attribute {node-name($n)} {f:substituteVars($n, $context, ())}
     
     default return $n        
-};
-
-(:~
- : Inspects a component and returns another component which it references, 
- : or the original component if it does not reference another component. 
- : A reference is expressed by an @ref attribute. The referenced component 
- : is the checklib element with an @id attribute matching the value of @ref 
- : and with a local name matching the local name of the referencing component.
- :
- : @param gxComponent a component possibly referencing another component
- : @return the original component, if it does not have a reference, or the
- :   referenced component
- :)
-declare function f:compileGreenfox_resolveReference($gxComponent as element()) as element() {
-    if (not($gxComponent/@ref)) then $gxComponent else
-    
-    let $gxname := local-name($gxComponent)
-    let $target := $gxComponent/root()//gx:checklib/*[local-name(.) eq $gxname][@id eq $gxComponent/@ref]
-    return
-        $target
 };
 
 (:~
@@ -158,46 +201,28 @@ declare function f:substituteVarsAux($s as xs:string?,
                        $postfix ! f:substituteVarsAux(., $context, $prefixChar))                
 };
 
-(:~
- : Maps the value of a string to a set of name-value pairs.
- : If $domain is supplied, the name-value pair 'domain'-$domain
- : is added.
- :
- : @param params a string containing concatenated name-value pairs
- : @param domain the domain folder
- : @return a map expressing the pairs a key-value pairs
- :)
-declare function f:externalContext($params as xs:string?, 
-                                   $domain as xs:string?) 
-        as map(xs:string, item()*) {
-    let $nvpairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
-    let $prelim :=
-        map:merge(
-            $nvpairs ! 
-            map:entry(replace(., '\s*=.*', ''), 
-                      replace(., '^.*?=\s*', ''))
-        )
-    return
-        if ($domain) then
-            if (map:contains($prelim, 'domain')) then
-                error(QName((), 'INVALID_ARG'),
-                    "When using params with a 'domain' field, you must not ',
-                     use the 'domain' parameter; aborted.'") 
-            else
-                let $domainNormalized := f:normalizeFilepath($domain) 
-                return
-                    map:put($prelim, 'domain', $domainNormalized)
-        else 
-            let $domainFromContext := map:get($prelim, 'domain')
-            return
-                if ($domainFromContext) then
-                    let $domainNormalized := f:normalizeFilepath($domainFromContext)
-                    return
-                        map:put($prelim, 'domain', ($domainNormalized, $domainFromContext)[1])
-                else
-                    $prelim
-};
 
+(: ============================================================================
+ :
+ :     f u n c t i o n s    a d d i n g    I D    a t t r i b u t e s
+ :
+ : ============================================================================ :)
+
+(:~
+ : Adds @id and further attributes to selected elements. Added attributes:
+ : @id, @resourceShapeID, @valueShapeID.
+ :
+ : Special rules:
+ : - @resourceShapeID is added to `file` and `folder` elements only
+ : - @valueShapeID is added to `xpath`, `foxpath` and `links` elements only
+ : - on `mediatype`elements, the ID attribute is called `constraintID`, 
+ :   rather than `id`.
+ :
+ : Selected elements: all elements except for `context` and its descendants.
+ :
+ : @param gfox a greenfox schema
+ : @return an augmented copy, containing the added attributes
+ :)
 declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
     copy $gfox_ := $gfox
     modify
@@ -206,12 +231,16 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
         group by $localName := local-name($elem)
         return
             for $e at $pos in $elem
+            
+            (: Add @id attribute :)
             let $idAtt := $e/@id
             let $idValue := ($idAtt, concat($localName, '_', $pos))[1]
             let $idName :=
                 switch($localName)
                 case 'mediatype' return 'constraintID'
                 default return 'id'
+                
+            (: Add further attributes, if applicable (@resourceShapeID, @valueShapeID) :)
             let $furtherAtts:=
                 typeswitch($elem[1])
                 case element(gx:file) | element(gx:folder) return
@@ -219,55 +248,94 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
                 case element(gx:xpath) | element(gx:foxpath) | element(gx:links) return
                     attribute valueShapeID {$idValue}
                 default return ()
-            return (
+            return
+            (: Delete existing @id, add @id and further attributes :)
+            (
                 $idAtt/(delete node .),
                 insert node ($furtherAtts, attribute {$idName} {$idValue}) as first into $e                
             )                
     return $gfox_                
 };
 
-declare function f:compileGreenfox_addIds2($gfox as element(gx:greenfox)) {
-    f:compileGreenfox_addIds2RC($gfox)
+declare function f:compileGreenfox_addResourceShapeIds($gfox as element(gx:greenfox)) {
+    f:compileGreenfox_addResourceShapeIdsRC($gfox)
 };
 
-declare function f:compileGreenfox_addIds2RC($n as node()) {
+declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
     typeswitch($n)
+    
+    (: `file` and `folder` are just copied :)
     case element(gx:file) | element(gx:folder) return
         element {node-name($n)} {
-            in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
-            $n/@* ! f:compileGreenfox_addIds2RC(.),
-            $n/node() ! f:compileGreenfox_addIds2RC(.)
+            i:copyNamespaceNodes($n),
+            $n/@* ! f:compileGreenfox_addResourceShapeIdsRC(.),
+            $n/node() ! f:compileGreenfox_addResourceShapeIdsRC(.)
         }
+     
+    (: Special treatment of `TargetSize` obsolete
+    
+    (: TargetSize - add @resourceShapeID :)        
     case element(gx:targetSize) return
-        (: let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][2]/@resourceShapeID :)
         let $resourceShapeID := $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
         return
             element {node-name($n)} {
-                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
+                i:copyNamespaceNodes($n),
                 $resourceShapeID,
-                $n/@* ! f:compileGreenfox_addIds2RC(.),
-                $n/node() ! f:compileGreenfox_addIds2RC(.)
+                $n/@* ! f:compileGreenfox_addResourceShapeIdsRC(.),
+                $n/node() ! f:compileGreenfox_addResourceShapeIdsRC(.)
             }
+    :)
+    
+    (: Divers elements - add @resourceShapeID :)
     case element() return
         let $resourceShapeID :=
             if ($n/(self::gx:xpath,
                     self::gx:foxpath,
+                    self::gx:links,   
+                    self::gx:targetSize,
                     self::gx:fileSize, 
                     self::gx:lastModified, 
                     self::gx:mediatype,
                     self::gx:folderContent,
-                    self::gx:xsdValid,
-                    self::gx:links
-               )) then  
+                    self::gx:xsdValid)) then  
                 $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
             else ()                
         return
             element {node-name($n)} {
-                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
+                i:copyNamespaceNodes($n),
                 $resourceShapeID,
-                $n/@* ! f:compileGreenfox_addIds2RC(.),
-                $n/node() ! f:compileGreenfox_addIds2RC(.)
+                $n/@* ! f:compileGreenfox_addResourceShapeIdsRC(.),
+                $n/node() ! f:compileGreenfox_addResourceShapeIdsRC(.)
             }
     default return $n        
 };
+
+(: ============================================================================
+ :
+ :     f u n c t i o n s    t e m p o r a r i l y    n o t    u s e d
+ :
+ : ============================================================================ :)
+
+(:~
+ : Inspects a component and returns another component which it references, 
+ : or the original component if it does not reference another component. 
+ : A reference is expressed by an @ref attribute. The referenced component 
+ : is the checklib element with an @id attribute matching the value of @ref 
+ : and with a local name matching the local name of the referencing component.
+ :
+ : NOTE: This function is currently not used.
+ :
+ : @param gxComponent a component possibly referencing another component
+ : @return the original component, if it does not have a reference, or the
+ :   referenced component
+ :)
+declare function f:compileGreenfox_resolveReference($gxComponent as element()) as element() {
+    if (not($gxComponent/@ref)) then $gxComponent else
+    
+    let $gxname := local-name($gxComponent)
+    let $target := $gxComponent/root()//gx:checklib/*[local-name(.) eq $gxname][@id eq $gxComponent/@ref]
+    return
+        $target
+};
+
 
