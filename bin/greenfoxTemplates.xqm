@@ -71,7 +71,7 @@ declare function f:instantiateGreenfoxTemplate($template as map(*))
     (: Read parameters :)   
     let $folderPath := $template?folder
     let $folder2Path := $template?folder2
-    let $filePath := trace($template?file , 'FILE_PATH: ')
+    let $filePath := $template?file
     let $file2Path := $template?file2
     let $empty := $template?empty
     let $mfolder := $template?mfolder        

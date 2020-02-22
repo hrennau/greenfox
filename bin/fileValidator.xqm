@@ -33,14 +33,11 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath, @recursiveLinkXPath)[1]
     let $targetPaths := f:getTargetPaths($gxFile, $context)
     
-    (: check: targetSize :)
-    let $targetCount := count($targetPaths)   
+    (: Check targetSize :)
     let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
-    let $instanceResults :=        
-        for $targetPath in $targetPaths
-        return
-            f:validateFileInstance($targetPath, $gxFile, $context)
-            
+    (: Check instances :)
+    let $instanceResults := $targetPaths ! f:validateFileInstance(., $gxFile, $context)
+    (: Merge results :)        
     let $results := ($targetCountResults, $instanceResults)
     return
         $results

@@ -244,15 +244,17 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
             let $furtherAtts:=
                 typeswitch($elem[1])
                 case element(gx:file) | element(gx:folder) return
-                    attribute resourceShapeID {$idValue}
+                    if ($elem/@resourceShapeID) then ()
+                    else attribute resourceShapeID {$idValue}
                 case element(gx:xpath) | element(gx:foxpath) | element(gx:links) return
-                    attribute valueShapeID {$idValue}
+                    if ($elem/@valueShapeID) then ()
+                    else attribute valueShapeID {$idValue}
                 default return ()
             return
             (: Delete existing @id, add @id and further attributes :)
             (
                 $idAtt/(delete node .),
-                insert node ($furtherAtts, attribute {$idName} {$idValue}) as first into $e                
+                insert node (attribute {$idName} {$idValue}, $furtherAtts) as first into $e                
             )                
     return $gfox_                
 };

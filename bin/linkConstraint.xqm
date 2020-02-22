@@ -17,22 +17,45 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:~
+ : Validates constraints referring to links.
+ :
+ : @param shape the value shape declaring the constraints
+ : @param contextItem the initial context item to be used in expressions
+ : @param contextFilePath the file path of the file containing the initial context item
+ : @param contextDoc the XML document containing the initial context item
+ : @param context a set of name-value pairs accessible to processing code
+ : @return a set of validation results
+ :)
 declare function f:validateLinks($shape as element(), 
                                  $contextItem as item()?,
                                  $contextFilePath as xs:string,
                                  $contextDoc as document-node()?,
                                  $context as map(xs:string, item()*))
         as element()* {
-
+    (: let $_DEBUG := trace(count($contextItem), '_#CONTEXT_ITEM: ') :)
+    
+    (: The focus path identifies the location of the initial context item
+       (empty sequence if the initial context item is the root of the 
+       context document :)
     let $focusPath :=
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
             $contextItem/f:datapath(.)
-        else ()
+        else ()        
+        
+    (: The "context info" gives access to the context file path and the focus path :)        
     let $contextInfo := map:merge((
         $contextFilePath ! map:entry('filePath', .),
         $focusPath ! map:entry('nodePath', .)
     ))
 
+    return
+        if (empty($contextItem)) then   (: this document could not be parsed :)
+            f:validationResult_links('red', $shape, (), 
+                                     attribute reason {'Context document could not be parsed'}, 
+                                     (), $contextInfo, ())
+        else
+        
     let $recursive := $shape/@recursive
     let $results :=
         if ($recursive eq 'true') then
@@ -70,9 +93,10 @@ declare function f:validateLinksResolvable($contextNode as node(),
             $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
             $filepath
         )[1]
-        let $uri := resolve-uri($linkValue, $baseUri)
+        let $uri := try {resolve-uri($linkValue, $baseUri)} catch * {()}
         return
-            if ($mediatype eq 'xml') then $linkValue[not(doc-available($uri))]
+            if (not($uri)) then $linkValue
+            else if ($mediatype eq 'xml') then $linkValue[not(doc-available($uri))]
             else if ($mediatype = ('json', 'text')) then            
                 let $text := if (not(unparsed-text-available($uri))) then ()
                              else unparsed-text($uri)
@@ -83,7 +107,7 @@ declare function f:validateLinksResolvable($contextNode as node(),
                         return $linkValue[not($jdoc)]
 
             else
-                $linkValue[not(file:exists($uri))]
+                $linkValue[not(i:resourceExists($uri))]
     let $colour := if (exists($errors)) then 'red' else 'green'
     let $values := if (empty($errors)) then () else $errors ! string(.) => f:extractValues_linkConstraint($valueShape)
     return (
@@ -374,25 +398,23 @@ declare function f:extractValues_linkConstraint($exprValue as item()*, $valueSha
 };        
 
 (:~
- : Resolves the link expression in the context of a document to a value.
+ : Resolves the link expression in the context of an XDM node to a value.
  :
  : @param doc document in the context of which the expression must be resolved
  : @param valueShape the value shape specifying the link constraints
  : @param context context for evaluations
  : @return the expression value
  :)
-declare function f:resolveLinkExpression($doc as document-node(),
+declare function f:resolveLinkExpression($doc as node(),
                                          $valueShape as element(),
                                          $context as map(xs:string, item()*))
         as item()* {
-    let $mediatype := $valueShape/@mediatype    
     let $expr := $valueShape/@xpath
     let $exprLang := 'xpath'
     let $evaluationContext := $context?_evaluationContext    
     let $exprValue :=
         switch($exprLang)
-        case 'xpath' return
-            i:evaluateXPath($expr, $doc, $evaluationContext, true(), true())
+        case 'xpath' return i:evaluateXPath($expr, $doc, $evaluationContext, true(), true())
         default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
     return $exprValue        
 };        

@@ -405,7 +405,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize focusNode ifMediatype xsdValid grep"
+                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize focusNode ifMediatype xsdValid mediatype grep"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
@@ -558,7 +558,7 @@ return
                 <ex:mandatoryAtts attNames="xpath"
                     msg="A 'links' constraint must have an 'xpath' attribute"
                     msgOK="OK - 'links' element: has 'xpath' attribute"/>
-                
+
             </focusNode>
             
             <!-- ========================================
@@ -581,13 +581,24 @@ return
                 <!-- allowed attributes -->
                 <ex:allowedAtts attNames="xsdFoxpath xsdValidMsg xsdValidMsgOK msg msgOK"
                     msg="Unexpected attributes in 'xsdValid' element; expected: $attNames"
-                    msgOK="OK - 'xsdValie' element: no unexpected attributes"/>
+                    msgOK="OK - 'xsdValid' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->                
                 <ex:mandatoryAtts attNames="xsdFoxpath"
                     msg="An 'xsdValid' constraint must have an 'xsdFoxpath' attribute"
                     msgOK="OK - 'xsdValid' element: has 'xsdFoxpath' attribute"/>
             </focusNode>
             
+            <!-- ========================================
+                    <mediatype>
+                 ======================================== -->
+            <focusNode xpath="//*:mediatype">
+                <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK"
+                    msg="Unexpected attributes in 'mediatype' element; expected: $attNames"
+                    msgOK="OK - 'mediatype' element: no unexpected attributes"/>
+                <ex:xoneAtts attNames="eq in"
+                    msg="A 'mediatype' constraint must have an 'eq' or an 'in' attribute"
+                    msgOK="OK - 'mediatype' element: has 'eq' or 'in' attribute"/>
+            </focusNode>
             
             <focusNode xpath="//*:focusNode">
                 <ex:allowedAtts attNames="id xpath"

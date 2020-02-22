@@ -328,4 +328,55 @@ declare function f:normalizeFilepath($path as xs:string)
     try {
         $path ! file:path-to-native(.) ! replace(., '[/\\]$', '')
     } catch * {()}
-};        
+}; 
+
+(:~
+ : Resolves a file path to a sequence of resource file paths.
+ :
+ : @param path file path to be checked
+ : @return true if the file path can be resolved, false otherwise
+ :)
+declare function f:resolveFilepath($path as xs:string)
+        as xs:string* {
+    if (file:exists($path)) then file:path-to-native($path)
+    else
+        let $foxpathValue := i:evaluateFoxpath($path, ())
+        return
+            $foxpathValue[. instance of xs:anyAtomicType]
+};
+
+(:~
+ : Checks if a path or URI can be resolved to a resource.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceExists($path as xs:string)
+        as xs:boolean {
+    if (matches($path, '^http:/+')) then unparsed-text-available($path)
+    else try {file:exists($path)} catch * {false()}
+};
+
+(:~
+ : Checks if a path points to a file system file.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceIsFileSystemFile($path as xs:string)
+        as xs:boolean {
+    if (not(file:exists($path))) then false()
+    else file:is-file($path)
+};
+
+(:~
+ : Checks if a path points to a file system folder.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceIsFileSystemDir($path as xs:string)
+        as xs:boolean {
+    if (not(file:exists($path))) then false()
+    else file:is-dir($path)
+};

@@ -24,6 +24,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateGreenfox($gfox as element(gx:greenfox)) 
         as element()* {
+    let $domain := $gfox/gx:domain/@path
+    let $_CHECK_DOMAIN := f:check_domainFolderExists($domain)
+    
     let $errors := (
         let $xpathExpressions := (
             for $xpath in $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
@@ -114,3 +117,26 @@ declare function f:greenfoxLocation($node as node()) as xs:string {
             else ''            
     ) => string-join('/')
 };
+
+(:~
+ : Checks if the domain folder exists, raises an error otherwise.
+ :
+ : @param domain the domain folder
+ : @return throws an error with diagnostic message
+ :)
+declare function f:check_domainFolderExists($domain as xs:string?)
+        as empty-sequence() {
+    if (not($domain)) then () else
+    
+    if (not(i:resourceExists($domain))) then
+        let $errorCode := 'DOMAIN_NOT_FOUND'
+        let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
+        return error(QName((), $errorCode), $msg)
+    else if (i:resourceIsFileSystemFile($domain)) then
+        let $errorCode := 'DOMAIN_IS_NOT_A_FOLDER'
+        let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
+        return error(QName((), $errorCode), $msg)
+    else ()
+};
+
+

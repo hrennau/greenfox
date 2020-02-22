@@ -52,7 +52,7 @@ declare function f:validateOp($request as element())
     (: Preliminary checks :)        
     let $domain := tt:getParams($request, 'domain')
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
-    let $_CHECK := f:check_domainExists($domain)
+    let $_CHECK := i:check_domainFolderExists($domain)
     let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)    
     
     (: Collect parameters :)
@@ -80,21 +80,6 @@ declare function f:validateOp($request as element())
     let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
     return $report
 };        
-
-(:~
- : Checks if the domain folder exists, raises an error otherwise.
- :
- : @param domain the domain folder
- : @return throws an error with diagnostic message
- :)
-declare function f:check_domainExists($domain as xs:string?)
-        as empty-sequence() {
-    if (not($domain) or file:exists($domain)) then () else    
-
-    let $errorCode := 'DOMAIN_NOT_FOUND'
-    let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
-    return error(QName((), $errorCode), $msg)
-};
 
 (:~
  : Checks if the greenfox schema has the expected root element, raises
