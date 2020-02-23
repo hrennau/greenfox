@@ -5,7 +5,7 @@
     <!-- *** External context *** -->
     <context>
         <field name="lastModified" value="2019-12-01"/>
-        <field name="domain"/>
+        <field name="domain" value="${schemaPath}\..\..\..\example-data\system-s"/>
     </context>
 
     <!-- *** System file tree *** -->

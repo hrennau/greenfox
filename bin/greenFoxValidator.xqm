@@ -25,7 +25,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateGreenfox($gfox as element(gx:greenfox)) 
         as element()* {
     let $domain := $gfox/gx:domain/@path
-    let $_CHECK_DOMAIN := f:check_domainFolderExists($domain)
+    let $_CHECK_DOMAIN := f:check_domainFolderExists($gfox)
     
     let $errors := (
         let $xpathExpressions := (
@@ -92,9 +92,7 @@ declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)        
     let $metaGfoxSource := doc('../metaschema/gfox-gfox.xml')/*
     let $paramGfox := file:path-to-native($gfoxSourceURI) 
-    
-    let $metaContextSource := map{'gfox': $paramGfox}
-    let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, $metaContextSource)
+    let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, 'gfox=' || $paramGfox, ())
     let $metaGfox := $metaGfoxAndContext[. instance of element()]
     let $metaContext := $metaGfoxAndContext[. instance of map(*)]
     let $metaReportType := 'redTree'
@@ -124,19 +122,19 @@ declare function f:greenfoxLocation($node as node()) as xs:string {
  : @param domain the domain folder
  : @return throws an error with diagnostic message
  :)
-declare function f:check_domainFolderExists($domain as xs:string?)
+declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
         as empty-sequence() {
-    if (not($domain)) then () else
-    
-    if (not(i:resourceExists($domain))) then
-        let $errorCode := 'DOMAIN_NOT_FOUND'
-        let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
-        return error(QName((), $errorCode), $msg)
-    else if (i:resourceIsFileSystemFile($domain)) then
-        let $errorCode := 'DOMAIN_IS_NOT_A_FOLDER'
-        let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
-        return error(QName((), $errorCode), $msg)
-    else ()
+    let $domain := $gfox//gx:domain/@path
+    return
+        if (not(i:resourceExists($domain))) then
+            let $errorCode := 'DOMAIN_NOT_FOUND'
+            let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
+            return error(QName((), $errorCode), $msg)
+        else if (i:resourceIsFileSystemFile($domain)) then
+            let $errorCode := 'DOMAIN_IS_NOT_A_FOLDER'
+            let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
+            return error(QName((), $errorCode), $msg)
+        else ()
 };
 
 

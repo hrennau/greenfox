@@ -127,7 +127,7 @@ declare function f:validateLinksResolvable($contextNode as node(),
                                  $resultAdditionalAtts, $values, 
                                  $contextInfo, $resultOptions),
         (: Write results for count constraints :)                                  
-        f:validateLinkCount(count($exprValue), $exprValue, $valueShape, $contextInfo)
+        f:validateLinkCount($exprValue, $valueShape, $contextInfo)
     )                                 
 };
 
@@ -161,7 +161,7 @@ declare function f:validateRecursiveLinksResolvable(
         f:validationResult_links($colour, $valueShape, (), 
                                  $resultAdditionalAtts, $values, 
                                  $contextInfo, $resultOptions),
-        f:validateLinkCount(count($docsAndErrors), $docsAndErrors?uri, $valueShape, $contextInfo)
+        f:validateLinkCount($docsAndErrors?uri, $valueShape, $contextInfo)
     )        
 };
 
@@ -197,7 +197,7 @@ declare function f:validateRecursiveLinksResolvableRC($contextNode as node(),
         return
             (: If the link value cannot be resolved to a URI, an error is detected :)
             if (not($uri)) then
-                    map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
+                map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
         
             else if ($mediatype = 'json') then            
                 if (not(unparsed-text-available($uri))) then 
@@ -243,14 +243,14 @@ declare function f:validateRecursiveLinksResolvableRC($contextNode as node(),
  : @param contextInfo information about the resource context
  : @return a validation result, red or green
  :)
-declare function f:validateLinkCount($valueCount as xs:integer,
-                                     $exprValue as item()*,
+declare function f:validateLinkCount($exprValue as item()*,
                                      $valueShape as element(),
                                      $contextInfo as map(xs:string, item()*))
         as element()? {
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
     
+    let $valueCount := count($exprValue)
     for $cmp in $valueShape/(@count, @minCount, @maxCount)
     let $cmpTrue :=
         typeswitch($cmp)

@@ -52,7 +52,6 @@ declare function f:validateOp($request as element())
     (: Preliminary checks :)        
     let $domain := tt:getParams($request, 'domain')
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
-    let $_CHECK := i:check_domainFolderExists($domain)
     let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)    
     
     (: Collect parameters :)
@@ -63,9 +62,11 @@ declare function f:validateOp($request as element())
     let $reportOptions := map{}
 
     (: Compile greenfox schema :)
-    let $gfoxAndContext := f:compileGreenfox($gfoxSource, i:externalContext($params, $domain))
+    let $gfoxAndContext := f:compileGreenfox($gfoxSource, $params, $domain)
     let $gfox := $gfoxAndContext[. instance of element()]
     let $context := $gfoxAndContext[. instance of map(*)]
+    (: let $_CHECK := i:check_domainFolderExists($gfox) :)
+    
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
     
     (: Validate greenfox schema :)

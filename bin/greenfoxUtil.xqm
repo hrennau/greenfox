@@ -325,9 +325,11 @@ declare function f:copyNamespaceNodes($elem as element())
  :)
 declare function f:normalizeFilepath($path as xs:string)
         as xs:string? {
+    (
     try {
-        $path ! file:path-to-native(.) ! replace(., '[/\\]$', '')
-    } catch * {()}
+        $path ! file:path-to-native(.)
+    } catch * {$path}
+    ) ! replace(., '[/\\]$', '') ! replace(., '/', '\\')
 }; 
 
 (:~
