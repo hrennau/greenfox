@@ -65,7 +65,6 @@ declare function f:validateOp($request as element())
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, $params, $domain)
     let $gfox := $gfoxAndContext[. instance of element()]
     let $context := $gfoxAndContext[. instance of map(*)]
-    (: let $_CHECK := i:check_domainFolderExists($gfox) :)
     
     let $_LOG := f:logFile($gfox, 'GFOX.xml')
     
