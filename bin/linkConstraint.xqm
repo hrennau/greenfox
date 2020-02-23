@@ -17,6 +17,12 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(: ============================================================================
+ :
+ :     f u n c t i o n s    v a l i d a t i n g    l i n k s
+ :
+ : ============================================================================ :)
+
 (:~
  : Validates constraints referring to links.
  :
@@ -59,76 +65,9 @@ declare function f:validateLinks($shape as element(),
         else
         
     let $recursive := $shape/@recursive
-    let $results :=
-        if ($recursive eq 'true') then
-            f:validateRecursiveLinksResolvable($contextItem, $contextFilePath, $shape, $context, $contextInfo)
-        else
-            f:validateLinksResolvable($contextItem, $shape, $context, $contextInfo)   
+    let $results := f:validateLinksResolvable($contextItem, $contextFilePath, $shape, $context, $contextInfo)
     return
         $results
-};
-
-(:~
- : Validates a LinkResolvable constraint with parameter 'recursive' equal to false.
- :
- : @param contextNode the context node
- : @param valueShape the value shape containing the constraint
- : @param context general context information
- : @param contextInfo information about the resource context
- : @return a validation result, red or green
- :)
-declare function f:validateLinksResolvable($contextNode as node(),
-                                           $valueShape as element(),
-                                           $context as map(xs:string, item()*),
-                                           $contextInfo as map(xs:string, item()*))
-        as element()* {
-           
-    let $resultAdditionalAtts := attribute recursive {false()}        
-    let $resultOptions := ()
-    
-    let $exprValue := f:resolveLinkExpression($contextNode, $valueShape, $context)    
-    let $filepath := $contextInfo?filepath        
-    let $mediatype := $valueShape/@mediatype
-    let $errors :=    
-        for $linkValue in $exprValue
-        let $baseUri := (
-            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
-            $filepath
-        )[1]
-        let $uri := try {resolve-uri($linkValue, $baseUri)} catch * {()}
-        return
-            (: If the link value cannot be resolved to a URI, an error is detected :)
-            if (not($uri)) then $linkValue
-            
-            (: If mediatype is xml, the uri must point to well-formed XML :)
-            else if ($mediatype eq 'xml') then $linkValue[not(doc-available($uri))]            
-              
-            else if ($mediatype = ('json', 'text')) then            
-                let $text := if (not(unparsed-text-available($uri))) then ()
-                             else unparsed-text($uri)
-                return
-                    (: If mediatype is json or text, the uri must point to text :)
-                    if (not($text)) then $linkValue
-                    else
-                        let $jdoc := try {json:parse($text)} catch * {()}
-                        (: If mediatype is json, the uri must point to well-formed JSON :)
-                        return $linkValue[not($jdoc)]
-
-            else
-                (: If no mediatype was specified, the uri must point to a resource :)
-                $linkValue[not(i:resourceExists($uri))]
-                
-    let $colour := if (exists($errors)) then 'red' else 'green'
-    let $values := if (empty($errors)) then () else 
-                   $errors ! string(.) => f:extractValues_linkConstraint($valueShape)
-    return (
-        (: Write results for links which could not be resolved :)
-        f:validationResult_links($colour, $valueShape, $exprValue, 
-                                 $resultAdditionalAtts, $values, 
-                                 $contextInfo, $resultOptions),
-        (: Write results for count constraints :)                                  
-        f:validateLinkCount($exprValue, $valueShape, $contextInfo)
-    )                                 
 };
 
 (:~
@@ -141,7 +80,7 @@ declare function f:validateLinksResolvable($contextNode as node(),
  : @param contextInfo information about the resource context 
  : @return validation results, red and/or green
  :)
-declare function f:validateRecursiveLinksResolvable(
+declare function f:validateLinksResolvable(
                              $contextNode as node(),
                              $filepath as xs:string,
                              $valueShape as element(),
@@ -151,86 +90,29 @@ declare function f:validateRecursiveLinksResolvable(
     let $resultAdditionalAtts := attribute recursive {true()}
     let $resultOptions := ()
     
-    let $docsAndErrors := f:validateRecursiveLinksResolvableRC($contextNode, $filepath, $valueShape, $context, (), ())
+    let $expr := $valueShape/@xpath
+    let $mediatype := $valueShape/@mediatype
+    let $recursive := $valueShape/@recursive/xs:boolean(.)
+    let $docsAndErrors := f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
+    
     let $docs := $docsAndErrors?doc
     let $errors := $docsAndErrors[?error eq 'true']
     
     let $colour := if (exists($errors)) then 'red' else 'green'
-    let $values := if (empty($errors)) then () else $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
+    let $values :=  if (empty($errors)) then () 
+                    else if ($recursive) then 
+                        $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
+                    else 
+                        $errors ! <gx:value>{?linkValue}</gx:value>
     return (
-        f:validationResult_links($colour, $valueShape, (), 
-                                 $resultAdditionalAtts, $values, 
-                                 $contextInfo, $resultOptions),
-        f:validateLinkCount($docsAndErrors?uri, $valueShape, $contextInfo)
+        f:validationResult_links(
+                            $colour, $valueShape, (), 
+                            $resultAdditionalAtts, $values, 
+                            $contextInfo, $resultOptions),
+        let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
+        return 
+            f:validateLinkCount($uris, $valueShape, $contextInfo)
     )        
-};
-
-(:~
- : Recursive helper function of `validateRecursiveLinksResolvable`.
- :
- : @param contextNode context node to be used when evaluating the link producing expression
- : @param filepath the file path of the resource currently investigated
- : @param valueShape the value shape containing the constraint
- : @param context the processing context
- : @param pathsSofar file paths of link targets already visited and successfully resolved
- : @param errorsSofar file paths of link targets already visited and found unresolvable 
- : @return maps describing links, either found resolvable or unresolvable
- :)
-declare function f:validateRecursiveLinksResolvableRC($contextNode as node(),
-                                                      $filepath as xs:string,
-                                                      $valueShape as element(),
-                                                      $context as map(xs:string, item()*),
-                                                      $pathsSofar as xs:string*,
-                                                      $errorsSofar as xs:string*)
-        as item()* {
-           
-    let $exprValue := f:resolveLinkExpression($contextNode, $valueShape, $context)
-    let $mediatype := $valueShape/@mediatype
-    let $targetsAndErrors :=   
-        for $linkValue in $exprValue
-        let $baseUri := (
-            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
-            $filepath
-        )[1]
-        let $uri := resolve-uri($linkValue, $baseUri)
-        where not($uri = ($pathsSofar, $errorsSofar))
-        return
-            (: If the link value cannot be resolved to a URI, an error is detected :)
-            if (not($uri)) then
-                map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
-        
-            else if ($mediatype = 'json') then            
-                if (not(unparsed-text-available($uri))) then 
-                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
-                else
-                    let $text := unparsed-text($uri)
-                    let $jdoc := try {json:parse($text)} catch * {()}
-                    return 
-                        if (not($jdoc)) then 
-                            map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
-                        else 
-                            map{'uri': $uri, 'doc': $jdoc}
-                        
-            else (: if not JSON, XML is assumed :) 
-                if (not(doc-available($uri))) then 
-                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
-                else 
-                    map{'uri': $uri, 'doc': doc($uri)}
-    
-    let $errorInfos := $targetsAndErrors[?error eq 'true'][?uri eq '' or not(?uri = $errorsSofar)]
-    let $targetInfos := $targetsAndErrors[?doc][not(?uri = $pathsSofar)]
-    
-    let $newErrors := $errorInfos?uri    
-    let $newPaths := $targetInfos?uri
-    let $nextDocs := $targetInfos?doc
-    
-    let $newPathsSofar := ($pathsSofar, $newPaths)
-    let $newErrorsSofar := ($errorsSofar, $newErrors)
-    return (
-        $errorInfos,   (: these are errors not yet observed :)
-        $targetInfos,   (: these are targets not yet observed :)
-        $targetInfos ! f:validateRecursiveLinksResolvableRC(?doc, ?uri, $valueShape, $context, $newPathsSofar, $newErrorsSofar)
-    )
 };
 
 (:~
@@ -263,12 +145,17 @@ declare function f:validateLinkCount($exprValue as item()*,
             f:validationResult_linkCount('green', $valueShape, $cmp, $valueCount, 
                                          $resultAdditionalAtts, (), $contextInfo, $resultOptions)
         else 
-            let $values := f:extractValues_linkConstraint($exprValue, $valueShape)
+            let $values := $exprValue ! xs:string(.) ! <xs:value>{.}</xs:value>
             return
                 f:validationResult_linkCount('red', $valueShape, $cmp, $exprValue, 
                                              $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
 };
 
+(: ============================================================================
+ :
+ :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
+ :
+ : ============================================================================ :)
 
 (:~
  : Creates a validation result for a LinkResolvable constraint.
@@ -393,6 +280,340 @@ declare function f:validationResult_linkCount($colour as xs:string,
         }       
 };
 
+(: ============================================================================
+ :
+ :     f u n c t i o n s    r e s o l v i n g    l i n k s
+ :
+ : ============================================================================ :)
+
+(:~
+ : Resolves links specified by an expression producing the file paths (relative or
+ : absolute) of link targets. Returns for each link a map providing URI and document 
+ : node (if resolvable), or URI, original link value, file path of the document 
+ : containing the link and error flag (otherwise). If $recursive is true, links are 
+ : resolved recursively.
+ :
+ : @param expr expression producing the file paths of link targets (relative or absolute)
+ : @param contextNode context node to be used when evaluating the link producing expression
+ : @param filepath the file path of the resource currently investigated
+ : @param mediatype the mediatype of link targets
+ : @param recursive flag indicating if links are resolved recursively
+ : @param context the processing context
+ : @return maps describing links, either containing the resolved target or information about 
+ :   failure to resolve the link
+ :)
+declare function f:resolveLinks(
+                             $expr as xs:string,
+                             $contextNode as node(),
+                             $filepath as xs:string,
+                             $mediatype as xs:string?,
+                             $recursive as xs:boolean,
+                             $context as map(xs:string, item()*))
+        as item()* {
+    let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
+    return
+        $linkMaps
+};
+
+(:~
+ : Recursive helper function of `resolveLinks`.
+ :
+ : @param expr expression producing the file paths of linke targets (relative or absolute)
+ : @param contextNode context node to be used when evaluating the link producing expression
+ : @param filepath the file path of the resource currently investigated
+ : @param mediatype the mediatype of link targets
+ : @param recursive flag indicating if links are resolved recursively
+ : @param context the processing context
+ : @param pathsSofar file paths of link targets already visited and successfully resolved
+ : @param errorsSofar file paths of link targets already visited and found unresolvable 
+ : @return maps describing links, either containing the resolved target or information about 
+ :   failure to resolve the link
+ :)
+declare function f:resolveLinksRC($expr as xs:string,
+                                  $contextNode as node(),
+                                  $filepath as xs:string,                                  
+                                  $mediatype as xs:string?,
+                                  $recursive as xs:boolean,
+                                  $context as map(xs:string, item()*),
+                                  $pathsSofar as xs:string*,
+                                  $errorsSofar as xs:string*)
+        as map(xs:string, item()*)* {
+           
+    let $exprValue := f:resolveLinkExpression($expr, $contextNode, $context)
+    let $targetsAndErrors :=   
+        for $linkValue in $exprValue
+        let $baseUri := (
+            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
+            $filepath
+        )[1]
+        let $uri := resolve-uri($linkValue, $baseUri)
+        where not($uri = ($pathsSofar, $errorsSofar))
+        return
+            (: If the link value cannot be resolved to a URI, an error is detected :)
+            if (not($uri)) then
+                map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
+        
+            else if ($mediatype = 'json') then            
+                if (not(unparsed-text-available($uri))) then 
+                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                else
+                    let $text := unparsed-text($uri)
+                    let $jdoc := try {json:parse($text)} catch * {()}
+                    return 
+                        if (not($jdoc)) then 
+                            map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                        else 
+                            map{'uri': $uri, 'doc': $jdoc}
+                        
+            else (: if not JSON, XML is assumed :) 
+                if (not(doc-available($uri))) then 
+                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                else 
+                    map{'uri': $uri, 'doc': doc($uri)}
+    
+    let $errorInfos := $targetsAndErrors[?error eq 'true'][?uri eq '' or not(?uri = $errorsSofar)]
+    let $targetInfos := $targetsAndErrors[?doc][not(?uri = $pathsSofar)]
+    
+    let $newErrors := $errorInfos?uri    
+    let $newPaths := $targetInfos?uri
+    let $nextDocs := $targetInfos?doc
+    
+    let $newPathsSofar := ($pathsSofar, $newPaths)
+    let $newErrorsSofar := ($errorsSofar, $newErrors)
+    return (
+        $errorInfos,   (: these are errors not yet observed :)
+        $targetInfos,   (: these are targets not yet observed :)
+        if (not($recursive)) then () else
+            $targetInfos 
+            ! f:resolveLinksRC($expr, ?doc, ?uri, $mediatype, $recursive, $context, $newPathsSofar, $newErrorsSofar)
+    )
+};
+
+(:~
+ : Resolves the link expression in the context of an XDM node to a value.
+ :
+ : The expression is retrieved from the shape element, and the evaluation context
+ : is retrieved from the processing context.
+ :
+ : @param doc document in the context of which the expression must be resolved
+ : @param valueShape the value shape specifying the link constraints
+ : @param context context for evaluations
+ : @return the expression value
+ :)
+declare function f:resolveLinkExpression($expr as xs:string,
+                                         $contextNode as node(),
+                                         $context as map(xs:string, item()*))
+        as item()* {
+    let $exprLang := 'xpath'
+    let $evaluationContext := $context?_evaluationContext    
+    let $exprValue :=
+        switch($exprLang)
+        case 'xpath' return i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
+        default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
+    return $exprValue        
+};        
+
+(:
+(:~
+ : Validates a LinkResolvable constraint with parameter 'recursive' equal to false.
+ :
+ : @param contextNode the context node
+ : @param valueShape the value shape containing the constraint
+ : @param context general context information
+ : @param contextInfo information about the resource context
+ : @return a validation result, red or green
+ :)
+declare function f:validateLinksResolvable($contextNode as node(),
+                                           $valueShape as element(),
+                                           $context as map(xs:string, item()*),
+                                           $contextInfo as map(xs:string, item()*))
+        as element()* {
+           
+    let $resultAdditionalAtts := attribute recursive {false()}        
+    let $resultOptions := ()
+    
+    let $exprValue := f:resolveLinkExpression($contextNode, $valueShape, $context)    
+    let $filepath := $contextInfo?filepath        
+    let $mediatype := $valueShape/@mediatype
+    let $errors :=    
+        for $linkValue in $exprValue
+        let $baseUri := (
+            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
+            $filepath
+        )[1]
+        let $uri := try {resolve-uri($linkValue, $baseUri)} catch * {()}
+        return
+            (: If the link value cannot be resolved to a URI, an error is detected :)
+            if (not($uri)) then $linkValue
+            
+            (: If mediatype is xml, the uri must point to well-formed XML :)
+            else if ($mediatype eq 'xml') then $linkValue[not(doc-available($uri))]            
+              
+            else if ($mediatype = ('json', 'text')) then            
+                let $text := if (not(unparsed-text-available($uri))) then ()
+                             else unparsed-text($uri)
+                return
+                    (: If mediatype is json or text, the uri must point to text :)
+                    if (not($text)) then $linkValue
+                    else
+                        let $jdoc := try {json:parse($text)} catch * {()}
+                        (: If mediatype is json, the uri must point to well-formed JSON :)
+                        return $linkValue[not($jdoc)]
+
+            else
+                (: If no mediatype was specified, the uri must point to a resource :)
+                $linkValue[not(i:resourceExists($uri))]
+                
+    let $colour := if (exists($errors)) then 'red' else 'green'
+    let $values := if (empty($errors)) then () else 
+                   $errors ! string(.) => f:extractValues_linkConstraint($valueShape)
+    return (
+        (: Write results for links which could not be resolved :)
+        f:validationResult_links($colour, $valueShape, $exprValue, 
+                                 $resultAdditionalAtts, $values, 
+                                 $contextInfo, $resultOptions),
+        (: Write results for count constraints :)                                  
+        f:validateLinkCount($exprValue, $valueShape, $contextInfo)
+    )                                 
+};
+
+(:~
+ : Validates a LinkResolvable constraint with parameter 'recursive' equal to true.
+ :
+ : @param contextNode context node to be used when evaluating the link producing expression
+ : @param filepath the file path of the resource currently investigated
+ : @param valueShape the value shape containing the constraint
+ : @param context the processing context
+ : @param contextInfo information about the resource context 
+ : @return validation results, red and/or green
+ :)
+declare function f:validateRecursiveLinksResolvable(
+                             $contextNode as node(),
+                             $filepath as xs:string,
+                             $valueShape as element(),
+                             $context as map(xs:string, item()*),
+                             $contextInfo as map(xs:string, item()*))
+        as item()* {
+    let $resultAdditionalAtts := attribute recursive {true()}
+    let $resultOptions := ()
+    (:
+    let $docsAndErrors := f:validateRecursiveLinksResolvableRC($contextNode, $filepath, $valueShape, $context, (), ())
+     :)
+    let $expr := $valueShape/@xpath
+    let $mediatype := $valueShape/@mediatype
+    let $recursive := $valueShape/@recursive
+    let $docsAndErrors := f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
+    
+    let $docs := $docsAndErrors?doc
+    let $errors := $docsAndErrors[?error eq 'true']
+    
+    let $colour := if (exists($errors)) then 'red' else 'green'
+    let $values := if (empty($errors)) then () else $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
+    return (
+        f:validationResult_links($colour, $valueShape, (), 
+                                 $resultAdditionalAtts, $values, 
+                                 $contextInfo, $resultOptions),
+        f:validateLinkCount($docsAndErrors?uri, $valueShape, $contextInfo)
+    )        
+};
+
+(:~
+ : Recursive helper function of `validateRecursiveLinksResolvable`.
+ :
+ : @param contextNode context node to be used when evaluating the link producing expression
+ : @param filepath the file path of the resource currently investigated
+ : @param valueShape the value shape containing the constraint
+ : @param context the processing context
+ : @param pathsSofar file paths of link targets already visited and successfully resolved
+ : @param errorsSofar file paths of link targets already visited and found unresolvable 
+ : @return maps describing links, either found resolvable or unresolvable
+ :)
+declare function f:validateRecursiveLinksResolvableRC($contextNode as node(),
+                                                      $filepath as xs:string,
+                                                      $valueShape as element(),
+                                                      $context as map(xs:string, item()*),
+                                                      $pathsSofar as xs:string*,
+                                                      $errorsSofar as xs:string*)
+        as item()* {
+           
+    let $exprValue := f:resolveLinkExpression($contextNode, $valueShape, $context)
+    let $mediatype := $valueShape/@mediatype
+    let $targetsAndErrors :=   
+        for $linkValue in $exprValue
+        let $baseUri := (
+            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
+            $filepath
+        )[1]
+        let $uri := resolve-uri($linkValue, $baseUri)
+        where not($uri = ($pathsSofar, $errorsSofar))
+        return
+            (: If the link value cannot be resolved to a URI, an error is detected :)
+            if (not($uri)) then
+                map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
+        
+            else if ($mediatype = 'json') then            
+                if (not(unparsed-text-available($uri))) then 
+                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                else
+                    let $text := unparsed-text($uri)
+                    let $jdoc := try {json:parse($text)} catch * {()}
+                    return 
+                        if (not($jdoc)) then 
+                            map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                        else 
+                            map{'uri': $uri, 'doc': $jdoc}
+                        
+            else (: if not JSON, XML is assumed :) 
+                if (not(doc-available($uri))) then 
+                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                else 
+                    map{'uri': $uri, 'doc': doc($uri)}
+    
+    let $errorInfos := $targetsAndErrors[?error eq 'true'][?uri eq '' or not(?uri = $errorsSofar)]
+    let $targetInfos := $targetsAndErrors[?doc][not(?uri = $pathsSofar)]
+    
+    let $newErrors := $errorInfos?uri    
+    let $newPaths := $targetInfos?uri
+    let $nextDocs := $targetInfos?doc
+    
+    let $newPathsSofar := ($pathsSofar, $newPaths)
+    let $newErrorsSofar := ($errorsSofar, $newErrors)
+    return (
+        $errorInfos,   (: these are errors not yet observed :)
+        $targetInfos,   (: these are targets not yet observed :)
+        $targetInfos ! f:validateRecursiveLinksResolvableRC(?doc, ?uri, $valueShape, $context, $newPathsSofar, $newErrorsSofar)
+    )
+};
+:)
+
+(:
+(:~
+ : Resolves the link expression in the context of an XDM node to a value.
+ :
+ : The expression is retrieved from the shape element, and the evaluation context
+ : is retrieved from the processing context.
+ :
+ : @param doc document in the context of which the expression must be resolved
+ : @param valueShape the value shape specifying the link constraints
+ : @param context context for evaluations
+ : @return the expression value
+ :)
+declare function f:resolveLinkExpression($contextNode as node(),
+                                         $valueShape as element(),
+                                         $context as map(xs:string, item()*))
+        as item()* {
+    let $expr := $valueShape/@xpath
+    let $exprLang := 'xpath'
+    let $evaluationContext := $context?_evaluationContext    
+    let $exprValue :=
+        switch($exprLang)
+        case 'xpath' return i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
+        default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
+    return $exprValue        
+};        
+:)
+
+(:
 (:~
  : Creates 'gx:value' elements describing constraint violating items.
  :
@@ -419,28 +640,4 @@ declare function f:extractValues_linkConstraint($exprValue as item()*, $valueSha
                     else <gx:valueNodePath>{i:datapath($item)}</gx:valueNodePath>
                 default return ()                
 };        
-
-(:~
- : Resolves the link expression in the context of an XDM node to a value.
- :
- : The expression is retrieved from the shape element, and the evaluation context
- : is retrieved from the processing context.
- :
- : @param doc document in the context of which the expression must be resolved
- : @param valueShape the value shape specifying the link constraints
- : @param context context for evaluations
- : @return the expression value
- :)
-declare function f:resolveLinkExpression($contextNode as node(),
-                                         $valueShape as element(),
-                                         $context as map(xs:string, item()*))
-        as item()* {
-    let $expr := $valueShape/@xpath
-    let $exprLang := 'xpath'
-    let $evaluationContext := $context?_evaluationContext    
-    let $exprValue :=
-        switch($exprLang)
-        case 'xpath' return i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
-        default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
-    return $exprValue        
-};        
+:)
