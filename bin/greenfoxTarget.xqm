@@ -11,6 +11,7 @@ module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "greenfoxUtil.xqm",
+    "linkConstraint.xqm",
     "validationResult.xqm",
     "log.xqm" ;
     
@@ -30,16 +31,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:getTargetPaths($resourceShape as element(), $context as map(xs:string, item()*))
         as xs:string* {
     let $isExpectedResourceKind := if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
-    (:
-        let $isDir := $resourceShape/self::gx:folder
-        return function($r) {if ($isDir) then file:is-dir($r) else file:is-file($r)}
-:)        
     let $contextPath := $context?_contextPath  
     
     (: _TO_DO_ cleanup - adhoc addition of $filePath and $fileName :)
     let $evaluationContext := $context?_evaluationContext
     let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $contextPath)
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
+    let $context := map:put($context, '_evaluationContext', $evaluationContext)
     
     let $targetPaths :=
         let $path := $resourceShape/@path
@@ -52,9 +50,9 @@ declare function f:getTargetPaths($resourceShape as element(), $context as map(x
             else if ($foxpath) then
                 f:getTargetPaths_foxpath($foxpath, $contextPath, $evaluationContext)
             else if ($linkTargets) then
-                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $evaluationContext)
+                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $context)
             else if ($recursiveLinkTargets) then
-                f:getTargetPaths_recursiveLinkTargets($recursiveLinkTargets, $contextPath, $evaluationContext)
+                f:getTargetPaths_recursiveLinkTargets($recursiveLinkTargets, $contextPath, $context)
             else error()
         ) [$isExpectedResourceKind(.)]                 
     return $targetPaths        
@@ -99,12 +97,18 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
  :)
 declare function f:getTargetPaths_linkTargets($xpath as xs:string, 
                                               $contextPath as xs:string, 
-                                              $evaluationContext as map(xs:QName, item()*))
+                                              $context as map(xs:string, item()*))
         as xs:string* {
-    let $doc :=
-        if (not(doc-available($contextPath))) then () else doc($contextPath)
+    if (not(doc-available($contextPath))) then () else        
+    let $doc :=  doc($contextPath)
+    let $targetAndErrorMaps := i:resolveLinks($xpath, $doc, $contextPath, (), false(), $context)
+    let $uris := $targetAndErrorMaps[?doc]?uri
+    return $uris
+    
+(:        
+    let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
     return
-        if (not($doc)) then () else
+        $linkMaps
         
         let $exprValue := i:evaluateXPath($xpath, $doc, $evaluationContext, true(), true())
         return
@@ -114,6 +118,7 @@ declare function f:getTargetPaths_linkTargets($xpath as xs:string,
                     resolve-uri($item, $item/ancestor-or-self::*[1]/base-uri(.))
                 else 
                     string($item)
+:)                    
 };
 
 (:~
@@ -127,9 +132,16 @@ declare function f:getTargetPaths_linkTargets($xpath as xs:string,
  :)
 declare function f:getTargetPaths_recursiveLinkTargets($xpath as xs:string, 
                                                        $contextPath as xs:string, 
-                                                       $evaluationContext as map(xs:QName, item()*))
+                                                       $context as map(xs:string, item()*))
         as xs:string* {
-    f:getTargetPaths_recursiveLinkTargetsRC($xpath, $contextPath, $evaluationContext, ())        
+    if (not(doc-available($contextPath))) then () else        
+    let $doc :=  doc($contextPath)
+    let $targetAndErrorMaps := i:resolveLinks($xpath, $doc, $contextPath, (), true(), $context)
+    let $uris := $targetAndErrorMaps[?doc]?uri
+    return $uris
+(:        
+    f:getTargetPaths_recursiveLinkTargetsRC($xpath, $contextPath, $evaluationContext, ())
+ :)    
 };
 
 (:~
