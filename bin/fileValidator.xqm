@@ -31,7 +31,9 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
         as element()* {
     let $contextPath := $context?_contextPath
     let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath, @recursiveLinkXPath)[1]
-    let $targetPaths := f:getTargetPaths($gxFile, $context)
+    let $targetPathsAndErrorInfos := f:getTargetPaths($gxFile, $context)
+    let $targetPaths := $targetPathsAndErrorInfos[. instance of xs:anyAtomicType]
+    let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
     
     (: Check targetSize :)
     let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)

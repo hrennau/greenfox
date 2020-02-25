@@ -39,7 +39,9 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
     let $contextPath := $context?_contextPath
     let $components := $gxFolder/*[not(@deactivated eq 'true')]
     let $targetDecl := $gxFolder/(@foxpath, @path)[1]
-    let $targetPaths := f:getTargetPaths($gxFolder, $context)
+    let $targetPathsAndErrorInfos := f:getTargetPaths($gxFolder, $context)
+    let $targetPaths := $targetPathsAndErrorInfos[. instance of xs:anyAtomicType]
+    let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
     
     (: check: targetSize :)                    
     let $targetCount := count($targetPaths)
