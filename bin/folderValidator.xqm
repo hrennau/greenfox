@@ -42,7 +42,8 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
     let $targetPathsAndErrorInfos := f:getTargetPaths($gxFolder, $context)
     let $targetPaths := $targetPathsAndErrorInfos[. instance of xs:anyAtomicType]
     let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
-    
+
+    (:
     (: check: targetSize :)                    
     let $targetCount := count($targetPaths)
     let $contextPathLabel := replace($contextPath, '\\', '/')
@@ -57,8 +58,14 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
             else    
                 $components/self::gx:targetSize                
                                 /i:validateTargetCount(., $targetPaths, $contextPathLabel, $targetDecl)
+    :)
+    
+    (: Check targetSize :)
+    let $targetCountResults := $gxFolder/gx:targetSize 
+                               ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
+    (: Check instances :)                            
     let $instanceResults := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
-        
+(:        
     let $subsetResults :=
         for $gxFolderSubset in $components/self::gx:folderSubset
         let $subsetComponents := $gxFolderSubset/*[not(@deactivated eq 'true')]
@@ -80,6 +87,8 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
         let $instanceResults := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
         return ($targetCountResults, $instanceResults)
     let $results := ($targetCountResults, $instanceResults, $subsetResults)
+:)    
+    let $results := ($targetCountResults, $instanceResults)
     return
         $results 
 };

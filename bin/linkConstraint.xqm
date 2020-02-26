@@ -97,7 +97,7 @@ declare function f:validateLinksResolvable(
     
     let $docs := $docsAndErrors?doc
     let $errors := $docsAndErrors[?error eq 'true']
-    
+    (:
     let $colour := if (exists($errors)) then 'red' else 'green'
     let $values :=  if (empty($errors)) then () 
                     else if ($recursive) then 
@@ -112,7 +112,15 @@ declare function f:validateLinksResolvable(
         let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
         return 
             f:validateLinkCount($uris, $valueShape, $contextInfo)
-    )        
+    )
+    :)
+    return (
+        f:validationResult_links_for_linkErrors($errors, $recursive, $valueShape, $contextInfo)
+        ,
+        let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
+        return 
+            f:validateLinkCount($uris, $valueShape, $contextInfo)    
+    )
 };
 
 (:~
@@ -156,6 +164,28 @@ declare function f:validateLinkCount($exprValue as item()*,
  :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
  :
  : ============================================================================ :)
+
+declare function f:validationResult_links_for_linkErrors($errors as map(*)*,
+                                                         $recursive as xs:boolean,
+                                                         $valueShape as element(),
+                                                         $contextInfo) 
+        as element() {
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()
+    
+    let $colour := if (exists($errors)) then 'red' else 'green'
+    let $values :=  
+        if (empty($errors)) then () 
+        else if ($recursive) then 
+            $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
+        else 
+            $errors ! <gx:value>{?linkValue}</gx:value>
+    return
+        f:validationResult_links(
+                            $colour, $valueShape, (), 
+                            $resultAdditionalAtts, $values, 
+                            $contextInfo, $resultOptions)
+};
 
 (:~
  : Creates a validation result for a LinkResolvable constraint.

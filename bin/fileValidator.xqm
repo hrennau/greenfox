@@ -36,9 +36,12 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
     
     (: Check targetSize :)
-    let $targetCountResults := $gxFile/gx:targetSize ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
+    let $targetCountResults := $gxFile/gx:targetSize 
+                               ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
     (: Check instances :)
-    let $instanceResults := $targetPaths ! f:validateFileInstance(., $gxFile, $context)
+    let $instanceResults := $targetPaths 
+                            ! f:validateFileInstance(., $gxFile, $context)
+    
     (: Merge results :)        
     let $results := ($targetCountResults, $instanceResults)
     return

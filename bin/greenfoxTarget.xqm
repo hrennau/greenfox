@@ -20,10 +20,12 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Returns the target paths of a resource shape.
  :
- : The target is identified either by a path (@path)
- : or by a foxpath expression (@foxpath). The path is
- : appended to the context path. The foxpath is
- : evaluated.
+ : The target is identified either by a path (@path) or
+ : by a foxpath expression (@foxpath), or by an expression
+ : producing link targets (@linkXPath, @recursiveLinkXPath).
+ :
+ : The path is appended to the context path. The foxpath is
+ : evaluated. Link targets are resolved.
  :
  : @param resourceShape a file or folder shape
  : @param context a map of variable bindings
@@ -150,6 +152,7 @@ declare function f:getTargetPaths_recursiveLinkTargets($xpath as xs:string,
  :)    
 };
 
+(:
 (:~
  : Recursive helper function of `getTargetPaths_recursiveLinkTargets`.
  :
@@ -171,7 +174,7 @@ declare function f:getTargetPaths_recursiveLinkTargetsRC($xpath as xs:string,
         f:getTargetPaths_recursiveLinkTargetsRC($xpath, ., $evaluationContext, $newSofar) [not(. = $newSofar)]
     return ($sofar, $newPaths, $newPathsR) => distinct-values() => sort()           
 };
-
+:)
 
 (:~
  : Validates the target count of a resource shape or a focus node.
