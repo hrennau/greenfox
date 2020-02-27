@@ -196,7 +196,8 @@ return
 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="count minCount maxCount msg countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id"
+                    attNames="count minCount maxCount msg countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id
+                              targetLinkResolvable targetLinkResolvableMsg targetLinkResolvableMsgOK"
                     msg="Unexpected attributes in 'targetSize' element; expected: $attNames"
                     msgOK="OK - 'folder' element: no unexpected attributes"/>
 

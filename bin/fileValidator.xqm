@@ -29,6 +29,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFile, $context, $gxFile/gx:targetSize)
+    let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
+    let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
+(: 
     let $contextPath := $context?_contextPath
     let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath, @recursiveLinkXPath)[1]
     let $targetPathsAndErrorInfos := f:getTargetPaths($gxFile, $context)
@@ -38,12 +42,13 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     (: Check targetSize :)
     let $targetCountResults := $gxFile/gx:targetSize 
                                ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
+:)                               
     (: Check instances :)
     let $instanceResults := $targetPaths 
                             ! f:validateFileInstance(., $gxFile, $context)
     
     (: Merge results :)        
-    let $results := ($targetCountResults, $instanceResults)
+    let $results := ($targetValidationResults, $instanceResults)
     return
         $results
 };

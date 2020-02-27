@@ -339,7 +339,7 @@ declare function f:resolveLinks(
                              $mediatype as xs:string?,
                              $recursive as xs:boolean,
                              $context as map(xs:string, item()*))
-        as item()* {
+        as map(xs:string, item()*)* {
     let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
     return
         $linkMaps
@@ -369,14 +369,14 @@ declare function f:resolveLinksRC($expr as xs:string,
                                   $errorsSofar as xs:string*)
         as map(xs:string, item()*)* {
            
-    let $exprValue := f:resolveLinkExpression($expr, $contextNode, $context)
+    let $exprValue := trace(f:resolveLinkExpression($expr, $contextNode, $context) , '_EXPR_VALUE: ')
     let $targetsAndErrors :=   
         for $linkValue in $exprValue
         let $baseUri := (
             $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
             $filepath
         )[1]
-        let $uri := resolve-uri($linkValue, $baseUri)
+        let $uri := trace(resolve-uri($linkValue, $baseUri) , '_URI: ')
         where not($uri = ($pathsSofar, $errorsSofar))
         return
             (: If the link value cannot be resolved to a URI, an error is detected :)
@@ -395,14 +395,19 @@ declare function f:resolveLinksRC($expr as xs:string,
                         else 
                             map{'uri': $uri, 'doc': $jdoc}
                         
-            else (: if not JSON, XML is assumed :) 
+            else if ($mediatype = 'xml') then 
                 if (not(doc-available($uri))) then 
                     map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
                 else 
                     map{'uri': $uri, 'doc': doc($uri)}
+            else
+                if (i:resourceExists($uri)) then
+                    map{'uri': $uri, 'linkValue': string($linkValue)}
+                else
+                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
     
     let $errorInfos := $targetsAndErrors[?error eq 'true'][?uri eq '' or not(?uri = $errorsSofar)]
-    let $targetInfos := $targetsAndErrors[?doc][not(?uri = $pathsSofar)]
+    let $targetInfos := $targetsAndErrors[not(?error eq 'true')][not(?uri = $pathsSofar)]
     
     let $newErrors := $errorInfos?uri    
     let $newPaths := $targetInfos?uri
