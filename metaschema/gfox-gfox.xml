@@ -389,6 +389,11 @@ return
                     notMatchesMsg="A foxpath expression on 'folder' must be relative, must not start with a backslash"
                     notMatchesMsgOK="OK - 'folder' @foxpath does not start with a backslash"/>
 
+                <!-- @path must not contain wild cards -->
+                <xpath expr="@path" notMatches="[*?]"
+                    notMatchesMsg="A path expression on 'folder' must not contain wildcards"
+                    notMatchesMsgOK="OK - 'folder' @path expression on 'folder' valid"/>
+                
             </focusNode>
 
             <!-- ========================================
@@ -410,6 +415,11 @@ return
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
+                <!-- @path must not contain wildcards -->
+                <xpath expr="@path" notMatches="[*?]"
+                    notMatchesMsg="A path expression on 'file' must not contain wildcards"
+                    notMatchesMsgOK="OK - 'file' @path expression on 'folder' valid"/>
+                
             </focusNode>
 
             <!-- ========================================

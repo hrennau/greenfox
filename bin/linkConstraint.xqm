@@ -96,24 +96,7 @@ declare function f:validateLinksResolvable(
     let $docsAndErrors := f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
     
     let $docs := $docsAndErrors?doc
-    let $errors := $docsAndErrors[?error eq 'true']
-    (:
-    let $colour := if (exists($errors)) then 'red' else 'green'
-    let $values :=  if (empty($errors)) then () 
-                    else if ($recursive) then 
-                        $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
-                    else 
-                        $errors ! <gx:value>{?linkValue}</gx:value>
-    return (
-        f:validationResult_links(
-                            $colour, $valueShape, (), 
-                            $resultAdditionalAtts, $values, 
-                            $contextInfo, $resultOptions),
-        let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
-        return 
-            f:validateLinkCount($uris, $valueShape, $contextInfo)
-    )
-    :)
+    let $errors := $docsAndErrors[?errorCode]
     return (
         f:validationResult_links_for_linkErrors($errors, $recursive, $valueShape, $contextInfo)
         ,
@@ -166,7 +149,7 @@ declare function f:validateLinkCount($exprValue as item()*,
  : ============================================================================ :)
 
 declare function f:validationResult_links_for_linkErrors($errors as map(*)*,
-                                                         $recursive as xs:boolean,
+                                                         $recursive as xs:boolean?,
                                                          $valueShape as element(),
                                                          $contextInfo) 
         as element() {
@@ -318,10 +301,12 @@ declare function f:validationResult_linkCount($colour as xs:string,
 
 (:~
  : Resolves links specified by an expression producing the file paths (relative or
- : absolute) of link targets. Returns for each link a map providing URI and document 
- : node (if resolvable), or URI, original link value, file path of the document 
- : containing the link and error flag (otherwise). If $recursive is true, links are 
- : resolved recursively.
+ : absolute) of link targets. Returns for each link an evaluation report, which is
+ : a map providing the link value, the link URI, the filepath of the link defining
+ : document, the target document (if mediatype is XML or JSON and if the link could
+ : be resolved) and an optional error code. Absence/presence of an errorCode means 
+ : successful/failed link resolution. If $recursive is true, links are resolved 
+ : recursively.
  :
  : @param expr expression producing the file paths of link targets (relative or absolute)
  : @param contextNode context node to be used when evaluating the link producing expression
@@ -337,7 +322,7 @@ declare function f:resolveLinks(
                              $contextNode as node(),
                              $filepath as xs:string,
                              $mediatype as xs:string?,
-                             $recursive as xs:boolean,
+                             $recursive as xs:boolean?,
                              $context as map(xs:string, item()*))
         as map(xs:string, item()*)* {
     let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
@@ -363,7 +348,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                                   $contextNode as node(),
                                   $filepath as xs:string,                                  
                                   $mediatype as xs:string?,
-                                  $recursive as xs:boolean,
+                                  $recursive as xs:boolean?,
                                   $context as map(xs:string, item()*),
                                   $pathsSofar as xs:string*,
                                   $errorsSofar as xs:string*)
@@ -381,33 +366,64 @@ declare function f:resolveLinksRC($expr as xs:string,
         return
             (: If the link value cannot be resolved to a URI, an error is detected :)
             if (not($uri)) then
-                map{'uri': '', 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}            
+                map{'type': 'linkResolutionReport',
+                    'linkValue': string($linkValue),                
+                    'uri': '',
+                    'errorCode': 'no_uri', 
+                    'filepath': $filepath}            
         
             else if ($mediatype = 'json') then            
                 if (not(unparsed-text-available($uri))) then 
-                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                    map{'type': 'linkResolutionReport',
+                        'linkValue': string($linkValue), 
+                        'uri': $uri, 
+                        'errorCode': 'nofind_text', 
+                        'filepath': $filepath}
                 else
                     let $text := unparsed-text($uri)
                     let $jdoc := try {json:parse($text)} catch * {()}
                     return 
                         if (not($jdoc)) then 
-                            map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                            map{'type': 'linkResolutionReport',
+                                'linkValue': string($linkValue), 
+                                'uri': $uri, 
+                                'errorCode': 'not_json', 
+                                'filepath': $filepath}
                         else 
-                            map{'uri': $uri, 'doc': $jdoc}
+                            map{'type': 'linkResolutionReport',
+                                'linkValue': string($linkValue),
+                                'uri': $uri, 
+                                'doc': $jdoc,
+                                'filepath': $filepath}
                         
-            else if ($mediatype = 'xml') then 
+            else if ($mediatype = 'xml') then trace(
                 if (not(doc-available($uri))) then 
-                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                    map{'type': 'linkResolutionReport',
+                        'linkValue': string($linkValue),
+                        'uri': $uri, 
+                        'errorCode': 'not_xml', 
+                        'filepath': $filepath}
                 else 
-                    map{'uri': $uri, 'doc': doc($uri)}
+                    map{'type': 'linkResolutionReport',
+                        'linkValue': string($linkValue),
+                        'uri': $uri, 
+                        'doc': doc($uri), 
+                        'filepath': $filepath} , '_EVALUATION_REPORT: ')
             else
                 if (i:resourceExists($uri)) then
-                    map{'uri': $uri, 'linkValue': string($linkValue)}
+                    map{'type': 'linkResolutionReport',
+                        'linkValue': string($linkValue),
+                        'uri': $uri, 
+                        'filepath': $filepath}
                 else
-                    map{'uri': $uri, 'linkValue': string($linkValue), 'error': 'true', 'filepath': $filepath}
+                    map{'type': 'linkResolutionReport',
+                        'linkValue': string($linkValue),
+                        'uri': $uri,                         
+                        'errorCode': 'no_resource', 
+                        'filepath': $filepath}
     
-    let $errorInfos := $targetsAndErrors[?error eq 'true'][?uri eq '' or not(?uri = $errorsSofar)]
-    let $targetInfos := $targetsAndErrors[not(?error eq 'true')][not(?uri = $pathsSofar)]
+    let $errorInfos := $targetsAndErrors[?errorCode][not(?uri = $errorsSofar)]
+    let $targetInfos := $targetsAndErrors[not(?errorCode)][not(?uri = $pathsSofar)]
     
     let $newErrors := $errorInfos?uri    
     let $newPaths := $targetInfos?uri

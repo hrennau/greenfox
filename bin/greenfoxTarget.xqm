@@ -31,12 +31,12 @@ declare function f:getTargetPaths($resourceShape as element(),
                                   $targetConstraints as element(gx:targetSize)?)
         as item()* {     
     (: Retrieve target paths :)
-    let $targetPathsAndLinkInfos := f:getTargetPaths($resourceShape, $context)
-    let $targetPaths := $targetPathsAndLinkInfos[. instance of xs:anyAtomicType]
+    let $targetPathsAndEvaluationReports := f:getTargetPaths($resourceShape, $context)
+    let $targetPaths := $targetPathsAndEvaluationReports[. instance of xs:anyAtomicType]
     return if (not($targetConstraints)) then $targetPaths else
     
     (: Perform validation of target paths :)
-    let $linkInfos := $targetPathsAndLinkInfos[. instance of map(*)]
+    let $evaluationReports := $targetPathsAndEvaluationReports[. instance of map(*)]
     let $contextPath := $context?_contextPath
     let $targetDeclaration := $resourceShape/(@path, @foxpath, @linkXPath, @recursiveLinkXPath)
     let $validationResults := f:validateTargetConstraints(
@@ -44,7 +44,7 @@ declare function f:getTargetPaths($resourceShape as element(),
                                         $targetDeclaration, 
                                         $targetPaths, 
                                         $contextPath, 
-                                        $linkInfos)
+                                        $evaluationReports)
     (: Returntarget paths and validation results :)                                        
     return
         ($targetPaths, $validationResults)
@@ -56,7 +56,8 @@ declare function f:getTargetPaths($resourceShape as element(),
  :
  : ============================================================================ :)
 (:~
- : Returns the target paths of a resource shape.
+ : Returns the target paths of a resource shape, optionally also
+ : evaluation reports. 
  :
  : The target is identified either by a path (@path) or
  : by a foxpath expression (@foxpath), or by an expression
@@ -65,6 +66,11 @@ declare function f:getTargetPaths($resourceShape as element(),
  : The path is appended to the context path. The foxpath is
  : evaluated. Link targets are resolved.
  :
+ : Whether evaluation reports are returned depends on the kind 
+ : of target declaration:
+ : - if path of foxpath: no reports
+ : - if links or recursive links: with reports
+ : 
  : @param resourceShape a file or folder shape
  : @param context a map of variable bindings
  : @return the target paths :)
@@ -80,28 +86,22 @@ declare function f:getTargetPaths($resourceShape as element(),
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
     
-    let $targetPathsAndLinkInfos :=
+    let $targetPathsAndEvaluationReports :=
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $linkTargets := $resourceShape/@linkXPath
-        let $recursiveLinkTargets := $resourceShape/@recursiveLinkXPath
-        let $pathsAndLinkInfos := (
+        let $linkTargets := $resourceShape/(@linkXPath, @recursiveLinkXPath)[1]
+        let $linkTargetsRecursive := $linkTargets instance of attribute(recursiveLinkXPath)
+        return
             if ($path) then 
                 f:getTargetPaths_path($path, $contextPath)
             else if ($foxpath) then
-                f:getTargetPaths_foxpath($foxpath, $contextPath, $evaluationContext)
+                f:getTargetPaths_foxpath(
+                    $foxpath, $contextPath, $evaluationContext)
             else if ($linkTargets) then
-                f:getTargetPaths_linkTargets($linkTargets, $contextPath, $context)
-            else if ($recursiveLinkTargets) then
-                f:getTargetPaths_recursiveLinkTargets($recursiveLinkTargets, $contextPath, $context)
+                f:getTargetPaths_linkTargets(
+                    $linkTargets, $linkTargetsRecursive, $resourceShape, $contextPath, $context)
             else error()
-        )
-        (: let $_DEBUG := if (not($linkTargets)) then () else  trace($pathsAndLinkInfos, '_PATHS_AND_LINK_INFOS: ') :)
-        let $paths := $pathsAndLinkInfos[. instance of xs:anyAtomicType][$isExpectedResourceKind(.)]
-        let $linkInfos := $pathsAndLinkInfos[. instance of map(*)]
-        return
-            ($paths, $linkInfos)
-    return $targetPathsAndLinkInfos        
+    return $targetPathsAndEvaluationReports
 };        
 
 (:~
@@ -130,51 +130,55 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
                                           $contextPath as xs:string,
                                           $evaluationContext as map(xs:QName, item()*))
         as xs:string* {
-    i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())        
-};
-
-(:~
- : Evaluates the target paths which are link targets. Returns all links 
- : which could be resolved to a resource, as well as for each link (whether
- : or not it could be resolved to a resource) a link describing map.
- :
- : @param xpath XPath expression producing the links values
- : @param contextPath file path of the context item
- : @param evaluationContext XPath evaluation context
- : @return the target paths corresponding to the link targets, and link info maps
- :)
-declare function f:getTargetPaths_linkTargets($xpath as xs:string, 
-                                              $contextPath as xs:string, 
-                                              $context as map(xs:string, item()*))
-        as item()* {
-    if (not(doc-available($contextPath))) then 
-        map{'error': 'true', 'reason': 'Document cannot be parsed', 'filepath': $contextPath}
-    else        
-    let $doc :=  doc($contextPath)
-    let $linkMaps := i:resolveLinks($xpath, $doc, $contextPath, (), false(), $context)
-    let $uris := $linkMaps[not(?error)]?uri
-    return ($uris, $linkMaps)
+    i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
 };
 
 (:~
  : Evaluates the target paths which are recursive link targets. The path producing
  : expression is recursively applied to the documents obtained by resolving the links.
+ : The function returns the URIs of successfully resolved links, as well as link
+ : reports for all links, both successfully and not successfully resolved.
  :
  : @param xpath XPath expression producing the links values
  : @param contextPath file path of the context item
- : @param evaluationContext XPath evaluation context
- : @return the target paths corresponding to the link targets, and error describing maps
+ : @param context processing context
+ : @return the URIs of link values successfully resolved, and link reports 
+ :  for all link values
  :)
-declare function f:getTargetPaths_recursiveLinkTargets($xpath as xs:string, 
-                                                       $contextPath as xs:string, 
-                                                       $context as map(xs:string, item()*))
+declare function f:getTargetPaths_linkTargets(
+                                  $xpath as xs:string, 
+                                  $recursive as xs:boolean,
+                                  $resourceShape as element(),
+                                  $contextPath as xs:string, 
+                                  $context as map(xs:string, item()*))
         as item()* {
-    if (not(doc-available($contextPath))) then () else        
-    let $doc :=  doc($contextPath)
-    let $targetAndErrorMaps := i:resolveLinks($xpath, $doc, $contextPath, (), true(), $context)
-    let $uris := $targetAndErrorMaps[?doc]?uri
-    let $errorMaps := $targetAndErrorMaps[not(?error)]    
-    return ($uris, $errorMaps)
+    let $contextMediatype := ($resourceShape/@mediatype, 'xml')[1]
+    let $targetMediatype := trace(
+        if ($resourceShape/@mediatype) then $resourceShape/@mediatype
+        else if ($recursive) then 'xml'
+        else () , '___TARGET_MEDIATYPE: ')
+
+    let $doc :=
+        if ($contextMediatype eq 'xml') then
+            if (not(doc-available($contextPath))) then () 
+            else doc($contextPath)
+        else if ($contextMediatype eq 'json') then
+            if (not(unparsed-text-available($contextPath))) then ()
+            else
+                let $text := unparsed-text($contextPath)
+                return
+                    try{json:parse($text)} catch * {()}
+    return
+        if (not($doc)) then  
+            map{'type': 'linkResolutionReport',
+                'errorCode': 'context_document_not_' || $contextMediatype, 
+                'filepath': $contextPath}
+        else
+    
+    let $reports := i:resolveLinks(
+        $xpath, $doc, $contextPath, $targetMediatype, $recursive, $context)
+    let $uris := $reports[not(?errorCode)]?uri
+    return ($uris, $reports)   
 };
 
 (: ============================================================================
@@ -198,12 +202,12 @@ declare function f:validateTargetConstraints($constraints as element(),
                                              $targetDeclaration as attribute(),
                                              $targetResources as item()*,                                             
                                              $contextPath as xs:string,
-                                             $targetLinkInfos as map(*)*)
+                                             $evaluationReports as map(*)*)
         as element()* {
     let $countResults := f:validateTargetCount($constraints, $targetResources, 
                                                $contextPath, $targetDeclaration)
     let $linkResults := f:validateTargetLinks($constraints, $targetDeclaration, 
-                                              $contextPath, $targetLinkInfos)   
+                                              $contextPath, $evaluationReports)   
     return ($countResults, $linkResults)
 };        
 
@@ -217,7 +221,7 @@ declare function f:validateTargetConstraints($constraints as element(),
 declare function f:validateTargetLinks($constraints as element(),
                                        $targetDeclaration as attribute(),   
                                        $contextPath as xs:string,
-                                       $targetLinkInfos as map(*)*)
+                                       $evaluationReports as map(*)*)
         as element()? {
         if (not($constraints/@targetLinkResolvable eq 'true')) then () else        
         
@@ -228,7 +232,7 @@ declare function f:validateTargetLinks($constraints as element(),
         let $resultAdditionalAtts := ()
         let $resultOptions := ()
         let $recursive := $targetDeclaration instance of attribute(recursiveLinkXPath)
-        let $targetLinkErrors := $targetLinkInfos[?error]    
+        let $targetLinkErrors := $evaluationReports[?errorCode]    
         let $colour := if (exists($targetLinkErrors)) then 'red' else 'green'
         let $values :=  
             if (empty($targetLinkErrors)) then () 
@@ -243,7 +247,7 @@ declare function f:validateTargetLinks($constraints as element(),
                                 $colour, 
                                 $targetDeclaration, 
                                 $constraints,
-                                $targetLinkInfos,
+                                $evaluationReports,
                                 $resultAdditionalAtts, 
                                 $values,
                                 $contextInfo, 
@@ -358,7 +362,9 @@ declare function f:validationResult_targetCount(
  : Creates a validation result for a TargetLinkResolvable constraint.
  :
  : @param colour 'green' or 'red', indicating violation or conformance
- : @param exprValue expression value producing the links
+ : @param targetDeclaration a @linkXPath or @recursiveLinkXPath attribute
+ : @param constraints element defining the target constraints
+ : @param evaluationReports evaluation reports as obtained for all link values
  : @param additionalAtts additional attributes to be included in the validation result
  : @param additionalElems additional elements to be included in the validation result 
  : @param contextInfo information about the resource context
@@ -369,7 +375,7 @@ declare function f:validationResult_targetLinks(
                                     $colour as xs:string,
                                     $targetDeclaration as attribute(),
                                     $constraints as element(),
-                                    $exprValue as item()*,
+                                    $evaluationReports as item()*,
                                     $additionalAtts as attribute()*,
                                     $additionalElems as element()*,
                                     $contextInfo as map(xs:string, item()*),
@@ -384,7 +390,7 @@ declare function f:validationResult_targetLinks(
     let $standardAttNames := $constraintConfig?atts
     let $standardAtts := $constraints/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
-    let $valueCountAtt := attribute valueCount {count($exprValue)} 
+    let $valueCountAtt := attribute valueCount {count($evaluationReports)} 
     
     let $resourceShapeId := $constraints/@resourceShapeID
     let $constraintId := concat($resourceShapeId, '-targetLinkResolvable')
