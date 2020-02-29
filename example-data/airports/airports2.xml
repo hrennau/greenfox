@@ -7,4 +7,7 @@
     <airport href="airport-jfk.xml">
         <code>JFK</code>
     </airport>
+    <airport href="airport-chq.xml">
+        <code>CHQ</code>
+    </airport>
 </airports>

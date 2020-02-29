@@ -1,0 +1,15 @@
+{
+    "airports": [
+    {
+        "airport": {
+            "code": "MAX",
+            "moreAirports2": {
+                "href": "airports2.json"
+            },
+            "moreAirports": {
+                "href": "airports.json"
+            }
+        }
+    }
+    ]
+}

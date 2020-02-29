@@ -202,7 +202,7 @@ return
                     msgOK="OK - 'folder' element: no unexpected attributes"/>
 
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="minCount maxCount count"
+                <ex:oneOrMoreAtts attNames="minCount maxCount count targetLinkResolvable"
                     msg="A 'targetSize' shape must contains at least one of these attributes: $attNames"
                     msgOK="OK - 'targetSize' element: has at least one of these attributes: $attNames"/>
 

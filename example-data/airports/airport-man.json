@@ -1,0 +1,10 @@
+{
+    "airports": [
+    {
+        "airport": {
+            "code": "man",
+            "href": "airport-max.json"
+        }
+    }
+    ]
+}

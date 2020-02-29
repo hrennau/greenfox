@@ -36,35 +36,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFolder($gxFolder as element(), $context as map(xs:string, item()*)) 
         as element()* {
-    let $contextPath := $context?_contextPath
-    let $components := $gxFolder/*[not(@deactivated eq 'true')]
-    let $targetDecl := $gxFolder/(@foxpath, @path)[1]
-    let $targetPathsAndErrorInfos := f:getTargetPaths($gxFolder, $context)
-    let $targetPaths := $targetPathsAndErrorInfos[. instance of xs:anyAtomicType]
-    let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
-
-    (:
-    (: check: targetSize :)                    
-    let $targetCount := count($targetPaths)
-    let $contextPathLabel := replace($contextPath, '\\', '/')
-    (:
-        if ($targetCount eq 1) then $targetPaths
-        else replace($contextPath, '\\', '/')
-     :)        
-    let $targetCountResults := 
-        let $constraint := $components/self::gx:targetSize
-        return
-            if (not($constraint)) then ()
-            else    
-                $components/self::gx:targetSize                
-                                /i:validateTargetCount(., $targetPaths, $contextPathLabel, $targetDecl)
-    :)
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFolder, $context, $gxFolder/gx:targetSize)
+    let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
+    let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
     
-    (: Check targetSize :)
-    let $targetCountResults := $gxFolder/gx:targetSize 
-                               ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
     (: Check instances :)                            
     let $instanceResults := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
+    
 (:        
     let $subsetResults :=
         for $gxFolderSubset in $components/self::gx:folderSubset
@@ -88,13 +66,18 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
         return ($targetCountResults, $instanceResults)
     let $results := ($targetCountResults, $instanceResults, $subsetResults)
 :)    
-    let $results := ($targetCountResults, $instanceResults)
+    let $results := ($targetValidationResults, $instanceResults)
     return
         $results 
 };
 
 (:~
- : Validates a folder instance against the folder shape.
+ : Validates a folder instance against a folder shape.
+ :
+ : @param folderPath the file system path of the folder
+ : @param gxFolder a folder shape
+ : @param context the processing context
+ : @return validation results
  :)
 declare function f:validateFolderInstance($folderPath as xs:string, 
                                           $gxFolder as element(), 

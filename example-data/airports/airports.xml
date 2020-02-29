@@ -3,7 +3,7 @@
     <airport href="airport-jfk.xml">
         <code>JFK</code>
     </airport>
-    <airport href="airport-cgnX.xml"/>
+    <airport href="airport-cgn.xml"/>
     <airport href="airport-man.xml"/>
     <airport>
         <code>MUN</code>
@@ -12,5 +12,4 @@
     <airport href="airport-fra.xml">
         <code>FRA</code>
     </airport>
-    <airport href="user-extensions/user-extension-dus/airport-dus.xml"/>
 </airports>

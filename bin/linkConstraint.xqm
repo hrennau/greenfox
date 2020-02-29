@@ -90,9 +90,9 @@ declare function f:validateLinksResolvable(
     let $resultAdditionalAtts := attribute recursive {true()}
     let $resultOptions := ()
     
-    let $expr := $valueShape/@xpath
-    let $mediatype := $valueShape/@mediatype
+    let $expr := $valueShape/@xpath    
     let $recursive := $valueShape/@recursive/xs:boolean(.)
+    let $mediatype := ($valueShape/@mediatype, 'xml'[$recursive])[1]    
     let $docsAndErrors := f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
     
     let $docs := $docsAndErrors?doc
@@ -354,14 +354,16 @@ declare function f:resolveLinksRC($expr as xs:string,
                                   $errorsSofar as xs:string*)
         as map(xs:string, item()*)* {
            
-    let $exprValue := trace(f:resolveLinkExpression($expr, $contextNode, $context) , '_EXPR_VALUE: ')
+    let $exprValue := f:resolveLinkExpression($expr, $contextNode, $context)    
     let $targetsAndErrors :=   
         for $linkValue in $exprValue
         let $baseUri := (
-            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.),
+            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.)
+                      [string()]
+                      [. ne static-base-uri()],
             $filepath
         )[1]
-        let $uri := trace(resolve-uri($linkValue, $baseUri) , '_URI: ')
+        let $uri := resolve-uri($linkValue, $baseUri)
         where not($uri = ($pathsSofar, $errorsSofar))
         return
             (: If the link value cannot be resolved to a URI, an error is detected :)
@@ -396,7 +398,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                                 'doc': $jdoc,
                                 'filepath': $filepath}
                         
-            else if ($mediatype = 'xml') then trace(
+            else if ($mediatype = 'xml') then
                 if (not(doc-available($uri))) then 
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
@@ -408,7 +410,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                         'linkValue': string($linkValue),
                         'uri': $uri, 
                         'doc': doc($uri), 
-                        'filepath': $filepath} , '_EVALUATION_REPORT: ')
+                        'filepath': $filepath}
             else
                 if (i:resourceExists($uri)) then
                     map{'type': 'linkResolutionReport',

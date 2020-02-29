@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <airports>
-    <airport href="airport-max.xml">
-        <code>MAN</code>
+    <airport>
+        <code>CHQ</code>
     </airport>
 </airports>

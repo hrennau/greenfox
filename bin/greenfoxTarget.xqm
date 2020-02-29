@@ -152,11 +152,11 @@ declare function f:getTargetPaths_linkTargets(
                                   $contextPath as xs:string, 
                                   $context as map(xs:string, item()*))
         as item()* {
-    let $contextMediatype := ($resourceShape/@mediatype, 'xml')[1]
-    let $targetMediatype := trace(
+    let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
+    let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
         else if ($recursive) then 'xml'
-        else () , '___TARGET_MEDIATYPE: ')
+        else ()
 
     let $doc :=
         if ($contextMediatype eq 'xml') then

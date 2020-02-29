@@ -1,0 +1,19 @@
+<greenfox xmlns="http://www.greenfox.org/ns/schema" greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog" xml:base="file:///C:/tt/greenfox/example-schemas/howto/LinkTargetsAsTargets/recursive-link-targets-as-targets.json.gfox.xml">
+    
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <domain id="domain_1" path="C:\tt\greenfox\example-data" name="greenfox-example-data">
+        <folder id="airportsFolderFolderShape" resourceShapeID="airportsFolderFolderShape" foxpath="airports">
+            <targetSize resourceShapeID="airportsFolderFolderShape" id="targetSize_1" countMsg="Missing folder: airports" count="1"/>            
+            <file id="airportsFileShape" resourceShapeID="airportsFileShape" foxpath="airports.json" mediatype="json">
+                <file id="linkTargetsFileShape" resourceShapeID="linkTargetsFileShape" recursiveLinkXPath="//href" mediatype="json">
+                    <targetSize resourceShapeID="linkTargetsFileShape" id="targetSize_2" minCount="9" minCountMsg="Not expected number of link targets" targetLinkResolvable="true" targetLinkResolvableMsg="Target links could not be resolved"/>
+                    <xpath resourceShapeID="linkTargetsFileShape" id="xpath_1" valueShapeID="xpath_1" expr="//code" exists="true" existsMsg="Missing code value"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>

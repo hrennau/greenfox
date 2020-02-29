@@ -11,7 +11,7 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
                 <file linkXPath="//@href" id="linkTargetsFileShape">
-                    <targetSize minCount="4" 
+                    <targetSize minCount="5" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"/>
