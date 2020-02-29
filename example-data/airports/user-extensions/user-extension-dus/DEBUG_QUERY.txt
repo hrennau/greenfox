@@ -1,6 +1,0 @@
-declare namespace gx="http://www.greenfox.org/ns/schema";
-declare variable $filePath external;
-declare variable $domain external;
-declare variable $fileName external;
-declare variable $domainName external;
-airports.json

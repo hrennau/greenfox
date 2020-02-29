@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint components FileName...
+    
+    Constraint components:
+    * FileNameLike - @like
+    * FileNameNotLike - @notLike
+    
+    Validation catches 
+    * .json files with a name pattern not matching 'airport*.json'
+    * .json files with a name pattern matching '*test*'
+    
+    Note parameters not used in the example:
+    : @case - if 'true', the name is compared case-sensitively; default: 'false'
+    * @flags - regex flags, used in @like, @notLike, @matches, @notMatches; default: ''
+    
+    Note the following similar constraint components:
+    * FileNameEq - @eq
+    * FileNameNe - @ne
+    * FíleNameMatches - @matches
+    * FileNameNotMatches - @notMatches   
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-filename"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath=".\\*.json" id="jsonFileShape">
+                <fileName case="false" 
+                          like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
+                          notLike="*test*" notLikeMsg="JSON files should not match pattern '*test*'"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

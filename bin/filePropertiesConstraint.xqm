@@ -27,13 +27,14 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     let $ge := $constraint/@ge
     let $eq := $constraint/@eq
     let $like := $constraint/@like
+    let $notLike := $constraint/@notLike
     let $matches := $constraint/@matches
+    let $notMatches := $constraint/@notMatches
     
-    let $regexLike := $like/f:glob2regex(.)
     let $actValue := file:last-modified($filePath) ! string(.)
     
     let $results := 
-        for $facet in ($lt, $gt, $le, $ge, $eq, $like, $matches)
+        for $facet in ($lt, $gt, $le, $ge, $eq, $like, $notLike, $matches, $notMatches)
         let $violation :=
             switch($facet/local-name(.))
             case 'lt' return $actValue >= $facet
@@ -42,7 +43,9 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             case 'ge' return $actValue < $facet
             case 'eq' return $actValue != $facet
             case 'matches' return not(matches($actValue, $matches))
-            case 'like' return not(matches($actValue, $regexLike))
+            case 'notMatches' return matches($actValue, $notMatches)
+            case 'like' return not(matches($actValue, $like/f:glob2regex(.)))
+            case 'notLike' return matches($actValue, $notLike/f:glob2regex(.))
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
         return   
@@ -54,12 +57,13 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
         as element()* {
     let $constraintId := $constraint/@id
     let $constraintLabel := $constraint/@label
-    
-    let $lt := $constraint/@lt
-    let $gt := $constraint/@gt
-    let $le := $constraint/@le
-    let $ge := $constraint/@ge
+
     let $eq := $constraint/@eq
+    let $ne := $constraint/@ne
+    let $lt := $constraint/@lt
+    let $le := $constraint/@le    
+    let $gt := $constraint/@gt
+    let $ge := $constraint/@ge
     
     let $actValue := file:size($filePath)
     
@@ -67,11 +71,46 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
         for $facet in ($lt, $gt, $le, $ge, $eq)
         let $violation :=
             switch($facet/local-name(.))
+            case 'eq' return $actValue != $facet
+            case 'ne' return $actValue = $facet
             case 'lt' return $actValue >= $facet
             case 'le' return $actValue > $facet
             case 'gt' return $actValue <= $facet
             case 'ge' return $actValue < $facet
-            case 'eq' return $actValue != $facet
+            default return error()
+        let $colour := if ($violation) then 'red' else 'green'
+        return   
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
+    return $results                        
+};
+
+declare function f:validateFileName($filePath as xs:string, $constraint as element(gx:fileName), $context)
+        as element()* {
+    let $constraintId := $constraint/@id
+    let $constraintLabel := $constraint/@label
+    
+    let $eq := $constraint/@eq
+    let $ne := $constraint/@ne    
+    let $like := $constraint/@like
+    let $notLike := $constraint/@notLike    
+    let $matches := $constraint/@matches
+    let $notMatches := $constraint/@notMatches
+    let $flags := ($constraint/@flags, '')[1]
+    let $case := $constraint/@case/xs:boolean(.)
+
+    let $actValue := file:name($filePath)
+    let $actValueED := if ($case) then $actValue else lower-case($actValue)
+    let $results := 
+        for $facet in ($eq, $ne, $like, $notLike, $matches, $notMatches)
+        let $facetED := if ($case) then $facet else lower-case($facet)
+        let $violation :=
+            switch($facet/local-name(.))
+            case 'eq' return $actValueED ne $facetED
+            case 'ne' return $actValueED eq $facetED
+            case 'like' return not(matches($actValueED, f:glob2regex($facetED), $flags))
+            case 'notLike' return matches($actValueED, f:glob2regex($facetED), $flags)
+            case 'matches' return not(matches($actValueED, $facetED, $flags))
+            case 'notMatches' return matches($actValueED, $facetED, $flags)
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
         return   
@@ -83,7 +122,7 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
  : Constraint component, constraining the file or folder name.
  : The constraint element $fileName can be a <gx:fileName> or a <gx:folderName>.
  :)
-declare function f:validateFileName($filePath as xs:string, $fileName as element(), $context)
+declare function f:validateFileName_obsolete($filePath as xs:string, $fileName as element(), $context)
         as element()* {
     let $constraintId := $fileName/@id
     let $constraintLabel := $fileName/@label
@@ -155,7 +194,11 @@ declare function f:constructError_fileProperties($colour as xs:string,
     let $elemName := 'gx:' || $colour    
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), concat('Last modified should be ', local-name($constraint), ' ', $constraint))
+        else 
+            i:getErrorMsg($constraintElem, 
+                          $constraint/local-name(.), 
+                          concat('Last modified should be ', 
+                          local-name($constraint), ' ', $constraint))
     let $values := i:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)

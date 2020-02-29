@@ -227,30 +227,6 @@ return
             </focusNode>
 
             <!-- ========================================
-                    <lastModified>
-                 ======================================== -->
-            
-            <focusNode xpath="*:greenfox//*:lastModified">
-                <!-- attribute names -->
-                <ex:allowedAtts 
-                    attNames="id 
-                              eq eqMsg eqMsgOK
-                              lt ltMsg ltMsgOK
-                              le leMsg leMsgOK
-                              gt gtMsg gtMsgOK
-                              ge geMsg gtMsgOK
-                              matches matchesMsg matchesMsgOK
-                              like likeMsg likeMsgOK"
-                    msg="Unexpected attributes in 'lastModified' element."
-                    msgOK="OK - 'lastModified' element: no unexpected attributes"/>
-                <ex:oneOrMoreAtts
-                    attNames="eq lt le gt ge"
-                    msg="One of these attributes expected: $attNames"
-                    msgOK="OK - 'lastModified' element: required attributes found"/>
-                
-            </focusNode>
-            
-            <!-- ========================================
                     <folderContent>
                  ======================================== -->
 
@@ -380,7 +356,7 @@ return
                     msgOK="OK - 'folder' element: has foxpath or path"/>
 
                 <!-- element names -->
-                <ex:allowedElems elemNames="targetSize file folder folderContent foxpath"
+                <ex:allowedElems elemNames="targetSize file folder folderContent foxpath lastModified fileName"
                     msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
                     msgOK="OK - 'folder' element: no unexpected elements"/>
 
@@ -411,7 +387,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize focusNode ifMediatype xsdValid mediatype grep"
+                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName focusNode ifMediatype xsdValid mediatype grep"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
@@ -578,6 +554,50 @@ return
             <focusNode xpath="//*:fileSize">
             </focusNode>
 
+            <!-- ========================================
+                    <fileName>
+                 ======================================== -->
+            <focusNode xpath="//*:fileName">
+                <!-- allowed attributes -->
+                <ex:allowedAtts attNames="id descriptions
+                    flags case
+                    eq eqMsg eqMsgOK
+                    ne neMsg neMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK"
+                    msg="Unexpected attributes in 'xsdValid' element; expected: $attNames"
+                    msgOK="OK - 'xsdValid' element: no unexpected attributes"/>
+            </focusNode>
+            
+            <!-- ========================================
+                    <lastModified>
+                 ======================================== -->
+            
+            <focusNode xpath="*:greenfox//*:lastModified">
+                <!-- attribute names -->
+                <ex:allowedAtts 
+                    attNames="id label description
+                    eq eqMsg eqMsgOK
+                    lt ltMsg ltMsgOK
+                    le leMsg leMsgOK
+                    gt gtMsg gtMsgOK
+                    ge geMsg gtMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK"
+                    msg="Unexpected attributes in 'lastModified' element."
+                    msgOK="OK - 'lastModified' element: no unexpected attributes"/>
+                <ex:oneOrMoreAtts
+                    attNames="eq lt le gt ge"
+                    msg="One of these attributes expected: $attNames"
+                    msgOK="OK - 'lastModified' element: required attributes found"/>
+                
+            </focusNode>
+            
+            
             <!-- ========================================
                     <ifMediatype>
                  ======================================== -->

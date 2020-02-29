@@ -77,10 +77,9 @@ declare function f:getTargetPaths($resourceShape as element(),
 declare function f:getTargetPaths($resourceShape as element(), 
                                   $context as map(xs:string, item()*))
         as item()* {
-    let $isExpectedResourceKind := if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
     let $contextPath := $context?_contextPath  
     
-    (: _TO_DO_ cleanup - adhoc addition of $filePath and $fileName :)
+    (: Adhoc addition of $filePath and $fileName :)
     let $evaluationContext := $context?_evaluationContext
     let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $contextPath)
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
@@ -93,13 +92,11 @@ declare function f:getTargetPaths($resourceShape as element(),
         let $linkTargetsRecursive := $linkTargets instance of attribute(recursiveLinkXPath)
         return
             if ($path) then 
-                f:getTargetPaths_path($path, $contextPath)
+                f:getTargetPaths_path($path, $resourceShape, $context)
             else if ($foxpath) then
-                f:getTargetPaths_foxpath(
-                    $foxpath, $contextPath, $evaluationContext)
+                f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
             else if ($linkTargets) then
-                f:getTargetPaths_linkTargets(
-                    $linkTargets, $linkTargetsRecursive, $resourceShape, $contextPath, $context)
+                f:getTargetPaths_linkTargets($linkTargets, $linkTargetsRecursive, $resourceShape, $context)
             else error()
     return $targetPathsAndEvaluationReports
 };        
@@ -108,13 +105,20 @@ declare function f:getTargetPaths($resourceShape as element(),
  : Evaluates the target path given by a plain path expression.
  :
  : @param path plain path expression
- : @param contextPath file path of the context item
+ : @param resourceShape the resource shape 
+ : @param context the processing context
  : @return the target path
  :)
 declare function f:getTargetPaths_path($path as xs:string, 
-                                       $contextPath as xs:string)
+                                       $resourceShape as element(),
+                                       $context as map(xs:string, item()*))
         as xs:string* {
-    concat($contextPath, '\', $path)[file:exists(.)]        
+    let $contextPath := $context?_contextPath        
+    let $isExpectedResourceKind := 
+        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+    return    
+        concat($contextPath, '\', $path)[file:exists(.)]
+        [$isExpectedResourceKind(.)]        
 };
 
 (:~
@@ -122,15 +126,23 @@ declare function f:getTargetPaths_path($path as xs:string,
  : expression value.
  :
  : @param foxpath foxpath expression producing the target paths
+ : @param resourceShape the resource shape
  : @param contextPath file path of the context item
- : @param evaluationContext XPath evaluation context
+ : @param context the processing context
+ : 
  : @return the target paths corresponding to the link targets
  :)
 declare function f:getTargetPaths_foxpath($foxpath as xs:string, 
-                                          $contextPath as xs:string,
-                                          $evaluationContext as map(xs:QName, item()*))
+                                          $resourceShape as element(),
+                                          $context as map(xs:string, item()*))
         as xs:string* {
-    i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
+    let $contextPath := $context?_contextPath        
+    let $isExpectedResourceKind := 
+        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+    let $evaluationContext := $context?_evaluationContext        
+    return    
+        i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
+        [$isExpectedResourceKind(.)]
 };
 
 (:~
@@ -149,9 +161,11 @@ declare function f:getTargetPaths_linkTargets(
                                   $xpath as xs:string, 
                                   $recursive as xs:boolean,
                                   $resourceShape as element(),
-                                  $contextPath as xs:string, 
                                   $context as map(xs:string, item()*))
         as item()* {
+    let $contextPath := $context?_contextPath        
+    let $isExpectedResourceKind := 
+        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
     let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
@@ -177,7 +191,7 @@ declare function f:getTargetPaths_linkTargets(
     
     let $reports := i:resolveLinks(
         $xpath, $doc, $contextPath, $targetMediatype, $recursive, $context)
-    let $uris := $reports[not(?errorCode)]?uri
+    let $uris := $reports[not(?errorCode)]?uri [$isExpectedResourceKind(.)]
     return ($uris, $reports)   
 };
 

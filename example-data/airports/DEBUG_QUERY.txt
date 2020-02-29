@@ -1,9 +1,0 @@
-declare namespace gx="http://www.greenfox.org/ns/schema";
-declare variable $this external;
-declare variable $doc external;
-declare variable $jdoc external;
-declare variable $csvdoc external;
-declare variable $domain external;
-declare variable $filePath external;
-declare variable $fileName external;
-//code
