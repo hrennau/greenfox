@@ -31,9 +31,10 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*.json" id="jsonFileShape">
-                <fileName case="false" 
-                          like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
+                <fileName like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
                           notLike="*test*" notLikeMsg="JSON files should not match pattern '*test*'"/>
+                <fileName case="true"
+                          notMatches="\s-\sKopie" notLikeMsg="JSON files should not match regex ' - Kopie'"/>
             </file>
         </folder>
     </domain>
