@@ -1,7 +1,8 @@
 (:
  : -------------------------------------------------------------------------
  :
- : lastModifiedValidator.xqm - Document me!
+ : fileProperitesConstraint.xqm - functions checking the name, size or last 
+ :   modified time of a resource
  :
  : -------------------------------------------------------------------------
  :)
@@ -11,11 +12,18 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
 
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "greenfoxUtil.xqm",
-    "validationResult.xqm";
+    "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:~
+ : Validates the last modified time of a resource.
+ :
+ : @param filePath the file path of the resource
+ : @param constraint an element containing attributes declaring the constraints
+ : @param context the processing context
+ : @return validation results
+ :)
 declare function f:validateLastModified($filePath as xs:string, $constraint as element(gx:lastModified), $context)
         as element()* {
     let $constraintId := $constraint/@id
@@ -31,6 +39,8 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     let $matches := $constraint/@matches
     let $notMatches := $constraint/@notMatches
     
+    let $flags := string($constraint/@flags)
+    
     let $actValue := file:last-modified($filePath) ! string(.)
     
     let $results := 
@@ -42,17 +52,29 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             case 'gt' return $actValue <= $facet
             case 'ge' return $actValue < $facet
             case 'eq' return $actValue != $facet
-            case 'matches' return not(matches($actValue, $matches))
-            case 'notMatches' return matches($actValue, $notMatches)
-            case 'like' return not(matches($actValue, $like/f:glob2regex(.)))
-            case 'notLike' return matches($actValue, $notLike/f:glob2regex(.))
+            case 'matches' return not(matches($actValue, $matches, $flags))
+            case 'notMatches' return matches($actValue, $notMatches, $flags)
+            case 'like' return not(matches($actValue, $like/f:glob2regex(.), $flags))
+            case 'notLike' return matches($actValue, $notLike/f:glob2regex(.), $flags)            
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
+        let $additionalAtts := (
+            if (not($facet/local-name(.) = ('like', 'notLike', 'matches', 'notMatches'))) then ()
+            else attribute flags {$flags}
+        )
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
+(:~
+ : Validates the file size of a resource.
+ :
+ : @param filePath the file path of the resource
+ : @param constraint an element containing attributes declaring the constraints
+ : @param context the processing context
+ : @return validation results
+ :)
 declare function f:validateFileSize($filePath as xs:string, $constraint as element(gx:fileSize), $context)
         as element()* {
     let $constraintId := $constraint/@id
@@ -79,11 +101,20 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
             case 'ge' return $actValue < $facet
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
+        let $additionalAtts := ()
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
+(:~
+ : Validates the name of a resource.
+ :
+ : @param filePath the file path of the resource
+ : @param constraint an element containing attributes declaring the constraints
+ : @param context the processing context
+ : @return validation results
+ :)
 declare function f:validateFileName($filePath as xs:string, $constraint as element(gx:fileName), $context)
         as element()* {
     let $constraintId := $constraint/@id
@@ -95,8 +126,9 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
     let $notLike := $constraint/@notLike    
     let $matches := $constraint/@matches
     let $notMatches := $constraint/@notMatches
+    
     let $flags := ($constraint/@flags, '')[1]
-    let $case := $constraint/@case/xs:boolean(.)
+    let $case := ($constraint/@case/xs:boolean(.), false())[1]
 
     let $actValue := file:name($filePath)
     let $actValueED := if ($case) then $actValue else lower-case($actValue)
@@ -113,83 +145,57 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
             case 'notMatches' return matches($actValueED, $facetED, $flags)
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
+        let $additionalAtts := (
+            attribute case {$case},
+            if (not($facet/local-name(.) = ('like', 'notLike', 'matches', 'notMatches'))) then ()
+            else attribute flags {$flags}
+        )
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue)
+            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
 (:~
- : Constraint component, constraining the file or folder name.
- : The constraint element $fileName can be a <gx:fileName> or a <gx:folderName>.
+ : Writes a validation result, for constraint components FileName*, FileSize*,
+ : LastModified*.
+ :
+ : @param colour the colour of the result
+ : @param constraintElem the element containing the attributes declaring the constraint
+ : @param constraint the main attribute declaring the constraint 
+ : @param actualValue the actual value of the file property
+ : @param additionalAtts additional attributes to be included in the result
+ : @return an element representing a 'red' or 'green' validation result
  :)
-declare function f:validateFileName_obsolete($filePath as xs:string, $fileName as element(), $context)
-        as element()* {
-    let $constraintId := $fileName/@id
-    let $constraintLabel := $fileName/@label
-    
-    let $eq := $fileName/@eq
-    let $like := $fileName/@like
-    let $matches := $fileName/@matches
-    let $ne := $fileName/@ne
-    let $notLike := $fileName/@notLike
-    let $notMatches := $fileName/@notMatches
-    
-    let $actValue := file:name($filePath) ! string(.)
-    let $flags := string($fileName/@flags)
-    
-    let $errors := (
-        if (empty($eq) or $actValue eq $eq) then () else
-            f:constructError_fileName($constraintId, $constraintLabel, $eq, $actValue, ())
-        ,
-        if (empty($ne) or $actValue ne $ne) then () else
-            f:constructError_fileName($constraintId, $constraintLabel, $ne, $actValue, ())
-        ,
-        if (empty($matches) or matches($actValue, $matches, $flags)) then () else
-            f:constructError_fileName($constraintId, $constraintLabel, $matches, $actValue, ())
-        ,
-        if (empty($notMatches) or not(matches($actValue, $notMatches, $flags))) then () else
-            f:constructError_fileName($constraintId, $constraintLabel, $notMatches, $actValue, ())
-        ,
-        if (not($like)) then () else
-            let $useFlags :=
-                if ($flags[string()]) then $flags else 'i'
-            let $regex :=
-                $like !
-                replace(., '\*', '.*') !
-                replace(., '\?', '.') !
-                concat('^', ., '$')
-            return                
-                if (matches($actValue, $regex, $flags)) then () else
-                    f:constructError_fileName($constraintId, $constraintLabel, $like, $actValue, ())
-        ,
-        if (not($notLike)) then () else
-            let $useFlags :=
-                if ($flags[string()]) then $flags else 'i'
-            let $regex :=
-                $notLike !
-                replace(., '\*', '.*') !
-                replace(., '\?', '.') !
-                concat('^', ., '$')
-            return                
-                if (not(matches($actValue, $regex, $flags))) then () else
-                    f:constructError_fileName($constraintId, $constraintLabel, $notLike, $actValue, ())
-        ,        
-        ()
-    )
-    return
-        <gx:fileNameErrors count="{count($errors)}">{$errors}</gx:fileNameErrors>
-        [$errors]
-        
-};
-
 declare function f:constructError_fileProperties($colour as xs:string,
                                                  $constraintElem as element(),
                                                  $constraint as attribute(),
-                                                 $actualValue as item()) 
+                                                 $actualValue as item(),
+                                                 $additionalAtts as attribute()*) 
         as element() {
     let $constraintComp :=
         $constraintElem/f:firstCharToUpperCase(local-name(.)) ||
         $constraint/f:firstCharToUpperCase(local-name(.))
+        
+    let $resourcePropertyName :=
+        switch(local-name($constraintElem))
+        case 'fileName' return 'File name'
+        case 'fileSize' return 'File size'
+        case 'LastModified' return 'Last modified time'
+        default return error()
+        
+    let $compare :=
+        switch(local-name($constraint))
+        case 'eq' return 'be equal to'
+        case 'ne' return 'not be equal to'
+        case 'lt' return 'be less than'
+        case 'le' return 'be less than or equal to'        
+        case 'gt' return 'be greater than'
+        case 'ge' return 'be greater than or equal to'        
+        case 'like' return 'match the pattern'
+        case 'notLike' return 'not match the pattern'
+        case 'matches' return 'match the regex'
+        case 'notMatches' return 'not match the regex'
+        default return 'satisfy'
         
     let $elemName := 'gx:' || $colour    
     let $msg := 
@@ -197,8 +203,8 @@ declare function f:constructError_fileProperties($colour as xs:string,
         else 
             i:getErrorMsg($constraintElem, 
                           $constraint/local-name(.), 
-                          concat('Last modified should be ', 
-                          local-name($constraint), ' ', $constraint))
+                          concat($resourcePropertyName, ' should ', $compare,
+                          " '", $constraint, "'"))
     let $values := i:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
@@ -209,82 +215,8 @@ declare function f:constructError_fileProperties($colour as xs:string,
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
             attribute resourceShapeID {$resourceShapeId},            
-            (: $constraintElem/@label/attribute constraintLabel {.}, :)
             $constraint,
+            $additionalAtts,
             $values
         }                                          
 };
-
-(:
-declare function f:constructError_lastModified($colour as xs:string,
-                                               $constraintElem as element(gx:lastModified),
-                                               $constraint as attribute(),
-                                               $actualValue as xs:string) 
-        as element() {
-    let $elemName := 'gx:' || $colour        
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), concat('Last modified should be ', local-name($constraint), ' ', $constraint))
-    let $values := i:validationResultValues($actualValue, $constraintElem)
-    let $constraintComp := 'LastModified' || f:firstCharToUpperCase($constraint/local-name(.))
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
-    return
-    
-        element {$elemName} {
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            (: $constraintElem/@label/attribute constraintLabel {.}, :)
-            $constraint,
-            $values
-        }                                          
-};
-:)
-(:
-declare function f:constructError_fileSize($constraintId as attribute()?,
-                                           $constraintLabel as attribute()?,
-                                           $constraint as attribute(),
-                                           $actualValue as xs:integer,
-                                           $additionalAtts as attribute()*) 
-        as element(gx:red) {
-    let $constraintComp := 'FileSize' || f:firstCharToUpperCase($constraint/local-name(.))
-    let $msg := concat('File size not ', local-name($constraint), ' check value = ', $constraint)
-    return
-    
-        <gx:red>{
-            attribute constraintComp {$constraintComp},
-            $constraintId,
-            $constraintLabel,
-            attribute value {$actualValue},
-            attribute message {$msg},
-            $additionalAtts        
-        }</gx:red>                                                  
-};
-:)
-
-declare function f:constructError_fileName($constraintId as attribute()?,
-                                           $constraintLabel as attribute()?,
-                                           $constraint as attribute(),
-                                           $actualValue as xs:string,
-                                           $additionalAtts as attribute()*) 
-        as element(gx:red) {
-    let $constraintName := local-name($constraint)
-    let $code := 'file-name-' || $constraintName
-    let $msg := concat('File name ',
-                    if ($constraintName eq 'matches') then 'does not match '
-                    else concat('not ', $constraintName, ' '),
-                    'check value = ', $constraint)
-    return
-    
-        <gx:red class="fileName" code="{$code}">{
-            $constraintId,
-            $constraintLabel,
-            $constraint,
-            attribute actValue {$actualValue},
-            attribute message {$msg},
-            $additionalAtts        
-        }</gx:red>                                                  
-};
-
