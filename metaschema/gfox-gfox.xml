@@ -180,7 +180,7 @@ return
                     msg="Unexpected content of the 'domain' element; expected: only 'folder' and 'file' elements"
                     msgOK="OK - 'domain' element: no unexpected child elements"/>
                 
-                <xpath description="Validates the @path value" expr="@path" matches="\\|\{.*\}"
+                <xpath description="Validates the @path value" expr="@path" matches="^basex://.*|\\|\{.*\}"
                     matchesMsg="Path value must use backslashes, reference external variables"
                     matchesMsgOK="OK - 'domain' element: @path uses backslashes" notMatches="/"
                     notMatchesMsg="Path value must not use slashes, only backslashes"

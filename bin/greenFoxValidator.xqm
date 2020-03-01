@@ -126,6 +126,15 @@ declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
         as empty-sequence() {
     let $domain := $gfox//gx:domain/@path
     return
+        if (starts-with($domain, 'basex://')) then
+            let $value := f:evaluateFoxpath($domain, (), map{}, false())
+            return
+                if (exists($value)) then () 
+                else
+                    let $errorCode := 'DOMAIN_NOT_FOUND'
+                    let $msg := concat("Domain database not found: '", $domain, "'; aborted.'")
+                    return error(QName((), $errorCode), $msg)
+        else
         if (not(i:resourceExists($domain))) then
             let $errorCode := 'DOMAIN_NOT_FOUND'
             let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
