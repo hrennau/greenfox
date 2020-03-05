@@ -33,16 +33,16 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                             if (not($char1 = ('{', '['))) then ()
                             else try {json:parse($text)} catch * {()}
                     case 'csv' return 
-                        let $try := f:csvDoc($filePath, $constraint)
+                        let $doc := f:csvDoc($filePath, $constraint)
                         return
-                            if (not($try)) then () 
+                            if (not($doc)) then () 
                             else
                                 let $minColCount := $constraint/@csv.minColumnCount
                                 let $minRowCount := $constraint/@csv.minRowCount
                                 let $violationsEtc := (
                                     if (not($minColCount)) then ()
                                     else 
-                                        let $actMinColCount := min($try/*/*/count(*))
+                                        let $actMinColCount := min($doc/*/*/count(*))
                                         return
                                             if ($minColCount <= $actMinColCount) then ()
                                             else (
@@ -53,7 +53,7 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                                     ,
                                     if (not($minRowCount)) then () 
                                     else
-                                        let $rowCount := $try/*/* => count()
+                                        let $rowCount := $doc/*/* => count()
                                         return
                                             if ($minRowCount <= $rowCount) then ()
                                             else (
@@ -64,7 +64,7 @@ declare function f:validateMediatype($filePath as xs:string, $constraint as elem
                                             
                                 )
                                 return
-                                    if (empty($violationsEtc)) then $try
+                                    if (empty($violationsEtc)) then $doc
                                     else
                                         let $violations := $violationsEtc[. instance of xs:string]
                                         let $additionalAtts := $violationsEtc[. instance of attribute()]
@@ -91,16 +91,12 @@ declare function f:validationResult_mediatype($colour as xs:string,
                                               $violations as xs:string*,
                                               $additionalAtts as attribute()*)
         as element() {
-    let $elemName := 
-        switch($colour)
-        case 'red' return 'gx:red'
-        default return concat('gx:', $colour)
-    let $constraintComponent := 'mediatype'   
+    let $elemName := 'gx:' || $colour
+    let $constraintComponent := 'MediatypeEq'   
     return
         element {$elemName}{
             $constraint/@msg,
             attribute constraintComp {$constraintComponent},
-            attribute constraintFacet {$facet},
             $constraint/@resourceShapeID,
             $constraint/@constraintID,
             $constraint/@label/attribute constraintLabel {.},

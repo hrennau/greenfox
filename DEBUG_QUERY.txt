@@ -1,5 +1,0 @@
-declare namespace gx="http://www.greenfox.org/ns/schema";
-declare variable $domain external;
-declare variable $fileName external;
-declare variable $domainName external;
-$domain\resources\xsd\\*.xsd

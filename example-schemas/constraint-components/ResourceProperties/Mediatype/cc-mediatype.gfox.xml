@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint component MediatypeEq.
+    
+    Constraint components:
+    * MediatypeEq - @eq
+    
+    Validation catches 
+    * .json files which are not well-formed JSON
+    * .xml files which are not well-formed XML    
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath=".\\*.json" id="jsonFileShape">
+                <mediatype eq="json"/>
+            </file>
+            <file foxpath=".\\*.xml" id="xmlFileShape">
+                <mediatype eq="xml"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
