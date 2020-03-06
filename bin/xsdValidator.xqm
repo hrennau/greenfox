@@ -101,7 +101,15 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
     let $schema := $elementDecl/base-uri(.)    
     let $report := validate:xsd-report($doc, $schema)
     return
-        if ($report//status eq 'valid') then ()
+        if ($report//status eq 'valid') then
+            <gx:green>{
+                $constraint/@msgOK,
+                attribute constraintComponent {"xsdValid"},
+                attribute filePath {$filePath},                
+                $constraint/@xsdFoxpath,
+                $constraint/@id/attribute constraintID {.},
+                $constraint/@label/attribute constraintLabel {.}            
+            }</gx:green>
         else
             <gx:red>{
                 $constraint/@msg,
