@@ -458,6 +458,13 @@ return
                 <ex:allowedElems elemNames="in notin contains"
                     msg="Unexpected elements in 'xpath' element; expected: ${elemNames}"
                     msgOK="OK - 'foxpath' element: no unexpected elements"/>
+                
+                <xpath expr="@quant" inMsg="@quant must be 'all' or 'some'">
+                    <in>
+                        <eq>all</eq>
+                        <eq>some</eq>
+                    </in>
+                </xpath>
 
             </focusNode>
 
@@ -523,6 +530,13 @@ return
                     msg="Unexpected elements in 'foxpath' element; expected: ${elemNames}"
                     msgOK="OK - 'foxpath' element: no unexpected elements"/>
 
+                <xpath expr="@quant" inMsg="@quant must be 'all' or 'some'">
+                    <in>
+                        <eq>all</eq>
+                        <eq>some</eq>
+                    </in>
+                </xpath>                
+                
             </focusNode>
 
             <!-- ========================================
