@@ -16,6 +16,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_nameFilter.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "deepSimilarConstraint.xqm",
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
@@ -122,7 +123,8 @@ declare function f:validateFileInstance($filePath as xs:string,
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
                 case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
                 case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
-                case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)            
+                case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)     
+                case $deepSimilar as element(gx:deepSimilar) return i:validateDeepSimilar($filePath, $deepSimilar, $doc, $doc, $context)
                 case $targetSize as element(gx:targetSize) return ()
                 default return 
                     if ($child intersect $extensionConstraints) then 
@@ -178,7 +180,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             $mediatype = ('xml', 'xml-or-json')
             or
             not($mediatype) and $components/(
-                self::gx:xpath, self::gx:links, 
+                self::gx:xpath, self::gx:links, self::gx:deepSimilar, 
                 @validatorXPath, gx:validatorXPath, 
                 descendant-or-self::gx:focusNode//(@xpath, gx:xpath, gx:links))    
             or

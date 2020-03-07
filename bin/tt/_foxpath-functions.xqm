@@ -1305,6 +1305,13 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 xs:integer($arg1)
                 
+        (: function `xs:string` 
+           ===================== :)
+        else if ($fname eq 'xs:string') then
+            let $arg1 := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)          
+            return
+                xs:string($arg1)
+                
         else
         error(QName((), 'NOT_YET_IMPLEMENTED'),
             concat('Unexpected function name: ', $fname))

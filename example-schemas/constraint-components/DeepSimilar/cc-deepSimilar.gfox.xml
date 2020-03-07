@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint component DeepSimilar.
+    
+    Constraint components:
+    * DeepSimilar - @otherFoxpath
+    
+    Validation catches 
+    * Comparison files which are not deep-similar
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="DeepSimilar" id="deepSimilarFolderShape">
+            <targetSize countMsg="Missing folder: DeepSimilar" count="1"/>            
+            <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
+                <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
+                <deepSimilar otherFoxpath="..\executionSummary2.xml">
+                    <skipItem kind="element" localName="articleNumber"/>
+                    <skipItem kind="element" localName="timestamp"/>
+                    <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>
+                </deepSimilar>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

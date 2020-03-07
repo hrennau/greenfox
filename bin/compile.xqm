@@ -263,6 +263,7 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
             let $idName :=
                 switch($localName)
                 case 'mediatype' return 'constraintID'
+                case 'deepSimilar' return 'constraintID'
                 default return 'id'
                 
             (: Add further attributes, if applicable (@resourceShapeID, @valueShapeID) :)
@@ -324,6 +325,7 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:fileSize, 
                     self::gx:lastModified, 
                     self::gx:mediatype,
+                    self::gx:deepSimilar,
                     self::gx:folderContent,
                     self::gx:xsdValid)) then  
                 $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID

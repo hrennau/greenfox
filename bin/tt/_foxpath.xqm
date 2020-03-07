@@ -2082,8 +2082,6 @@ declare function f:pattern2Regex($pattern as xs:string)
 declare function f:editInitialContext($context as item()?) as item()? {
     if (empty($context)) then $context
     else if ($context instance of node()) then $context
-    else $context 
-         ! (if (starts-with(., 'basex://')) then .
-            else (file:path-to-native(.) ! replace(., '\\', '/') ! replace(., '/$', '')))
+    else $context ! file:path-to-native(.) ! replace(., '\\', '/') ! replace(., '/$', '')
 };
 
