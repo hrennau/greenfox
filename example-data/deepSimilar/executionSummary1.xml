@@ -1,0 +1,27 @@
+<conversionSummary>
+  <timestamp>20200307-181408</timestamp>
+  <returnCode>ERROR_XSD</returnCode>
+  <versionInfo>
+    <versionNumber>1.0</versionNumber>
+    <buildNumber>20191203b-SNAPSHOT</buildNumber>
+  </versionInfo>
+  <input>
+    <gi fileName="abc.rtf" fileSize="37121149" />
+    <parameters>
+      <articleNumber>678002</articleNumber>
+      <partyName>Medice</partyName>
+      <view>#unspecified</view>
+    </parameters>
+  </input>
+  <output>
+    <conversionResults>
+      <articleBook fileName="articleBook.xml" fileSize="77451" />
+      <images fileName="images.zip" fileSize="664407" />
+    </conversionResults>
+    <reports>
+      <summary fileName="summary.xml" />
+      <checkReport fileName="checkreport.docx" fileSize="724692" />
+      <xsdErrors fileName="xsd-errors.xml" fileSize="1929" />
+    </reports>
+  </output>
+</conversionSummary>
