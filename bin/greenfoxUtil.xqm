@@ -149,7 +149,6 @@ declare function f:occ2minMax($occ as xs:string)
  :)
 declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:string)
         as xs:boolean {
-    (: if (not(file:is-file($filePath))) then false() else :)
     if (not(i:resourceIsFile($filePath))) then false() else
     
     some $mediatype in $mediatypes satisfies (
@@ -316,37 +315,41 @@ declare function f:copyNamespaceNodes($elem as element())
 };        
 
 (:~
- : Normalizes a given file path. If the file path does not
- : exist, the empty sequence is returned.
+ : Normalizes a given file path.
  :
  : Normalization means (a) resolving a relative path to an
- : absolute path, replacing slashes with backward slashes.
+ : absolute path, (b) replacing slashes with backward slashes.
  :
  : @path a file path
- : @return normalized file path, or the empty sequence if the file path does not exist
+ : @return normalized file path
  :)
 declare function f:normalizeFilepath($path as xs:string)
         as xs:string? {
+(:        
     (
-    try {
-        $path ! file:path-to-native(.)
-    } catch * {$path}
+    try {$path ! file:path-to-native(.)} catch * {$path}
     ) ! replace(., '[/\\]$', '') ! replace(., '/', '\\')
+:)
+    $path 
+    ! replace(., '\\', '/') 
+    ! resolve-uri(., file:parent('.') ! replace(., '\\', '/')) 
+    ! replace(., '\\$', '') 
+    ! f:pathToFoxpath(.) 
 }; 
 
 (:~
- : Resolves a file path to a sequence of resource file paths.
+ : Transforms a file system path or URI to a Foxpath
+ : representation, using backslash as step separator
  :
- : @param path file path to be checked
- : @return true if the file path can be resolved, false otherwise
+ : @param path file system path or URI
+ : @return Foxpath representation of the path or URI
  :)
-declare function f:resolveFilepath($path as xs:string)
-        as xs:string* {
-    if (file:exists($path)) then file:path-to-native($path)
-    else
-        let $foxpathValue := i:evaluateFoxpath($path, ())
-        return
-            $foxpathValue[. instance of xs:anyAtomicType]
+declare function f:pathToFoxpath($path as xs:string)
+        as xs:string {
+    $path
+    ! replace(., 'file:/+', '/')
+    ! replace(., '/', '\\')
+    ! replace(., '^\\(.:)', '$1')
 };
 
 (:~
@@ -357,9 +360,11 @@ declare function f:resolveFilepath($path as xs:string)
  : @return the file paths or URIs of child resources
  :)
 declare function f:resourceChildResources($path as xs:string, $name as xs:string?)
-        as xs:boolean {
+        as xs:string* {
+    let $path_ := f:pathToFoxpath($path)        
+    let $name := ($name, '*')[1]
     let $foxpathOptions := i:getFoxpathOptions(true()) 
-    return tt:childUriCollection($path, $name, (), $foxpathOptions)
+    return tt:childUriCollection($path_, $name, (), $foxpathOptions)
 };
 
 (:~
@@ -370,11 +375,6 @@ declare function f:resourceChildResources($path as xs:string, $name as xs:string
  :)
 declare function f:resourceExists($path as xs:string)
         as xs:boolean {
-(:        
-    if (matches($path, '^http:/+')) then unparsed-text-available($path)
-    else try {file:exists($path)} catch * {false()}
- :)   
-    (: let $_DEBUG := trace($path, '___RESOURCE_EXISTS - PATH: ') return :)
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else
         let $foxpathOptions := i:getFoxpathOptions(true()) 
@@ -389,8 +389,9 @@ declare function f:resourceExists($path as xs:string)
  :)
 declare function f:resourceIsFile($path as xs:string)
         as xs:boolean {
+    let $path_ := f:pathToFoxpath($path)
     let $foxpathOptions := i:getFoxpathOptions(true())
-    return tt:fox-is-file($path, $foxpathOptions)
+    return tt:fox-is-file($path_, $foxpathOptions)
 };
 
 (:~
@@ -430,6 +431,19 @@ declare function f:resourceLastModified($path as xs:string)
 };
 
 (:~
+ : Returns the time of last modification of a resource.
+ :
+ : @param path file path or URI of a resource
+ : @return the time of last modification
+ :)
+declare function f:resourceReadBinary($path as xs:string)
+        as xs:base64Binary? {
+    let $path_ := f:pathToFoxpath($path)        
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-binary($path_, $foxpathOptions)
+};
+
+(:~
  : Returns the name of a resource.
  :
  : @param path file path or URI of a resource
@@ -441,40 +455,20 @@ declare function f:resourceName($path as xs:string)
 };
 
 (:~
- : Transforms a file system path or URI to a Foxpath
- : representation, using backslash as step separator
+ : Returns a hash key for a file identified by a file path or URI.
  :
- : @param path file system path or URI
- : @return Foxpath representation of the path or URI
+ : @param path file path or URI
+ : @param keyKind identifies the key of hash key, value one of 'md5', 'sha1', 'sha256'.
+ : @return hash key
  :)
-declare function f:pathToFoxpath($path as xs:string)
+declare function f:hashKey($path as xs:string, $keyKind as xs:string)
         as xs:string {
-    $path
-    ! replace(., 'file:/+', '/')
-    ! replace(., '/', '\\')
-    ! replace(., '^\\(.:)', '$1')
-};
-
-(:~
- : Checks if a path points to a file system file.
- :
- : @param path file path or URI to be checked
- : @return true if the path can be resolved, false otherwise
- :)
-declare function f:resourceIsFileSystemFile($path as xs:string)
-        as xs:boolean {
-    if (not(file:exists($path))) then false()
-    else file:is-file($path)
-};
-
-(:~
- : Checks if a path points to a file system folder.
- :
- : @param path file path or URI to be checked
- : @return true if the path can be resolved, false otherwise
- :)
-declare function f:resourceIsFileSystemDir($path as xs:string)
-        as xs:boolean {
-    if (not(file:exists($path))) then false()
-    else file:is-dir($path)
+    let $fileContent := f:resourceReadBinary($path)
+    let $rawHash :=
+        switch($keyKind)
+        case 'md5' return hash:md5($fileContent)
+        case 'sha1' return hash:sha1($fileContent)
+        case 'sha256' return hash:sha256($fileContent)
+        default return error()
+    return xs:hexBinary($rawHash) ! xs:string(.)
 };

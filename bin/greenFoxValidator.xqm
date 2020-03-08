@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : domainValidator.xqm - Document me!
+ : greenfoxValidator.xqm - validates a greenfox schema
  :
  : -------------------------------------------------------------------------
  :)
@@ -139,7 +139,7 @@ declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
             let $errorCode := 'DOMAIN_NOT_FOUND'
             let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
             return error(QName((), $errorCode), $msg)
-        else if (i:resourceIsFileSystemFile($domain)) then
+        else if (i:resourceIsFile($domain)) then
             let $errorCode := 'DOMAIN_IS_NOT_A_FOLDER'
             let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
             return error(QName((), $errorCode), $msg)
