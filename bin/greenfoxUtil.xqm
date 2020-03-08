@@ -361,7 +361,7 @@ declare function f:resourceExists($path as xs:string)
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else try {file:exists($path)} catch * {false()}
  :)   
-    let $_DEBUG := trace($path, '___RESOURCE_EXISTS - PATH: ') return
+    (: let $_DEBUG := trace($path, '___RESOURCE_EXISTS - PATH: ') return :)
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else
         let $foxpathOptions := i:getFoxpathOptions(true()) 
@@ -379,6 +379,19 @@ declare function f:resourceIsFile($path as xs:string)
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-is-file($path, $foxpathOptions)
 };
+
+(:~
+ : Returns the file size of a resource.
+ :
+ : @param path file path or URI of a resource
+ : @return the file size in bytes
+ :)
+declare function f:resourceFileSize($path as xs:string)
+        as xs:integer {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-file-size($path, $foxpathOptions)
+};
+
 
 (:~
  : Checks if a path or URI points to a folder, not a file.

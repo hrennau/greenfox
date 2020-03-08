@@ -1,4 +1,4 @@
-(:
+(:~
  : -------------------------------------------------------------------------
  :
  : fileProperitesConstraint.xqm - functions checking the name, size or last 
@@ -87,7 +87,8 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
     let $gt := $constraint/@gt
     let $ge := $constraint/@ge
     
-    let $actValue := file:size($filePath)
+    (: let $actValue := file:size($filePath) :)
+    let $actValue := i:resourceFileSize($filePath)
     
     let $results := 
         for $facet in ($lt, $gt, $le, $ge, $eq)
