@@ -21,7 +21,12 @@ declare function f:validateDeepSimilar($filePath as xs:string,
                                        $doc as document-node()?,
                                        $context as map(xs:string, item()*))
         as element()* {
+
+    (: Adhoc addition of $filePath and $fileName :)
     let $evaluationContext := $context?_evaluationContext
+    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
+    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($filePath, '.*[/\\]', ''))
+    let $context := map:put($context, '_evaluationContext', $evaluationContext)
     
     let $skipPrettyWS := true()
     let $otherFoxpath := $constraintElem/@otherFoxpath
@@ -38,7 +43,7 @@ declare function f:validateDeepSimilar($filePath as xs:string,
         else ()
     return
         if (not($otherDoc)) then
-            f:validationResult_deepSimimlar('red', $constraintElem, $constraintElem/@otherFoxpath, 'noOtherDoc', ())
+            f:validationResult_deepSimimlar('red', $constraintElem, $constraintElem/@otherFoxpath, 'no-other-doc', (), ())
         else
         
     let $d1 := f:normalizeDocForComparison($node, $skipPrettyWS, $constraintElem/*)
@@ -46,7 +51,7 @@ declare function f:validateDeepSimilar($filePath as xs:string,
     let $isDeepSimilar := deep-equal($d1, $d2)
     let $colour := if ($isDeepSimilar) then 'green' else 'red'
     return
-        f:validationResult_deepSimimlar($colour, $constraintElem, $constraintElem/@otherFoxpath, (), ())
+        f:validationResult_deepSimimlar($colour, $constraintElem, $constraintElem/@otherFoxpath, (), (), ())
 };   
 
 declare function f:normalizeDocForComparison($node as node(), 
@@ -80,6 +85,28 @@ declare function f:normalizeDocForComparison($node as node(),
                                , '___SKIP_NODES: ')
                 return
                     if (empty($delNodes)) then () else delete node $delNodes
+            case $roundItem as element(gx:roundItem) return
+                let $kind := $roundItem/@kind
+                let $localName := $roundItem/@localName
+                let $namespace := $roundItem/@namespace
+                let $parentLocalName := $roundItem/@parentLocalName
+                let $parentNamespace := $roundItem/@parentNamespace
+                let $scale := $roundItem/@scale/number(.)
+                
+                let $candidates := if ($kind eq 'attribute') then $node_//@* else $node_//*
+                let $roundNodes := trace(
+                    $candidates[not($localName) or local-name() eq $localName]
+                               [not(@namespace) or namespace-uri(.) eq $namespace]
+                               [not($parentLocalName) or ../local-name(.) eq $parentLocalName]
+                               [not(@parentNamespace) or ../namespace-uri(.) eq $parentNamespace]
+                               , '___ROUND_NODES: ')
+                return
+                    if (empty($roundNodes)) then () 
+                    else 
+                        for $node in $roundNodes
+                        let $value := $node/number(.)
+                        let $newValue := trace(round($value div $scale, 0) * $scale, '___ROUNDED:     ')
+                        return replace value of node $node with $newValue
             default return ()
     )
     return $node_
@@ -99,7 +126,8 @@ declare function f:validationResult_deepSimimlar($colour as xs:string,
                                                  $constraintElem as element(gx:deepSimilar),
                                                  $constraint as attribute(),
                                                  $reasonCodes as xs:string*,
-                                                 $additionalAtts as attribute()*)
+                                                 $additionalAtts as attribute()*,
+                                                 $additionalElems as element()*)
         as element() {
     let $elemName := 'gx:' || $colour
     let $constraintComponent :=
@@ -120,7 +148,9 @@ declare function f:validationResult_deepSimimlar($colour as xs:string,
             attribute resourceShapeID {$resourceShapeId},            
             $moreAtts, 
             if (empty($reasonCodes)) then () else attribute reasonCodes {$reasonCodes},
-            $additionalAtts
+            $additionalAtts,
+            $constraintElem/*,
+            $additionalElems
         }        
 };
 
