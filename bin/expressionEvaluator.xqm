@@ -12,6 +12,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -63,7 +64,7 @@ declare function f:evaluateFoxpath($foxpath as xs:string,
                                    $addVariableDeclarations as xs:boolean)
         as item()* {
     let $isContextUri := not($contextItem instance of node())
-    let $foxpathOptions := f:getFoxpathOptions($isContextUri)
+    let $foxpathOptions := i:getFoxpathOptions($isContextUri)
     let $foxpathAugmented :=
         if (not($addVariableDeclarations)) then $foxpath
         else
@@ -100,18 +101,9 @@ declare function f:evaluateFoxpath($foxpath as xs:string, $contextItem as item()
 
 declare function f:parseFoxpath($foxpath as xs:string)
         as item()* {
-    let $foxpathOptions := f:getFoxpathOptions(true()) 
+    let $foxpathOptions := i:getFoxpathOptions(true()) 
     return tt:parseFoxpath($foxpath, $foxpathOptions)
 };
-
-declare function f:getFoxpathOptions($isContextUri as xs:boolean) 
-        as map(*) {
-    map{    
-        'IS_CONTEXT_URI': $isContextUri,
-        'FOXSTEP_SEPERATOR': '\',
-        'NODESTEP_SEPERATOR': '/'
-    }        
-};     
 
 (:~
  : Augments an XPath or foxpath expression by adding a prolog containing

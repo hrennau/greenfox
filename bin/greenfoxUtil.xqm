@@ -11,6 +11,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_request.xqm",
     "tt/_reportAssistent.xqm",
     "tt/_errorAssistent.xqm",
+    "tt/_foxpath-uri-operations.xqm",
     "tt/_log.xqm",
     "tt/_nameFilter.xqm",
     "tt/_pcollection.xqm";    
@@ -355,8 +356,14 @@ declare function f:resolveFilepath($path as xs:string)
  :)
 declare function f:resourceExists($path as xs:string)
         as xs:boolean {
+(:        
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else try {file:exists($path)} catch * {false()}
+ :)   
+    if (matches($path, '^http:/+')) then unparsed-text-available($path)
+    else
+        let $foxpathOptions := i:getFoxpathOptions(true()) 
+        return tt:fox-file-exists($path, $foxpathOptions)
 };
 
 (:~
