@@ -149,7 +149,8 @@ declare function f:occ2minMax($occ as xs:string)
  :)
 declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:string)
         as xs:boolean {
-    if (not(file:is-file($filePath))) then false() else
+    (: if (not(file:is-file($filePath))) then false() else :)
+    if (not(i:resourceIsFile($filePath))) then false() else
     
     some $mediatype in $mediatypes satisfies (
         if ($mediatype eq 'xml') then doc-available($filePath)
@@ -364,6 +365,30 @@ declare function f:resourceExists($path as xs:string)
     else
         let $foxpathOptions := i:getFoxpathOptions(true()) 
         return tt:fox-file-exists($path, $foxpathOptions)
+};
+
+(:~
+ : Checks if a path or URI points to a file, not a folder.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceIsFile($path as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-file($path, $foxpathOptions)
+};
+
+(:~
+ : Checks if a path or URI points to a folder, not a file.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceIsDir($path as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-dir($path, $foxpathOptions)
 };
 
 (:~
