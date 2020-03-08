@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : deepSimilarConstraint.xqm - validates a resource against a DeepSimilar constraint
+ : docSimilarConstraint.xqm - validates a resource against a DocSimilar constraint
  :
  : -------------------------------------------------------------------------
  :)
@@ -15,11 +15,11 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateDeepSimilar($filePath as xs:string,
-                                       $constraintElem as element(gx:deepSimilar),
-                                       $node as node(),
-                                       $doc as document-node()?,
-                                       $context as map(xs:string, item()*))
+declare function f:validateDocSimilar($filePath as xs:string,
+                                      $constraintElem as element(gx:docSimilar),
+                                      $node as node(),
+                                      $doc as document-node()?,
+                                      $context as map(xs:string, item()*))
         as element()* {
 
     (: Adhoc addition of $filePath and $fileName :)
@@ -43,15 +43,15 @@ declare function f:validateDeepSimilar($filePath as xs:string,
         else ()
     return
         if (not($otherDoc)) then
-            f:validationResult_deepSimimlar('red', $constraintElem, $constraintElem/@otherFoxpath, 'no-other-doc', (), ())
+            f:validationResult_docSimilar('red', $constraintElem, $constraintElem/@otherFoxpath, 'no-other-doc', (), ())
         else
         
     let $d1 := f:normalizeDocForComparison($node, $skipPrettyWS, $constraintElem/*)
     let $d2 := f:normalizeDocForComparison($otherDoc, $skipPrettyWS, $constraintElem/*)
-    let $isDeepSimilar := deep-equal($d1, $d2)
-    let $colour := if ($isDeepSimilar) then 'green' else 'red'
+    let $isDocSimilar := deep-equal($d1, $d2)
+    let $colour := if ($isDocSimilar) then 'green' else 'red'
     return
-        f:validationResult_deepSimimlar($colour, $constraintElem, $constraintElem/@otherFoxpath, (), (), ())
+        f:validationResult_docSimilar($colour, $constraintElem, $constraintElem/@otherFoxpath, (), (), ())
 };   
 
 declare function f:normalizeDocForComparison($node as node(), 
@@ -114,7 +114,7 @@ declare function f:normalizeDocForComparison($node as node(),
 
 
 (:~
- : Writes a validation result for a DeepSimilar constraint.
+ : Writes a validation result for a DocSimilar constraint.
  :
  : @param colour indicates success or error
  : @param constraintElem the element representing the constraint
@@ -122,12 +122,12 @@ declare function f:normalizeDocForComparison($node as node(),
  : @param reasons strings identifying reasons of violation
  : @param additionalAtts additional attributes to be included in the validation result
  :) 
-declare function f:validationResult_deepSimimlar($colour as xs:string,
-                                                 $constraintElem as element(gx:deepSimilar),
-                                                 $constraint as attribute(),
-                                                 $reasonCodes as xs:string*,
-                                                 $additionalAtts as attribute()*,
-                                                 $additionalElems as element()*)
+declare function f:validationResult_docSimilar($colour as xs:string,
+                                               $constraintElem as element(gx:docSimilar),
+                                               $constraint as attribute(),
+                                               $reasonCodes as xs:string*,
+                                               $additionalAtts as attribute()*,
+                                               $additionalElems as element()*)
         as element() {
     let $elemName := 'gx:' || $colour
     let $constraintComponent :=
