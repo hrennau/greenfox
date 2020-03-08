@@ -361,6 +361,7 @@ declare function f:resourceExists($path as xs:string)
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else try {file:exists($path)} catch * {false()}
  :)   
+    let $_DEBUG := trace($path, '___RESOURCE_EXISTS - PATH: ') return
     if (matches($path, '^http:/+')) then unparsed-text-available($path)
     else
         let $foxpathOptions := i:getFoxpathOptions(true()) 
@@ -389,6 +390,21 @@ declare function f:resourceIsDir($path as xs:string)
         as xs:boolean {
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-is-dir($path, $foxpathOptions)
+};
+
+(:~
+ : Transforms a file system path or URI to a Foxpath
+ : representation, using backslash as step separator
+ :
+ : @param path file system path or URI
+ : @return Foxpath representation of the path or URI
+ :)
+declare function f:pathToFoxpath($path as xs:string)
+        as xs:string {
+    $path
+    ! replace(., 'file:/+', '/')
+    ! replace(., '/', '\\')
+    ! replace(., '^\\(.:)', '$1')
 };
 
 (:~

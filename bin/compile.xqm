@@ -62,7 +62,7 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
         $externalContext?domain[not(map:contains($context_prelim, 'domain'))] ! map:entry('domain', .),
         $externalContext?schemaPath[not(map:contains($context_prelim, 'schemaPath'))] ! map:entry('schemaPath', .)
     ))
-    
+
     (: Perform variable substitution :)
     let $gfox2 := f:substituteVariablesRC($gfox, $context)
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
@@ -83,11 +83,11 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
  : Rules:
  : (1) If $domain is supplied, the name-value pair 'domain'-$domain is added. 
  : (2) If ...
- : (a) the parameters do not contain a name-value pair with name 'schemaPath' and 
- : (b) the gfox context does not have a field 'schemaPath' with a default value
- : Then
- : a name-value pair 'schemaPath'-$schemalocation is added, where $schemalocation 
- : is the file system location of the schema (derived from $gfox).
+ :     (a) the parameters do not contain a name-value pair with name 'schemaPath' and 
+ :     (b) the gfox context does not have a field 'schemaPath' with a default value
+ :     Then
+ :     a name-value pair 'schemaPath'-$schemalocation is added, where $schemalocation 
+ :     is the file system location of the schema (derived from $gfox).
  :
  : @param params a string containing concatenated name-value pairs
  : @param domain the domain folder
@@ -126,7 +126,7 @@ declare function f:externalContext($params as xs:string?,
         if (map:contains($prelim2, 'schemaPath')) then $prelim2
         else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim2
         else 
-            let $schemaLocation := $gfox/base-uri(.) ! file:path-to-native(.)
+            let $schemaLocation := $gfox/base-uri(.) ! i:pathToFoxpath(.)
             return map:put($prelim2, 'schemaPath', $schemaLocation)
     return
         $prelim3
