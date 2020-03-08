@@ -115,9 +115,11 @@ declare function f:getTargetPaths_path($path as xs:string,
         as xs:string* {
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
+        if ($resourceShape/self::gx:folder) then i:resourceIsDir#1 else i:resourceIsFile#1
     return    
-        concat($contextPath, '\', $path)[file:exists(.)]
+        (: concat($contextPath, '\', $path)[file:exists(.)] :)
+        concat($contextPath, '\', $path)[i:resourceExists(.)]
         [$isExpectedResourceKind(.)]        
 };
 
@@ -138,7 +140,8 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
         as xs:string* {
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
+        if ($resourceShape/self::gx:folder) then i:resourceIsDir#1 else i:resourceIsFile#1
     let $evaluationContext := $context?_evaluationContext        
     return    
         i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
@@ -165,7 +168,8 @@ declare function f:getTargetPaths_linkTargets(
         as item()* {
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1
+        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
+        if ($resourceShape/self::gx:folder) then i:resourceIsDir#1 else i:resourceIsFile#1
     let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
