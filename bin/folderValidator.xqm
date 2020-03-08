@@ -21,6 +21,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "fileValidator.xqm",
     "folderContentValidator.xqm",
+    "folderContentSimilarConstraint.xqm",
     "greenfoxTarget.xqm",
     "greenfoxUtil.xqm";
     
@@ -42,30 +43,6 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
     
     (: Check instances :)                            
     let $instanceResults := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
-    
-(:        
-    let $subsetResults :=
-        for $gxFolderSubset in $components/self::gx:folderSubset
-        let $subsetComponents := $gxFolderSubset/*[not(@deactivated eq 'true')]
-        let $subsetLabel := $gxFolderSubset/@subsetLabel
-        let $foxpath := $gxFolderSubset/@foxpath
-        let $subsetTargetDecl := $foxpath
-        
-        let $subsetTargetPaths := (
-            for $targetPath in $targetPaths
-            return i:evaluateFoxpath($foxpath, $targetPath) 
-        )[. = $targetPaths] => distinct-values()
-        let $subsetTargetCount := count($subsetTargetPaths)        
-        let $targetCountResults := 
-            let $constraint := $subsetComponents/self::gx:targetSize   
-            return
-                if (not($constraint)) then ()
-                else
-                    $subsetComponents/self::gx:targetSize/i:validateTargetCount(., $subsetTargetCount, $contextPath, $subsetTargetDecl)
-        let $instanceResults := $subsetTargetPaths ! f:validateFolderInstance(., $gxFolderSubset, $context)
-        return ($targetCountResults, $instanceResults)
-    let $results := ($targetCountResults, $instanceResults, $subsetResults)
-:)    
     let $results := ($targetValidationResults, $instanceResults)
     return
         $results 
@@ -100,6 +77,7 @@ declare function f:validateFolderInstance($folderPath as xs:string,
             let $error :=
                 typeswitch($child)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
+                case $folderContentSimilar as element(gx:folderContentSimilar) return f:validateFolderContentSimilar($folderPath, $folderContentSimilar, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)
                 case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)                

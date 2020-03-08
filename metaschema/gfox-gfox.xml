@@ -346,7 +346,7 @@ return
             <focusNode xpath="//*:folder">
 
                 <!-- attribute names -->
-                <ex:allowedAtts attNames="id description foxpath path"
+                <ex:allowedAtts attNames="id description deactivated foxpath path"
                     msg="Unexpected attributes in 'folder' element; expected: foxpath, path, id"
                     msgOK="OK - 'folder' element: no unexpected attributes"/>
 
@@ -356,7 +356,7 @@ return
                     msgOK="OK - 'folder' element: has foxpath or path"/>
 
                 <!-- element names -->
-                <ex:allowedElems elemNames="targetSize file folder folderContent foxpath lastModified fileName"
+                <ex:allowedElems elemNames="targetSize file folder folderContent  folderContentSimilar foxpath lastModified fileName"
                     msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
                     msgOK="OK - 'folder' element: no unexpected elements"/>
 
@@ -377,7 +377,7 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description foxpath path linkXPath recursiveLinkXPath mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated foxpath path linkXPath recursiveLinkXPath mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
@@ -387,7 +387,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName deepSimilar focusNode ifMediatype xsdValid mediatype grep"
+                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar deepSimilar focusNode ifMediatype xsdValid mediatype grep"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
