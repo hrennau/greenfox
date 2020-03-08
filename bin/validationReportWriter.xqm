@@ -21,6 +21,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "log.xqm",
     "greenfoxEditUtil.xqm",
     "greenFoxValidator.xqm",
+    "greenfoxUtil.xqm",
     "systemValidator.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
@@ -106,7 +107,7 @@ declare function f:writeValidationReport_whiteTree(
         group by $resourceIdentifier
         let $resourceIdentifierAtt :=
             if (not($resourceIdentifier)) then () else
-                let $attName := if (file:is-file($resourceIdentifier)) then 'file' else 'folder'
+                let $attName := if (i:resourceIsFile($resourceIdentifier)) then 'file' else 'folder'
                 return
                     attribute {$attName} {$resourceIdentifier}
         let $red := $result/(self::gx:red, self::gx:red)

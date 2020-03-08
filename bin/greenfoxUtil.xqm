@@ -350,6 +350,19 @@ declare function f:resolveFilepath($path as xs:string)
 };
 
 (:~
+ : Returns the child resources of a resource.
+ :
+ : @param path file path or URI of a resource
+ : @param name name pattern (optional)
+ : @return the file paths or URIs of child resources
+ :)
+declare function f:resourceChildResources($path as xs:string, $name as xs:string?)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true()) 
+    return tt:childUriCollection($path, $name, (), $foxpathOptions)
+};
+
+(:~
  : Checks if a path or URI can be resolved to a resource.
  :
  : @param path file path or URI to be checked
@@ -381,6 +394,18 @@ declare function f:resourceIsFile($path as xs:string)
 };
 
 (:~
+ : Checks if a path or URI points to a folder, not a file.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:resourceIsDir($path as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-dir($path, $foxpathOptions)
+};
+
+(:~
  : Returns the file size of a resource.
  :
  : @param path file path or URI of a resource
@@ -392,17 +417,27 @@ declare function f:resourceFileSize($path as xs:string)
     return tt:fox-file-size($path, $foxpathOptions)
 };
 
+(:~
+ : Returns the time of last modification of a resource.
+ :
+ : @param path file path or URI of a resource
+ : @return the time of last modification
+ :)
+declare function f:resourceLastModified($path as xs:string)
+        as xs:dateTime {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-file-date($path, $foxpathOptions)
+};
 
 (:~
- : Checks if a path or URI points to a folder, not a file.
+ : Returns the name of a resource.
  :
- : @param path file path or URI to be checked
- : @return true if the path can be resolved, false otherwise
+ : @param path file path or URI of a resource
+ : @return the name of the resource
  :)
-declare function f:resourceIsDir($path as xs:string)
-        as xs:boolean {
-    let $foxpathOptions := i:getFoxpathOptions(true())
-    return tt:fox-is-dir($path, $foxpathOptions)
+declare function f:resourceName($path as xs:string)
+        as xs:string {
+    $path ! replace(., '^.*[/\\]', '')
 };
 
 (:~

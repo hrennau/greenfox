@@ -41,7 +41,8 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
     
     let $flags := string($constraint/@flags)
     
-    let $actValue := file:last-modified($filePath) ! string(.)
+    (: let $actValue := file:last-modified($filePath) ! string(.) :)
+    let $actValue := i:resourceLastModified($filePath) ! string(.)
     
     let $results := 
         for $facet in ($lt, $gt, $le, $ge, $eq, $like, $notLike, $matches, $notMatches)
@@ -131,7 +132,8 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
     let $flags := ($constraint/@flags, '')[1]
     let $case := ($constraint/@case/xs:boolean(.), false())[1]
 
-    let $actValue := file:name($filePath)
+    (: let $actValue := file:name($filePath) :)
+    let $actValue := i:resourceName($filePath)
     let $actValueED := if ($case) then $actValue else lower-case($actValue)
     let $results := 
         for $facet in ($eq, $ne, $like, $notLike, $matches, $notMatches)
@@ -181,7 +183,7 @@ declare function f:constructError_fileProperties($colour as xs:string,
         switch(local-name($constraintElem))
         case 'fileName' return 'File name'
         case 'fileSize' return 'File size'
-        case 'LastModified' return 'Last modified time'
+        case 'lastModified' return 'Last modified time'
         default return error()
         
     let $compare :=

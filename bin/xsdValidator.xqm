@@ -40,7 +40,8 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
 :)        
         return (
             for $v in $value return
-                if (file:is-dir($v)) then file:list($v, false(), '*.xsd') ! concat($v, '/', .)
+                (: if (i:resourceIsDir($v)) then file:list($v, false(), '*.xsd') ! concat($v, '/', .) :)
+                if (i:resourceIsDir($v)) then i:resourceChildResources($v, '*.xsd')
                 else $v
         )
     return
