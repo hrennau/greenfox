@@ -314,6 +314,7 @@ declare function f:copyNamespaceNodes($elem as element())
     in-scope-prefixes($elem)[string()] ! namespace {.} {namespace-uri-for-prefix(., $elem)}        
 };        
 
+(:
 (:~
  : Normalizes a given file path.
  :
@@ -335,6 +336,37 @@ declare function f:normalizeFilepath($path as xs:string)
     ! resolve-uri(., file:parent('.') ! replace(., '\\', '/')) 
     ! replace(., '\\$', '') 
     ! f:pathToFoxpath(.) 
+}; 
+:)
+
+(:~
+ : Normalizes a given file path.
+ :
+ : Normalization means (a) resolving a relative path to an
+ : absolute path, (b) replacing slashes with backward slashes.
+ :
+ : @path a file path
+ : @return normalized file path
+ :)
+declare function f:normalizeFilepath($path as xs:string)
+        as xs:string { trace(
+    file:path-to-uri($path)      (: absolute URI, with any % encoding :)
+    ! file:path-to-native(.)     (: pure file system path :)
+    ! replace(., '/', '\\')      (: for non-Windows systems :)
+    ! replace(., '[/\\]$', '')   (: discard a trailing \ :)
+    , concat('_PATH=', $path, ' - NORMALIZE_FILEPATH: '))
+};
+
+(:~ 
+ : Like file:path-to-native, but making sure that backslaehs
+ : are used irrespective of the operation system.
+ :
+ : @param path the path to be edited
+ : @return the edited path
+ :)
+declare function f:pathToNative($path as xs:string)
+        as xs:string {
+    $path ! file:path-to-native(.) ! replace(., '/', '\\')        
 }; 
 
 (:~
@@ -361,7 +393,7 @@ declare function f:pathToFoxpath($path as xs:string)
  :)
 declare function f:resourceChildResources($path as xs:string, $name as xs:string?)
         as xs:string* {
-    let $path_ := f:pathToFoxpath($path)        
+    let $path_ := f:pathToNative($path)        
     let $name := ($name, '*')[1]
     let $foxpathOptions := i:getFoxpathOptions(true()) 
     return tt:childUriCollection($path_, $name, (), $foxpathOptions)
@@ -389,7 +421,7 @@ declare function f:resourceExists($path as xs:string)
  :)
 declare function f:resourceIsFile($path as xs:string)
         as xs:boolean {
-    let $path_ := f:pathToFoxpath($path)
+    let $path_ := f:pathToNative($path)
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-is-file($path_, $foxpathOptions)
 };
@@ -438,7 +470,7 @@ declare function f:resourceLastModified($path as xs:string)
  :)
 declare function f:resourceReadBinary($path as xs:string)
         as xs:base64Binary? {
-    let $path_ := f:pathToFoxpath($path)        
+    let $path_ := f:pathToNative($path)        
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-binary($path_, $foxpathOptions)
 };

@@ -50,12 +50,12 @@ declare function f:validateOp($request as element())
         as element() {
         
     (: Preliminary checks :)        
-    let $domain := tt:getParams($request, 'domain')
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
     let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)    
     
     (: Collect parameters :)
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
+    let $domain := tt:getParams($request, 'domain')    
     let $params := tt:getParams($request, 'params')
     let $reportType := tt:getParams($request, 'reportType')
     let $reportFormat := tt:getParams($request, 'format')

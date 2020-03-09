@@ -34,18 +34,25 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : Compiles a greenfox schema and returns an augmented copy of the schema, plus
  : a context map. The context map consists of the context map contained by the
  : schema, extended/overwritten by the name-value pairs supplied as
- : external context. In the augmented schema, components with a component
- : reference are replaced with the referenced component, augmented with the
- : attributes and content elements of the referencing component.
+ : external context. 
+ :
+ : The following documentation is currently not valid:
+ :   In the augmented schema, components with a component
+ :   reference are replaced with the referenced component, augmented with the
+ :   attributes and content elements of the referencing component.
  :
  : @param gfox a greenfox schema
- : @param externalContext a set of externally provided name-value pairs
- : @return the augmented schema
+ : @param params a string encoding parameter value assignments supplied by the user
+ : @param domain the path of the domain, as supplied by the user
+ : @return the augmented schema, and a context map
  :)
 declare function f:compileGreenfox($gfox as element(gx:greenfox), 
                                    $params as xs:string?,
                                    $domain as xs:string?) 
         as item()+ {
+        
+    (: The external context contains the parameter values supplied by the user via 
+       parameter 'params', augmented with $domain and the schema path :)
     let $externalContext := f:externalContext($params, $domain, $gfox)        
         
     (: Merge context contents with externally supplied name-value pairs :)
@@ -80,18 +87,16 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
 (:~
  : Maps the value of a string to a set of name-value pairs.
  :
- : Rules:
- : (1) If $domain is supplied, the name-value pair 'domain'-$domain is added. 
- : (2) If ...
- :     (a) the parameters do not contain a name-value pair with name 'schemaPath' and 
- :     (b) the gfox context does not have a field 'schemaPath' with a default value
- :     Then
- :     a name-value pair 'schemaPath'-$schemalocation is added, where $schemalocation 
- :     is the file system location of the schema (derived from $gfox).
+ : Augmentation:
+ : (1) If $domain is supplied: add 'domain' name-value pair 
+ :     Otherwise, if the string contains a 'domain' emtry: edit 'domain' name-value pair, making the path absolute
+ : (2) Add 'schemaPath' name-value pair, where the value is the file path of the schema -
+ :     unless the input string contains a 'schemaPath' parameter, or the 'context' element 
+ :     of the schema has a 'schemaPath' field with a default value 
  :
  : @param params a string containing concatenated name-value pairs
- : @param domain the domain folder
- : @return a map expressing the pairs a key-value pairs
+ : @param domain the value of call parameter 'domain', should be the path of the domain folder
+ : @return a map expressing the name-value pairs
  :)
 declare function f:externalContext($params as xs:string?, 
                                    $domain as xs:string?,
@@ -105,29 +110,33 @@ declare function f:externalContext($params as xs:string?,
             map:entry(replace(., '\s*=.*', ''), 
                       replace(., '^.*?=\s*', ''))
         )
-        
-    (: Add or edit 'domain' entry :)
-    let $prelim2 :=
-        if ($domain) then
-            if (map:contains($prelim, 'domain')) then
-                error(QName((), 'INVALID_ARG'),
-                    "When using params with a 'domain' field, you must not ',
-                     use the 'domain' parameter; aborted.'") 
-            else
-                $domain ! f:normalizeFilepath(.) ! map:put($prelim, 'domain', .)
-        else 
-            let $domainFromContext := map:get($prelim, 'domain')
-            return
-                if ($domainFromContext) then
-                    $domainFromContext ! f:normalizeFilepath(.) ! map:put($prelim, 'domain', .)
-                else $prelim
+
     (: Add 'schemaPath' entry :)                
-    let $prelim3 :=
-        if (map:contains($prelim2, 'schemaPath')) then $prelim2
-        else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim2
+    let $prelim2 :=
+        if (map:contains($prelim, 'schemaPath')) then $prelim
+        else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim
         else 
-            let $schemaLocation := $gfox/base-uri(.) ! i:pathToFoxpath(.)
-            return map:put($prelim2, 'schemaPath', $schemaLocation)
+            let $schemaLocation := $gfox/base-uri(.) ! i:pathToNative(.)
+            return map:put($prelim, 'schemaPath', $schemaLocation)
+
+    (: Add or edit 'domain' entry;
+       normalization: absolute path, using back slashes :)
+    let $prelim3 :=
+        if ($domain) then
+            if (map:contains($prelim2, 'domain')) then
+                error(QName((), 'INVALID_ARG'),
+                    concat("Ambiguous input - you supplied parameter 'domain' and also ",
+                           "parameter 'params' with a 'domain' entry; aborted.'"))
+            else
+                (: Add 'domain' entry, value from call parameter 'domain' :)
+                $domain ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
+        else 
+            let $domainFromNvpair := map:get($prelim2, 'domain')
+            return
+                if ($domainFromNvpair) then
+                    (: Edit 'domain' entry :)
+                    $domainFromNvpair ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
+                else $prelim2
     return
         $prelim3
 };

@@ -8,7 +8,7 @@ module namespace m="http://www.ttools.org/xquery-functions";
 
 declare base-uri "..";
 
-declare variable $m:BASE_URI := file:current-dir() ! replace(., '\\', '/');
+declare variable $m:BASE_URI := file:current-dir() ! file:path-to-uri(.);
 
 (:
  : ============================================================================
@@ -20,7 +20,7 @@ declare variable $m:BASE_URI := file:current-dir() ! replace(., '\\', '/');
 
 declare function m:resolve-uri($uri as xs:string?) 
         as xs:anyURI? {
-    let $uri := resolve-uri($uri, $m:BASE_URI) return
+    let $uri := file:resolve-path($uri, $m:BASE_URI) ! file:path-to-uri(.) return
     resolve-uri($uri)
 };
 
@@ -33,13 +33,13 @@ declare function m:static-base-uri()
 
 declare function m:doc($uri as xs:string?)
         as document-node()? {
-    let $uri := resolve-uri($uri, $m:BASE_URI) return
+    let $uri := file:resolve-path($uri, $m:BASE_URI) ! file:path-to-uri(.) return
     doc($uri)
 };
 
 declare function m:doc-available($uri as xs:string?)
         as xs:boolean {
-    let $uri := resolve-uri($uri, $m:BASE_URI) return
+    let $uri := file:resolve-path($uri, $m:BASE_URI) ! file:path-to-uri(.) return
     try {        
         doc-available($uri)
     } catch * {
@@ -51,42 +51,42 @@ declare function m:doc-available($uri as xs:string?)
 
 declare function m:unparsed-text($href as xs:string?)
         as xs:string? {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text($href)
 };
 
 declare function m:unparsed-text($href as xs:string?, $encoding as xs:string)
         as xs:string? {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text($href, $encoding)
 };
 
 declare function m:unparsed-text-lines($href as xs:string?)
         as xs:string* {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text-lines($href)
 };
 
 declare function m:unparsed-text-lines($href as xs:string?, $encoding as xs:string)
         as xs:string* {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text-lines($href, $encoding)
 };
 
 declare function m:unparsed-text-available($href as xs:string?)
         as xs:boolean {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text-available($href)
 };
 
 declare function m:unparsed-text-available($href as xs:string?, $encoding as xs:string)
         as xs:boolean {
-    let $href := resolve-uri($href, $m:BASE_URI) return
+    let $href := file:resolve-path($href, $m:BASE_URI) ! file:path-to-uri(.) return
     unparsed-text-available($href, $encoding)
 };
 
 declare function m:uri-collection($uri as xs:string?)
         as xs:anyURI* {
-    let $uri := resolve-uri($uri, $m:BASE_URI) return
+    let $uri := file:resolve-path($uri, $m:BASE_URI) ! file:path-to-uri(.) return
     uri-collection($uri)
 };

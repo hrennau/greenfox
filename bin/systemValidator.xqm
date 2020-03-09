@@ -74,7 +74,7 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
         as element()* {
     let $baseURI := $gxDomain/@path ! (
                     if (starts-with(., 'basex://')) then . 
-                    else i:pathToFoxpath(.))
+                    else i:pathToNative(.))
     let $name := $gxDomain/@name/string()
     
     (: Evaluation context, containing entries available as 

@@ -779,7 +779,7 @@ declare function f:childUriCollection($uri as xs:string,
         else
         
     let $kindFilter := $stepDescriptor/@kindFilter
-    let $ignKindTest :=       
+    let $ignKindTest :=        
         try {file:list($uri, false(), $name)           
             ! replace(., '\\', '/')
             ! replace(., '/$', '')

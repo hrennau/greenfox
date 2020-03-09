@@ -136,14 +136,16 @@ declare function m:resolveRcat($rcat as node()?, $pquery as xs:string?)
  :)
 declare function m:rcatFromFoxpath($foxpath as xs:string)
         as element(rcat) {
-    let $selFiles := tt:resolveFoxpath($foxpath, map:entry('IS_CONTEXT_URI', true()), ())        
+    let $selFiles := tt:resolveFoxpath($foxpath, map:entry('IS_CONTEXT_URI', true()), ())  
+    (: turn into absolute URIs :)
+    let $selFiles := $selFiles ! file:path-to-native(.)    
     return
         if ($selFiles instance of element(errors)) then
             tt:wrapErrors(
                 tt:createError('INVALID_FOXPATH_EXPR', concat('Expression text: ', $foxpath))
             )
         else 
-            let $baseURI := file:current-dir() ! replace(., '\\', '/')
+            let $baseURI := file:current-dir() ! file:path-to-native(.)
             return
                 <rcat foxpath="{$foxpath}" 
                       format="xml" 
@@ -189,13 +191,15 @@ declare function m:rcatFromFoxpath($foxpath as xs:string)
             attribute csv.toRec {($properties/@toRec, '0')[1]}
         ) else ()
 
-    let $selFiles := tt:resolveFoxpath($foxpath, map:entry('IS_CONTEXT_URI', true()), ())        
+    let $selFiles := tt:resolveFoxpath($foxpath, map:entry('IS_CONTEXT_URI', true()), ())   
     return
         if ($selFiles instance of element(errors)) then
             tt:wrapErrors(
                 tt:createError('INVALID_FOXPATH_EXPR', concat('Expression text: ', $foxpath))
             )
-        else 
+        else
+            (: turn into absolute URIs :)
+            let $selFiles := $selFiles ! file:path-to-native(.)        
             let $baseURI := file:current-dir() ! replace(., '\\', '/')
             return
                 <rcat foxpath="{$foxpath}" 
@@ -414,11 +418,18 @@ declare function m:_resolveRcat_jsonx($rcat as node()?)
     return if ($rcat/self::z:errors) then $rcat else
     
     let $encoding := ($rcat/@encoding, 'ISO-8859-1')[1]
-    return    
-        for $uri in $rcat//@href
-        let $text := try {tt:unparsed-text($uri)} catch * {()}
-        return
-            try {json:parse($text)/*} catch *  {()}
+    
+    for $uri in $rcat//@href
+    let $text := try {tt:unparsed-text($uri)} catch * {()}
+    let $docRaw :=
+        try {json:parse($text)/*} catch *  {()}
+    let $doc :=
+        if (not($docRaw)) then () else
+        copy $docRaw_ := $docRaw
+        modify insert node attribute xml:base {$uri} into $docRaw_
+        return $docRaw_
+    return $doc       
+        
 };
 
 
