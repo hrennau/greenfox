@@ -55,21 +55,10 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
        parameter 'params', augmented with $domain and the schema path :)
     let $externalContext := f:externalContext($params, $domain, $gfox)        
         
-    (: Merge context contents with externally supplied name-value pairs :)
-    let $context_prelim := map:merge(
-        for $field in $gfox/gx:context/gx:field
-        let $name := $field/@name/string()
-        let $value := ($externalContext($name), $field/@value)[1]
-        return
-            map:entry($name, $value))
-            
-    (: add entries 'domain' and 'schemaPath' :)
-    let $context := map:merge((
-        $context_prelim,
-        $externalContext?domain[not(map:contains($context_prelim, 'domain'))] ! map:entry('domain', .),
-        $externalContext?schemaPath[not(map:contains($context_prelim, 'schemaPath'))] ! map:entry('schemaPath', .)
-    ))
-
+    (: Merge context contents with externally supplied name-value pairs,
+       and perform variable substitutions :)
+    let $context := f:editContext($gfox/gx:context, $externalContext)
+    
     (: Perform variable substitution :)
     let $gfox2 := f:substituteVariablesRC($gfox, $context)
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
@@ -78,6 +67,66 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
         ($gfox4, $context)
 };
 
+(:~
+ : Edits a schema context, overwriting default values with external values
+ : and performing variable substitution.
+ :
+ : @param context the schema context
+ : @param externalContext a context assembled from externally supplied values
+ : @return the edited context
+ :)
+declare function f:editContext($context as element(gx:context),
+                               $externalContext as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    (: Collect entries, overwriting schemaq values with external values :)        
+    let $entries := (        
+        if ($context/gx:field[@name eq 'schemaPath']) then ()
+        else $externalContext?schemaPath ! map:entry('schemaPath', .)
+        ,
+        if ($context/gx:field[@name eq 'domain']) then ()
+        else $externalContext?domain ! map:entry('domain', .)
+        ,
+        for $field in $context/gx:field
+        let $name := $field/@name/string()
+        let $value := ($externalContext($name), $field/@value)[1]
+        return
+            map:entry($name, $value)
+    )
+    return 
+        (: Perform variable substitution :)    
+        map:merge(
+            if (empty($entries)) then () else
+                f:editContextRC($entries, $externalContext, map{})
+        )        
+};
+
+(:~
+ : Auxiliary function of function `f:editontext`.
+ :
+ :)
+declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
+                                 $externalContext as map(xs:string, item()*),
+                                 $substitutionContext as map(xs:string, item()*))
+        as map(xs:string, item()*)+ {
+    let $head := head($contextEntries)
+    let $tail := tail($contextEntries)
+    
+    let $name := map:keys($head)
+    let $value := $head($name)
+    let $augmentedValue := 
+        let $raw := f:substituteVars($value, $substitutionContext, ())
+        return
+            if ($name eq 'domain') then i:pathToNative($raw)
+            else $raw
+    let $augmentedEntry := map:entry($name, $augmentedValue)    
+    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
+    return (
+        $augmentedEntry,
+        if (empty($tail)) then () else
+            f:editContextRC($tail, $externalContext, $newSubstitutionContext)
+    )            
+};        
+
 (: ============================================================================
  :
  :     f u n c t i o n    c r e a t i n g    e x t e r n a l    c o n t e x t
@@ -85,17 +134,19 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
  : ============================================================================ :)
 
 (:~
- : Maps the value of a string to a set of name-value pairs.
+ : Maps the value of a parameters string to a set of name-value pairs.
  :
  : Augmentation:
- : (1) If $domain is supplied: add 'domain' name-value pair 
- :     Otherwise, if the string contains a 'domain' emtry: edit 'domain' name-value pair, making the path absolute
+ : (1) If function parameter $domain is supplied: add 'domain' name-value pair 
+ :     Otherwise, if the parameters string contains a 'domain' emtry: 
+ :     edit 'domain' name-value pair, making the path absolute
  : (2) Add 'schemaPath' name-value pair, where the value is the file path of the schema -
- :     unless the input string contains a 'schemaPath' parameter, or the 'context' element 
+ :     unless the parameters string contains a 'schemaPath' parameter, or the 'context' element 
  :     of the schema has a 'schemaPath' field with a default value 
  :
- : @param params a string containing concatenated name-value pairs
+ : @param params a parameters string containing semicolon-separated name-value pairs
  : @param domain the value of call parameter 'domain', should be the path of the domain folder
+ : @param gfox the greenfox schema
  : @return a map expressing the name-value pairs
  :)
 declare function f:externalContext($params as xs:string?, 
@@ -103,10 +154,10 @@ declare function f:externalContext($params as xs:string?,
                                    $gfox as element(gx:greenfox)) 
         as map(xs:string, item()*) {
     let $gfoxContext := $gfox/gx:greenfox/gx:context    
-    let $nvpairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
+    let $nvPairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
     let $prelim :=
         map:merge(
-            $nvpairs ! 
+            $nvPairs ! 
             map:entry(replace(., '\s*=.*', ''), 
                       replace(., '^.*?=\s*', ''))
         )
@@ -122,6 +173,7 @@ declare function f:externalContext($params as xs:string?,
     (: Add or edit 'domain' entry;
        normalization: absolute path, using back slashes :)
     let $prelim3 :=
+        (: domain parameter specified :)
         if ($domain) then
             if (map:contains($prelim2, 'domain')) then
                 error(QName((), 'INVALID_ARG'),
@@ -130,11 +182,12 @@ declare function f:externalContext($params as xs:string?,
             else
                 (: Add 'domain' entry, value from call parameter 'domain' :)
                 $domain ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
-        else 
+        (: Without domain parameter :)                
+        else  
+            (: If domain name-value pair: edit value (making path absolute) :)        
             let $domainFromNvpair := map:get($prelim2, 'domain')
-            return
+            return           
                 if ($domainFromNvpair) then
-                    (: Edit 'domain' entry :)
                     $domainFromNvpair ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
                 else $prelim2
     return
@@ -168,6 +221,22 @@ declare function f:substituteVariablesRC($n as node(), $context as map(xs:string
             if ($n/@xml:base) then () else attribute xml:base {base-uri($n)},
             $n/node() ! f:substituteVariablesRC(., $context) 
         }
+
+    (: Context - add entries from external context not contained by schema context :)
+    case element(gx:context) return
+        element {node-name($n)} {
+            map:keys($context)[not(. = $n/gx:field/@name)] 
+            ! <field xmlns="http://www.greenfox.org/ns/schema" name="{.}" value="{$context(.)}"/>,
+            $n/* ! f:substituteVariablesRC(., $context)
+        }
+        
+    case element(gx:field) return
+        let $name := $n/@name
+        return
+            element {node-name($n)} {
+                $n/@name ! f:substituteVariablesRC(., $context),
+                $n/attribute value {($context($name), @value)[1]}
+            }
         
     (: Copies the element :)
     case element() return
