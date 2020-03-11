@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint components FolderContent... 
+    
+    Constraint components:
+    * FolderContentClosed - @closed
+    
+    Validation catches 
+    * ?
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            <folderContent closed="true">
+                <memberFolder name="user-extensions"/>
+                <memberFile name="airport-???.xml" minCount="6"/>
+                <memberFile name="airport-???.json" maxCount="6"/>
+                <memberFile name="airports.xml" md5="D12FB6BBF1880D67A77706A7D5A13F21"/>
+                <memberFile name="airports2.xml"/>
+                <memberFile name="airports.json" md5="31CF4D875F077DFCCABAAC5F81D2865C"/>
+                <memberFile name="airports2.json"/>
+            </folderContent>  
+            <folder foxpath="user-extensions">
+                <targetSize countMsg="Missing folder: user-extensions" count="1"/>
+                <folderContent closed="true">
+                    <memberFolder name="user-extension-dus"/>
+                    <memberFolder name="user-extension-xxx"/>
+                </folderContent>
+                <folder foxpath="user-extension-dus">
+                    <targetSize countMsg="Missing folder: user-extension-dus" count="1"/>
+                    <folderContent closed="true">
+                        <memberFile name="airport-dus.json"/>
+                        <memberFile name="airport-dus.xml"/>
+                    </folderContent>
+                </folder>
+            </folder>
+        </folder>
+    </domain>
+
+</greenfox>
