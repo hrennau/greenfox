@@ -101,8 +101,10 @@ declare function f:matchesLike($string as xs:string, $like as xs:string, $flags 
  :)
 declare function f:glob2regex($pattern as xs:string)
         as xs:string {
-    replace($pattern, '\*', '.*') 
+    replace($pattern, '\.', '\\.')
+    ! replace(., '\*', '.*') 
     ! replace(., '\?', '.')
+    ! replace(., '[()\[\]{}^$]', '\\$0')
     ! concat('^', ., '$')
 };   
 
