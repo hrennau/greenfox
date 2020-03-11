@@ -368,7 +368,17 @@ declare function f:normalizeFilepath($path as xs:string)
  :)
 declare function f:pathToNative($path as xs:string)
         as xs:string {
-    $path ! file:path-to-native(.) ! replace(., '/', '\\')        
+    let $sep := codepoints-to-string(30000)    
+    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#[/\\].*', '$1')[. ne $path]
+    return
+        (: URI is archive URI :)
+        if ($beforeArchiveEntry) then
+            let $after := substring($path, string-length($beforeArchiveEntry) + 1)
+            return
+                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '/', '\\') 
+        (: URI is a file system URI :)
+        else
+            $path ! file:path-to-native(.) ! replace(., '/', '\\')        
 }; 
 
 (:~
@@ -395,7 +405,8 @@ declare function f:pathToFoxpath($path as xs:string)
  :)
 declare function f:resourceChildResources($path as xs:string, $name as xs:string?)
         as xs:string* {
-    let $path_ := f:pathToNative($path)        
+    let $path_ := f:pathToNative($path)
+    let $path_ := $path   (: To verify ... :)
     let $name := ($name, '*')[1]
     let $foxpathOptions := i:getFoxpathOptions(true()) 
     return tt:childUriCollection($path_, $name, (), $foxpathOptions)
@@ -424,6 +435,7 @@ declare function f:resourceExists($path as xs:string)
 declare function f:resourceIsFile($path as xs:string)
         as xs:boolean {
     let $path_ := f:pathToNative($path)
+    let $path_ := $path
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-is-file($path_, $foxpathOptions)
 };
@@ -472,7 +484,8 @@ declare function f:resourceLastModified($path as xs:string)
  :)
 declare function f:resourceReadBinary($path as xs:string)
         as xs:base64Binary? {
-    let $path_ := f:pathToNative($path)        
+    let $path_ := f:pathToNative($path)      
+    let $path_ := $path
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-binary($path_, $foxpathOptions)
 };
