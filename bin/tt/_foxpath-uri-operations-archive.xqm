@@ -317,9 +317,12 @@ declare function f:descendantUriCollection_archive(
             concat('^', replace(replace($name, '\*', '.*'), '\?', '.'), '$')
 
     let $entries := archive:entries($archive) ! string()    
-    let $relPaths := 
-        if (not($archivePath)) then $entries else 
-            $entries ! substring(., 2 + string-length($archivePath))   
+    let $relPaths :=
+        if (not($archivePath)) then $entries 
+        else
+            let $prefix := $archivePath || '/'
+            return            
+                $entries[starts-with(., $prefix)] ! substring(., 2 + string-length($archivePath)) 
         
     let $files := distinct-values($relPaths)
     let $matchKind :=

@@ -31,7 +31,7 @@
                 <targetSize countMsg="Missing folder: user-extensions" count="1"/>
                 <folderContent closed="true">
                     <memberFolder name="user-extension-dus"/>
-                    <memberFolder name="user-extension-xxx"/>
+                    <memberFolder name="user-extension-xxx" minCount="0"/>
                 </folderContent>
                 <folder foxpath="user-extension-dus">
                     <targetSize countMsg="Missing folder: user-extension-dus" count="1"/>
