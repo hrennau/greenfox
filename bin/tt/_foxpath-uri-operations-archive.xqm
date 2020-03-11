@@ -281,7 +281,7 @@ declare function f:childUriCollection_archive($archive as xs:base64Binary,
                 return
                     if ($kindFilter eq 'dir') then $folderChildren
                     else ($fileChildren, $folderChildren)
-        ) [string()]
+        ) [string()] => distinct-values()   
     let $matchName :=
         if (not($pattern)) then $children else
             $children[matches(replace(replace(., '/$', ''), '.*/', ''), $pattern, 'i')]
