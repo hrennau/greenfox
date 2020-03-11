@@ -39,9 +39,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
     let $msgFolderContent := $_constraint/@msg
 
     (: determine member files and folders :)
-    (: let $members := file:list($folderPath, false(), '*') ! replace(., '[/\\]$', '') :)
     let $members := i:resourceChildResources($folderPath, '*') ! replace(., '[/\\]$', '')
-    (: let $memberFiles := $members[file:is-file(concat($folderPath, '/', .))] :)
     let $memberFiles := $members[i:resourceIsFile(concat($folderPath, '/', .))]
     let $memberFolders := $members[not(. = $memberFiles)]
 
@@ -64,37 +62,6 @@ declare function f:validateFolderContent($folderPath as xs:string,
         return        
             f:constructError_folderContentClosed(
                 $colour, $_constraint, $unexpectedMembers, $additionalAtts, $additionalElems) 
-(:        
-            if (exists($unexpectedMembers)) then
-                let $msg := i:getErrorMsg($constraint, 'closed', 'Unexpected folder contents.')
-                return                            
-                    <gx:red>{
-                        $msg ! attribute msg {.},
-                        attribute constraintComp {'FolderContentClosed'},
-                        $_constraint/@id/attribute constraintID {.},
-                        $_constraint/@label/attribute constraintLabel {.},
-                        $constraint/@resourceShapeID,
-                        attribute filePath {$folderPathDisplay},
-
-                        for $name in $unexpectedMembers
-                        let $path := concat($folderPath, '/', $name)
-                        let $kind := if (file:is-dir($path)) then 'folder' else 'file'
-                        return
-                            <gx:value resoureKind="{$kind}">{$path}</gx:value>
-
-                    }</gx:red>
-            else            
-                let $msg := i:getOkMsg($constraint, 'closed', ())
-                return                            
-                    <gx:green>{
-                        $msg ! attribute msg {.},
-                        attribute constraintComp {'FolderContentClosed'},
-                        $_constraint/@id/attribute constraintID {.},
-                        $_constraint/@label/attribute constraintLabel {.},
-                        $constraint/@resourceShapeID,
-                        attribute filePath {$folderPathDisplay}
-                    }</gx:green>
-:)            
     let $results_cardinality :=
         for $d in $_constraint/(* except gx:ignoreMember)
         let $minCount := $d/@minCount/number(.)
