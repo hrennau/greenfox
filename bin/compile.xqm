@@ -67,69 +67,9 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
         ($gfox4, $context)
 };
 
-(:~
- : Edits a schema context, overwriting default values with external values
- : and performing variable substitution.
- :
- : @param context the schema context
- : @param externalContext a context assembled from externally supplied values
- : @return the edited context
- :)
-declare function f:editContext($context as element(gx:context),
-                               $externalContext as map(xs:string, item()*))
-        as map(xs:string, item()*) {
-    (: Collect entries, overwriting schemaq values with external values :)        
-    let $entries := (        
-        if ($context/gx:field[@name eq 'schemaPath']) then ()
-        else $externalContext?schemaPath ! map:entry('schemaPath', .)
-        ,
-        if ($context/gx:field[@name eq 'domain']) then ()
-        else $externalContext?domain ! map:entry('domain', .)
-        ,
-        for $field in $context/gx:field
-        let $name := $field/@name/string()
-        let $value := ($externalContext($name), $field/@value)[1]
-        return
-            map:entry($name, $value)
-    )
-    return 
-        (: Perform variable substitution :)    
-        map:merge(
-            if (empty($entries)) then () else
-                f:editContextRC($entries, $externalContext, map{})
-        )        
-};
-
-(:~
- : Auxiliary function of function `f:editontext`.
- :
- :)
-declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
-                                 $externalContext as map(xs:string, item()*),
-                                 $substitutionContext as map(xs:string, item()*))
-        as map(xs:string, item()*)+ {
-    let $head := head($contextEntries)
-    let $tail := tail($contextEntries)
-    
-    let $name := map:keys($head)
-    let $value := $head($name)
-    let $augmentedValue := 
-        let $raw := f:substituteVars($value, $substitutionContext, ())
-        return
-            if ($name eq 'domain') then i:pathToNative($raw)
-            else $raw
-    let $augmentedEntry := map:entry($name, $augmentedValue)    
-    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
-    return (
-        $augmentedEntry,
-        if (empty($tail)) then () else
-            f:editContextRC($tail, $externalContext, $newSubstitutionContext)
-    )            
-};        
-
 (: ============================================================================
  :
- :     f u n c t i o n    c r e a t i n g    e x t e r n a l    c o n t e x t
+ :     f u n c t i o n    m a n a g i n g    t h e    c o n t e x t
  :
  : ============================================================================ :)
 
@@ -193,6 +133,66 @@ declare function f:externalContext($params as xs:string?,
     return
         $prelim3
 };
+
+(:~
+ : Edits a schema context, overwriting default values with external values
+ : and performing variable substitution.
+ :
+ : @param context the schema context
+ : @param externalContext a context assembled from externally supplied values
+ : @return the edited context
+ :)
+declare function f:editContext($context as element(gx:context),
+                               $externalContext as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    (: Collect entries, overwriting schemaq values with external values :)        
+    let $entries := (        
+        if ($context/gx:field[@name eq 'schemaPath']) then ()
+        else $externalContext?schemaPath ! map:entry('schemaPath', .)
+        ,
+        if ($context/gx:field[@name eq 'domain']) then ()
+        else $externalContext?domain ! map:entry('domain', .)
+        ,
+        for $field in $context/gx:field
+        let $name := $field/@name/string()
+        let $value := ($externalContext($name), $field/@value)[1]
+        return
+            map:entry($name, $value)
+    )
+    return 
+        (: Perform variable substitution :)    
+        map:merge(
+            if (empty($entries)) then () else
+                f:editContextRC($entries, $externalContext, map{})
+        )        
+};
+
+(:~
+ : Auxiliary function of function `f:editontext`.
+ :
+ :)
+declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
+                                 $externalContext as map(xs:string, item()*),
+                                 $substitutionContext as map(xs:string, item()*))
+        as map(xs:string, item()*)+ {
+    let $head := head($contextEntries)
+    let $tail := tail($contextEntries)
+    
+    let $name := map:keys($head)
+    let $value := $head($name)
+    let $augmentedValue := 
+        let $raw := f:substituteVars($value, $substitutionContext, ())
+        return
+            if ($name eq 'domain') then i:pathToNative($raw)
+            else $raw
+    let $augmentedEntry := map:entry($name, $augmentedValue)    
+    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
+    return (
+        $augmentedEntry,
+        if (empty($tail)) then () else
+            f:editContextRC($tail, $externalContext, $newSubstitutionContext)
+    )            
+};        
 
 (: ============================================================================
  :
