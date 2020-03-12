@@ -166,31 +166,6 @@ declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:s
     )
 };
 
-(:~
- : Parses a file into a csv document.
- :
- : @param filePath the file path
- : @param params an element which may have attributes controllig the parsing
- : @return the csv document, or the empty sequence of parsing is not successful
- :)
-declare function f:csvDoc($filePath as xs:string, $params as element())
-        as document-node()? {
-    let $separator := ($params/@csv.separator, 'comma')[1]
-    let $withHeader := ($params/@csv.withHeader, 'no')[1]
-    let $names := ($params/@csv.names, 'direct')[1]
-    let $withQuotes := ($params/@csv.withQuotes, 'yes')[1]
-    let $backslashes := ($params/@csv.backslashes, 'no')[1]
-    let $options := map{
-        'separator': $separator,
-        'header': $withHeader,
-        'format': $names,
-        'quotes': $withQuotes,
-        'backslashes': $backslashes
-    }
-    let $text := unparsed-text($filePath)
-    return try {csv:parse($text, $options)} catch * {()}
-};   
-
 declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemName as xs:QName?)
         as item()? {
     try {        

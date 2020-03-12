@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of constraint components LastModified...
+    
+    Constraint components: 
+    * LastModifiedLt - @le
+    * LstModifiedGt - @gt
+    * LastModifiedMatches - @matches
+    * LastModifiedNotMatches - @notMatches
+        
+    Validation catches file modified ...
+    * before 2020-02-08
+    * at or after 2020-03-01
+    * not between 09:00 and 21:00
+    * between 00:00 and 02:00
+    
+    Note the following similar constraint components:
+    * LastModifiedLe - @le
+    * LastModifiedGe - @ge 
+    * LastModifiedEq - @eq
+    * LastModifiedLike - @like   
+    * LastModifiedNotLlike - @notLike
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath=".\\*" id="anyFileShape">
+                <lastModified le="2020-03-01" 
+                              leMsg="Files must be older than 2020-03-01"
+                              gt="2020-02-08"
+                              gtMsg="Files must be from 2020-02-10 or later"
+                              matches="^.*T(09|10|11|12|13|14|15|16|17|18|19|20).*$" 
+                              matchesMsg="Files must be modified after 09:00 and before 21:00"
+                              notMatches="^.*T0[0-2].*"
+                              notMatchesMsg="Files must not be modified between 00:00 and 02:00"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
