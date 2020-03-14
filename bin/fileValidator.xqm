@@ -189,8 +189,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
         return
             if (not($required)) then () 
-            else if (not(doc-available($filePath))) then ()
-            else doc($filePath)
+            else if (not(i:foxDocAvailable($filePath, ()))) then ()
+            else i:foxDoc($filePath, ())
     let $jdoc :=
         if ($xdoc) then () else
         
@@ -205,7 +205,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         return
             if (not($required)) then ()
             else
-                let $text := unparsed-text($filePath)
+                let $text := i:foxUnparsedText($filePath, (), ())
                 return try {json:parse($text)} catch * {()}
            
     let $htmldoc :=
@@ -222,7 +222,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         return
             if (not($required)) then ()
             else
-                let $text := unparsed-text($filePath)
+                let $text := i:foxUnparsedText($filePath, (), ())
                 return try {html:parse($text)} catch * {()}
            
     let $csvdoc :=

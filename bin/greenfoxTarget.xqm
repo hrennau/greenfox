@@ -178,12 +178,12 @@ declare function f:getTargetPaths_linkTargets(
 
     let $doc :=
         if ($contextMediatype eq 'xml') then
-            if (not(doc-available($contextPath))) then () 
-            else doc($contextPath)
+            if (not(i:foxDocAvailable($contextPath, ()))) then () 
+            else i:foxDoc($contextPath, ())
         else if ($contextMediatype eq 'json') then
-            if (not(unparsed-text-available($contextPath))) then ()
+            if (not(i:foxUnparsedTextAvailable($contextPath, (), ()))) then ()
             else
-                let $text := unparsed-text($contextPath)
+                let $text := i:foxUnparsedText($contextPath, (), ())
                 return
                     try{json:parse($text)} catch * {()}
     return

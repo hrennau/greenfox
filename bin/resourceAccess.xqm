@@ -10,6 +10,9 @@ module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath-uri-operations.xqm";
     
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "resourceAccess.xqm";
+    
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -28,6 +31,14 @@ declare function f:foxUnparsedText($uri as xs:string,
     tt:fox-unparsed-text($uri, $encoding, $options)        
 };
 
+declare function f:foxUnparsedTextAvailable($uri as xs:string, 
+                                            $encoding as xs:string?, 
+                                            $options as map(*)?)
+        as xs:boolean {
+    let $text := try {tt:fox-unparsed-text($uri, $encoding, $options)} catch * {()}
+    return exists($text)
+};
+
 (:~
  : Returns an XML document identified by URI or file path.
  :
@@ -39,6 +50,19 @@ declare function f:foxDoc($uri as xs:string,
                           $options as map(*)?)
         as document-node()? {
     tt:fox-doc($uri, $options)        
+};
+
+(:~
+ : Returns true if a given URI or file path points to a well-formed XML document.
+ :
+ : @param uri the URI or file path of the resource
+ : @param options options controlling the evaluation
+ : @return true if the URI points to a well-formed XML document
+ :)
+declare function f:foxDocAvailable($uri as xs:string,
+                                   $options as map(*)?)
+        as xs:boolean {
+    tt:fox-doc-available($uri, $options)        
 };
 
 (:~
@@ -83,6 +107,23 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
     return
         f:foxCsvDoc($filePath, $separator, $withHeader, $names, $withQuotes, $backslashes, ())
 };   
+
+(:~
+ : Resolves a URI to an absolute URI. If the input URI is absolute, it is
+ : returned unchanged; otherwise it is resolved against the base URI.
+ :
+ : @param uri the URI to be resolved
+ : @param baseUri base URI against which to resolve
+ : @return the resolved URI
+ :)
+declare function f:foxResolveUri($uri as xs:string, $baseUri as xs:string)
+        as xs:string {
+    if (matches($uri, '^(/|[a-zA-Z]:/|\i\c*:/)')) then $uri
+    else
+        let $baseUri := replace($baseUri, '/$', '') 
+                        ! replace(., '[^/]+$', '')
+        return concat($baseUri, $uri)
+};        
 
 
 
