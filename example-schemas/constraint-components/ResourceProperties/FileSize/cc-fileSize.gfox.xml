@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FileSizeXY.
+    Demonstrates the use of constraint components FileSizeXY.
     
     Constraint component:
     * FileSizeGt 
@@ -18,7 +18,7 @@
     * FileNameGt - fileSize/@gt
     * FileNameGe - fileSize/@ge
     * FileNameLt - fileSize/@lt
-    * FileNameLt - fileSize/@le
+    * FileNameLe - fileSize/@le
     * FileNameEq - fileSize/@eq
     * FileNameNe - fileSize/@ne    
 -->

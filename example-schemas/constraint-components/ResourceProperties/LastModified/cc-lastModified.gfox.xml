@@ -1,27 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components LastModified...
+    Demonstrates the use of constraint components LastModifiedXY.
     
     Constraint components: 
-    * LastModifiedLt - @le
-    * LstModifiedGt - @gt
-    * LastModifiedMatches - @matches
-    * LastModifiedNotMatches - @notMatches
+    * LastModifiedLe
+    - lastModified/@le
+        specifies a limit date-time so that the last modification must have been at or before that date-time
+    * LastModifiedGt
+    - lastModified/@gt
+        specifies a limit date-time so that the last modification must have been after that date-time
+    * LastModifiedMatches 
+    - lastModified/@matches
+        specifies a regular expression which the date-time of the last modification must match
+    * LastModifiedNotMatches
+    - lastModifiedNotMatches
+        specifies a regular expression which the date-time of the last modification must not match
         
     Validation catches file modified ...
     * before 2020-02-08
-    * at or after 2020-03-01
+    * on or after 2020-03-01
     * not between 09:00 and 21:00
-    * between 00:00 and 02:00
+    * between 00:00 and 03:00
     
-    Note the following similar constraint components:
-    * LastModifiedLe - @le
-    * LastModifiedGe - @ge 
-    * LastModifiedEq - @eq
-    * LastModifiedLike - @like   
-    * LastModifiedNotLlike - @notLike
+    The complete set of constraint components related to the date-time of last modification is:
+    * LastModifiedGt - lastModified/@gt
+    * LastModifiedGe - lastModified/@ge    
+    * LastModifiedLt - lastModified/@lt
+    * LastModifiedLe - lastModified/@le             
+    * LastModifiedEq - lastModified/@eq
+    * LastModifiedMatches - lastModified/@matches   
+    * LastModifiedNotMatches - lastModified/@notMatches
+    * LastModifiedLike - lastModified/@like   
+    * LastModifiedNotLike - lastModified/@notLike
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last.modified"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -37,9 +49,9 @@
                               gt="2020-02-08"
                               gtMsg="Files must be from 2020-02-10 or later"
                               matches="^.*T(09|10|11|12|13|14|15|16|17|18|19|20).*$" 
-                              matchesMsg="Files must be modified after 09:00 and before 21:00"
+                              matchesMsg="Files must be modified between 09:00 and 21:00"
                               notMatches="^.*T0[0-2].*"
-                              notMatchesMsg="Files must not be modified between 00:00 and 02:00"/>
+                              notMatchesMsg="Files must not be modified between 00:00 and 03:00"/>                
             </file>
         </folder>
     </domain>

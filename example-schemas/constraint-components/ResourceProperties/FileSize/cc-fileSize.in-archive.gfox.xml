@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FileSizeXY. This example checks
+    Demonstrates the use of constraint components FileSizeXY. This example checks
     resources contained by an archive file.
     
     Constraint component:
@@ -19,7 +19,7 @@
     * FileNameGt - fileSize/@gt
     * FileNameGe - fileSize/@ge
     * FileNameLt - fileSize/@lt
-    * FileNameLt - fileSize/@le
+    * FileNameLe - fileSize/@le
     * FileNameEq - fileSize/@eq
     * FileNameNe - fileSize/@ne    
 -->
