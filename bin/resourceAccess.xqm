@@ -66,6 +66,32 @@ declare function f:foxDocAvailable($uri as xs:string,
 };
 
 (:~
+ : Checks if a path or URI points to a folder, not a file.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:foxResourceIsDir($path as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-dir($path, $foxpathOptions)
+};
+
+(:~
+ : Checks if a path or URI points to a file, not a folder.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:foxResourceIsFile($path as xs:string)
+        as xs:boolean {
+    let $path_ := f:pathToNative($path)
+    let $path_ := $path
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-file($path_, $foxpathOptions)
+};
+
+(:~
  : Returns an XML representation of the CSV record identified by URI or file path.
  :
  : @param uri the URI or file path of the resource
