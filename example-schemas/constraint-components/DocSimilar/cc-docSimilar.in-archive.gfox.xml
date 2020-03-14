@@ -3,16 +3,25 @@
     Demonstrates the use of constraint component DocSimilar.  This example checks
     resources contained by an archive file.
     
-    Note the <skipItem> elements excluding some elements and an attribute from
-    the comparison.
-    
     Constraint components:
-    * DocSimilar
-    - @otherFoxpath specifies the other document with which to compare
-    - ./skipItem specifies elements or attributes to exclude from the comparison
+    * Name:  DocSimilar
+    - XML:   docSimilar/@otherFoxpath specifies the other document with which to compare
+    - Check: The current file must be represented by a node tree which is equal to the node tree
+             representing the file identified by the Foxpath expression, taking into
+             consideration exceptions defined by child elements <skipItem> and <roundItem>.
     
-    Validation catches 
-    * Comparison files which are not doc-similar
+    When comparing node trees, items identified by a <skipItem> element are ignored, and the text
+    value of items identified by a <roundItem> element is replaced with a rounded value.
+    Items are identified by the following selectors, all of which are optional:
+    * item kind - @kind, 'element' or 'attribute'
+    * local name - @local name
+    * namespace - @namespace
+    * parent local name - @parentLocalName
+    * parent namespace - @parentNamespace
+    
+    In this example, validation catches 
+    * an 'executionSummary1.xml' file not doc-similar to a sibling file 'executionSummary2.xml', ignoring
+      'articleNumber' and 'timestamp' elements and @fileSize attributes on 'articleBook' elements.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc.similar/archive"
           xmlns="http://www.greenfox.org/ns/schema">

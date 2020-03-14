@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint component MediatypeEq.
+    Demonstrates the use of constraint component MediatypeEq.
     
-    Constraint components:
-    * MediatypeEq - @eq
+    Constraint component:
+    * Name:  MediatypeEq 
+    - XML:   mediatype/@eq
+    - Check: The mediatype must be equal to the specified value; if the attribute
+             value contains whitespace, the mediatype must be equal to one of the
+             whitespace separated values   
+             
+    Supported values for mediatypes are: xml, json, csv.
     
-    Validation catches 
+    In this example, validation catches 
     * .json files which are not well-formed JSON
     * .xml files which are not well-formed XML    
+    
+    Note optional further parameters (not used in the example):
+    * @csv.minRowCount - when checking mediatyp 'csv', the number of rows must not be less than the specified value    
+    * @csv.minColumnCount - when checking mediatype 'csv', all rows must have at least the specified number of columns
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
