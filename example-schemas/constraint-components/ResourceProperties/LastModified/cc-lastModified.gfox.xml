@@ -3,24 +3,31 @@
     Demonstrates the use of constraint components LastModifiedXY.
     
     Constraint components: 
-    * LastModifiedLe
-    - lastModified/@le
-        specifies a limit date-time so that the last modification must have been at or before that date-time
-    * LastModifiedGt
-    - lastModified/@gt
-        specifies a limit date-time so that the last modification must have been after that date-time
-    * LastModifiedMatches 
-    - lastModified/@matches
-        specifies a regular expression which the date-time of the last modification must match
-    * LastModifiedNotMatches
-    - lastModifiedNotMatches
-        specifies a regular expression which the date-time of the last modification must not match
+    * Name:  LastModifiedLe
+    - XML:   lastModified/@le
+    - Check: The date or date-time of last modification must be less than or equal to the specified limit
+    
+    * Name:  LastModifiedGt
+    - XML:   lastModified/@gt
+    - Check: The date or date-time of last modification must be greater than the specified limit
+    
+    * Name:  LastModifiedMatches 
+    - XML:   lastModified/@matches
+    - Check: The date or date-time of last modification must match the given regular expression
+    
+    * Name:  LastModifiedNotMatches
+    - XML:   lastModifiedNotMatches
+    - Check: The date or date-time of last modification must not match the given regular expression
         
-    Validation catches file modified ...
+    In this example, validation catches files modified ...
     * before 2020-02-08
     * on or after 2020-03-01
     * not between 09:00 and 21:00
     * between 00:00 and 03:00
+    
+    Note optional further parameters (@flags not used in the example):
+    : @case - if 'true', the date-time is compared case-sensitively; default: 'false'
+    * @flags - regex flags, used in @like, @notLike, @matches, @notMatches; default: ''
     
     The complete set of constraint components related to the date-time of last modification is:
     * LastModifiedGt - lastModified/@gt
@@ -28,10 +35,10 @@
     * LastModifiedLt - lastModified/@lt
     * LastModifiedLe - lastModified/@le             
     * LastModifiedEq - lastModified/@eq
-    * LastModifiedMatches - lastModified/@matches   
-    * LastModifiedNotMatches - lastModified/@notMatches
     * LastModifiedLike - lastModified/@like   
     * LastModifiedNotLike - lastModified/@notLike
+    * LastModifiedMatches - lastModified/@matches   
+    * LastModifiedNotMatches - lastModified/@notMatches
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last.modified"
           xmlns="http://www.greenfox.org/ns/schema">

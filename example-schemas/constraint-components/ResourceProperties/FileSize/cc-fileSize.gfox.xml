@@ -2,13 +2,14 @@
 <!-- 
     Demonstrates the use of constraint components FileSizeXY.
     
-    Constraint component:
-    * FileSizeGt 
-    - fileSize/@gt 
-        specifies a limit size so that the file size must be greater than this limit
-    * FileSizeLe 
-    - fileSize/@le 
-        specifies a limit size so that the file size must be less than or equal to this limit
+    Constraint components:
+    * Name:  FileSizeGt 
+    - XML:   fileSize/@gt 
+    - Check: The file size must be greater than the specified limit
+    
+    * Name:  FileSizeLe 
+    - XML:   fileSize/@le 
+    - Check: The file size must be less than or equal to the specified limit
     
     Validation catches 
     * empty files (with size "0").

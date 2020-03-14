@@ -1,26 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FileName...
+    Demonstrates the use of constraint components FileNameXY. This example checks
+    resources contained by an archive file.
     
     Constraint components:
-    * FileNameLike - @like
-    * FileNameNotLike - @notLike
+    * Name:  FileNameLike 
+    - XML:   FileName/@like
+    - Check: The file name must match the given glob pattern
     
-    Validation catches 
-    * .json files with a name pattern not matching 'airport*.json'
-    * .json files with a name pattern matching '*test*'
+    * Name:  FileNameNotLike 
+    - XML:   FileName/@notLike
+    - Check: The file name must not match the given glob pattern
     
-    Note parameters not used in the example:
+    In this example, validation catches 
+    * .json files with a name matching glob pattern 'airport*.json'
+    * .json files with a name not matching glob '*test*'
+    * .json files with a name not matching regex '\s+-\s+Kopie'    
+    
+    Note optional further parameters (@flags not used in the example):
     : @case - if 'true', the name is compared case-sensitively; default: 'false'
     * @flags - regex flags, used in @like, @notLike, @matches, @notMatches; default: ''
     
-    Note the following similar constraint components:
-    * FileNameEq - @eq
-    * FileNameNe - @ne
-    * FíleNameMatches - @matches
-    * FileNameNotMatches - @notMatches   
+    The complete set of file name related constraint components is:
+    * FileNameEq - fileName/@eq
+    * FileNameNe - fileName/@ne
+    * FíleNameLike - fileName/@like
+    * FileNameNotLike - fileName/@notLike   
+    * FíleNameMatches - fileName/@matches
+    * FileNameNotMatches - fileName/@notMatches   
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-filename"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.name/archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -28,7 +37,8 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+        <!-- Target folder within archive -->        
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*.json" id="jsonFileShape">
                 <fileName like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
