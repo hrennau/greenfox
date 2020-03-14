@@ -367,7 +367,7 @@ declare function f:resolveLinksRC($expr as xs:string,
         :)
         let $baseUri := $filepath
         (: let $uri := trace(resolve-uri($linkValue, $baseUri) , '___URI: ') :)
-        let $uri := i:foxResolveUri($linkValue, $baseUri)
+        let $uri := i:fox-resolve-uri($linkValue, $baseUri)
         where not($uri = ($pathsSofar, $errorsSofar))
         return
             (: If the link value cannot be resolved to a URI, an error is detected :)
@@ -379,14 +379,14 @@ declare function f:resolveLinksRC($expr as xs:string,
                     'filepath': $filepath}            
         
             else if ($mediatype = 'json') then            
-                if (not(i:foxUnparsedTextAvailable($uri, (), ()))) then 
+                if (not(i:fox-unparsed-text-available($uri, ()))) then 
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue), 
                         'uri': $uri, 
                         'errorCode': 'nofind_text', 
                         'filepath': $filepath}
                 else
-                    let $text := i:foxUnparsedText($uri, (), ())
+                    let $text := i:fox-unparsed-text($uri, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
                     return 
                         if (not($jdoc)) then 
@@ -403,7 +403,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                                 'filepath': $filepath}
                         
             else if ($mediatype = 'xml') then
-                if (not(i:foxDocAvailable($uri, ()))) then 
+                if (not(i:fox-doc-available($uri))) then 
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
                         'uri': $uri, 
@@ -413,7 +413,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
                         'uri': $uri, 
-                        'doc': i:foxDoc($uri, ()), 
+                        'doc': i:fox-doc($uri), 
                         'filepath': $filepath}
             else
                 if (i:resourceExists($uri)) then

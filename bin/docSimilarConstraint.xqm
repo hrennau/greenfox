@@ -11,7 +11,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "greenfoxUtil.xqm";
+    "greenfoxUtil.xqm",
+    "resourceAccess.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -38,7 +39,7 @@ declare function f:validateDocSimilar($filePath as xs:string,
                 typeswitch($other)
                 case node() return $other
                 case xs:anyAtomicType return 
-                    if (doc-available($other)) then doc($other) else ()
+                    if (i:fox-doc-available($other)) then i:fox-doc($other) else ()
                 default return ()
         else ()
     return

@@ -37,9 +37,9 @@ declare function f:validateMediatype($filePath as xs:string,
                 for $mtype in $eqItems
                 return
                     switch($mtype)
-                    case 'xml' return try {i:foxDoc($filePath, ())} catch * {()}
+                    case 'xml' return try {i:fox-doc($filePath)} catch * {()}
                     case 'json' return
-                        let $text := i:foxUnparsedText($filePath, (), ())
+                        let $text := i:fox-unparsed-text($filePath, ())
                         let $char1 := replace($text, '^\s*(.).*$', '$1', 's')
                         return
                             if (not($char1 = ('{', '['))) then ()

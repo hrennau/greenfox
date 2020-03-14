@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FileSize...
+    Demonstrates use of constraint components FileSizeXY.
     
     Constraint component:
-    * FileSizeGt - @gt
-    * FileSizeLe - @le
+    * FileSizeGt 
+    - fileSize/@gt 
+        specifies a limit size so that the file size must be greater than this limit
+    * FileSizeLe 
+    - fileSize/@le 
+        specifies a limit size so that the file size must be less than or equal to this limit
     
     Validation catches 
     * empty files (with size "0").
     * files larger 1000 Bytes
     
-    Note the following similar constraint components:
-    * FileNameGe - @ge
-    * FileNameLt - @lt
-    * FileNameEq - @eq
-    * FileNameNe - @ne    
+    The complete set of file size related constraint components is:
+    * FileNameGt - fileSize/@gt
+    * FileNameGe - fileSize/@ge
+    * FileNameLt - fileSize/@lt
+    * FileNameLt - fileSize/@le
+    * FileNameEq - fileSize/@eq
+    * FileNameNe - fileSize/@ne    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.size"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -34,3 +40,4 @@
     </domain>
 
 </greenfox>
+

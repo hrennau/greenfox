@@ -117,7 +117,7 @@ declare function f:getTargetPaths_path($path as xs:string,
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
         (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
-        if ($resourceShape/self::gx:folder) then i:foxResourceIsDir#1 else i:foxResourceIsFile#1
+        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
     return    
         (: concat($contextPath, '\', $path)[file:exists(.)] :)
         concat($contextPath, '\', $path)[i:resourceExists(.)]
@@ -142,7 +142,7 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
         (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
-        if ($resourceShape/self::gx:folder) then i:foxResourceIsDir#1 else i:foxResourceIsFile#1
+        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
     let $evaluationContext := $context?_evaluationContext        
     return    
         i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
@@ -170,7 +170,7 @@ declare function f:getTargetPaths_linkTargets(
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
         (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
-        if ($resourceShape/self::gx:folder) then i:foxResourceIsDir#1 else i:foxResourceIsFile#1
+        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
     let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
@@ -179,12 +179,12 @@ declare function f:getTargetPaths_linkTargets(
 
     let $doc :=
         if ($contextMediatype eq 'xml') then
-            if (not(i:foxDocAvailable($contextPath, ()))) then () 
-            else i:foxDoc($contextPath, ())
+            if (not(i:fox-doc-available($contextPath))) then () 
+            else i:fox-doc($contextPath)
         else if ($contextMediatype eq 'json') then
-            if (not(i:foxUnparsedTextAvailable($contextPath, (), ()))) then ()
+            if (not(i:fox-unparsed-text-available($contextPath, ()))) then ()
             else
-                let $text := i:foxUnparsedText($contextPath, (), ())
+                let $text := i:fox-unparsed-text($contextPath, ())
                 return
                     try{json:parse($text)} catch * {()}
     return

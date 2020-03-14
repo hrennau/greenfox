@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FileSize...
+    Demonstrates use of constraint components FileSizeXY. This example checks
+    resources contained by an archive file.
     
     Constraint component:
-    * FileSizeGt - @gt
-    * FileSizeLe - @le
+    * FileSizeGt 
+    - fileSize/@gt 
+        specifies a limit size so that the file size must be greater than this limit
+    * FileSizeLe 
+    - fileSize/@le 
+        specifies a limit size so that the file size must be less than or equal to this limit
     
     Validation catches 
     * empty files (with size "0").
     * files larger 1000 Bytes
     
-    Note the following similar constraint components:
-    * FileNameGe - @ge
-    * FileNameLt - @lt
-    * FileNameEq - @eq
-    * FileNameNe - @ne    
+    The complete set of file size related constraint components is:
+    * FileNameGt - fileSize/@gt
+    * FileNameGe - fileSize/@ge
+    * FileNameLt - fileSize/@lt
+    * FileNameLt - fileSize/@le
+    * FileNameEq - fileSize/@eq
+    * FileNameNe - fileSize/@ne    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.size/archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -24,7 +31,8 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+        <!-- Target folder within archive -->
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*" id="anyFileShape">
                 <fileSize gt="0" gtMsg="Empty files not allowed"

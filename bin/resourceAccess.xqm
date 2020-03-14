@@ -24,18 +24,16 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param options options controlling the evaluation
  : @return the text of the resource, or the empty sequence if retrieval fails
  :)
-declare function f:foxUnparsedText($uri as xs:string, 
-                                   $encoding as xs:string?, 
-                                   $options as map(*)?)
+declare function f:fox-unparsed-text($uri as xs:string, 
+                                     $encoding as xs:string?)
         as xs:string? {
-    tt:fox-unparsed-text($uri, $encoding, $options)        
+    tt:fox-unparsed-text($uri, $encoding, ())        
 };
 
-declare function f:foxUnparsedTextAvailable($uri as xs:string, 
-                                            $encoding as xs:string?, 
-                                            $options as map(*)?)
+declare function f:fox-unparsed-text-available($uri as xs:string, 
+                                               $encoding as xs:string?)
         as xs:boolean {
-    let $text := try {tt:fox-unparsed-text($uri, $encoding, $options)} catch * {()}
+    let $text := try {tt:fox-unparsed-text($uri, $encoding, ())} catch * {()}
     return exists($text)
 };
 
@@ -46,10 +44,8 @@ declare function f:foxUnparsedTextAvailable($uri as xs:string,
  : @param options options controlling the evaluation
  : @return the document, or the empty sequence if retrieval or parsing fails
  :)
-declare function f:foxDoc($uri as xs:string, 
-                          $options as map(*)?)
-        as document-node()? {
-    tt:fox-doc($uri, $options)        
+declare function f:fox-doc($uri as xs:string) as document-node()? {
+    tt:fox-doc($uri, ())        
 };
 
 (:~
@@ -59,10 +55,9 @@ declare function f:foxDoc($uri as xs:string,
  : @param options options controlling the evaluation
  : @return true if the URI points to a well-formed XML document
  :)
-declare function f:foxDocAvailable($uri as xs:string,
-                                   $options as map(*)?)
+declare function f:fox-doc-available($uri as xs:string)
         as xs:boolean {
-    tt:fox-doc-available($uri, $options)        
+    tt:fox-doc-available($uri, ())        
 };
 
 (:~
@@ -71,7 +66,7 @@ declare function f:foxDocAvailable($uri as xs:string,
  : @param path file path or URI to be checked
  : @return true if the path can be resolved, false otherwise
  :)
-declare function f:foxResourceIsDir($path as xs:string)
+declare function f:fox-resource-is-dir($path as xs:string)
         as xs:boolean {
     let $foxpathOptions := i:getFoxpathOptions(true())
     return tt:fox-is-dir($path, $foxpathOptions)
@@ -83,7 +78,7 @@ declare function f:foxResourceIsDir($path as xs:string)
  : @param path file path or URI to be checked
  : @return true if the path can be resolved, false otherwise
  :)
-declare function f:foxResourceIsFile($path as xs:string)
+declare function f:fox-resource-is-file($path as xs:string)
         as xs:boolean {
     let $path_ := f:pathToNative($path)
     let $path_ := $path
@@ -105,13 +100,13 @@ declare function f:foxResourceIsFile($path as xs:string)
  : @return an XML document representing JSON data, or the empty sequence if 
  :     retrieval or parsing fails
  :)
-declare function f:foxCsvDoc($uri as xs:string,
-                             $separator as xs:string,
-                             $withHeader as xs:string,
-                             $names as xs:string,
-                             $withQuotes as xs:string,
-                             $backslashes as xs:string,
-                             $options as map(*)?)
+declare function f:fox-csv-doc($uri as xs:string,
+                               $separator as xs:string,
+                               $withHeader as xs:string,
+                               $names as xs:string,
+                               $withQuotes as xs:string,
+                               $backslashes as xs:string,
+                               $options as map(*)?)
         as document-node()? {
     tt:fox-csv-doc($uri, $separator, $withHeader, $names, $withQuotes, $backslashes, $options)
 };
@@ -131,7 +126,7 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
     let $withQuotes := ($params/@csv.withQuotes, 'yes')[1]
     let $backslashes := ($params/@csv.backslashes, 'no')[1]
     return
-        f:foxCsvDoc($filePath, $separator, $withHeader, $names, $withQuotes, $backslashes, ())
+        f:fox-csv-doc($filePath, $separator, $withHeader, $names, $withQuotes, $backslashes, ())
 };   
 
 (:~
@@ -142,7 +137,7 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
  : @param baseUri base URI against which to resolve
  : @return the resolved URI
  :)
-declare function f:foxResolveUri($uri as xs:string, $baseUri as xs:string)
+declare function f:fox-resolve-uri($uri as xs:string, $baseUri as xs:string)
         as xs:string {
     if (matches($uri, '^(/|[a-zA-Z]:/|\i\c*:/)')) then $uri
     else
