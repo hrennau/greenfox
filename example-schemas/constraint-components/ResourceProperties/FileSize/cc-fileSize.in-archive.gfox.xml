@@ -12,7 +12,7 @@
     - XML:   fileSize/@le 
     - Check: The file size must be less than or equal to the specified limit
     
-    Validation catches 
+    In this example, validation catches 
     * empty files (with size "0").
     * files larger 1000 Bytes
     
