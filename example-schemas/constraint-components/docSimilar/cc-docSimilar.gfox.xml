@@ -4,23 +4,48 @@
     
     Constraint components:
     * Name:  DocSimilar
-    - XML:   docSimilar/@otherFoxpath specifies the other document with which to compare
-    - Check: The current file must be represented by a node tree which is equal to the node tree
-             representing the file identified by the Foxpath expression, taking into
-             consideration exceptions defined by child elements <skipItem> and <roundItem>.
+    - XML:   docSimilar/(@otherFoxpath, skipItem*, roundItem*)
+    - Check: The current file must be represented by a node tree which is equal to the 
+             node tree(s) provided by the Foxpath expression (either as node trees or
+             as URIs to be resolved), taking into consideration exceptions defined 
+             by child elements <skipItem> and <roundItem>.
+             
+    * Name:  DocSimilarCount
+    - XML:   docSimilar/@count
+    - Check: The number of node trees with which to compare must be equal to the specified 
+             value
+             
+    * Name:  DocSimilarMinCount
+    - XML:   docSimilar/@minCount
+    - Check: The number of node trees with which to compare must be greater than or equal to 
+             the specified value
+             
+    * Name:  DocSimilarMaxCount
+    - XML:   docSimilar/@maxCount
+    - Check: The number of node trees with which to compare must be less than or equal to the 
+             specified value
+
+    When attributes @count, @minCount or @maxCount are used, they constrain the number
+    of node trees with which to compare. By default, there must be exactly one node
+    tree with which to compare.
     
-    When comparing node trees, items identified by a <skipItem> element are ignored, and the text
-    value of items identified by a <roundItem> element is replaced with a rounded value.
-    Items are identified by the following selectors, all of which are optional:
+    When comparing node trees, both trees are modified before comparing, as indicated by
+    modifier elements, which are child elements of the <docSimilar> element:
+    * <skipItem> elements identify items to be removed
+    * <roundItem> elements identify items the text value of which is replaced with a rounded value
+    
+    Modifier elements identify the items to which they apply using selector attributes, all of
+    which are optional:
     * item kind - @kind, 'element' or 'attribute'
-    * local name - @local name
+    * local name - @localName
     * namespace - @namespace
     * parent local name - @parentLocalName
     * parent namespace - @parentNamespace
     
-    In this example, validation catches 
-    * an 'executionSummary1.xml' file not doc-similar to a sibling file 'executionSummary2.xml', ignoring
-      'articleNumber' and 'timestamp' elements and @fileSize attributes on 'articleBook' elements.
+    In this example, validation catches an 'executionSummary1.xml' file ...
+    * for which no sibling file 'executionSummary2.xml' can be found
+    * which is not similar to a sibling file 'executionSummary2.xml', ignoring 'articleNumber' and 
+     'timestamp' elements and @fileSize attributes on 'articleBook' elements.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc.similar"
           xmlns="http://www.greenfox.org/ns/schema">

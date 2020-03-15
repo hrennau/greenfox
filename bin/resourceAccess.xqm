@@ -130,6 +130,19 @@ declare function f:csvDoc($filePath as xs:string, $params as element())
 };   
 
 (:~
+ : Returns the base URI for a given node.
+ :
+ : @param node as node
+ : @return the base URI
+ :)
+declare function f:fox-base-uri($node as node())
+        as xs:string {
+    let $raw := $node/base-uri(.)
+    return
+        $raw ! replace(., '%23', '#')
+};        
+
+(:~
  : Resolves a URI to an absolute URI. If the input URI is absolute, it is
  : returned unchanged; otherwise it is resolved against the base URI.
  :

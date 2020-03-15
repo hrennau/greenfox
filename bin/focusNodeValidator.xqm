@@ -68,6 +68,10 @@ declare function f:validateFocusNode($focusNodeShape as element(),
                 i:validateFocusNode($focusNode, $exprValueItem, $contextFilePath, $contextDoc, $context)
             case $targetSize as element(gx:targetSize) return
                 i:validateTargetCount($targetSize, $exprValue, $contextFilePath, ($xpath, $foxpath)[1])
+                
+            case $docSimilar as element(gx:docSimilar) return                
+                i:validateDocSimilar($contextFilePath, $docSimilar, $exprValueItem, $contextDoc, $context)
+                
             default return 
                 if ($component intersect $extensionConstraints) then
                     f:validateExtensionConstraint($component, $exprValueItem, $contextFilePath, $contextDoc, $context)
