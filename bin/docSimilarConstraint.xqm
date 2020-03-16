@@ -65,6 +65,14 @@ declare function f:validateDocSimilar($filePath as xs:string,
         ($results_count, $results_comparison)
 };   
 
+(:~
+ : Returns the items representing the other documents with which to compare.
+ : The items may be nodes or URIs.
+ :
+ : @param filePath filePath of the context document
+ : @param constraintElem the element representing the DocumentSimilar constraint
+ : @param context the processing context
+ :)
 declare function f:validateDocSimilar_otherDocReps($filePath as xs:string,
                                                    $constraintElem as element(),
                                                    $context as map(xs:string, item()*))
