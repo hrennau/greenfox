@@ -350,10 +350,10 @@ declare function f:pathToNative($path as xs:string)
         if ($beforeArchiveEntry) then
             let $after := substring($path, string-length($beforeArchiveEntry) + 1)
             return
-                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '/', '\\') 
+                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '/', '\\') ! replace(., '\\$', '') 
         (: URI is a file system URI :)
         else
-            $path ! file:path-to-native(.) ! replace(., '/', '\\')        
+            $path ! file:path-to-native(.) ! replace(., '/', '\\') ! replace(., '\\$', '')    
 }; 
 
 (:~

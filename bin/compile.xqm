@@ -341,7 +341,6 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
             let $idName :=
                 switch($localName)
                 case 'mediatype' return 'constraintID'
-                case 'folderContentSimilar' return 'constraintID'
                 default return 'id'
                 
             (: Add further attributes, if applicable (@resourceShapeID, @valueShapeID) :)
