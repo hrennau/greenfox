@@ -1,0 +1,24 @@
+{
+    "airports": [
+        {
+            "airport": {            
+                "href": "airport-cgn.json"
+            }
+        },
+        {
+            "airport": {
+                "code": "DUS"
+            }
+        },
+        {
+            "airport": {
+                "href": "airport-jfk.json"
+            }
+        },
+        {
+            "airport": {
+                "href": "airport-chq.json"
+            }
+        }
+    ]        
+}        

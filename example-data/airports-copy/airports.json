@@ -1,0 +1,36 @@
+{
+    "airports": [
+        {
+            "airport": {
+                "href": "airport-jfk.json",
+                "code": "JFK"
+            }
+        },
+        {
+            "airport": {            
+                "href": "airport-cgn.json"
+            }
+        },
+        {
+            "airport": {            
+                "href": "airport-man.json"
+            }
+        },
+        {
+            "airport": {
+                "code": "MUN"
+            }
+        },
+        {
+            "airport": {            
+                "href": "user-extensions/user-extension-dus/airport-dus.json"
+            }
+        },
+        {
+            "airport": {            
+                "href": "airport-fra.json",
+                "code": "FRA"
+            }
+        }
+    ]        
+}        
