@@ -356,7 +356,7 @@ return
                     msgOK="OK - 'folder' element: has foxpath or path"/>
 
                 <!-- element names -->
-                <ex:allowedElems elemNames="targetSize file folder folderContent  folderContentSimilar foxpath lastModified fileName"
+                <ex:allowedElems elemNames="targetSize file folder folderContent  folderSimilar foxpath lastModified fileName"
                     msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
                     msgOK="OK - 'folder' element: no unexpected elements"/>
 
