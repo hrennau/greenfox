@@ -21,7 +21,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionValueConstraint.xqm",
     "fileValidator.xqm",
     "folderContentValidator.xqm",
-    "folderContentSimilarConstraint.xqm",
+    "folderSimilarConstraint.xqm",
     "greenfoxTarget.xqm",
     "greenfoxUtil.xqm";
     
@@ -77,7 +77,7 @@ declare function f:validateFolderInstance($folderPath as xs:string,
             let $error :=
                 typeswitch($child)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
-                case $folderContentSimilar as element(gx:folderContentSimilar) return f:validateFolderContentSimilar($folderPath, $folderContentSimilar, $context)
+                case $folderSimilar as element(gx:folderSimilar) return f:validateFolderSimilar($folderPath, $folderSimilar, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)
                 case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)                

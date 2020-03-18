@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-03-15T14:55:44.964+01:00 
+ : @version 2020-03-18T12:37:43.345+01:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -12,7 +12,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 
 import module namespace a1="http://www.greenfox.org/ns/xquery-functions" at
     "greenfoxTemplates.xqm",
-    "validate.xqm";
+    "validate.xqm",
+    "validationReportMerger.xqm";
 
 declare namespace m="http://www.greenfox.org/ns/xquery-functions";
 declare namespace z="http://www.greenfox.org/ns/structure";
@@ -99,6 +100,10 @@ declare variable $toolScheme :=
       <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
       <param name="format" type="xs:string?" default="xml"/>
       <pgroup name="input" minOccurs="1"/>
+    </operation>
+    <operation name="merge" type="element()" func="mergeOp" mod="validationReportMerger.xqm" namespace="http://www.greenfox.org/ns/xquery-functions">
+      <param name="gfox" type="docFOX" fct_minDocCount="1" sep="WS"/>
+      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
     </operation>
     <operation name="_help" func="_help" mod="tt/_help.xqm">
       <param name="default" type="xs:boolean" default="false"/>
@@ -270,6 +275,17 @@ declare function m:execOperation_validate($request as element())
 };
      
 (:~
+ : Executes operation 'merge'.
+ :
+ : @param request the request element
+ : @return the operation result
+ :)
+declare function m:execOperation_merge($request as element())
+        as element() {
+    a1:mergeOp($request)        
+};
+     
+(:~
  : Executes operation '_help'.
  :
  : @param request the request element
@@ -306,6 +322,7 @@ declare function m:execOperation($req as element())
         else if ($opName eq '_nodlSample') then m:execOperation__nodlSample($req)
         else if ($opName eq 'template') then m:execOperation_template($req)
         else if ($opName eq 'validate') then m:execOperation_validate($req)
+        else if ($opName eq 'merge') then m:execOperation_merge($req)
         else if ($opName eq '_help') then m:execOperation__help($req)
         else
         tt:createError('UNKNOWN_OPERATION', concat('No such operation: ', $opName), 

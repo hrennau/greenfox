@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : folderContentSimilarConstraint.xqm - validates a resource against a FolderContentSimilar constraint
+ : folderSimilarConstraint.xqm - validates a resource against a FolderSimilar constraint
  :
  : -------------------------------------------------------------------------
  :)
@@ -15,9 +15,9 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateFolderContentSimilar($filePath as xs:string,
-                                                $constraintElem as element(gx:folderContentSimilar),
-                                                $context as map(xs:string, item()*))
+declare function f:validateFolderSimilar($filePath as xs:string,
+                                         $constraintElem as element(gx:folderSimilar),
+                                         $context as map(xs:string, item()*))
         as element()* {
 
     (: The "context info" gives access to the context file path and the focus path :)        
@@ -39,26 +39,20 @@ declare function f:validateFolderContentSimilar($filePath as xs:string,
     
     (: Check the number of items representing the documents with which to compare :)
     let $results_count := 
-        f:validateFolderContentSimilarCount($otherFolders, $constraintElem, $contextInfo)
+        f:validateFolderSimilarCount($otherFolders, $constraintElem, $contextInfo)
     
-(:    
-        if ($otherFoxpath) then f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
-        else ()
-    let $otherDocExists := 
-        if (1 ne count($otherDoc)) then false()
-        else $otherDoc ! i:resourceExists(.)
-:)        
     let $results_comparison :=
+        let $config := f:validateFolderSimilar_config($constraintElem)
         for $otherFolder in $otherFolders
         let $additionalAtts := attribute otherFolder {$otherFolder}
         (: compare 1 with 2 :)
-        let $results12 := f:compareFolders($filePath, $otherFolder, $evaluationContext)
-        let $results21 := f:compareFolders($otherFolder, $filePath, $evaluationContext)
+        let $results12 := f:compareFolders($filePath, $otherFolder, $config, "12", $evaluationContext)
+        let $results21 := f:compareFolders($otherFolder, $filePath, $config, "21", $evaluationContext)
         let $keys12 := map:keys($results12)
         let $keys21 := map:keys($results21)
         return
             if (empty($keys12) and empty($keys21)) then 
-                f:validationResult_folderContentSimilar('green', $constraintElem, $constraintElem/@otherFoxpath, (), $additionalAtts, ())
+                f:validationResult_folderSimilar('green', $constraintElem, $constraintElem/@otherFoxpath, (), $additionalAtts, ())
             else
                 let $values := (
                     if (not(map:contains($results12, 'files1Only'))) then ()
@@ -78,7 +72,7 @@ declare function f:validateFolderContentSimilar($filePath as xs:string,
                         $results21?dirs1Only ! <gx:value kind="folder" where="otherFolder">{.}</gx:value>
                 )
                 return
-                    f:validationResult_folderContentSimilar('red', $constraintElem, $constraintElem/@otherFoxpath, (), $additionalAtts, $values)
+                    f:validationResult_folderSimilar('red', $constraintElem, $constraintElem/@otherFoxpath, (), $additionalAtts, $values)
                     
     return
         ($results_count, $results_comparison)
@@ -95,10 +89,10 @@ declare function f:validateFolderContentSimilar($filePath as xs:string,
  : @param contextInfo information about the resource context
  : @return a validation result, red or green
  :)
-declare function f:validateFolderContentSimilarCount(
-                                           $exprValue as item()*,
-                                           $constraintElem as element(),
-                                           $contextInfo as map(xs:string, item()*))
+declare function f:validateFolderSimilarCount(
+                                        $exprValue as item()*,
+                                        $constraintElem as element(),
+                                        $contextInfo as map(xs:string, item()*))
         as element()* {
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
@@ -117,13 +111,13 @@ declare function f:validateFolderContentSimilarCount(
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
     return        
         if ($cmpTrue($valueCount, $cmp)) then  
-            f:validationResult_folderContentSimilarCount('green', $constraintElem, $cmp, $valueCount, 
-                                               $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+            f:validationResult_folderSimilarCount('green', $constraintElem, $cmp, $valueCount, 
+                                                  $resultAdditionalAtts, (), $contextInfo, $resultOptions)
         else 
             let $values := $exprValue ! xs:string(.) ! <gx:value>{.}</gx:value>
             return
-                f:validationResult_folderContentSimilarCount('red', $constraintElem, $cmp, $exprValue, 
-                                                   $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
+                f:validationResult_folderSimilarCount('red', $constraintElem, $cmp, $exprValue, 
+                                                      $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
 };
 
 (:~
@@ -149,6 +143,8 @@ declare function f:validateFolderContentsSimilar_otherFolderReps(
 
 declare function f:compareFolders($folder1 as xs:string, 
                                   $folder2 as xs:string, 
+                                  $config as element(),
+                                  $direction as xs:string,   (: '12' or '21' :)
                                   $evaluationContext as map(xs:QName, item()*))
         as item()* {
     let $files1 := f:evaluateFoxpath('*[is-file(.)]', $folder1, $evaluationContext, true())        
@@ -159,15 +155,58 @@ declare function f:compareFolders($folder1 as xs:string,
     let $fileNames1 := $files1 ! replace(., '^.*[/\\]', '')
     let $fileNames2 := $files2 ! replace(., '^.*[/\\]', '')
     let $fileNames1Only := $fileNames1[not(. = $fileNames2)]
+         [$direction eq '12' and not(
+            some $ignoredFile in $config/ignoredFiles1/ignoredFile1 satisfies matches(., $ignoredFile/@regex, 'i'))
+          or $direction eq '21' and not(            
+            some $ignoredFile in $config/ignoredFiles2/ignoredFile2 satisfies matches(., $ignoredFile/@regex, 'i'))          
+         ]
     
     let $dirNames1 := $dirs1 ! replace(., '^.*[/\\]', '')
     let $dirNames2 := $dirs2 ! replace(., '^.*[/\\]', '')
     let $dirNames1Only := $dirNames1[not(. = $dirNames2)]
+         [$direction eq '12' and not(
+            some $ignoredFolder in $config/ignoredFolders1/ignoredFolder1 satisfies matches(., $ignoredFolder/@regex, 'i'))
+          or $direction eq '21' and not(            
+            some $ignoredFolder in $config/ignoredFolders2/ignoredFolder2 satisfies matches(., $ignoredFolder/@regex, 'i'))          
+         ]
     return
         map:merge((
             if (empty($fileNames1Only)) then () else map{'files1Only': $fileNames1Only},
             if (empty($dirNames1Only)) then () else map{'dirs1Only': $dirNames1Only}
         ))
+};
+
+declare function f:validateFolderSimilar_config($folderSimilar as element(gx:folderSimilar))
+        as element() {
+    let $ignoredFiles :=
+        for $name in string-join($folderSimilar/gx:skipFiles/@names, ' ') ! tokenize(.)
+        let $regex := $name ! i:glob2regex(.)
+        return <ignoredFile1 name="{$name}" regex="{$regex}"/>
+        
+    let $ignoredFolders :=
+        for $name in string-join($folderSimilar/gx:skipFolders/@names, ' ') ! tokenize(.)
+        let $regex := $name ! i:glob2regex(.)
+        return <ignoredFolder1 name="{$name}" regex="{$regex}"/>
+
+    let $ignoredOtherFiles :=
+        for $name in string-join($folderSimilar/gx:skipForeignFiles/@names, ' ') ! tokenize(.)
+        let $regex := $name ! i:glob2regex(.)
+        return <ignoredFile2 name="{$name}" regex="{$regex}"/>
+        
+    let $ignoredOtherFolders :=
+        for $name in string-join($folderSimilar/gx:skipForeignFolders/@names, ' ') ! tokenize(.)
+        let $regex := $name ! i:glob2regex(.)
+        return <ignoredFolder2 name="{$name}" regex="{$regex}"/>
+        
+    return
+        <config>{
+            <ignoredFiles1>{$ignoredFiles}</ignoredFiles1>,
+            <ignoredFolders1>{$ignoredFolders}</ignoredFolders1>,            
+            <ignoredFiles2>{$ignoredOtherFiles}</ignoredFiles2>,
+            <ignoredFolders2>{$ignoredOtherFolders}</ignoredFolders2>
+        }</config>
+        
+
 };
 
 (: ============================================================================
@@ -185,13 +224,13 @@ declare function f:compareFolders($folder1 as xs:string,
  : @param reasons strings identifying reasons of violation
  : @param additionalAtts additional attributes to be included in the validation result
  :) 
-declare function f:validationResult_folderContentSimilar(
-                                                 $colour as xs:string,
-                                                 $constraintElem as element(gx:folderContentSimilar),
-                                                 $constraint as attribute(),
-                                                 $reasonCodes as xs:string*,
-                                                 $additionalAtts as attribute()*,
-                                                 $additionalElems as element()*)
+declare function f:validationResult_folderSimilar(
+                                          $colour as xs:string,
+                                          $constraintElem as element(gx:folderSimilar),
+                                          $constraint as attribute(),
+                                          $reasonCodes as xs:string*,
+                                          $additionalAtts as attribute()*,
+                                          $additionalElems as element()*)
         as element() {
     let $elemName := 'gx:' || $colour
     let $constraintComponent :=
@@ -229,24 +268,24 @@ declare function f:validationResult_folderContentSimilar(
  : @param options options controling details of the validation result
  : @return a validation result, red or green
  :)
-declare function f:validationResult_folderContentSimilarCount(
-                                                    $colour as xs:string,
-                                                    $constraintElem as element(),
-                                                    $constraint as attribute(),
-                                                    $exprValue as item()*,
-                                                    $additionalAtts as attribute()*,
-                                                    $additionalElems as element()*,
-                                                    $contextInfo as map(xs:string, item()*),
-                                                    $options as map(*)?)
+declare function f:validationResult_folderSimilarCount(
+                                          $colour as xs:string,
+                                          $constraintElem as element(),
+                                          $constraint as attribute(),
+                                          $exprValue as item()*,
+                                          $additionalAtts as attribute()*,
+                                          $additionalElems as element()*,
+                                          $contextInfo as map(xs:string, item()*),
+                                          $options as map(*)?)
         as element() {
     let $exprAtt := $constraintElem/(@otherFoxpath, @otherXPath)        
     let $expr := $exprAtt/normalize-space(.)
     let $exprLang := $exprAtt ! local-name(.) ! replace(., '^other', '') ! lower-case(.)     
     let $constraintConfig :=
         typeswitch($constraint)
-        case attribute(count) return map{'constraintComp': 'FolderContentSimilarCount', 'atts': ('count')}
-        case attribute(minCount) return map{'constraintComp': 'FolderContentSimilarMinCount', 'atts': ('minCount')}
-        case attribute(maxCount) return map{'constraintComp': 'FolderContentSimilarMaxCount', 'atts': ('maxCount')}
+        case attribute(count) return map{'constraintComp': 'FolderSimilarCount', 'atts': ('count')}
+        case attribute(minCount) return map{'constraintComp': 'FolderSimilarMinCount', 'atts': ('minCount')}
+        case attribute(maxCount) return map{'constraintComp': 'FolderSimilarMaxCount', 'atts': ('maxCount')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
