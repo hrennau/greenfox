@@ -344,7 +344,7 @@ declare function f:normalizeFilepath($path as xs:string)
 declare function f:pathToNative($path as xs:string)
         as xs:string {
     let $sep := codepoints-to-string(30000)    
-    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#[/\\].*', '$1')[. ne $path]
+    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
     return
         (: URI is archive URI :)
         if ($beforeArchiveEntry) then
@@ -380,11 +380,9 @@ declare function f:pathToFoxpath($path as xs:string)
  :)
 declare function f:resourceChildResources($path as xs:string, $name as xs:string?)
         as xs:string* {
-    let $path_ := f:pathToNative($path)
-    let $path_ := $path   (: To verify ... :)
     let $name := ($name, '*')[1]
     let $foxpathOptions := i:getFoxpathOptions(true()) 
-    return tt:childUriCollection($path_, $name, (), $foxpathOptions)
+    return tt:childUriCollection($path, $name, (), $foxpathOptions)
 };
 
 (:~

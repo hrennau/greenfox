@@ -80,10 +80,8 @@ declare function f:fox-resource-is-dir($path as xs:string)
  :)
 declare function f:fox-resource-is-file($path as xs:string)
         as xs:boolean {
-    let $path_ := f:pathToNative($path)
-    let $path_ := $path
     let $foxpathOptions := i:getFoxpathOptions(true())
-    return tt:fox-is-file($path_, $foxpathOptions)
+    return tt:fox-is-file($path, $foxpathOptions)
 };
 
 (:~
