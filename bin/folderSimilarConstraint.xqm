@@ -147,10 +147,16 @@ declare function f:compareFolders($folder1 as xs:string,
                                   $direction as xs:string,   (: '12' or '21' :)
                                   $evaluationContext as map(xs:QName, item()*))
         as item()* {
+    let $files1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-file(.)]  
+    let $files2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-file(.)]
+    let $dirs1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-dir(.)]  
+    let $dirs2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-dir(.)]
+    (:
     let $files1 := f:evaluateFoxpath('*[is-file(.)]', $folder1, $evaluationContext, true())        
     let $files2 := f:evaluateFoxpath('*[is-file(.)]', $folder2, $evaluationContext, true())
     let $dirs1 := f:evaluateFoxpath('*[is-dir(.)]', $folder1, $evaluationContext, true())
-    let $dirs2 := f:evaluateFoxpath('*[is-dir(.)]', $folder2, $evaluationContext, true())
+    let $dirs2 := f:evaluateFoxpath('*[is-dir(.)]', $folder2, $evaluationContext, true())    
+    :)
     
     let $fileNames1 := $files1 ! replace(., '^.*[/\\]', '')
     let $fileNames2 := $files2 ! replace(., '^.*[/\\]', '')

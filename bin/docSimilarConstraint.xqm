@@ -42,12 +42,18 @@ declare function f:validateDocSimilar($filePath as xs:string,
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
             $contextItem/f:datapath(.)
         else ()
-        
+
     (: The "context info" gives access to the context file path and the focus path :)        
     let $contextInfo := map:merge((
         $filePath ! map:entry('filePath', .),
         $focusPath ! map:entry('nodePath', .)
     ))
+
+    (: Adhoc addition of $filePath and $fileName :)
+    let $evaluationContext := $context?_evaluationContext
+    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
+    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($filePath, '.*[/\\]', ''))
+    let $context := map:put($context, '_evaluationContext', $evaluationContext)
 
     (: Determine items representing the documents with which to compare;
        each item should be either a node or a URI :)
