@@ -46,14 +46,14 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
 
     let $prefixMap :=
         map:merge(
-            for $nsdesc in $gfox/@greenfoxSchemaURI => distinct-values() => sort() => f:_getPrefixTnsPairs()
+            for $nsdesc in $gfox/@greenfoxURI => distinct-values() => sort() => f:_getPrefixTnsPairs()
             let $prefix := substring-before($nsdesc, ':')
             let $uri := substring-after($nsdesc, ':')
             return map:entry($uri, $prefix)
         )
     let $results :=        
         for $gfox in $gfox
-        let $uri := $gfox/@greenfoxSchemaURI
+        let $uri := $gfox/@greenfoxURI
         let $prefix := $prefixMap($uri)
         let $results := $gfox//(gx:red, gx:yellow, gx:green)
         for $result in $results
@@ -68,14 +68,17 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
                         attribute constraintIRI {$prefix || ':' || $att}
                     case attribute(resourceID) return
                         attribute resourceIRI {$prefix || ':' || $att}
+                    case attribute(valueShapeID) return
+                        attribute valueShapeIRI {$prefix || ':' || $att}
                     default return $att,
                 $result/node()                
             }
     let $resources :=
         for $result in $results
         group by $filePath := $result/(@file, @folder)
-        let $filePathAtt := $results[1]/(@file, @folder)/attribute {local-name(.)} {.}
-        let $colour := $result/local-name(.)
+        let $result1 := $result[1]
+        let $filePathAtt := $result1/(@file, @folder)/attribute {local-name(.)} {.}
+        let $colour := $result1/local-name(.)
         order by (if ($colour eq 'red') then 1 
                  else if ($colour eq 'yellow') then 2 
                  else 3), 
@@ -108,7 +111,8 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
                              countGreenResources="{$countGreenResources}">{
             <gx:greenfoxSchemas>{
                 $gfox/<xs:greenfoxSchema documentURI="{@greenfoxDocumentURI}" 
-                                         schemaURI="{@greenfoxSchemaURI}" 
+                                         greenfoxURI="{@greenfoxURI}"
+                                         greenfoxPrefix="{$prefixMap(@greenfoxURI)}"
                                          countErrors="{@countErrors}"/>
             }</gx:greenfoxSchemas>,
             $resources

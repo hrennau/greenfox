@@ -61,7 +61,7 @@ declare function f:writeValidationReport_raw(
                                         $options as map(*))
         as item()* {
     let $gfoxSourceURI := $gfox[1]/@xml:base
-    let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
+    let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $useResults := 
         if ($reportType eq 'white') then $results 
         else if ($reportType eq 'red') then $results[self::gx:red, self::gx:yellow]
@@ -71,7 +71,7 @@ declare function f:writeValidationReport_raw(
                              countErrors="{count($results/(self::gx:red, self::gx:red))}" 
                              validationTime="{current-dateTime()}"
                              greenfoxDocumentURI="{$gfoxSourceURI}" 
-                             greenfoxSchemaURI="{$gfoxSchemaURI}"
+                             greenfoxURI="{$greenfoxURI}"
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
             for $result in $useResults
@@ -99,7 +99,7 @@ declare function f:writeValidationReport_whiteTree(
                                         $options as map(*))
         as element() {
     let $gfoxSourceURI := $gfox[1]/@xml:base
-    let $gfoxSchemaURI := $gfox[1]/@greenfoxURI
+    let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
         for $result in $results        
         let $resourceIdentifier := $result/(@filePath, @folderPath)[1]
@@ -146,7 +146,7 @@ declare function f:writeValidationReport_whiteTree(
                              countGreenResources="{count($greenResources)}"
                              validationTime="{current-dateTime()}"
                              greenfoxDocumentURI="{$gfoxSourceURI}" 
-                             greenfoxSchemaURI="{$gfoxSchemaURI}"
+                             greenfoxURI="{$greenfoxURI}"
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
             <gx:redResources>{
