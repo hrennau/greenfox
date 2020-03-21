@@ -1,0 +1,340 @@
+(:
+ : -------------------------------------------------------------------------
+ :
+ : evaluationContextManager.xqm - functions for managing the evaluation context used for expressions
+ :
+ : -------------------------------------------------------------------------
+ :)
+ 
+module namespace f="http://www.greenfox.org/ns/xquery-functions";
+
+import module namespace tt="http://www.ttools.org/xquery-functions" at 
+    "tt/_foxpath.xqm";    
+    
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "foxpathUtil.xqm",
+    "greenfoxUtil.xqm";
+    
+declare namespace gx="http://www.greenfox.org/ns/schema";
+
+(:~
+ : Returns for a given shape the components within the scope of evaluation 
+ : context required for this shape.
+ :
+ : Returns a map with three fields:
+ : - core components: all components which are not extension constraints
+ : - extensionConstraints: constraints based on extension constraint components
+ : - extensionConstraintComponents: extension constraint components referenced by extension constraints
+ :)
+declare function f:getEvaluationContextScope($filePath as xs:string, 
+                                             $shape as element())
+        as map(xs:string, element()*) {
+
+    let $components := 
+        $shape/*/f:getEvaluationContextScopeRC($filePath, $shape, .)
+    
+    (: Subset of the constraints which are extension constraint definitions :)
+    let $extensionConstraints := f:getExtensionConstraints($components)     
+    
+    (: Extension constraint components :)
+    let $extensionConstraintComponents := f:getExtensionConstraintComponents($components)
+    return
+        map{
+            'coreComponents': $components except $extensionConstraints,
+            'extensionConstraints': $extensionConstraints,
+            'extensionConstraintComponents': $extensionConstraintComponents
+        }
+};
+
+(:~
+ : Auxilliary function supporting function f:getEvaluationContextScope.
+ :
+ : @param filePath file path of the shape for which the scope is defined
+ : @param shape the shape for which the scope is defined
+ : @param component a potential component
+ : @return the component if appropriate, as well as all descendant components within
+ :   the evaluation scope
+ :)
+declare function f:getEvaluationContextScopeRC($filePath as xs:string,
+                                               $shape as element(),
+                                               $component as element())
+        as element()* {
+    if ($component/@deactivated eq 'true') then () else
+
+    typeswitch($component)
+    case element(gx:file) | 
+         element(gx:folder) | 
+         element(gx:focusNode) return ()
+         
+    case element(gx:xpath) | 
+         element(gx:foxpath) | 
+         element(gx:folderContent) 
+        return $component
+        
+    case element(gx:focusNode) return $component
+        
+    case $ifMediatype as element(gx:ifMediatype) return
+        $ifMediatype
+        [i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
+        /*/f:getEvaluationContextScopeRC($filePath, $shape, .)
+        
+    default return (
+        $component,
+        $component/*/f:getEvaluationContextScopeRC($filePath, $shape, .)
+    )        
+};        
+
+(:~
+ : Determines the required variable bindings, given a set of in-scope components specifying XPath and
+ : foxpath expressions. These bindings are the superset from which the actual bindings for all
+ : individual expressions are selected.
+ :
+ : @param potentialBindings the variable names for which a binding may be required
+ : @param coreComponents core components defining XPath and foxpath expressions
+ : @param extensionConstraints constraint declarations referencing extension constraint components
+ : @param extensionConstraintComponents extension constraint components 
+ : @return the actually required variable bindngs
+ :)
+declare function f:getRequiredBindings($potentialBindings as xs:string*, 
+                                       $coreComponents as element()*,
+                                       $extensionConstraints as element()*,
+                                       $extensionConstraintComponents as element()*)
+        as xs:string* {
+
+    let $potentialBindings_params := $extensionConstraintComponents/gx:param/@name/string()
+    let $potentialBindings := ($potentialBindings, $potentialBindings_params)
+
+    let $reqBindings :=
+        for $component in ($coreComponents, $extensionConstraints, $extensionConstraintComponents)
+        let $xpathExpressions := $component/(
+            self::gx:xpath/@expr,
+            self::gx:validatorXPath,
+            @*[ends-with(name(), 'XPath')]
+        )
+        let $foxpathExpressions := $component/(
+            self::gx:foxpath/@expr,
+            self::gx:validatorFoxpath,
+            @*[ends-with(name(), 'Foxpath')]
+        )
+        return (
+            $xpathExpressions/f:determineRequiredBindingsXPath(., $potentialBindings),
+            $foxpathExpressions/f:determineRequiredBindingsFoxpath(., $potentialBindings)
+        ) => distinct-values() => sort()
+    return $reqBindings   
+    
+    (:
+    let $reqBindings := $component/(
+        self::gx:xsdValid/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),    
+        self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),
+        self::gx:xpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
+        self::gx:xpath/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        self::gx:foxpath/@expr/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
+        self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        (@validatorXPath, gx:validatorXPath)/i:determineRequiredBindingsXPath(., $potentialBindings),        
+        (@validatorFoxpath, gx:validatorFoxpath)/i:determineRequiredBindingsFoxpath(., $potentialBindings),
+        gx:foxpathExpr/i:determineRequiredBindingsXPath(., $potentialBindings)
+      
+        $component/self::gx:xpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .),
+        $component/self::gx:foxpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .)
+        ) => distinct-values() => sort()
+    return $reqBindings        
+     :)        
+};        
+
+(:~
+ : Returns the variable bindings used by an XPath expression.
+ : Only bindings from $candidateBindings are considered.
+ :
+ : @param expr an XPath or XQuery expression
+ : @param candidateBindings names of variable bindings to be checked
+ : @return those candidateBindings as are found in the expression
+ :) 
+declare function f:determineRequiredBindingsXPath($expr as xs:string,
+                                                  $candidateBindings as xs:string*)
+        as xs:string* {
+    let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
+    let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
+    let $tree := xquery:parse($extendedExpr)
+    return $tree//StaticVarRef/@var => distinct-values() => sort()
+};
+
+(:~
+ : Returns the variable bindings used by a foxpath expression.
+ : Only bindings from $candidateBindings are considered.
+ :
+ : @param expr an XPath or XQuery expression
+ : @param candidateBindings names of variable bindings to be checked
+ : @return those candidateBindings as are found in the expression
+ :) 
+declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
+                                                    $candidateBindings as xs:string*)
+        as xs:string* {
+    let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
+    let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
+    let $tree := f:parseFoxpath($extendedExpr)
+    let $_CHECK := if ($tree/self::errors) then error() else ()
+    return (
+        $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()
+    )[. = $candidateBindings]
+};
+
+(:~
+ : Updates the context so that it contains an evulation context as required for
+ : an expression with known required bindings.
+ :
+ : @param reqBindings the names of variables referenced by the expression
+ : @param context the context
+ : @param filePath file path of a file or folder currently processed
+ : @param xdoc an XML document
+ : @param jdoc an XML document representing a JSON document
+ : @param csvdoc an XML document representing a CSV record
+ : @return the updated context, containing the new evaluation context implied 
+ :   by the required bindings and the values to be bound to them 
+ :)
+declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
+                                            $reqBindings as xs:string*,
+                                            $filePath as xs:string,
+                                            $xdoc as document-node()?,
+                                            $jdoc as document-node()?,
+                                            $csvdoc as document-node()?,
+                                            $htmldoc as document-node()?,
+                                            $params as element(gx:param)*)
+        as map(xs:string, item()*) {
+    let $doc := ($xdoc, $jdoc, $csvdoc)[1]    
+    let $reqDocs := map:merge((
+        $xdoc ! map:entry('xdoc', .),
+        $jdoc ! map:entry('jdoc', .),
+        $csvdoc ! map:entry('csvdoc', .),
+        $doc ! map:entry('doc', .)))
+    let $context := 
+        let $evaluationContext :=
+            map:merge((
+                $context?_evaluationContext,
+                if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
+                if (not($reqBindings = 'xdoc')) then () else map:entry(QName('', 'xdoc'), $xdoc),
+                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
+                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
+                if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
+                if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
+                if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
+                if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain),
+                (: _TO_DO_ Support datatypes (xs:integer, ...) :)
+                $params ! map:entry(QName('', @name), string(.))                
+            ))    
+        return map:put($context, '_evaluationContext', $evaluationContext) !
+               map:put(., '_reqDocs', $reqDocs)
+    return $context        
+};  
+
+(:~
+ : Provides the names of required variable bindings and required documents.
+ : Required documents depend on the mediatype of this file, as well as on 
+ : required bindings: 
+ : * assign $xdoc if mediatype 'xml' or 'xml-or-json' or required binding 'doc'
+ : * assign $jdoc if mediatype 'json' or 'xml-or-json' or required binding 'jdoc'
+ : * assign $htmldoc if mediatype 'html' or 'required binding 'htmldoc' 
+ : * assign $csvdoc if mediatype 'csv' or 'required binding 'csvdoc'
+ :
+ : @param filePath file path of this file
+ : @param gxFile file shape
+ : @param components constraint components in scope, implying requirements
+ : @param mediatype the mediatype of the file resource
+ : @return a map with key 'requiredBindings' containing a list of required variable
+ :   names, key 'xdoc' an XML doc, 'jdoc' an XML representation of the JSON
+ :   document, key 'csvdoc' an XML representation of the CSV document
+ :)
+declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
+                                              $gxFile as element(gx:file),
+                                              $coreComponents as element()*,
+                                              $extensionConstraints as element()*,
+                                              $extensionConstraintComponents) 
+        as map(*) {
+    let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents)
+    let $focusNodes := $allComponents/descendant::gx:focusNode
+    let $mediatype := $gxFile/@mediatype        
+    
+    (: the required bindings are a subset of potential bindings :)
+    let $requiredBindings :=
+        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
+        return f:getRequiredBindings($potentialBindings, 
+                                     $coreComponents, 
+                                     $extensionConstraints,
+                                     $extensionConstraintComponents)        
+    let $xdoc :=
+        let $required :=            
+            $mediatype = ('xml', 'xml-or-json')
+            or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
+            or not($mediatype) and (
+              (: Listing reasons for loading XML document :)
+              $coreComponents/(self::gx:xpath, 
+                               self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
+                               self::gx:links, 
+                               self::gx:docSimilar, 
+                               gx:validatorXPath, 
+                               @validatorXPath), 
+              $focusNodes/@xpath
+            )    
+        return
+            if (not($required)) then () 
+            else if (not(i:fox-doc-available($filePath))) then ()
+            else i:fox-doc($filePath)
+    let $jdoc :=
+        if ($xdoc) then () else
+        
+        let $required :=
+            $requiredBindings = 'json'
+            or
+            $mediatype = ('json', 'xml-or-json')
+            or 
+            not($mediatype) and (
+                (: Listing reasons for loading JSON document :)
+                $coreComponents/(self::gx:xpath,
+                                 self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
+                                 self::gx:links,
+                                 self::gx:docSimilar,
+                                 gx:validatorXPath,
+                                 @validatorXPath),
+                $focusNodes/@xpath
+            )
+        return
+            if (not($required)) then ()
+            else
+                let $text := i:fox-unparsed-text($filePath, ())
+                return try {json:parse($text)} catch * {()}
+           
+    let $htmldoc :=
+        if ($xdoc or $jdoc) then () else
+        
+        let $required :=
+            $requiredBindings = 'html'
+            or
+            $mediatype = ('html', 'xml-or-html')
+        return
+            if (not($required)) then ()
+            else
+                let $text := i:fox-unparsed-text($filePath, ())
+                return try {html:parse($text)} catch * {()}
+           
+    let $csvdoc :=
+        let $required :=
+            $requiredBindings = 'csvdoc'
+            or
+            $mediatype eq 'csv'
+        return
+            if (not($required)) then ()
+            else f:csvDoc($filePath, $gxFile)
+         
+    (: the document types are mutually exclusive - $doc is the 
+       only document obtained (if any) :)
+    return
+        map:merge((
+            map:entry('requiredBindings', $requiredBindings),
+            $xdoc ! map:entry('xdoc', .),
+            $jdoc ! map:entry('jdoc', .),
+            $csvdoc ! map:entry('csvdoc', .),
+            $htmldoc ! map:entry('htmldoc', .)
+        ))
+};        
+                                            
+

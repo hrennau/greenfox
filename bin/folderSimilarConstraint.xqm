@@ -20,11 +20,6 @@ declare function f:validateFolderSimilar($filePath as xs:string,
                                          $context as map(xs:string, item()*))
         as element()* {
 
-    (: The "context info" gives access to the context file path and the focus path :)        
-    let $contextInfo := map:merge((
-        $filePath ! map:entry('filePath', .)
-    ))
-
     (: Adhoc addition of $filePath and $fileName :)
     let $evaluationContext := $context?_evaluationContext
     let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
@@ -39,7 +34,7 @@ declare function f:validateFolderSimilar($filePath as xs:string,
     
     (: Check the number of items representing the documents with which to compare :)
     let $results_count := 
-        f:validateFolderSimilarCount($otherFolders, $constraintElem, $contextInfo)
+        f:validateFolderSimilar_count($otherFolders, $constraintElem, $filePath)
     
     let $results_comparison :=
         let $config := f:validateFolderSimilar_config($constraintElem)
@@ -89,10 +84,10 @@ declare function f:validateFolderSimilar($filePath as xs:string,
  : @param contextInfo information about the resource context
  : @return a validation result, red or green
  :)
-declare function f:validateFolderSimilarCount(
+declare function f:validateFolderSimilar_count(
                                         $exprValue as item()*,
                                         $constraintElem as element(),
-                                        $contextInfo as map(xs:string, item()*))
+                                        $filePath as xs:string)
         as element()* {
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
@@ -112,12 +107,12 @@ declare function f:validateFolderSimilarCount(
     return        
         if ($cmpTrue($valueCount, $cmp)) then  
             f:validationResult_folderSimilarCount('green', $constraintElem, $cmp, $valueCount, 
-                                                  $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                                                  $resultAdditionalAtts, (), $filePath, $resultOptions)
         else 
             let $values := $exprValue ! xs:string(.) ! <gx:value>{.}</gx:value>
             return
                 f:validationResult_folderSimilarCount('red', $constraintElem, $cmp, $exprValue, 
-                                                      $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
+                                                      $resultAdditionalAtts, $values, $filePath, $resultOptions)
 };
 
 (:~
@@ -151,30 +146,31 @@ declare function f:compareFolders($folder1 as xs:string,
     let $files2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-file(.)]
     let $dirs1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-dir(.)]  
     let $dirs2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-dir(.)]
-    (:
-    let $files1 := f:evaluateFoxpath('*[is-file(.)]', $folder1, $evaluationContext, true())        
-    let $files2 := f:evaluateFoxpath('*[is-file(.)]', $folder2, $evaluationContext, true())
-    let $dirs1 := f:evaluateFoxpath('*[is-dir(.)]', $folder1, $evaluationContext, true())
-    let $dirs2 := f:evaluateFoxpath('*[is-dir(.)]', $folder2, $evaluationContext, true())    
-    :)
     
     let $fileNames1 := $files1 ! replace(., '^.*[/\\]', '')
     let $fileNames2 := $files2 ! replace(., '^.*[/\\]', '')
     let $fileNames1Only := $fileNames1[not(. = $fileNames2)]
+        [not(some $ignoredFile in $config/ignoredFiles/ignoredFile 
+             satisfies matches(., $ignoredFile/@regex, 'i'))]
+    (:
          [$direction eq '12' and not(
             some $ignoredFile in $config/ignoredFiles1/ignoredFile1 satisfies matches(., $ignoredFile/@regex, 'i'))
           or $direction eq '21' and not(            
             some $ignoredFile in $config/ignoredFiles2/ignoredFile2 satisfies matches(., $ignoredFile/@regex, 'i'))          
          ]
-    
+     :)
     let $dirNames1 := $dirs1 ! replace(., '^.*[/\\]', '')
     let $dirNames2 := $dirs2 ! replace(., '^.*[/\\]', '')
     let $dirNames1Only := $dirNames1[not(. = $dirNames2)]
+       [not(some $ignoredFile in $config/ignoredFolders/ignoredFolder 
+            satisfies matches(., $ignoredFile/@regex, 'i'))]    
+(:    
          [$direction eq '12' and not(
             some $ignoredFolder in $config/ignoredFolders1/ignoredFolder1 satisfies matches(., $ignoredFolder/@regex, 'i'))
           or $direction eq '21' and not(            
             some $ignoredFolder in $config/ignoredFolders2/ignoredFolder2 satisfies matches(., $ignoredFolder/@regex, 'i'))          
          ]
+ :)         
     return
         map:merge((
             if (empty($fileNames1Only)) then () else map{'files1Only': $fileNames1Only},
@@ -187,13 +183,13 @@ declare function f:validateFolderSimilar_config($folderSimilar as element(gx:fol
     let $ignoredFiles :=
         for $name in string-join($folderSimilar/gx:skipFiles/@names, ' ') ! tokenize(.)
         let $regex := $name ! i:glob2regex(.)
-        return <ignoredFile1 name="{$name}" regex="{$regex}"/>
+        return <ignoredFile name="{$name}" regex="{$regex}"/>
         
     let $ignoredFolders :=
         for $name in string-join($folderSimilar/gx:skipFolders/@names, ' ') ! tokenize(.)
         let $regex := $name ! i:glob2regex(.)
-        return <ignoredFolder1 name="{$name}" regex="{$regex}"/>
-
+        return <ignoredFolder name="{$name}" regex="{$regex}"/>
+(:
     let $ignoredOtherFiles :=
         for $name in string-join($folderSimilar/gx:skipForeignFiles/@names, ' ') ! tokenize(.)
         let $regex := $name ! i:glob2regex(.)
@@ -203,13 +199,17 @@ declare function f:validateFolderSimilar_config($folderSimilar as element(gx:fol
         for $name in string-join($folderSimilar/gx:skipForeignFolders/@names, ' ') ! tokenize(.)
         let $regex := $name ! i:glob2regex(.)
         return <ignoredFolder2 name="{$name}" regex="{$regex}"/>
-        
+:)        
     return
         <config>{
+            <ignoredFiles>{$ignoredFiles}</ignoredFiles>,
+            <ignoredFolders>{$ignoredFolders}</ignoredFolders>           
+(:        
             <ignoredFiles1>{$ignoredFiles}</ignoredFiles1>,
             <ignoredFolders1>{$ignoredFolders}</ignoredFolders1>,            
             <ignoredFiles2>{$ignoredOtherFiles}</ignoredFiles2>,
             <ignoredFolders2>{$ignoredOtherFolders}</ignoredFolders2>
+:)            
         }</config>
         
 
@@ -281,7 +281,7 @@ declare function f:validationResult_folderSimilarCount(
                                           $exprValue as item()*,
                                           $additionalAtts as attribute()*,
                                           $additionalElems as element()*,
-                                          $contextInfo as map(xs:string, item()*),
+                                          $filePath as xs:string,
                                           $options as map(*)?)
         as element() {
     let $exprAtt := $constraintElem/(@otherFoxpath, @otherXPath)        
@@ -306,7 +306,7 @@ declare function f:validationResult_folderSimilarCount(
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintElemId := $constraintElem/@id
     let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $filePathAtt := $filePath ! attribute filePath {.}
 
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
@@ -318,7 +318,7 @@ declare function f:validationResult_folderSimilarCount(
             attribute constraintComp {$constraintConfig?constraintComp},
             attribute constraintID {$constraintId},
             attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
+            $filePathAtt,
             $standardAtts,
             $useAdditionalAtts,
             $valueCountAtt,            

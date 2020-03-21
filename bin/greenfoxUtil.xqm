@@ -154,9 +154,9 @@ declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:s
     if (not(i:resourceIsFile($filePath))) then false() else
     
     some $mediatype in $mediatypes satisfies (
-        if ($mediatype eq 'xml') then doc-available($filePath)
+        if ($mediatype eq 'xml') then i:fox-doc-available($filePath)
         else if ($mediatype eq 'json') then
-            let $text := try {unparsed-text($filePath)} catch * {()}
+            let $text := try {i:fox-unparsed-text($filePath, ())} catch * {()}
             return
                 if (not($text)) then false()
                 else if (not(substring($text, 1, 1) = ('{', '['))) then false()

@@ -5,10 +5,10 @@
     
     Constraint components:
     * Name:  FolderSimilar
-    - XML:   folderSimilar/(@otherFoxpath, skipFiles*, skipFolders*, skipForeignFiles*, skipForeignFolders*)
+    - XML:   folderSimilar/(@otherFoxpath, skipFiles*, skipFolders*)
     - Check: The current folder contains the same folders and files as other folder(s) selected by the
-             Foxpath expression, taking into consideration exceptions defined by child elements <skipFiles>,
-             <skipFolders>, <skipForeignFiles>, <skipForeignFolders>.
+             Foxpath expression, taking into consideration exceptions defined by child elements <skipFiles>
+             and <skipFolders>.
              
     * Name:  FolderSimilarCount
     - XML:   folderSimilar/@count
@@ -22,18 +22,15 @@
     - XML:   folderSimilar/@maxCount
     - Check: The number of folders with which to compare must be less than or equal to the specified value
 
-    When attributes @count, @minCount or @maxCount are used, they constrain the number of folders selecgted
+    When attributes @count, @minCount or @maxCount are used, they constrain the number of folders selected
     by the Foxpath expression. By default, the expression must select exactly one folder.
     
-    When comparing folders, files and folders contained by the current folder, but not by the folder with
-    which to compare, are ignored if they match the names or name patterns specified by <skipFiles>/@names
-    and <skipFolders>/@names, respectively. Similarly, files and folder contained by the folder with which
-    to compare, but not by the current folder, are ignored if they match the names or name patterns specified
-    by <skipForeignFiles>/@names and <skipForeignFolders>/@names, respectively.
+    When comparing folders, files and sub folders found in only one of the two folders compared are ignored 
+    if they match the names or name patterns specified by <skipFiles>/@names or <skipFolders>/@names, 
+    respectively.
     
     In this example, validation catches an 'airports' folder containing files or folders not contained by the
-    'airports-copy' folder, ignoring airport-xxx.xml in the 'airports' folder and airport-xxx.json
-    in the 'airports-copy' folder.
+    'airports-copy' folder, ignoring 'airport-max.*' files and a folder 'user-extensions2'.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder.similar/archive"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -47,7 +44,7 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderSimilar otherFoxpath="ancestor~::archives\airports-copy.zip\#archive#\airports-copy">
                 <skipFiles names="airport-max.*"/>
-                <skipForeignFolders names="user-extensions2"/>
+                <skipFolders names="user-extensions2"/>
             </folderSimilar>
         </folder>                
     </domain>

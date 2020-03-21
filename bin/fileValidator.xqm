@@ -17,6 +17,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "docSimilarConstraint.xqm",
+    "evaluationContextManager.xqm",
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
     "filePropertiesConstraint.xqm",
@@ -71,22 +72,36 @@ declare function f:validateFileInstance($filePath as xs:string,
     (: update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
     let $context := map:put($context, '_contextName', $filePath ! replace(., '.*\\', ''))
-    let $components :=
+    let $componentsMap := i:getEvaluationContextScope($filePath, $gxFile)
+    
+    let $coreComponents := $componentsMap?coreComponents
+    let $extensionConstraints := $componentsMap?extensionConstraints
+    let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
+    let $components := ($coreComponents, $extensionConstraints)
+    (:
         let $children := $gxFile/*[not(@deactivated eq 'true')]
         return (
             $children[not(self::gx:ifMediatype)],
             $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
                      /*[not(@deactivated eq 'true')]   
         )
+      :)
+      
     (: Subset of the constraints which are extension constraint definitions :)
-    let $extensionConstraints := f:getExtensionConstraints($components)     
+    (: let $extensionConstraints := $componentsMap?extensionConstraints :)     
+    (: let $extensionConstraints := f:getExtensionConstraints($components) :)
     
     (: Extension constraint components needed already now in order to analyze
        if they contain references to xdoc, jdoc, csvdoc :)
-    let $extensionConstraintComponents := f:getExtensionConstraintComponents($components)
+    (: let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents :)
+    (: let $extensionConstraintComponents := f:getExtensionConstraintComponents($components) :)
     
     (: Required bindings are a subset of potential bindings :)
-    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, $gxFile, ($components, $extensionConstraintComponents))
+    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, 
+                                                            $gxFile, 
+                                                            $coreComponents, 
+                                                            $extensionConstraints, 
+                                                            $extensionConstraintComponents)
     let $reqBindings := $reqBindingsAndDocs?requiredBindings
     (: If expressions reference documents, these are stored in a map :)
     let $reqDocs := 
@@ -112,8 +127,9 @@ declare function f:validateFileInstance($filePath as xs:string,
         )
     
         let $valueShapeResults :=
-            for $child in $components[not((self::gx:targetSize, self::gx:file, self::gx:folder))] 
-            let $error :=
+            for $child in $components 
+            let $_DEBUG := trace( $child/name(), '_CHILD_NAME: ') 
+            let $results :=
                 typeswitch($child)
                 case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
                 case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
@@ -133,7 +149,8 @@ declare function f:validateFileInstance($filePath as xs:string,
                         error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
                               concat('Unexpected shape or constraint element, name: ', $child/name()))
             return
-                if ($error) then $error/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+                $results/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
+(:                
                 else if ($child/self::gx:focusNode) then ()
                 else
                     <gx:green>{
@@ -142,102 +159,10 @@ declare function f:validateFileInstance($filePath as xs:string,
                         $child/@id/attribute constraintID {.},
                         $child/@label/attribute constraintLabel {.}
                     }</gx:green>
+ :)                    
         return
             ($resourceShapeResults, $valueShapeResults)
     return
         $results
 };
 
-(:~
- : Provide the names of required variable bindings and required documents.
- : Required documents depend on the mediatype of this file, as well as on 
- : required bindings: 
- : * assign $xdoc if mediatype 'xml' or 'xml-or-json' or required binding 'doc'
- : * assign $jdoc if mediatype 'json' or 'xml-or-json' or required binding 'jdoc'
- : * assign $csvdoc if mediatype 'csv' or 'required binding 'csvdoc'
- :
- : @param filePath file path of this file
- : @param gxFile file shape
- : @param components constraint components in scope, implying requirements
- : @param mediatype the mediatype of the file resource
- : @return a map with key 'requiredBindings' containing a list of required variable
- :   names, key 'xdoc' an XML doc, 'jdoc' an XML representation of the JSON
- :   document, key 'csvdoc' an XML representation of the CSV document
- :)
-declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
-                                              $gxFile as element(gx:file),
-                                              $components as element()*) 
-        as map(*) {
-    let $mediatype := $gxFile/@mediatype        
-    
-    (: the required bindings are a subset of potential bindings :)
-    let $requiredBindings :=
-        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
-        return f:getRequiredBindings($potentialBindings, $components)
-        
-    let $xdoc :=
-        let $required := 
-            $mediatype = ('xml', 'xml-or-json')
-            or
-            not($mediatype) and $components/(
-                self::gx:xpath, self::gx:links, self::gx:docSimilar, 
-                @validatorXPath, gx:validatorXPath, 
-                descendant-or-self::gx:focusNode//(@xpath, gx:xpath, gx:links))    
-            or
-            $components/self::gx:foxpath/@*[ends-with(name(.), 'XPath')]
-            or
-            not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
-        return
-            if (not($required)) then () 
-            else if (not(i:fox-doc-available($filePath))) then ()
-            else i:fox-doc($filePath)
-    let $jdoc :=
-        if ($xdoc) then () else
-        
-        let $required :=
-            $mediatype = ('json', 'xml-or-json')
-            or 
-            not($mediatype) and $components/self::gx:xpath
-            or
-            $components/self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')]
-            or
-            not($mediatype = ('xml', 'csv')) and $requiredBindings = 'json'
-        return
-            if (not($required)) then ()
-            else
-                let $text := i:fox-unparsed-text($filePath, ())
-                return try {json:parse($text)} catch * {()}
-           
-    let $htmldoc :=
-        if ($xdoc or $jdoc) then () else
-        
-        let $required :=
-            $mediatype = ('html', 'xml-or-html')
-            or 
-            not($mediatype) and $components/self::gx:xpath
-            or
-            $components/self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')]
-            or
-            not($mediatype = ('xml', 'csv', 'json')) and $requiredBindings = 'html'
-        return
-            if (not($required)) then ()
-            else
-                let $text := i:fox-unparsed-text($filePath, ())
-                return try {html:parse($text)} catch * {()}
-           
-    let $csvdoc :=
-        if ($mediatype eq 'csv' or $requiredBindings = 'csvdoc') then 
-            f:csvDoc($filePath, $gxFile)
-         else ()
-         
-    (: the document types are mutually exclusive - $doc is the 
-       only document obtained (if any) :)
-    return
-        map:merge((
-            map:entry('requiredBindings', $requiredBindings),
-            $xdoc ! map:entry('xdoc', .),
-            $jdoc ! map:entry('jdoc', .),
-            $csvdoc ! map:entry('csvdoc', .),
-            $htmldoc ! map:entry('htmldoc', .)
-        ))
-};        

@@ -46,7 +46,7 @@ declare function f:validateExtensionConstraint($constraint as element(),
     
     let $reqBindings :=
         let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'htmldoc', 'domain', 'filePath', 'fileName')
-        return f:getRequiredBindings($potentialBindings, $constraintComponent)
+        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $useParams)  
@@ -101,7 +101,19 @@ declare function f:validateExtensionConstraint($constraint as element(),
 };  
 
 (:~
- : Returns the extension constraint components referenced by a given set of constraint definitions.
+ : Returns the extension constraints contained in a list of constraint definitions.
+ :
+ : @param constraints constraint definitions
+ : @return the extension constraints
+ :)
+declare function f:getExtensionConstraints($constraints as element()*) as element()* {
+    $constraints except $constraints/self::gx:*
+    (: $constraints/self::*[not(namespace-uri(.) eq $f:URI_GX)] :)
+};
+
+(:~
+ : Returns the extension constraint components referenced by a given set of constraint 
+ : definitions.
  :
  : @param constraints constraint definitions
  : @return the extension constraint components referenced by the constraint definitions
@@ -110,10 +122,13 @@ declare function f:getExtensionConstraintComponents($constraints as element()*) 
     let $extensionConstraints := f:getExtensionConstraints($constraints)
     return if (not($extensionConstraints)) then () else
     (
-    let $extensionConstraintComponents := $extensionConstraints[1]/ancestor::gx:greenfox/gx:constraintComponents/gx:constraintComponent
+    let $extensionConstraintComponents := 
+        $extensionConstraints[1]/ancestor::gx:greenfox/gx:constraintComponents/gx:constraintComponent
     for $extensionConstraint in $extensionConstraints
     let $extensionConstraintName := $extensionConstraint/node-name(.)
-    let $refExtensionConstraintComponent := $extensionConstraintComponents[@constraintElementName/resolve-QName(., ..) = $extensionConstraintName]
+    let $refExtensionConstraintComponent := 
+        $extensionConstraintComponents
+        [@constraintElementName/resolve-QName(., ..) = $extensionConstraintName]
     return 
         if (empty($refExtensionConstraintComponent)) then 
             (: The error should never occur, as the greenfox validator should report the problem before starting any validation :)
@@ -121,16 +136,6 @@ declare function f:getExtensionConstraintComponents($constraints as element()*) 
                   'extension constraint component URI: ', i:qnameToURI($extensionConstraintName)))
         else $refExtensionConstraintComponent
     )/.        
-};
-
-(:~
- : Returns the extension constraints contained in a list of constraint definitions.
- :
- : @param constraints constraint definitions
- : @return the extension constraints
- :)
-declare function f:getExtensionConstraints($constraints as element()*) as element()* {
-    $constraints/self::*[not(namespace-uri(.) eq $f:URI_GX)]
 };
 
 (:~
