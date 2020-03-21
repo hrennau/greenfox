@@ -107,7 +107,7 @@ declare function f:externalContext($params as xs:string?,
         if (map:contains($prelim, 'schemaPath')) then $prelim
         else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim
         else 
-            let $schemaLocation := $gfox/base-uri(.) ! i:pathToNative(.)
+            let $schemaLocation := $gfox/base-uri(.) ! i:pathToAbsolutePath(.)
             return map:put($prelim, 'schemaPath', $schemaLocation)
 
     (: Add or edit 'domain' entry;
@@ -121,14 +121,14 @@ declare function f:externalContext($params as xs:string?,
                            "parameter 'params' with a 'domain' entry; aborted.'"))
             else
                 (: Add 'domain' entry, value from call parameter 'domain' :)
-                $domain ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
+                $domain ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
         (: Without domain parameter :)                
         else  
             (: If domain name-value pair: edit value (making path absolute) :)        
             let $domainFromNvpair := map:get($prelim2, 'domain')
             return           
                 if ($domainFromNvpair) then
-                    $domainFromNvpair ! i:pathToNative(.) ! map:put($prelim2, 'domain', .)
+                    $domainFromNvpair ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
                 else $prelim2
     return
         $prelim3
@@ -183,7 +183,7 @@ declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
     let $augmentedValue := 
         let $raw := f:substituteVars($value, $substitutionContext, ())
         return
-            if ($name eq 'domain') then i:pathToNative($raw)
+            if ($name eq 'domain') then i:pathToAbsolutePath($raw)
             else $raw
     let $augmentedEntry := map:entry($name, $augmentedValue)    
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))

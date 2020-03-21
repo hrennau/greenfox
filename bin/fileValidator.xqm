@@ -78,23 +78,6 @@ declare function f:validateFileInstance($filePath as xs:string,
     let $extensionConstraints := $componentsMap?extensionConstraints
     let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
     let $components := ($coreComponents, $extensionConstraints)
-    (:
-        let $children := $gxFile/*[not(@deactivated eq 'true')]
-        return (
-            $children[not(self::gx:ifMediatype)],
-            $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
-                     /*[not(@deactivated eq 'true')]   
-        )
-      :)
-      
-    (: Subset of the constraints which are extension constraint definitions :)
-    (: let $extensionConstraints := $componentsMap?extensionConstraints :)     
-    (: let $extensionConstraints := f:getExtensionConstraints($components) :)
-    
-    (: Extension constraint components needed already now in order to analyze
-       if they contain references to xdoc, jdoc, csvdoc :)
-    (: let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents :)
-    (: let $extensionConstraintComponents := f:getExtensionConstraintComponents($components) :)
     
     (: Required bindings are a subset of potential bindings :)
     let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, 
@@ -128,7 +111,6 @@ declare function f:validateFileInstance($filePath as xs:string,
     
         let $valueShapeResults :=
             for $child in $components 
-            let $_DEBUG := trace( $child/name(), '_CHILD_NAME: ') 
             let $results :=
                 typeswitch($child)
                 case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)

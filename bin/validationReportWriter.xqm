@@ -107,7 +107,7 @@ declare function f:writeValidationReport_whiteTree(
         group by $resourceIdentifier
         let $resourceIdentifierAtt :=
             if (not($resourceIdentifier)) then () else
-                let $attName := if (i:resourceIsFile($resourceIdentifier)) then 'file' else 'folder'
+                let $attName := if (i:fox-resource-is-file($resourceIdentifier)) then 'file' else 'folder'
                 return
                     attribute {$attName} {$resourceIdentifier}
         let $red := $result/(self::gx:red, self::gx:red)

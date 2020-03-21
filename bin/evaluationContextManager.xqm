@@ -85,7 +85,9 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          
     case element(gx:xpath) | 
          element(gx:foxpath) | 
-         element(gx:folderContent) 
+         element(gx:folderContent) |
+         element(gx:docSimilar) | 
+         element(gx:folderSimilar)
         return $component
         
     case element(gx:focusNode) return $component

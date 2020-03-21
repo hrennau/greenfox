@@ -40,7 +40,7 @@ declare function f:validateFolderContent($folderPath as xs:string,
 
     (: determine member files and folders :)
     let $members := i:resourceChildResources($folderPath, '*') ! replace(., '[/\\]$', '')
-    let $memberFiles := $members[i:resourceIsFile(concat($folderPath, '/', .))]
+    let $memberFiles := $members[i:fox-resource-is-file(concat($folderPath, '/', .))]
     let $memberFolders := $members[not(. = $memberFiles)]
 
     let $results_folderContentClosed :=
@@ -322,7 +322,7 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
     
     let $valueElems :=
         for $path in $paths
-        let $kind := if (i:resourceIsDir($path)) then 'folder' else 'file'
+        let $kind := if (i:fox-resource-is-dir($path)) then 'folder' else 'file'
         return
             <gx:value resoureKind="{$kind}">{$path}</gx:value>
     
@@ -371,7 +371,7 @@ declare function f:constructError_folderContentCount($colour as xs:string,
     
     let $valueElems :=
         for $path in $paths
-        let $kind := if (i:resourceIsDir($path)) then 'folder' else 'file'
+        let $kind := if (i:fox-resource-is-dir($path)) then 'folder' else 'file'
         return
             <gx:value resoureKind="{$kind}">{$path}</gx:value>
     let $actCount := count($paths)            

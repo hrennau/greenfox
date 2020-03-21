@@ -125,6 +125,7 @@ declare function f:greenfoxLocation($node as node()) as xs:string {
 declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
         as empty-sequence() {
     let $domain := $gfox//gx:domain/@path
+    let $domainUri := i:pathToUriCompatible($domain)
     return
         if (starts-with($domain, 'basex://')) then
             let $value := f:evaluateFoxpath($domain, (), map{}, false())
@@ -135,11 +136,11 @@ declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
                     let $msg := concat("Domain database not found: '", $domain, "'; aborted.'")
                     return error(QName((), $errorCode), $msg)
         else
-        if (not(i:resourceExists($domain))) then
+        if (not(i:fox-resource-exists($domainUri))) then
             let $errorCode := 'DOMAIN_NOT_FOUND'
             let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
             return error(QName((), $errorCode), $msg)
-        else if (i:resourceIsFile($domain)) then
+        else if (i:fox-resource-is-file($domainUri)) then
             let $errorCode := 'DOMAIN_IS_NOT_A_FOLDER'
             let $msg := concat("Domain folder not found: '", $domain, "'; aborted.'")
             return error(QName((), $errorCode), $msg)

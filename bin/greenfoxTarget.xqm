@@ -119,8 +119,7 @@ declare function f:getTargetPaths_path($path as xs:string,
         (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
     return    
-        (: concat($contextPath, '\', $path)[file:exists(.)] :)
-        concat($contextPath, '\', $path)[i:resourceExists(.)]
+        concat($contextPath, '\', $path)[i:fox-resource-exists(.)]
         [$isExpectedResourceKind(.)]        
 };
 

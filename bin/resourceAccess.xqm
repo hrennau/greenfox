@@ -61,30 +61,6 @@ declare function f:fox-doc-available($uri as xs:string)
 };
 
 (:~
- : Checks if a path or URI points to a folder, not a file.
- :
- : @param path file path or URI to be checked
- : @return true if the path can be resolved, false otherwise
- :)
-declare function f:fox-resource-is-dir($path as xs:string)
-        as xs:boolean {
-    let $foxpathOptions := i:getFoxpathOptions(true())
-    return tt:fox-is-dir($path, $foxpathOptions)
-};
-
-(:~
- : Checks if a path or URI points to a file, not a folder.
- :
- : @param path file path or URI to be checked
- : @return true if the path can be resolved, false otherwise
- :)
-declare function f:fox-resource-is-file($path as xs:string)
-        as xs:boolean {
-    let $foxpathOptions := i:getFoxpathOptions(true())
-    return tt:fox-is-file($path, $foxpathOptions)
-};
-
-(:~
  : Returns an XML representation of the CSV record identified by URI or file path.
  :
  : @param uri the URI or file path of the resource
@@ -156,6 +132,92 @@ declare function f:fox-resolve-uri($uri as xs:string, $baseUri as xs:string)
                         ! replace(., '[^/]+$', '')
         return concat($baseUri, $uri)
 };        
+
+(:~
+ : Checks if a URI or URI compatible path can be resolved to a resource.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:fox-resource-exists($uri as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true()) 
+    return tt:fox-file-exists($uri, $foxpathOptions)
+};
+
+(:~
+ : Checks if a URI or URI compatible path points to a file, not a folder.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:fox-resource-is-file($uri as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-file($uri, $foxpathOptions)
+};
+
+(:~
+ : Checks if a URI or URI compatible path points to a folder, not a file.
+ :
+ : @param path file path or URI to be checked
+ : @return true if the path can be resolved, false otherwise
+ :)
+declare function f:fox-resource-is-dir($uri as xs:string)
+        as xs:boolean {
+    let $foxpathOptions := i:getFoxpathOptions(true())
+    return tt:fox-is-dir($uri, $foxpathOptions)
+};
+
+
+declare function f:pathToUriCompatible($path as xs:string)
+        as xs:string {
+    $path ! replace(., '\\', '/') ! replace(., '/$', '')        
+}; 
+
+(:~
+ : Resolves a path to an absolute path, assuming that the context
+ : is the file system.
+ :
+ : This function is used in order to normalize path values contained
+ : by the schema, e.g. the domain path. The functionality could
+ : also be defined as 'resolve-uri' with an implicit must not
+ : be confused with 'resolve-uri', which 
+ :
+ : @param path the path
+ : @return the absolute path
+ :)
+declare function f:pathToAbsolutePath($path as xs:string)
+        as xs:string {
+    let $path :=
+        if (matches($path, '^file:/+')) then replace($path, '^file:/+', '')
+        else $path
+        
+    let $prelim :=    
+        let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
+        return
+            (: URI is an archive URI :)
+            if ($archiveFilePath) then
+                let $archiveContentPath := 
+                    substring($path, string-length($archiveFilePath) + 1)
+                    ! replace(., '/', '\\')
+                return
+                    f:pathToAbsolutePath($archiveFilePath) || $archiveContentPath 
+            else
+                let $uriSchema := replace($path, '^(\i\c+:/+).*', '$1')[. ne $path]
+                return
+                    if ($uriSchema) then 
+                        let $uriPath := substring($path, 1 + string-length($uriSchema)) 
+                                        ! replace(., '/', '\\')
+                        return
+                            $uriSchema || $uriPath
+                    else
+                        $path 
+                        ! file:path-to-native(.) 
+                        ! replace(., '/', '\\')
+    return 
+        $prelim ! replace(., '\\$', '')    
+}; 
 
 
 

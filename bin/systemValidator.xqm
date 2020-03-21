@@ -72,9 +72,7 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
 declare function f:validateDomain($gxDomain as element(gx:domain), 
                                   $context as map(xs:string, item()*))
         as element()* {
-    let $baseURI := $gxDomain/@path ! (
-                    if (starts-with(., 'basex://')) then . 
-                    else i:pathToNative(.))
+    let $baseURI := $gxDomain/@path ! i:pathToAbsolutePath(.)
     let $name := $gxDomain/@name/string()
     
     (: Evaluation context, containing entries available as 

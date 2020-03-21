@@ -416,7 +416,7 @@ declare function f:resolveLinksRC($expr as xs:string,
                         'doc': i:fox-doc($uri), 
                         'filepath': $filepath}
             else
-                if (i:resourceExists($uri)) then
+                if (i:fox-resource-exists($uri)) then
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
                         'uri': $uri, 
