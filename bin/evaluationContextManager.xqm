@@ -18,6 +18,23 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
+ : Returns a list of variable names which may be referenced in an
+ : expression.
+ :
+ : @return variable names
+ :)
+declare function f:getPotentialBindings() as xs:string+ {
+    'domain', 
+    'filePath', 
+    'fileName',
+    'this', 
+    'doc', 
+    'jdoc', 
+    'csvdoc',
+    'htmldoc'
+};
+
+(:~
  : Returns for a given shape the components within the scope of evaluation 
  : context required for this shape.
  :
@@ -180,7 +197,7 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
 };
 
 (:~
- : Updates the context so that it contains an evulation context as required for
+ : Updates the context so that it contains an evaluation context as required for
  : an expression with known required bindings.
  :
  : @param reqBindings the names of variables referenced by the expression
@@ -238,8 +255,9 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
  :
  : @param filePath file path of this file
  : @param gxFile file shape
- : @param components constraint components in scope, implying requirements
- : @param mediatype the mediatype of the file resource
+ : @param coreComponents core components defining XPath and foxpath expressions
+ : @param extensionConstraints constraint declarations referencing extension constraint components
+ : @param extensionConstraintComponents extension constraint components 
  : @return a map with key 'requiredBindings' containing a list of required variable
  :   names, key 'xdoc' an XML doc, 'jdoc' an XML representation of the JSON
  :   document, key 'csvdoc' an XML representation of the CSV document
@@ -254,13 +272,17 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
     let $focusNodes := $allComponents/descendant::gx:focusNode
     let $mediatype := $gxFile/@mediatype        
     
-    (: the required bindings are a subset of potential bindings :)
+    (: Required bindings :)
     let $requiredBindings :=
-        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'domain', 'filePath', 'fileName')
+    
+        (: A subset of potential bindings, implied by variable references in expressions :)
+        let $potentialBindings := f:getPotentialBindings()
         return f:getRequiredBindings($potentialBindings, 
                                      $coreComponents, 
                                      $extensionConstraints,
-                                     $extensionConstraintComponents)        
+                                     $extensionConstraintComponents) 
+                                     
+    (: Required documents :)                                    
     let $xdoc :=
         let $required :=            
             $mediatype = ('xml', 'xml-or-json')
@@ -325,11 +347,12 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             if (not($required)) then ()
             else f:csvDoc($filePath, $gxFile)
          
-    (: the document types are mutually exclusive - $doc is the 
-       only document obtained (if any) :)
+    let $doc := ($xdoc, $jdoc, $htmldoc, $csvdoc) 
+
     return
         map:merge((
             map:entry('requiredBindings', $requiredBindings),
+            $doc ! map:entry('doc', .),
             $xdoc ! map:entry('xdoc', .),
             $jdoc ! map:entry('jdoc', .),
             $csvdoc ! map:entry('csvdoc', .),
