@@ -119,6 +119,7 @@ declare function f:fox-base-uri($node as node())
 (:~
  : Resolves a URI to an absolute URI. If the input URI is absolute, it is
  : returned unchanged; otherwise it is resolved against the base URI.
+ : Initial upward steps (..) are resolved.
  :
  : @param uri the URI to be resolved
  : @param baseUri base URI against which to resolve
@@ -128,9 +129,12 @@ declare function f:fox-resolve-uri($uri as xs:string, $baseUri as xs:string)
         as xs:string {
     if (matches($uri, '^(/|[a-zA-Z]:/|\i\c*:/)')) then $uri
     else
+        let $backstep := starts-with($uri, '../')
         let $baseUri := replace($baseUri, '/$', '') 
                         ! replace(., '[^/]+$', '')
-        return concat($baseUri, $uri)
+        return 
+            if (not($backstep)) then concat($baseUri, $uri)
+            else f:fox-resolve-uri(substring($uri, 4), $baseUri)
 };        
 
 (:~

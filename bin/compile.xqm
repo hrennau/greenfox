@@ -54,7 +54,8 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
     (: The external context contains the parameter values supplied by the user via 
        parameter 'params', augmented with $domain and the schema path :)
     let $externalContext := f:externalContext($params, $domain, $gfox)        
-        
+    let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
+    
     (: Merge context contents with externally supplied name-value pairs,
        and perform variable substitutions :)
     let $context := f:editContext($gfox/gx:context, $externalContext)
@@ -132,6 +133,33 @@ declare function f:externalContext($params as xs:string?,
                 else $prelim2
     return
         $prelim3
+};
+
+(:~
+ : Checks if the external context contains a value for each context field
+ : without default value.
+ :
+ : @param externalContext external context map
+ : @param contextElem the context element from the schema
+ : @return empty sequence, if check ok, or throws an error otherwise
+ :)
+declare function f:checkExternalContext($externalContext as map(*), 
+                                        $contextElem as element(gx:context))
+        as empty-sequence() {
+    let $missingValues := 
+        $contextElem/gx:field[not(@value)]/@name
+        [not(map:contains($externalContext, .))]
+    return
+        if (empty($missingValues)) then ()
+        else
+            let $missingValuesString1 := string-join($missingValues, ', ')
+            let $missingValuesString2 := string-join($missingValues ! concat(., '=...')) => string-join(';')
+            return
+                error(QName((), 'MISSING_INPUT'),
+                        concat('Missing context values for required context fields: ', 
+                               $missingValuesString1,
+                               '; please supply values using call parameter "params": params="', 
+                               $missingValuesString2, '"'))
 };
 
 (:~

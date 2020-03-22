@@ -452,3 +452,4 @@ declare function f:hashKey($path as xs:string, $keyKind as xs:string)
         default return error()
     return xs:hexBinary($rawHash) ! xs:string(.)
 };
+

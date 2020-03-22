@@ -66,7 +66,7 @@ declare function f:validateOp($request as element())
     let $gfox := $gfoxAndContext[. instance of element()]
     let $context := $gfoxAndContext[. instance of map(*)]
     
-    let $_LOG := f:logFile($gfox, 'GFOX.xml')
+    let $_LOG := i:DEBUG_FILE($gfox, 1, 'GFOX.xml')
     
     (: Validate greenfox schema :)
     let $gfoxErrors := f:validateGreenfox($gfox)

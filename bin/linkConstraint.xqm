@@ -13,7 +13,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
-    "greenfoxUtil.xqm";
+    "greenfoxUtil.xqm",
+    "log.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -59,7 +60,7 @@ declare function f:validateLinks($shape as element(),
         (: Handle the case that no context item was supplied; this happens if and only
            if the target resource could not be parsed into an XDM tree :)        
         if (empty($contextItem)) then   (: this document could not be parsed :)
-            f:validationResult_links('red', $shape, (), 
+            f:validationResult_links('red', $shape, (), (), 
                                      attribute reason {'Context document could not be parsed'}, 
                                      (), $contextInfo, ())
         else
@@ -95,10 +96,23 @@ declare function f:validateLinksResolvable(
     let $mediatype := ($valueShape/@mediatype, 'xml'[$recursive])[1]    
     let $docsAndErrors := f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
     
-    let $docs := $docsAndErrors?doc
+    let $docs := $docsAndErrors[?doc]
     let $errors := $docsAndErrors[?errorCode]
+    let $colour := if (exists($errors)) then 'red' else 'green'
     return (
-        f:validationResult_links_for_linkErrors($errors, $recursive, $valueShape, $contextInfo)
+        (: f:validationResult_links_resolvable($errors, $docs,  $recursive, $valueShape, $contextInfo) :)
+        f:validationResult_links($colour, $valueShape, $errors, $docs, (), (), $contextInfo, ())
+        
+(:
+declare function f:validationResult_links($colour as xs:string,
+                                          $valueShape as element(),
+                                          $errors as map(*)*,
+                                          $linkMaps as map(*)*,
+                                          $additionalAtts as attribute()*,
+                                          $additionalElems as element()*,
+                                          $contextInfo as map(xs:string, item()*),
+                                          $options as map(*)?)
+:)
         ,
         let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
         return 
@@ -147,11 +161,12 @@ declare function f:validateLinkCount($exprValue as item()*,
  :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
  :
  : ============================================================================ :)
-
-declare function f:validationResult_links_for_linkErrors($errors as map(*)*,
-                                                         $recursive as xs:boolean?,
-                                                         $valueShape as element(),
-                                                         $contextInfo) 
+(:
+declare function f:validationResult_links_resolvable($errors as map(*)*,
+                                                     $linkMaps as map(*)*,
+                                                     $recursive as xs:boolean?,
+                                                     $valueShape as element(),
+                                                     $contextInfo) 
         as element() {
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
@@ -165,10 +180,11 @@ declare function f:validationResult_links_for_linkErrors($errors as map(*)*,
             $errors ! <gx:value>{?linkValue}</gx:value>
     return
         f:validationResult_links(
-                            $colour, $valueShape, (), 
+                            $colour, $valueShape, $errors, $linkMaps, 
                             $resultAdditionalAtts, $values, 
                             $contextInfo, $resultOptions)
 };
+:)
 
 (:~
  : Creates a validation result for a LinkResolvable constraint.
@@ -183,12 +199,21 @@ declare function f:validationResult_links_for_linkErrors($errors as map(*)*,
  :)
 declare function f:validationResult_links($colour as xs:string,
                                           $valueShape as element(),
-                                          $exprValue as item()*,
+                                          $errors as map(*)*,
+                                          $linkMaps as map(*)*,
                                           $additionalAtts as attribute()*,
                                           $additionalElems as element()*,
                                           $contextInfo as map(xs:string, item()*),
                                           $options as map(*)?)
         as element() {
+    let $recursive := $valueShape/@recursive/xs:boolean(.)
+    let $values :=  
+        if (empty($errors)) then () 
+        else if ($recursive) then 
+            $errors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
+        else 
+            $errors ! <gx:value>{?linkValue}</gx:value>
+        
     let $exprAtt := $valueShape/@xpath        
     let $expr := $exprAtt/normalize-space(.)
     let $exprLang := $exprAtt ! local-name(.) ! replace(., '^link', '') ! lower-case(.)    
@@ -198,7 +223,7 @@ declare function f:validationResult_links($colour as xs:string,
     let $standardAttNames := $constraintConfig?atts
     let $standardAtts := $valueShape/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
-    let $valueCountAtt := attribute valueCount {count($exprValue)} 
+    let $valueCountAtt := attribute valueCount {count($linkMaps)} 
     
     let $valueShapeId := $valueShape/@valueShapeID
     let $constraintId := concat($valueShapeId, '-linkResolvable')
@@ -225,6 +250,7 @@ declare function f:validationResult_links($colour as xs:string,
             $valueCountAtt,            
             attribute exprLang {$exprLang},
             attribute expr {$expr},
+            $values,
             $additionalElems
         }       
 };
@@ -353,7 +379,8 @@ declare function f:resolveLinksRC($expr as xs:string,
                                   $pathsSofar as xs:string*,
                                   $errorsSofar as xs:string*)
         as map(xs:string, item()*)* {
-           
+    (: let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_FILEPATH: ', $filepath, '&#xA;')) :)
+    
     let $exprValue := f:resolveLinkExpression($expr, $contextNode, $context)    
     let $targetsAndErrors :=   
         for $linkValue in $exprValue
@@ -366,10 +393,14 @@ declare function f:resolveLinksRC($expr as xs:string,
         )[1]
         :)
         let $baseUri := $filepath
-        (: let $uri := trace(resolve-uri($linkValue, $baseUri) , '___URI: ') :)
         let $uri := i:fox-resolve-uri($linkValue, $baseUri)
+        (:
+        let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_LINKVALU: ', $linkValue, '&#xA;'))
+        let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_URI_____: ', $uri, '&#xA;'))
+         :)
         where not($uri = ($pathsSofar, $errorsSofar))
         return
+            let $_DEBUG := i:DEBUG($uri, 'links', 2, '_URI_TO_RESOLVE: ') return
             (: If the link value cannot be resolved to a URI, an error is detected :)
             if (not($uri)) then
                 map{'type': 'linkResolutionReport',
@@ -404,12 +435,14 @@ declare function f:resolveLinksRC($expr as xs:string,
                         
             else if ($mediatype = 'xml') then
                 if (not(i:fox-doc-available($uri))) then 
+                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#FAILURE: ') return
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
                         'uri': $uri, 
                         'errorCode': 'not_xml', 
                         'filepath': $filepath}
                 else 
+                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') return
                     map{'type': 'linkResolutionReport',
                         'linkValue': string($linkValue),
                         'uri': $uri, 
