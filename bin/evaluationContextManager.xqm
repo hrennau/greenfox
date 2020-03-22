@@ -24,10 +24,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return variable names
  :)
 declare function f:getPotentialBindings() as xs:string+ {
+    'this',
     'domain', 
     'filePath', 
     'fileName',
-    'this', 
     'doc', 
     'jdoc', 
     'csvdoc',
@@ -49,15 +49,21 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
 
     let $components := 
         $shape/*/f:getEvaluationContextScopeRC($filePath, $shape, .)
+    let $resourceShapes := $components/(self::gx:file, self::folder)
+    let $focusNodes := $components/self::gx:focusNode
+    let $constraints := $components except ($resourceShapes, $focusNodes)
     
     (: Subset of the constraints which are extension constraint definitions :)
-    let $extensionConstraints := f:getExtensionConstraints($components)     
+    let $extensionConstraints := f:getExtensionConstraints($constraints)     
+    let $coreConstraints := $constraints except $extensionConstraints
     
     (: Extension constraint components :)
-    let $extensionConstraintComponents := f:getExtensionConstraintComponents($components)
+    let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return
         map{
-            'coreComponents': $components except $extensionConstraints,
+            'resourceShapes': $resourceShapes,
+            'focusNodes': $focusNodes,
+            'coreConstraints': $coreConstraints,
             'extensionConstraints': $extensionConstraints,
             'extensionConstraintComponents': $extensionConstraintComponents
         }
@@ -81,7 +87,8 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
     typeswitch($component)
     case element(gx:file) | 
          element(gx:folder) | 
-         element(gx:focusNode) return ()
+         element(gx:focusNode) 
+         return $component
          
     case element(gx:xpath) | 
          element(gx:foxpath) | 
@@ -117,22 +124,27 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
 declare function f:getRequiredBindings($potentialBindings as xs:string*, 
                                        $coreComponents as element()*,
                                        $extensionConstraints as element()*,
-                                       $extensionConstraintComponents as element()*)
+                                       $extensionConstraintComponents as element()*,
+                                       $resourceShapes as element()*,
+                                       $focusNodes as element()*)
         as xs:string* {
 
     let $potentialBindings_params := $extensionConstraintComponents/gx:param/@name/string()
     let $potentialBindings := ($potentialBindings, $potentialBindings_params)
 
     let $reqBindings :=
-        for $component in ($coreComponents, $extensionConstraints, $extensionConstraintComponents)
+        for $component in ($coreComponents, $extensionConstraints, $extensionConstraintComponents,
+                           $resourceShapes, $focusNodes)
         let $xpathExpressions := $component/(
             self::gx:xpath/@expr,
             self::gx:validatorXPath,
+            @xpath,
             @*[ends-with(name(), 'XPath')]
         )
         let $foxpathExpressions := $component/(
             self::gx:foxpath/@expr,
             self::gx:validatorFoxpath,
+            @foxpath,
             @*[ends-with(name(), 'Foxpath')]
         )
         return (
@@ -268,10 +280,12 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                               $gxFile as element(gx:file),
                                               $coreComponents as element()*,
                                               $extensionConstraints as element()*,
-                                              $extensionConstraintComponents) 
+                                              $extensionConstraintComponents as element()*,
+                                              $resourceShapes as element()*,
+                                              $focusNodes as element()*) 
         as map(*) {
-    let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents)
-    let $focusNodes := $allComponents/descendant::gx:focusNode
+    let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, $resourceShapes, $focusNodes)
+    let $focusNodes := $allComponents/descendant-or-self::gx:focusNode
     let $mediatype := $gxFile/@mediatype        
     
     (: Required bindings :)
@@ -282,7 +296,9 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         return f:getRequiredBindings($potentialBindings, 
                                      $coreComponents, 
                                      $extensionConstraints,
-                                     $extensionConstraintComponents) 
+                                     $extensionConstraintComponents,
+                                     $resourceShapes,
+                                     $focusNodes) 
                                      
     (: Required documents :)                                    
     let $xdoc :=

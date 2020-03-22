@@ -74,17 +74,22 @@ declare function f:validateFileInstance($filePath as xs:string,
     let $context := map:put($context, '_contextName', $filePath ! replace(., '.*\\', ''))
     let $componentsMap := i:getEvaluationContextScope($filePath, $gxFile)
     
-    let $coreComponents := $componentsMap?coreComponents
+    let $resourceShapes := $componentsMap?resourceShapes
+    let $focusNodes := $componentsMap?focusNodes
+    let $coreConstraints := $componentsMap?coreConstraints
     let $extensionConstraints := $componentsMap?extensionConstraints
     let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
-    let $components := ($coreComponents, $extensionConstraints)
+    let $constraints := ($coreConstraints, $extensionConstraints)
     
     (: Required bindings are a subset of potential bindings :)
-    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs($filePath, 
-                                                            $gxFile, 
-                                                            $coreComponents, 
-                                                            $extensionConstraints, 
-                                                            $extensionConstraintComponents)
+    let $reqBindingsAndDocs := f:getRequiredBindingsAndDocs(
+                               $filePath, 
+                               $gxFile, 
+                               $coreConstraints, 
+                               $extensionConstraints, 
+                               $extensionConstraintComponents,
+                               $resourceShapes,
+                               $focusNodes)
     let $reqBindings := $reqBindingsAndDocs?requiredBindings
     (: If expressions reference documents, these are stored in a map :)
     let $reqDocs := 
@@ -105,46 +110,37 @@ declare function f:validateFileInstance($filePath as xs:string,
     let $results :=
         (: validate - member resources :)
         let $resourceShapeResults := (
-            $components/self::gx:file/i:validateFile(., $context),
-            $components/self::gx:folder/i:validateFolder(., $context)
+            $resourceShapes/self::gx:file/i:validateFile(., $context),
+            $resourceShapes/self::gx:folder/i:validateFolder(., $context)
         )
-    
-        let $valueShapeResults :=
-            for $child in $components 
-            let $results :=
+        let $focusNodeResults := $focusNodes/i:validateFocusNode(., $doc, $filePath, $doc, $context)
+        let $coreConstraintResults :=
+            for $child in $coreConstraints
+            return
                 typeswitch($child)
-                case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
-                case $links as element(gx:links) return i:validateLinks($links, $doc, $filePath, $doc, $context)                
-                case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
-                case $focusNode as element(gx:focusNode) return i:validateFocusNode($focusNode, $doc, $filePath, $doc, $context)            
+                case $targetSize as element(gx:targetSize) return ()                
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
                 case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
                 case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
                 case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)     
+                case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
+                case $links as element(gx:links) return i:validateLinks($links, $doc, $filePath, $doc, $context)                
+                case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
                 case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $docSimilar, $doc, $doc, $context)
-                case $targetSize as element(gx:targetSize) return ()
                 default return 
-                    if ($child intersect $extensionConstraints) then 
-                        f:validateExtensionConstraint($child, ($doc, $filePath)[1], $filePath, $doc, $context)
-                    else            
-                        error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
-                              concat('Unexpected shape or constraint element, name: ', $child/name()))
-            return
-                $results/i:augmentErrorElement(., attribute filePath {$filePath}, 'first')
-(:                
-                else if ($child/self::gx:focusNode) then ()
-                else
-                    <gx:green>{
-                        attribute filePath {$filePath},
-                        attribute constraintComp {$child/local-name(.)},
-                        $child/@id/attribute constraintID {.},
-                        $child/@label/attribute constraintLabel {.}
-                    }</gx:green>
- :)                    
-        return
-            ($resourceShapeResults, $valueShapeResults)
-    return
-        $results
+                    error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
+                          concat('Unexpected shape or constraint element, name: ', $child/name()))
+        let $extensionConstraintResults := 
+            $extensionConstraints/f:validateExtensionConstraint(., ($doc, $filePath)[1], $filePath, $doc, $context)
+         
+        return (
+            $resourceShapeResults, 
+            $focusNodeResults,
+            $coreConstraintResults,
+            $extensionConstraintResults
+        )
+    return $results        
+        
 };
 

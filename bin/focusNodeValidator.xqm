@@ -34,7 +34,7 @@ declare function f:validateFocusNode($focusNodeShape as element(),
                                      $contextDoc as document-node()?,
                                      $context as map(xs:string, item()*))
         as element()* {
-    let $xpath := $focusNodeShape/@xpath
+    let $xpath := trace($focusNodeShape/@xpath , '_FOCUS_NODE_XPATH: ')
     let $foxpath := $focusNodeShape/@foxpath
     let $components :=
         let $children := $focusNodeShape/*[not(@deactivated eq 'true')]
@@ -43,8 +43,11 @@ declare function f:validateFocusNode($focusNodeShape as element(),
             $children/self::gx:ifMediatype[i:matchesMediatype((@eq, @in/tokenize(.)), $contextFilePath)]
                      /*[not(@deactivated eq 'true')]   
         )
+    (: let $_DEBUG := trace(string-join($components/name(), '; '), '_FOCUS_NODE_COMPONENT_NAMES: ') :)
+    
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($components)     
+    (: let $_DEBUG := trace(string-join($extensionConstraints/name(), '; '), '_FOCUS_NODE_EXTENSION_NAMES: ') :)
     
     let $evaluationContext := $context?_evaluationContext
     let $exprValue :=    
@@ -57,6 +60,7 @@ declare function f:validateFocusNode($focusNodeShape as element(),
         (: for every item of the expression value :)
         for $exprValueItem in $exprValue
         for $component in $components
+        (: let $_DEBUG := trace($component/name(), '_FOCUS_NODE_COMPONENT_NAME: ') :)
         return
             typeswitch($component)
             

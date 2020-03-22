@@ -17,6 +17,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "evaluationContextManager.xqm",
     "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -45,8 +46,8 @@ declare function f:validateExtensionConstraint($constraint as element(),
     )
     
     let $reqBindings :=
-        let $potentialBindings := ('this', 'doc', 'jdoc', 'csvdoc', 'htmldoc', 'domain', 'filePath', 'fileName')
-        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent)
+        let $potentialBindings := i:getPotentialBindings()
+        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), ())
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $useParams)  
