@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of recursive link targets. A recursive link target is a target consisting 
+    of the resources found by resolving links recursively The links are provided by an XPath 
+    expression. Here, the target declaration is:
+       @recursiveLinkXPath="//@href"
+       
+    The <targetSize> constraint element may declare a special constraint, @targetLinkResolvable, 
+    which requires all links found by the target declaration to be resolvable.
+    
+    Note that count-related constraints of the <targetSize> element (e.g. @count or @minCount)
+    refer to the number of target resources found, not to the number of links attempted to resolve,
+    which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target/declarations/link-targets-recursive"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+                <file recursiveLinkXPath="//@href" id="linkTargetsFileShape">
+                    <targetSize minCount="9" 
+                                minCountMsg="Not expected number of link targets"
+                                targetLinkResolvable="true"
+                                targetLinkResolvableMsg="Target links could not be resolved"/>
+                    <xpath expr="//code"
+                           exists="true"
+                           existsMsg="Missing code value"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>
