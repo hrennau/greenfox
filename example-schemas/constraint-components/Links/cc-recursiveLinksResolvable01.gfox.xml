@@ -8,13 +8,13 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain"/>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.xml" id="docbookFileShape">
+            <file foxpath="airports.xml" id="airportsFileShape">
                 <links xpath="//@href"
                        recursive="true"
                        msg="Some recursive links cannot be resolved."/>
