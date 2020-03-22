@@ -17,9 +17,9 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateExpressionValue($constraint as element(), 
-                                           $contextItem as item()?,
-                                           $contextFilePath as xs:string,
+declare function f:validateExpressionValue($contextFilePath as xs:string,
+                                           $constraint as element(), 
+                                           $contextItem as item()?,                                           
                                            $contextDoc as document-node()?,
                                            $context as map(xs:string, item()*))
         as element()* {
@@ -719,7 +719,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
         case attribute(minCount) return map{'constraintComp': 'ExprValueCount', 'atts': ('minCount')}
         case attribute(maxCount) return map{'constraintComp': 'ExprValueCount', 'atts': ('maxCount')}
         case attribute(empty) return map{'constraintComp': 'ExprValueEmpty', 'atts': ('empty')}
-        case attribute(exists) return map{'constraintComp': 'ExprValueEmpty', 'atts': ('exists')}
+        case attribute(exists) return map{'constraintComp': 'ExprValueExists', 'atts': ('exists')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts

@@ -22,9 +22,9 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateExtensionConstraint($constraint as element(), 
-                                               $contextItem as item()?,
-                                               $contextFilePath as xs:string,
+declare function f:validateExtensionConstraint($contextFilePath as xs:string,
+                                               $constraint as element(), 
+                                               $contextItem as item()?,                                               
                                                $contextDoc as document-node()?,
                                                $context as map(xs:string, item()*))
                                             

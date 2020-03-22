@@ -34,20 +34,10 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFile, $context, $gxFile/gx:targetSize)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
-(: 
-    let $contextPath := $context?_contextPath
-    let $targetDecl := $gxFile/(@foxpath, @path, @linkXPath, @recursiveLinkXPath)[1]
-    let $targetPathsAndErrorInfos := f:getTargetPaths($gxFile, $context)
-    let $targetPaths := $targetPathsAndErrorInfos[. instance of xs:anyAtomicType]
-    let $errorInfos := $targetPathsAndErrorInfos[. instance of map(*)]
     
-    (: Check targetSize :)
-    let $targetCountResults := $gxFile/gx:targetSize 
-                               ! i:validateTargetCount(., $targetPaths, $contextPath, $targetDecl)
-:)                               
     (: Check instances :)
-    let $instanceResults := $targetPaths 
-                            ! f:validateFileInstance(., $gxFile, $context)
+    let $instanceResults := 
+        $targetPaths ! f:validateFileInstance(., $gxFile, $context)
     
     (: Merge results :)        
     let $results := ($targetValidationResults, $instanceResults)
@@ -102,11 +92,17 @@ declare function f:validateFileInstance($filePath as xs:string,
     
     (: the document types are mutually exclusive - $doc is the 
        only document obtained (if any) :)
-    let $doc := ($reqBindingsAndDocs?xdoc, $reqBindingsAndDocs?jdoc, $reqBindingsAndDocs?csvdoc, $reqBindingsAndDocs?htmldoc)[1]
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())  
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())
+    let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]        
+    let $contextItem := ($contextDoc, $filePath)[1]
+    let $results := f:validateFileInstanceComponents($filePath, $gxFile, $contextItem, $contextDoc, $context)
+    return $results
+    
     
     (: perform validations :)
+    
+    (:
     let $results :=
         (: validate - member resources :)
         let $resourceShapeResults := (
@@ -141,6 +137,84 @@ declare function f:validateFileInstance($filePath as xs:string,
             $extensionConstraintResults
         )
     return $results        
-        
+    :)    
 };
+
+declare function f:validateFileInstanceComponents($filePath as xs:string,
+                                                  $component as element(),
+                                                  $contextItem as item(),                                                                                                    
+                                                  $contextDoc as document-node()?, 
+                                                  $context as map(*))
+        as element()* {
+    let $childComponents := $component/*[not(@deactivated eq 'true')]
+    let $files := $childComponents/self::gx:file
+    let $folders := $childComponents/self::gx:folder
+    let $focusNodes := $childComponents/self::gx:focusNode
+    let $constraints := $childComponents except ($files, $folders, $focusNodes)
+    let $extensionConstraints := f:getExtensionConstraints($constraints)
+    let $coreConstraints := $constraints except $extensionConstraints
+    
+    let $resourceShapeResults := (
+        $files/i:validateFile(., $context),
+        $folders/i:validateFolder(., $context)
+    )
+    let $focusNodeResults := $focusNodes/i:validateFocusNode($filePath, ., $contextItem, $contextDoc, $context)
+    let $coreConstraintResults :=
+        for $constraint in $coreConstraints
+        return
+            typeswitch($constraint)
+            case $targetSize as element(gx:targetSize) return ()                
+            case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
+            case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
+            case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
+            case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)     
+            case $xpath as element(gx:xpath) return i:validateExpressionValue($filePath, $xpath, $contextItem, $contextDoc, $context)
+            case $foxpath as element(gx:foxpath) return i:validateExpressionValue($filePath, $foxpath, $contextItem, $contextDoc, $context)            
+            case $links as element(gx:links) return i:validateLinks($filePath, $links, $contextItem, $contextDoc, $context)                
+            case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
+            case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $docSimilar, $contextItem, $contextDoc, $context)
+            
+            case $ifMediatype as element(gx:ifMediatype) return
+                $ifMediatype
+                [i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
+                /f:validateFileInstanceComponents($filePath, ., $contextItem, $contextDoc, $context)
+            
+            default return 
+                error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
+                      concat('Unexpected shape or constraint element, name: ', $constraint/name()))
+        let $extensionConstraintResults := 
+            $extensionConstraints/f:validateExtensionConstraint($filePath, ., $contextItem, $contextDoc, $context)
+         
+        return (
+            $resourceShapeResults, 
+            $focusNodeResults,
+            $coreConstraintResults,
+            $extensionConstraintResults
+        )        
+};        
+
+declare function f:validateFocusNode($filePath as xs:string,
+                                     $focusNodeShape as element(), 
+                                     $contextItem as item()?,                                     
+                                     $contextDoc as document-node()?,
+                                     $context as map(xs:string, item()*))
+        as element()* {
+    let $exprValue :=    
+        let $xpath := $focusNodeShape/@xpath
+        let $foxpath := $focusNodeShape/@foxpath
+        let $evaluationContext := $context?_evaluationContext
+        return
+            if ($xpath) then 
+                i:evaluateXPath($xpath, $contextItem, $evaluationContext, true(), true())
+            else if ($foxpath) then  
+                f:evaluateFoxpath($foxpath, $contextItem, $evaluationContext, true())
+            else error(QName((), 'SCHEMA_ERROR'), 'Missing expression')
+    let $results :=
+        for $contextItem in $exprValue
+        return
+            f:validateFileInstanceComponents($filePath, $focusNodeShape, $contextItem, $contextDoc, $context)
+    return
+        $results
+};
+
 

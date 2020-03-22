@@ -28,13 +28,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context a context of name value pairs
  : @return validation results
  :)
-declare function f:validateFocusNode($focusNodeShape as element(), 
+declare function f:validateFocusNodeXXX($focusNodeShape as element(), 
                                      $contextItem as item()?,
                                      $contextFilePath as xs:string,
                                      $contextDoc as document-node()?,
                                      $context as map(xs:string, item()*))
         as element()* {
-    let $xpath := trace($focusNodeShape/@xpath , '_FOCUS_NODE_XPATH: ')
+    let $xpath := $focusNodeShape/@xpath
     let $foxpath := $focusNodeShape/@foxpath
     let $components :=
         let $children := $focusNodeShape/*[not(@deactivated eq 'true')]

@@ -34,9 +34,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context a set of name-value pairs accessible to processing code
  : @return a set of validation results
  :)
-declare function f:validateLinks($shape as element(), 
-                                 $contextItem as item()?,
-                                 $contextFilePath as xs:string,
+declare function f:validateLinks($contextFilePath as xs:string,
+                                 $shape as element(), 
+                                 $contextItem as item()?,                                 
                                  $contextDoc as document-node()?,
                                  $context as map(xs:string, item()*))
         as element()* {
