@@ -15,6 +15,9 @@ declare variable $f:URI_XSD := 'http://www.w3.org/2001/XMLSchema';
 declare variable $f:URI_GX := 'http://www.greenfox.org/ns/schema';
 declare variable $f:PREFIX_GX := 'gx';
 
-declare variable $f:DEBUG := 1;
+declare variable $f:DEBUG_LEVEL := 1;
 declare variable $f:DEBUG_FOLDER := '.';
+declare variable $f:DEBUG_TAGS := 
+    'linksxxx'
+    => tokenize();
 
