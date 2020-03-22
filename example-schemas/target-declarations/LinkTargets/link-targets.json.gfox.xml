@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. A link target is a target consisting of the resources
-    found by resolving links. The links are provided by an XPath expression. Here, the target 
-    declaration is:
+    Demonstrates the use of link targets. This example checks JSON targets referenced by JSON 
+    documents.
+    
+    A link target is a target consisting of the resources found by resolving links. The links 
+    are provided by an XPath expression. Here, the target declaration is:
        @linkXPath="//@href"
        
     The <targetSize> constraint element may declare a special constraint, @targetLinkResolvable, 
@@ -12,7 +14,7 @@
     refer to the number of target resources found, not to the number of links attempted to resolve,
     which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets/json"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
@@ -22,9 +24,8 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
-                <file linkXPath="//@href" id="linkTargetsFileShape">
+            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+                <file linkXPath="//href" id="linkTargetsFileShape" mediatype="json">
                     <targetSize minCount="5" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"

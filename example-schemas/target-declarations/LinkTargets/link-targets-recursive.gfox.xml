@@ -12,15 +12,15 @@
     refer to the number of target resources found, not to the number of links attempted to resolve,
     which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target/declarations/link-targets-recursive"
-    xmlns="http://www.greenfox.org/ns/schema">
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets-recursive"
+          xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderFolderShape">
+        <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
