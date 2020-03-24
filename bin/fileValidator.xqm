@@ -31,6 +31,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateFile($gxFile as element(gx:file), $context as map(*)) 
         as element()* {
+    let $_DEBUG := f:DEBUG_CONTEXT($gxFile/@id, $context)        
     let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFile, $context, $gxFile/gx:targetSize)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]

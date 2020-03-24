@@ -39,3 +39,38 @@ declare function f:DEBUG_FILE($item as item(),
     if ($debugLevel gt $i:DEBUG_LEVEL) then () else
     file:write($i:DEBUG_FOLDER || '/' || $fileName, $item)
 };
+
+declare function f:DEBUG_CONTEXT($label as xs:string, $context as map(xs:string, item()*))
+        as empty-sequence() {
+    let $dir := $i:DEBUG_FOLDER
+    let $fname := $dir || '/DEBUG_' || $label || '.xml'
+    let $contextDoc :=
+        <context>{
+            f:DEBUG_CONTEXT_RC($context)
+        }</context>
+    return
+        file:write($fname, $contextDoc)
+};
+
+declare function f:DEBUG_CONTEXT_RC($item as item()) as item()* {
+    typeswitch($item)
+    case map(*) return
+        for $key in map:keys($item) 
+        let $value := $item($key)
+        order by string($key)
+        return
+            element {$key} {
+                if (count($value) eq 1) then f:DEBUG_CONTEXT_RC($value)
+                else $value ! <_item>{f:DEBUG_CONTEXT_RC(.)}</_item>
+            }
+            
+    case attribute() return
+        <attribute name="{$item/name()}" value="{$item}"/>
+    case element() return
+        <element name="{$item/name()}"/>
+    case document-node() return
+        <document rootName="{$item/*/name()}"/>
+        
+    default return $item            
+};
+

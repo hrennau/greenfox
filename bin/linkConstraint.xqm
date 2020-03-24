@@ -352,8 +352,16 @@ declare function f:resolveLinks(
                              $context as map(xs:string, item()*))
         as map(xs:string, item()*)* {
     let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
+    
+    (: There may be duplicates to be removed, as recursive descents happen in parallel :)
+    let $linkMapsDedup :=
+        for $linkMap in $linkMaps
+        group by $uri := $linkMap?uri
+        return
+            if (not($uri)) then $linkMap
+            else $linkMap[1]
     return
-        $linkMaps
+        $linkMapsDedup
 };
 
 (:~
