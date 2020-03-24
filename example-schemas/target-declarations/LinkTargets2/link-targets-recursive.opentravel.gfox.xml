@@ -3,18 +3,21 @@
     xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
-        <field name="domain"/>
+        <field name="domain" value="\projects\xsdbase"/>/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         <folder path="OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
             <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>            
-            <file foxpath=".\OTA_AirAvailRQ.xsd" id="airAvailFileShape">
+            <file foxpath="*.xsd except (OTA_SimpleTypes.xsd, OTA_Lists.xsd)" id="xsdFileShape">
                 <file recursiveLinkXPath="/xs:schema/xs:include/@schemaLocation" id="xsdFileShape">
-                    <targetSize minCount="70" minCountMsg="Not expected number of link targets"/>
-                    <xpath expr="/xs:schema/@targetNamespace"
-                           exists="true"
-                           existsMsg="Missing tns"/>
+                    <targetSize minCount="2" 
+                                minCountMsg="Not expected number of link targets"
+                                targetLinkResolvable="true"
+                                targetLinkResolvableMsg="Target links could not be resolved"/>
+                    <xpath expr="/xs:schema/@elementFormDefault"
+                           eq="qualified"
+                           count="1"/>
                 </file>
             </file>
         </folder>
