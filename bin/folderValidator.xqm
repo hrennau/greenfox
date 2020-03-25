@@ -80,7 +80,7 @@ declare function f:validateFolderInstance($folderPath as xs:string,
                 case $folderSimilar as element(gx:folderSimilar) return f:validateFolderSimilar($folderPath, $folderSimilar, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $folderPath, $folderPath, (), $context)                
+                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($folderPath, $foxpath, $folderPath, (), $context)                
                 default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($child)))
             return
                 if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')

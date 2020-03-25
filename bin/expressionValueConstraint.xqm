@@ -23,13 +23,13 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
                                            $contextDoc as document-node()?,
                                            $context as map(xs:string, item()*))
         as element()* {
-(:        
+    (:   
     let $_DEBUG := trace(typeswitch($contextItem) 
                          case document-node() return 'DNODE' 
                          case element() return 'ELEM' 
                          default return 'OTHER', '_TYPE_CONTEXT_ITEM_0: ')
-:)           
-    let $focusPath :=
+     :)
+     let $focusPath :=
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
             $contextItem/f:datapath(.)
         else ()
@@ -45,7 +45,7 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
         if ($constraint/self::gx:xpath) then 
             i:evaluateXPath($expr, $contextItem, $evaluationContext, true(), true())
         else if ($constraint/self::gx:foxpath) then  
-            f:evaluateFoxpath($expr, $contextItem, $evaluationContext, true())
+            f:evaluateFoxpath($expr, $contextFilePath, $evaluationContext, true())
         else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraint/name(.)))
         
     let $constraintId := $constraint/@id

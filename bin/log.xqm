@@ -43,7 +43,7 @@ declare function f:DEBUG_FILE($item as item(),
 declare function f:DEBUG_CONTEXT($label as xs:string, $context as map(xs:string, item()*))
         as empty-sequence() {
     let $dir := $i:DEBUG_FOLDER
-    let $fname := $dir || '/DEBUG_' || $label || '.xml'
+    let $fname := $dir || '/DEBUG.CONTEXT_' || $label || '.xml'
     let $contextDoc :=
         <context>{
             f:DEBUG_CONTEXT_RC($context)

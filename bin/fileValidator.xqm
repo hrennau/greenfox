@@ -38,7 +38,8 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
     
     (: Check instances :)
     let $instanceResults := 
-        $targetPaths ! f:validateFileInstance(., $gxFile, $context)
+        for $targetPath at $pos in $targetPaths
+        return f:validateFileInstance($targetPath, $gxFile, $pos, $context)
     
     (: Merge results :)        
     let $results := ($targetValidationResults, $instanceResults)
@@ -55,7 +56,8 @@ declare function f:validateFile($gxFile as element(gx:file), $context as map(*))
  : @return validation results
  :)
 declare function f:validateFileInstance($filePath as xs:string, 
-                                        $gxFile as element(gx:file), 
+                                        $gxFile as element(gx:file),
+                                        $position as xs:integer?,
                                         $context as map(*)) 
         as element()* {
     (: let $_LOG := trace($filePath, 'FILE_PATH: ') :) 
@@ -95,50 +97,13 @@ declare function f:validateFileInstance($filePath as xs:string,
        only document obtained (if any) :)
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())
+        
+    let $_DEBUG := f:DEBUG_CONTEXT($gxFile/@id || '_DOCNR_' || $position, $context)
+    
     let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]        
     let $contextItem := ($contextDoc, $filePath)[1]
     let $results := f:validateFileInstanceComponents($filePath, $gxFile, $contextItem, $contextDoc, $context)
     return $results
-    
-    
-    (: perform validations :)
-    
-    (:
-    let $results :=
-        (: validate - member resources :)
-        let $resourceShapeResults := (
-            $resourceShapes/self::gx:file/i:validateFile(., $context),
-            $resourceShapes/self::gx:folder/i:validateFolder(., $context)
-        )
-        let $focusNodeResults := $focusNodes/i:validateFocusNode(., $doc, $filePath, $doc, $context)
-        let $coreConstraintResults :=
-            for $child in $coreConstraints
-            return
-                typeswitch($child)
-                case $targetSize as element(gx:targetSize) return ()                
-                case $lastModified as element(gx:lastModified) return i:validateLastModified($filePath, $lastModified, $context)
-                case $fileSize as element(gx:fileSize) return i:validateFileSize($filePath, $fileSize, $context)
-                case $fileName as element(gx:fileName) return i:validateFileName($filePath, $fileName, $context)
-                case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)     
-                case $xpath as element(gx:xpath) return i:validateExpressionValue($xpath, $doc, $filePath, $doc, $context)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($foxpath, $filePath, $filePath, $doc, $context)            
-                case $links as element(gx:links) return i:validateLinks($links, $doc, $filePath, $doc, $context)                
-                case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
-                case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $docSimilar, $doc, $doc, $context)
-                default return 
-                    error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
-                          concat('Unexpected shape or constraint element, name: ', $child/name()))
-        let $extensionConstraintResults := 
-            $extensionConstraints/f:validateExtensionConstraint(., ($doc, $filePath)[1], $filePath, $doc, $context)
-         
-        return (
-            $resourceShapeResults, 
-            $focusNodeResults,
-            $coreConstraintResults,
-            $extensionConstraintResults
-        )
-    return $results        
-    :)    
 };
 
 declare function f:validateFileInstanceComponents($filePath as xs:string,

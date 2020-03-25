@@ -65,9 +65,9 @@ declare function f:validateFocusNodeXXX($focusNodeShape as element(),
             typeswitch($component)
             
             case $xpathShape as element(gx:xpath) return
-                i:validateExpressionValue($xpathShape, $exprValueItem, $contextFilePath, $contextDoc, $context)
+                i:validateExpressionValue($contextFilePath, $xpathShape, $exprValueItem, $contextDoc, $context)
             case $foxpathShape as element(gx:foxpath) return
-                i:validateExpressionValue($foxpathShape, $exprValueItem, $contextFilePath, $contextDoc, $context)
+                i:validateExpressionValue($contextFilePath, $foxpathShape, $exprValueItem, $contextDoc, $context)
             case $focusNode as element(gx:focusNode) return                
                 i:validateFocusNode($focusNode, $exprValueItem, $contextFilePath, $contextDoc, $context)
             case $targetSize as element(gx:targetSize) return
@@ -78,7 +78,7 @@ declare function f:validateFocusNodeXXX($focusNodeShape as element(),
                 
             default return 
                 if ($component intersect $extensionConstraints) then
-                    f:validateExtensionConstraint($component, $exprValueItem, $contextFilePath, $contextDoc, $context)
+                    f:validateExtensionConstraint($contextFilePath, $component, $exprValueItem, $contextDoc, $context)
                 else            
                     error(QName((), 'UNEXPECTED_SHAPE_OR_CONSTRAINT_ELEMENT'), 
                           concat('Unexpected shape or constraint element, name: ', $component/name()))

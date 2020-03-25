@@ -138,7 +138,7 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
                                           $resourceShape as element(),
                                           $context as map(xs:string, item()*))
         as xs:string* {
-    let $contextPath := trace($context?_contextPath, '_CONTEXTPATH: ')        
+    let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
         (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
