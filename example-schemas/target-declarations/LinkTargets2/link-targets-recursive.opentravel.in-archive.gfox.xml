@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets-recursive.in-archive/opentravel"
     xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
@@ -9,9 +9,9 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="archives\OpenTravel.zip\#archive#\OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
             <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>            
-            <file foxpath="*.xsd except (OTA_SimpleTypes.xsd, OTA_Lists.xsd)" id="xsdFileShape">
+            <file foxpath="OTA_AirAvail*.xsd" id="xsdFileShape">
                 <file recursiveLinkXPath="/xs:schema/xs:include/@schemaLocation" id="xsdFileShape">
-                    <targetSize minCount="2" 
+                    <targetSize count="6" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"/>

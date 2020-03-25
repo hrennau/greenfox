@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets-recursive/opentravel"
     xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
