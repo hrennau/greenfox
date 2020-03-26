@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint components XsdValid.
+    
+    Constraint components:
+    * Name:  FileSizeGt 
+    - XML:   fileSize/@gt 
+    - Check: The file size must be greater than the specified limit
+    
+    * Name:  FileSizeLe 
+    - XML:   fileSize/@le 
+    - Check: The file size must be less than or equal to the specified limit
+    
+    In this example, validation catches 
+    * empty files (with size "0").
+    * files larger 1000 Bytes
+    
+    The complete set of file size related constraint components is:
+    * FileNameGt - fileSize/@gt
+    * FileNameGe - fileSize/@ge
+    * FileNameLt - fileSize/@lt
+    * FileNameLe - fileSize/@le
+    * FileNameEq - fileSize/@eq
+    * FileNameNe - fileSize/@ne    
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xsdvalid"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="input-output-config\output" id="outputFolderShape">
+            <targetSize countMsg="Missing folder: output" count="1"/>            
+            <file foxpath="*.xml" id="responseFileShape">
+                <targetSize minCountMsg="At least two responses expected" minCount="2"/>
+                <xsdValid xsdFoxpath="$domain\xsd\schema-foo-article.xsd"
+                          msg="Response msg not XSD valid"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+
