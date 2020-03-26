@@ -72,16 +72,17 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
 declare function f:validateDomain($gxDomain as element(gx:domain), 
                                   $context as map(xs:string, item()*))
         as element()* {
-    let $baseURI := $gxDomain/@path ! i:pathToAbsolutePath(.)
-    let $name := $gxDomain/@name/string()
+    let $domainPath := $gxDomain/@path ! i:pathToAbsolutePath(.)
+    let $domainURI := $domainPath ! i:pathToUriCompatible(.)
+    let $domainName := $gxDomain/@name/string()
     
     (: Evaluation context, containing entries available as 
        external variables to XPath and foxpath expressions;
        initial entries: domain, domainName:)
     let $evaluationContext :=
         map:merge((
-            map:entry(QName((), 'domain'), $baseURI),
-            map:entry(QName((), 'domainName'), $name)
+            map:entry(QName((), 'domain'), $domainURI),
+            map:entry(QName((), 'domainName'), $domainName)
         ))
         
     (: Processing context, containing entries available to
@@ -90,10 +91,10 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
     let $context := 
         map:merge((
             $context,
-            map:entry('_domain', $baseURI),
-            map:entry('_domainName', $name),
-            map:entry('_contextPath', $baseURI),            
-            map:entry('_evaluationContext', $evaluationContext)
+            map:entry('_contextPath', $domainURI),
+            map:entry('_evaluationContext', $evaluationContext),            
+            map:entry('_domain', $domainPath),
+            map:entry('_domainName', $domainName)
         ))   
         
     let $results :=
