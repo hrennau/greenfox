@@ -239,7 +239,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
  : @param coreComponents core components defining XPath and foxpath expressions
  : @param extensionConstraints constraint declarations referencing extension constraint components
  : @param extensionConstraintComponents extension constraint components 
- : @return the actually required variable bindngs
+ : @return the actually required variable bindings
  :)
 declare function f:getRequiredBindings($potentialBindings as xs:string*, 
                                        $coreComponents as element()*,
@@ -272,25 +272,6 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
             $foxpathExpressions/f:determineRequiredBindingsFoxpath(., $potentialBindings)
         ) => distinct-values() => sort()
     return $reqBindings   
-    
-    (:
-    let $reqBindings := $component/(
-        self::gx:xsdValid/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),    
-        self::gx:xpath/@expr/i:determineRequiredBindingsXPath(., $potentialBindings),
-        self::gx:xpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
-        self::gx:xpath/@*[ends-with(name(), 'Foxpath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        self::gx:foxpath/@expr/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsXPath(., $potentialBindings),
-        self::gx:foxpath/@*[ends-with(name(), 'XPath')]/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        (@validatorXPath, gx:validatorXPath)/i:determineRequiredBindingsXPath(., $potentialBindings),        
-        (@validatorFoxpath, gx:validatorFoxpath)/i:determineRequiredBindingsFoxpath(., $potentialBindings),
-        gx:foxpathExpr/i:determineRequiredBindingsXPath(., $potentialBindings)
-      
-        $component/self::gx:xpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .),
-        $component/self::gx:foxpath/(gx:xpath, gx:foxpath)/f:getRequiredBindings($potentialBindings, .)
-        ) => distinct-values() => sort()
-    return $reqBindings        
-     :)        
 };        
 
 (:~
@@ -305,7 +286,6 @@ declare function f:determineRequiredBindingsXPath($expr as xs:string,
                                                   $candidateBindings as xs:string*)
         as xs:string* {
     let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
-    let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
     let $tree := xquery:parse($extendedExpr)
     return $tree//StaticVarRef/@var => distinct-values() => sort()
 };
@@ -322,7 +302,6 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
                                                     $candidateBindings as xs:string*)
         as xs:string* {
     let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
-    let $_DEBUG := file:write('DEBUG_QUERY.txt', $extendedExpr)
     let $tree := f:parseFoxpath($extendedExpr)
     let $_CHECK := if ($tree/self::errors) then error() else ()
     return (
@@ -352,7 +331,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $htmldoc as document-node()?,
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
-    let $doc := ($xdoc, $jdoc, $csvdoc)[1]    
+    let $doc := ($xdoc, $jdoc, $csvdoc, $htmldoc)[1]    
     let $reqDocs := map:merge((
         $xdoc ! map:entry('xdoc', .),
         $jdoc ! map:entry('jdoc', .),
@@ -362,15 +341,22 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
         let $evaluationContext :=
             map:merge((
                 $context?_evaluationContext,
+                
+                (: Add in-scope document :)
                 if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
                 if (not($reqBindings = 'xdoc')) then () else map:entry(QName('', 'xdoc'), $xdoc),
                 if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
                 if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
+                if (not($reqBindings = 'htmldoc')) then () else map:entry(QName('', 'htmldoc'), $htmldoc),
+                
+                (: Add built-in variables - this, filePath, fileName :)
                 if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
                 if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
                 if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
                 if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain),
                 (: _TO_DO_ Support datatypes (xs:integer, ...) :)
+                
+                (: Add parameter element values :)
                 $params ! map:entry(QName('', @name), string(.))                
             ))    
         return map:put($context, '_evaluationContext', $evaluationContext) !

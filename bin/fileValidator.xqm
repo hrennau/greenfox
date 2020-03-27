@@ -93,11 +93,10 @@ declare function f:validateFileInstance($filePath as xs:string,
             $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .)
         ))        
     
-    (: the document types are mutually exclusive - $doc is the 
-       only document obtained (if any) :)
+    (: Update the evaluation context so that it contains an entry for each
+       variable reference found in the in-scope components :)
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())
-        
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())        
     let $_DEBUG := f:DEBUG_CONTEXT($gxFile/@id || '_DOCNR_' || $position, $context)
     
     let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]        
