@@ -4,18 +4,19 @@
     An additional ExprValueMinCount constraint ensures that successful validation is
     not possible without evaluation of the ExprValueEq constraint.
     
-    This example uses an expression yielding several value items, and a quantifier (@quant) is 
-    specified with a value 'some'. Successful validation therefore requires that at least one 
-    value item satisfies the condition.
+    This example uses a @useDatatype parameter: before comparing the expression value
+    items with the value specified by @eq, both operands of the comparison are cast
+    to the specified datatype, here xs:integer.
     
     Constraint components:
     * Name:  ExprValueEq 
     - XML:   xpath/(@expr, @eq) 
     - Check: Every item of the expression value must be equal to the value given by @eq.
     
-    * Name:  ExprValueMinCount 
-    - XML:   xpath/(@expr, @minCount) 
-    - Check: The number of value items must be at least the number specified by @minCount.
+    * Name:  ExprValueCount 
+    - XML:   xpath/(@expr, @count) 
+    - Check: The number of value items must be equal to the number specified by @count.
+    
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xpath-value-eq"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -29,12 +30,12 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize countMsg="Missing file: airports.xml" count="1"/>
-                <xpath expr="//@href ! substring-before(., '-')"
-                       quant="some"
-                       eq="user"
-                       eqMsg="Not expected airport reference"
+                <xpath expr="/airports/airport[not(code)]/count(@*)"
+                       useDatatype="xs:integer"
+                       eq="1"
+                       eqMsg="Not expected number of attributes"
                        minCount="2"
-                       minCountMsg="Should contain at least @href attributes"/>
+                       minCountMsg="Missing child elements of root element"/>
             </file>
         </folder>
     </domain>

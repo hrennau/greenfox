@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components ExprValueEq, using an XPath expression.
+    Demonstrates the use of constraint component ExprValueEq, using an XPath expression.
     An additional ExprValueMinCount constraint ensures that successful validation is
     not possible without evaluation of the ExprValueEq constraint.
     

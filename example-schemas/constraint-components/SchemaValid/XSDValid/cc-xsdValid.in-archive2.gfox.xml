@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components XsdValid.
+    Demonstrates the use of constraint components XsdValid. This example checks
+    resources contained by an archive file, and also the XSD is contained by an
+    archive file.
     
     Constraint components:
     * Name:  XsdValid 
     - XML:   xsdValid/@xsdFoxpath 
     - Check: The resource must be valid against one of the schemas selected by the Foxpath expressio
-    
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xsdvalid"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -16,11 +17,11 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="input-output-config\output" id="outputFolderShape">
+        <folder foxpath="archives\input-output-config.zip\#archive#\input-output-config\output" id="outputFolderShape">
             <targetSize countMsg="Missing folder: output" count="1"/>            
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCountMsg="At least two responses expected" minCount="2"/>
-                <xsdValid xsdFoxpath="$domain\xsd\schema-foo-article.xsd"
+                <xsdValid xsdFoxpath="$domain\archives\xsd.zip\#archive#\xsd\schema-foo-article.xsd"
                           msg="Response msg not XSD valid"/>                
             </file>
         </folder>
