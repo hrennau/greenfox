@@ -15,6 +15,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "resourceAccess.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
+declare namespace fox="http://www.foxpath.org/ns/annotations";
 
 (:~
  : Validates a DocSimilar constraint and accompanying constraints.
@@ -109,9 +110,11 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
     let $normOptions :=
         map{
             'skipPrettyWS': true(),
-            'skipXmlBase': true()
+            'keepXmlBase': false()
         }
-    let $skipPrettyWS := true()
+    (: Currently, the options cannot be controlled by schema parameters;
+       this will be changed when the need arises
+     :)
     
     let $otherDocs :=
         for $rep in $otherDocReps 
@@ -135,8 +138,8 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
                 return
                     concat($baseUri, '#', $datapath)
         )
-        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions)
-        let $d2 := f:normalizeDocForComparison($otherDoc, $constraintElem/*, $normOptions)
+        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $otherDoc)
+        let $d2 := f:normalizeDocForComparison($otherDoc, $constraintElem/*, $normOptions, $contextItem)
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         return
@@ -322,12 +325,22 @@ declare function f:validationResult_docSimilarCount($colour as xs:string,
  :     D o c u m e n t    n o r m a l i z a t i o n
  :
  : ============================================================================ :)
+(:~
+ : Normalization of a node prior to comparison with another node.
+ :
+ : @param node the node to be normalized
+ : @param normItems configuration items prescribing modifications
+ : @param normOptions options controlling the normalization
+ : @param otherNode the node with whith to compare
+ : @return the normalized node
+ :)
 declare function f:normalizeDocForComparison($node as node(), 
                                              $normItems as element()*,
-                                             $normOptions as map(xs:string, item()*))
+                                             $normOptions as map(xs:string, item()*),
+                                             $otherNode as node())
         as node()? {
     let $skipPrettyWS := $normOptions?skipPrettyWS
-    let $skipXmlBase := $normOptions?skipXmlBase
+    let $keepXmlBase := $normOptions?keepXmlBase
     
     let $selectedItems := 
         function($tree, $modifier) as node()* {
@@ -355,11 +368,14 @@ declare function f:normalizeDocForComparison($node as node(),
             return
                 if (empty($delNodes)) then () else delete node $delNodes
         ,
-        if (not($skipXmlBase) or not($node_//@xml:base)) then ()
-        else
-            let $delNodes := $node_//@xml:base
+        (: @xml:base attributes are removed :)
+        if ($keepXmlBase) then () else
+            let $xmlBaseAtts := trace($node_//@xml:base, '_BASE_ADDED: ')
             return
-                if (empty($delNodes)) then () else delete node $delNodes
+                if (empty($xmlBaseAtts)) then ()
+                else
+                    let $delNodes := trace($xmlBaseAtts/(., ../@fox:base-added) , '_DEL_NODES: ')
+                    return delete node $delNodes
         ,
         for $normItem in $normItems
         return

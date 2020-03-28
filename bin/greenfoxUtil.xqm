@@ -175,6 +175,7 @@ declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemN
         case QName($i:URI_XSD, 'decimal') return $s cast as xs:decimal
         case QName($i:URI_XSD, 'long') return $s cast as xs:long
         case QName($i:URI_XSD, 'short') return $s cast as xs:short
+        case QName($i:URI_XSD, 'date') return $s cast as xs:date
         case QName($i:URI_XSD, 'dateTime') return $s cast as xs:dateTime
         case QName($i:URI_XSD, 'duration') return $s cast as xs:duration
         case QName($i:URI_XSD, 'dayTimeDuration') return $s cast as xs:dayTimeDuration

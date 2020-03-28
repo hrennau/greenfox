@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : xsdValidator.xqm - Document me!
+ : xsdValidator.xqm - validates a resource against XSDs
  :
  : -------------------------------------------------------------------------
  :)
@@ -16,25 +16,17 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx:xsdValid), $context as map(*))
+declare function f:xsdValidate($filePath as xs:string, 
+                               $constraint as element(gx:xsdValid), 
+                               $context as map(*))
         as element()* {
     if (not(i:fox-doc-available($filePath))) then 
         let $msg := "XSD validation requires XML file, but file is not XML"
         return
             f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
-            
-        (:
-        <gx:red msg="XSD validation requires XML file, but file is not XML">{
-                  attribute constraintComponent {"XsdValid"},
-                  $constraint/@id/attribute constraintID {.},
-                  $constraint/@label/attribute constraintLabel {.},                  
-                  $constraint/@resourceShapeID/attribute resourceShapeID {.},                  
-                  $constraint/@xsdFoxpath
-        }</gx:red>
-         :)
     else
-        
-    let $doc := i:fox-doc($filePath)
+      
+    let $doc := i:fox-doc-no-base-xml($filePath)
     let $expr := $constraint/@xsdFoxpath
     let $evaluationContext := $context?_evaluationContext
     let $xsdPaths := 
@@ -51,14 +43,6 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
             let $msg := "No XSDs found"
             return
                 f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())            
-(:            
-            <gx:red msg="No XSDs found">{
-                      attribute constraintComponent {"XsdValid"},
-                      $constraint/@id/attribute constraintID {.},
-                      $constraint/@label/attribute constraintLabel {.},
-                      $constraint/@resourceShapeID/attribute resourceShapeID {.},                      
-                      $constraint/@xsdFoxpath
-            }</gx:red> :)
         else
         
     let $xsdRoots := 
@@ -75,15 +59,6 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
                 let $msg := "xsdFoxpath yields non-XSD node"
                 return
                     f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
-(:                    
-                <gx:red msg="xsdFoxpath yields non-XSD node">{
-                  attribute constraintComponent {"XsdValid"},
-                  $constraint/@id/attribute constraintID {.},
-                  $constraint/@label/attribute constraintLabel {.},                  
-                  $constraint/@resourceShapeID/attribute resourceShapeID {.},
-                  $constraint/@xsdFoxpath                                   
-                }</gx:red>
-:)                
         else
 
     let $rootElem := $doc/*
@@ -101,31 +76,11 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
                                'namespace=', $namespace, '; local name: ', $lname)
             return
                 f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
-(:            
-            <gx:red msg="{concat('No XSD element declaration found for this document; ',
-                                 'namespace=', $namespace, '; local name: ', $lname)}">{
-                attribute constraintComponent {"XsdValid"},
-                $constraint/@id/attribute constraintID {.},
-                $constraint/@label/attribute constraintLabel {.},
-                $constraint/@resourceShapeID/attribute resourceShapeID {.},                
-                $constraint/@xsdFoxpath
-             }</gx:red>
-:)                      
         else if (count($elementDecl) gt 1) then
             let $msg := concat('More than 1 XSD element declarations found for this document; ',
                                'namespace=', $namespace, '; local name: ', $lname)
             return                                    
                 f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
-(:                
-            <gx:red msg="{concat('More than 1 XSD element declarations found for this document; ',
-                                 'namespace=', $namespace, '; local name: ', $lname)}">{
-                attribute constraintComponent {"XsdValid"},
-                $constraint/@id/attribute constraintID {.},
-                $constraint/@label/attribute constraintLabel {.},
-                $constraint/@resourceShapeID/attribute resourceShapeID {.},                
-                $constraint/@xsdFoxpath                
-            }</gx:red>
-:)            
         else 
         
     (: let $schema := $elementDecl/base-uri(.) :)    
@@ -136,28 +91,6 @@ declare function f:xsdValidate($filePath as xs:string, $constraint as element(gx
             f:constructResult_xsdValid('green', (), $filePath, $constraint, ())
         else            
             f:constructResult_xsdValid('red', (), $filePath, $constraint, $report)
-(:            
-            <gx:green>{
-                $constraint/@msgOK,
-                attribute filePath {$filePath},                
-                attribute constraintComponent {"XsdValid"},
-                $constraint/@id/attribute constraintID {.},
-                $constraint/@label/attribute constraintLabel {.},          
-                $constraint/@resourceShapeID/attribute resourceShapeID {.},                
-                $constraint/@xsdFoxpath
-            }</gx:green>            
-        else
-            <gx:red>{
-                $constraint/@msg,
-                attribute filePath {$filePath},                
-                attribute constraintComponent {"XsdValid"},
-                $constraint/@id/attribute constraintID {.},
-                $constraint/@label/attribute constraintLabel {.},            
-                $constraint/@resourceShapeID/attribute resourceShapeID {.},                
-                $constraint/@xsdFoxpath,
-                $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
-            }</gx:red>
-:)            
 };
 
 declare function f:constructResult_xsdValid($colour as xs:string,

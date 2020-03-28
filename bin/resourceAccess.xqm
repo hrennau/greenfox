@@ -38,14 +38,27 @@ declare function f:fox-unparsed-text-available($uri as xs:string,
 };
 
 (:~
- : Returns an XML document identified by URI or file path.
+ : Returns an XML document identified by URI or file path. If the
+ : URI points to an archive file, an @xml:base attribute is
+ : added to the root element, along with a @fox:base-xml-added
+ : attribute. If you do not want this addition, use the function
+ : variant 'fox-doc-no-base-xml'.
  :
  : @param uri the URI or file path of the resource
  : @param options options controlling the evaluation
  : @return the document, or the empty sequence if retrieval or parsing fails
  :)
 declare function f:fox-doc($uri as xs:string) as document-node()? {
-    tt:fox-doc($uri, ())        
+    let $options := map{'addXmlBase': true()}
+    return f:fox-doc($uri, $options)        
+};
+
+declare function f:fox-doc-no-base-xml($uri as xs:string) as document-node()? {
+    tt:fox-doc($uri, map{'addBaseXml': false()})        
+};
+
+declare function f:fox-doc($uri as xs:string, $options as map(xs:string, item()*)) as document-node()? {
+    tt:fox-doc($uri, $options)        
 };
 
 (:~
