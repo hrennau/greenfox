@@ -630,39 +630,39 @@ declare function f:validationResult_expression($colour as xs:string,
     let $constraint1 := $constraint[1]    
     let $constraintConfig :=
         typeswitch($constraint1)
-        case attribute(eq) return map{'constraintComp': 'ExprValueEq', 'atts': ('eq', 'useDatatype')}
-        case attribute(ne) return map{'constraintComp': 'ExprValueNe', 'atts': ('ne', 'useDatatype')}
+        case attribute(eq) return map{'constraintComp': 'ExprValueEq', 'atts': ('eq', 'useDatatype', 'quant')}
+        case attribute(ne) return map{'constraintComp': 'ExprValueNe', 'atts': ('ne', 'useDatatype', 'quant')}
         case element(gx:in) return map{'constraintComp': 'ExprValueIn', 'atts': ('useDatatype')}
         case element(gx:notin) return map{'constraintComp': 'ExprValueNotin', 'atts': ('useDatatype')}
         case element(gx:contains) return map{'constraintComp': 'ExprValueContains', 'atts': ('useDatatype')}
-        case attribute(lt) return map{'constraintComp': 'ExprValueLt', 'atts': ('lt', 'useDatatype')}        
-        case attribute(le) return map{'constraintComp': 'ExprValueLe', 'atts': ('le', 'useDatatype')}        
-        case attribute(gt) return map{'constraintComp': 'ExprValueGt', 'atts': ('gt', 'useDatatype')}        
-        case attribute(ge) return map{'constraintComp': 'ExprValueGe', 'atts': ('ge', 'useDatatype')}
-        case attribute(datatype) return map{'constraintComp': 'ExprValueDatatype', 'atts': ('datatype', 'useDatatype')}
-        case attribute(matches) return map{'constraintComp': 'ExprValueMatches', 'atts': ('matches', 'useDatatype')}
-        case attribute(notMatches) return map{'constraintComp': 'ExprValueNotMatches', 'atts': ('notMatches', 'useDatatype')}
-        case attribute(like) return map{'constraintComp': 'ExprValueLike', 'atts': ('like', 'useDatatype')}        
-        case attribute(notLike) return map{'constraintComp': 'ExprValueNotLike', 'atts': ('notLike', 'useDatatype')}
-        case attribute(length) return map{'constraintComp': 'ExprValueLength', 'atts': ('length')}
-        case attribute(minLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('minLength')}        
-        case attribute(maxLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('maxLength')}        
-        case attribute(eqXPath) return map{'constraintComp': 'ExprValueEqXPath', 'atts': ('eqXPath', 'useDatatype')}
-        case attribute(neXPath) return map{'constraintComp': 'ExprValueNeXPath', 'atts': ('neXPath', 'useDatatype')}
-        case attribute(leXPath) return map{'constraintComp': 'ExprValueLeXPath', 'atts': ('leXPath', 'useDatatype')}
-        case attribute(ltXPath) return map{'constraintComp': 'ExprValueLtXPath', 'atts': ('ltXPath', 'useDatatype')}
-        case attribute(geXPath) return map{'constraintComp': 'ExprValueGeXPath', 'atts': ('geXPath', 'useDatatype')}
-        case attribute(gtXPath) return map{'constraintComp': 'ExprValueGtXPath', 'atts': ('gtXPath', 'useDatatype')}
-        case attribute(inXPath) return map{'constraintComp': 'ExprValueInXPath', 'atts': ('inXPath', 'useDatatype')}        
+        case attribute(lt) return map{'constraintComp': 'ExprValueLt', 'atts': ('lt', 'useDatatype', 'quant')}        
+        case attribute(le) return map{'constraintComp': 'ExprValueLe', 'atts': ('le', 'useDatatype', 'quant')}        
+        case attribute(gt) return map{'constraintComp': 'ExprValueGt', 'atts': ('gt', 'useDatatype', 'quant')}        
+        case attribute(ge) return map{'constraintComp': 'ExprValueGe', 'atts': ('ge', 'useDatatype', 'quant')}
+        case attribute(datatype) return map{'constraintComp': 'ExprValueDatatype', 'atts': ('datatype', 'useDatatype', 'quant')}
+        case attribute(matches) return map{'constraintComp': 'ExprValueMatches', 'atts': ('matches', 'useDatatype', 'quant')}
+        case attribute(notMatches) return map{'constraintComp': 'ExprValueNotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
+        case attribute(like) return map{'constraintComp': 'ExprValueLike', 'atts': ('like', 'useDatatype', 'quant')}        
+        case attribute(notLike) return map{'constraintComp': 'ExprValueNotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
+        case attribute(length) return map{'constraintComp': 'ExprValueLength', 'atts': ('length', 'quant')}
+        case attribute(minLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('minLength', 'quant')}        
+        case attribute(maxLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('maxLength', 'quant')}        
+        case attribute(eqXPath) return map{'constraintComp': 'ExprValueEqXPath', 'atts': ('eqXPath', 'useDatatype', 'quant')}
+        case attribute(neXPath) return map{'constraintComp': 'ExprValueNeXPath', 'atts': ('neXPath', 'useDatatype', 'quant')}
+        case attribute(leXPath) return map{'constraintComp': 'ExprValueLeXPath', 'atts': ('leXPath', 'useDatatype', 'quant')}
+        case attribute(ltXPath) return map{'constraintComp': 'ExprValueLtXPath', 'atts': ('ltXPath', 'useDatatype', 'quant')}
+        case attribute(geXPath) return map{'constraintComp': 'ExprValueGeXPath', 'atts': ('geXPath', 'useDatatype', 'quant')}
+        case attribute(gtXPath) return map{'constraintComp': 'ExprValueGtXPath', 'atts': ('gtXPath', 'useDatatype', 'quant')}
+        case attribute(inXPath) return map{'constraintComp': 'ExprValueInXPath', 'atts': ('inXPath', 'useDatatype', 'quant')}        
         case attribute(containsXPath) return map{'constraintComp': 'ExprValueContainsXPath', 'atts': ('containsXPath', 'useDatatype')}
         case attribute(containsFoxpath) return map{'constraintComp': 'ExprValueContainsFoxpath', 'atts': ('containsFoxpath', 'useDatatype')}
-        case attribute(eqFoxpath) return map{'constraintComp': 'ExprValueEqFoxpath', 'atts': ('eqFoxpath', 'useDatatype')}
-        case attribute(neFoxpath) return map{'constraintComp': 'ExprValueNeFoxpath', 'atts': ('neFoxpath', 'useDatatype')}
-        case attribute(ltFoxpath) return map{'constraintComp': 'ExprValueLtFoxpath', 'atts': ('ltFoxpath', 'useDatatype')}
-        case attribute(leFoxpath) return map{'constraintComp': 'ExprValueLeFoxpath', 'atts': ('leFoxpath', 'useDatatype')}
-        case attribute(gtFoxpath) return map{'constraintComp': 'ExprValueGtFoxpath', 'atts': ('gtFoxpath', 'useDatatype')}
-        case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype')}
-        case attribute(inFoxpath) return map{'constraintComp': 'ExprValueInFoxpath', 'atts': ('inFoxpath', 'useDatatype')}        
+        case attribute(eqFoxpath) return map{'constraintComp': 'ExprValueEqFoxpath', 'atts': ('eqFoxpath', 'useDatatype', 'quant')}
+        case attribute(neFoxpath) return map{'constraintComp': 'ExprValueNeFoxpath', 'atts': ('neFoxpath', 'useDatatype', 'quant')}
+        case attribute(ltFoxpath) return map{'constraintComp': 'ExprValueLtFoxpath', 'atts': ('ltFoxpath', 'useDatatype', 'quant')}
+        case attribute(leFoxpath) return map{'constraintComp': 'ExprValueLeFoxpath', 'atts': ('leFoxpath', 'useDatatype', 'quant')}
+        case attribute(gtFoxpath) return map{'constraintComp': 'ExprValueGtFoxpath', 'atts': ('gtFoxpath', 'useDatatype', 'quant')}
+        case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype', 'quant')}
+        case attribute(inFoxpath) return map{'constraintComp': 'ExprValueInFoxpath', 'atts': ('inFoxpath', 'useDatatype', 'quant')}        
         case attribute(itemsUnique) return map{'constraintComp': 'ExprValueItemsUnique', 'atts': ('itemsUnique')}
         default return error()
     let $valueShapeId := $valueShape/@valueShapeID
