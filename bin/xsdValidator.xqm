@@ -102,7 +102,7 @@ declare function f:constructResult_xsdValid($colour as xs:string,
     let $elemName := 'gx:' || $colour
     return
         element {$elemName}{
-            $msg,
+            $msg ! attribute msg {.},
             attribute filePath {$filePath},                
             attribute constraintComponent {"XsdValid"},
             $constraintElem/@id/attribute constraintID {.},
