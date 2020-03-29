@@ -22,53 +22,110 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateGreenfox($gfox as element(gx:greenfox)) 
+declare function f:validateGreenfox($schema as element(gx:greenfox)) 
         as element()* {
-    let $domain := $gfox/gx:domain/@path
-    let $_CHECK_DOMAIN := f:check_domainFolderExists($gfox)
-    
+    let $domain := $schema/gx:domain/@path
+    let $_CHECK_DOMAIN := f:check_domainFolderExists($schema)
+
+    let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
+
     let $errors := (
+        (: Collect XPath expressions :)
         let $xpathExpressions := (
-            for $xpath in $gfox//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            for $xpath in $schema//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
             return $xpath/(
                 @expr,
                 @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
-            for $foxpath in $gfox//gx:foxpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            for $foxpath in $schema//gx:foxpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
             return $foxpath/(
                 @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
-            $gfox//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
-            $gfox//gx:constraintComponent/(@validatorXPath, gx:validatorXPath)
+            $schema//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
+            $schema//gx:constraintComponent/(@validatorXPath, gx:validatorXPath)
         )
         
-        let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
         for $expr in $xpathExpressions
+        
+        (: Determine potential bindings :)        
         let $potentialBindings := 
             if ($expr/(self::gx:validatorXPath, self::attribute(validatorXPath))) then
-                let $paramNames := 
-                    $expr/parent::gx:constraintComponent/gx:param/@name
+                let $paramNames := $expr/parent::gx:constraintComponent/gx:param/@name
                 return
                     ($potentialBindings_base, $paramNames) => distinct-values()
             else $potentialBindings_base
         return
             try {
+                (: Add prolog :)
                 let $requiredBindings := i:determineRequiredBindingsXPath($expr, $potentialBindings)
                 let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
+                
+                (: Try parsing :)
                 let $plan := xquery:parse($augmentedExpr)
                 return ()
             } catch * {
                 let $exprDisp := normalize-space($expr)
                 return
-                    <gx:red code="INVALID_XPATH" msg="Invalid XQuery expression" expr="{$exprDisp}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
+                    <gx:red code="INVALID_XPATH" 
+                            msg="Invalid XQuery expression" 
+                            expr="{$exprDisp}" 
+                            file="{base-uri($expr/..)}" 
+                            loc="{$expr/f:greenfoxLocation(.)}">{
+                        $err:code ! attribute err:code {.},
+                        $err:description ! attribute err:description {.},
+                        $err:value ! attribute err:value {.},
+                        ()
+                    }</gx:red>
+            }         
+        ,
+        (: Collect Foxpath expressions :)
+        let $foxpathExpressions := (
+            for $foxpath in $schema//gx:foxpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            return $foxpath/(
+                @expr,
+                @*[matches(local-name(.), 'Foxpath$', 'i')]
+            ),             
+            for $xpath in $schema//gx:xpath[not(ancestor-or-self::*[@deactivated eq 'true'])]
+            return $xpath/(
+                @*[matches(local-name(.), 'Foxpath$', 'i')]
+            ),             
+            $schema//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@foxpath,
+            $schema//gx:constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)
+        )
+        
+        for $expr in $foxpathExpressions
+        
+        (: Determine potential bindings :)        
+        let $potentialBindings := 
+            if ($expr/(self::gx:validatorFoxpath, self::attribute(validatorFoxpath))) then
+                let $paramNames := $expr/parent::gx:constraintComponent/gx:param/@name
+                return
+                    ($potentialBindings_base, $paramNames) => distinct-values()
+            else $potentialBindings_base
+        return
+            try {
+                (: Add prolog :)
+                let $requiredBindings := i:determineRequiredBindingsFoxpath($expr, $potentialBindings)
+                let $augmentedExpr := i:finalizeQuery($expr, $requiredBindings)
+                
+                (: Try parsing :)
+                let $plan := f:parseFoxpath($augmentedExpr)
+                return ()
+            } catch * {
+                let $exprDisp := normalize-space($expr)
+                return
+                    <gx:red code="INVALID_FOXPATH" 
+                            msg="Invalid Foxpath expression" 
+                            expr="{$exprDisp}" 
+                            file="{base-uri($expr/..)}" 
+                            loc="{$expr/f:greenfoxLocation(.)}">{
                         $err:code ! attribute err:code {.},
                         $err:description ! attribute err:description {.},
                         $err:value ! attribute err:value {.},
                         ()
                     }</gx:red>
             }                
-               
-        ,
+(:        
         let $foxpathExpressions := $gfox/descendant-or-self::*[not(ancestor-or-self::*[@deactivated eq 'true'])]/@foxpath
         for $expr in $foxpathExpressions        
         let $plan := f:parseFoxpath($expr)
@@ -78,6 +135,7 @@ declare function f:validateGreenfox($gfox as element(gx:greenfox))
                 <gx:red code="INVALID_FOXPATH" msg="Invalid foxpath expression" expr="{$expr}" file="{base-uri($expr/..)}" loc="{$expr/f:greenfoxLocation(.)}">{
                     $plan
                 }</gx:red>
+:)                
     )
     return
         <gx:invalidGreenfox countErrors="{count($errors)}" xmlns:err="http://www.w3.org/2005/xqt-errors">{$errors}</gx:invalidGreenfox>[$errors]

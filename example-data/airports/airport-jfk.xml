@@ -2,5 +2,6 @@
 <airports>
     <airport>
         <code>JFK</code>
+        <altitude>13</altitude>
     </airport>
 </airports>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint component ExprValueEq, using a Foxpath expression.
+    An additional ExprValueCount constraint ensures that successful validation is not 
+    possible without evaluation of the ExprValueEq constraint.
+    
+    The schema checks that a folder contains a file matching a name pattern and containing 
+    at a given location a given number.
+    
+    The comparison between actual value and expected value is performed numerically, due
+    to parameter @useDatatype.
+    
+    Constraint components:
+    * Name:  ExprValueEq 
+    - XML:   foxpath/(@expr, @eq) 
+    - Check: Every item of the expression value must be equal to the value given by @eq.
+    
+    * Name:  ExprValueCount 
+    - XML:   foxpath/(@expr, @count) 
+    - Check: The number of value items must be equal to the number specified by @count.
+    
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxpath-value-eq/use-datatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>   
+            <!-- Check numerical value (with @useDatatype) -->
+            <foxpath expr="*-jfk.xml/airports/airport/altitude"
+                     useDatatype="xs:decimal"
+                     eq="13.0"
+                     eqMsg="Description of airport JFK contains unexpected altitude"
+                     count="1"
+                     countMsg="No file found for airport JFK"/>
+        </folder>
+    </domain>
+
+</greenfox>
+

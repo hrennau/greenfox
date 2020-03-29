@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FolderContent... 
+    Demonstrates use of constraint components FolderContent...
+    
+    This example checks resources contained by an archive file.
     
     Constraint components:
     * FolderContentClosed - @closed
@@ -16,7 +18,7 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderContent closed="true">
                 <memberFolder name="user-extensions"/>

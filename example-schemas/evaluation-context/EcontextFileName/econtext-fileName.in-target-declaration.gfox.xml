@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of context variable $fileName in a target declaration.
+    
+    In this example, $fileName is used in the target declaration in order to derive
+    the target file name from the current file name. So the validation of each
+    airport-*.xml file entails a validation of the corresponding airport*.json file.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/evaluation-context/filename.in-target-declaration"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>     
+            <!-- Target = airport XML files -->
+            <file foxpath="airport-*.xml" id="airportXmlFileShape">
+                <targetSize minCountMsg="Too few airport XML files" minCount="3"/>
+                <!-- Target = corresponding JSON sibling -->
+                <file foxpath="..\*[file-name(.) eq replace($fileName, '\.xml$', '.json')]"
+                      id="airportJsonFileShape">
+                    <targetSize countMsg="JSON variant missing for XML file" count="1"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

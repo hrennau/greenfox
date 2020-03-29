@@ -2,7 +2,8 @@
     "airports": [
     {
         "airport": {
-            "code": "JFK"
+            "code": "JFK",
+            "altitude": 13
         }
     }
     ]

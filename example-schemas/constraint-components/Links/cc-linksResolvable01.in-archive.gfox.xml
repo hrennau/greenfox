@@ -15,7 +15,7 @@
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports-archive\airports.zip\#archive#\*" id="airportsFolderShape">
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*[//@href]" id="airportsFileShape">
                 <links xpath="//@href" mediatype="xml"

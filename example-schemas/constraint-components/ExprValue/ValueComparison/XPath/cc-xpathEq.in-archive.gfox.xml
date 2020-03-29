@@ -2,7 +2,9 @@
 <!-- 
     Demonstrates the use of constraint component ExprValueEq, using an XPath expression.
     An additional ExprValueCount constraint ensures that successful validation is not 
-    possible not possible without evaluation of the ExprValueEq constraint.
+    possible without evaluation of the ExprValueEq constraint.
+    
+    This example checks resources contained by an archive file.
     
     Constraint components:
     * Name:  ExprValueEq 
@@ -14,11 +16,11 @@
     - Check: The number of value items must be equal to the number specified by @count.
     
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xpath-value-eq"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xpath-value-eq/archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\..\example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">

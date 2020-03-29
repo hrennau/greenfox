@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint component ExprValueEq, using a Foxpath expression.
+    An additional ExprValueMinCount constraint ensures that successful validation is
+    not possible without evaluation of the ExprValueEq constraint.
+    
+    The schema checks that in a given folder at least one files *-*.xml contains at a given
+    location a given string.
+    
+    This example uses a quantifier (@quant) with a value 'some'. Successful validation therefore 
+    only requires at least one value item to satisfy the condition.
+    
+    Constraint components:
+    * Name:  ExprValueEq 
+    - XML:   foxpath/(@expr, @eq) 
+    - Check: Every item of the expression value must be equal to the value given by @eq.
+    
+    * Name:  ExprValueMinCount 
+    - XML:   foxpath/(@expr, @minCount) 
+    - Check: The number of value items must be at least the number specified by @minCount.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxpath-value-eq.some-items"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/> 
+            <!-- At least one value item must satisfy the condition -->
+            <foxpath expr="*-*.xml//code"
+                     quant="some"
+                     eq="JFK"
+                     eqMsg="No description found for airport JFK"
+                     minCount="2"
+                     minCountMsg="Folder should contain at least 2 files *-*.xml"/>
+        </folder>
+    </domain>
+
+</greenfox>
+

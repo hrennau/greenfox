@@ -303,7 +303,12 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
         as xs:string* {
     let $extendedExpr := f:finalizeQuery($expr, $candidateBindings)
     let $tree := f:parseFoxpath($extendedExpr)
-    let $_CHECK := if ($tree/self::errors) then error() else ()
+    let $_CHECK := 
+        if (not($tree/self::errors/error[1])) then () else 
+            error(QName((), 'FOXPATH_ERROR'), $tree/error[1]/concat(
+                'An error occurred when trying to determine required bindings (Foxpath); ',
+                'errCode: ', @code, '; ',
+                'errDescription: ', @msg)) 
     return (
         $tree//var[not((parent::let, parent::for))]/@localName => distinct-values() => sort()
     )[. = $candidateBindings]
