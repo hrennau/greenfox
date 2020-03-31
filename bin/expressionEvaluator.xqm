@@ -20,26 +20,32 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Evaluates an XPath expression.
  :
+ : If $addVariableDeclarations is true, the expression is augmented by
+ : inserting a prolog with variable declarations.
+ :
+ : If $addContextItem is true, the context item is added to the evaluation
+ : context.
+ :
  : @param xpath an XPath expression
  : @param contextItem the context item
- : @param context the evaluation context
+ : @param evaluationContext the evaluation context
  : @param addVariableDeclarations if true, a prolog is added to the query which declares the external variables
  : @param addContextItem if true, the context item is added to the context with key ''
  : @return the expression value
  :)
 declare function f:evaluateXPath($xpath as xs:string, 
                                  $contextItem as item()?, 
-                                 $context as map(xs:QName, item()*),
+                                 $evaluationContext as map(xs:QName, item()*),
                                  $addVariableDeclarations as xs:boolean,
                                  $addContextItem as xs:boolean)
         as item()* {
-    let $xpathUsed :=
+    let $xpathEffective :=
         if (not($addVariableDeclarations)) then $xpath
-        else i:finalizeQuery($xpath, map:keys($context))
-    let $contextUsed :=
-        if (not($addContextItem)) then $context
-        else map:put($context, '', $contextItem)
-    return xquery:eval($xpathUsed, $contextUsed)
+        else i:finalizeQuery($xpath, map:keys($evaluationContext))
+    let $evaluationContextEffective :=
+        if (not($addContextItem)) then $evaluationContext
+        else map:put($evaluationContext, '', $contextItem)
+    return xquery:eval($xpathEffective, $evaluationContextEffective)
 };
 
 declare function f:evaluateSimpleXPath($xpath as xs:string, 
