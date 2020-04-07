@@ -1,0 +1,55 @@
+<airports country="Ireland" count="17">
+  <airport id="596" iata="ORK" icao="EICK" href="ireland/airport-ORK"/>
+  <airport id="597" iata="GWY" icao="EICM" href="ireland/airport-GWY"/>
+  <airport id="599" iata="DUB" icao="EIDW" href="ireland/airport-DUB"/>
+  <airport id="600" iata="NOC" icao="EIKN" href="ireland/airport-NOC"/>
+  <airport id="601" iata="KIR" icao="EIKY" href="ireland/airport-KIR"/>
+  <airport id="602" icao="EIME">
+    <name>Casement Air Base</name>
+    <city>Casement</city>
+    <country>Ireland</country>
+    <latitude>53.301700592</latitude>
+    <longitude>-6.451330184940001</longitude>
+    <altitude>319</altitude>
+    <timezone>0</timezone>
+    <dst>E</dst>
+    <tzTimezone>Europe/Dublin</tzTimezone>
+    <type>airport</type>
+    <source1>OurAirports</source1>
+  </airport>
+  <airport id="603" iata="SNN" icao="EINN" href="ireland/airport-SNN"/>
+  <airport id="604" iata="SXL" icao="EISG" href="ireland/airport-SXL"/>
+  <airport id="605" iata="WAT" icao="EIWF" href="ireland/airport-WAT"/>
+  <airport id="5577" iata="CFN" icao="EIDL" href="ireland/airport-CFN"/>
+  <airport id="5578" icao="EIWT">
+    <name>Weston Airport</name>
+    <city>Leixlip</city>
+    <country>Ireland</country>
+    <latitude>53.3521995544</latitude>
+    <longitude>-6.48611021042</longitude>
+    <altitude>150</altitude>
+    <timezone>0</timezone>
+    <dst>E</dst>
+    <tzTimezone>Europe/Dublin</tzTimezone>
+    <type>airport</type>
+    <source1>OurAirports</source1>
+  </airport>
+  <airport id="6421" iata="IOR" icao="EIIM" href="ireland/airport-IOR"/>
+  <airport id="6422" iata="NNR" icao="EICA" href="ireland/airport-NNR"/>
+  <airport id="7030" iata="INQ" icao="EIIR" href="ireland/airport-INQ"/>
+  <airport id="7468" iata="IIA" icao="EIMN" href="ireland/airport-IIA"/>
+  <airport id="8683" icao="EINC">
+    <name>Newcastle Aerodrome</name>
+    <city>Newcastle</city>
+    <country>Ireland</country>
+    <latitude>53.07109832763672</latitude>
+    <longitude>-6.0452799797058105</longitude>
+    <altitude>1</altitude>
+    <timezone>0</timezone>
+    <dst>E</dst>
+    <tzTimezone>Europe/Dublin</tzTimezone>
+    <type>airport</type>
+    <source1>OurAirports</source1>
+  </airport>
+  <airport id="8698" iata="BYT" icao="EIBN" href="ireland/airport-BYT"/>
+</airports>

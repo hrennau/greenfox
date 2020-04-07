@@ -1,0 +1,13 @@
+<airport id="417" iata="ENF" icao="EFET">
+  <name>Enontekio Airport</name>
+  <city>Enontekio</city>
+  <country>Finland</country>
+  <latitude>68.362602233887</latitude>
+  <longitude>23.424299240112</longitude>
+  <altitude>1005</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

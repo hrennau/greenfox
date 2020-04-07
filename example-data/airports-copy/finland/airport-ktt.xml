@@ -1,0 +1,13 @@
+<airport id="438" iata="KTT" icao="EFKT">
+  <name>Kittilä Airport</name>
+  <city>Kittila</city>
+  <country>Finland</country>
+  <latitude>67.700996398926</latitude>
+  <longitude>24.846799850464</longitude>
+  <altitude>644</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

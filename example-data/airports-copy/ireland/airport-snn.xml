@@ -1,0 +1,13 @@
+<airport id="603" iata="SNN" icao="EINN">
+  <name>Shannon Airport</name>
+  <city>Shannon</city>
+  <country>Ireland</country>
+  <latitude>52.702</latitude>
+  <longitude>-8.92482</longitude>
+  <altitude>46</altitude>
+  <timezone>0</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Dublin</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

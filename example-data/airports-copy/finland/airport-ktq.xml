@@ -1,0 +1,13 @@
+<airport id="427" iata="KTQ" icao="EFIT">
+  <name>Kitee Airport</name>
+  <city>Kitee</city>
+  <country>Finland</country>
+  <latitude>62.1661</latitude>
+  <longitude>30.073601</longitude>
+  <altitude>364</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

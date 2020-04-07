@@ -1,0 +1,13 @@
+<airport id="601" iata="KIR" icao="EIKY">
+  <name>Kerry Airport</name>
+  <city>Kerry</city>
+  <country>Ireland</country>
+  <latitude>52.18090057373047</latitude>
+  <longitude>-9.52377986907959</longitude>
+  <altitude>112</altitude>
+  <timezone>0</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Dublin</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

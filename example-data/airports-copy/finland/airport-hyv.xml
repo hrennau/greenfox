@@ -1,0 +1,13 @@
+<airport id="424" iata="HYV" icao="EFHV">
+  <name>Hyvinkää Airfield</name>
+  <city>Hyvinkaa</city>
+  <country>Finland</country>
+  <latitude>60.6543998718</latitude>
+  <longitude>24.8810997009</longitude>
+  <altitude>430</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

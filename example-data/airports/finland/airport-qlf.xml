@@ -1,0 +1,13 @@
+<airport id="440" iata="QLF" icao="EFLA">
+  <name>Lahti Vesivehmaa Airport</name>
+  <city>Vesivehmaa</city>
+  <country>Finland</country>
+  <latitude>61.144199</latitude>
+  <longitude>25.693501</longitude>
+  <altitude>502</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

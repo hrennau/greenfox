@@ -1,15 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <airports>
-    <airport href="airport-jfk.xml">
-        <code>JFK</code>
-    </airport>
-    <airport href="airport-cgn.xml"/>
-    <airport href="airport-man.xml"/>
-    <airport>
-        <code>MUN</code>
-    </airport>
-    <airport href="user-extensions/user-extension-dus/airport-dus.xml"/>
-    <airport href="airport-fra.xml">
-        <code>FRA</code>
-    </airport>
+  <airportsForCountry country="Denmark" href="airports-denmark.xml"/>
+  <airportsForCountry country="Finland" href="airports-finland.xml"/>
+  <airportsForCountry country="Ireland" href="airports-ireland.xml"/>
+  <airportsForCountry country="Luxembourg" href="airports-luxembourg.xml"/>
 </airports>

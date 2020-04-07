@@ -1,0 +1,13 @@
+<airport id="429" iata="JOE" icao="EFJO">
+  <name>Joensuu Airport</name>
+  <city>Joensuu</city>
+  <country>Finland</country>
+  <latitude>62.662899017334</latitude>
+  <longitude>29.607500076294</longitude>
+  <altitude>398</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

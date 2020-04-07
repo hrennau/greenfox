@@ -1,0 +1,13 @@
+<airport id="453" iata="RVN" icao="EFRO">
+  <name>Rovaniemi Airport</name>
+  <city>Rovaniemi</city>
+  <country>Finland</country>
+  <latitude>66.564796447754</latitude>
+  <longitude>25.830400466919</longitude>
+  <altitude>642</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

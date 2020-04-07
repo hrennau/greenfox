@@ -1,0 +1,13 @@
+<airport id="430" iata="JYV" icao="EFJY">
+  <name>Jyvaskyla Airport</name>
+  <city>Jyvaskyla</city>
+  <country>Finland</country>
+  <latitude>62.399501800537</latitude>
+  <longitude>25.678300857544</longitude>
+  <altitude>459</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

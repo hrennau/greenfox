@@ -1,0 +1,13 @@
+<airport id="5579" iata="CNL" icao="EKSN">
+  <name>Sindal Airport</name>
+  <city>Sindal</city>
+  <country>Denmark</country>
+  <latitude>57.503502</latitude>
+  <longitude>10.2294</longitude>
+  <altitude>92</altitude>
+  <timezone>1</timezone>
+  <dst>N</dst>
+  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

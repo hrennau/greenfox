@@ -1,0 +1,13 @@
+<airport id="461" iata="UTI" icao="EFUT">
+  <name>Utti Air Base</name>
+  <city>Utti</city>
+  <country>Finland</country>
+  <latitude>60.89640045166</latitude>
+  <longitude>26.938400268555</longitude>
+  <altitude>339</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

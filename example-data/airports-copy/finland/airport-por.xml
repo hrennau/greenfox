@@ -1,0 +1,13 @@
+<airport id="448" iata="POR" icao="EFPO">
+  <name>Pori Airport</name>
+  <city>Pori</city>
+  <country>Finland</country>
+  <latitude>61.461700439453</latitude>
+  <longitude>21.799999237061</longitude>
+  <altitude>44</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

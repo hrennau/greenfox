@@ -4,7 +4,7 @@
     An additional ExprValueCount constraint ensures that successful validation is not 
     possible without evaluation of the ExprValueEq constraint.
     
-    The schema checks that a folder contains a file matching a name pattern and containing 
+    The schema checks that a folder contains a file with a given name and containing 
     at a given location a given string.
     
     This example checks resources contained by an archive file.
@@ -27,14 +27,13 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <!-- Folder contained by an archive -->
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <foxpath expr="*-jfk.xml/airports/airport/code"
-                     eq="JFK"
-                     eqMsg="Description of airport JFK contains unexpected airport code"
+            <foxpath expr="denmark\airport-cph.xml/airport/city"
+                     eq="Copenhagen"
+                     eqMsg="Description of airport CPH contains unexpected city"
                      count="1"
-                     countMsg="No file found for airport JFK"/>
+                     countMsg="File or element not found"/>
         </folder>
     </domain>
 

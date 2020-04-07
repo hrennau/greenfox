@@ -1,0 +1,13 @@
+<airport id="5560" iata="SJY" icao="EFSI">
+  <name>Seinäjoki Airport</name>
+  <city>Seinäjoki / Ilmajoki</city>
+  <country>Finland</country>
+  <latitude>62.692101</latitude>
+  <longitude>22.8323</longitude>
+  <altitude>302</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

@@ -1,0 +1,13 @@
+<airport id="600" iata="NOC" icao="EIKN">
+  <name>Ireland West Knock Airport</name>
+  <city>Connaught</city>
+  <country>Ireland</country>
+  <latitude>53.910301208496094</latitude>
+  <longitude>-8.818490028381348</longitude>
+  <altitude>665</altitude>
+  <timezone>0</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Dublin</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

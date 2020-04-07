@@ -1,0 +1,13 @@
+<airport id="610" iata="EBJ" icao="EKEB">
+  <name>Esbjerg Airport</name>
+  <city>Esbjerg</city>
+  <country>Denmark</country>
+  <latitude>55.525902</latitude>
+  <longitude>8.5534</longitude>
+  <altitude>97</altitude>
+  <timezone>1</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

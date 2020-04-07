@@ -1,0 +1,13 @@
+<airport id="463" iata="VRK" icao="EFVR">
+  <name>Varkaus Airport</name>
+  <city>Varkaus</city>
+  <country>Finland</country>
+  <latitude>62.171100616455</latitude>
+  <longitude>27.868600845337</longitude>
+  <altitude>286</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

@@ -1,0 +1,13 @@
+<airport id="439" iata="KUO" icao="EFKU">
+  <name>Kuopio Airport</name>
+  <city>Kuopio</city>
+  <country>Finland</country>
+  <latitude>63.007099151611</latitude>
+  <longitude>27.797800064087</longitude>
+  <altitude>323</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

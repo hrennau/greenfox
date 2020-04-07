@@ -1,0 +1,13 @@
+<airport id="612" iata="KRP" icao="EKKA">
+  <name>Karup Airport</name>
+  <city>Karup</city>
+  <country>Denmark</country>
+  <latitude>56.29750061035156</latitude>
+  <longitude>9.124629974365234</longitude>
+  <altitude>170</altitude>
+  <timezone>1</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

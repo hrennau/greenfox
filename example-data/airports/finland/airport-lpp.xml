@@ -1,0 +1,13 @@
+<airport id="441" iata="LPP" icao="EFLP">
+  <name>Lappeenranta Airport</name>
+  <city>Lappeenranta</city>
+  <country>Finland</country>
+  <latitude>61.044601</latitude>
+  <longitude>28.144743</longitude>
+  <altitude>349</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

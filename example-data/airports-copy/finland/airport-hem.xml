@@ -1,0 +1,13 @@
+<airport id="420" iata="HEM" icao="EFHF">
+  <name>Helsinki Malmi Airport</name>
+  <city>Helsinki</city>
+  <country>Finland</country>
+  <latitude>60.254600524902344</latitude>
+  <longitude>25.042800903320312</longitude>
+  <altitude>57</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

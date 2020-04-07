@@ -1,0 +1,13 @@
+<airport id="614" iata="MRW" icao="EKMB">
+  <name>Lolland Falster Maribo Airport</name>
+  <city>Maribo</city>
+  <country>Denmark</country>
+  <latitude>54.699299</latitude>
+  <longitude>11.4401</longitude>
+  <altitude>16</altitude>
+  <timezone>1</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

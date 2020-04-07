@@ -1,0 +1,13 @@
+<airport id="455" iata="SVL" icao="EFSA">
+  <name>Savonlinna Airport</name>
+  <city>Savonlinna</city>
+  <country>Finland</country>
+  <latitude>61.943099975586</latitude>
+  <longitude>28.945100784302</longitude>
+  <altitude>311</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

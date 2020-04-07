@@ -1,0 +1,13 @@
+<airport id="597" iata="GWY" icao="EICM">
+  <name>Galway Airport</name>
+  <city>Galway</city>
+  <country>Ireland</country>
+  <latitude>53.300201416015625</latitude>
+  <longitude>-8.941590309143066</longitude>
+  <altitude>81</altitude>
+  <timezone>0</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Dublin</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

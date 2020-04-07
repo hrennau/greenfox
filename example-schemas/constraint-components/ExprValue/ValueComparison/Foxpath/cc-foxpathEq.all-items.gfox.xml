@@ -4,7 +4,8 @@
     An additional ExprValueMinCount constraint ensures that successful validation is
     not possible without evaluation of the ExprValueEq constraint.
     
-    The schema checks that in a given folder all files *-*.xml have an 'airports' root element.
+    The schema checks that all files matching a pattern of folder and file names contain
+    at a given location a given string.
     
     This example uses an expression yielding several value items, and no quantifier (@quant)
     is specified. As the default quantifier is 'all', successful validation requires that all
@@ -31,11 +32,11 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>     
             <!-- All value items must satisfy the condition -->            
-            <foxpath expr="*-*.xml/*/local-name(.)"
-                     eq="airports"
-                     eqMsg="File *-*.xml has not expected root element name"
-                     minCount="2"
-                     minCountMsg="Folder should contain at least 2 files *-*.xml"/>
+            <foxpath expr="*\airport-*.xml//type"
+                     eq="airport"
+                     eqMsg="Airport description has not the expected type 'airport'"
+                     minCount="60"
+                     minCountMsg="Repository should contain at least 60 airport descriptions"/>
         </folder>
     </domain>
 

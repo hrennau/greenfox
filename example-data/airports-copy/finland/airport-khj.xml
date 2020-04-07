@@ -1,0 +1,13 @@
+<airport id="434" iata="KHJ" icao="EFKJ">
+  <name>Kauhajoki Airport</name>
+  <city>Kauhajoki</city>
+  <country>Finland</country>
+  <latitude>62.4625015259</latitude>
+  <longitude>22.3931007385</longitude>
+  <altitude>407</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

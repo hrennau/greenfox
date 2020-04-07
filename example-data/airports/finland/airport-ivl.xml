@@ -1,0 +1,13 @@
+<airport id="428" iata="IVL" icao="EFIV">
+  <name>Ivalo Airport</name>
+  <city>Ivalo</city>
+  <country>Finland</country>
+  <latitude>68.607299804688</latitude>
+  <longitude>27.405300140381</longitude>
+  <altitude>481</altitude>
+  <timezone>2</timezone>
+  <dst>E</dst>
+  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>
