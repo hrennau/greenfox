@@ -11,6 +11,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_foxpath.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+    "docSimilarConstraintReports.xqm",
     "greenfoxUtil.xqm",
     "resourceAccess.xqm";
     
@@ -116,6 +117,8 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
        this will be changed when the need arises
      :)
     
+    let $redReport := $constraintElem/@redReport
+    
     let $otherDocs :=
         for $rep in $otherDocReps 
         return
@@ -123,11 +126,12 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
             case node() return $rep
             case xs:anyAtomicType return 
                 if (i:fox-doc-available($rep)) then i:fox-doc($rep) 
-                else error()  (: _TO_DO_ - create red result :)
+                else error(QName((), 'UNEXPECTED_ERROR'), concat('Document cannot be parsed: ', $rep))  
+                (: _TO_DO_ - create red result :)
             default return ()
 
     (: Check document similarity :)
-    let $results_comparison_data :=
+    let $comparisonReports :=
         for $otherDoc at $pos in $otherDocs
         let $otherDocRep := $otherDocReps[$pos]
         let $otherDocIdentity := (
@@ -142,19 +146,44 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         let $d2 := f:normalizeDocForComparison($otherDoc, $constraintElem/*, $normOptions, $contextItem)
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
+        let $report := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
+(:        
+            if (not($redReport)) then ()
+            else if (not($colour eq 'red')) then ()
+            else
+                let $localPaths1 := $d1//*/(., @*)/f:localPath(.) => distinct-values()
+                let $localPaths2 := $d2//*/(., @*)/f:localPath(.) => distinct-values()
+                let $localPathsOnly1 := $localPaths1[not(. = $localPaths2)]
+                let $localPathsOnly2 := $localPaths2[not(. = $localPaths1)]
+                return
+                    <gx:localPaths>{
+                        if (empty($localPathsOnly1)) then () else
+                        <gx:only1 count="{count($localPathsOnly1)}">{
+                            ($localPathsOnly1 => sort()) ! <gx:path>{.}</gx:path>
+                        }</gx:only1>,
+                        if (empty($localPathsOnly2)) then () else
+                        <gx:only2 count="{count($localPathsOnly2)}">{
+                            ($localPathsOnly2 => sort()) ! <gx:path>{.}</gx:path>
+                        }</gx:only2>
+                    }</gx:localPaths>
+:)                    
         return
-            map{'colour': $colour, 
-                'otherDocIdentity': $otherDocIdentity}
-            (: f:validationResult_docSimilar($colour, $constraintElem, $constraintElem/@otherFoxpath, $otherDocIdentity, (), ()) :)
+            map:merge((
+                map:entry('colour', $colour),
+                map:entry('otherDocIdentity', $otherDocIdentity),
+                if (not($report)) then () else map:entry('report', $report)
+            ))
+
     return
-        let $colour := if (some $r in $results_comparison_data satisfies $r?colour eq 'red') then 'red' else 'green'
+        let $colour := if (some $r in $comparisonReports satisfies $r?colour eq 'red') then 'red' else 'green'
         let $otherDocIdentities := 
-            if ($colour eq 'red') then $results_comparison_data[?colour eq 'red'] ! ?otherDocIdentity
-            else $results_comparison_data?otherDocIdentity
+            if ($colour eq 'red') then $comparisonReports[?colour eq 'red'] ! ?otherDocIdentity
+            else $comparisonReports?otherDocIdentity
         return
             f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
                                           $constraintElem/@otherFoxpath, 
+                                          $comparisonReports,
                                           $otherDocIdentities, (), (), $contextInfo)    
 };
 
@@ -217,6 +246,7 @@ declare function f:validateDocSimilarCount($exprValue as item()*,
 declare function f:validationResult_docSimilar($colour as xs:string,
                                                $constraintElem as element(gx:docSimilar),
                                                $constraint as attribute(),
+                                               $comparisonReports as map(xs:string, item()*)*,
                                                $otherDocIdentities as xs:string*,
                                                $additionalAtts as attribute()*,
                                                $additionalElems as element()*,
@@ -234,6 +264,8 @@ declare function f:validationResult_docSimilar($colour as xs:string,
         if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
         else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
         
+    let $reports := $comparisonReports[?report] ! 
+            <gx:report otherDocIdentity="{?otherDocIdentity}">{?report}</gx:report>
     return
         element {$elemName}{
             $msg ! attribute msg {$msg},
@@ -246,7 +278,9 @@ declare function f:validationResult_docSimilar($colour as xs:string,
             $constraintElem/*,
             if (not($colour eq 'red')) then () else
                 $otherDocIdentities ! <gx:value>{.}</gx:value>,
-            $additionalElems
+            $additionalElems,
+            if (empty($reports)) then () else
+                <gx:reports>{$reports}</gx:reports>
         }        
 };
 
@@ -370,7 +404,7 @@ declare function f:normalizeDocForComparison($node as node(),
         ,
         (: @xml:base attributes are removed :)
         if ($keepXmlBase) then () else
-            let $xmlBaseAtts := trace($node_//@xml:base, '_BASE_ADDED: ')
+            let $xmlBaseAtts := $node_//@xml:base
             return
                 if (empty($xmlBaseAtts)) then ()
                 else
@@ -415,7 +449,3 @@ declare function f:normalizeDocForComparison($node as node(),
     )
     return $node_
 };
-
-
-
-
