@@ -1,8 +1,8 @@
 <airports country="Denmark" count="31">
-  <airport id="607" iata="AAR" icao="EKAH" href="denmark/airport-AAR"/>
-  <airport id="608" iata="BLL" icao="EKBI" href="denmark/airport-BLL"/>
-  <airport id="609" iata="CPH" icao="EKCH" href="denmark/airport-CPH"/>
-  <airport id="610" iata="EBJ" icao="EKEB" href="denmark/airport-EBJ"/>
+  <airport id="607" iata="AAR" icao="EKAH" href="denmark/airport-AAR.xml"/>
+  <airport id="608" iata="BLL" icao="EKBI" href="denmark/airport-BLL.xml"/>
+  <airport id="609" iata="CPH" icao="EKCH" href="denmark/airport-CPH.xml"/>
+  <airport id="610" iata="EBJ" icao="EKEB" href="denmark/airport-EBJ.xml"/>
   <airport id="611" icao="EKGH">
     <name>Grønholt Hillerød Airport</name>
     <city>Gronholt</city>
@@ -16,10 +16,10 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="612" iata="KRP" icao="EKKA" href="denmark/airport-KRP"/>
-  <airport id="613" iata="BYR" icao="EKLS" href="denmark/airport-BYR"/>
-  <airport id="614" iata="MRW" icao="EKMB" href="denmark/airport-MRW"/>
-  <airport id="615" iata="ODE" icao="EKOD" href="denmark/airport-ODE"/>
+  <airport id="612" iata="KRP" icao="EKKA" href="denmark/airport-KRP.xml"/>
+  <airport id="613" iata="BYR" icao="EKLS" href="denmark/airport-BYR.xml"/>
+  <airport id="614" iata="MRW" icao="EKMB" href="denmark/airport-MRW.xml"/>
+  <airport id="615" iata="ODE" icao="EKOD" href="denmark/airport-ODE.xml"/>
   <airport id="616" icao="EKPB">
     <name>Kruså-Padborg Airport</name>
     <city>Krusa-padborg</city>
@@ -33,12 +33,12 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="617" iata="RKE" icao="EKRK" href="denmark/airport-RKE"/>
-  <airport id="618" iata="RNN" icao="EKRN" href="denmark/airport-RNN"/>
-  <airport id="619" iata="SGD" icao="EKSB" href="denmark/airport-SGD"/>
-  <airport id="621" iata="SKS" icao="EKSP" href="denmark/airport-SKS"/>
-  <airport id="622" iata="SQW" icao="EKSV" href="denmark/airport-SQW"/>
-  <airport id="623" iata="TED" icao="EKTS" href="denmark/airport-TED"/>
+  <airport id="617" iata="RKE" icao="EKRK" href="denmark/airport-RKE.xml"/>
+  <airport id="618" iata="RNN" icao="EKRN" href="denmark/airport-RNN.xml"/>
+  <airport id="619" iata="SGD" icao="EKSB" href="denmark/airport-SGD.xml"/>
+  <airport id="621" iata="SKS" icao="EKSP" href="denmark/airport-SKS.xml"/>
+  <airport id="622" iata="SQW" icao="EKSV" href="denmark/airport-SQW.xml"/>
+  <airport id="623" iata="TED" icao="EKTS" href="denmark/airport-TED.xml"/>
   <airport id="624" icao="EKVD">
     <name>Kolding Vamdrup Airfield</name>
     <city>Kolding</city>
@@ -65,8 +65,8 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="627" iata="STA" icao="EKVJ" href="denmark/airport-STA"/>
-  <airport id="628" iata="AAL" icao="EKYT" href="denmark/airport-AAL"/>
+  <airport id="627" iata="STA" icao="EKVJ" href="denmark/airport-STA.xml"/>
+  <airport id="628" iata="AAL" icao="EKYT" href="denmark/airport-AAL.xml"/>
   <airport id="4080" icao="EKSS">
     <name>Samsø Airport</name>
     <city>Samsoe</city>
@@ -80,7 +80,7 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="5579" iata="CNL" icao="EKSN" href="denmark/airport-CNL"/>
+  <airport id="5579" iata="CNL" icao="EKSN" href="denmark/airport-CNL.xml"/>
   <airport id="6855" icao="EKKL">
     <name>Kalundborg Airport</name>
     <city>Kalundborg</city>

@@ -4,8 +4,8 @@
     An additional ExprValueCount constraint ensures that successful validation is not 
     possible without evaluation of the ExprValueEq constraint.
     
-    The schema checks that a folder contains a file with a given name and containing 
-    at a given location a given string.
+    The schema checks that a document identified by its file path contains at a given 
+    location a given string.
     
     Constraint components:
     * Name:  ExprValueEq 

@@ -1,9 +1,9 @@
 <airports country="Ireland" count="17">
-  <airport id="596" iata="ORK" icao="EICK" href="ireland/airport-ORK"/>
-  <airport id="597" iata="GWY" icao="EICM" href="ireland/airport-GWY"/>
-  <airport id="599" iata="DUB" icao="EIDW" href="ireland/airport-DUB"/>
-  <airport id="600" iata="NOC" icao="EIKN" href="ireland/airport-NOC"/>
-  <airport id="601" iata="KIR" icao="EIKY" href="ireland/airport-KIR"/>
+  <airport id="596" iata="ORK" icao="EICK" href="ireland/airport-ORK.xml"/>
+  <airport id="597" iata="GWY" icao="EICM" href="ireland/airport-GWY.xml"/>
+  <airport id="599" iata="DUB" icao="EIDW" href="ireland/airport-DUB.xml"/>
+  <airport id="600" iata="NOC" icao="EIKN" href="ireland/airport-NOC.xml"/>
+  <airport id="601" iata="KIR" icao="EIKY" href="ireland/airport-KIR.xml"/>
   <airport id="602" icao="EIME">
     <name>Casement Air Base</name>
     <city>Casement</city>
@@ -17,10 +17,10 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="603" iata="SNN" icao="EINN" href="ireland/airport-SNN"/>
-  <airport id="604" iata="SXL" icao="EISG" href="ireland/airport-SXL"/>
-  <airport id="605" iata="WAT" icao="EIWF" href="ireland/airport-WAT"/>
-  <airport id="5577" iata="CFN" icao="EIDL" href="ireland/airport-CFN"/>
+  <airport id="603" iata="SNN" icao="EINN" href="ireland/airport-SNN.xml"/>
+  <airport id="604" iata="SXL" icao="EISG" href="ireland/airport-SXL.xml"/>
+  <airport id="605" iata="WAT" icao="EIWF" href="ireland/airport-WAT.xml"/>
+  <airport id="5577" iata="CFN" icao="EIDL" href="ireland/airport-CFN.xml"/>
   <airport id="5578" icao="EIWT">
     <name>Weston Airport</name>
     <city>Leixlip</city>
@@ -34,10 +34,10 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="6421" iata="IOR" icao="EIIM" href="ireland/airport-IOR"/>
-  <airport id="6422" iata="NNR" icao="EICA" href="ireland/airport-NNR"/>
-  <airport id="7030" iata="INQ" icao="EIIR" href="ireland/airport-INQ"/>
-  <airport id="7468" iata="IIA" icao="EIMN" href="ireland/airport-IIA"/>
+  <airport id="6421" iata="IOR" icao="EIIM" href="ireland/airport-IOR.xml"/>
+  <airport id="6422" iata="NNR" icao="EICA" href="ireland/airport-NNR.xml"/>
+  <airport id="7030" iata="INQ" icao="EIIR" href="ireland/airport-INQ.xml"/>
+  <airport id="7468" iata="IIA" icao="EIMN" href="ireland/airport-IIA.xml"/>
   <airport id="8683" icao="EINC">
     <name>Newcastle Aerodrome</name>
     <city>Newcastle</city>
@@ -51,5 +51,5 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="8698" iata="BYT" icao="EIBN" href="ireland/airport-BYT"/>
+  <airport id="8698" iata="BYT" icao="EIBN" href="ireland/airport-BYT.xml"/>
 </airports>

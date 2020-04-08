@@ -4,7 +4,8 @@
     An additional ExprValueCount constraint ensures that successful validation is not 
     possible without evaluation of the ExprValueEq constraint.
     
-    The schema checks that a file contains at a given location a given string.   
+    The schema checks that a document identified by its file path contains at a given 
+    location a given string.
     
     Constraint components:
     * Name:  ExprValueEq 
@@ -26,13 +27,13 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airport-jfk.xml" id="airportFileShape">
-                <targetSize countMsg="Missing file: airport-jfk.xml" count="1"/>
-                <xpath expr="/airports/airport/code"
-                       eq="JFK"
-                       eqMsg="Description of airport JFK contains unexpected airport code"
+            <file foxpath="ireland\airport-gwy.xml" id="airportFileShape">
+                <targetSize countMsg="Missing file: airport-gwy.xml" count="1"/>
+                <xpath expr="/airport/@icao"
+                       eq="EICM"
+                       eqMsg="Description of airport GWY contains unexpected ICAO code"
                        count="1"
-                       countMsg="Missing code for airport JFK"/>
+                       countMsg="Missing code for airport GWY"/>
             </file>
         </folder>
     </domain>
