@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":435,
+    "iata":"KOK",
+    "icao":"EFKK",
+    "name":"Kokkola-Pietarsaari Airport",
+    "city":"Kruunupyy",
+    "country":"Finland",
+    "latitude":63.721199035645,
+    "longitude":23.143100738525,
+    "altitude":84,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

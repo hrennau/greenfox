@@ -12,9 +12,9 @@
     - Check: The file name must not match the given glob pattern
     
     In this example, validation catches 
-    * .json files with a name matching glob pattern 'airport*.json'
-    * .json files with a name not matching glob '*test*'
-    * .json files with a name not matching regex '\s+-\s+Kopie'    
+    * .json files with a name not matching glob pattern 'airport*.json'
+    * .json files with a name matching glob '*test*'
+    * .json files with a name matching regex '\s+-\s+Kopie'    
     
     Note optional further parameters (@flags not used in the example):
     : @case - if 'true', the name is compared case-sensitively; default: 'false'
@@ -39,10 +39,11 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*.json" id="jsonFileShape">
+                <targetSize minCountMsg="Missing json files in and under 'airports' folder" minCount="70"/>
                 <fileName like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
                           notLike="*test*" notLikeMsg="JSON files should not match pattern '*test*'"/>
-                <fileName case="true"
-                          notMatches="\s+-\s+Kopie" notLikeMsg="JSON files should not match regex '\s+-\s+Kopie'"/>
+                <fileName notMatches="\s+-\s+Kopie" notMatchesMsg="JSON files should not match regex '\s+-\s+Kopie'" 
+                          case="true"/>
             </file>
         </folder>
     </domain>

@@ -4,8 +4,8 @@
     An additional ExprValueCount constraint ensures that successful validation is not
     possible without evaluation of the ExprValueEq constraint.
     
-    The schema checks that at least one file matching a pattern of folder and file names contains
-    at a given location a given string.
+    The schema checks that the rounded maximum of the decimal values found in a set of 
+    files and at a given location is equal to a given value.
     
     This example uses a @useDatatype parameter: before comparing the expression value
     items with the value specified by @eq, both operands of the comparison are cast
@@ -31,8 +31,8 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>     
             <!-- All value items must satisfy the condition -->            
-            <foxpath expr="(denmark\airport-*.xml//latitude => max(., 3)) ! round(., 2)"
-                     eq="57.50"
+            <foxpath expr="(denmark\airport-*.xml//latitude/xs:decimal(.) => max(., 3)) ! round(., 3)"
+                     eq="57.504"
                      useDatatype="xs:decimal"
                      eqMsg="Airport description has not the expected type 'airport'"
                      count="1"

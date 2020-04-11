@@ -4,9 +4,10 @@
     An additional ExprValueMinCount constraint ensures that successful validation is
     not possible without evaluation of the ExprValueEq constraint.
     
-    This example uses an expression yielding several value items, and a quantifier (@quant) is 
-    specified with a value 'some'. Successful validation therefore requires that at least one 
-    value item satisfies the condition.
+    The schema checks that at a given datapath at least one item contains a given string.
+    
+    This example uses a quantifier (@quant) with a value 'some'. Successful validation therefore 
+    only requires at least one value item to satisfy the condition.
     
     Constraint components:
     * Name:  ExprValueEq 
@@ -27,14 +28,14 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize countMsg="Missing file: airports.xml" count="1"/>
-                <xpath expr="//@href ! substring-before(., '-')"
+            <file foxpath="airports-denmark.xml" id="airportsFileShape">
+                <targetSize countMsg="Missing file: airports-denmark.xml" count="1"/>
+                <xpath expr="//airport/timezone"
+                       eq="2"
                        quant="some"
-                       eq="user"
-                       eqMsg="Not expected airport reference"
-                       minCount="2"
-                       minCountMsg="Should contain at least @href attributes"/>
+                       eqMsg="There should also be an airport with timezone 2"
+                       minCount="14"
+                       minCountMsg="Should contain at least 14 airport descriptions"/>
             </file>
         </folder>
     </domain>

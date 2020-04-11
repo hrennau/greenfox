@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":618,
+    "iata":"RNN",
+    "icao":"EKRN",
+    "name":"Bornholm Airport",
+    "city":"Ronne",
+    "country":"Denmark",
+    "latitude":55.06330108642578,
+    "longitude":14.759599685668945,
+    "altitude":52,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

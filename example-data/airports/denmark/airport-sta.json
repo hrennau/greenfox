@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":627,
+    "iata":"STA",
+    "icao":"EKVJ",
+    "name":"Stauning Airport",
+    "city":"Stauning",
+    "country":"Denmark",
+    "latitude":55.9901008605957,
+    "longitude":8.353910446166992,
+    "altitude":17,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

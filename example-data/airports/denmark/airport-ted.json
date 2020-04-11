@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":623,
+    "iata":"TED",
+    "icao":"EKTS",
+    "name":"Thisted Airport",
+    "city":"Thisted",
+    "country":"Denmark",
+    "latitude":57.06880187988281,
+    "longitude":8.705220222473145,
+    "altitude":23,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

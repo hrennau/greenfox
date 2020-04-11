@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":605,
+    "iata":"WAT",
+    "icao":"EIWF",
+    "name":"Waterford Airport",
+    "city":"Waterford",
+    "country":"Ireland",
+    "latitude":52.187198638916016,
+    "longitude":-7.0869598388671875,
+    "altitude":119,
+    "timezone":0,
+    "dst":"E",
+    "tzTimezone":"Europe\/Dublin",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

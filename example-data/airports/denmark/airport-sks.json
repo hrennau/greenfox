@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":621,
+    "iata":"SKS",
+    "icao":"EKSP",
+    "name":"Skrydstrup Air Base",
+    "city":"Skrydstrup",
+    "country":"Denmark",
+    "latitude":55.221048,
+    "longitude":9.26702,
+    "altitude":141,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

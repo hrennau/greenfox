@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components FileNameXY. This example checks
-    resources contained by an archive file.
+    Demonstrates the use of constraint components FileNameXY.
     
-    Constraint components:
+    This example checks resources contained by an archive file.
+    
+    Constraint components:    
     * Name:  FileNameLike 
     - XML:   FileName/@like
     - Check: The file name must match the given glob pattern
@@ -13,9 +14,9 @@
     - Check: The file name must not match the given glob pattern
     
     In this example, validation catches 
-    * .json files with a name matching glob pattern 'airport*.json'
-    * .json files with a name not matching glob '*test*'
-    * .json files with a name not matching regex '\s+-\s+Kopie'    
+    * .json files with a name not matching glob pattern 'airport*.json'
+    * .json files with a name matching glob '*test*'
+    * .json files with a name matching regex '\s+-\s+Kopie'    
     
     Note optional further parameters (@flags not used in the example):
     : @case - if 'true', the name is compared case-sensitively; default: 'false'
@@ -29,7 +30,7 @@
     * FíleNameMatches - fileName/@matches
     * FileNameNotMatches - fileName/@notMatches   
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.name/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.name"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -37,14 +38,14 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <!-- Target folder within archive -->        
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*.json" id="jsonFileShape">
+                <targetSize minCountMsg="Missing json files in and under 'airports' folder" minCount="70"/>
                 <fileName like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
                           notLike="*test*" notLikeMsg="JSON files should not match pattern '*test*'"/>
-                <fileName case="true"
-                          notMatches="\s-\sKopie" notLikeMsg="JSON files should not match regex ' - Kopie'"/>
+                <fileName notMatches="\s+-\s+Kopie" notMatchesMsg="JSON files should not match regex '\s+-\s+Kopie'" 
+                          case="true"/>
             </file>
         </folder>
     </domain>

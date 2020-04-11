@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":457,
+    "iata":"SOT",
+    "icao":"EFSO",
+    "name":"Sodankyla Airport",
+    "city":"Sodankyla",
+    "country":"Finland",
+    "latitude":67.3949966431,
+    "longitude":26.6191005707,
+    "altitude":602,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}
