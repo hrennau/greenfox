@@ -64,7 +64,7 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             else attribute flags {$flags}
         )
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
+            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -105,7 +105,7 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
         let $colour := if ($violation) then 'red' else 'green'
         let $additionalAtts := ()
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
+            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -154,7 +154,7 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
             else attribute flags {$flags}
         )
         return   
-            f:constructError_fileProperties($colour, $constraint, $facet, $actValue, $additionalAtts)
+            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -169,7 +169,8 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
  : @param additionalAtts additional attributes to be included in the result
  : @return an element representing a 'red' or 'green' validation result
  :)
-declare function f:constructError_fileProperties($colour as xs:string,
+declare function f:constructError_fileProperties($filePath as xs:string,
+                                                 $colour as xs:string,
                                                  $constraintElem as element(),
                                                  $constraint as attribute(),
                                                  $actualValue as item(),
@@ -217,7 +218,8 @@ declare function f:constructError_fileProperties($colour as xs:string,
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
+            attribute resourceShapeID {$resourceShapeId},   
+            $filePath ! attribute filePath {.},
             $constraint,
             $additionalAtts,
             $values
