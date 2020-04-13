@@ -20,7 +20,6 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "compile.xqm",
     "log.xqm",
     "greenfoxEditUtil.xqm",
-    "greenFoxValidator.xqm",
     "greenfoxUtil.xqm",
     "systemValidator.xqm";
     

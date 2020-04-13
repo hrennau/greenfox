@@ -61,7 +61,7 @@
             <targetSize countMsg="Missing folder: DocSimilar" count="1"/>            
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
-                <docSimilar otherFoxpath="..\executionSummary2.xml" count="1">
+                <docSimilar otherFoxpath="..\executionSummary-reference.xml" count="1">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>
                     <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>

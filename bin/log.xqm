@@ -18,7 +18,7 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "compile.xqm",
     "constants.xqm",
-    "greenFoxValidator.xqm",
+    "greenfoxSchemaValidator.xqm",
     "systemValidator.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";

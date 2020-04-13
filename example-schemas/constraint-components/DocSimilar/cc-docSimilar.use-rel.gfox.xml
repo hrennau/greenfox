@@ -54,6 +54,9 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <setRel name="summaryReference"
+            foxpath="..\*[file-name(.) eq replace($fileName, '.xml$', '-reference.xml')]"/>
+    
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="docSimilar" id="docSimilarFolderShape">
             <targetSize countMsg="Missing folder: docSimilar" count="1"/>            

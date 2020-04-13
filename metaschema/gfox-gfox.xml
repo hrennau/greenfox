@@ -88,10 +88,20 @@ return
                     eqMsgOK="Greenfox element has correct namespace"/>
 
                 <!-- check child element names -->
-                <ex:allowedElems elemNames="context constraintComponents domain"
+                <ex:allowedElems elemNames="context setRel constraintComponents domain"
                     msg="Unexpected elements in 'greenfox' element; expected: $elemNames"
                     msgOK="OK - 'greenfox' element: no unexpected child elements"/>
 
+                <!-- ========================================
+                        <setRel>
+                     ======================================== -->
+                
+                <focusNode xpath="*:setRel">
+                    <ex:allowedAtts attNames="name foxpath"
+                        msg="Unexpected attributes in 'setRel' element; expected: 'name' and 'foxpath'"
+                        msgOK="OK - 'setRel' element: no unexpected attributes"/>                    
+                </focusNode>
+                    
                 <!-- ========================================
                         <context>
                      ======================================== -->

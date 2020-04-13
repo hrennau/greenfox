@@ -31,9 +31,9 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "compile.xqm",
+    "greenfoxSchemaValidator.xqm",    
     "log.xqm",
     "greenfoxEditUtil.xqm",
-    "greenFoxValidator.xqm",
     "systemValidator.xqm",
     "validationReportWriter.xqm";
     

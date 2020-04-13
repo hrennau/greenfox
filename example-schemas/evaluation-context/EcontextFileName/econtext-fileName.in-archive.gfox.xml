@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of context variable $fileName.
+    
+    The context variable is used by the @eqFoxpath property of an XPath value constraint.
+    
+    The schema verifies that every airport-*.json resource contains the same IATA code as the
+    accompanying XML resource. The XML resource name is equal to the JSON resource name with
+    .json replaced with .xml. 
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/evaluation-context/filename"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>         
+            <file foxpath=".\\airport-*.json" id="airportFileShape" mediatype="json">
+                <targetSize minCountMsg="Missing files: airport-*.json" minCount="60"/>
+                <!-- Check the IATA code against the value found in the XML resource -->
+                <xpath expr="//airport/iata"
+                       eqFoxpath="let $xmlFileName := replace($fileName, '\.json', '.xml') return
+                                  ..\*[matches(file-name(.), $xmlFileName)]
+                                  /airport/@iata"
+                       eqFoxpathMsg="IATA code not equal to the code in XML resource"
+                       count="1" 
+                       countMsg="Missing XML resource or IATA attribute"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

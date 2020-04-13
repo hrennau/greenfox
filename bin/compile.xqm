@@ -20,7 +20,9 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
-    "greenfoxUtil.xqm";
+    "greenfoxUtil.xqm",
+    "greenfoxVarUtil.xqm",
+    "processingContext.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -50,15 +52,8 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
                                    $params as xs:string?,
                                    $domain as xs:string?) 
         as item()+ {
-        
-    (: The external context contains the parameter values supplied by the user via 
-       parameter 'params', augmented with $domain and the schema path :)
-    let $externalContext := f:externalContext($params, $domain, $gfox)        
-    let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
-    
-    (: Merge context contents with externally supplied name-value pairs,
-       and perform variable substitutions :)
-    let $context := f:editContext($gfox/gx:context, $externalContext)
+    (: Construct the initial context :)
+    let $context := f:initialContext($gfox, $params, $domain)
     
     (: Perform variable substitution :)
     let $gfox2 := f:substituteVariablesRC($gfox, $context)
@@ -67,160 +62,6 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
     return
         ($gfox4, $context)
 };
-
-(: ============================================================================
- :
- :     f u n c t i o n    m a n a g i n g    t h e    c o n t e x t
- :
- : ============================================================================ :)
-
-(:~
- : Maps the value of a parameters string to a set of name-value pairs.
- :
- : Augmentation:
- : (1) If function parameter $domain is supplied: add 'domain' name-value pair 
- :     Otherwise, if the parameters string contains a 'domain' emtry: 
- :     edit 'domain' name-value pair, making the path absolute
- : (2) Add 'schemaPath' name-value pair, where the value is the file path of the schema -
- :     unless the parameters string contains a 'schemaPath' parameter, or the 'context' element 
- :     of the schema has a 'schemaPath' field with a default value 
- :
- : @param params a parameters string containing semicolon-separated name-value pairs
- : @param domain the value of call parameter 'domain', should be the path of the domain folder
- : @param gfox the greenfox schema
- : @return a map expressing the name-value pairs
- :)
-declare function f:externalContext($params as xs:string?, 
-                                   $domain as xs:string?,
-                                   $gfox as element(gx:greenfox)) 
-        as map(xs:string, item()*) {
-    let $gfoxContext := $gfox/gx:greenfox/gx:context    
-    let $nvPairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
-    let $prelim :=
-        map:merge(
-            $nvPairs ! 
-            map:entry(replace(., '\s*=.*', ''), 
-                      replace(., '^.*?=\s*', ''))
-        )
-
-    (: Add 'schemaPath' entry :)                
-    let $prelim2 :=
-        if (map:contains($prelim, 'schemaPath')) then $prelim
-        else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim
-        else 
-            let $schemaLocation := $gfox/base-uri(.) ! i:pathToAbsolutePath(.)
-            return map:put($prelim, 'schemaPath', $schemaLocation)
-
-    (: Add or edit 'domain' entry;
-       normalization: absolute path, using back slashes :)
-    let $prelim3 :=
-        (: domain parameter specified :)
-        if ($domain) then
-            if (map:contains($prelim2, 'domain')) then
-                error(QName((), 'INVALID_ARG'),
-                    concat("Ambiguous input - you supplied parameter 'domain' and also ",
-                           "parameter 'params' with a 'domain' entry; aborted.'"))
-            else
-                (: Add 'domain' entry, value from call parameter 'domain' :)
-                $domain ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
-        (: Without domain parameter :)                
-        else  
-            (: If domain name-value pair: edit value (making path absolute) :)        
-            let $domainFromNvpair := map:get($prelim2, 'domain')
-            return           
-                if ($domainFromNvpair) then
-                    $domainFromNvpair ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
-                else $prelim2
-    return
-        $prelim3
-};
-
-(:~
- : Checks if the external context contains a value for each context field
- : without default value.
- :
- : @param externalContext external context map
- : @param contextElem the context element from the schema
- : @return empty sequence, if check ok, or throws an error otherwise
- :)
-declare function f:checkExternalContext($externalContext as map(*), 
-                                        $contextElem as element(gx:context))
-        as empty-sequence() {
-    let $missingValues := 
-        $contextElem/gx:field[not(@value)]/@name
-        [not(map:contains($externalContext, .))]
-    return
-        if (empty($missingValues)) then ()
-        else
-            let $missingValuesString1 := string-join($missingValues, ', ')
-            let $missingValuesString2 := string-join($missingValues ! concat(., '=...')) => string-join(';')
-            return
-                error(QName((), 'MISSING_INPUT'),
-                        concat('Missing context values for required context fields: ', 
-                               $missingValuesString1,
-                               '; please supply values using call parameter "params": params="', 
-                               $missingValuesString2, '"'))
-};
-
-(:~
- : Edits a schema context, overwriting default values with external values
- : and performing variable substitution.
- :
- : @param context the schema context
- : @param externalContext a context assembled from externally supplied values
- : @return the edited context
- :)
-declare function f:editContext($context as element(gx:context),
-                               $externalContext as map(xs:string, item()*))
-        as map(xs:string, item()*) {
-    (: Collect entries, overwriting schemaq values with external values :)        
-    let $entries := (        
-        if ($context/gx:field[@name eq 'schemaPath']) then ()
-        else $externalContext?schemaPath ! map:entry('schemaPath', .)
-        ,
-        if ($context/gx:field[@name eq 'domain']) then ()
-        else $externalContext?domain ! map:entry('domain', .)
-        ,
-        for $field in $context/gx:field
-        let $name := $field/@name/string()
-        let $value := ($externalContext($name), $field/@value)[1]
-        return
-            map:entry($name, $value)
-    )
-    return 
-        (: Perform variable substitution :)    
-        map:merge(
-            if (empty($entries)) then () else
-                f:editContextRC($entries, $externalContext, map{})
-        )        
-};
-
-(:~
- : Auxiliary function of function `f:editontext`.
- :
- :)
-declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
-                                 $externalContext as map(xs:string, item()*),
-                                 $substitutionContext as map(xs:string, item()*))
-        as map(xs:string, item()*)+ {
-    let $head := head($contextEntries)
-    let $tail := tail($contextEntries)
-    
-    let $name := map:keys($head)
-    let $value := $head($name)
-    let $augmentedValue := 
-        let $raw := f:substituteVars($value, $substitutionContext, ())
-        return
-            if ($name eq 'domain') then i:pathToAbsolutePath($raw)
-            else $raw
-    let $augmentedEntry := map:entry($name, $augmentedValue)    
-    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
-    return (
-        $augmentedEntry,
-        if (empty($tail)) then () else
-            f:editContextRC($tail, $externalContext, $newSubstitutionContext)
-    )            
-};        
 
 (: ============================================================================
  :
@@ -283,55 +124,6 @@ declare function f:substituteVariablesRC($n as node(), $context as map(xs:string
     
     default return $n        
 };
-
-(:~
- : Substitutes variable references with variable values. The references have the form ${name} or
- : @{name}. References using the dollar character are resolved using $context, and references
- : using the @ character are resolved using $callContext.
- :
- : @param s a string
- : @param context a context which is a map associating key strings with value strings
- : @param callContext a second context
- : @return a copy of the string with all variable references replaced with variable values
- :)
-declare function f:substituteVars($s as xs:string?, 
-                                  $context as map(xs:string, item()*), 
-                                  $callContext as map(xs:string, item()*)?) 
-        as xs:string? {
-    let $s2 := f:substituteVarsAux($s, $context, '\$')
-    return
-        if (empty($callContext)) then $s2    
-        else f:substituteVarsAux($s2, $callContext, '@') 
-};
-
-(:~
- : Auxiallary function of `f:substituteVars`.
- :
- : @param s a string
- : @param context a context which is a map associating key strings with value strings
- : @param prefixChar character signalling a variable reference 
- : @return a copy of the string with all variable references replaced with variable values
- :) 
-declare function f:substituteVarsAux($s as xs:string?, 
-                                     $context as map(xs:string, item()*), 
-                                     $prefixChar as xs:string) as xs:string? {
-    let $sep := codepoints-to-string(30000)
-    let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), 
-                              concat('$1', $sep, '$2', $sep, '$3'))
-    return
-        if ($parts eq $s) then $s   (: no matches :)
-        else
-            let $partStrings := tokenize($parts, $sep)
-            let $prefix := $partStrings[1]
-            let $varRef := $partStrings[2]
-            let $postfix := $partStrings[3][string()]
-            let $varName := $varRef ! substring(., 3) ! substring(., 1, string-length(.) - 1)
-            let $varValue := $context($varName) ! f:substituteVarsAux(., $context, $prefixChar)           
-            return
-                concat($prefix, ($varValue, $varRef)[1], 
-                       $postfix ! f:substituteVarsAux(., $context, $prefixChar))                
-};
-
 
 (: ============================================================================
  :

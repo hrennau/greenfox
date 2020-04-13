@@ -13,11 +13,11 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "evaluationContextManager.xqm",
     "expressionValueConstraint.xqm",
     "extensionValidator.xqm",
-    "filePropertiesConstraint.xqm",
     "focusNodeValidator.xqm",
     "greenfoxTarget.xqm",
     "linkConstraint.xqm",    
     "mediatypeConstraint.xqm",
+    "resourcePropertiesConstraint.xqm",    
     "xsdValidator.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
