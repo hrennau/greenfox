@@ -17,6 +17,35 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:~
+ : Updates the processing context by updating the _resourceRelationships entry.
+ : New relationships are parsed from <setRel> elements and added to the context,
+ : overwriting any existing relationship with the same name.
+ :
+ : @param setRels elements defining resource relationships
+ : @param context the current processing context
+ : @return the updated processing context
+ :)
+declare function f:updateContextResourceRelationships($context as map(*),
+                                                      $setRels as element(gx:setRel)*)
+        as map(*) {
+    let $newRelationships := f:parseResourceRelationships($setRels)
+    return if (empty($newRelationships)) then $context else
+        
+    let $newNames := $newRelationships ! map:keys(.)    
+    let $currentRelationships := $context?_resourceRelationships
+    return 
+        if (empty($currentRelationships)) then 
+            map:put($context, '_resourceRelationships', $newRelationships)
+        else
+            let $currentNames := $currentRelationships ! map:keys(.)
+            return
+                map:merge((
+                    $newRelationships,
+                    $currentNames[not(. = $newNames)] ! $currentRelationships(.)
+                ))
+};    
+
 (: ============================================================================
  :
  :     I n i t i a l    c o n t e x t
@@ -24,7 +53,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Creates the initial processing context.
+ : Creates the initial processing context. Its context reflect ...
+ : - schema element <context>
+ : - schema elements <setRel> which are immediate child elements of the root element
  :
  : @param gfox a greenfox schema
  : @param params a string encoding parameter value assignments supplied by the user
@@ -36,12 +67,14 @@ declare function f:initialContext($gfox as element(gx:greenfox),
                                   $domain as xs:string?)
         as map(xs:string, item()*) {
         
-    (: The external context contains the parameter values supplied by the user via 
-       parameter 'params', augmented with $domain and the schema path :)
-    let $externalContext := f:externalContext($params, $domain, $gfox)        
+    (: Parse the external context. It has been supplied by the user as a
+       concatenated list of name/value pairs. :)
+    let $externalContext := f:externalContext($params, $domain, $gfox)
+    
+    (: Check the external context :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
         
-    (: Collect entries, overwriting schemaq values with external values :)
+    (: Collect entries, overwriting schema values with external values :)
     let $contextElem := $gfox/gx:context    
     let $entries := (        
         if ($contextElem/gx:field[@name eq 'schemaPath']) then ()
@@ -56,21 +89,29 @@ declare function f:initialContext($gfox as element(gx:greenfox),
         return
             map:entry($name, $value)
     )
+    let $entries2 := f:editContextEntries($entries)
     return 
         (: Perform variable substitution :)    
         map:merge(
-            if (empty($entries)) then () else
-                f:editContextRC($entries, $externalContext, map{})
+            $entries2
         )        
 };
 
 (:~
- : Auxiliary function of function `f:editContext`.
+ : Edits context entries, replacing variable references. An entry may reference
+ : earlier entries as a variable.
+ :)
+declare function f:editContextEntries($contextEntries as map(xs:string, item()*)+)
+        as map(xs:string, item()*)+ {
+    f:editContextEntriesRC($contextEntries, map{})        
+};        
+
+(:~
+ : Auxiliary function of function `f:editContextEntries`.
  :
  :)
-declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
-                                 $externalContext as map(xs:string, item()*),
-                                 $substitutionContext as map(xs:string, item()*))
+declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()*)+,
+                                        $substitutionContext as map(xs:string, item()*))
         as map(xs:string, item()*)+ {
     let $head := head($contextEntries)
     let $tail := tail($contextEntries)
@@ -87,7 +128,7 @@ declare function f:editContextRC($contextEntries as map(xs:string, item()*)+,
     return (
         $augmentedEntry,
         if (empty($tail)) then () else
-            f:editContextRC($tail, $externalContext, $newSubstitutionContext)
+            f:editContextEntriesRC($tail, $newSubstitutionContext)
     )            
 };        
 

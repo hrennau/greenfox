@@ -55,14 +55,14 @@
     </context>
     
     <setRel name="summaryReference"
-            foxpath="..\*[file-name(.) eq replace($fileName, '.xml$', '-reference.xml')]"/>
+            foxpath="..\*[file-name(.) eq replace($fileName, '\d*.xml$', '-reference.xml')]"/>
     
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="docSimilar" id="docSimilarFolderShape">
             <targetSize countMsg="Missing folder: docSimilar" count="1"/>            
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
-                <docSimilar otherFoxpath="..\executionSummary-reference.xml">
+                <docSimilar relName="summaryReference">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>
                     <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>

@@ -22,7 +22,8 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "greenfoxUtil.xqm",
     "greenfoxVarUtil.xqm",
-    "processingContext.xqm";
+    "processingContext.xqm",
+    "resourceRelationships.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -59,8 +60,10 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
     let $gfox2 := f:substituteVariablesRC($gfox, $context)
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
     let $gfox4 := f:compileGreenfox_addResourceShapeIds($gfox3)
+    
+    let $context2 := f:updateContextResourceRelationships($context, $gfox/gx:setRel)
     return
-        ($gfox4, $context)
+        ($gfox4, $context2)
 };
 
 (: ============================================================================

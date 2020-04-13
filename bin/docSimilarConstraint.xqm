@@ -13,7 +13,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "docSimilarConstraintReports.xqm",
     "greenfoxUtil.xqm",
-    "resourceAccess.xqm";
+    "resourceAccess.xqm",
+    "resourceRelationships.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 declare namespace fox="http://www.foxpath.org/ns/annotations";
@@ -59,15 +60,14 @@ declare function f:validateDocSimilar($filePath as xs:string,
 
     (: Determine items representing the documents with which to compare;
        each item should be either a node or a URI :)
-    let $otherDocReps := f:validateDocSimilar_otherDocReps($filePath, $constraintElem, $context)
+    let $targets := f:validateDocSimilar_targets($filePath, $constraintElem, $context)
 
     (: Check the number of items representing the documents with which to compare :)
-    let $results_count := 
-        f:validateDocSimilarCount($otherDocReps, $constraintElem, $contextInfo)
+    let $results_count := f:validateDocSimilarCount($targets, $constraintElem, $contextInfo)
     
     (: Check the similarity :)
     let $results_comparison := 
-        f:validateDocSimilar_similarity($contextItem, $otherDocReps, $constraintElem, $contextInfo)
+        f:validateDocSimilar_similarity($contextItem, $targets, $constraintElem, $contextInfo)
         
     return
         ($results_count, $results_comparison)
@@ -81,15 +81,18 @@ declare function f:validateDocSimilar($filePath as xs:string,
  : @param constraintElem the element representing the DocumentSimilar constraint
  : @param context the processing context
  :)
-declare function f:validateDocSimilar_otherDocReps($filePath as xs:string,
-                                                   $constraintElem as element(),
-                                                   $context as map(xs:string, item()*))
+declare function f:validateDocSimilar_targets($filePath as xs:string,
+                                              $constraintElem as element(),
+                                              $context as map(xs:string, item()*))
         as item()* {
     let $evaluationContext := $context?_evaluationContext
-    let $otherFoxpath := $constraintElem/@otherFoxpath 
+    let $otherFoxpath := $constraintElem/@otherFoxpath
+    let $relName := $constraintElem/@relName
     return    
         if ($otherFoxpath) then 
             f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
+        else if ($relName) then
+            f:relationshipTargets($relName, $filePath, $context)
         else error()
 };
 
@@ -182,7 +185,7 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         return
             f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
-                                          $constraintElem/@otherFoxpath, 
+                                          $constraintElem/(@otherFoxpath, @relName)[1], 
                                           $comparisonReports,
                                           $otherDocIdentities, (), (), $contextInfo)    
 };
