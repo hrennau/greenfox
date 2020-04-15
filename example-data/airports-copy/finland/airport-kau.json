@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":431,
+    "iata":"KAU",
+    "icao":"EFKA",
+    "name":"Kauhava Airport",
+    "city":"Kauhava",
+    "country":"Finland",
+    "latitude":63.127102,
+    "longitude":23.051399,
+    "altitude":151,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

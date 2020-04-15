@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":615,
+    "iata":"ODE",
+    "icao":"EKOD",
+    "name":"Odense Airport",
+    "city":"Odense",
+    "country":"Denmark",
+    "latitude":55.47669982910156,
+    "longitude":10.330900192260742,
+    "altitude":56,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

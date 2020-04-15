@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":428,
+    "iata":"IVL",
+    "icao":"EFIV",
+    "name":"Ivalo Airport",
+    "city":"Ivalo",
+    "country":"Finland",
+    "latitude":68.607299804688,
+    "longitude":27.405300140381,
+    "altitude":481,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

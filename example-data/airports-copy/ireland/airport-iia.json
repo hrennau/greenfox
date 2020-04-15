@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":7468,
+    "iata":"IIA",
+    "icao":"EIMN",
+    "name":"Inishmaan Aerodrome",
+    "city":"Inishmaan",
+    "country":"Ireland",
+    "latitude":53.09299850463867,
+    "longitude":-9.568059921264648,
+    "altitude":15,
+    "timezone":0,
+    "dst":"U",
+    "tzTimezone":"Europe\/Dublin",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

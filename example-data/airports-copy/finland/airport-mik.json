@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":444,
+    "iata":"MIK",
+    "icao":"EFMI",
+    "name":"Mikkeli Airport",
+    "city":"Mikkeli",
+    "country":"Finland",
+    "latitude":61.6866,
+    "longitude":27.201799,
+    "altitude":329,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

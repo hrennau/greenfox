@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":437,
+    "iata":"KAO",
+    "icao":"EFKS",
+    "name":"Kuusamo Airport",
+    "city":"Kuusamo",
+    "country":"Finland",
+    "latitude":65.987602233887,
+    "longitude":29.239400863647,
+    "altitude":866,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

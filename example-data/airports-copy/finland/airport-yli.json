@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":464,
+    "iata":"YLI",
+    "icao":"EFYL",
+    "name":"Ylivieska Airfield",
+    "city":"Ylivieska-raudaskyla",
+    "country":"Finland",
+    "latitude":64.0547222,
+    "longitude":24.7252778,
+    "altitude":252,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

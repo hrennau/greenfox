@@ -416,6 +416,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description deactivated label 
+                    contextRel
                     expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
                     exists existsMsg existsMsgOK

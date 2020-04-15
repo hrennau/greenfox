@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":7030,
+    "iata":"INQ",
+    "icao":"EIIR",
+    "name":"Inisheer Aerodrome",
+    "city":"Inisheer",
+    "country":"Ireland",
+    "latitude":53.064701080322266,
+    "longitude":-9.510899543762207,
+    "altitude":40,
+    "timezone":0,
+    "dst":"E",
+    "tzTimezone":"Europe\/Dublin",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

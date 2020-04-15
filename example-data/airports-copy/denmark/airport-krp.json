@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":612,
+    "iata":"KRP",
+    "icao":"EKKA",
+    "name":"Karup Airport",
+    "city":"Karup",
+    "country":"Denmark",
+    "latitude":56.29750061035156,
+    "longitude":9.124629974365234,
+    "altitude":170,
+    "timezone":1,
+    "dst":"E",
+    "tzTimezone":"Europe\/Copenhagen",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

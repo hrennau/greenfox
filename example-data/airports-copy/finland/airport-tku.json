@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":460,
+    "iata":"TKU",
+    "icao":"EFTU",
+    "name":"Turku Airport",
+    "city":"Turku",
+    "country":"Finland",
+    "latitude":60.514099121094,
+    "longitude":22.262800216675,
+    "altitude":161,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

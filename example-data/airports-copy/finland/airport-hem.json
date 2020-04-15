@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":420,
+    "iata":"HEM",
+    "icao":"EFHF",
+    "name":"Helsinki Malmi Airport",
+    "city":"Helsinki",
+    "country":"Finland",
+    "latitude":60.254600524902344,
+    "longitude":25.042800903320312,
+    "altitude":57,
+    "timezone":2,
+    "dst":"E",
+    "tzTimezone":"Europe\/Helsinki",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

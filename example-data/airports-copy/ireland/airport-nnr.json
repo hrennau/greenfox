@@ -1,0 +1,18 @@
+{
+  "airport":{
+    "id":6422,
+    "iata":"NNR",
+    "icao":"EICA",
+    "name":"Connemara Regional Airport",
+    "city":"Indreabhan",
+    "country":"Ireland",
+    "latitude":53.23030090332031,
+    "longitude":-9.467780113220215,
+    "altitude":70,
+    "timezone":0,
+    "dst":"U",
+    "tzTimezone":"Europe\/Dublin",
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

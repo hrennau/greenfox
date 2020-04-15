@@ -28,7 +28,7 @@
     * FíleNameMatches - fileName/@matches
     * FileNameNotMatches - fileName/@notMatches   
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file.name"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-name"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

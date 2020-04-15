@@ -1,0 +1,22 @@
+{
+  "airports":{
+    "airportsForCountry":[
+      {
+        "country":"Denmark",
+        "href":"airports-denmark.xml"
+      },
+      {
+        "country":"Finland",
+        "href":"airports-finland.xml"
+      },
+      {
+        "country":"Ireland",
+        "href":"airports-ireland.xml"
+      },
+      {
+        "country":"Luxembourg",
+        "href":"airports-luxembourg.xml"
+      }
+    ]
+  }
+}
