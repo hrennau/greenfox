@@ -33,6 +33,9 @@ declare function f:relationshipTargets($relName as xs:string,
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
+        
+    let $context := f:prepareEvaluationContext($context, 'filePath', $filePath, (), (), (), (), ())
+        
     let $resourceRelationship := $context?_resourceRelationships($relName)
     let $targets :=
         if (empty($resourceRelationship)) then error()

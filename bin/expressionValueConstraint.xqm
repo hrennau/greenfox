@@ -98,6 +98,8 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
     let $flags := string($constraint/@flags)
     let $quantifier := ($constraint/@quant, 'all')[1]
     
+    let $contextRel := $constraint/@contextRel
+    
     let $eqFoxpathValue := 
         if (not($eqFoxpath)) then () else
             let $contextItem := $contextFilePath
@@ -115,7 +117,17 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
             return
                 f:evaluateXPath($eqXPath, $contextItem, $evaluationContext, true(), true())            
 
-    let $results := (
+    let $results := 
+        let $contextInfos :=
+            if (not($contextRel)) then $contextInfo
+            else
+                let $relTargets := f:relationshipTargets($contextRel, $contextFilePath, $context)
+                for $relTarget in $relTargets
+                return
+                    map:put($contextInfo, 'relTarget', $relTarget)
+        for $contextInfo in $contextInfos 
+        return
+    (
         if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraint, $contextInfo),    
         if (not($ne)) then () else f:validateExpressionValue_cmp($exprValue, $ne, $quantifier, $constraint, $contextInfo),
         if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint, $contextInfo),
@@ -360,7 +372,12 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
     
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
         
+    (: Retrieve relationship target to be used as context for comparison expression :)
+    let $cmpRelTarget := $contextInfo?relTarget
+    
+    (: Context kind :)
     let $cmpContext :=
+        if (exists($cmpRelTarget)) then () else
         let $attName := local-name($cmp) || 'Context'
         return $valueShape/@*[local-name(.) eq $attName]
 
@@ -429,7 +446,12 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
                 else error()                            
             else
                 let $useContextItem := 
-                    if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
+                    if ($cmpRelTarget) then
+                        if ($cmpExprKind eq 'xpath') then 
+                            if ($cmpRelTarget instance of node()) then $cmpRelTarget
+                            else doc($cmpRelTarget)
+                        else $cmpRelTarget
+                    else if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
                     else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
                     else $contextItem
                 let $cmpItems := $getCmpItems($useContextItem)
