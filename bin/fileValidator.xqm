@@ -56,7 +56,7 @@ declare function f:validateFile($fileShape as element(gx:file), $context as map(
  :
  : @param filePath the file path
  : @param gxFile the file shape
- : @param context the evaluation context
+ : @param context the processing context
  : @return validation results
  :)
 declare function f:validateFileInstance($filePath as xs:string, 
@@ -71,7 +71,7 @@ declare function f:validateFileInstance($filePath as xs:string,
     
     (: Determine "in-scope components" 
        - all components to be evaluated in the context of this file resource :)
-    let $componentsMap := i:getEvaluationContextScope($filePath, $fileShape)
+    let $componentsMap := i:getEvaluationContextScope($filePath, $fileShape, $context)
     
     let $resourceShapes := $componentsMap?resourceShapes
     let $focusNodes := $componentsMap?focusNodes
@@ -89,7 +89,8 @@ declare function f:validateFileInstance($filePath as xs:string,
             $extensionConstraints, 
             $extensionConstraintComponents,
             $resourceShapes,
-            $focusNodes)
+            $focusNodes,
+            $context)
             
     let $reqBindings := $reqBindingsAndDocs?requiredBindings
     let $reqDocs := 

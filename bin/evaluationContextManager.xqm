@@ -35,16 +35,24 @@ declare function f:getPotentialBindings() as xs:string+ {
 };
 
 (:~
- : Returns for a given shape the components within the scope of evaluation 
- : context required for this shape.
+ : Returns for a given shape the components within the scope of  its evaluation 
+ : context.
  :
- : Returns a map with three fields:
+ : Returns a map with five fields:
+ : - resource shapes
+ : - focus nodes
  : - core components: all components which are not extension constraints
  : - extensionConstraints: constraints based on extension constraint components
  : - extensionConstraintComponents: extension constraint components referenced by extension constraints
+ :
+ : @param filePath file path of the focus resource
+ : @param shape the shape currently processed
+ : @param context the processing context
+ : @return a map providing the components
  :)
 declare function f:getEvaluationContextScope($filePath as xs:string, 
-                                             $shape as element())
+                                             $shape as element(),
+                                             $context as map(xs:string, item()*))
         as map(xs:string, element()*) {
 
     let $components := 
@@ -56,7 +64,9 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
-    
+    (:
+    let $relationships := f:getRelationshipDefinitions($components)
+    :)
     (: Extension constraint components :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return
@@ -70,7 +80,7 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
 };
 
 (:~
- : Auxilliary function supporting function f:getEvaluationContextScope.
+ : Auxiliary function supporting function f:getEvaluationContextScope.
  :
  : @param filePath file path of the shape for which the scope is defined
  : @param shape the shape for which the scope is defined
@@ -124,6 +134,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
  : @param coreComponents core components defining XPath and foxpath expressions
  : @param extensionConstraints constraint declarations referencing extension constraint components
  : @param extensionConstraintComponents extension constraint components 
+ : @param context the processing context
  : @return a map with key 'requiredBindings' containing a list of required variable
  :   names, key 'xdoc' an XML doc, 'jdoc' an XML representation of the JSON
  :   document, key 'csvdoc' an XML representation of the CSV document
@@ -134,7 +145,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                               $extensionConstraints as element()*,
                                               $extensionConstraintComponents as element()*,
                                               $resourceShapes as element()*,
-                                              $focusNodes as element()*) 
+                                              $focusNodes as element()*,
+                                              $context as map(xs:string, item()*)) 
         as map(*) {
     let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, $resourceShapes, $focusNodes)
     let $focusNodes := $allComponents/descendant-or-self::gx:focusNode
@@ -150,7 +162,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $extensionConstraints,
                                      $extensionConstraintComponents,
                                      $resourceShapes,
-                                     $focusNodes) 
+                                     $focusNodes,
+                                     $context) 
                                      
     (: Required documents :)                                    
     let $xdoc :=
@@ -239,6 +252,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
  : @param coreComponents core components defining XPath and foxpath expressions
  : @param extensionConstraints constraint declarations referencing extension constraint components
  : @param extensionConstraintComponents extension constraint components 
+ : @param context the processing context
  : @return the actually required variable bindings
  :)
 declare function f:getRequiredBindings($potentialBindings as xs:string*, 
@@ -246,30 +260,43 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                                        $extensionConstraints as element()*,
                                        $extensionConstraintComponents as element()*,
                                        $resourceShapes as element()*,
-                                       $focusNodes as element()*)
+                                       $focusNodes as element()*,
+                                       $context as map(xs:string, item()*))
         as xs:string* {
 
     let $potentialBindings_params := $extensionConstraintComponents/gx:param/@name/string()
     let $potentialBindings := ($potentialBindings, $potentialBindings_params)
-
+    let $components := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, 
+                        $resourceShapes, $focusNodes)
+    
+    let $relationships :=
+        let $relNames := f:getRelationshipNamesReferenced($components)
+        return
+            if (empty($relNames)) then ()
+            else $context?_resourceRelationships?($relNames)
+            
     let $reqBindings :=
-        for $component in ($coreComponents, $extensionConstraints, $extensionConstraintComponents,
-                           $resourceShapes, $focusNodes)
-        let $xpathExpressions := $component/(
-            self::gx:xpath/@expr,
-            self::gx:validatorXPath,
-            @xpath,
-            @*[ends-with(name(), 'XPath')]
-        )
-        let $foxpathExpressions := $component/(
-            self::gx:foxpath/@expr,
-            self::gx:validatorFoxpath,
-            @foxpath,
-            @*[ends-with(name(), 'Foxpath')]
-        )
+        let $xpathExpressions := (
+            $relationships?xpath ! .,
+            $components/(
+                self::gx:xpath/@expr,
+                self::gx:validatorXPath,
+                @xpath,
+                @*[ends-with(name(), 'XPath')]
+            )
+        ) => distinct-values()            
+        let $foxpathExpressions := (
+            $relationships?foxpath ! .,         
+            $components/(
+                self::gx:foxpath/@expr,
+                self::gx:validatorFoxpath,
+                @foxpath,
+                @*[ends-with(name(), 'Foxpath')]
+            )
+        ) => distinct-values()
         return (
-            $xpathExpressions/f:determineRequiredBindingsXPath(., $potentialBindings),
-            $foxpathExpressions/f:determineRequiredBindingsFoxpath(., $potentialBindings)
+            $xpathExpressions ! f:determineRequiredBindingsXPath(., $potentialBindings),
+            $foxpathExpressions ! f:determineRequiredBindingsFoxpath(., $potentialBindings)
         ) => distinct-values() => sort()
     return $reqBindings   
 };        

@@ -44,6 +44,7 @@
                 <targetSize minCountMsg="Missing json files in and under 'airports' folder" minCount="70"/>
                 <fileName like="airport*.json" likeMsg="JSON files should match pattern 'airport*.json"
                           notLike="*test*" notLikeMsg="JSON files should not match pattern '*test*'"/>
+                <!-- Second 'fileName' element required because of @case -->                
                 <fileName notMatches="\s+-\s+Kopie" notMatchesMsg="JSON files should not match regex '\s+-\s+Kopie'" 
                           case="true"/>
             </file>

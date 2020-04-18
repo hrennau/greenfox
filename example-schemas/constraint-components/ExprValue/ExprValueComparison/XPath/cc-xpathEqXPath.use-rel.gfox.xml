@@ -21,7 +21,7 @@
     - XML:   foxpath/(@expr, @minCount) 
     - Check: The number of value items must be at least the number specified by @minCount.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xpath-eq-foxpath"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xpath-eq-xpath.use-rel"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

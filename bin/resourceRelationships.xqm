@@ -33,9 +33,13 @@ declare function f:relationshipTargets($relName as xs:string,
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
-        
+    
+    (: _TO_DO_ - Review and improve the handling of evaluation context;
+                 the current solution is totally adhoc
+     :)
+     (:
     let $context := f:prepareEvaluationContext($context, 'filePath', $filePath, (), (), (), (), ())
-        
+     :)   
     let $resourceRelationship := $context?_resourceRelationships($relName)
     let $targets :=
         if (empty($resourceRelationship)) then error()
@@ -97,4 +101,22 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
                 ))
             )
     )
+};    
+
+(:~
+ : Returns the names of all resource relationships referenced within a
+ : component.
+ :
+ : This function incapsulates the knowledge in items (attributes,
+ : elements) contain relationship names. It is called, for example,
+ : by function 'getRequiredBindings', which needs to find all expressions
+ : used by a set of components.
+ :
+ : @param component the component to be investigated
+ : @return the relationship names
+ :)
+declare function f:getRelationshipNamesReferenced($components as element()*)
+        as xs:string* {
+    $components//(@contextRel)
+    => distinct-values()
 };        
