@@ -97,7 +97,7 @@ return
                      ======================================== -->
                 
                 <focusNode xpath="*:setRel">
-                    <ex:allowedAtts attNames="name foxpath"
+                    <ex:allowedAtts attNames="name connector linkContextXP linkXP linkTargetXP foxpath mediatype recursive"
                         msg="Unexpected attributes in 'setRel' element; expected: 'name' and 'foxpath'"
                         msgOK="OK - 'setRel' element: no unexpected attributes"/>                    
                 </focusNode>
@@ -387,13 +387,13 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description deactivated foxpath path linkXPath recursiveLinkXPath mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated foxpath path linkXP recursiveLinkXP mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
-                <ex:xoneAtts attNames="foxpath path linkXPath recursiveLinkXPath"
-                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXPath, recursiveLinkXPath"
-                    msgOK="OK - 'file' element: has foxpath or path or linkXPath"/>
+                <ex:xoneAtts attNames="foxpath path linkXP recursiveLinkXP"
+                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXP, recursiveLinkXP"
+                    msgOK="OK - 'file' element: has foxpath or path or linkXP"/>
 
                 <!-- element names -->
                 <ex:allowedElems
@@ -557,7 +557,7 @@ return
                 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="id description label xpath mediatype recursive
+                    attNames="id description label rel xpath mediatype recursive
                     count countMsg countMsgOK
                     minCount minCountMsg minCountMsgOK
                     maxCount maxCountMsg maxCountMsgOK
@@ -567,9 +567,9 @@ return
                     msgOK="OK - 'links' element: no unexpected attributes"/>
                 
                 <!-- mandatory attributes -->
-                <ex:mandatoryAtts attNames="xpath"
-                    msg="A 'links' constraint must have an 'xpath' attribute"
-                    msgOK="OK - 'links' element: has 'xpath' attribute"/>
+                <ex:oneOrMoreAtts attNames="xpath rel"
+                    msg="A 'links' constraint must have an 'xpath' attribute, or a 'rel' attribute"
+                    msgOK="OK - 'links' element: has 'xpath' or 'rel' attribute"/>
 
             </focusNode>
             

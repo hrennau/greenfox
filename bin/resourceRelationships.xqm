@@ -14,7 +14,10 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
-    
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
+    "linkResolver2.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -34,17 +37,14 @@ declare function f:relationshipTargets($relName as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
     
-    (: _TO_DO_ - Review and improve the handling of evaluation context;
-                 the current solution is totally adhoc
-     :)
-     (:
-    let $context := f:prepareEvaluationContext($context, 'filePath', $filePath, (), (), (), (), ())
-     :)   
-    let $resourceRelationship := $context?_resourceRelationships($relName)
+    let $relDef := $context?_resourceRelationships($relName)
+    let $connector := $relDef?connector
     let $targets :=
-        if (empty($resourceRelationship)) then error()
-        else if ($resourceRelationship?relKind eq 'foxpath') then
-            f:relationshipTargets_foxpath($resourceRelationship, $filePath, $context)
+        if (empty($relDef)) then error()
+        else if ($connector eq 'foxpath') then
+            f:relationshipTargets_foxpath($relDef, $filePath, $context)
+        else if ($connector eq 'links') then
+            f:relationshipTargets_links($relDef, $filePath, $context)
         else error()
     return
         $targets
@@ -73,6 +73,39 @@ declare function f:relationshipTargets_foxpath(
         else error()
 };
 
+declare function f:relationshipTargets_links(
+                                       $resourceRelationship as map(xs:string, item()*),
+                                       $filePath as xs:string,
+                                       $context as map(xs:string, item()*))
+        as item()* {
+    let $evaluationContext := $context?_evaluationContext
+    let $reqDocs := $context?_reqDocs
+    
+    let $linkContextExpr := $resourceRelationship?linkContextXP
+    let $linkExpr := $resourceRelationship?linkXP
+    let $linkTargetExpr := $resourceRelationship?linkTargetXP
+    let $mediatype := $resourceRelationship?mediatype
+    let $recursive := $resourceRelationship?recursive    
+    let $contextNode := $reqDocs?doc
+    
+    let $lrObjects := link:resolveLinks(
+                             $filePath,
+                             $contextNode,
+                             $linkContextExpr,
+                             $linkExpr,
+                             $linkTargetExpr,
+                             $mediatype,
+                             $recursive,
+                             $context)
+    return
+        $lrObjects
+        (:
+        if ($mediatype eq 'xml') then $lrObjects?targetResource
+        else if ($mediatype eq 'json') then $lrObjects?targetResource
+        else $lrObjects?uri
+        :)
+};
+
 (:~
  : Parses resource relationships defined by <setRel> elements into a
  : map. Each relationship is represented by a field whose name is the
@@ -87,17 +120,35 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
     map:merge(        
         for $setRel in $setRels
         let $name := $setRel/@name/string()
+        let $recursive := $setRel/@recursive
+        let $mediatype := $setRel/@mediatype
+        
         let $foxpath := $setRel/@foxpath/string()
-        let $relKind :=
-            if ($foxpath) then 'foxpath'
-            else error()
+        
+        let $linkContextXP := $setRel/@linkContextXP
+        let $linkXP := $setRel/@linkXP
+        let $linkTargetXP := $setRel/@linkTargetXQ
+        
+        let $connector :=
+            let $explicit := $setRel/@connector/string()
+            return
+                if ($explicit) then $explicit
+                else if ($foxpath) then 'foxpath'
+                else error()
         return
             map:entry(
                 $name,
                 map:merge((
-                    map:entry('relKind', $relKind),
                     map:entry('relName', $name),
-                    $foxpath ! map:entry('foxpath', .)
+                    map:entry('connector', $connector),                    
+                    $recursive ! map:entry('recursive', .),
+                    $mediatype ! map:entry('mediatype', .),
+                    
+                    $foxpath ! map:entry('foxpath', .),
+                    
+                    $linkContextXP ! map:entry('linkContextXP', .),
+                    $linkXP ! map:entry('linkXP', .),
+                    $linkTargetXP ! map:entry('linkTargetXP', .)
                 ))
             )
     )

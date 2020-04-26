@@ -55,7 +55,8 @@
     </context>
     
     <setRel name="summaryReference"
-            foxpath="..\*[file-name(.) eq replace($fileName, '\d*.xml$', '-reference.xml')]"/>
+            connector="foxpath"
+            foxpath="fox-sibling($fileName, '\d*.xml$', '-reference.xml')"/>
     
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="docSimilar" id="docSimilarFolderShape">

@@ -150,26 +150,6 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $report := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
-(:        
-            if (not($redReport)) then ()
-            else if (not($colour eq 'red')) then ()
-            else
-                let $localPaths1 := $d1//*/(., @*)/f:localPath(.) => distinct-values()
-                let $localPaths2 := $d2//*/(., @*)/f:localPath(.) => distinct-values()
-                let $localPathsOnly1 := $localPaths1[not(. = $localPaths2)]
-                let $localPathsOnly2 := $localPaths2[not(. = $localPaths1)]
-                return
-                    <gx:localPaths>{
-                        if (empty($localPathsOnly1)) then () else
-                        <gx:only1 count="{count($localPathsOnly1)}">{
-                            ($localPathsOnly1 => sort()) ! <gx:path>{.}</gx:path>
-                        }</gx:only1>,
-                        if (empty($localPathsOnly2)) then () else
-                        <gx:only2 count="{count($localPathsOnly2)}">{
-                            ($localPathsOnly2 => sort()) ! <gx:path>{.}</gx:path>
-                        }</gx:only2>
-                    }</gx:localPaths>
-:)                    
         return
             map:merge((
                 map:entry('colour', $colour),
@@ -187,7 +167,7 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
                                           $constraintElem, 
                                           $constraintElem/(@otherFoxpath, @relName)[1], 
                                           $comparisonReports,
-                                          $otherDocIdentities, (), (), $contextInfo)    
+                                          $otherDocIdentities, (), (), $contextInfo)
 };
 
 
@@ -279,8 +259,7 @@ declare function f:validationResult_docSimilar($colour as xs:string,
             $focusNode,            
             $additionalAtts,
             $constraintElem/*,
-            if (not($colour eq 'red')) then () else
-                $otherDocIdentities ! <gx:value>{.}</gx:value>,
+            $otherDocIdentities ! <gx:targetDoc>{.}</gx:targetDoc>,
             $additionalElems,
             if (empty($reports)) then () else
                 <gx:reports>{$reports}</gx:reports>
@@ -381,6 +360,11 @@ declare function f:normalizeDocForComparison($node as node(),
     
     let $selectedItems := 
         function($tree, $modifier) as node()* {
+            let $targetXPath := $modifier/@targetXPath
+            return
+                if ($targetXPath) then
+                    xquery:eval($targetXPath, map{'': $tree})
+                else
             let $kind := $modifier/@kind
             let $localName := $modifier/@localName
             let $namespace := $modifier/@namespace

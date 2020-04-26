@@ -61,7 +61,7 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
     let $gfox4 := f:compileGreenfox_addResourceShapeIds($gfox3)
     
-    let $context2 := f:updateContextResourceRelationships($context, $gfox/gx:setRel)
+    let $context2 := f:updateContextResourceRelationships($context, $gfox4/gx:setRel)
     return
         ($gfox4, $context2)
 };

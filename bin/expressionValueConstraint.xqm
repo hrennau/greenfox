@@ -754,7 +754,7 @@ declare function f:validationResult_expressionCount($colour as xs:string,
     (: let $constraintId := concat($valueShapeId, '-', $constraintSuffix) :)    
     let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePathe {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
 
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($valueShape, $constraint/local-name(.), ())

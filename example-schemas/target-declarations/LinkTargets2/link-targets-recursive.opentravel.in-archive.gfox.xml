@@ -10,7 +10,7 @@
         <folder foxpath="archives\OpenTravel.zip\#archive#\OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
             <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>            
             <file foxpath="OTA_AirAvail*.xsd" id="xsdFileShape">
-                <file recursiveLinkXPath="/xs:schema/xs:include/@schemaLocation" id="xsdFileShape">
+                <file recursiveLinkXP="/xs:schema/xs:include/@schemaLocation" id="xsdFileShape">
                     <targetSize count="6" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"

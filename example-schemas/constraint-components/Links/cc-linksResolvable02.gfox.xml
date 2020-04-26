@@ -4,7 +4,7 @@
     violated if any links selected by a given expression cannot be resolved. The
     optional @mediatype attribute further constrains the link target to have the
     specified mediatype (xml, json, text). The optional attributes @minCount,
-    @maxCount, @count constraint the number of items returned by the expression
+    @maxCount, @count constrain the number of items returned by the expression
     producing the links.    
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"

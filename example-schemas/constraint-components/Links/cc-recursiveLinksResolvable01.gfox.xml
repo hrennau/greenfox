@@ -17,7 +17,8 @@
             <file foxpath="airports.xml" id="airportsFileShape">
                 <links xpath="//@href"
                        recursive="true"
-                       msg="Some recursive links cannot be resolved."/>
+                       msg="Some recursive links cannot be resolved."
+                       minCount="60" minCountMsg="Less links than expected"/>
             </file>
         </folder>
     </domain>
