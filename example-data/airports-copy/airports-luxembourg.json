@@ -6,7 +6,9 @@
       "id":629,
       "iata":"LUX",
       "icao":"ELLX",
-      "href":"luxembourg\/airport-lux.xml"
+      "latitude":49.6233333,
+      "longitude":6.2044444,
+      "href":"luxembourg\/airport-lux.json"
     }
   }
 }
