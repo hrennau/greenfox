@@ -20,6 +20,79 @@ import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-r
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+declare function f:resolveRelationship($relName as xs:string,
+                                       $resultFormat as xs:string, (: uri | doc | relobject :)
+                                       $filePath as xs:string,
+                                       $context as map(xs:string, item()*))
+        as item()* {
+    
+    let $relDef := $context?_resourceRelationships($relName)
+    let $connector := $relDef?connector
+    let $values :=
+        if (empty($relDef)) then error()
+        else if ($connector eq 'foxpath') then
+            f:resolveRelationship_foxpath($relDef, $resultFormat, $filePath, $context)
+        else error()
+    return
+        $values
+};
+
+declare function f:resolveRelationship_foxpath(
+                                       $resourceRelationship as map(xs:string, item()*),
+                                       $resultFormat as xs:string,  (: uri | doc | relobject :)
+                                       $filePath as xs:string,
+                                       $context as map(xs:string, item()*))
+        as item()* {
+    let $evaluationContext := $context?_evaluationContext
+    let $reqDocs := $context?_reqDocs
+    
+    let $linkContextDoc := $reqDocs?doc
+    let $foxpath := $resourceRelationship?foxpath 
+    let $linkContextXP := $resourceRelationship?linkContextXP
+    let $linkTargetXP := $resourceRelationship?linkTargetXP
+    
+    let $linkContextItems :=
+        if (not($linkContextXP)) then $filePath
+        else i:evaluateXPath($linkContextXP, $linkContextDoc, $evaluationContext, true(), true())
+
+    (: For each source context node ... :)
+    for $linkContextItem in $linkContextItems
+    
+    (: Determine target resources (file system level) :)
+    let $targets := f:evaluateFoxpath($foxpath, $linkContextItem, $evaluationContext, true())
+    for $target in $targets
+    let $targetContextNode :=
+        if ($target instance of node()) then $target
+        else if ($linkTargetXP) then doc($target)
+        else doc($target)
+        (: _TO_DO_ Parse only if required - due to mediatype etc. :)
+    let $_DEBUG := trace(count($targetContextNode), '_COUNT_TARGET_CONTEXT_NODES: ')    
+    let $targetNodes :=
+        if (not($linkTargetXP)) then ()
+        else 
+            let $_DEBUG := trace($linkTargetXP, '_LINK_TARGET_XP: ')
+            let $evaluationContextNext := map:put($evaluationContext, QName('', 'linkContext'), $linkContextItem)
+            return
+                i:evaluateXPath($linkTargetXP, $targetContextNode, $evaluationContextNext, true(), true())
+    let $sourceNode := 
+        if (not($linkContextXP)) then '#root'
+        else $linkContextItem
+    let $uri :=
+        if ($target instance of xs:anyAtomicType) then $target
+        else if ($target instance of node()) then
+            let $baseURI := $target/base-uri(.)
+            return $baseURI
+    return trace(
+        map:merge((
+            map:entry('type', 'relObject'),
+            map:entry('sourceNode', $sourceNode),
+            map:entry('uri', $uri),
+            if (not($targetNodes)) then () else
+                map:entry('targetNodes', $targetNodes)
+        )) , '_REL_OBJECT: ')
+};
+
+
 (:~
  : Resolves a resource relationship name to a set of target resources. Resolution
  : context is the file path of the focus resource. The target resources may
@@ -127,7 +200,7 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
         
         let $linkContextXP := $setRel/@linkContextXP
         let $linkXP := $setRel/@linkXP
-        let $linkTargetXP := $setRel/@linkTargetXQ
+        let $linkTargetXP := $setRel/@linkTargetXP
         
         let $connector :=
             let $explicit := $setRel/@connector/string()
@@ -168,6 +241,6 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
  :)
 declare function f:getRelationshipNamesReferenced($components as element()*)
         as xs:string* {
-    $components//(@contextRel)
+    $components//(@rel, @contextRel)
     => distinct-values()
 };        

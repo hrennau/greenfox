@@ -104,6 +104,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:foxpath) | 
          element(gx:folderContent) |
          element(gx:docSimilar) | 
+         element(gx:contentCorrespondence) |
          element(gx:folderSimilar)
         return $component
         
@@ -176,6 +177,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
                                self::gx:links, 
                                self::gx:docSimilar, 
+                               self::gx:contentCorrespondence,
                                gx:validatorXPath, 
                                @validatorXPath), 
               $focusNodes/@xpath
@@ -198,6 +200,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                  self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
                                  self::gx:links,
                                  self::gx:docSimilar,
+                                 self::gx:contentCorrespondence,
                                  gx:validatorXPath,
                                  @validatorXPath),
                 $focusNodes/@xpath
@@ -282,7 +285,8 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                 self::gx:xpath/@expr,
                 self::gx:validatorXPath,
                 @xpath,
-                @*[ends-with(name(), 'XPath')]
+                @*[ends-with(name(), 'XPath')],
+                @*[ends-with(name(), 'XP')]
             )
         ) => distinct-values()            
         let $foxpathExpressions := (

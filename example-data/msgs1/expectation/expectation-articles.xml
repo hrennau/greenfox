@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example code list; you can use any structure, as the codes are referenced by XPath -->
+<articles>
+    <article id="a101" name="name-a101" category="garden" price="1101"/>
+    <article id="a102" name="name-a102" category="garden" price="1102"/>    
+    <article id="a103" name="name-a103" category="house" price="1103"/>    
+</articles>

@@ -9,6 +9,7 @@
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+
     "docSimilarConstraint.xqm",
     "evaluationContextManager.xqm",
     "expressionValueConstraint.xqm",
@@ -19,7 +20,11 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "mediatypeConstraint.xqm",
     "resourcePropertiesConstraint.xqm",    
     "xsdValidator.xqm";
-    
+
+import module namespace concord="http://www.greenfox.org/ns/xquery-functions/concord" at
+
+    "concordConstraint.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -146,6 +151,7 @@ declare function f:validateFileInstanceComponents($filePath as xs:string,
             case $links as element(gx:links) return i:validateLinks($filePath, $links, $contextItem, $contextDoc, $context)                
             case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
             case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $docSimilar, $contextItem, $contextDoc, $context)
+            case $concord as element(gx:contentCorrespondence) return concord:validateConcord($filePath, $concord, $contextItem, $contextDoc, $context)
             
             case $ifMediatype as element(gx:ifMediatype) return
                 $ifMediatype

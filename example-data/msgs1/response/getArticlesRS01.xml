@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<getArticlesRS>
+    <returnCode>OK</returnCode>
+    <articles>
+        <article>
+            <articleID>a101</articleID>
+            <articleName>name-a101</articleName>
+            <articlePrice>1101</articlePrice>       
+            <category>garden</category>
+        </article>
+        <article>
+            <articleID>a103</articleID>
+            <articleName>name-a103</articleName>
+            <articlePrice>1103.00</articlePrice>       
+            <category>house</category>
+        </article>
+    </articles>
+</getArticlesRS>
