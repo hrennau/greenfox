@@ -6,12 +6,16 @@
     "name":"Cork Airport",
     "city":"Cork",
     "country":"Ireland",
-    "latitude":51.84130096435547,
-    "longitude":-8.491109848022461,
-    "altitude":502,
-    "timezone":0,
-    "dst":"E",
-    "tzTimezone":"Europe\/Dublin",
+    "geo":{
+      "latitude":51.84130096435547,
+      "longitude":-8.491109848022461,
+      "altitude":502
+    },
+    "temporal":{
+      "timezone":0,
+      "tzTimezone":"Europe\/Dublin",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

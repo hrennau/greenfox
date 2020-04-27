@@ -6,12 +6,16 @@
     "name":"Kuusamo Airport",
     "city":"Kuusamo",
     "country":"Finland",
-    "latitude":65.987602233887,
-    "longitude":29.239400863647,
-    "altitude":866,
-    "timezone":2,
-    "dst":"E",
-    "tzTimezone":"Europe\/Helsinki",
+    "geo":{
+      "latitude":65.987602233887,
+      "longitude":29.239400863647,
+      "altitude":866
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

@@ -6,12 +6,16 @@
     "name":"Donegal Airport",
     "city":"Dongloe",
     "country":"Ireland",
-    "latitude":55.0442008972168,
-    "longitude":-8.340999603271484,
-    "altitude":30,
-    "timezone":0,
-    "dst":"E",
-    "tzTimezone":"Europe\/Dublin",
+    "geo":{
+      "latitude":55.0442008972168,
+      "longitude":-8.340999603271484,
+      "altitude":30
+    },
+    "temporal":{
+      "timezone":0,
+      "tzTimezone":"Europe\/Dublin",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

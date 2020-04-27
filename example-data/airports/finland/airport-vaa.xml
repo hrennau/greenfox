@@ -2,12 +2,16 @@
   <name>Vaasa Airport</name>
   <city>Vaasa</city>
   <country>Finland</country>
-  <latitude>63.050701141357</latitude>
-  <longitude>21.762199401855</longitude>
-  <altitude>19</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>63.050701141357</latitude>
+    <longitude>21.762199401855</longitude>
+    <altitude>19</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

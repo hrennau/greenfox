@@ -41,12 +41,16 @@
         "name":"Grønholt Hillerød Airport",
         "city":"Gronholt",
         "country":"Denmark",
-        "latitude":55.94139862060547,
-        "longitude":12.382200241088867,
-        "altitude":97,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":55.94139862060547,
+          "longitude":12.382200241088867,
+          "altitude":97
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -88,12 +92,16 @@
         "name":"Kruså-Padborg Airport",
         "city":"Krusa-padborg",
         "country":"Denmark",
-        "latitude":54.87030029296875,
-        "longitude":9.279009819030762,
-        "altitude":88,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":54.87030029296875,
+          "longitude":9.279009819030762,
+          "altitude":88
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -151,12 +159,16 @@
         "name":"Kolding Vamdrup Airfield",
         "city":"Kolding",
         "country":"Denmark",
-        "latitude":55.436298,
-        "longitude":9.33092,
-        "altitude":143,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":55.436298,
+          "longitude":9.33092,
+          "altitude":143
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -166,12 +178,16 @@
         "name":"Vesthimmerlands Flyveplads",
         "city":"Vesthimmerland",
         "country":"Denmark",
-        "latitude":56.846901,
-        "longitude":9.45861,
-        "altitude":119,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":56.846901,
+          "longitude":9.45861,
+          "altitude":119
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -197,12 +213,16 @@
         "name":"Samsø Airport",
         "city":"Samsoe",
         "country":"Denmark",
-        "latitude":55.88949966430664,
-        "longitude":10.613699913024902,
-        "altitude":1,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":55.88949966430664,
+          "longitude":10.613699913024902,
+          "altitude":1
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -220,12 +240,16 @@
         "name":"Kalundborg Airport",
         "city":"Kalundborg",
         "country":"Denmark",
-        "latitude":55.70029830932617,
-        "longitude":11.25,
-        "altitude":1,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":55.70029830932617,
+          "longitude":11.25,
+          "altitude":1
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -235,12 +259,16 @@
         "name":"Tønder Airport",
         "city":"Toender",
         "country":"Denmark",
-        "latitude":54.9296989440918,
-        "longitude":8.840570449829102,
-        "altitude":1,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":54.9296989440918,
+          "longitude":8.840570449829102,
+          "altitude":1
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -250,12 +278,16 @@
         "name":"Endelave Flyveplads",
         "city":"Endelage",
         "country":"Denmark",
-        "latitude":55.7565,
-        "longitude":10.2485,
-        "altitude":15,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":55.7565,
+          "longitude":10.2485,
+          "altitude":15
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -265,12 +297,16 @@
         "name":"Herning Airport",
         "city":"Herning",
         "country":"Denmark",
-        "latitude":56.18470001220703,
-        "longitude":9.044449806213379,
-        "altitude":167,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"Europe\/Copenhagen",
+        "geo":{
+          "latitude":56.18470001220703,
+          "longitude":9.044449806213379,
+          "altitude":167
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"Europe\/Copenhagen",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -280,12 +316,16 @@
         "name":"Nordborg Flyveplads",
         "city":"Nordborg",
         "country":"Denmark",
-        "latitude":55.07485,
-        "longitude":9.753379,
-        "altitude":0,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":55.07485,
+          "longitude":9.753379,
+          "altitude":0
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -295,12 +335,16 @@
         "name":"Ærø Airport",
         "city":"Aero",
         "country":"Denmark",
-        "latitude":54.85279846191406,
-        "longitude":10.456399917602539,
-        "altitude":3,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":54.85279846191406,
+          "longitude":10.456399917602539,
+          "altitude":3
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -310,12 +354,16 @@
         "name":"El Fuentero Airport",
         "city":"Svenborg",
         "country":"Denmark",
-        "latitude":7.099999904632568,
-        "longitude":-69.58333587646484,
-        "altitude":420,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":7.099999904632568,
+          "longitude":-69.58333587646484,
+          "altitude":420
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -325,12 +373,16 @@
         "name":"Anholt Airport",
         "city":"Anholt",
         "country":"Denmark",
-        "latitude":56.698898315399994,
-        "longitude":11.5558996201,
-        "altitude":23,
-        "timezone":1,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":56.698898315399994,
+          "longitude":11.5558996201,
+          "altitude":23
+        },
+        "temporal":{
+          "timezone":1,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -340,12 +392,16 @@
         "name":"Aarhus Seaplne Terminal",
         "city":"Aarhus",
         "country":"Denmark",
-        "latitude":56.151717,
-        "longitude":10.248428,
-        "altitude":0,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":56.151717,
+          "longitude":10.248428,
+          "altitude":0
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       }

@@ -6,12 +6,16 @@
     "name":"Halli Airport",
     "city":"Halli",
     "country":"Finland",
-    "latitude":61.856039,
-    "longitude":24.786686,
-    "altitude":479,
-    "timezone":2,
-    "dst":"E",
-    "tzTimezone":"Europe\/Helsinki",
+    "geo":{
+      "latitude":61.856039,
+      "longitude":24.786686,
+      "altitude":479
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

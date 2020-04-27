@@ -2,12 +2,16 @@
   <name>Cork Airport</name>
   <city>Cork</city>
   <country>Ireland</country>
-  <latitude>51.84130096435547</latitude>
-  <longitude>-8.491109848022461</longitude>
-  <altitude>502</altitude>
-  <timezone>0</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Dublin</tzTimezone>
+  <geo>
+    <latitude>51.84130096435547</latitude>
+    <longitude>-8.491109848022461</longitude>
+    <altitude>502</altitude>
+  </geo>
+  <temporal>
+    <timezone>0</timezone>
+    <tzTimezone>Europe/Dublin</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

@@ -6,12 +6,16 @@
     "name":"Skive Airport",
     "city":"Skive",
     "country":"Denmark",
-    "latitude":56.550201416015625,
-    "longitude":9.172980308532715,
-    "altitude":74,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":56.550201416015625,
+      "longitude":9.172980308532715,
+      "altitude":74
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

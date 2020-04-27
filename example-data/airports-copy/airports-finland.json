@@ -17,12 +17,16 @@
         "name":"Eura Airport",
         "city":"Eura",
         "country":"Finland",
-        "latitude":61.1161003112793,
-        "longitude":22.201400756835938,
-        "altitude":259,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.1161003112793,
+          "longitude":22.201400756835938,
+          "altitude":259
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -56,12 +60,16 @@
         "name":"Hameenkyro Airport",
         "city":"Hameenkyro",
         "country":"Finland",
-        "latitude":61.689701080322266,
-        "longitude":23.073699951171875,
-        "altitude":449,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.689701080322266,
+          "longitude":23.073699951171875,
+          "altitude":449
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -71,12 +79,16 @@
         "name":"Hanko Airport",
         "city":"Hanko",
         "country":"Finland",
-        "latitude":59.848899841308594,
-        "longitude":23.083599090576172,
-        "altitude":20,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":59.848899841308594,
+          "longitude":23.083599090576172,
+          "altitude":20
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -94,12 +106,16 @@
         "name":"Kiikala Airport",
         "city":"Kikala",
         "country":"Finland",
-        "latitude":60.4625015259,
-        "longitude":23.6525001526,
-        "altitude":381,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":60.4625015259,
+          "longitude":23.6525001526,
+          "altitude":381
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -109,12 +125,16 @@
         "name":"Immola Airport",
         "city":"Immola",
         "country":"Finland",
-        "latitude":61.24919891357422,
-        "longitude":28.90369987487793,
-        "altitude":338,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.24919891357422,
+          "longitude":28.90369987487793,
+          "altitude":338
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -196,12 +216,16 @@
         "name":"Kemijarvi Airport",
         "city":"Kemijarvi",
         "country":"Finland",
-        "latitude":66.712898,
-        "longitude":27.156799,
-        "altitude":692,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":66.712898,
+          "longitude":27.156799,
+          "altitude":692
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -259,12 +283,16 @@
         "name":"Menkijarvi Airport",
         "city":"Menkijarvi",
         "country":"Finland",
-        "latitude":62.94670104980469,
-        "longitude":23.51889991760254,
-        "altitude":331,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":62.94670104980469,
+          "longitude":23.51889991760254,
+          "altitude":331
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -282,12 +310,16 @@
         "name":"Nummela Airport",
         "city":"Nummela",
         "country":"Finland",
-        "latitude":60.333900451699996,
-        "longitude":24.2964000702,
-        "altitude":367,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":60.333900451699996,
+          "longitude":24.2964000702,
+          "altitude":367
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -305,12 +337,16 @@
         "name":"Piikajarvi Airport",
         "city":"Piikajarvi",
         "country":"Finland",
-        "latitude":61.245601654052734,
-        "longitude":22.19339942932129,
-        "altitude":148,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.245601654052734,
+          "longitude":22.19339942932129,
+          "altitude":148
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -328,12 +364,16 @@
         "name":"Pudasjärvi Airport",
         "city":"Pudasjarvi",
         "country":"Finland",
-        "latitude":65.4021987915,
-        "longitude":26.946899414100002,
-        "altitude":397,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":65.4021987915,
+          "longitude":26.946899414100002,
+          "altitude":397
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -343,12 +383,16 @@
         "name":"Pyhäsalmi Airport",
         "city":"Pyhasalmi",
         "country":"Finland",
-        "latitude":63.7318992615,
-        "longitude":25.926300048799998,
-        "altitude":528,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":63.7318992615,
+          "longitude":25.926300048799998,
+          "altitude":528
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -358,12 +402,16 @@
         "name":"Raahe Pattijoki Airport",
         "city":"Pattijoki",
         "country":"Finland",
-        "latitude":64.6881027222,
-        "longitude":24.6958007812,
-        "altitude":118,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":64.6881027222,
+          "longitude":24.6958007812,
+          "altitude":118
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -373,12 +421,16 @@
         "name":"Rantasalmi Airport",
         "city":"Rantasalmi",
         "country":"Finland",
-        "latitude":62.0654983521,
-        "longitude":28.3565006256,
-        "altitude":292,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":62.0654983521,
+          "longitude":28.3565006256,
+          "altitude":292
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -396,12 +448,16 @@
         "name":"Rayskala Airport",
         "city":"Rayskala",
         "country":"Finland",
-        "latitude":60.74470138549805,
-        "longitude":24.107799530029297,
-        "altitude":407,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":60.74470138549805,
+          "longitude":24.107799530029297,
+          "altitude":407
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -419,12 +475,16 @@
         "name":"Selanpaa Airport",
         "city":"Selanpaa",
         "country":"Finland",
-        "latitude":61.062400817871094,
-        "longitude":26.798900604248047,
-        "altitude":417,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.062400817871094,
+          "longitude":26.798900604248047,
+          "altitude":417
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -450,12 +510,16 @@
         "name":"Teisko Airport",
         "city":"Teisko",
         "country":"Finland",
-        "latitude":61.7733,
-        "longitude":24.027,
-        "altitude":515,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":61.7733,
+          "longitude":24.027,
+          "altitude":515
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -513,12 +577,16 @@
         "name":"Hernesaari Heliport",
         "city":"Helsinki",
         "country":"Finland",
-        "latitude":60.14777755737305,
-        "longitude":24.9244441986084,
-        "altitude":7,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"Europe\/Helsinki",
+        "geo":{
+          "latitude":60.14777755737305,
+          "longitude":24.9244441986084,
+          "altitude":7
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"Europe\/Helsinki",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -528,12 +596,16 @@
         "name":"Kymi Airport",
         "city":"Kotka",
         "country":"Finland",
-        "latitude":60.5713996887207,
-        "longitude":26.896099090576172,
-        "altitude":223,
-        "timezone":2,
-        "dst":"E",
-        "tzTimezone":"\\N",
+        "geo":{
+          "latitude":60.5713996887207,
+          "longitude":26.896099090576172,
+          "altitude":223
+        },
+        "temporal":{
+          "timezone":2,
+          "tzTimezone":"\\N",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       }

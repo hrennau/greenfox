@@ -2,12 +2,16 @@
   <name>Enontekio Airport</name>
   <city>Enontekio</city>
   <country>Finland</country>
-  <latitude>68.362602233887</latitude>
-  <longitude>23.424299240112</longitude>
-  <altitude>1005</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>68.362602233887</latitude>
+    <longitude>23.424299240112</longitude>
+    <altitude>1005</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

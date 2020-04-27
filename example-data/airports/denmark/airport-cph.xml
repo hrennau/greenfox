@@ -2,12 +2,16 @@
   <name>Copenhagen Kastrup Airport</name>
   <city>Copenhagen</city>
   <country>Denmark</country>
-  <latitude>55.617900848389</latitude>
-  <longitude>12.656000137329</longitude>
-  <altitude>17</altitude>
-  <timezone>1</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <geo>
+    <latitude>55.617900848389</latitude>
+    <longitude>12.656000137329</longitude>
+    <altitude>17</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

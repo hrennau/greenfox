@@ -6,12 +6,16 @@
     "name":"Esbjerg Airport",
     "city":"Esbjerg",
     "country":"Denmark",
-    "latitude":55.525902,
-    "longitude":8.5534,
-    "altitude":97,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":55.525902,
+      "longitude":8.5534,
+      "altitude":97
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

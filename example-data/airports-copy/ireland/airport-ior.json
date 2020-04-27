@@ -6,12 +6,16 @@
     "name":"Inishmore Aerodrome",
     "city":"Inis Mor",
     "country":"Ireland",
-    "latitude":53.1067008972168,
-    "longitude":-9.653610229492188,
-    "altitude":24,
-    "timezone":0,
-    "dst":"U",
-    "tzTimezone":"Europe\/Dublin",
+    "geo":{
+      "latitude":53.1067008972168,
+      "longitude":-9.653610229492188,
+      "altitude":24
+    },
+    "temporal":{
+      "timezone":0,
+      "tzTimezone":"Europe\/Dublin",
+      "dst":"U"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

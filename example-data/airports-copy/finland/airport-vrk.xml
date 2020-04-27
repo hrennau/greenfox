@@ -2,12 +2,16 @@
   <name>Varkaus Airport</name>
   <city>Varkaus</city>
   <country>Finland</country>
-  <latitude>62.171100616455</latitude>
-  <longitude>27.868600845337</longitude>
-  <altitude>286</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>62.171100616455</latitude>
+    <longitude>27.868600845337</longitude>
+    <altitude>286</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

@@ -6,12 +6,16 @@
     "name":"Savonlinna Airport",
     "city":"Savonlinna",
     "country":"Finland",
-    "latitude":61.943099975586,
-    "longitude":28.945100784302,
-    "altitude":311,
-    "timezone":2,
-    "dst":"E",
-    "tzTimezone":"Europe\/Helsinki",
+    "geo":{
+      "latitude":61.943099975586,
+      "longitude":28.945100784302,
+      "altitude":311
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

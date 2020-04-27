@@ -6,12 +6,16 @@
     "name":"Skrydstrup Air Base",
     "city":"Skrydstrup",
     "country":"Denmark",
-    "latitude":55.221048,
-    "longitude":9.26702,
-    "altitude":141,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":55.221048,
+      "longitude":9.26702,
+      "altitude":141
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

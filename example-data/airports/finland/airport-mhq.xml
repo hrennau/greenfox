@@ -2,12 +2,16 @@
   <name>Mariehamn Airport</name>
   <city>Mariehamn</city>
   <country>Finland</country>
-  <latitude>60.122200012207</latitude>
-  <longitude>19.898199081421</longitude>
-  <altitude>17</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Mariehamn</tzTimezone>
+  <geo>
+    <latitude>60.122200012207</latitude>
+    <longitude>19.898199081421</longitude>
+    <altitude>17</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Mariehamn</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

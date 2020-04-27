@@ -32,6 +32,8 @@ declare function f:resolveRelationship($relName as xs:string,
         if (empty($relDef)) then error()
         else if ($connector eq 'foxpath') then
             f:resolveRelationship_foxpath($relDef, $resultFormat, $filePath, $context)
+        else if ($connector eq 'links') then
+            f:resolveRelationship_links($relDef, $resultFormat, $filePath, $context)
         else error()
     return
         $values
@@ -70,7 +72,6 @@ declare function f:resolveRelationship_foxpath(
     let $targetNodes :=
         if (not($linkTargetXP)) then ()
         else 
-            let $_DEBUG := trace($linkTargetXP, '_LINK_TARGET_XP: ')
             let $evaluationContextNext := map:put($evaluationContext, QName('', 'linkContext'), $linkContextItem)
             return
                 i:evaluateXPath($linkTargetXP, $targetContextNode, $evaluationContextNext, true(), true())
@@ -85,13 +86,50 @@ declare function f:resolveRelationship_foxpath(
     return trace(
         map:merge((
             map:entry('type', 'relObject'),
-            map:entry('sourceNode', $sourceNode),
+            map:entry('linkContextNode', $sourceNode),
             map:entry('uri', $uri),
             if (not($targetNodes)) then () else
-                map:entry('targetNodes', $targetNodes)
+                map:entry('linkTargetNodes', $targetNodes)
         )) , '_REL_OBJECT: ')
 };
 
+declare function f:resolveRelationship_links(
+                                       $resourceRelationship as map(xs:string, item()*),
+                                       $resultFormat as xs:string,  (: uri | doc | relobject :)
+                                       $filePath as xs:string,
+                                       $context as map(xs:string, item()*))
+        as item()* {
+    let $evaluationContext := $context?_evaluationContext
+    let $reqDocs := $context?_reqDocs
+    
+    let $linkContextExpr := $resourceRelationship?linkContextXP
+    let $linkExpr := $resourceRelationship?linkXP
+    let $linkTargetExpr := $resourceRelationship?linkTargetXP
+    let $mediatype := $resourceRelationship?mediatype
+    let $recursive := $resourceRelationship?recursive    
+    let $contextNode := $reqDocs?doc
+    
+    let $mediatype := if ($mediatype) then $mediatype
+                      else if ($linkTargetExpr) then 'xml' 
+                      else ()
+    
+    let $lrObjects := link:resolveLinks(
+                             $filePath,
+                             $contextNode,
+                             $linkContextExpr,
+                             $linkExpr,
+                             $linkTargetExpr,
+                             $mediatype,
+                             $recursive,
+                             $context)
+    return
+        $lrObjects
+        (:
+        if ($mediatype eq 'xml') then $lrObjects?targetResource
+        else if ($mediatype eq 'json') then $lrObjects?targetResource
+        else $lrObjects?uri
+        :)
+};   
 
 (:~
  : Resolves a resource relationship name to a set of target resources. Resolution

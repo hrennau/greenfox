@@ -2,12 +2,16 @@
   <name>Seinäjoki Airport</name>
   <city>Seinäjoki / Ilmajoki</city>
   <country>Finland</country>
-  <latitude>62.692101</latitude>
-  <longitude>22.8323</longitude>
-  <altitude>302</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>62.692101</latitude>
+    <longitude>22.8323</longitude>
+    <altitude>302</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

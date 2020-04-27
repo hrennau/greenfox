@@ -6,12 +6,16 @@
     "name":"Aarhus Airport",
     "city":"Aarhus",
     "country":"Denmark",
-    "latitude":56.2999992371,
-    "longitude":10.619000434899998,
-    "altitude":82,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":56.2999992371,
+      "longitude":10.619000434899998,
+      "altitude":82
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

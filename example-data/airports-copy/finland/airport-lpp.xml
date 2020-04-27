@@ -2,12 +2,16 @@
   <name>Lappeenranta Airport</name>
   <city>Lappeenranta</city>
   <country>Finland</country>
-  <latitude>61.044601</latitude>
-  <longitude>28.144743</longitude>
-  <altitude>349</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>61.044601</latitude>
+    <longitude>28.144743</longitude>
+    <altitude>349</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

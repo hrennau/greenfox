@@ -2,12 +2,16 @@
   <name>Aalborg Airport</name>
   <city>Aalborg</city>
   <country>Denmark</country>
-  <latitude>57.0927589138</latitude>
-  <longitude>9.84924316406</longitude>
-  <altitude>10</altitude>
-  <timezone>1</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Copenhagen</tzTimezone>
+  <geo>
+    <latitude>57.0927589138</latitude>
+    <longitude>9.84924316406</longitude>
+    <altitude>10</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

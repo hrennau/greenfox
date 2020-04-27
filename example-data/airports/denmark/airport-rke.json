@@ -6,12 +6,16 @@
     "name":"Copenhagen Roskilde Airport",
     "city":"Copenhagen",
     "country":"Denmark",
-    "latitude":55.585601806640625,
-    "longitude":12.131400108337402,
-    "altitude":146,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":55.585601806640625,
+      "longitude":12.131400108337402,
+      "altitude":146
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

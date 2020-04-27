@@ -154,12 +154,16 @@ declare function f:resolveLinksRC(
                         'errorCode': 'not_xml', 
                         'filepath': $filePath}
                 else 
-                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') return
+                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') 
+                    let $targetResource := i:fox-doc($uri)
+                    let $linkTargetNodes := f:getLinkTargetNodes($targetResource, $linkTargetExpr, $linkContextNode, $context)  
+                    return
                     map{'type': 'linkResolutionObject',
                         'linkContextNode': $linkContextNode,                    
                         'linkValue': string($linkValue),
                         'uri': $uri, 
-                        'targetResource': i:fox-doc($uri), 
+                        'targetResource': $targetResource,
+                        'linkTargetNodes': $linkTargetNodes,
                         'filepath': $filePath}
             else
                 if (i:fox-resource-exists($uri)) then
@@ -193,6 +197,18 @@ declare function f:resolveLinksRC(
             ! f:resolveLinksRC(?uri, ?targetResource, $linkContextExpr, $linkExpr, $linkTargetExpr, $mediatype, $recursive, $context, $newPathsSofar, $newErrorsSofar)            
     )
 };
+
+declare function f:getLinkTargetNodes($targetResource as node(), 
+                                      $linkTargetExpr as xs:string?, 
+                                      $linkContextItem as node(), 
+                                      $context as map(xs:string, item()*))
+        as node()* {
+    if (not($linkTargetExpr)) then $targetResource
+    else 
+        let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
+        return
+            i:evaluateXPath($linkTargetExpr, $targetResource, $evaluationContextNext, true(), true())        
+};        
 
 (:~
  : Resolves the link expression in the context of an XDM node to a value.

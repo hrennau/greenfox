@@ -6,12 +6,16 @@
     "name":"Ireland West Knock Airport",
     "city":"Connaught",
     "country":"Ireland",
-    "latitude":53.910301208496094,
-    "longitude":-8.818490028381348,
-    "altitude":665,
-    "timezone":0,
-    "dst":"E",
-    "tzTimezone":"Europe\/Dublin",
+    "geo":{
+      "latitude":53.910301208496094,
+      "longitude":-8.818490028381348,
+      "altitude":665
+    },
+    "temporal":{
+      "timezone":0,
+      "tzTimezone":"Europe\/Dublin",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

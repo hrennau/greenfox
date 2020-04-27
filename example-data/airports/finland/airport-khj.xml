@@ -2,12 +2,16 @@
   <name>Kauhajoki Airport</name>
   <city>Kauhajoki</city>
   <country>Finland</country>
-  <latitude>62.4625015259</latitude>
-  <longitude>22.3931007385</longitude>
-  <altitude>407</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>62.4625015259</latitude>
+    <longitude>22.3931007385</longitude>
+    <altitude>407</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

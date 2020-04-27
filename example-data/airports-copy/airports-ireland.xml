@@ -8,12 +8,16 @@
     <name>Casement Air Base</name>
     <city>Casement</city>
     <country>Ireland</country>
-    <latitude>53.301700592</latitude>
-    <longitude>-6.451330184940001</longitude>
-    <altitude>319</altitude>
-    <timezone>0</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Dublin</tzTimezone>
+    <geo>
+      <latitude>53.301700592</latitude>
+      <longitude>-6.451330184940001</longitude>
+      <altitude>319</altitude>
+    </geo>
+    <temporal>
+      <timezone>0</timezone>
+      <tzTimezone>Europe/Dublin</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -25,12 +29,16 @@
     <name>Weston Airport</name>
     <city>Leixlip</city>
     <country>Ireland</country>
-    <latitude>53.3521995544</latitude>
-    <longitude>-6.48611021042</longitude>
-    <altitude>150</altitude>
-    <timezone>0</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Dublin</tzTimezone>
+    <geo>
+      <latitude>53.3521995544</latitude>
+      <longitude>-6.48611021042</longitude>
+      <altitude>150</altitude>
+    </geo>
+    <temporal>
+      <timezone>0</timezone>
+      <tzTimezone>Europe/Dublin</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -42,12 +50,16 @@
     <name>Newcastle Aerodrome</name>
     <city>Newcastle</city>
     <country>Ireland</country>
-    <latitude>53.07109832763672</latitude>
-    <longitude>-6.0452799797058105</longitude>
-    <altitude>1</altitude>
-    <timezone>0</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Dublin</tzTimezone>
+    <geo>
+      <latitude>53.07109832763672</latitude>
+      <longitude>-6.0452799797058105</longitude>
+      <altitude>1</altitude>
+    </geo>
+    <temporal>
+      <timezone>0</timezone>
+      <tzTimezone>Europe/Dublin</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>

@@ -6,12 +6,16 @@
     "name":"Mikkeli Airport",
     "city":"Mikkeli",
     "country":"Finland",
-    "latitude":61.6866,
-    "longitude":27.201799,
-    "altitude":329,
-    "timezone":2,
-    "dst":"E",
-    "tzTimezone":"Europe\/Helsinki",
+    "geo":{
+      "latitude":61.6866,
+      "longitude":27.201799,
+      "altitude":329
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

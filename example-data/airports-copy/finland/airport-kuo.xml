@@ -2,12 +2,16 @@
   <name>Kuopio Airport</name>
   <city>Kuopio</city>
   <country>Finland</country>
-  <latitude>63.007099151611</latitude>
-  <longitude>27.797800064087</longitude>
-  <altitude>323</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>63.007099151611</latitude>
+    <longitude>27.797800064087</longitude>
+    <altitude>323</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

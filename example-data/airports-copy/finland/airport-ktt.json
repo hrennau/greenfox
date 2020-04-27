@@ -6,12 +6,16 @@
     "name":"Kittilä Airport",
     "city":"Kittila",
     "country":"Finland",
-    "latitude":67.700996398926,
-    "longitude":24.846799850464,
-    "altitude":644,
-    "timezone":2,
-    "dst":"E",
-    "tzTimezone":"Europe\/Helsinki",
+    "geo":{
+      "latitude":67.700996398926,
+      "longitude":24.846799850464,
+      "altitude":644
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

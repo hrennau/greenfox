@@ -2,12 +2,16 @@
   <name>Sodankyla Airport</name>
   <city>Sodankyla</city>
   <country>Finland</country>
-  <latitude>67.3949966431</latitude>
-  <longitude>26.6191005707</longitude>
-  <altitude>602</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>67.3949966431</latitude>
+    <longitude>26.6191005707</longitude>
+    <altitude>602</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

@@ -2,12 +2,16 @@
   <name>Oulu Airport</name>
   <city>Oulu</city>
   <country>Finland</country>
-  <latitude>64.930099487305</latitude>
-  <longitude>25.354600906372</longitude>
-  <altitude>47</altitude>
-  <timezone>2</timezone>
-  <dst>E</dst>
-  <tzTimezone>Europe/Helsinki</tzTimezone>
+  <geo>
+    <latitude>64.930099487305</latitude>
+    <longitude>25.354600906372</longitude>
+    <altitude>47</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
   <type>airport</type>
   <source1>OurAirports</source1>
 </airport>

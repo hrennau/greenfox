@@ -6,12 +6,16 @@
     "name":"Sønderborg Airport",
     "city":"Soenderborg",
     "country":"Denmark",
-    "latitude":54.96440124511719,
-    "longitude":9.791729927062988,
-    "altitude":24,
-    "timezone":1,
-    "dst":"E",
-    "tzTimezone":"Europe\/Copenhagen",
+    "geo":{
+      "latitude":54.96440124511719,
+      "longitude":9.791729927062988,
+      "altitude":24
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
     "type":"airport",
     "source1":"OurAirports"
   }

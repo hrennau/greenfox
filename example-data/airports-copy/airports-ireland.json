@@ -49,12 +49,16 @@
         "name":"Casement Air Base",
         "city":"Casement",
         "country":"Ireland",
-        "latitude":53.301700592,
-        "longitude":-6.451330184940001,
-        "altitude":319,
-        "timezone":0,
-        "dst":"E",
-        "tzTimezone":"Europe\/Dublin",
+        "geo":{
+          "latitude":53.301700592,
+          "longitude":-6.451330184940001,
+          "altitude":319
+        },
+        "temporal":{
+          "timezone":0,
+          "tzTimezone":"Europe\/Dublin",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -96,12 +100,16 @@
         "name":"Weston Airport",
         "city":"Leixlip",
         "country":"Ireland",
-        "latitude":53.3521995544,
-        "longitude":-6.48611021042,
-        "altitude":150,
-        "timezone":0,
-        "dst":"E",
-        "tzTimezone":"Europe\/Dublin",
+        "geo":{
+          "latitude":53.3521995544,
+          "longitude":-6.48611021042,
+          "altitude":150
+        },
+        "temporal":{
+          "timezone":0,
+          "tzTimezone":"Europe\/Dublin",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },
@@ -143,12 +151,16 @@
         "name":"Newcastle Aerodrome",
         "city":"Newcastle",
         "country":"Ireland",
-        "latitude":53.07109832763672,
-        "longitude":-6.0452799797058105,
-        "altitude":1,
-        "timezone":0,
-        "dst":"E",
-        "tzTimezone":"Europe\/Dublin",
+        "geo":{
+          "latitude":53.07109832763672,
+          "longitude":-6.0452799797058105,
+          "altitude":1
+        },
+        "temporal":{
+          "timezone":0,
+          "tzTimezone":"Europe\/Dublin",
+          "dst":"E"
+        },
         "type":"airport",
         "source1":"OurAirports"
       },

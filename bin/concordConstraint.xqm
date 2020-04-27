@@ -72,8 +72,8 @@ declare function f:validateConcord($contextFilePath as xs:string,
         
         (: Repeat for each instance of the relationship (mapping of a source node to a target resource) :)
         for $relObject in $relObjects
-        let $sourceNode := $relObject?sourceNode
-        let $targetNodes := $relObject?targetNodes        
+        let $sourceNode := $relObject?linkContextNode
+        let $targetNodes := $relObject?linkTargetNodes        
         let $result :=
             f:validateExpressionValue_cmpExpr($sourceExpr, $sourceNode,
                                               $targetExpr, $targetNodes,
@@ -82,9 +82,11 @@ declare function f:validateConcord($contextFilePath as xs:string,
                                               $context,  
                                               $constraint, 
                                               $contextInfo)
+                                              (:
         let $_DEBUG := trace($sourceNode,  '___SOURCE_NODE: ')                                              
         let $_DEBUG := trace($targetNodes, '___TARGET_NODES: ')
         let $_DEBUG := trace($result, '___RESULT: ')
+        :)
         return $result                                              
     return $results
 };
@@ -107,7 +109,7 @@ declare function f:validateExpressionValue_cmpExpr($sourceExpr as xs:string,
     let $useDatatype := $constraintElem/@useDatatype/resolve-QName(., ..)
         
     let $evaluationContext := $context?_evaluationContext   
-    let $sourceItemsRaw := i:evaluateXPath($sourceExpr, $sourceContextNode, $evaluationContext, true(), true())
+    let $sourceItemsRaw := trace( i:evaluateXPath($sourceExpr, $sourceContextNode, $evaluationContext, true(), true()) , '_SOURCE_ITEMS_RAW: ')
     
     (: Expr value augmented (if useDatatype specified :)
     let $sourceItems := 

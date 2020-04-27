@@ -4,12 +4,16 @@
     <name>Eura Airport</name>
     <city>Eura</city>
     <country>Finland</country>
-    <latitude>61.1161003112793</latitude>
-    <longitude>22.201400756835938</longitude>
-    <altitude>259</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.1161003112793</latitude>
+      <longitude>22.201400756835938</longitude>
+      <altitude>259</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -20,12 +24,16 @@
     <name>Hameenkyro Airport</name>
     <city>Hameenkyro</city>
     <country>Finland</country>
-    <latitude>61.689701080322266</latitude>
-    <longitude>23.073699951171875</longitude>
-    <altitude>449</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.689701080322266</latitude>
+      <longitude>23.073699951171875</longitude>
+      <altitude>449</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -33,12 +41,16 @@
     <name>Hanko Airport</name>
     <city>Hanko</city>
     <country>Finland</country>
-    <latitude>59.848899841308594</latitude>
-    <longitude>23.083599090576172</longitude>
-    <altitude>20</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>59.848899841308594</latitude>
+      <longitude>23.083599090576172</longitude>
+      <altitude>20</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -47,12 +59,16 @@
     <name>Kiikala Airport</name>
     <city>Kikala</city>
     <country>Finland</country>
-    <latitude>60.4625015259</latitude>
-    <longitude>23.6525001526</longitude>
-    <altitude>381</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>60.4625015259</latitude>
+      <longitude>23.6525001526</longitude>
+      <altitude>381</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -60,12 +76,16 @@
     <name>Immola Airport</name>
     <city>Immola</city>
     <country>Finland</country>
-    <latitude>61.24919891357422</latitude>
-    <longitude>28.90369987487793</longitude>
-    <altitude>338</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.24919891357422</latitude>
+      <longitude>28.90369987487793</longitude>
+      <altitude>338</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -82,12 +102,16 @@
     <name>Kemijarvi Airport</name>
     <city>Kemijarvi</city>
     <country>Finland</country>
-    <latitude>66.712898</latitude>
-    <longitude>27.156799</longitude>
-    <altitude>692</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>66.712898</latitude>
+      <longitude>27.156799</longitude>
+      <altitude>692</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -101,12 +125,16 @@
     <name>Menkijarvi Airport</name>
     <city>Menkijarvi</city>
     <country>Finland</country>
-    <latitude>62.94670104980469</latitude>
-    <longitude>23.51889991760254</longitude>
-    <altitude>331</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>62.94670104980469</latitude>
+      <longitude>23.51889991760254</longitude>
+      <altitude>331</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -115,12 +143,16 @@
     <name>Nummela Airport</name>
     <city>Nummela</city>
     <country>Finland</country>
-    <latitude>60.333900451699996</latitude>
-    <longitude>24.2964000702</longitude>
-    <altitude>367</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>60.333900451699996</latitude>
+      <longitude>24.2964000702</longitude>
+      <altitude>367</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -129,12 +161,16 @@
     <name>Piikajarvi Airport</name>
     <city>Piikajarvi</city>
     <country>Finland</country>
-    <latitude>61.245601654052734</latitude>
-    <longitude>22.19339942932129</longitude>
-    <altitude>148</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.245601654052734</latitude>
+      <longitude>22.19339942932129</longitude>
+      <altitude>148</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -143,12 +179,16 @@
     <name>Pudasjärvi Airport</name>
     <city>Pudasjarvi</city>
     <country>Finland</country>
-    <latitude>65.4021987915</latitude>
-    <longitude>26.946899414100002</longitude>
-    <altitude>397</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>65.4021987915</latitude>
+      <longitude>26.946899414100002</longitude>
+      <altitude>397</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -156,12 +196,16 @@
     <name>Pyhäsalmi Airport</name>
     <city>Pyhasalmi</city>
     <country>Finland</country>
-    <latitude>63.7318992615</latitude>
-    <longitude>25.926300048799998</longitude>
-    <altitude>528</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>63.7318992615</latitude>
+      <longitude>25.926300048799998</longitude>
+      <altitude>528</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -169,12 +213,16 @@
     <name>Raahe Pattijoki Airport</name>
     <city>Pattijoki</city>
     <country>Finland</country>
-    <latitude>64.6881027222</latitude>
-    <longitude>24.6958007812</longitude>
-    <altitude>118</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>64.6881027222</latitude>
+      <longitude>24.6958007812</longitude>
+      <altitude>118</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -182,12 +230,16 @@
     <name>Rantasalmi Airport</name>
     <city>Rantasalmi</city>
     <country>Finland</country>
-    <latitude>62.0654983521</latitude>
-    <longitude>28.3565006256</longitude>
-    <altitude>292</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>62.0654983521</latitude>
+      <longitude>28.3565006256</longitude>
+      <altitude>292</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -196,12 +248,16 @@
     <name>Rayskala Airport</name>
     <city>Rayskala</city>
     <country>Finland</country>
-    <latitude>60.74470138549805</latitude>
-    <longitude>24.107799530029297</longitude>
-    <altitude>407</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>60.74470138549805</latitude>
+      <longitude>24.107799530029297</longitude>
+      <altitude>407</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -210,12 +266,16 @@
     <name>Selanpaa Airport</name>
     <city>Selanpaa</city>
     <country>Finland</country>
-    <latitude>61.062400817871094</latitude>
-    <longitude>26.798900604248047</longitude>
-    <altitude>417</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.062400817871094</latitude>
+      <longitude>26.798900604248047</longitude>
+      <altitude>417</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -225,12 +285,16 @@
     <name>Teisko Airport</name>
     <city>Teisko</city>
     <country>Finland</country>
-    <latitude>61.7733</latitude>
-    <longitude>24.027</longitude>
-    <altitude>515</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>61.7733</latitude>
+      <longitude>24.027</longitude>
+      <altitude>515</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -244,12 +308,16 @@
     <name>Hernesaari Heliport</name>
     <city>Helsinki</city>
     <country>Finland</country>
-    <latitude>60.14777755737305</latitude>
-    <longitude>24.9244441986084</longitude>
-    <altitude>7</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <geo>
+      <latitude>60.14777755737305</latitude>
+      <longitude>24.9244441986084</longitude>
+      <altitude>7</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>Europe/Helsinki</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
@@ -257,12 +325,16 @@
     <name>Kymi Airport</name>
     <city>Kotka</city>
     <country>Finland</country>
-    <latitude>60.5713996887207</latitude>
-    <longitude>26.896099090576172</longitude>
-    <altitude>223</altitude>
-    <timezone>2</timezone>
-    <dst>E</dst>
-    <tzTimezone>\N</tzTimezone>
+    <geo>
+      <latitude>60.5713996887207</latitude>
+      <longitude>26.896099090576172</longitude>
+      <altitude>223</altitude>
+    </geo>
+    <temporal>
+      <timezone>2</timezone>
+      <tzTimezone>\N</tzTimezone>
+      <dst>E</dst>
+    </temporal>
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
