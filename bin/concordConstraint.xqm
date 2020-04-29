@@ -61,6 +61,8 @@ declare function f:validateConcord($contextFilePath as xs:string,
     (: Resolve relationship to a sequence of relObjects :)
     let $relObjects := trace(i:resolveRelationship($rel, 'relobject', $contextFilePath, $context) , '_REL_OBJECTS: ')
     
+    let $results_count := f:validateConcordCount($relObjects, $shape, $contextInfo)
+    
     let $evaluationContext := $context?_evaluationContext    
     let $results := 
         (: Loop over constraints ... :)
@@ -75,33 +77,33 @@ declare function f:validateConcord($contextFilePath as xs:string,
         let $sourceNode := $relObject?linkContextNode
         let $targetNodes := $relObject?linkTargetNodes        
         let $result :=
-            f:validateExpressionValue_cmpExpr($sourceExpr, $sourceNode,
-                                              $targetExpr, $targetNodes,
-                                              $corr, $quantifier,
-                                              $contextFilePath, $contextDoc,                   
-                                              $context,  
-                                              $constraint, 
-                                              $contextInfo)
+            f:validateConcordValues($sourceExpr, $sourceNode,
+                                    $targetExpr, $targetNodes,
+                                    $corr, $quantifier,
+                                    $contextFilePath, $contextDoc,                   
+                                    $context,  
+                                    $constraint, 
+                                    $contextInfo)
                                               (:
         let $_DEBUG := trace($sourceNode,  '___SOURCE_NODE: ')                                              
         let $_DEBUG := trace($targetNodes, '___TARGET_NODES: ')
         let $_DEBUG := trace($result, '___RESULT: ')
         :)
         return $result                                              
-    return $results
+    return ($results, $results_count)
 };
 
-declare function f:validateExpressionValue_cmpExpr($sourceExpr as xs:string,
-                                                   $sourceContextNode as node(),
-                                                   $targetExpr as xs:string,
-                                                   $targetContextNodes as node()*,
-                                                   $corr as xs:string,
-                                                   $quantifier as xs:string,
-                                                   $contextFilePath as xs:string,
-                                                   $contextDoc as document-node()?,                                                   
-                                                   $context as map(*),
-                                                   $constraintElem as element(),
-                                                   $contextInfo as map(xs:string, item()*))
+declare function f:validateConcordValues($sourceExpr as xs:string,
+                                         $sourceContextNode as node(),
+                                         $targetExpr as xs:string,
+                                         $targetContextNodes as node()*,
+                                         $corr as xs:string,
+                                         $quantifier as xs:string,
+                                         $contextFilePath as xs:string,
+                                         $contextDoc as document-node()?,                                                   
+                                         $context as map(*),
+                                         $constraintElem as element(),
+                                         $contextInfo as map(xs:string, item()*))
         as element()* {
     let $sourceExprLang := 'xpath'
     let $targetExprLang := 'xpath'
@@ -109,7 +111,7 @@ declare function f:validateExpressionValue_cmpExpr($sourceExpr as xs:string,
     let $useDatatype := $constraintElem/@useDatatype/resolve-QName(., ..)
         
     let $evaluationContext := $context?_evaluationContext   
-    let $sourceItemsRaw := trace( i:evaluateXPath($sourceExpr, $sourceContextNode, $evaluationContext, true(), true()) , '_SOURCE_ITEMS_RAW: ')
+    let $sourceItemsRaw := i:evaluateXPath($sourceExpr, $sourceContextNode, $evaluationContext, true(), true())
     
     (: Expr value augmented (if useDatatype specified :)
     let $sourceItems := 
@@ -155,24 +157,118 @@ declare function f:validateExpressionValue_cmpExpr($sourceExpr as xs:string,
             else error()    
         let $colour := if (exists($violations)) then 'red' else 'green'                
         return
-            f:validationResult_expression($colour, $sourceExpr, $sourceExprLang, $targetExpr, $targetExprLang,
-                                          $violations, $corr, $useDatatype, $flags,
-                                          $constraintElem, $contextInfo, ())
+            f:validationResult_concordValues($colour, $sourceExpr, $sourceExprLang, $targetExpr, $targetExprLang,
+                                             $violations, $corr, $useDatatype, $flags,
+                                             $constraintElem, $contextInfo, ())
     return $results            
 };    
 
-declare function f:validationResult_expression($colour as xs:string,
-                                               $sourceExpr,
-                                               $sourceExprLang,
-                                               $targetExpr, 
-                                               $targetExprLang,
-                                               $violations as item()*,
-                                               $corr as xs:string,
-                                               $useDatatype as xs:QName?,
-                                               $flags as xs:string?,
-                                               $constraintElem as element(),
-                                               $contextInfo as map(xs:string, item()*),
-                                               $options as map(*)?)
+(:~
+ : Validates a link count related constraint (LinkCountMinCount, LinkCountMaxCount, LinkCountCount).
+ : It is not checked if the links can be resolved - only their number is considered.
+ :
+ : @param exprValue expression value producing the links
+ : @param cmp link count related constraint
+ : @param valueShape the value shape containing the constraint
+ : @param contextInfo information about the resource context
+ : @return a validation result, red or green
+ :)
+declare function f:validateConcordCount($relObjects as map(*)*,
+                                        $constraintElem as element(),
+                                        $contextInfo as map(xs:string, item()*))
+        as element()* {
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()
+    
+    (: Cardinality: contextNodes :)
+    let $countConstraintsContextNodes := $constraintElem/(
+        @countContextNodes, @minCountContextNodes, @maxCountCountextNodes
+    )
+    let $resultsContextNodes :=
+        if (not($countConstraintsContextNodes)) then () else
+        
+        let $contextNodes := ($relObjects?linkContextNode)/.
+        let $valueCount := count($contextNodes)
+        for $countConstraint in $countConstraintsContextNodes
+        let $cmp := $countConstraint/xs:integer(.)
+        let $green :=
+            typeswitch($countConstraint)
+            case attribute(countContextNodes) return $valueCount eq $cmp
+            case attribute(minCountContextNodes) return $valueCount ge $cmp
+            case attribute(maxCountContextNodes) return $valueCount le $cmp
+            default return error()
+        let $colour := if ($green) then 'green' else 'red'        
+        return  
+            f:validationResult_concordCount($colour, $constraintElem, $countConstraint, $valueCount, $contextInfo, $resultOptions)
+            
+    (: Cardinality: target resources per context node :)            
+    let $resultsTargetResources :=
+        let $countConstraintsTargetResources := $constraintElem/(        
+            @countTargetResources, @minCountTargetResources, @maxCountTargetResources
+        )
+        for $relObject in $relObjects
+        group by $sourceNode := $relObject?linkContextNode/generate-id(.)
+        let $targetResources := $relObject?targetResource
+        let $valueCount := (
+            if (every $tr in $targetResources satisfies $tr instance of node()) then $targetResources/.
+            else distinct-values(
+                for $tr in $targetResources return if ($tr instance of xs:anyAtomicType) then $tr else $tr/base-uri(.)
+            )
+            ) => count()
+            
+        for $countConstraint in $countConstraintsTargetResources
+        let $cmp := $countConstraint/xs:integer(.)
+        let $green :=
+            typeswitch($countConstraint)
+            case attribute(countTargetResources) return $valueCount eq $cmp
+            case attribute(minCountTargetResources) return $valueCount ge $cmp
+            case attribute(maxCountTargetResources) return $valueCount le $cmp
+            default return error()
+        let $colour := if ($green) then 'green' else 'red'        
+        return  
+            f:validationResult_concordCount($colour, $constraintElem, $countConstraint, $valueCount, $contextInfo, $resultOptions)
+        
+    (: Cardinality: target nodes per context node :)            
+    let $resultsTargetNodes :=
+        let $countConstraintsTargetNodes := $constraintElem/(        
+            @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes
+        )
+        for $relObject in $relObjects
+        group by $sourceNode := $relObject?linkContextNode/generate-id(.)
+        let $targetNodes := $relObject?linkTargetNodes
+        let $valueCount := $targetNodes/. => count()            
+        for $countConstraint in $countConstraintsTargetNodes
+        let $cmp := $countConstraint/xs:integer(.)
+        let $green :=
+            typeswitch($countConstraint)
+            case attribute(countTargetNodes) return $valueCount eq $cmp
+            case attribute(minCountTargetNodes) return $valueCount ge $cmp
+            case attribute(maxCountTargetNodes) return $valueCount le $cmp
+            default return error()
+        let $colour := if ($green) then 'green' else 'red'        
+        return  
+            f:validationResult_concordCount($colour, $constraintElem, $countConstraint, $valueCount, $contextInfo, $resultOptions)
+        
+    return (
+        $resultsContextNodes,
+        $resultsTargetResources,
+        $resultsTargetNodes
+    )
+        
+};
+
+declare function f:validationResult_concordValues($colour as xs:string,
+                                                  $sourceExpr,
+                                                  $sourceExprLang,
+                                                  $targetExpr, 
+                                                  $targetExprLang,
+                                                  $violations as item()*,
+                                                  $corr as xs:string,
+                                                  $useDatatype as xs:QName?,
+                                                  $flags as xs:string?,
+                                                  $constraintElem as element(),
+                                                  $contextInfo as map(xs:string, item()*),
+                                                  $options as map(*)?)
         as element() {
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
@@ -203,5 +299,72 @@ declare function f:validationResult_expression($colour as xs:string,
         }
        
 };
+
+(:~
+ : Creates a validation result for a LinkCount related constraint (LinkMinCount,
+ : LinkMaxCount, LinkCount.
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param valueShape the shape declaring the constraint
+ : @param exprValue expression value producing the links
+ : @param additionalAtts additional attributes to be included in the validation result
+ : @param additionalElems additional elements to be included in the validation result 
+ : @param contextInfo information about the resource context
+ : @param options options controling details of the validation result
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_concordCount($colour as xs:string,
+                                                 $constraintElem as element(),
+                                                 $constraint as attribute(),
+                                                 $valueCount as item()*,
+                                                 $contextInfo as map(xs:string, item()*),
+                                                 $options as map(*)?)
+        as element() {
+    let $constraintConfig :=
+        typeswitch($constraint)
+        case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
+        case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
+        case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}
+        case attribute(countTargetResources)    return map{'constraintComp': 'LinkTargetResourcesCount',    'atts': ('countTargetResources')}
+        case attribute(minCountTargetResources) return map{'constraintComp': 'LinkTargetResourcesMinCount', 'atts': ('minCountTargetResources')}
+        case attribute(maxCountTargetResources) return map{'constraintComp': 'LinkTargetResourcesMaxCount', 'atts': ('maxCountTargetResources')}
+        case attribute(countTargetNodes)        return map{'constraintComp': 'LinkTargetNodesCount',        'atts': ('countTargetNodes')}
+        case attribute(minCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMinCount',     'atts': ('minCountTargetNodes')}
+        case attribute(maxCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMaxCount',     'atts': ('maxCountTargetNodes')}
+        default return error()
+    
+    let $standardAttNames := $constraintConfig?atts
+    let $standardAtts := 
+        let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
+        return
+            (: make sure the constraint attribute is included, even if it is a default constraint :)
+            ($explicit, $constraint[not(. intersect $explicit)])
+    let $valueCountAtt := attribute valueCount {$valueCount} 
+    let $rel := $constraintElem/@rel
+    
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintElemId := $constraintElem/@id
+    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
+    let $elemName := 'gx:' || $colour
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintConfig?constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            $filePath,
+            $focusNode,
+            $rel ! attribute rel {.},
+            $standardAtts,
+            $valueCountAtt            
+        }       
+};
+
 
 
