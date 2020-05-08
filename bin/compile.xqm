@@ -228,6 +228,7 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:folderContentSimilar,
                     self::gx:docSimilar,
                     self::gx:contentCorrespondence,
+                    self::gx:content,
                     self::gx:deepSimilar,
                     self::gx:folderContent,
                     self::gx:xsdValid)) then  

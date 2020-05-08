@@ -13,8 +13,12 @@
             connector="links"
             linkXP="@href"
             linkContextXP="//airport"
-            linkTargetXP="/*/geo"
-            />
+            linkTargetXP="/*/geo">
+        <constraints 
+            minCountContextNodes="14" 
+            countTargetResources="1" 
+            countTargetNodes="1"/>
+    </setRel>
 
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
@@ -22,9 +26,9 @@
             <file foxpath="airports-ireland.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <contentCorrespondence rel="airportGeoDetails" relCount="1" minCountContextNodes="14" countTargetResources="1" countTargetNodes="1">
-                    <content sourceXP="@latitude" targetXP="latitude" corr="eq" countSource="1" countTarget="2"/>
-                    <content sourceXP="@longitude" targetXP="longitude" corr="eq"/>
+                <contentCorrespondence rel="airportGeoDetails" relCount="1">
+                    <content sourceXP="@latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                    <content sourceXP="@longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
                 </contentCorrespondence>
                 
             </file>

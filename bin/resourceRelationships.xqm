@@ -20,13 +20,19 @@ import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-r
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+declare function f:linkDescriptorObject($relName as xs:string, 
+                                        $context as map(xs:string, item()*))
+        as map(*)? {
+    $context?_resourceRelationships($relName)        
+};        
+
 declare function f:resolveRelationship($relName as xs:string,
                                        $resultFormat as xs:string, (: uri | doc | relobject :)
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
     
-    let $relDef := $context?_resourceRelationships($relName)
+    let $relDef := f:linkDescriptorObject($relName, $context)
     let $connector := $relDef?connector
     let $values :=
         if (empty($relDef)) then error()
@@ -246,6 +252,7 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
                 if ($explicit) then $explicit
                 else if ($foxpath) then 'foxpath'
                 else error()
+        let $constraints := $setRel/gx:constraints
         return
             map:entry(
                 $name,
@@ -259,7 +266,8 @@ declare function f:parseResourceRelationships($setRels as element(gx:setRel)*)
                     
                     $linkContextXP ! map:entry('linkContextXP', .),
                     $linkXP ! map:entry('linkXP', .),
-                    $linkTargetXP ! map:entry('linkTargetXP', .)
+                    $linkTargetXP ! map:entry('linkTargetXP', .),
+                    $constraints ! map:entry('constraints', $constraints)
                 ))
             )
     )

@@ -22,7 +22,7 @@
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <contentCorrespondence rel="articleExpectations" relCount="1">
+                <contentCorrespondence rel="articleExpectations" minCountContextNodes="2" countTargetNodes="1">
                     <content sourceXP="articleName" targetXP="@name" corr="eq"/>
                     <content sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" corr="eq"/>
                 </contentCorrespondence>
