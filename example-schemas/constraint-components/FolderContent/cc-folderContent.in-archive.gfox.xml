@@ -21,29 +21,24 @@
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderContent closed="true">
-                <memberFolder name="user-extensions"/>
-                <memberFile name="airport-???.xml" minCount="6"/>
-                <memberFile name="airport-???.json" maxCount="6"/>
-                <memberFile name="airports.xml" md5="D12FB6BBF1880D67A77706A7D5A13F21"/>
-                <memberFile name="airports2.xml"/>
-                <memberFile name="airports.json" md5="31CF4D875F077DFCCABAAC5F81D2865C"/>
-                <memberFile name="airports2.json"/>
+                <memberFolder name="denmark"/>
+                <memberFolder name="ireland"/>
+                <memberFolder name="finland"/>
+                <memberFolder name="luxembourg"/>
+                <memberFile name="airports.xml" count="1"/>
+                <memberFile name="airports.json" count="1"/>
+                <memberFile name="airports-*.xml" maxCount="4"/>
+                <memberFile name="airports-*.json" maxCount="4"/>
+                <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
+                <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
             </folderContent>  
-            <folder foxpath="user-extensions">
-                <targetSize countMsg="Missing folder: user-extensions" count="1"/>
+            <folder foxpath="denmark">
+                <targetSize countMsg="Missing folder: denmark" count="1"/>
                 <folderContent closed="true">
-                    <memberFolder name="user-extension-dus"/>
-                    <memberFolder name="user-extension-xxx" minCount="0"/>
+                    <memberFile name="airport-???.xml" minCount="17"/>
+                    <memberFile name="airport-???.json" minCount="17"/>
                 </folderContent>
-                <folder foxpath="user-extension-dus">
-                    <targetSize countMsg="Missing folder: user-extension-dus" count="1"/>
-                    <folderContent closed="true">
-                        <memberFile name="airport-dus.json"/>
-                        <memberFile name="airport-dus.xml"/>
-                    </folderContent>
-                </folder>
             </folder>
         </folder>
     </domain>
-
 </greenfox>

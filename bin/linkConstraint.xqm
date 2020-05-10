@@ -14,11 +14,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm",
-    "linkResolver.xqm",
     "log.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver2.xqm";
+    "linkResolver.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -46,8 +45,8 @@ declare function f:validateLinks($contextFilePath as xs:string,
         as element()* {
     (: let $_DEBUG := trace(count($contextItem), '_#CONTEXT_ITEM: ') :)
     
-    (: The focus path identifies the location of the initial context item
-       (empty sequence if the initial context item is the root of the 
+    (: The focus path identifies the location of the initial context item;
+       empty sequence if the initial context item is the root of the 
        context document :)
     let $focusPath :=
         if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
@@ -67,9 +66,7 @@ declare function f:validateLinks($contextFilePath as xs:string,
                                      attribute reason {'Context document could not be parsed'}, 
                                      (), $contextInfo, ())
         else
-            let $results := f:validateLinksResolvable($contextItem, $contextFilePath, $shape, $context, $contextInfo)
-            return
-                $results
+            f:validateLinksResolvable($contextItem, $contextFilePath, $shape, $context, $contextInfo)
 };
 
 (:~
@@ -89,31 +86,29 @@ declare function f:validateLinksResolvable(
                              $context as map(xs:string, item()*),
                              $contextInfo as map(xs:string, item()*))
         as item()* {
-    let $docsAndErrors :=        
+    let $lros :=        
         let $rel := $valueShape/@rel
         return
-            if ($rel) then i:relationshipTargets($rel, $filepath, $context)
+            if ($rel) then i:resolveRelationship($rel, 'lro', $filepath, $context)
             else        
                 let $expr := $valueShape/@xpath    
                 let $recursive := $valueShape/@recursive/xs:boolean(.)
                 let $mediatype := ($valueShape/@mediatype, 'xml'[$recursive])[1]  
-                return link:resolveLinks($filepath, $contextNode, (), $expr, (), $mediatype, $recursive, $context)
-(:                
-                return f:resolveLinks($expr, $contextNode, $filepath, $mediatype, $recursive, $context)
-:)
+                return 
+                    link:resolveLinks($filepath, $contextNode, (), $expr, (), $mediatype, $recursive, $context)
 
     (: Write results :)
-    let $docs := $docsAndErrors[?doc, ?targetResource]
-    let $errors := $docsAndErrors[?errorCode]
+    let $docs := $lros[?targetDoc]
+    let $errors := $lros[?errorCode]
     let $colour := if (exists($errors)) then 'red' else 'green'
     return (
         f:validationResult_links($colour, $valueShape, $errors, $docs, (), (), $contextInfo, ())
         ,
         
         (: Evaluate count constraints :)
-        let $uris := $docsAndErrors ! (?uri, ?linkValue)[1]                            
+        let $targetURIs := $lros?targetURI                            
         return 
-            f:validateLinkCount($uris, $valueShape, $contextInfo)    
+            f:validateLinkCount($targetURIs, $valueShape, $contextInfo)    
     )
 };
 

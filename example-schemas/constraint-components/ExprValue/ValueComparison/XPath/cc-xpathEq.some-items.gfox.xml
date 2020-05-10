@@ -30,7 +30,7 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports-denmark.xml" id="airportsFileShape">
                 <targetSize countMsg="Missing file: airports-denmark.xml" count="1"/>
-                <xpath expr="//airport/timezone"
+                <xpath expr="//airport/temporal/timezone"
                        eq="2"
                        quant="some"
                        eqMsg="There should also be an airport with timezone 2"

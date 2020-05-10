@@ -33,7 +33,7 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="finland\airport-hel.xml" id="airportsFileShape">
                 <targetSize countMsg="Missing file: airports-hel.xml" count="1"/>
-                <xpath expr="/airport/latitude/xs:decimal(.) ! round(., 3)"
+                <xpath expr="/airport/geo/latitude/xs:decimal(.) ! round(., 3)"
                        useDatatype="xs:decimal"
                        eq="60.317"
                        eqMsg="Not expected latitude"

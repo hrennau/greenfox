@@ -55,10 +55,10 @@
             <file foxpath=".\\*" id="anyFileShape">
                 <targetSize minCount="140" minCountMsg="Less files than expected"/>
                 <lastModified 
-                    le="2020-04-16" leMsg="Files must be older than 2020-04-16"
+                    le="2020-04-30" leMsg="Files must be older than 2020-04-30"
                     gt="2020-04-01" gtMsg="Files must be from 2020-04-01 or later"
-                    matches="^.*T(20|21).*$" matchesMsg="Files must be modified between 20:00 and 22:00"
-                    notMatches="^.*T21:[1-2].*" notMatchesMsg="Files must not be modified between 21:10 and 21:30"/>                
+                    matches="^.*T(21|22|23).*$" matchesMsg="Files must be modified between 21:00 and 00:00"
+                    notMatches="^.*T23:5*" notMatchesMsg="Files must not be modified between 23:50 and 00:00"/>                
             </file>
         </folder>
     </domain>

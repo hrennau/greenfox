@@ -6,7 +6,7 @@
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/link-resolver";
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
 
@@ -25,8 +25,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Resolves links specified by an expression producing the file paths (relative or
- : absolute) of link targets. Returns for each link a link object, which is a map
+ : Resolves links specified in terms of a URI expression, an optional Link Context Expression
+ : and an optional Link Target Expression. Returns for each link a link resolution object.
+ : _TO_EDIT_
+ : ... which is a map
  : providing the link value (as obtained from the expression), the link URI (obtained
  : by resolving against the base URI), the filepath of the link defining document
  : (often called the "context"), the parsed target document (if mediatype is XML or 
@@ -36,158 +38,208 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : producing the link values is applied to the documents obtained by resolving the 
  : link.
  :
- : @param expr expression producing the file paths of link targets (relative or absolute)
+ : @param contextURI the file path of the resource currently investigated
  : @param contextNode context node to be used when evaluating the link producing expression
- : @param filepath the file path of the resource currently investigated
+ : @param linkContextExpr expression mapping the context node to link context nodes
+ : @param linkExpr expression mapping a link context node to the link value items
  : @param mediatype the mediatype of link targets
  : @param recursive flag indicating if links are resolved recursively
  : @param context the processing context
- : @return maps describing links, either containing the resolved target or information about 
+ : @return link resolution objects, either containing the resolved target or information about 
  :   failure to resolve the link
  :)
 declare function f:resolveLinks(
-                             $expr as xs:string,
-                             $contextNode as node(),
-                             $filepath as xs:string,
+                             $contextURI as xs:string,
+                             $contextNode as node()?,
+                             $linkContextExpr as xs:string?,
+                             $linkExpr as xs:string,
+                             $linkTargetExpr as xs:string?,
                              $mediatype as xs:string?,
                              $recursive as xs:boolean?,
                              $context as map(xs:string, item()*))
         as map(xs:string, item()*)* {
-    let $linkMaps := f:resolveLinksRC($expr, $contextNode, $filepath, $mediatype, $recursive, $context, (), ())
+    let $lros := f:resolveLinksRC($contextURI, $contextNode, 
+                                  $linkContextExpr, $linkExpr, $linkTargetExpr, 
+                                  $mediatype, $recursive, 
+                                  $context, (), ())
     
     (: There may be duplicates to be removed, as recursive descents happen in parallel :)
-    let $linkMapsDedup :=
-        for $linkMap in $linkMaps
-        group by $uri := $linkMap?uri
+(:    
+    let $lrosDedup :=
+        for $lrObject in $lrObjects
+        group by $targetURI := $lrObject?targetURI
         return
-            if (not($uri)) then $linkMap
-            else $linkMap[1]
+            if (not($targetURI)) then $lrObject
+            else $lrObject[1]
     return
-        $linkMapsDedup
+        $lrObjectsDedup
+ :)
+    return $lros 
 };
 
 (:~
  : Recursive helper function of `resolveLinks`.
  :
- : @param expr expression producing the file paths of linke targets (relative or absolute)
+ : @param contextURI the file path of the resource currently investigated
  : @param contextNode context node to be used when evaluating the link producing expression
- : @param filepath the file path of the resource currently investigated
+ : @param linkContextExpr expression mapping the context node to link context nodes
+ : @param linkExpr expression mapping a link context node to the link value items
  : @param mediatype the mediatype of link targets
  : @param recursive flag indicating if links are resolved recursively
  : @param context the processing context
- : @param pathsSofar file paths of link targets already visited and successfully resolved
- : @param errorsSofar file paths of link targets already visited and found unresolvable 
- : @return maps describing links, either containing the resolved target or information about 
+ : @return link resolution objects, either containing the resolved target or information about 
  :   failure to resolve the link
  :)
-declare function f:resolveLinksRC($expr as xs:string,
-                                  $contextNode as node(),
-                                  $filepath as xs:string,                                  
-                                  $mediatype as xs:string?,
-                                  $recursive as xs:boolean?,
-                                  $context as map(xs:string, item()*),
-                                  $pathsSofar as xs:string*,
-                                  $errorsSofar as xs:string*)
+declare function f:resolveLinksRC(
+                             $contextURI as xs:string,
+                             $contextNode as node()?,
+                             $linkContextExpr as xs:string?,
+                             $linkExpr as xs:string,
+                             $linkTargetExpr as xs:string?,
+                             $mediatype as xs:string?,
+                             $recursive as xs:boolean?,
+                             $context as map(xs:string, item()*),
+                             $pathsSofar as xs:string*,
+                             $errorsSofar as xs:string*)
+                             
         as map(xs:string, item()*)* {
-    (: let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_FILEPATH: ', $filepath, '&#xA;')) :)
-    
-    let $exprValue := f:resolveLinkExpression($expr, $contextNode, $context)    
-    let $targetsAndErrors :=   
-        for $linkValue in $exprValue
-        (:
-        let $baseUri := (
-            $linkValue[. instance of node()]/ancestor-or-self::*[1]/base-uri(.)
-                      [string()]
-                      [. ne static-base-uri()],
-            $filepath
-        )[1]
-        :)
-        let $baseUri := $filepath
-        let $uri := i:fox-resolve-uri($linkValue, $baseUri)
-        (:
-        let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_LINKVALU: ', $linkValue, '&#xA;'))
-        let $_DEBUGWRITE := file:append('DEBUG.txt', concat('#_URI_____: ', $uri, '&#xA;'))
-         :)
-        where not($uri = ($pathsSofar, $errorsSofar))
-        return
-            let $_DEBUG := i:DEBUG($uri, 'links', 2, '_URI_TO_RESOLVE: ') return
-            (: If the link value cannot be resolved to a URI, an error is detected :)
-            if (not($uri)) then
-                map{'type': 'linkResolutionReport',
-                    'linkValue': string($linkValue),                
-                    'uri': '',
-                    'errorCode': 'no_uri', 
-                    'filepath': $filepath}            
         
+    (: The mapping of the context node to Link Context Nodes is optional:
+       the default link context is the context node itself. :)        
+    let $linkContextNodes :=
+        if (not($linkContextExpr)) then $contextNode
+        else f:resolveLinkExpression($linkContextExpr, $contextNode, $context)
+        
+    for $linkContextNode in $linkContextNodes
+    let $linkValues := f:resolveLinkExpression($linkExpr, $linkContextNode, $context)
+    let $lros :=   
+        for $linkValue in $linkValues
+        let $baseUri := $contextURI
+        let $targetURI := i:fox-resolve-uri($linkValue, $baseUri)
+        where not($targetURI = ($pathsSofar, $errorsSofar))
+        return
+            let $_DEBUG := i:DEBUG($targetURI, 'links', 2, '_URI_TO_RESOLVE: ') return
+            
+            (: Error - link value cannot be resolved :)
+            if (not($targetURI)) then
+                map{'type': 'linkResolutionObject',
+                    'contextURI': $contextURI,
+                    'contextNode': $linkContextNode,
+                    'linkValue': string($linkValue),                
+                    'targetURI': '',
+                    'targetExists': false(),
+                    'errorCode': 'no_uri'}            
+        
+            (: Mediatype: json :)
             else if ($mediatype = 'json') then            
-                if (not(i:fox-unparsed-text-available($uri, ()))) then 
-                    map{'type': 'linkResolutionReport',
-                        'linkValue': string($linkValue), 
-                        'uri': $uri, 
-                        'errorCode': 'nofind_text', 
-                        'filepath': $filepath}
+                if (not(i:fox-unparsed-text-available($targetURI, ()))) then
+                    let $targetExists := i:fox-resource-exists($targetURI)
+                    let $errorCode := if ($targetExists) then 'no_text' else 'no_resource'
+                    return
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextNode': $linkContextNode,                     
+                            'linkValue': string($linkValue), 
+                            'targetURI': $targetURI, 
+                            'targetExists': $targetExists,
+                            'errorCode': $errorCode}
                 else
-                    let $text := i:fox-unparsed-text($uri, ())
+                    let $text := i:fox-unparsed-text($targetURI, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
                     return 
                         if (not($jdoc)) then 
-                            map{'type': 'linkResolutionReport',
+                            map{'type': 'linkResolutionObject',
+                                'contextURI': $contextURI,
+                                'contextNode': $linkContextNode,                            
                                 'linkValue': string($linkValue), 
-                                'uri': $uri, 
-                                'errorCode': 'not_json', 
-                                'filepath': $filepath}
+                                'targetURI': $targetURI,
+                                'targetExists': true(),
+                                'errorCode': 'not_json'}
                         else 
-                            map{'type': 'linkResolutionReport',
+                            map{'type': 'linkResolutionObject',                                
+                                'contextURI': $contextURI,
+                                'contextNode': $linkContextNode,                            
                                 'linkValue': string($linkValue),
-                                'uri': $uri, 
-                                'doc': $jdoc,
-                                'filepath': $filepath}
-                        
+                                'targetURI': $targetURI,
+                                'targetExists': true(),
+                                'targetDoc': $jdoc}
+            
+            (: Mediatype: xml :)            
             else if ($mediatype = 'xml') then
-                if (not(i:fox-doc-available($uri))) then 
-                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#FAILURE: ') return
-                    map{'type': 'linkResolutionReport',
-                        'linkValue': string($linkValue),
-                        'uri': $uri, 
-                        'errorCode': 'not_xml', 
-                        'filepath': $filepath}
+                if (not(i:fox-doc-available($targetURI))) then 
+                    let $_DEBUG := i:DEBUG($targetURI, 'links', 1, '_LINK_RESOLVING_XML#FAILURE: ') 
+                    let $targetExists := i:fox-resource-exists($targetURI)
+                    let $errorCode := if ($targetExists) then 'not_xml' else 'no_resource'                    
+                    return
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextNode': $linkContextNode,                    
+                            'linkValue': string($linkValue),
+                            'targetURI': $targetURI,
+                            'targetExists': $targetExists,
+                            'errorCode': $errorCode}
                 else 
-                    let $_DEBUG := i:DEBUG($uri, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') return
-                    map{'type': 'linkResolutionReport',
-                        'linkValue': string($linkValue),
-                        'uri': $uri, 
-                        'doc': i:fox-doc($uri), 
-                        'filepath': $filepath}
+                    let $_DEBUG := i:DEBUG($targetURI, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') 
+                    let $targetDoc := i:fox-doc($targetURI)
+                    let $linkTargetNodes := f:getLinkTargetNodes($targetDoc, $linkTargetExpr, $linkContextNode, $context)  
+                    return
+                        map:merge((
+                            map:entry('type', 'linkResolutionObject'),
+                            map:entry('contextURI', $contextURI),
+                            map:entry('contextNode', $linkContextNode),                    
+                            map:entry('linkValue', string($linkValue)),
+                            map:entry('targetURI', $targetURI), 
+                            map:entry('targetExists', true()),
+                            map:entry('targetDoc', $targetDoc),
+                            $linkTargetExpr ! map:entry('targetNodes', $linkTargetNodes)
+                        ))
             else
-                if (i:fox-resource-exists($uri)) then
-                    map{'type': 'linkResolutionReport',
+                if (i:fox-resource-exists($targetURI)) then
+                    map{'type': 'linkResolutionObject',
+                        'contextURI': $contextURI,
+                        'contextNode': $linkContextNode,                    
                         'linkValue': string($linkValue),
-                        'uri': $uri, 
-                        'filepath': $filepath}
+                        'targetURI': $targetURI,
+                        'targetExists': true()}
                 else
-                    map{'type': 'linkResolutionReport',
+                    map{'type': 'linkResolutionObject',
+                        'contextURI': $contextURI,
+                        'contextNode': $linkContextNode,                    
                         'linkValue': string($linkValue),
-                        'uri': $uri,                         
-                        'errorCode': 'no_resource', 
-                        'filepath': $filepath}
+                        'targetURI': $targetURI,
+                        'targetExists': false(),
+                        'errorCode': 'no_resource'}
     
-    let $errorInfos := $targetsAndErrors[?errorCode][not(?uri = $errorsSofar)]
-    let $targetInfos := $targetsAndErrors[not(?errorCode)][not(?uri = $pathsSofar)]
-    
-    let $newErrors := $errorInfos?uri    
-    let $newPaths := $targetInfos?uri
-    let $nextDocs := $targetInfos?doc
-    
+    let $lrosError := $lros[?errorCode][not(?targetURI = $errorsSofar)]
+    let $lrosSuccess := $lros[not(?errorCode)][not(?targetURI = $pathsSofar)]    
+    let $newErrors := $lrosError?targetURI    
+    let $newPaths := $lrosSuccess?targetURI
     let $newPathsSofar := ($pathsSofar, $newPaths)
     let $newErrorsSofar := ($errorsSofar, $newErrors)
     return (
-        $errorInfos,   (: these are errors not yet observed :)
-        $targetInfos,   (: these are targets not yet observed :)
+        $lrosError,   (: these are errors not yet observed :)
+        $lrosSuccess,   (: these are targets not yet observed :)
         if (not($recursive)) then () else
-            $targetInfos 
-            ! f:resolveLinksRC($expr, ?doc, ?uri, $mediatype, $recursive, $context, $newPathsSofar, $newErrorsSofar)
+            $lrosSuccess 
+            ! f:resolveLinksRC(?targetURI, ?targetDoc, 
+                               $linkContextExpr, $linkExpr, $linkTargetExpr, 
+                               $mediatype, $recursive, 
+                               $context, 
+                               $newPathsSofar, $newErrorsSofar)            
     )
 };
+
+declare function f:getLinkTargetNodes($targetResource as node(), 
+                                      $linkTargetExpr as xs:string?, 
+                                      $linkContextItem as node(), 
+                                      $context as map(xs:string, item()*))
+        as node()* {
+    if (not($linkTargetExpr)) then ()
+    else 
+        let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
+        return
+            i:evaluateXPath($linkTargetExpr, $targetResource, $evaluationContextNext, true(), true())        
+};        
 
 (:~
  : Resolves the link expression in the context of an XDM node to a value.

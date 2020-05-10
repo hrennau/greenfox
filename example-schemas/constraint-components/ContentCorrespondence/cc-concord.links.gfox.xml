@@ -26,7 +26,7 @@
             <file foxpath="airports-ireland.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <contentCorrespondence rel="airportGeoDetails" relCount="1">
+                <contentCorrespondence rel="airportGeoDetails">
                     <content sourceXP="@latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
                     <content sourceXP="@longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
                 </contentCorrespondence>

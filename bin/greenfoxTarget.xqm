@@ -18,7 +18,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "log.xqm" ;
     
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver2.xqm";
+    "linkResolver.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 

@@ -14,7 +14,12 @@
             foxpath="$this\..\fox-sibling('expectation')\expectation-articles.xml"
             linkContextXP="//article"
             linkTargetXP="//article[@id eq $linkContext/articleID]"
-            />
+            >
+        <constraints 
+            minCountContextNodes="20" 
+            countTargetResources="1" 
+            countTargetNodes="1"/>        
+    </setRel>
 
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="msgs1\response" id="responseFolderShape">
@@ -22,7 +27,7 @@
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <contentCorrespondence rel="articleExpectations" minCountContextNodes="2" countTargetNodes="1">
+                <contentCorrespondence rel="articleExpectations">
                     <content sourceXP="articleName" targetXP="@name" corr="eq"/>
                     <content sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" corr="eq"/>
                 </contentCorrespondence>
