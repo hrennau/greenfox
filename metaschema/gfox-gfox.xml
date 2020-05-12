@@ -557,7 +557,9 @@ return
                 
                 <!-- attribute names -->
                 <ex:allowedAtts
-                    attNames="id description label rel xpath mediatype recursive
+                    attNames="id description label 
+                    rel linkXP xpath 
+                    mediatype recursive
                     count countMsg countMsgOK
                     minCount minCountMsg minCountMsgOK
                     maxCount maxCountMsg maxCountMsgOK
@@ -567,7 +569,7 @@ return
                     msgOK="OK - 'links' element: no unexpected attributes"/>
                 
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="xpath rel"
+                <ex:oneOrMoreAtts attNames="linkXP xpath rel"
                     msg="A 'links' constraint must have an 'xpath' attribute, or a 'rel' attribute"
                     msgOK="OK - 'links' element: has 'xpath' or 'rel' attribute"/>
 

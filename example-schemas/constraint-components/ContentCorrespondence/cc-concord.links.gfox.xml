@@ -17,6 +17,7 @@
         <constraints 
             minCountContextNodes="14" 
             countTargetResources="1" 
+            countTargetDocs="1"
             countTargetNodes="1"/>
     </setRel>
 

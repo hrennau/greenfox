@@ -19,7 +19,8 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*[//@href]" id="airportsFileShape">
                 <targetSize count="5" countMsg="Expected exactly five resources with @href"/>
-                <links xpath="//@href" mediatype="xml"
+                <links linkXP="//@href/concat(., '')" 
+                       mediatype="xml"
                        msg="Less 'href' links than expected"
                        minCount="1"/>
             </file>

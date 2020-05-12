@@ -16,8 +16,9 @@
             linkTargetXP="//article[@id eq $linkContext/articleID]"
             >
         <constraints 
-            minCountContextNodes="20" 
+            minCountContextNodes="2" 
             countTargetResources="1" 
+            countTargetDocs="1"
             countTargetNodes="1"/>        
     </setRel>
 

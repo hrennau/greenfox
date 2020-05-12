@@ -38,13 +38,11 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return a set of validation results
  :)
 declare function f:validateLinks($contextFilePath as xs:string,
-                                 $shape as element(), 
+                                 $constraintElem as element(), 
                                  $contextItem as item()?,                                 
                                  $contextDoc as document-node()?,
                                  $context as map(xs:string, item()*))
         as element()* {
-    (: let $_DEBUG := trace(count($contextItem), '_#CONTEXT_ITEM: ') :)
-    
     (: The focus path identifies the location of the initial context item;
        empty sequence if the initial context item is the root of the 
        context document :)
@@ -62,15 +60,15 @@ declare function f:validateLinks($contextFilePath as xs:string,
     return
         (: Error: document could not be parsed :)        
         if (empty($contextItem)) then 
-            f:validationResult_links('red', $shape, (), (), 
+            f:validationResult_links('red', $constraintElem, (), (), 
                                      attribute reason {'Context document could not be parsed'}, 
                                      (), $contextInfo, ())
         else
-            f:validateLinksResolvable($contextItem, $contextFilePath, $shape, $context, $contextInfo)
+            f:resolveAndValidateLinks($contextItem, $contextFilePath, $constraintElem, $context, $contextInfo)
 };
 
 (:~
- : Validates a LinkResolvable constraint.
+ : Resolves and validates links.
  :
  : @param contextNode context node to be used when evaluating the link producing expression
  : @param filepath the file path of the resource currently investigated
@@ -79,37 +77,62 @@ declare function f:validateLinks($contextFilePath as xs:string,
  : @param contextInfo information about the resource context 
  : @return validation results, red and/or green
  :)
-declare function f:validateLinksResolvable(
+declare function f:resolveAndValidateLinks(
                              $contextNode as node(),
                              $filepath as xs:string,
-                             $valueShape as element(),
+                             $constraintElem as element(),
                              $context as map(xs:string, item()*),
                              $contextInfo as map(xs:string, item()*))
         as item()* {
+    (: Link definition object :)
+    let $ldo := $constraintElem/@rel/i:linkDefinitionObject(., $context)
+    
+    (: Link resolution objects :)
+    let $lros := f:resolveLinksForValidation($contextNode, $filepath, $constraintElem, $context, $contextInfo)
+    
+    (: Write results :)
+    return (
+        i:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo)
+        (:i:validationResult_links($colour, $ldo, $valueShape, $failures, $successes, $contextInfo, ()):)
+        ,
+        (: Evaluate count constraints :)
+        let $targetURIs := $lros?targetURI                            
+        return f:validateLinkCount($targetURIs, $constraintElem, $contextInfo)    
+    )
+};
+
+(:~
+ : Resolves links defined by or referenced by a link constraint element.
+ :
+ : @param contextNode context node to be used when evaluating the link producing expression
+ : @param filepath the file path of the resource currently investigated
+ : @param valueShape the value shape containing the constraint
+ : @param context the processing context
+ : @param contextInfo information about the resource context 
+ : @return validation results, red and/or green
+ :)
+declare function f:resolveLinksForValidation(
+                             $contextNode as node(),
+                             $filepath as xs:string,
+                             $constraintElem as element(),
+                             $context as map(xs:string, item()*),
+                             $contextInfo as map(xs:string, item()*))
+        as map(*)* {
+    (: Link definition object :)
+    let $ldo := $constraintElem/@rel/i:linkDefinitionObject(., $context)
+    
+    (: Link resolution objects :)
     let $lros :=        
-        let $rel := $valueShape/@rel
+        let $rel := $constraintElem/@rel
         return
             if ($rel) then i:resolveRelationship($rel, 'lro', $filepath, $context)
             else        
-                let $expr := $valueShape/@xpath    
-                let $recursive := $valueShape/@recursive/xs:boolean(.)
-                let $mediatype := ($valueShape/@mediatype, 'xml'[$recursive])[1]  
+                let $expr := $constraintElem/(@linkXP, @xpath)[1]    
+                let $recursive := $constraintElem/@recursive/xs:boolean(.)
+                let $mediatype := ($constraintElem/@mediatype, 'xml'[$recursive])[1]  
                 return 
                     link:resolveLinks($filepath, $contextNode, (), $expr, (), $mediatype, $recursive, $context)
-
-    (: Write results :)
-    let $docs := $lros[?targetDoc]
-    let $errors := $lros[?errorCode]
-    let $colour := if (exists($errors)) then 'red' else 'green'
-    return (
-        f:validationResult_links($colour, $valueShape, $errors, $docs, (), (), $contextInfo, ())
-        ,
-        
-        (: Evaluate count constraints :)
-        let $targetURIs := $lros?targetURI                            
-        return 
-            f:validateLinkCount($targetURIs, $valueShape, $contextInfo)    
-    )
+    return $lros                    
 };
 
 (:~
