@@ -15,10 +15,11 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
-                <links xpath="//@href"
+                <links linkXP="//@href/concat(., '')"
                        recursive="true"
-                       msg="Some recursive links cannot be resolved."
-                       minCount="60" minCountMsg="Less links than expected"/>
+                       linksResolvable="true" linksResolvableMsg="Some recursive links cannot be resolved."
+                       minCountContextNodes="1" minCountContextNodesMsg="At least one 'airportsForCountry' expected"
+                       minCountTargetDocs="1" minCountTargetDocsMsg="Less links than expected"/>
             </file>
         </folder>
     </domain>

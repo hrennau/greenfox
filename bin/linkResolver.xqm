@@ -146,6 +146,7 @@ declare function f:resolveLinksRC(
                 else
                     let $text := i:fox-unparsed-text($targetURI, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
+                    let $linkTargetNodes := f:getLinkTargetNodes($jdoc, $linkTargetExpr, $linkContextNode, $context)
                     return 
                         if (not($jdoc)) then 
                             map{'type': 'linkResolutionObject',
@@ -156,13 +157,15 @@ declare function f:resolveLinksRC(
                                 'targetExists': true(),
                                 'errorCode': 'not_json'}
                         else 
-                            map{'type': 'linkResolutionObject',                                
-                                'contextURI': $contextURI,
-                                'contextNode': $linkContextNode,                            
-                                'linkValue': string($linkValue),
-                                'targetURI': $targetURI,
-                                'targetExists': true(),
-                                'targetDoc': $jdoc}
+                            map:merge((
+                                map:entry('type', 'linkResolutionObject'),                                
+                                map:entry('contextURI', $contextURI),
+                                map:entry('contextNode', $linkContextNode),
+                                map:entry('linkValue', string($linkValue)),
+                                map:entry('targetURI', $targetURI),
+                                map:entry('targetExists', true()),
+                                map:entry('targetDoc', $jdoc),
+                                $linkTargetExpr ! map:entry('targetNodes', $linkTargetNodes)))
             
             (: Mediatype: xml :)            
             else if ($mediatype = 'xml') then

@@ -21,8 +21,8 @@
                 <targetSize count="5" countMsg="Expected exactly five resources with @href"/>
                 <links linkXP="//@href/concat(., '')" 
                        mediatype="xml"
-                       msg="Less 'href' links than expected"
-                       minCount="1"/>
+                       linksResolvable="true" linksResolvableMsg="Link cannot be resolved"
+                       minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>                
             </file>
         </folder>
     </domain>

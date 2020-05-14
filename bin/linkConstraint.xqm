@@ -96,8 +96,11 @@ declare function f:resolveAndValidateLinks(
         (:i:validationResult_links($colour, $ldo, $valueShape, $failures, $successes, $contextInfo, ()):)
         ,
         (: Evaluate count constraints :)
+        i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
+(:                                      
         let $targetURIs := $lros?targetURI                            
-        return f:validateLinkCount($targetURIs, $constraintElem, $contextInfo)    
+        return f:validateLinkCount($targetURIs, $constraintElem, $contextInfo)
+:)        
     )
 };
 
@@ -127,14 +130,17 @@ declare function f:resolveLinksForValidation(
         return
             if ($rel) then i:resolveRelationship($rel, 'lro', $filepath, $context)
             else        
-                let $expr := $constraintElem/(@linkXP, @xpath)[1]    
+                let $linkContextExpr := $constraintElem/@contextXP
+                let $linkExpr := $constraintElem/(@linkXP, @xpath)[1]                
+                let $linkTargetExpr := $constraintElem/@targetXP
                 let $recursive := $constraintElem/@recursive/xs:boolean(.)
                 let $mediatype := ($constraintElem/@mediatype, 'xml'[$recursive])[1]  
                 return 
-                    link:resolveLinks($filepath, $contextNode, (), $expr, (), $mediatype, $recursive, $context)
+                    link:resolveLinks($filepath, $contextNode, $linkContextExpr, $linkExpr, $linkTargetExpr, $mediatype, $recursive, $context)
     return $lros                    
 };
 
+(:
 (:~
  : Validates a link count related constraint (LinkCountMinCount, LinkCountMaxCount, LinkCountCount).
  : It is not checked if the links can be resolved - only their number is considered.
@@ -170,6 +176,7 @@ declare function f:validateLinkCount($exprValue as item()*,
                 f:validationResult_linkCount('red', $valueShape, $cmp, $exprValue, 
                                              $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
 };
+:)
 
 (: ============================================================================
  :

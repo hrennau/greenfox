@@ -26,7 +26,10 @@
             <file foxpath="airports-*.xml" id="airportsFileShape">
                 <targetSize count="4" countMsg="Expected exactly five airports documents"/>
                 <links rel="airportDetails"
-                       minCount="1" minCountMsg="Less 'href' links than expected"/>
+                       linksResolvable="true"
+                       linksResolvableMsg="Link not resolvable"
+                       minCountTargetDocs="0"
+                       minCountTargetDocsMsg="At least one target document expected"/>                
             </file>
         </folder>
     </domain>

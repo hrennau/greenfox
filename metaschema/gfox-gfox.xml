@@ -558,12 +558,26 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description label 
-                    rel linkXP xpath 
-                    mediatype recursive
-                    count countMsg countMsgOK
-                    minCount minCountMsg minCountMsgOK
-                    maxCount maxCountMsg maxCountMsgOK
-                    msg
+                    rel mediatype recursive                     
+                    contextXP linkXP targetXP
+                    
+                    linksResolvable linksResolvableMsg linksResolvableMsgOK
+                    
+                    countContextNodes minCountContextNodes maxCountContextNodes
+                    countTargetResources minCountTargetResources maxCountTargetResources
+                    countTargetDocs minCountTargetDocs maxCountTargetDocs
+                    countTargetNodes minCountTargetNodes maxCountTargetNodes
+                    
+                    countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                    countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                    countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                    countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                    
+                    countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                    countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                    countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                    countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                    
                     reporterXPath"                    
                     msg="Unexpected attributes in 'links' element"
                     msgOK="OK - 'links' element: no unexpected attributes"/>
