@@ -110,7 +110,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $resultsContextNodes :=
         if (not($countConstraintsContextNodes)) then () else
         
-        let $_DEBUG := trace($lros, '___LROS: ')
+        (: let $_DEBUG := trace($lros, '___LROS: ') :)
         (: determine count :)
         let $valueCount := 
             let $contextNodes := ($lros?contextNode)/.

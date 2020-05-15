@@ -64,7 +64,7 @@ declare function f:validateConcord($contextFilePath as xs:string,
     
     (: Resolve: relationship name -> Link Resolution Objects :)
     let $ldo := i:linkDefinitionObject($rel, $context)
-    let $lros := trace(i:resolveRelationship($rel, 'lro', $contextFilePath, $context) , '_LROS: ')
+    let $lros := i:resolveRelationship($rel, 'lro', $contextFilePath, $context)
     let $results_count := i:validateLinkCounts($lros, $ldo, $shape, $contextInfo)
     
     let $evaluationContext := $context?_evaluationContext    

@@ -15,10 +15,10 @@
         <folder foxpath="niem-4.2\niem" id="niemFolderShape">
             <targetSize countMsg="Missing folder: niem" count="1"/>            
             <file foxpath=".\\*.xsd" id="niemDomainXsdFileShape">
-                <links xpath="//xs:import/@schemaLocation"
+                <links linkXP="//xs:import/@schemaLocation"
                        recursive="true"
-                       minCountMsg="Not the expected number of recursive links"
-                       msg="Some recursive links cannot be resolved."/>
+                       minCountTargetDocs="1" minCountTargetDocsMsg="Not the expected number of recursive links"
+                       linksResolvableMsg="Some recursive links cannot be resolved."/>
             </file>
         </folder>
     </domain>

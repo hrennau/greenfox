@@ -58,13 +58,7 @@ declare function f:validateLinks($contextFilePath as xs:string,
     ))
 
     return
-        (: Error: document could not be parsed :)        
-        if (empty($contextItem)) then 
-            f:validationResult_links('red', $constraintElem, (), (), 
-                                     attribute reason {'Context document could not be parsed'}, 
-                                     (), $contextInfo, ())
-        else
-            f:resolveAndValidateLinks($contextItem, $contextFilePath, $constraintElem, $context, $contextInfo)
+        f:resolveAndValidateLinks($contextItem, $contextFilePath, $constraintElem, $context, $contextInfo)
 };
 
 (:~
@@ -78,17 +72,25 @@ declare function f:validateLinks($contextFilePath as xs:string,
  : @return validation results, red and/or green
  :)
 declare function f:resolveAndValidateLinks(
-                             $contextNode as node(),
+                             $contextItem as item(),
                              $filepath as xs:string,
                              $constraintElem as element(),
                              $context as map(xs:string, item()*),
                              $contextInfo as map(xs:string, item()*))
         as item()* {
+        (:
+    if (not($contextItem instance of node())) then
+        f:validationResult_links('red', $constraintElem, (), (), 
+                                 attribute reason {'Context document could not be parsed'}, 
+                                 (), $contextInfo, ())
+    else                                 
+    :)
+    
     (: Link definition object :)
     let $ldo := $constraintElem/@rel/i:linkDefinitionObject(., $context)
     
     (: Link resolution objects :)
-    let $lros := f:resolveLinksForValidation($contextNode, $filepath, $constraintElem, $context, $contextInfo)
+    let $lros := f:resolveLinksForValidation($contextItem, $filepath, $constraintElem, $context, $contextInfo)
     
     (: Write results :)
     return (
@@ -115,7 +117,7 @@ declare function f:resolveAndValidateLinks(
  : @return validation results, red and/or green
  :)
 declare function f:resolveLinksForValidation(
-                             $contextNode as node(),
+                             $contextItem as item(),
                              $filepath as xs:string,
                              $constraintElem as element(),
                              $context as map(xs:string, item()*),
@@ -136,7 +138,7 @@ declare function f:resolveLinksForValidation(
                 let $recursive := $constraintElem/@recursive/xs:boolean(.)
                 let $mediatype := ($constraintElem/@mediatype, 'xml'[$recursive])[1]  
                 return 
-                    link:resolveLinks($filepath, $contextNode, $linkContextExpr, $linkExpr, $linkTargetExpr, $mediatype, $recursive, $context)
+                    link:resolveUriLinks($filepath, $contextItem, $linkContextExpr, $linkExpr, $linkTargetExpr, $mediatype, $recursive, $context)
     return $lros                    
 };
 

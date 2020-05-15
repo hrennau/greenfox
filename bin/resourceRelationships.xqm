@@ -68,6 +68,29 @@ declare function f:resolveRelationship_foxpath(
                                        $context as map(xs:string, item()*))
         as item()* {
     let $evaluationContext := $context?_evaluationContext
+    let $reqDocs := $context?_reqDocs    
+
+    let $linkContextURI := $filePath
+    let $linkContextDoc := $reqDocs?doc
+    let $linkContextXP := $ldo?linkContextXP
+    let $foxpath := $ldo?foxpath
+    let $linkTargetXP := $ldo?linkTargetXP
+    let $targetMediatype := $ldo?mediatype
+    return
+        link:resolveFoxLinks(
+             $linkContextURI, $linkContextDoc, $linkContextXP, 
+             $foxpath, $linkTargetXP,
+             $targetMediatype, $resultFormat, $context)
+};
+
+(:
+declare function f:resolveRelationship_foxpath(
+                                       $ldo as map(xs:string, item()*),
+                                       $resultFormat as xs:string,  (: uri | doc | lro :)
+                                       $filePath as xs:string,
+                                       $context as map(xs:string, item()*))
+        as item()* {
+    let $evaluationContext := $context?_evaluationContext
     let $reqDocs := $context?_reqDocs
     
     let $linkContextDoc := $reqDocs?doc
@@ -192,9 +215,10 @@ declare function f:resolveRelationship_foxpath(
         else error(QName((), 'INVALID_ARG'), 
             concat('Invalid value of "resultFormat": ', $resultFormat, ' ; must be one of: lro, doc, uri'))
 };
+:)
 
 declare function f:resolveRelationship_links(
-                                       $resourceRelationship as map(xs:string, item()*),
+                                       $ldo as map(xs:string, item()*),
                                        $resultFormat as xs:string,  (: uri | doc | relobject :)
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
@@ -202,35 +226,22 @@ declare function f:resolveRelationship_links(
     let $evaluationContext := $context?_evaluationContext
     let $reqDocs := $context?_reqDocs
     
-    let $linkContextExpr := $resourceRelationship?linkContextXP
-    let $linkExpr := $resourceRelationship?linkXP
-    let $linkTargetExpr := $resourceRelationship?linkTargetXP
-    let $mediatype := $resourceRelationship?mediatype
-    let $recursive := $resourceRelationship?recursive    
-    let $contextNode := $reqDocs?doc
-    
-    let $mediatype := if ($mediatype) then $mediatype
-                      else if ($linkTargetExpr) then 'xml' 
-                      else ()
-    
-    let $lrObjects := link:resolveLinks(
-                             $filePath,
-                             $contextNode,
-                             $linkContextExpr,
-                             $linkExpr,
-                             $linkTargetExpr,
-                             $mediatype,
-                             $recursive,
-                             $context)
+    let $linkContextURI := $filePath
+    let $linkContextDoc := $reqDocs?doc    
+    let $linkContextXP := $ldo?linkContextXP
+    let $linkXP := $ldo?linkXP
+    let $linkTargetXP := $ldo?linkTargetXP    
+    let $mediatype := 
+        let $explicit := $ldo?mediatype
+        return if (not($explicit) and $linkTargetXP) then 'xml' else $explicit
+    let $recursive := $ldo?recursive
     return
-        $lrObjects
-        (:
-        if ($mediatype eq 'xml') then $lrObjects?targetResource
-        else if ($mediatype eq 'json') then $lrObjects?targetResource
-        else $lrObjects?uri
-        :)
+        link:resolveUriLinks(
+                      $linkContextURI, $linkContextDoc, $linkContextXP, $linkXP, $linkTargetXP,
+                      $mediatype, $recursive, $context)
 };   
 
+(:
 (:~
  : Resolves a resource relationship name to a set of target resources. Resolution
  : context is the file path of the focus resource. The target resources may
@@ -316,6 +327,7 @@ declare function f:relationshipTargets_links(
         else $lrObjects?uri
         :)
 };
+:)
 
 (:~
  : Parses resource relationships defined by <setRel> elements into a
@@ -385,6 +397,7 @@ declare function f:getRelationshipNamesReferenced($components as element()*)
     => distinct-values()
 };        
 
+(:
 declare function f:resolveRelationship_foxpath_obsolete(
                                        $resourceRelationship as map(xs:string, item()*),
                                        $resultFormat as xs:string,  (: uri | doc | relobject :)
@@ -438,3 +451,4 @@ declare function f:resolveRelationship_foxpath_obsolete(
                 map:entry('linkTargetNodes', $targetNodes)
         )) , '_REL_OBJECT: ')
 };
+:)

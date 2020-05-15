@@ -89,10 +89,8 @@ declare function f:validateDocSimilar_targets($filePath as xs:string,
     let $otherFoxpath := $constraintElem/@otherFoxpath
     let $relName := $constraintElem/@relName
     return    
-        if ($otherFoxpath) then 
-            f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
-        else if ($relName) then
-            f:relationshipTargets($relName, $filePath, $context)
+        if ($otherFoxpath) then f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
+        else if ($relName) then f:resolveRelationship($relName, 'doc', $filePath, $context)
         else error()
 };
 

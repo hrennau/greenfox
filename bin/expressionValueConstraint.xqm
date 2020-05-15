@@ -121,7 +121,8 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
         let $contextInfos :=
             if (not($contextRel)) then $contextInfo
             else
-                let $relTargets := f:relationshipTargets($contextRel, $contextFilePath, $context)
+                (: _TO_DO_ Probably it will become necessary to replace 'doc' with 'node' :)
+                let $relTargets := f:resolveRelationship($contextRel, 'doc', $contextFilePath, $context)
                 for $relTarget in $relTargets
                 return
                     map:put($contextInfo, 'relTarget', $relTarget)

@@ -201,7 +201,7 @@ declare function f:getTargetPaths_linkTargets(
     let $reports := i:resolveLinks(
         $xpath, $doc, $contextPath, $targetMediatype, $recursive, $context)
      :)    
-    let $reports := link:resolveLinks($contextPath, $doc, (), $xpath, (), $targetMediatype, $recursive, $context)
+    let $reports := link:resolveUriLinks($contextPath, $doc, (), $xpath, (), $targetMediatype, $recursive, $context)
         
         
     let $uris := $reports[not(?errorCode)]?uri [$isExpectedResourceKind(.)]
