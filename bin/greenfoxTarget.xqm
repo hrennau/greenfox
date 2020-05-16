@@ -93,15 +93,14 @@ declare function f:getTargetPaths($resourceShape as element(),
     let $targetPathsAndEvaluationReports :=
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $linkTargets := $resourceShape/(@linkXP, @recursiveLinkXP)[1]
-        let $linkTargetsRecursive := $linkTargets instance of attribute(recursiveLinkXP)
+        let $isLinkTarget := $resourceShape/exists((@linkXP))
         return
             if ($path) then 
                 f:getTargetPaths_path($path, $resourceShape, $context)
             else if ($foxpath) then
                 f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
-            else if ($linkTargets) then
-                f:getTargetPaths_linkTargets($linkTargets, $linkTargetsRecursive, $resourceShape, $context)
+            else if ($isLinkTarget) then
+                f:getTargetPaths_linkTargets($resourceShape, $context)
             else error()
     return $targetPathsAndEvaluationReports
 };        
@@ -153,33 +152,34 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
 };
 
 (:~
- : Evaluates the target paths which are recursive link targets. The path producing
- : expression is recursively applied to the documents obtained by resolving the links.
- : The function returns the URIs of successfully resolved links, as well as link
- : reports for all links, both successfully and not successfully resolved.
+ : Evaluates the target paths obtained by resolving links. The function returns 
+ : a sequence of Link Resolution Objects.
  :
- : @param xpath XPath expression producing the links values
- : @param contextPath file path of the context item
+ : @param linkContextXP XPath expression producing link context nodes 
+ : @param linkXP XPath expression producing the links values
+ : @recursive if true, links must be resolved recursivel
  : @param context processing context
  : @return the URIs of link values successfully resolved, and link reports 
  :  for all link values
  :)
 declare function f:getTargetPaths_linkTargets(
-                                  $xpath as xs:string, 
-                                  $recursive as xs:boolean,
                                   $resourceShape as element(),
                                   $context as map(xs:string, item()*))
         as item()* {
-    let $contextPath := $context?_contextPath        
+    let $linkContextXP := $resourceShape/@contextXP
+    let $linkXP := $resourceShape/@linkXP
+    let $recursive := $resourceShape/@resource/xs:boolean(.)
+    
+    let $contextPath := $context?_contextPath    
     let $isExpectedResourceKind := 
-        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
-    let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
         else if ($recursive) then 'xml'
-        else ()
-    
+        else ()    
+    let $doc := $context?_reqDocs?doc
+(:
+    let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
     let $doc :=
         (: _TO_DO_ Replace with retrieval from $context?_reqDocs :)
         if ($contextMediatype eq 'xml') then
@@ -191,20 +191,15 @@ declare function f:getTargetPaths_linkTargets(
                 let $text := i:fox-unparsed-text($contextPath, ())
                 return
                     try{json:parse($text)} catch * {()}
+:)                    
     return
         if (not($doc)) then  
             map{'type': 'linkResolutionReport',
-                'errorCode': 'context_document_not_' || $contextMediatype, 
-                'filepath': $contextPath}
+                'errorCode': 'context_document_not_nodetree', 
+                'contextURI': $contextPath}
         else
-    (:
-    let $reports := i:resolveLinks(
-        $xpath, $doc, $contextPath, $targetMediatype, $recursive, $context)
-     :)    
-    let $reports := link:resolveUriLinks($contextPath, $doc, (), $xpath, (), $targetMediatype, $recursive, $context)
-        
-        
-    let $uris := $reports[not(?errorCode)]?uri [$isExpectedResourceKind(.)]
+    let $reports := link:resolveUriLinks($contextPath, $doc, $linkContextXP, $linkXP, (), $targetMediatype, $recursive, $context)        
+    let $uris := $reports[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)]
     return ($uris, $reports)   
 };
 

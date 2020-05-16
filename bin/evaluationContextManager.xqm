@@ -165,7 +165,6 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $resourceShapes,
                                      $focusNodes,
                                      $context) 
-                                     
     (: Required documents :)                                    
     let $xdoc :=
         let $required :=            
@@ -173,11 +172,13 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
             or not($mediatype) and (
               (: Listing reasons for loading XML document :)
-              $coreComponents/(self::gx:xpath, 
+              $allComponents/(self::gx:xpath, 
                                self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
                                self::gx:links, 
                                self::gx:docSimilar, 
                                self::gx:contentCorrespondence,
+                               self::gx:file/@linkXP,
+                               self::gx:folder/@linkXP,
                                gx:validatorXPath, 
                                @validatorXPath), 
               $focusNodes/@xpath
