@@ -387,7 +387,7 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description deactivated foxpath path linkXP recursiveLinkXP mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated foxpath path linkXP linkRecursive mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->

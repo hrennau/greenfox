@@ -18,6 +18,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:
 (:~
  : Validates a context item against a focus node shape.
  :
@@ -85,3 +86,4 @@ declare function f:validateFocusNodeXXX($focusNodeShape as element(),
     return
         $results
 };
+:)

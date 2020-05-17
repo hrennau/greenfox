@@ -24,15 +24,15 @@
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
-                <file recursiveLinkXP="//@href" id="linkTargetsFileShape">
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>    
+                <file linkXP="//@href" linkRecursive="true" id="linkTargetsFileShape">
                     <targetSize minCount="9" 
-                                minCountMsg="Not expected number of link targets"
-                                targetLinkResolvable="true"
-                                targetLinkResolvableMsg="Target links could not be resolved"/>
+                        minCountMsg="Not expected number of link targets"
+                        targetLinkResolvable="true"
+                        targetLinkResolvableMsg="Target links could not be resolved"/>
                     <xpath expr="//airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                        exists="true"
+                        existsMsg="Country airports document without airports"/>
                 </file>
             </file>
         </folder>

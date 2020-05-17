@@ -37,7 +37,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFolder($gxFolder as element(), $context as map(xs:string, item()*)) 
         as element()* {
-    let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFolder, $context, $gxFolder/gx:targetSize)
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFolder, $context)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
     

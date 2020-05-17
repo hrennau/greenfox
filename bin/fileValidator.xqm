@@ -41,7 +41,7 @@ declare function f:validateFile($fileShape as element(gx:file), $context as map(
     let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id, $context)  
     
     (: Determine target and evaluate target constraints :)
-    let $targetPathsAndTargetValidationResults := f:getTargetPaths($fileShape, $context, $fileShape/gx:targetSize)
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($fileShape, $context)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
     
@@ -216,8 +216,7 @@ declare function f:validateFocusNode($filePath as xs:string,
     
     (: Validation results - target size :)
     let $results_target :=
-        $focusNodeShape/gx:targetSize
-        /i:validateTargetCount(., $focusNodes, $filePath, ($xpath, $foxpath)[1])
+        $focusNodeShape/i:validateTargetCount(., $focusNodes, $filePath)
 
     (: Other validation results :)
     let $results_other :=

@@ -28,28 +28,26 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : @param resourceShape the resource shape owning the target declaration
  : @param context the processing context
- : @param targetConstraints an element representing target constraints
- : @return target file paths, and results of validating the target file paths against target constraints
+ : @return target file paths, and results of validating the target against target constraints
  :) 
 declare function f:getTargetPaths($resourceShape as element(),
-                                  $context as map(xs:string, item()*),
-                                  $targetConstraints as element(gx:targetSize)?)
-        as item()* {     
+                                  $context as map(xs:string, item()*))
+        as item()* {   
+    
     (: Retrieve target paths :)
-    let $targetPathsAndEvaluationReports := f:getTargetPaths($resourceShape, $context)
-    let $targetPaths := $targetPathsAndEvaluationReports[. instance of xs:anyAtomicType]
-    return if (not($targetConstraints)) then $targetPaths else
+    let $constraintElem := $resourceShape/gx:targetSize
+    let $targetPathsAndLros := f:resolveTargetDeclaration($resourceShape, $context)
+    let $targetPaths := $targetPathsAndLros[. instance of xs:anyAtomicType]
+    return if (not($constraintElem)) then $targetPaths else
     
     (: Perform validation of target paths :)
-    let $evaluationReports := $targetPathsAndEvaluationReports[. instance of map(*)]
+    let $lros := $targetPathsAndLros[. instance of map(*)]
     let $contextPath := $context?_contextPath
-    let $targetDeclaration := $resourceShape/(@path, @foxpath, @linkXP, @recursiveLinkXP)
     let $validationResults := f:validateTargetConstraints(
-                                        $targetConstraints, 
-                                        $targetDeclaration, 
+                                        $resourceShape,
                                         $targetPaths, 
-                                        $contextPath, 
-                                        $evaluationReports)
+                                        $lros,
+                                        $contextPath)
     (: Returntarget paths and validation results :)                                        
     return
         ($targetPaths, $validationResults)
@@ -62,11 +60,11 @@ declare function f:getTargetPaths($resourceShape as element(),
  : ============================================================================ :)
 (:~
  : Returns the target paths of a resource shape, optionally also
- : evaluation reports. 
+ : Link Resolution Objects. 
  :
  : The target is identified either by a path (@path) or
  : by a foxpath expression (@foxpath), or by an expression
- : producing link targets (@linkXP, @recursiveLinkXP).
+ : producing link targets (@linkXP, @linkRecursive).
  :
  : The path is appended to the context path. The foxpath is
  : evaluated. Link targets are resolved.
@@ -79,8 +77,8 @@ declare function f:getTargetPaths($resourceShape as element(),
  : @param resourceShape a file or folder shape
  : @param context a map of variable bindings
  : @return the target paths :)
-declare function f:getTargetPaths($resourceShape as element(), 
-                                  $context as map(xs:string, item()*))
+declare function f:resolveTargetDeclaration($resourceShape as element(), 
+                                            $context as map(xs:string, item()*))
         as item()* {
     let $contextPath := $context?_contextPath  
     
@@ -155,9 +153,7 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
  : Evaluates the target paths obtained by resolving links. The function returns 
  : a sequence of Link Resolution Objects.
  :
- : @param linkContextXP XPath expression producing link context nodes 
- : @param linkXP XPath expression producing the links values
- : @recursive if true, links must be resolved recursivel
+ : @param resourceShape resource shape element, with attribute providing the target declaration 
  : @param context processing context
  : @return the URIs of link values successfully resolved, and link reports 
  :  for all link values
@@ -168,7 +164,7 @@ declare function f:getTargetPaths_linkTargets(
         as item()* {
     let $linkContextXP := $resourceShape/@contextXP
     let $linkXP := $resourceShape/@linkXP
-    let $recursive := $resourceShape/@resource/xs:boolean(.)
+    let $recursive := $resourceShape/@linkRecursive/xs:boolean(.)
     
     let $contextPath := $context?_contextPath    
     let $isExpectedResourceKind := 
