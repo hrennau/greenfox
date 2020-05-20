@@ -395,6 +395,13 @@ declare function f:getRelationshipNamesReferenced($components as element()*)
         as xs:string* {
     $components//(@rel, @contextRel)
     => distinct-values()
+}; 
+
+declare function f:getRelationshipDefinitions($components as element()*, 
+                                              $context as map(xs:string, item()*))
+        as map(*)* {
+    let $relNames := f:getRelationshipNamesReferenced($components) => distinct-values()
+    return $relNames ! f:linkDefinitionObject(., $context)
 };        
 
 (:

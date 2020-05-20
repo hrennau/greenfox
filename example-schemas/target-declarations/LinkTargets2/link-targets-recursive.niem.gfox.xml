@@ -10,7 +10,7 @@
         <folder foxpath="niem-4.2\niem\domains" id="niemCoreFolderShape">
             <targetSize countMsg="Missing folder: domains" count="1"/>            
             <file foxpath=".\\agriculture.xsd" id="intelligenceFileShape">
-                <file recursiveLinkXP="/xs:schema/xs:import/@schemaLocation" id="niemCoreFileShape">
+                <file linkXP="/xs:schema/xs:import/@schemaLocation" linkRecursive="true" id="niemCoreFileShape">
                     <targetSize targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"
                                 count="27" 

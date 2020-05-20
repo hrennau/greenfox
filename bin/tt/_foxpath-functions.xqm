@@ -261,7 +261,7 @@ declare function f:resolveStaticFunctionCall($call as element(),
                 if (not($fromSubstring)) then () else
                     $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                f:foxfunc_fox-ancestor($context, $name, $fromSubstring, $toSubstring, false())
+                f:foxfunc_fox-ancestor($context, $name, $fromSubstring, $toSubstring)
 
         (: function `fox-ancestor-or-self` 
            =============================== :)
@@ -272,7 +272,7 @@ declare function f:resolveStaticFunctionCall($call as element(),
                 if (not($fromSubstring)) then () else
                     $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                f:foxfunc_fox-ancestor($context, $name, $fromSubstring, $toSubstring, true())
+                f:foxfunc_fox-ancestor-or-self($context, $name, $fromSubstring, $toSubstring)
                 
         (: function `frequencies` 
            ====================== :)

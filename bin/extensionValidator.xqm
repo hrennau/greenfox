@@ -47,7 +47,7 @@ declare function f:validateExtensionConstraint($contextFilePath as xs:string,
     
     let $reqBindings :=
         let $potentialBindings := i:getPotentialBindings()
-        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), $context)
+        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $useParams)  

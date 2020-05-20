@@ -88,17 +88,16 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
     
-    let $targetPathsAndEvaluationReports :=
+    let $targetPathsAndEvaluationReports :=        
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
         let $isLinkTarget := $resourceShape/exists((@linkXP))
+        let $rel := $resourceShape/@rel        
         return
-            if ($path) then 
-                f:getTargetPaths_path($path, $resourceShape, $context)
-            else if ($foxpath) then
-                f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
-            else if ($isLinkTarget) then
-                f:getTargetPaths_linkTargets($resourceShape, $context)
+            if ($path) then f:getTargetPaths_path($path, $resourceShape, $context)
+            else if ($foxpath) then f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
+            else if ($isLinkTarget) then f:getTargetPaths_linkTargets($resourceShape, $context)
+            else if ($rel) then f:getTargetPaths_rel($resourceShape, $context)            
             else error()
     return $targetPathsAndEvaluationReports
 };        
@@ -141,7 +140,6 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
         as xs:string* {
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
-        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
     let $evaluationContext := $context?_evaluationContext        
     return    
@@ -168,26 +166,13 @@ declare function f:getTargetPaths_linkTargets(
     
     let $contextPath := $context?_contextPath    
     let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
+        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
+        else i:fox-resource-is-file#1
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
         else if ($recursive) then 'xml'
         else ()    
     let $doc := $context?_reqDocs?doc
-(:
-    let $contextMediatype := ($resourceShape/ancestor::gx:file[1]/@mediatype, 'xml')[1]
-    let $doc :=
-        (: _TO_DO_ Replace with retrieval from $context?_reqDocs :)
-        if ($contextMediatype eq 'xml') then
-            if (not(i:fox-doc-available($contextPath))) then () 
-            else i:fox-doc($contextPath)
-        else if ($contextMediatype eq 'json') then
-            if (not(i:fox-unparsed-text-available($contextPath, ()))) then ()
-            else
-                let $text := i:fox-unparsed-text($contextPath, ())
-                return
-                    try{json:parse($text)} catch * {()}
-:)                    
     return
         if (not($doc)) then  
             map{'type': 'linkResolutionReport',
@@ -195,7 +180,20 @@ declare function f:getTargetPaths_linkTargets(
                 'contextURI': $contextPath}
         else
     let $reports := link:resolveUriLinks($contextPath, $doc, $linkContextXP, $linkXP, (), $targetMediatype, $recursive, $context)        
-    let $uris := $reports[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)]
+    let $uris := $reports[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] => distinct-values()
     return ($uris, $reports)   
 };
 
+declare function f:getTargetPaths_rel(
+                                  $resourceShape as element(),
+                                  $context as map(xs:string, item()*))
+        as item()* {
+    let $rel := $resourceShape/@rel
+    let $contextPath := $context?_contextPath
+    let $isExpectedResourceKind := 
+        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
+        else i:fox-resource-is-file#1
+    let $lros := i:resolveRelationship($rel, 'lro', $contextPath, $context)        
+    let $uris := $lros[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] => distinct-values()
+    return ($uris, $lros)    
+};        

@@ -44,8 +44,10 @@ declare function f:resolveFoxLinks(
     let $evaluationContext := $context?_evaluationContext
     let $unparsedTextEncoding := ()
     let $targetMediatype := 
-        if (not($targetMediatype) and $linkTargetXP) then 'xml'
-        else $targetMediatype
+        if (not($targetMediatype) and ($linkTargetXP or $resultFormat eq 'doc')) then 
+            'xml'
+        else 
+            $targetMediatype
     
     (: Link context items:
        - unless $linkContextXP is provided: the context resource URI
@@ -89,6 +91,8 @@ declare function f:resolveFoxLinks(
                     else if (i:fox-unparsed-text-available($targetURI, $unparsedTextEncoding)) then 'not_xml'
                     else 'nofind_text'
                     
+                else ()
+                    
             (: Flag indicating that link target nodes should be determined :)
             let $linkTargetNodesExpected := $linkTargetXP and $targetDoc instance of node()
                     
@@ -116,7 +120,7 @@ declare function f:resolveFoxLinks(
                     if (not($linkTargetNodesExpected)) then () else
                         map:entry('targetNodes', $linkTargetNodes)
                 ))
-                    
+       
     (: Link Resolution Objects for node items: grouped by containing root node :)                    
     let $lrosNodeItems :=
         for $target in $targetsNode

@@ -393,7 +393,7 @@ declare function f:normalizeDocForComparison($node as node(),
             return
                 if (empty($xmlBaseAtts)) then ()
                 else
-                    let $delNodes := trace($xmlBaseAtts/(., ../@fox:base-added) , '_DEL_NODES: ')
+                    let $delNodes := $xmlBaseAtts/(., ../@fox:base-added)
                     return delete node $delNodes
         ,
         for $normItem in $normItems

@@ -31,7 +31,8 @@ declare function f:getPotentialBindings() as xs:string+ {
     'doc', 
     'jdoc', 
     'csvdoc',
-    'htmldoc'
+    'htmldoc',
+    'linkContext'
 };
 
 (:~
@@ -53,7 +54,7 @@ declare function f:getPotentialBindings() as xs:string+ {
 declare function f:getEvaluationContextScope($filePath as xs:string, 
                                              $shape as element(),
                                              $context as map(xs:string, item()*))
-        as map(xs:string, element()*) {
+        as map(xs:string, item()*) {
 
     let $components := 
         $shape/*/f:getEvaluationContextScopeRC($filePath, $shape, .)
@@ -64,6 +65,7 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
+    let $relationshipDefinitions := i:getRelationshipDefinitions($components, $context)
     (:
     let $relationships := f:getRelationshipDefinitions($components)
     :)
@@ -75,7 +77,8 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
             'focusNodes': $focusNodes,
             'coreConstraints': $coreConstraints,
             'extensionConstraints': $extensionConstraints,
-            'extensionConstraintComponents': $extensionConstraintComponents
+            'extensionConstraintComponents': $extensionConstraintComponents,
+            'relationshipDefinitions': $relationshipDefinitions
         }
 };
 
@@ -145,12 +148,13 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                               $coreComponents as element()*,
                                               $extensionConstraints as element()*,
                                               $extensionConstraintComponents as element()*,
+                                              $relationshipDefinitions as map(*)*,                                              
                                               $resourceShapes as element()*,
                                               $focusNodes as element()*,
                                               $context as map(xs:string, item()*)) 
         as map(*) {
     let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, $resourceShapes, $focusNodes)
-    let $focusNodes := $allComponents/descendant-or-self::gx:focusNode
+    let $focusNodes := $allComponents[. instance of node()]/descendant-or-self::gx:focusNode
     let $mediatype := $gxFile/@mediatype        
     
     (: Required bindings :)
@@ -162,6 +166,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $coreComponents, 
                                      $extensionConstraints,
                                      $extensionConstraintComponents,
+                                     $relationshipDefinitions,
                                      $resourceShapes,
                                      $focusNodes,
                                      $context) 
@@ -181,6 +186,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                self::gx:folder/@linkXP,
                                gx:validatorXPath, 
                                @validatorXPath), 
+              $relationshipDefinitions?linkXP,                               
               $focusNodes/@xpath
             )    
         return
@@ -263,6 +269,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                                        $coreComponents as element()*,
                                        $extensionConstraints as element()*,
                                        $extensionConstraintComponents as element()*,
+                                       $relationshipDefinitions as map(*)*,
                                        $resourceShapes as element()*,
                                        $focusNodes as element()*,
                                        $context as map(xs:string, item()*))
@@ -270,18 +277,14 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
 
     let $potentialBindings_params := $extensionConstraintComponents/gx:param/@name/string()
     let $potentialBindings := ($potentialBindings, $potentialBindings_params)
-    let $components := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, 
+    let $components := ($coreComponents, $extensionConstraints, $extensionConstraintComponents,
                         $resourceShapes, $focusNodes)
-    
-    let $relationships :=
-        let $relNames := f:getRelationshipNamesReferenced($components)
-        return
-            if (empty($relNames)) then ()
-            else $context?_resourceRelationships?($relNames)
-            
     let $reqBindings :=
         let $xpathExpressions := (
-            $relationships?xpath ! .,
+            $relationshipDefinitions?xpath ! .,
+            $relationshipDefinitions?linkXP ! .,
+            $relationshipDefinitions?linkContextXP ! .,
+            $relationshipDefinitions?linkTargetXP ! .,
             $components/(
                 self::gx:xpath/@expr,
                 self::gx:validatorXPath,
@@ -291,7 +294,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
             )
         ) => distinct-values()            
         let $foxpathExpressions := (
-            $relationships?foxpath ! .,         
+            $relationshipDefinitions?foxpath ! .,         
             $components/(
                 self::gx:foxpath/@expr,
                 self::gx:validatorFoxpath,

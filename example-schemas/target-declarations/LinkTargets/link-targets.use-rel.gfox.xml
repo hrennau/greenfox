@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of recursive link targets.  This example checks JSON resources contained by 
-    an archive file.
-    
-    A recursive link target is a target consisting of the resources found by resolving links recursively 
-    The links are provided by an XPath expression. Here, the target declaration is:
-       @recursiveLinkXP="//@href"
+    Demonstrates the use of link targets. A link target is a target consisting of the resources
+    found by resolving links. The links are provided by an XPath expression. Here, the target 
+    declaration is:
+       @linkXPath="//@href"
        
     The <targetSize> constraint element may declare a special constraint, @targetLinkResolvable, 
     which requires all links found by the target declaration to be resolvable.
@@ -14,25 +12,28 @@
     refer to the number of target resources found, not to the number of links attempted to resolve,
     which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets-recursive/json/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <setRel name="airportDetails" connector="links" linkXP="//@href/concat(., '')"/>    
+        
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
-                <file linkXP="//href" linkRecursive="true" mediatype="json" id="linkTargetsFileShape">
-                    <targetSize minCount="60" 
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+                <file rel="airportDetails" id="linkTargetsFileShape">
+                    <targetSize minCount="4" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="//airport"
+                    <xpath expr="/*/airport"
                            exists="true"
-                           existsMsg="Airport(s) document without airport"/>
+                           existsMsg="Country airports document without airports"/>
                 </file>
             </file>
         </folder>
