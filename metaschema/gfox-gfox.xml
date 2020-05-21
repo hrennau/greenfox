@@ -207,7 +207,15 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="count minCount maxCount msg countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id
-                              targetLinkResolvable targetLinkResolvableMsg targetLinkResolvableMsgOK"
+                              targetLinkResolvable targetLinkResolvableMsg targetLinkResolvableMsgOK
+                              countContextNodes minCountContextNodes maxCountContextNodes
+                              countTargetResources minCountTargetResources maxCountTargetResources
+                              countTargetDocs minCountTargetDocs maxCountTargetDocs
+                              countTargetNodes minCountTargetNodes maxCountTargetNodes
+                              countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                              countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                              countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                              countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg"
                     msg="Unexpected attributes in 'targetSize' element; expected: $attNames"
                     msgOK="OK - 'folder' element: no unexpected attributes"/>
 

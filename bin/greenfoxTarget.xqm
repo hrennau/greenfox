@@ -14,8 +14,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "linkConstraint.xqm",
     "resourceAccess.xqm",
     "targetConstraint.xqm",
-    "validationResult.xqm",
     "log.xqm" ;
+    
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
     
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
     "linkResolver.xqm";
@@ -42,12 +44,11 @@ declare function f:getTargetPaths($resourceShape as element(),
     
     (: Perform validation of target paths :)
     let $lros := $targetPathsAndLros[. instance of map(*)]
-    let $contextPath := $context?_contextPath
     let $validationResults := f:validateTargetConstraints(
                                         $resourceShape,
                                         $targetPaths, 
                                         $lros,
-                                        $contextPath)
+                                        $context)
     (: Returntarget paths and validation results :)                                        
     return
         ($targetPaths, $validationResults)
@@ -160,6 +161,7 @@ declare function f:getTargetPaths_linkTargets(
                                   $resourceShape as element(),
                                   $context as map(xs:string, item()*))
         as item()* {
+    let $constraintElem := $resourceShape/gx:targetSize        
     let $linkContextXP := $resourceShape/@contextXP
     let $linkXP := $resourceShape/@linkXP
     let $recursive := $resourceShape/@linkRecursive/xs:boolean(.)
@@ -171,6 +173,9 @@ declare function f:getTargetPaths_linkTargets(
     let $targetMediatype :=
         if ($resourceShape/@mediatype) then $resourceShape/@mediatype
         else if ($recursive) then 'xml'
+        else if ($constraintElem/(@linksResolvable, 
+                                  @countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
+                                  @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes)) then 'xml'
         else ()    
     let $doc := $context?_reqDocs?doc
     return
@@ -188,12 +193,13 @@ declare function f:getTargetPaths_rel(
                                   $resourceShape as element(),
                                   $context as map(xs:string, item()*))
         as item()* {
+    let $constraintElem := $resourceShape/gx:targetSize        
     let $rel := $resourceShape/@rel
     let $contextPath := $context?_contextPath
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1
-    let $lros := i:resolveRelationship($rel, 'lro', $contextPath, $context)        
+    let $lros := i:resolveRelationship($rel, 'lro', $constraintElem, $contextPath, $context)        
     let $uris := $lros[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] => distinct-values()
     return ($uris, $lros)    
 };        

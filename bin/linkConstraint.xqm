@@ -123,7 +123,7 @@ declare function f:resolveLinksForValidation(
     let $lros :=        
         let $rel := $constraintElem/@rel
         return
-            if ($rel) then i:resolveRelationship($rel, 'lro', $filepath, $context)
+            if ($rel) then i:resolveRelationship($rel, 'lro', $constraintElem, $filepath, $context)
             else        
                 let $linkContextExpr := $constraintElem/@contextXP
                 let $linkExpr := $constraintElem/(@linkXP, @xpath)[1]                

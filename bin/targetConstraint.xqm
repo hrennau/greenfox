@@ -13,9 +13,11 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "greenfoxUtil.xqm",
     "linkConstraint.xqm",
     "resourceAccess.xqm",
-    "validationResult.xqm",
     "log.xqm" ;
-    
+
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (: ============================================================================
@@ -38,10 +40,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validateTargetConstraints($resourceShape as element(), 
                                              $targetResources as item()*,                                             
                                              $lros as map(*)*,
-                                             $contextPath as xs:string)
+                                             $context as map(xs:string, item()*))
         as element()* {
-    let $countResults := f:validateTargetCount($resourceShape, $targetResources, $contextPath)
-    let $linkResults := f:validateTargetLinks($resourceShape, $lros, $contextPath)   
+    let $countResults := f:validateTargetCount($resourceShape, $targetResources, $context)
+    let $linkResults := f:validateTargetLinks($resourceShape, $lros, $context)   
     return ($countResults, $linkResults)
 };        
 
@@ -54,8 +56,24 @@ declare function f:validateTargetConstraints($resourceShape as element(),
  :) 
 declare function f:validateTargetLinks($resourceShape as element(),
                                        $lros as map(*)*,
-                                       $contextPath as xs:string)
-        as element()? {
+                                       $context as map(xs:string, item()*))
+        as element()* {
+    
+    if (not($resourceShape/(@rel, @linkXP))) then () else
+       
+    let $contextPath := $context?_contextPath       
+    let $constraintElem := $resourceShape/gx:targetSize
+    let $ldo := $resourceShape/@rel/i:linkDefinitionObject(., $context)
+    let $contextInfo :=
+        map:merge((
+            map:entry('filePath', $contextPath)
+        ))
+    return (
+        i:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
+        i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
+    )
+    
+(:        
     let $constraintElem := $resourceShape/gx:targetSize 
     return
         if (not($constraintElem/@targetLinkResolvable eq 'true')) then () else        
@@ -83,7 +101,8 @@ declare function f:validateTargetLinks($resourceShape as element(),
                             $resultAdditionalAtts, 
                             $values,
                             $contextInfo, 
-                            $resultOptions)        
+                            $resultOptions)
+:)                            
 };
 
 (:~
@@ -95,8 +114,9 @@ declare function f:validateTargetLinks($resourceShape as element(),
  :) 
 declare function f:validateTargetCount($resourceShape as element(), 
                                        $targetItems as item()*,
-                                       $contextPath as xs:string)
+                                       $context as map(xs:string, item()*))
         as element()* {
+    let $contextPath := $context?_contextPath        
     let $constraintElem := $resourceShape/gx:targetSize        
     let $targetCount := count($targetItems)        
     let $results := (
@@ -175,7 +195,7 @@ declare function f:validationResult_targetCount(
         return attribute {$name} {$navigationSpec}
     let $values :=
         if (not($colour = ('red', 'yellow'))) then ()
-        else i:validationResultValues($targetItems, $constraintElem)
+        else vr:validationResultValues($targetItems, $constraintElem)
     return
         element {$elemName} {
             $useMsg ! attribute msg {.},
@@ -191,6 +211,7 @@ declare function f:validationResult_targetCount(
         }
 };
 
+(:
 (:~
  : Creates a validation result for a TargetLinkResolvable constraint.
  :
@@ -249,5 +270,5 @@ declare function f:validationResult_targetLinks(
             $additionalElems
         }       
 };
-
+:)
 

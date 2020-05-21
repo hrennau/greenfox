@@ -35,6 +35,7 @@ declare function f:linkDefinitionObject($relName as xs:string,
 
 declare function f:resolveRelationship($relName as xs:string,
                                        $resultFormat as xs:string, (: uri | doc | lro :)
+                                       $constraintElems as element()*,  (: required when inferring mediatype :)
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
@@ -44,9 +45,9 @@ declare function f:resolveRelationship($relName as xs:string,
     let $values :=
         if (empty($relDef)) then error()
         else if ($connector eq 'foxpath') then
-            f:resolveRelationship_foxpath($relDef, $resultFormat, $filePath, $context)
+            f:resolveRelationship_foxpath($relDef, $resultFormat, $constraintElems, $filePath, $context)
         else if ($connector eq 'links') then
-            f:resolveRelationship_links($relDef, $resultFormat, $filePath, $context)
+            f:resolveRelationship_links($relDef, $resultFormat, $constraintElems, $filePath, $context)
         else error()
     return
         $values
@@ -64,6 +65,7 @@ declare function f:resolveRelationship($relName as xs:string,
 declare function f:resolveRelationship_foxpath(
                                        $ldo as map(xs:string, item()*),
                                        $resultFormat as xs:string,  (: uri | doc | lro :)
+                                       $constraintElems as element()*,  (: required when inferring mediatype :)                                       
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
@@ -220,6 +222,7 @@ declare function f:resolveRelationship_foxpath(
 declare function f:resolveRelationship_links(
                                        $ldo as map(xs:string, item()*),
                                        $resultFormat as xs:string,  (: uri | doc | relobject :)
+                                       $constraintElems as element()*,  (: required when inferring mediatype :)                                       
                                        $filePath as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
@@ -231,9 +234,11 @@ declare function f:resolveRelationship_links(
     let $linkContextXP := $ldo?linkContextXP
     let $linkXP := $ldo?linkXP
     let $linkTargetXP := $ldo?linkTargetXP    
-    let $mediatype := 
+    let $mediatype := f:getLinkTargetMediatype($ldo, (), $constraintElems)
+(:    
         let $explicit := $ldo?mediatype
         return if (not($explicit) and $linkTargetXP) then 'xml' else $explicit
+ :)        
     let $recursive := $ldo?recursive
     return
         link:resolveUriLinks(
@@ -402,7 +407,36 @@ declare function f:getRelationshipDefinitions($components as element()*,
         as map(*)* {
     let $relNames := f:getRelationshipNamesReferenced($components) => distinct-values()
     return $relNames ! f:linkDefinitionObject(., $context)
+}; 
+
+(:~
+ : Returns the expected mediatype of link targets. The mediatype is either
+ : explicitly specified (@mediatype), or can be inferred from link
+ : definition details (@recursive), or can be inferred from link
+ : constraints (@countTargetDocs, @countTargetNodes)
+ :
+ : @param ldo link definition object
+ : @param lde link defining element
+ : @param constraintElems link constraining elements
+ : @return explicit or inferred mediatype, or the empty sequence
+ :)
+declare function f:getLinkTargetMediatype($ldo as map(xs:string, item()*),
+                                          $lde as element()?,
+                                          $constraintElems as element()*)
+        as xs:string? {
+    let $allConstraintElems := ($ldo?constraints, $constraintElems)
+    let $explicit := $ldo?mediatype
+    return
+        if ($explicit) then $explicit
+        else if ($ldo?recursive) then 'xml'
+        else if ($lde/@recursive) then 'xml'
+        else if ($allConstraintElems/
+            (@countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
+             @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes))
+            then 'xml'
+        else ()
 };        
+
 
 (:
 declare function f:resolveRelationship_foxpath_obsolete(

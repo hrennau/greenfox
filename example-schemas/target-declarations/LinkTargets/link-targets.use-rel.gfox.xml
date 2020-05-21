@@ -19,7 +19,9 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
-    <setRel name="airportDetails" connector="links" linkXP="//@href/concat(., '')"/>    
+    <setRel name="airportDetails" 
+            connector="links" 
+            linkXP="//@href/concat(., '')"/>    
         
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
@@ -27,8 +29,8 @@
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
                 <file rel="airportDetails" id="linkTargetsFileShape">
-                    <targetSize minCount="4" 
-                                minCountMsg="Not expected number of link targets"
+                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
+                                minCountTargetDocs="5" minCountTargetDocsMsg="Not expected number of link target documents"
                                 targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"/>
                     <xpath expr="/*/airport"

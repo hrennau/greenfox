@@ -15,6 +15,9 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
 
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -45,19 +48,16 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     
     let $linkConstraints := $ldo?constraints
     return    
-        if (not((($constraintElem, $linkConstraints)/@linksResolvable)[1] eq 'true')) then ()   
+        if (not((($constraintElem, $linkConstraints)/(@linksResolvable, @targetLinkResolvable))[1] eq 'true')) then ()   
         else
     
     for $lro in $lros
     group by $sourceNode := $lro?contextNode/generate-id(.)
     let $lro1 := $lro[1]
-    let $failures := $lro[?errorCode]
-    let $successes := $lro[not(?errorCode)]
-    let $colour := if (exists($failures)) then 'red' else 'green'
     let $contextNode := $lro1?contextNode  
+    let $_DEBUG := trace($ldo, '___LDO: ')
     return
-        f:validationResult_linksResolvable($colour, $ldo, $constraintElem, $contextNode, 
-            $failures, $successes, $contextInfo, ())
+        vr:validationResult_linksResolvable($ldo, $constraintElem, $contextNode, $lro, $contextInfo, ())
 };        
 
 (:~
@@ -248,75 +248,6 @@ declare function f:validateLinkCounts($lros as map(*)*,
  : ===============================================================================
  :)
 
-(:~
- : Creates a validation result for a LinksResolvable constraint.
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param ldo link definition element
- : @param constraintElem constraint element, defining constraints which may override
- :   any constraints specified by the link definition element
- : @param failures link resolution elements indicating a failed link resolution
- : @param successes link resolution elements indicating a successful link resolution
- : @param additionalElems additional elements to be included in the validation result 
- : @param contextInfo information about the resource context
- : @param options options controling details of the validation result
- : @return a validation result, red or green
- :)
-declare function f:validationResult_linksResolvable($colour as xs:string,
-                                                    $ldo as map(*)?,
-                                                    $constraintElem as element(),
-                                                    $contextNode as node(),
-                                                    $failures as map(*)*,
-                                                    $successes as map(*)*,
-                                                    $contextInfo as map(xs:string, item()*),
-                                                    $options as map(*)?)
-        as element() {
-    let $recursive := ($constraintElem/@recursive/xs:boolean(.), $ldo?resolvable)[1]
-    
-    (: values - link values of failing links :)
-    let $values :=  
-        if (empty($failures)) then () 
-        else if ($recursive) then 
-            $failures ! <gx:value where="{?contextURI}">{?linkValue}</gx:value>
-        else 
-            $failures ! <gx:value>{?linkValue}</gx:value>
-    
-    let $exprAtt := ($constraintElem/@linkXP, $ldo?linkXP)[1]        
-    let $expr := $exprAtt/normalize-space(.)
-    let $exprLang := ($exprAtt ! local-name(.) ! replace(., '^link', '') ! lower-case(.)) = ('xp', 'xpath')    
-    let $countResolved := attribute countResolved {count($successes)} 
-    let $countUnresolved := attribute countUnresolved {count($failures)}
-    
-    let $constraintComp := 'LinkResolvable'
-    let $valueShapeId := $constraintElem/@valueShapeID
-    let $constraintId := concat($valueShapeId, '-linkResolvable')
-    let $filePath := $contextInfo?filePath ! attribute contextURI {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    let $contextNodeDataPath := $contextNode/i:datapath(.)
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'linksResolvable', ())
-        else i:getErrorMsg($constraintElem, 'linksResolvable', ())
-    let $elemName := 
-        switch($colour)
-        case 'red' return 'gx:red'
-        default return concat('gx:', $colour)
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute valueShapeID {$valueShapeId},  
-            $filePath,
-            $focusNode,
-            $contextNodeDataPath ! attribute contextNodeDataPath {.},
-            $countUnresolved,
-            $countResolved,            
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},
-            $values
-        }       
-};
 
 (:~
  : Creates a validation result for a LinkCount related constraint (LinkMinCount,

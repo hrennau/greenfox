@@ -14,6 +14,9 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "greenfoxUtil.xqm";
 
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -209,7 +212,7 @@ declare function f:constructError_fileProperties($filePath as xs:string,
                           $constraint/local-name(.), 
                           concat($resourcePropertyName, ' should ', $compare,
                           " '", $constraint, "'"))
-    let $values := i:validationResultValues($actualValue, $constraintElem)
+    let $values := vr:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
     return

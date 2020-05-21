@@ -15,10 +15,13 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm";
 
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateExpressionValue($contextFilePath as xs:string,
-                                           $constraint as element(), 
+                                           $constraintElem as element(), 
                                            $contextItem as item()?,                                           
                                            $contextDoc as document-node()?,
                                            $context as map(xs:string, item()*))
@@ -37,68 +40,68 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
         $contextFilePath ! map:entry('filePath', .),
         $focusPath ! map:entry('nodePath', .)
     ))
-    let $msg := $constraint/@msg
-    let $exprLang := local-name($constraint)
-    let $expr := $constraint/@expr
+    let $msg := $constraintElem/@msg
+    let $exprLang := local-name($constraintElem)
+    let $expr := $constraintElem/@expr
     let $evaluationContext := $context?_evaluationContext
     let $exprValue :=    
-        if ($constraint/self::gx:xpath) then 
+        if ($constraintElem/self::gx:xpath) then 
             i:evaluateXPath($expr, $contextItem, $evaluationContext, true(), true())
-        else if ($constraint/self::gx:foxpath) then  
+        else if ($constraintElem/self::gx:foxpath) then  
             f:evaluateFoxpath($expr, $contextFilePath, $evaluationContext, true())
-        else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraint/name(.)))
+        else error(QName((), 'SCHEMA_ERROR'), concat('Unknown expression kind: ', $constraintElem/name(.)))
         
-    let $constraintId := $constraint/@id
-    let $constraintLabel := $constraint/@label
+    let $constraintId := $constraintElem/@id
+    let $constraintLabel := $constraintElem/@label
     
-    let $empty := $constraint/@empty
-    let $exists := $constraint/@exists
-    let $minCount := $constraint/@minCount
-    let $maxCount := $constraint/@maxCount
-    let $count := $constraint/@count
-    let $datatype := $constraint/@datatype
-    let $itemsUnique := $constraint/@itemsUnique
+    let $empty := $constraintElem/@empty
+    let $exists := $constraintElem/@exists
+    let $minCount := $constraintElem/@minCount
+    let $maxCount := $constraintElem/@maxCount
+    let $count := $constraintElem/@count
+    let $datatype := $constraintElem/@datatype
+    let $itemsUnique := $constraintElem/@itemsUnique
     
-    let $eq := $constraint/@eq   
-    let $ne := $constraint/@ne    
-    let $gt := $constraint/@gt
-    let $ge := $constraint/@ge
-    let $lt := $constraint/@lt
-    let $le := $constraint/@le    
-    let $in := $constraint/gx:in
-    let $notin := $constraint/gx:notin
-    let $contains := $constraint/gx:contains
-    let $matches := $constraint/@matches
-    let $notMatches := $constraint/@notMatches
-    let $like := $constraint/@like
-    let $notLike := $constraint/@notLike
+    let $eq := $constraintElem/@eq   
+    let $ne := $constraintElem/@ne    
+    let $gt := $constraintElem/@gt
+    let $ge := $constraintElem/@ge
+    let $lt := $constraintElem/@lt
+    let $le := $constraintElem/@le    
+    let $in := $constraintElem/gx:in
+    let $notin := $constraintElem/gx:notin
+    let $contains := $constraintElem/gx:contains
+    let $matches := $constraintElem/@matches
+    let $notMatches := $constraintElem/@notMatches
+    let $like := $constraintElem/@like
+    let $notLike := $constraintElem/@notLike
     
-    let $length := $constraint/@length
-    let $minLength := $constraint/@minLength
-    let $maxLength := $constraint/@maxLength    
+    let $length := $constraintElem/@length
+    let $minLength := $constraintElem/@minLength
+    let $maxLength := $constraintElem/@maxLength    
     
-    let $eqFoxpath := $constraint/@eqFoxpath
-    let $neFoxpath := $constraint/@neFoxpath
-    let $ltFoxpath := $constraint/@ltFoxpath
-    let $leFoxpath := $constraint/@leFoxpath
-    let $gtFoxpath := $constraint/@gtFoxpath
-    let $geFoxpath := $constraint/@geFoxpath
-    let $inFoxpath := $constraint/@inFoxpath
-    let $containsFoxpath := $constraint/@containsFoxpath    
+    let $eqFoxpath := $constraintElem/@eqFoxpath
+    let $neFoxpath := $constraintElem/@neFoxpath
+    let $ltFoxpath := $constraintElem/@ltFoxpath
+    let $leFoxpath := $constraintElem/@leFoxpath
+    let $gtFoxpath := $constraintElem/@gtFoxpath
+    let $geFoxpath := $constraintElem/@geFoxpath
+    let $inFoxpath := $constraintElem/@inFoxpath
+    let $containsFoxpath := $constraintElem/@containsFoxpath    
     
-    let $eqXPath := $constraint/@eqXPath
-    let $neXPath := $constraint/@neXPath
-    let $ltXPath := $constraint/@ltXPath
-    let $leXPath := $constraint/@leXPath    
-    let $gtXPath := $constraint/@gtXPath
-    let $geXPath := $constraint/@geXPath    
-    let $inXPath := $constraint/@inXPath
-    let $containsXPath := $constraint/@containsXPath    
+    let $eqXPath := $constraintElem/@eqXPath
+    let $neXPath := $constraintElem/@neXPath
+    let $ltXPath := $constraintElem/@ltXPath
+    let $leXPath := $constraintElem/@leXPath    
+    let $gtXPath := $constraintElem/@gtXPath
+    let $geXPath := $constraintElem/@geXPath    
+    let $inXPath := $constraintElem/@inXPath
+    let $containsXPath := $constraintElem/@containsXPath    
     
-    let $flags := string($constraint/@flags)
-    let $quantifier := ($constraint/@quant, 'all')[1]
+    let $flags := string($constraintElem/@flags)
+    let $quantifier := ($constraintElem/@quant, 'all')[1]
     
-    let $contextRel := $constraint/@contextRel
+    let $contextRel := $constraintElem/@contextRel
     
     let $eqFoxpathValue := 
         if (not($eqFoxpath)) then () else
@@ -122,79 +125,79 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
             if (not($contextRel)) then $contextInfo
             else
                 (: _TO_DO_ Probably it will become necessary to replace 'doc' with 'node' :)
-                let $relTargets := f:resolveRelationship($contextRel, 'doc', $contextFilePath, $context)
+                let $relTargets := f:resolveRelationship($contextRel, 'doc', $constraintElem, $contextFilePath, $context)
                 for $relTarget in $relTargets
                 return
                     map:put($contextInfo, 'relTarget', $relTarget)
         for $contextInfo in $contextInfos 
         return
     (
-        if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraint, $contextInfo),    
-        if (not($ne)) then () else f:validateExpressionValue_cmp($exprValue, $ne, $quantifier, $constraint, $contextInfo),
-        if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraint, $contextInfo),
-        if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraint, $contextInfo),
-        if (not($contains)) then () else f:validateExpressionValue_contains($exprValue, $quantifier, $constraint, $contextInfo),
-        if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraint, $contextInfo),
-        if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraint, $contextInfo),
-        if (not($gt)) then () else f:validateExpressionValue_cmp($exprValue, $gt, $quantifier, $constraint, $contextInfo),
-        if (not($ge)) then () else f:validateExpressionValue_cmp($exprValue, $ge, $quantifier, $constraint, $contextInfo),
-        if (not($matches)) then () else f:validateExpressionValue_cmp($exprValue, $matches, $quantifier, $constraint, $contextInfo),
-        if (not($notMatches)) then () else f:validateExpressionValue_cmp($exprValue, $notMatches, $quantifier, $constraint, $contextInfo),
-        if (not($like)) then () else f:validateExpressionValue_cmp($exprValue, $like, $quantifier, $constraint, $contextInfo),
-        if (not($notLike)) then () else f:validateExpressionValue_cmp($exprValue, $notLike, $quantifier, $constraint, $contextInfo),
-        if (not($length)) then () else f:validateExpressionValue_cmp($exprValue, $length, $quantifier, $constraint, $contextInfo),
-        if (not($minLength)) then () else f:validateExpressionValue_cmp($exprValue, $minLength, $quantifier, $constraint, $contextInfo),
-        if (not($maxLength)) then () else f:validateExpressionValue_cmp($exprValue, $maxLength, $quantifier, $constraint, $contextInfo),        
-        if (not($empty)) then () else f:validateExpressionValueCount($exprValue, $empty, $constraint, $contextInfo),
-        if (not($exists)) then () else f:validateExpressionValueCount($exprValue, $exists, $constraint, $contextInfo),
-        if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraint, $contextInfo),     
-        if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraint, $contextInfo),
-        if (not($maxCount)) then () else f:validateExpressionValueCount($exprValue, $maxCount, $constraint, $contextInfo),
-        if (not($datatype)) then () else f:validateExpressionValue_cmp($exprValue, $datatype, $quantifier, $constraint, $contextInfo),
+        if (not($eq)) then () else f:validateExpressionValue_cmp($exprValue, $eq, $quantifier, $constraintElem, $contextInfo),    
+        if (not($ne)) then () else f:validateExpressionValue_cmp($exprValue, $ne, $quantifier, $constraintElem, $contextInfo),
+        if (not($in)) then () else f:validateExpressionValue_in($exprValue, $quantifier, $constraintElem, $contextInfo),
+        if (not($notin)) then () else f:validateExpressionValue_notin($exprValue, $quantifier, $constraintElem, $contextInfo),
+        if (not($contains)) then () else f:validateExpressionValue_contains($exprValue, $quantifier, $constraintElem, $contextInfo),
+        if (not($lt)) then () else f:validateExpressionValue_cmp($exprValue, $lt, $quantifier, $constraintElem, $contextInfo),
+        if (not($le)) then () else f:validateExpressionValue_cmp($exprValue, $le, $quantifier, $constraintElem, $contextInfo),
+        if (not($gt)) then () else f:validateExpressionValue_cmp($exprValue, $gt, $quantifier, $constraintElem, $contextInfo),
+        if (not($ge)) then () else f:validateExpressionValue_cmp($exprValue, $ge, $quantifier, $constraintElem, $contextInfo),
+        if (not($matches)) then () else f:validateExpressionValue_cmp($exprValue, $matches, $quantifier, $constraintElem, $contextInfo),
+        if (not($notMatches)) then () else f:validateExpressionValue_cmp($exprValue, $notMatches, $quantifier, $constraintElem, $contextInfo),
+        if (not($like)) then () else f:validateExpressionValue_cmp($exprValue, $like, $quantifier, $constraintElem, $contextInfo),
+        if (not($notLike)) then () else f:validateExpressionValue_cmp($exprValue, $notLike, $quantifier, $constraintElem, $contextInfo),
+        if (not($length)) then () else f:validateExpressionValue_cmp($exprValue, $length, $quantifier, $constraintElem, $contextInfo),
+        if (not($minLength)) then () else f:validateExpressionValue_cmp($exprValue, $minLength, $quantifier, $constraintElem, $contextInfo),
+        if (not($maxLength)) then () else f:validateExpressionValue_cmp($exprValue, $maxLength, $quantifier, $constraintElem, $contextInfo),        
+        if (not($empty)) then () else f:validateExpressionValueCount($exprValue, $empty, $constraintElem, $contextInfo),
+        if (not($exists)) then () else f:validateExpressionValueCount($exprValue, $exists, $constraintElem, $contextInfo),
+        if (not($count)) then () else f:validateExpressionValueCount($exprValue, $count, $constraintElem, $contextInfo),     
+        if (not($minCount)) then () else f:validateExpressionValueCount($exprValue, $minCount, $constraintElem, $contextInfo),
+        if (not($maxCount)) then () else f:validateExpressionValueCount($exprValue, $maxCount, $constraintElem, $contextInfo),
+        if (not($datatype)) then () else f:validateExpressionValue_cmp($exprValue, $datatype, $quantifier, $constraintElem, $contextInfo),
 
         if (not($eqXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $eqXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($neXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $neXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($leXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $leXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($ltXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $ltXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($geXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $geXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($gtXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $gtXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($inXPath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $inXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($containsXPath)) then () else f:validateExpressionValue_containsExpressionValue(
                                                                           $exprValue, $containsXPath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $constraint, $contextInfo),
+                                                                          $contextDoc, $context, $constraintElem, $contextInfo),
 
         if (not($eqFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $eqFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($neFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $neFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($ltFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $ltFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($leFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $leFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($gtFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $gtFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($geFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $geFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($inFoxpath)) then () else f:validateExpressionValue_cmpExpr($exprValue, $inFoxpath, $contextItem, $contextFilePath, 
-                                                                            $contextDoc, $context, $quantifier, $constraint, $contextInfo),
+                                                                            $contextDoc, $context, $quantifier, $constraintElem, $contextInfo),
         if (not($containsFoxpath)) then () else f:validateExpressionValue_containsExpressionValue(
                                                                           $exprValue, $containsFoxpath, $contextItem, $contextFilePath, 
-                                                                          $contextDoc, $context, $constraint, $contextInfo),
-        if (not($itemsUnique/boolean(.))) then () else f:validateExpressionValue_itemsUnique($exprValue, $itemsUnique, $constraint, $contextInfo),   
+                                                                          $contextDoc, $context, $constraintElem, $contextInfo),
+        if (not($itemsUnique/boolean(.))) then () else f:validateExpressionValue_itemsUnique($exprValue, $itemsUnique, $constraintElem, $contextInfo),   
         
         ()                                                                          
 
        
     )
     let $furtherResults :=
-        for $xpath in $constraint/gx:xpath
+        for $xpath in $constraintElem/gx:xpath
         for $exprValueItem in $exprValue
         return
             i:validateExpressionValue($xpath, $exprValueItem, $contextFilePath, $contextDoc, $context)
@@ -339,12 +342,12 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
             return
                 if (empty($violations)) then () 
                 else f:validationResult_expression('red', $valueShape, $cmp, $exprValue,
-                                                   $resultAdditionalAtts, i:validationResultValues($violations, $valueShape),                                           
+                                                   $resultAdditionalAtts, vr:validationResultValues($violations, $valueShape),                                           
                                                    $contextInfo, $resultOptions)
         else if ($quantifier eq 'some') then 
             if (exists($useItems[$cmpTrue(., $useCmp)]))  then () 
             else f:validationResult_expression('red', $valueShape, $cmp, $exprValue,
-                                                $resultAdditionalAtts, i:validationResultValues($exprValue, $valueShape), 
+                                                $resultAdditionalAtts, vr:validationResultValues($exprValue, $valueShape), 
                                                 $contextInfo, $resultOptions)
     return
         if ($errors) then $errors

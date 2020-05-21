@@ -42,7 +42,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return a set of validation results
  :)
 declare function f:validateConcord($contextFilePath as xs:string,
-                                   $shape as element(), 
+                                   $constraintElem as element(), 
                                    $contextItem as item()?,                                 
                                    $contextDoc as document-node()?,
                                    $context as map(xs:string, item()*))
@@ -60,17 +60,17 @@ declare function f:validateConcord($contextFilePath as xs:string,
                 $focusPath ! map:entry('nodePath', .)
             ))
         
-    let $rel := $shape/@rel
+    let $rel := $constraintElem/@rel
     
     (: Resolve: relationship name -> Link Resolution Objects :)
     let $ldo := i:linkDefinitionObject($rel, $context)
-    let $lros := i:resolveRelationship($rel, 'lro', $contextFilePath, $context)
-    let $results_count := i:validateLinkCounts($lros, $ldo, $shape, $contextInfo)
+    let $lros := i:resolveRelationship($rel, 'lro', $constraintElem, $contextFilePath, $context)
+    let $results_count := i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
     
     let $evaluationContext := $context?_evaluationContext    
     let $results := 
         (: Loop over content elements - each one provides constraints ... :)
-        for $content in $shape/gx:content
+        for $content in $constraintElem/gx:content
         let $cmp := $content/@corr
         let $quantifier := ($content/@quant, 'all')[1]
         let $sourceExpr := $content/@sourceXP
