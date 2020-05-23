@@ -88,18 +88,18 @@ return
                     eqMsgOK="Greenfox element has correct namespace"/>
 
                 <!-- check child element names -->
-                <ex:allowedElems elemNames="context setRel constraintComponents domain"
+                <ex:allowedElems elemNames="context linkDef constraintComponents domain"
                     msg="Unexpected elements in 'greenfox' element; expected: $elemNames"
                     msgOK="OK - 'greenfox' element: no unexpected child elements"/>
 
                 <!-- ========================================
-                        <setRel>
+                        <linkDef>
                      ======================================== -->
                 
-                <focusNode xpath="*:setRel">
+                <focusNode xpath="*:linkDef">
                     <ex:allowedAtts attNames="name connector linkContextXP linkXP linkTargetXP foxpath mediatype recursive"
-                        msg="Unexpected attributes in 'setRel' element; expected: 'name' and 'foxpath'"
-                        msgOK="OK - 'setRel' element: no unexpected attributes"/>                    
+                        msg="Unexpected attributes in 'linkDef' element; expected: 'name' and 'foxpath'"
+                        msgOK="OK - 'linkDef' element: no unexpected attributes"/>                    
                 </focusNode>
                     
                 <!-- ========================================
@@ -395,11 +395,11 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description deactivated rel path foxpath linkXP linkRecursive mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated link path foxpath linkXP linkRecursive mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
-                <ex:xoneAtts attNames="foxpath rel path linkXP recursiveLinkXP"
+                <ex:xoneAtts attNames="foxpath link path linkXP recursiveLinkXP"
                     msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXP, recursiveLinkXP"
                     msgOK="OK - 'file' element: has foxpath or path or linkXP"/>
 
@@ -424,7 +424,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description deactivated label 
-                    contextRel
+                    contextLink
                     expr msg quant flags useDatatype
                     empty emptyMsg emptyMsgOK
                     exists existsMsg existsMsgOK
@@ -566,7 +566,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description label 
-                    rel mediatype recursive                     
+                    ref mediatype recursive                     
                     contextXP linkXP targetXP
                     
                     linksResolvable linksResolvableMsg linksResolvableMsgOK
@@ -591,9 +591,9 @@ return
                     msgOK="OK - 'links' element: no unexpected attributes"/>
                 
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="linkXP xpath rel"
-                    msg="A 'links' constraint must have an 'xpath' attribute, or a 'rel' attribute"
-                    msgOK="OK - 'links' element: has 'xpath' or 'rel' attribute"/>
+                <ex:oneOrMoreAtts attNames="linkXP xpath link"
+                    msg="A 'links' constraint must have an 'xpath' attribute, or a 'link' attribute"
+                    msgOK="OK - 'links' element: has 'xpath' or 'link' attribute"/>
 
             </focusNode>
             

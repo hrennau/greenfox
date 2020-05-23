@@ -60,7 +60,7 @@ declare function f:validateConcord($contextFilePath as xs:string,
                 $focusPath ! map:entry('nodePath', .)
             ))
         
-    let $rel := $constraintElem/@rel
+    let $rel := $constraintElem/@link
     
     (: Resolve: relationship name -> Link Resolution Objects :)
     let $ldo := i:linkDefinitionObject($rel, $context)

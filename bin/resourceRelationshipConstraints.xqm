@@ -51,13 +51,13 @@ declare function f:validateLinkResolvable($lros as map(*)*,
         if (not((($constraintElem, $linkConstraints)/(@linksResolvable, @targetLinkResolvable))[1] eq 'true')) then ()   
         else
     
+    (: Link Resolution Objects are grouped by context node :)
     for $lro in $lros
     group by $sourceNode := $lro?contextNode/generate-id(.)
     let $lro1 := $lro[1]
-    let $contextNode := $lro1?contextNode  
-    let $_DEBUG := trace($ldo, '___LDO: ')
+    let $contextItem := $lro1?contextItem  
     return
-        vr:validationResult_linksResolvable($ldo, $constraintElem, $contextNode, $lro, $contextInfo, ())
+        vr:validationResult_linksResolvable($ldo, $constraintElem, $contextItem, $lro1, $contextInfo, ())
 };        
 
 (:~

@@ -87,7 +87,7 @@ declare function f:validateDocSimilar_targets($filePath as xs:string,
         as item()* {
     let $evaluationContext := $context?_evaluationContext
     let $otherFoxpath := $constraintElem/@otherFoxpath
-    let $relName := $constraintElem/@relName
+    let $relName := $constraintElem/@link
     return    
         if ($otherFoxpath) then f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
         else if ($relName) then f:resolveRelationship($relName, 'doc', $constraintElem, $filePath, $context)
@@ -163,7 +163,7 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         return
             f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
-                                          $constraintElem/(@otherFoxpath, @relName)[1], 
+                                          $constraintElem/(@otherFoxpath, @link)[1], 
                                           $comparisonReports,
                                           $otherDocIdentities, (), (), $contextInfo)
 };

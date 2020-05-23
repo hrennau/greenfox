@@ -28,7 +28,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Validates constraints referring to links. The link is either referenced (@rel)
+ : Validates constraints referring to links. The link is either referenced (@link)
  : or defined by attributes on the constraints element ('links'). Possible
  : constraints:
  : - linksResolvable 
@@ -87,7 +87,7 @@ declare function f:resolveAndValidateLinks(
         as item()* {
         
     (: Link definition object :)
-    let $ldo := $constraintElem/@rel/i:linkDefinitionObject(., $context)
+    let $ldo := $constraintElem/@link/i:linkDefinitionObject(., $context)
     
     (: Link resolution objects :)
     let $lros := f:resolveLinksForValidation($contextItem, $filepath, $constraintElem, $context, $contextInfo)
@@ -100,7 +100,7 @@ declare function f:resolveAndValidateLinks(
 };
 
 (:~
- : Resolves links defined by or referenced by a link constraint element.
+ : Resolves links defined by, or referenced by a link constraint element.
  :
  : @param contextNode context node to be used when evaluating the link producing expression
  : @param filepath the file path of the resource currently investigated
@@ -116,21 +116,14 @@ declare function f:resolveLinksForValidation(
                              $context as map(xs:string, item()*),
                              $contextInfo as map(xs:string, item()*))
         as map(*)* {
-    (: Link definition object :)
-    let $ldo := $constraintElem/@rel/i:linkDefinitionObject(., $context)
-    
-    (: Link resolution objects :)
-    let $lros :=        
-        let $rel := $constraintElem/@rel
-        return
-            if ($rel) then i:resolveRelationship($rel, 'lro', $constraintElem, $filepath, $context)
-            else        
-                let $linkContextExpr := $constraintElem/@contextXP
-                let $linkExpr := $constraintElem/(@linkXP, @xpath)[1]                
-                let $linkTargetExpr := $constraintElem/@targetXP
-                let $recursive := $constraintElem/@recursive/xs:boolean(.)
-                let $mediatype := ($constraintElem/@mediatype, 'xml'[$recursive])[1]  
-                return 
-                    link:resolveUriLinks($filepath, $contextItem, $linkContextExpr, $linkExpr, $linkTargetExpr, $mediatype, $recursive, $context)
-    return $lros                    
+
+    (: _TO_DO_ Check: currently 'contextItem' is ignored.
+     :)
+     
+    let $ldo := 
+        let $ref := $constraintElem/@link/i:linkDefinitionObject(., $context)
+        return  
+            if ($ref) then $ref else f:parseLinkDefinition($constraintElem)
+    return
+        link:resolveLdo($ldo, 'lro', $filepath, $contextItem[. instance of node()], $context)                    
 };

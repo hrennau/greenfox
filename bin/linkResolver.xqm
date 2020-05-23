@@ -18,6 +18,261 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(:~
+ : Resolves a Link Definition Object to a sequence of Link Resolution Objects.
+ : 
+ : @param ldo a Link Definition Object
+ : @param resultFormat determines the result format; lro: Link Resolution Objects;
+ :       uri: URI references; target documents
+ : @param contextURI the URI of the context resource
+ : @param contextNode the context node
+ : @param context processing context
+ : @return a sequence of Link Resolution Objects, or selected data retrieved
+ :   from these
+ :)
+declare function f:resolveLdo($ldo as map(*),
+                              $resultFormat as xs:string?, (: lro | uri | doc :)
+                              $contextURI as xs:string,
+                              $contextNode as node()?,                              
+                              $context as map(xs:string, item()*))
+        as map(xs:string, item()*)* {
+
+    let $contextNode :=
+        if ($contextNode) then $contextNode
+        else if ($ldo?requiresContextNode) then
+            let $doc := $context?_reqDocs?doc
+            return
+                if (not($doc)) then  
+                    error((), concat('Invalid call - Link Definition "', $ldo?name, '" requires context node.'))
+                else $doc        
+    let $mediatype :=
+        if ($ldo?mediatype) then $ldo?mediatype 
+        else if ($resultFormat eq 'doc') then 'xml'
+        else ()
+    let $ldoAugmented := map:put($ldo, 'mediatype', $mediatype)
+    let $lros := f:resolveLdoRC($ldoAugmented, $contextURI, $contextNode, $context, (), ()) 
+    return $lros 
+};
+
+declare function f:resolveLdoRC(
+                              $ldo as map(*),
+                              $contextURI as xs:string,
+                              $contextNode as node()?,                              
+                              $context as map(xs:string, item()*),
+                              $urisSofar as xs:string*,
+                              $nodesSofar as xs:string*)
+                             
+        as map(xs:string, item()*)* {
+        
+    let $linkContextExpr := $ldo?linkContextXP
+    let $mediatype := $ldo?mediatype
+    
+    (: The mapping of the context node to Link Context Nodes is optional:
+       the default link context is the context resource, represented
+       by the context resource URI and, optionally, a context node :)        
+    let $linkContextItems :=
+        if (not($linkContextExpr)) then ($contextNode, $contextURI)[1]
+        else if (not($contextNode)) then error((), 
+            concat('Link context expression requires a context node; expression: ', 
+                   $linkContextExpr))                       
+        else f:resolveLinkExpression($linkContextExpr, $contextNode, $context)
+
+    (: Apply link definition to each link context item :)
+    for $linkContextItem in $linkContextItems
+    let $connectorValue := f:applyLinkConnector($ldo, $contextURI, $linkContextItem, $context)
+    let $hrefs := $connectorValue[. instance of xs:anyAtomicType]
+    let $connectorNodes := $connectorValue[. instance of node()]
+    
+    (: Link Resolution Objects for atomic link items :)
+    let $lrosAtomicItems :=   
+        for $href in $hrefs
+        let $baseURI := $contextURI
+        let $targetURI := i:fox-resolve-uri($href, $baseURI)
+        where not($targetURI = ($urisSofar))
+        return
+            (: Error - link value cannot be resolved :)
+            if (not($targetURI)) then
+                map{'type': 'linkResolutionObject',
+                    'contextURI': $contextURI,
+                    'contextItem': $linkContextItem,
+                    'href': string($href),                
+                    'targetURI': '',
+                    'targetExists': false(),
+                    'errorCode': 'no_uri'}            
+        
+            (: Mediatype: json :)
+            else if ($mediatype = 'json') then            
+                if (not(i:fox-unparsed-text-available($targetURI, ()))) then
+                    let $targetExists := i:fox-resource-exists($targetURI)
+                    let $errorCode := if ($targetExists) then 'no_text' else 'no_resource'
+                    return
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextItem': $linkContextItem,                     
+                            'href': string($href), 
+                            'targetURI': $targetURI, 
+                            'targetExists': $targetExists,
+                            'errorCode': $errorCode}
+                else
+                    let $text := i:fox-unparsed-text($targetURI, ())
+                    let $jdoc := try {json:parse($text)} catch * {()}
+                    let $linkTargetNodes := f:getLinkTargetNodes($jdoc, $ldo?linkTargetXP, $linkContextItem, $context)
+                    return 
+                        if (not($jdoc)) then 
+                            map{'type': 'linkResolutionObject',
+                                'contextURI': $contextURI,
+                                'contextItem': $linkContextItem,                            
+                                'href': string($href), 
+                                'targetURI': $targetURI,
+                                'targetExists': true(),
+                                'errorCode': 'not_json'}
+                        else 
+                            map:merge((
+                                map:entry('type', 'linkResolutionObject'),                                
+                                map:entry('contextURI', $contextURI),
+                                map:entry('contextItem', $linkContextItem),
+                                map:entry('href', string($href)),
+                                map:entry('targetURI', $targetURI),
+                                map:entry('targetExists', true()),
+                                map:entry('targetDoc', $jdoc),
+                                $ldo?linkTargetXP ! map:entry('targetNodes', $linkTargetNodes)))
+            
+            (: Mediatype: xml :)            
+            else if ($mediatype = 'xml') then
+                if (not(i:fox-doc-available($targetURI))) then 
+                    let $targetExists := i:fox-resource-exists($targetURI)
+                    let $errorCode := if ($targetExists) then 'not_xml' else 'no_resource'                    
+                    return
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextItem': $linkContextItem,                    
+                            'href': string($href),
+                            'targetURI': $targetURI,
+                            'targetExists': $targetExists,
+                            'errorCode': $errorCode}
+                else 
+                    let $targetDoc := i:fox-doc($targetURI)
+                    let $linkTargetNodes := f:getLinkTargetNodes($targetDoc, $ldo?linkTargetXP, $linkContextItem, $context)  
+                    return
+                        map:merge((
+                            map:entry('type', 'linkResolutionObject'),
+                            map:entry('contextURI', $contextURI),
+                            map:entry('contextItem', $linkContextItem),                    
+                            map:entry('href', string($href)),
+                            map:entry('targetURI', $targetURI), 
+                            map:entry('targetExists', true()),
+                            map:entry('targetDoc', $targetDoc),
+                            $ldo?linkTargetXP ! map:entry('targetNodes', $linkTargetNodes)
+                        ))
+            else
+                if (i:fox-resource-exists($targetURI)) then
+                    map{'type': 'linkResolutionObject',
+                        'contextURI': $contextURI,
+                        'contextItem': $linkContextItem,                    
+                        'href': string($href),
+                        'targetURI': $targetURI,
+                        'targetExists': true()}
+                else
+                    map{'type': 'linkResolutionObject',
+                        'contextURI': $contextURI,
+                        'contextItem': $linkContextItem,                    
+                        'href': string($href),
+                        'targetURI': $targetURI,
+                        'targetExists': false(),
+                        'errorCode': 'no_resource'}
+    
+    
+    (: Link Resolution Objects for node items: grouped by containing root node :)                    
+    let $lrosNodeItems :=
+        for $connectorNode in $connectorNodes
+        let $root := $connectorNode/root()
+        group by $rootID := $root/generate-id(.)        
+        let $nonRootNodes := $connectorNode except $root[1]
+        let $includedRootNode := $root[. intersect $connectorNode]
+        
+        (: target nodes: 
+               if expr linkTargetXP is specified: 
+                   union of the expression values obtained for each context node;
+                   context nodes: 
+                       all non-root nodes, if there are any,
+                       the root node otherwise
+               otherwise: all non-root nodes obtained from the foxpath
+         :)
+        let $linkTargetXP := $ldo?linkTargetXP
+        let $linkTargetNodes :=
+            if (not($linkTargetXP)) then $nonRootNodes
+            else if (count($connectorNode) eq 1) then $connectorNode
+            else
+                let $myConnectorNodes := ($nonRootNodes, $includedRootNode)
+                return
+                    f:getLinkTargetNodes($myConnectorNodes, $ldo?linkTargetXP, $linkContextItem, $context)                    
+        return
+            map:merge((
+                map:entry('type', 'linkResolutionObject'),
+                map:entry('contextURI', $contextURI),
+                map:entry('contextItem', $linkContextItem),
+                map:entry('targetExists', true()),
+                map:entry('targetDoc', $root),
+                (: Target nodes: only if linkTargetXP specified, or if foxpath produces non-root nodes :)
+                if (not($ldo?linkTargetXP) and not($nonRootNodes)) then () 
+                else
+                    map:entry('targetNodes', $linkTargetNodes)
+            ))
+    let $lros := ($lrosAtomicItems, $lrosNodeItems)
+    let $newUrisSofar := ($urisSofar, $lros?targetURI) => distinct-values()
+    let $newNodesSofar := ($nodesSofar, $connectorNodes)/.
+    return (
+        $lros,
+        if (not($ldo?recursive)) then () else
+            $lros[not(?errorCode)] 
+            !f:resolveLdoRC($ldo, ?targetURI, ?targetDoc, $context, $newUrisSofar, $newNodesSofar)            
+    )
+};
+
+(:~
+ : Returns a string if application of a link definition requires a
+ : context node. The string expresses the reason why a context node
+ : is required.
+ :
+ : @param ldo Link Definition Object
+ : @return a string giving a reason, or the empty sequence
+ :)
+declare function f:linkRequiresContextNode($ldo as map(xs:string, item()*))
+        as xs:string? {
+    if ($ldo?linkContextXP) then
+        'Link context expression requires a context node.'
+    else if ($ldo?linkXP) then 
+        'Link expression requires a context node.'
+    else if ($ldo?hrefXP) then 
+        'href expression requires a context node.'
+    else if ($ldo?uriXP) then 
+        'URI expression requires a context node.'
+    else if ($ldo?uriTemplate) then 
+        'URI template requires a context node.'
+    else ()
+};
+
+(:~
+ : Applies the connector of a link.
+ :
+ : @param contextURI URI of the link context resource
+ : @param contextItem the context item, which may be a node or the context resource URI
+ : @param context processing context
+ : @return items, which may be target URIs or target nodes
+ :)
+declare function f:applyLinkConnector($ldo as map(*),
+                                      $contextURI as xs:string,
+                                      $contextItem as item(),                             
+                                      $context as map(xs:string, item()*))
+        as item()* {
+    if ($ldo?linkXP) then
+        f:resolveLinkExpression($ldo?linkXP, $contextItem, $context) ! string(.)
+    else if ($ldo?foxpath) then
+        let $evaluationContext := $context?_evaluationContext
+        return
+            i:evaluateFoxpath($ldo?foxpath, $contextItem, $evaluationContext, true())    
+    else ()
+};
 
 (:~
  : Resolves a Foxpath-based link definition.
@@ -386,16 +641,34 @@ declare function f:resolveUriLinksRC(
     )
 };
 
-declare function f:getLinkTargetNodes($targetResource as node(), 
+(:~
+ : Returns the link target nodes of a link. If no link target expression is
+ : specified, no nodes are returned. Otherwise the link target expression is
+ : evaluated once for each connector node, using it as context node. The
+ : connector nodes are the nodes returned by the connector, if it returns
+ : nodes. If the connector returns a URI, rather than nodes, the connector
+ : node is the root node obtained by parsing the URI. When evaluating the 
+ : link target expression, the link context node is bound to the context 
+ : variable 'linkContext'.
+ :
+ : @param connectorNodes the connector nodes
+ : @param linkTargetExpr an expression mapping the connector nodes to
+ :   the link target nodes
+ : @param linkContextItem the link context item of the link
+ : @param context the processing context
+ : @return the link target nodes of the link
+ :) 
+declare function f:getLinkTargetNodes($connectorNodes as node()+, 
                                       $linkTargetExpr as xs:string?, 
                                       $linkContextItem as node(), 
                                       $context as map(xs:string, item()*))
         as node()* {
-    if (not($linkTargetExpr)) then ()
-    else 
-        let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
-        return
-            i:evaluateXPath($linkTargetExpr, $targetResource, $evaluationContextNext, true(), true())        
+    if (not($linkTargetExpr)) then () else
+ 
+    let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
+    for $connectorNode in $connectorNodes        
+    return
+        i:evaluateXPath($linkTargetExpr, $connectorNode, $evaluationContextNext, true(), true())        
 };        
 
 (:~

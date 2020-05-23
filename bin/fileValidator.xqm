@@ -83,7 +83,7 @@ declare function f:validateFileInstance($filePath as xs:string,
     let $coreConstraints := $componentsMap?coreConstraints
     let $extensionConstraints := $componentsMap?extensionConstraints
     let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
-    let $relationshipDefinitions := $componentsMap?relationshipDefinitions
+    let $ldos := $componentsMap?linkDefs
     let $constraints := ($coreConstraints, $extensionConstraints)
     
     (: Required bindings are a subset of potential bindings :)
@@ -94,7 +94,7 @@ declare function f:validateFileInstance($filePath as xs:string,
             $coreConstraints, 
             $extensionConstraints, 
             $extensionConstraintComponents,
-            $relationshipDefinitions,
+            $ldos,
             $resourceShapes,
             $focusNodes,
             $context)

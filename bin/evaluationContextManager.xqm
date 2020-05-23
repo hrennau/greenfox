@@ -65,10 +65,7 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
-    let $relationshipDefinitions := i:getRelationshipDefinitions($components, $context)
-    (:
-    let $relationships := f:getRelationshipDefinitions($components)
-    :)
+    let $linkDefs := i:getLinkDefs($components, $context)
     (: Extension constraint components :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return
@@ -78,7 +75,7 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
             'coreConstraints': $coreConstraints,
             'extensionConstraints': $extensionConstraints,
             'extensionConstraintComponents': $extensionConstraintComponents,
-            'relationshipDefinitions': $relationshipDefinitions
+            'linkDefs': $linkDefs
         }
 };
 
@@ -148,7 +145,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                               $coreComponents as element()*,
                                               $extensionConstraints as element()*,
                                               $extensionConstraintComponents as element()*,
-                                              $relationshipDefinitions as map(*)*,                                              
+                                              $ldos as map(*)*,                                              
                                               $resourceShapes as element()*,
                                               $focusNodes as element()*,
                                               $context as map(xs:string, item()*)) 
@@ -166,7 +163,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $coreComponents, 
                                      $extensionConstraints,
                                      $extensionConstraintComponents,
-                                     $relationshipDefinitions,
+                                     $ldos,
                                      $resourceShapes,
                                      $focusNodes,
                                      $context) 
@@ -176,19 +173,17 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             $mediatype = ('xml', 'xml-or-json')
             or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
             or not($mediatype) and (
-              (: Listing reasons for loading XML document :)
-              $allComponents/(self::gx:xpath, 
-                               self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
-                               self::gx:links, 
-                               self::gx:docSimilar, 
-                               self::gx:contentCorrespondence,
-                               self::gx:file/@linkXP,
-                               self::gx:folder/@linkXP,
-                               gx:validatorXPath, 
-                               @validatorXPath), 
-              $relationshipDefinitions?linkXP,                               
-              $focusNodes/@xpath
-            )    
+                $allComponents/(self::gx:xpath, 
+                                self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
+                                self::gx:links, 
+                                self::gx:docSimilar, 
+                                self::gx:contentCorrespondence,
+                                self::gx:file/@linkXP,
+                                self::gx:folder/@linkXP,
+                                gx:validatorXPath, 
+                                @validatorXPath) 
+            or exists($ldos[?requiresContextNode])                               
+            or $focusNodes/@xpath)
         return
             if (not($required)) then () 
             else if (not(i:fox-doc-available($filePath))) then ()

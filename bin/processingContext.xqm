@@ -19,17 +19,17 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
  : Updates the processing context by updating the _resourceRelationships entry.
- : New relationships are parsed from <setRel> elements and added to the context,
+ : New relationships are parsed from <linkDef> elements and added to the context,
  : overwriting any existing relationship with the same name.
  :
- : @param setRels elements defining resource relationships
+ : @param linkDefs elements defining resource relationships
  : @param context the current processing context
  : @return the updated processing context
  :)
 declare function f:updateContextResourceRelationships($context as map(*),
-                                                      $setRels as element(gx:setRel)*)
+                                                      $linkDefs as element(gx:linkDef)*)
         as map(*) {
-    let $newRelationships := f:parseResourceRelationships($setRels)
+    let $newRelationships := f:parseResourceRelationships($linkDefs)
     return if (empty($newRelationships)) then $context else
         
     let $newNames := $newRelationships ! map:keys(.)    
@@ -55,7 +55,7 @@ declare function f:updateContextResourceRelationships($context as map(*),
 (:~
  : Creates the initial processing context. Its context reflect ...
  : - schema element <context>
- : - schema elements <setRel> which are immediate child elements of the root element
+ : - schema elements <linkDef> which are immediate child elements of the root element
  :
  : @param gfox a greenfox schema
  : @param params a string encoding parameter value assignments supplied by the user

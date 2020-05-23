@@ -75,7 +75,7 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
     (: Successful and failing link resolutions :)
     let $failures := $lros[?errorCode]
     let $successes := $lros[not(?errorCode)]    
-    let $colour := if (exists($failures)) then 'green' else 'red'
+    let $colour := if (exists($failures)) then 'red' else 'green'
     
     (: Recursive flag :)
     let $recursiveAtt := ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
@@ -106,8 +106,9 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
     
     (: Component identification :)
     let $constraintComp := 'LinkResolvable'
+    let $resourceShapeId := $constraintElem/@resourceShapeID
     let $valueShapeId := $constraintElem/@valueShapeID
-    let $constraintId := concat($valueShapeId, '-linkResolvable')
+    let $constraintId := concat(($valueShapeId, $resourceShapeId)[1], '-linkResolvable')
     
     (: Data location :)
     let $filePath := $contextInfo?filePath ! attribute contextURI {.}
@@ -123,8 +124,9 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
         element {'gx:' || $colour} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute valueShapeID {$valueShapeId},  
+            $constraintId ! attribute constraintID {.},
+            $valueShapeId ! attribute valueShapeID {.},
+            $resourceShapeId ! attribute resourceShapeID {.},
             $filePath,
             $focusNode,
             $contextNodeDataPath ! attribute contextNodeDataPath {.},

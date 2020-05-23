@@ -44,7 +44,7 @@ declare function f:getTargetPaths($resourceShape as element(),
     
     (: Perform validation of target paths :)
     let $lros := $targetPathsAndLros[. instance of map(*)]
-    let $validationResults := f:validateTargetConstraints(
+    let $validationResults := i:validateTargetConstraints(
                                         $resourceShape,
                                         $targetPaths, 
                                         $lros,
@@ -89,18 +89,17 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
     
-    let $targetPathsAndEvaluationReports :=        
+    let $targetPathsAndEvaluationReports :=       
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $isLinkTarget := $resourceShape/exists((@linkXP))
-        let $rel := $resourceShape/@rel        
+        let $link := $resourceShape/(@link, @linkXP, @hrefXP, @uriXP, @linkReflectionBase)         
         return
             if ($path) then f:getTargetPaths_path($path, $resourceShape, $context)
             else if ($foxpath) then f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
-            else if ($isLinkTarget) then f:getTargetPaths_linkTargets($resourceShape, $context)
-            else if ($rel) then f:getTargetPaths_rel($resourceShape, $context)            
+            else if ($link) then f:getTargetPaths_link($resourceShape, $context)            
             else error()
-    return $targetPathsAndEvaluationReports
+    let $urisFromLros := $targetPathsAndEvaluationReports[. instance of map(*)][not(?errorCode)]?targetURI             
+    return ($urisFromLros, $targetPathsAndEvaluationReports)
 };        
 
 (:~
@@ -148,58 +147,19 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
         [$isExpectedResourceKind(.)]
 };
 
-(:~
- : Evaluates the target paths obtained by resolving links. The function returns 
- : a sequence of Link Resolution Objects.
- :
- : @param resourceShape resource shape element, with attribute providing the target declaration 
- : @param context processing context
- : @return the URIs of link values successfully resolved, and link reports 
- :  for all link values
- :)
-declare function f:getTargetPaths_linkTargets(
-                                  $resourceShape as element(),
-                                  $context as map(xs:string, item()*))
+declare function f:getTargetPaths_link($resourceShape as element(),
+                                       $context as map(xs:string, item()*))
         as item()* {
-    let $constraintElem := $resourceShape/gx:targetSize        
-    let $linkContextXP := $resourceShape/@contextXP
-    let $linkXP := $resourceShape/@linkXP
-    let $recursive := $resourceShape/@linkRecursive/xs:boolean(.)
-    
-    let $contextPath := $context?_contextPath    
+    let $ldo :=
+        if ($resourceShape/@link) then $resourceShape/@link/i:linkDefinitionObject(., $context)
+        else $resourceShape/i:parseLinkDefinition(.)
+    let $contextURI := $context?_contextPath  
+    let $contextNode := $context?_reqDocs?doc
+    let $lros := link:resolveLdo($ldo, 'lro', $contextURI, $contextNode, $context) 
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
-        else i:fox-resource-is-file#1
-    let $targetMediatype :=
-        if ($resourceShape/@mediatype) then $resourceShape/@mediatype
-        else if ($recursive) then 'xml'
-        else if ($constraintElem/(@linksResolvable, 
-                                  @countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
-                                  @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes)) then 'xml'
-        else ()    
-    let $doc := $context?_reqDocs?doc
-    return
-        if (not($doc)) then  
-            map{'type': 'linkResolutionReport',
-                'errorCode': 'context_document_not_nodetree', 
-                'contextURI': $contextPath}
-        else
-    let $reports := link:resolveUriLinks($contextPath, $doc, $linkContextXP, $linkXP, (), $targetMediatype, $recursive, $context)        
-    let $uris := $reports[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] => distinct-values()
-    return ($uris, $reports)   
-};
-
-declare function f:getTargetPaths_rel(
-                                  $resourceShape as element(),
-                                  $context as map(xs:string, item()*))
-        as item()* {
-    let $constraintElem := $resourceShape/gx:targetSize        
-    let $rel := $resourceShape/@rel
-    let $contextPath := $context?_contextPath
-    let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
-        else i:fox-resource-is-file#1
-    let $lros := i:resolveRelationship($rel, 'lro', $constraintElem, $contextPath, $context)        
-    let $uris := $lros[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] => distinct-values()
+        else i:fox-resource-is-file#1    
+    let $uris := $lros[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] 
+                 => distinct-values()
     return ($uris, $lros)    
 };        

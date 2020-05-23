@@ -25,7 +25,7 @@
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
                 <file linkXP="//@href" linkRecursive="true" id="linkTargetsFileShape">
-                    <targetSize minCount="9" 
+                    <targetSize minCount="90" 
                                 minCountMsg="Not expected number of link targets"
                                 targetLinkResolvable="true"
                                 targetLinkResolvableMsg="Target links could not be resolved"/>

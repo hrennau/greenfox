@@ -42,7 +42,7 @@ declare function f:validateGreenfox($schema as element(gx:greenfox))
                 @*[matches(local-name(.), 'XPath$', 'i')][not(matches(local-name(.), 'foxpath$', 'i'))]
             ),             
             $schema//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@xpath,
-            $schema//gx:setRel/@xpath,
+            $schema//gx:linkDef/(@linkContextXP, @linkTargetXP, @hrefXP, @uriXP, @linkXP),
             $schema//gx:constraintComponent/(@validatorXPath, gx:validatorXPath)
         )
         
@@ -91,7 +91,7 @@ declare function f:validateGreenfox($schema as element(gx:greenfox))
                 @*[matches(local-name(.), 'Foxpath$', 'i')]
             ),             
             $schema//gx:focusNode[not(ancestor-or-self::*[@deactivated eq 'true'])]/@foxpath,
-            $schema//gx:setRel/@foxpath,
+            $schema//gx:linkDef/@foxpath,
             $schema//gx:constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)
         )
         

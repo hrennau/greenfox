@@ -59,11 +59,12 @@ declare function f:validateTargetLinks($resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as element()* {
     
-    if (not($resourceShape/(@rel, @linkXP))) then () else
+    if (not($resourceShape/(@link, @linkXP))) then () else
        
+    let $_DEBUG := trace(count($lros), '_LROS_COUNT: ')
     let $contextPath := $context?_contextPath       
     let $constraintElem := $resourceShape/gx:targetSize
-    let $ldo := $resourceShape/@rel/i:linkDefinitionObject(., $context)
+    let $ldo := $resourceShape/@link/i:linkDefinitionObject(., $context)
     let $contextInfo :=
         map:merge((
             map:entry('filePath', $contextPath)
@@ -72,37 +73,6 @@ declare function f:validateTargetLinks($resourceShape as element(),
         i:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
         i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
     )
-    
-(:        
-    let $constraintElem := $resourceShape/gx:targetSize 
-    return
-        if (not($constraintElem/@targetLinkResolvable eq 'true')) then () else        
-        
-    let $contextInfo :=
-        map:merge((
-            map:entry('filePath', $contextPath)
-        ))
-    let $resultAdditionalAtts := ()
-    let $resultOptions := ()
-    let $recursive := $resourceShape/@recursive
-    let $targetLinkErrors := $lros[?errorCode]    
-    let $colour := if (exists($targetLinkErrors)) then 'red' else 'green'
-    let $values :=  
-        if (empty($targetLinkErrors)) then () 
-        else if ($recursive) then 
-            $targetLinkErrors ! <gx:value where="{?filepath}">{?linkValue}</gx:value>
-        else 
-            $targetLinkErrors ! <gx:value>{?linkValue}</gx:value>
-    return
-        f:validationResult_targetLinks(
-                            $colour, 
-                            $constraintElem,
-                            $lros,
-                            $resultAdditionalAtts, 
-                            $values,
-                            $contextInfo, 
-                            $resultOptions)
-:)                            
 };
 
 (:~
