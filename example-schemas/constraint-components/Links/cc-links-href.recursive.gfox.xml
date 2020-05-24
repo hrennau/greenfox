@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint components Link*, which are represented
+    by a <links> element. This example highlights the use of the 'recursive'
+    parameter - links are applied recursively. Here, target resources are not
+    only the resources identified by @href attributes in the context document,
+    but also all resources found by recursively following the @href links in
+    the target resources, their targets, etc.
+    
+    A LinksResolvable constraint (@resolvable = true) is violated if any target 
+    URIs cannot be resolved. 
+    
+    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
+    - target resources (* = TargetResources)
+    - target docs (* = TargetDocs)    
+    - target nodes (* = TargetNodes)
+    - link context nodes (* = ContextNodes)
+    Target resources, target docs and target nodes are counted per link context node.
+-->
+
+<!-- 
+    Demonstrates the use of constraint component LinksResolvable. The constraint is 
+    violated if any links selected by a given expression, applied recursively to the
+    results of resolving, cannot be resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/recursiveLinksResolvable"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <links hrefXP="//@href"
+                       recursive="true"
+                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
+                       minCountTargetDocs="69" minCountTargetDocsMsg="Less links than expected"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

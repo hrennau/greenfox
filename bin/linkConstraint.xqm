@@ -30,18 +30,18 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Validates constraints referring to links. The link is either referenced (@link)
+ : Validates constraints referring to links. The link is either referenced (@linkName)
  : or defined by attributes on the constraints element ('links'). Possible
  : constraints:
- : - linksResolvable 
- : - countContextNodes 
- : - countTargetResources
- : - countTargetDocs
- : - countTargetNodes
+ : - resolvable 
+ : - countContextNodes, minCountContextNodes, maxCountContextNodes 
+ : - countTargetResources, minCountTargetResources, maxCountTargetResources
+ : - countTargetDocs, minCountTargetDocs, maxCountTargetDocs
+ : - countTargetNodes, minCountTargetNodes, maxCountTargetNodes
  :
- : @param shape the value shape declaring the constraints
+ : @param contextFilePath the file path of the file containing the initial context item 
+ : @param constraintElem element defining the constraints
  : @param contextItem the initial context item to be used in expressions
- : @param contextFilePath the file path of the file containing the initial context item
  : @param contextDoc the XML document containing the initial context item
  : @param context the processing context
  : @return a set of validation results
@@ -52,20 +52,15 @@ declare function f:validateLinks($contextFilePath as xs:string,
                                  $contextDoc as document-node()?,
                                  $context as map(xs:string, item()*))
         as element()* {
-    (: The focus path identifies the location of the initial context item;
-       empty sequence if the initial context item is the root of the 
-       context document :)
-    let $focusPath :=
-        if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
-            $contextItem/f:datapath(.)
-        else ()
         
     (: The "context info" gives access to the context file path and the focus path :)        
-    let $contextInfo := map:merge((
-        $contextFilePath ! map:entry('filePath', .),
-        $focusPath ! map:entry('nodePath', .)
-    ))
-
+    let $contextInfo := 
+        let $focusPath := $contextItem[. instance of node()][not(. is $contextDoc)]/f:datapath(.)
+        return
+            map:merge((
+                $contextFilePath ! map:entry('filePath', .),
+                $focusPath ! map:entry('nodePath', .)
+        ))
     return
         f:resolveAndValidateLinks($contextItem, $contextFilePath, $constraintElem, $context, $contextInfo)
 };
@@ -94,7 +89,7 @@ declare function f:resolveAndValidateLinks(
     (: Link resolution objects :)
     let $lros := link:resolveLinkDef($ldo, 'lro', $filepath, $contextItem[. instance of node()], $context)
     
-    (: Write results :)
+    (: Write validation results :)
     return (
         link:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
         link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      

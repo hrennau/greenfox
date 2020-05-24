@@ -117,8 +117,8 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
 
     (: Message :)
     let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'linksResolvable', ())
-        else i:getErrorMsg($constraintElem, 'linksResolvable', ())
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'resolvable', ())
+        else i:getErrorMsg($constraintElem, 'resolvable', ())
         
     return
         element {'gx:' || $colour} {

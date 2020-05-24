@@ -344,7 +344,7 @@ declare function f:parseLinkDef($linkDef as element())
  :)
 declare function f:getLinkNamesReferenced($components as element()*)
         as xs:string* {
-    $components//(@link, @ref[parent::gx:links])
+    $components//(@link, @linkName)
     => distinct-values()
 }; 
 
