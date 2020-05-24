@@ -13,8 +13,11 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "docSimilarConstraintReports.xqm",
     "greenfoxUtil.xqm",
-    "resourceAccess.xqm",
-    "resourceRelationships.xqm";
+    "resourceAccess.xqm";
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm",
+    "linkResolution.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 declare namespace fox="http://www.foxpath.org/ns/annotations";
@@ -87,11 +90,18 @@ declare function f:validateDocSimilar_targets($filePath as xs:string,
         as item()* {
     let $evaluationContext := $context?_evaluationContext
     let $otherFoxpath := $constraintElem/@otherFoxpath
-    let $relName := $constraintElem/@link
     return    
         if ($otherFoxpath) then f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
-        else if ($relName) then f:resolveRelationship($relName, 'doc', $constraintElem, $filePath, $context)
-        else error()
+        else 
+            let $ldo :=
+                if ($constraintElem/@link) then $constraintElem/@link/link:linkDefObject(., $context)
+                else link:parseLinkDef($constraintElem)
+            return
+                if (empty($ldo)) then error((), 
+                    concat('docSimilar constraint element does not identify comparison target; ',
+                           'use @otherFoxpath, @link or link defining attributes like @hrefXP'))
+                else
+                    link:resolveLinkDef($ldo, 'doc', $filePath, (), $context)
 };
 
 (:~

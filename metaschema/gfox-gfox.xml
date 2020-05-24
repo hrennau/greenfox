@@ -97,8 +97,9 @@ return
                      ======================================== -->
                 
                 <focusNode xpath="*:linkDef">
-                    <ex:allowedAtts attNames="name connector linkContextXP linkXP linkTargetXP foxpath mediatype recursive"
-                        msg="Unexpected attributes in 'linkDef' element; expected: 'name' and 'foxpath'"
+                    <ex:allowedAtts attNames="name connector hrefXP uriXP linkXP linkContextXP linkTargetXP foxpath mediatype recursive"
+                        msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP linkXP 
+                             linkContextXP linkTargetXP foxpath mediatype recursive"
                         msgOK="OK - 'linkDef' element: no unexpected attributes"/>                    
                 </focusNode>
                     
@@ -207,7 +208,7 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="count minCount maxCount msg countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id
-                              targetLinkResolvable targetLinkResolvableMsg targetLinkResolvableMsgOK
+                              resolvable resolvableMsg resolvableMsgOK
                               countContextNodes minCountContextNodes maxCountContextNodes
                               countTargetResources minCountTargetResources maxCountTargetResources
                               countTargetDocs minCountTargetDocs maxCountTargetDocs
@@ -220,7 +221,7 @@ return
                     msgOK="OK - 'folder' element: no unexpected attributes"/>
 
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="minCount maxCount count targetLinkResolvable"
+                <ex:oneOrMoreAtts attNames="minCount maxCount count resolvable"
                     msg="A 'targetSize' shape must contains at least one of these attributes: $attNames"
                     msgOK="OK - 'targetSize' element: has at least one of these attributes: $attNames"/>
 
@@ -566,10 +567,10 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description label 
-                    ref mediatype recursive                     
-                    contextXP linkXP targetXP
+                    linkName mediatype recursive                     
+                    contextXP linkXP targetXP hrefXP uriXP
                     
-                    linksResolvable linksResolvableMsg linksResolvableMsgOK
+                    resolvable resolvableMsg resolvableMsgOK
                     
                     countContextNodes minCountContextNodes maxCountContextNodes
                     countTargetResources minCountTargetResources maxCountTargetResources
@@ -591,8 +592,8 @@ return
                     msgOK="OK - 'links' element: no unexpected attributes"/>
                 
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="linkXP xpath link"
-                    msg="A 'links' constraint must have an 'xpath' attribute, or a 'link' attribute"
+                <ex:oneOrMoreAtts attNames="linkName hrefXP uriXP linkXP hrefXP"
+                    msg="A 'links' constraint must have one of these attributes: linkName, hrefXP, uriXP, linkXP"
                     msgOK="OK - 'links' element: has 'xpath' or 'link' attribute"/>
 
             </focusNode>

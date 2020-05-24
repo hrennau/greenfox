@@ -15,6 +15,9 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm";
 
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkResolution.xqm";
+
 import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
     "validationResult.xqm";
 
@@ -32,9 +35,10 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
                          case element() return 'ELEM' 
                          default return 'OTHER', '_TYPE_CONTEXT_ITEM_0: ')
      :)
+     let $contextNode := $contextItem[. instance of node()]
      let $focusPath :=
-        if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
-            $contextItem/f:datapath(.)
+        if ($contextNode and not($contextNode is $contextDoc)) then
+            $contextNode/f:datapath(.)
         else ()
     let $contextInfo := map:merge((
         $contextFilePath ! map:entry('filePath', .),
@@ -101,7 +105,7 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
     let $flags := string($constraintElem/@flags)
     let $quantifier := ($constraintElem/@quant, 'all')[1]
     
-    let $contextRel := $constraintElem/@contextRel
+    let $linkName := $constraintElem/@linkName
     
     let $eqFoxpathValue := 
         if (not($eqFoxpath)) then () else
@@ -122,13 +126,13 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
 
     let $results := 
         let $contextInfos :=
-            if (not($contextRel)) then $contextInfo
+            if (not($linkName)) then $contextInfo
             else
                 (: _TO_DO_ Probably it will become necessary to replace 'doc' with 'node' :)
-                let $relTargets := f:resolveRelationship($contextRel, 'doc', $constraintElem, $contextFilePath, $context)
-                for $relTarget in $relTargets
+                let $linkTargets := link:resolveLinkDef($linkName, 'doc', $contextFilePath, $contextNode, $context)
+                for $linkTarget in $linkTargets
                 return
-                    map:put($contextInfo, 'relTarget', $relTarget)
+                    map:put($contextInfo, 'linkTarget', $linkTarget)
         for $contextInfo in $contextInfos 
         return
     (
@@ -377,11 +381,11 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
     let $useDatatype := $valueShape/@useDatatype/resolve-QName(., ..)
         
     (: Retrieve relationship target to be used as context for comparison expression :)
-    let $cmpRelTarget := $contextInfo?relTarget
+    let $cmpLinkTarget := $contextInfo?linkTarget
     
     (: Context kind :)
     let $cmpContext :=
-        if (exists($cmpRelTarget)) then () else
+        if (exists($cmpLinkTarget)) then () else
         let $attName := local-name($cmp) || 'Context'
         return $valueShape/@*[local-name(.) eq $attName]
 
@@ -450,11 +454,11 @@ declare function f:validateExpressionValue_cmpExpr($exprValue as item()*,
                 else error()                            
             else
                 let $useContextItem := 
-                    if ($cmpRelTarget) then
+                    if ($cmpLinkTarget) then
                         if ($cmpExprKind eq 'xpath') then 
-                            if ($cmpRelTarget instance of node()) then $cmpRelTarget
-                            else doc($cmpRelTarget)
-                        else $cmpRelTarget
+                            if ($cmpLinkTarget instance of node()) then $cmpLinkTarget
+                            else doc($cmpLinkTarget)
+                        else $cmpLinkTarget
                     else if ($exprKind eq 'foxpath' and $cmpExprKind eq 'xpath') then $contextDoc
                     else if ($exprKind eq 'xpath' and $cmpExprKind eq 'foxpath') then $contextFilePath
                     else $contextItem

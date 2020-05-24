@@ -11,9 +11,11 @@ module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "greenfoxUtil.xqm",
-    "linkConstraint.xqm",
     "resourceAccess.xqm",
     "log.xqm" ;
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkValidation.xqm";
 
 import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
     "validationResult.xqm";
@@ -64,14 +66,14 @@ declare function f:validateTargetLinks($resourceShape as element(),
     let $_DEBUG := trace(count($lros), '_LROS_COUNT: ')
     let $contextPath := $context?_contextPath       
     let $constraintElem := $resourceShape/gx:targetSize
-    let $ldo := $resourceShape/@link/i:linkDefinitionObject(., $context)
+    let $ldo := $resourceShape/@link/link:linkDefObject(., $context)
     let $contextInfo :=
         map:merge((
             map:entry('filePath', $contextPath)
         ))
     return (
-        i:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
-        i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
+        link:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
+        link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
     )
 };
 

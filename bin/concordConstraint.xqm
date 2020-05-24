@@ -14,12 +14,12 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm",
-    "resourceRelationships.xqm",
-    "resourceRelationshipConstraints.xqm",
     "log.xqm";
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm",
+    "linkResolution.xqm",
+    "linkValidation.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -48,6 +48,7 @@ declare function f:validateConcord($contextFilePath as xs:string,
                                    $context as map(xs:string, item()*))
         as element()* {
     
+    let $contextNode := $contextItem[. instance of node()]
     (: context info - a container for current file path and datapath of the focus node :)    
     let $contextInfo := 
         let $focusPath :=
@@ -60,12 +61,12 @@ declare function f:validateConcord($contextFilePath as xs:string,
                 $focusPath ! map:entry('nodePath', .)
             ))
         
-    let $rel := $constraintElem/@link
+    let $linkName := $constraintElem/@link
     
     (: Resolve: relationship name -> Link Resolution Objects :)
-    let $ldo := i:linkDefinitionObject($rel, $context)
-    let $lros := i:resolveRelationship($rel, 'lro', $constraintElem, $contextFilePath, $context)
-    let $results_count := i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
+    let $ldo := link:linkDefObject($linkName, $context)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextFilePath, $contextNode, $context)
+    let $results_count := link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
     
     let $evaluationContext := $context?_evaluationContext    
     let $results := 

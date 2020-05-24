@@ -22,8 +22,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "greenfoxUtil.xqm",
     "greenfoxVarUtil.xqm",
-    "processingContext.xqm",
-    "resourceRelationships.xqm";
+    "processingContext.xqm";
+    
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 

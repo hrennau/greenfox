@@ -14,7 +14,10 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
-    
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -65,7 +68,7 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
-    let $linkDefs := i:getLinkDefs($components, $context)
+    let $linkDefs := link:getLinkDefs($components, $context)
     (: Extension constraint components :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return

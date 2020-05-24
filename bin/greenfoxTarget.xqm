@@ -19,8 +19,8 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
     "validationResult.xqm";
     
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkResolution.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -151,11 +151,11 @@ declare function f:getTargetPaths_link($resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as item()* {
     let $ldo :=
-        if ($resourceShape/@link) then $resourceShape/@link/i:linkDefinitionObject(., $context)
-        else $resourceShape/i:parseLinkDefinition(.)
+        if ($resourceShape/@link) then $resourceShape/@link/link:linkDefObject(., $context)
+        else $resourceShape/link:parseLinkDef(.)
     let $contextURI := $context?_contextPath  
     let $contextNode := $context?_reqDocs?doc
-    let $lros := link:resolveLdo($ldo, 'lro', $contextURI, $contextNode, $context) 
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context) 
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1    

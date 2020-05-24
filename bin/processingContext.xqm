@@ -14,7 +14,10 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
-    
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -29,7 +32,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:updateContextResourceRelationships($context as map(*),
                                                       $linkDefs as element(gx:linkDef)*)
         as map(*) {
-    let $newRelationships := f:parseResourceRelationships($linkDefs)
+    let $newRelationships := link:parseLinkDefs($linkDefs)
     return if (empty($newRelationships)) then $context else
         
     let $newNames := $newRelationships ! map:keys(.)    

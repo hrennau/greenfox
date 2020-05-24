@@ -1,12 +1,12 @@
 (:
  : -------------------------------------------------------------------------
  :
- : resourceRelationshipConstraints.xqm - functions checking resource relationship constraints
+ : linkValidation.xqm - functions checking the results of link resolution
  :
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
@@ -48,7 +48,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     
     let $linkConstraints := $ldo?constraints
     return    
-        if (not((($constraintElem, $linkConstraints)/(@linksResolvable, @targetLinkResolvable))[1] eq 'true')) then ()   
+        if (not((($constraintElem, $linkConstraints)/(@resolvable))[1] eq 'true')) then ()   
         else
     
     (: Link Resolution Objects are grouped by context node :)
@@ -127,8 +127,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            f:validationResult_linkCount($colour, $constraintElem, $countConstraint, 
-                $valueCount, (), $contextInfo, $resultOptions)
+            vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
+                $colour, $valueCount, (), $contextInfo, $resultOptions)
             
     (: Cardinality: target resources per context node 
        ---------------------------------------------- :)            
@@ -141,7 +141,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@minCountTargetResources, $linkConstraints/@minCountTargetResources)[1],
             ($constraintElem/@maxCountTargetResources, $linkConstraints/@maxCountTargetResources)[1]
         )
-        for $lro in $lros
+        for $lro allowing empty in $lros
         group by $sourceNode := $lro?contextNode/generate-id(.)
         let $targetResources := ($lro[?targetExists]?targetURI) => distinct-values()
         let $lro1 := $lro[1]
@@ -160,8 +160,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            f:validationResult_linkCount($colour, $constraintElem, $countConstraint, 
-                $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
+            vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
+                $colour, $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
         
     (: Cardinality: target docs per context node 
        ----------------------------------------- :)            
@@ -174,7 +174,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@minCountTargetDocs, $linkConstraints/@minCountTargetDocs)[1],
             ($constraintElem/@maxCountTargetDocs, $linkConstraints/@maxCountTargetDocs)[1]
         )
-        for $lro in $lros
+        for $lro allowing empty in $lros
         group by $sourceNode := $lro?contextNode/generate-id(.)
         let $targetDocs := ($lro?targetDoc)/.
         let $lro1 := $lro[1]
@@ -193,8 +193,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'    
         return  
-            f:validationResult_linkCount($colour, $constraintElem, $countConstraint, 
-                $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
+            vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
+                $colour, $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
         
     (: Cardinality: target nodes per context node 
        ------------------------------------------ :)            
@@ -208,11 +208,11 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@minCountTargetNodes, $linkConstraints/@minCountTargetNodes)[1],
             ($constraintElem/@maxCountTargetNodes, $linkConstraints/@maxCountTargetNodes)[1]
         )
-        for $lro in $lros
+        for $lro allowing empty in $lros
         group by $sourceNode := $lro?contextNode/generate-id(.)
         let $targetNodes := ($lro?targetNodes)/.
         let $lro1 := $lro[1]
-        where $lro1?errorCode or map:contains($lro1, 'targetNodes')
+        where $lro1?errorCode or $lro1 ! map:contains(., 'targetNodes')
         return
             (: determine count :)
             let $valueCount := count($targetNodes)
@@ -228,8 +228,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
                 default return error()
             let $colour := if ($green) then 'green' else 'red'        
             return  
-                f:validationResult_linkCount($colour, $constraintElem, $countConstraint, 
-                    $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
+                vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
+                    $colour, $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
         
     return (
         $resultsContextNodes,
@@ -248,7 +248,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
  : ===============================================================================
  :)
 
-
+(:
 (:~
  : Creates a validation result for a LinkCount related constraint (LinkMinCount,
  : LinkMaxCount, LinkCount.
@@ -320,4 +320,4 @@ declare function f:validationResult_linkCount($colour as xs:string,
             $valueCountAtt            
         }       
 };
-
+:)

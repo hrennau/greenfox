@@ -16,8 +16,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "greenfoxUtil.xqm",
     "log.xqm";
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm",
+    "linkResolution.xqm",
+    "linkValidation.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -87,43 +89,14 @@ declare function f:resolveAndValidateLinks(
         as item()* {
         
     (: Link definition object :)
-    let $ldo := $constraintElem/@link/i:linkDefinitionObject(., $context)
+    let $ldo := link:getLinkDefObject($constraintElem, $context)
     
     (: Link resolution objects :)
-    let $lros := f:resolveLinksForValidation($contextItem, $filepath, $constraintElem, $context, $contextInfo)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $filepath, $contextItem[. instance of node()], $context)
     
     (: Write results :)
     return (
-        i:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
-        i:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
+        link:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
+        link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
     )
-};
-
-(:~
- : Resolves links defined by, or referenced by a link constraint element.
- :
- : @param contextNode context node to be used when evaluating the link producing expression
- : @param filepath the file path of the resource currently investigated
- : @param valueShape the value shape containing the constraint
- : @param context the processing context
- : @param contextInfo information about the resource context 
- : @return validation results, red and/or green
- :)
-declare function f:resolveLinksForValidation(
-                             $contextItem as item(),
-                             $filepath as xs:string,
-                             $constraintElem as element(),
-                             $context as map(xs:string, item()*),
-                             $contextInfo as map(xs:string, item()*))
-        as map(*)* {
-
-    (: _TO_DO_ Check: currently 'contextItem' is ignored.
-     :)
-     
-    let $ldo := 
-        let $ref := $constraintElem/@link/i:linkDefinitionObject(., $context)
-        return  
-            if ($ref) then $ref else f:parseLinkDefinition($constraintElem)
-    return
-        link:resolveLdo($ldo, 'lro', $filepath, $contextItem[. instance of node()], $context)                    
 };

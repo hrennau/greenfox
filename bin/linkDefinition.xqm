@@ -1,22 +1,22 @@
 (:
  : -------------------------------------------------------------------------
  :
- : resourceRelationships.xqm - functions for managing resource relationships
+ : linkDefinition.xqm - functions for managing link definitions
  :
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
     
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkResolution.xqm";
+
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "foxpathUtil.xqm",
     "greenfoxUtil.xqm";
-
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/link-resolver" at
-    "linkResolver.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -27,11 +27,45 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context processing context
  : @return the Link Definition Object, or the empty sequence, if no object is found
  :)
-declare function f:linkDefinitionObject($relName as xs:string, 
-                                        $context as map(xs:string, item()*))
+declare function f:linkDefObject($linkName as xs:string, 
+                                 $context as map(xs:string, item()*))
         as map(*)? {
-    $context?_resourceRelationships($relName)        
+    $context?_resourceRelationships($linkName)        
 };        
+
+declare function f:getLinkDefObject($linkDef as item(),
+                                    $context as map(xs:string, item()*))
+        as map(*)? {
+    let $ldo :=        
+        typeswitch($linkDef)
+        case $linkName as xs:string return
+            let $lookup := link:linkDefObject($linkName, $context)
+            return
+                if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
+                else $lookup
+        case $linkName as attribute() return
+            let $lookup := link:linkDefObject($linkName, $context)
+            return
+                if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
+                else $lookup
+        case $linkDefObject as map(*) return $linkDefObject
+        case $linkDefElem as element() return
+            let $linkName := $linkDefElem/(@linkName, @link)[1]
+            return
+                if ($linkName) then
+                    let $try := link:linkDefObject($linkName, $context)
+                    return
+                        if (empty($try)) then error((), concat('Unknown link name: ', $linkName))
+                        else $try
+                else
+                    let $parsed := link:parseLinkDef($linkDefElem)
+                    return
+                        if (empty($parsed)) then error((), 
+                            concat('Element cannot be parsed into a link definition object; element name: ', $linkDefElem/name()))
+                        else $parsed
+        default return error((), 'Parameter $linkDef must be a string, an object or an element')
+    return $ldo        
+};
 
 declare function f:resolveRelationship($relName as xs:string,
                                        $resultFormat as xs:string, (: uri | doc | lro :)
@@ -40,7 +74,7 @@ declare function f:resolveRelationship($relName as xs:string,
                                        $context as map(xs:string, item()*))
         as item()* {
     
-    let $relDef := f:linkDefinitionObject($relName, $context)
+    let $relDef := f:linkDefObject($relName, $context)
     let $connector := $relDef?connector
     let $values :=
         if (empty($relDef)) then error()
@@ -95,7 +129,7 @@ declare function f:resolveRelationship_links(
         
     let $contextNode := $context?_reqDocs?doc
     return            
-        link:resolveLdo($ldo, $resultFormat, $filePath, $contextNode, $context)                              
+        link:resolveLinkDef($ldo, $resultFormat, $filePath, $contextNode, $context)                              
 
 (:        
     let $evaluationContext := $context?_evaluationContext
@@ -216,12 +250,12 @@ declare function f:relationshipTargets_links(
  : @param linkDefs schema elements from which to parse the relationships
  : @return a map representing the relationships parsed from the <linkDef> elements
  :)
-declare function f:parseResourceRelationships($linkDefs as element()*)
+declare function f:parseLinkDefs($linkDefs as element()*)
         as map(*) {
     map:merge(        
         for $linkDef in $linkDefs
         let $name := $linkDef/@name/string()
-        let $ldo := f:parseLinkDefinition($linkDef)
+        let $ldo := f:parseLinkDef($linkDef)
         return map:entry($name, $ldo)
     )
 };    
@@ -232,21 +266,25 @@ declare function f:parseResourceRelationships($linkDefs as element()*)
  : @param linkDef an element defining a link
  : @return a Link Definition Object
  :)
-declare function f:parseLinkDefinition($linkDef as element())
+declare function f:parseLinkDef($linkDef as element())
         as map(*) {
+    let $recursive := $linkDef/(@linkRecursive, @recursive)[1]/string()
+    let $linkContextXP := $linkDef/@linkContextXP/string()
+    let $linkTargetXP := $linkDef/@linkTargetXP/string()            
+    let $foxpath := $linkDef/@foxpath/string() 
+    let $hrefXP := $linkDef/@hrefXP/string()
+    let $uriXP := $linkDef/@uriXP/string()
+    let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
+    let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
+    let $linkXP := $linkDef/@linkXP/string()
+    let $constraints := $linkDef/gx:constraints
+    let $uriTemplate := $linkDef/gx:uriTemplate
+    return
+        if (empty((
+            $hrefXP, $uriXP, $uriReflectionBase, $linkXP, $uriTemplate, $foxpath))) then () else
+            
     let $ldo :=        
         map:merge(        
-            let $recursive := $linkDef/(@linkRecursive, @recursive)[1]/string()
-            let $linkContextXP := $linkDef/@linkContextXP/string()
-            let $linkTargetXP := $linkDef/@linkTargetXP/string()            
-            let $foxpath := $linkDef/@foxpath/string() 
-            let $hrefXP := $linkDef/@hrefXP/string()
-            let $uriXP := $linkDef/@uriXP/string()
-            let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
-            let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
-            let $linkXP := $linkDef/@linkXP/string()
-            let $constraints := $linkDef/gx:constraints
-            let $uriTemplate := $linkDef/gx:uriTemplate
             let $connector :=
                 let $connectorExplicit := $linkDef/@connector/string()
                 return
@@ -314,7 +352,7 @@ declare function f:getLinkDefs($components as element()*,
                                $context as map(xs:string, item()*))
         as map(*)* {
     let $linkNames := f:getLinkNamesReferenced($components) => distinct-values()
-    return $linkNames ! f:linkDefinitionObject(., $context)
+    return $linkNames ! f:linkDefObject(., $context)
 }; 
 
 (:~

@@ -6,9 +6,13 @@
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions/link-resolver";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
+
 import module namespace tt="http://www.ttools.org/xquery-functions" at 
     "tt/_foxpath.xqm";    
+
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+    "linkDefinition.xqm";
 
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
@@ -21,7 +25,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Resolves a Link Definition Object to a sequence of Link Resolution Objects.
  : 
- : @param ldo a Link Definition Object
+ : @param linkDef link definition represented by name, Link Definition Object or
+ :   an element which can be parsed into a Link Definition Object
  : @param resultFormat determines the result format; lro: Link Resolution Objects;
  :       uri: URI references; target documents
  : @param contextURI the URI of the context resource
@@ -30,13 +35,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return a sequence of Link Resolution Objects, or selected data retrieved
  :   from these
  :)
-declare function f:resolveLdo($ldo as map(*),
-                              $resultFormat as xs:string?, (: lro | uri | doc :)
-                              $contextURI as xs:string,
-                              $contextNode as node()?,                              
-                              $context as map(xs:string, item()*))
+declare function f:resolveLinkDef($linkDef as item(),
+                                  $resultFormat as xs:string?, (: lro | uri | doc :)
+                                  $contextURI as xs:string,
+                                  $contextNode as node()?,                              
+                                  $context as map(xs:string, item()*))
         as map(xs:string, item()*)* {
-
+    let $ldo := link:getLinkDefObject($linkDef, $context)        
     let $contextNode :=
         if ($contextNode) then $contextNode
         else if ($ldo?requiresContextNode) then
@@ -44,7 +49,8 @@ declare function f:resolveLdo($ldo as map(*),
             return
                 if (not($doc)) then  
                     error((), concat('Invalid call - Link Definition "', $ldo?name, '" requires context node.'))
-                else $doc        
+                else $doc
+                
     let $mediatype :=
         if ($ldo?mediatype) then $ldo?mediatype 
         else if ($resultFormat eq 'doc') then 'xml'
@@ -77,9 +83,19 @@ declare function f:resolveLdoRC(
                    $linkContextExpr))                       
         else f:resolveLinkExpression($linkContextExpr, $contextNode, $context)
 
-    (: Apply link definition to each link context item :)
+    (: Apply connector to each link context item :)
     for $linkContextItem in $linkContextItems
     let $connectorValue := f:applyLinkConnector($ldo, $contextURI, $linkContextItem, $context)
+    return
+        (: Connector value a map with error :)
+        if ($connectorValue[. instance of map(*)]?type eq 'connectorError') then
+            map{'type': 'linkResolutionObject',
+                'contextURI': $contextURI,
+                'contextItem': $linkContextItem,
+                'targetExists': false(),
+                'errorCode': $connectorValue?errorCode}        
+        else
+        
     let $hrefs := $connectorValue[. instance of xs:anyAtomicType]
     let $connectorNodes := $connectorValue[. instance of node()]
     
@@ -230,30 +246,8 @@ declare function f:resolveLdoRC(
 };
 
 (:~
- : Returns a string if application of a link definition requires a
- : context node. The string expresses the reason why a context node
- : is required.
- :
- : @param ldo Link Definition Object
- : @return a string giving a reason, or the empty sequence
- :)
-declare function f:linkRequiresContextNode($ldo as map(xs:string, item()*))
-        as xs:string? {
-    if ($ldo?linkContextXP) then
-        'Link context expression requires a context node.'
-    else if ($ldo?linkXP) then 
-        'Link expression requires a context node.'
-    else if ($ldo?hrefXP) then 
-        'href expression requires a context node.'
-    else if ($ldo?uriXP) then 
-        'URI expression requires a context node.'
-    else if ($ldo?uriTemplate) then 
-        'URI template requires a context node.'
-    else ()
-};
-
-(:~
- : Applies the connector of a link.
+ : Applies the connector of a link to a link context item. Returns nodes, atoms or a map 
+ : with an error code.
  :
  : @param contextURI URI of the link context resource
  : @param contextItem the context item, which may be a node or the context resource URI
@@ -267,6 +261,15 @@ declare function f:applyLinkConnector($ldo as map(*),
         as item()* {
     if ($ldo?linkXP) then
         f:resolveLinkExpression($ldo?linkXP, $contextItem, $context) ! string(.)
+    else if ($ldo?uriXP) then
+        f:resolveLinkExpression($ldo?uriXP, $contextItem, $context) ! string(.)
+    else if ($ldo?hrefXP) then
+        let $items := f:resolveLinkExpression($ldo?hrefXP, $contextItem, $context)
+        return
+            if (not(every $item in $items satisfies $item instance of node())) then
+                map{'type': 'connectorError', 
+                    'errorCode': 'href_selection_not_nodes'}
+            else $items ! string(.)
     else if ($ldo?foxpath) then
         let $evaluationContext := $context?_evaluationContext
         return
@@ -694,3 +697,28 @@ declare function f:resolveLinkExpression($expr as xs:string,
         default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
     return $exprValue        
 };        
+
+(:
+(:~
+ : Returns a string if application of a link definition requires a
+ : context node. The string expresses the reason why a context node
+ : is required.
+ :
+ : @param ldo Link Definition Object
+ : @return a string giving a reason, or the empty sequence
+ :)
+declare function f:linkRequiresContextNode($ldo as map(xs:string, item()*))
+        as xs:string? {
+    if ($ldo?linkContextXP) then
+        'Link context expression requires a context node.'
+    else if ($ldo?linkXP) then 
+        'Link expression requires a context node.'
+    else if ($ldo?hrefXP) then 
+        'href expression requires a context node.'
+    else if ($ldo?uriXP) then 
+        'URI expression requires a context node.'
+    else if ($ldo?uriTemplate) then 
+        'URI template requires a context node.'
+    else ()
+};
+:)

@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component LinksResolvable. The constraint is 
-    violated if any links selected by a given expression cannot be resolved. The
-    optional @mediatype attribute further constrains the link target to have the
-    specified mediatype (xml, json, text). The optional attributes @minCount,
-    @maxCount, @count constraint the number of items returned by the expression
-    producing the links.    
+    Demonstrates the use of constraint components Link*, which are represented
+    by a <links> element. This example checks resources contained by an archive file.
+    
+    A LinksResolvable constraint (@resolvable = true) is violated if any target 
+    URIs cannot be resolved. 
+    
+    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
+    - target resources (* = TargetResources)
+    - target docs (* = TargetDocs)    
+    - target nodes (* = TargetNodes)
+    - link context nodes (* = ContextNodes)
+    Target resources, target docs and target nodes are counted per link context node.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -18,8 +24,8 @@
         <folder foxpath="archives\fileExistenceDependencies.zip\#archive#" id="fileExistenceDependenciesFolderShape">
             <targetSize countMsg="Missing folder: fileExistenceDependencies" count="1"/>            
             <file foxpath=".\\*.xml[/docbook:*]" id="docbookFileShape">
-                <links linkXP="//@fileref"
-                    linksResolvable="true" linksResolvableMsg="Found 'fileref' links which cannot be resolved."
+                <links hrefXP="//@fileref"
+                    resolvable="true" resolvableMsg="Found 'fileref' links which cannot be resolved."
                     minCountTargetResources="1" minCountTargetResourcesMsg="At least one fileref expected"/>
             </file>
         </folder>
