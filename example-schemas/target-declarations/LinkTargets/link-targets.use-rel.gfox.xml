@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. A link target is a target consisting of the resources
-    found by resolving links. The links are provided by an XPath expression. Here, the target 
-    declaration is:
-       @linkXPath="//@href"
+    Demonstrates the use of link targets. A link target is defined by a resource shape which
+    defines or references a link definition. In this example, the link is referenced via
+    @linkName, rather than defined by the <file> shape.
        
-    The <targetSize> constraint element may declare a special constraint, @targetLinkResolvable, 
-    which requires all links found by the target declaration to be resolvable.
+    The <targetSize> constraint element may declare link-related constraints: @resolvable,
+    as well as the link-related cardinality constraints:
+    - countContextNodes, minCount..., maxCount...
+    - countTargetResources, minCount..., maxCount...
+    - countTargetDocs, minCount..., maxCount...
+    - countTargetNodes, minCount..., maxCount...
     
-    Note that count-related constraints of the <targetSize> element (e.g. @count or @minCount)
-    refer to the number of target resources found, not to the number of links attempted to resolve,
-    which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
+    Note that the non-link-related cardinality constraints of the <targetSize> element (e.g. @count, 
+    @minCount, @maxCount) refer to the number of target resources found, not to the number of links 
+    attempted to resolve, which may be higher. Use @resolvable to ensure all links could be resolved.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -20,19 +23,17 @@
     </context>
     
     <linkDef name="airportDetails" 
-             connector="links" 
-             linkXP="//@href/concat(., '')"/>    
+             hrefXP="//@href"/>    
         
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
-                <file link="airportDetails" id="linkTargetsFileShape">
+                <file linkName="airportDetails" id="linkTargetsFileShape">
                     <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 minCountTargetDocs="4" minCountTargetDocsMsg="Not expected number of link target documents"
-                                targetLinkResolvable="true"
-                                targetLinkResolvableMsg="Target links could not be resolved"/>
+                                resolvable="true" resolvableMsg="Target links could not be resolved"/>
                     <xpath expr="/*/airport"
                            exists="true"
                            existsMsg="Country airports document without airports"/>

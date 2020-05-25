@@ -49,7 +49,7 @@ declare function f:getTargetPaths($resourceShape as element(),
                                         $targetPaths, 
                                         $lros,
                                         $context)
-    (: Returntarget paths and validation results :)                                        
+    (: Return target paths and validation results :)                                        
     return
         ($targetPaths, $validationResults)
 };
@@ -84,15 +84,16 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
     let $contextPath := $context?_contextPath  
     
     (: Adhoc addition of $filePath and $fileName :)
+    (:
     let $evaluationContext := $context?_evaluationContext
     let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $contextPath)
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
-    
+     :)
     let $targetPathsAndEvaluationReports :=       
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $link := $resourceShape/(@link, @linkXP, @hrefXP, @uriXP, @linkReflectionBase)         
+        let $link := $resourceShape/(@link, @linkName, @hrefXP, @uriXP, @linkReflectionBase)         
         return
             if ($path) then f:getTargetPaths_path($path, $resourceShape, $context)
             else if ($foxpath) then f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
@@ -150,12 +151,9 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
 declare function f:getTargetPaths_link($resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as item()* {
-    let $ldo :=
-        if ($resourceShape/@link) then $resourceShape/@link/link:linkDefObject(., $context)
-        else $resourceShape/link:parseLinkDef(.)
-    let $contextURI := $context?_contextPath  
+    let $contextURI := $context?_contextPath
     let $contextNode := $context?_reqDocs?doc
-    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context) 
+    let $lros := link:resolveLinkDef($resourceShape, 'lro', $contextURI, $contextNode, $context) 
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1    

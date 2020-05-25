@@ -396,13 +396,13 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description deactivated link path foxpath linkXP linkRecursive mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated linkName path foxpath hrefXP uriXP recursive mediatype csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
-                <ex:xoneAtts attNames="foxpath link path linkXP recursiveLinkXP"
-                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkXP, recursiveLinkXP"
-                    msgOK="OK - 'file' element: has foxpath or path or linkXP"/>
+                <ex:xoneAtts attNames="foxpath path linkName hrefXP uriXP"
+                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, link, hrefXP, uriXP"
+                    msgOK="OK - 'file' element: has expected attribute (one of: foxpath path link hrefXP uriXP)"/>
 
                 <!-- element names -->
                 <ex:allowedElems

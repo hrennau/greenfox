@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+    <!-- 
     Demonstrates the use of constraint components Link*, which are represented
-    by a <links> element. This example highlights the use of the 'recursive'
-    parameter - links are applied recursively. Here, target resources are not
-    only the resources identified by @href attributes in the context document,
-    but also all resources found by recursively following the @href links in
-    the target resources, their targets, etc.
+    by a <links> element. The optional @mediatype parameter requires link resolution
+    to include a parsing of the link targets into a node tree. This example checks
+    links connecting JSON documents.
     
     A LinksResolvable constraint (@resolvable = true) is violated if any target 
     URIs cannot be resolved. 
@@ -15,9 +13,9 @@
     - target docs (* = TargetDocs)    
     - target nodes (* = TargetNodes)
     - link context nodes (* = ContextNodes)
-    Target resources, target docs and target nodes are counted per link context node.
+    Target resources and target docs are counted per link context node.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/recursiveLinksResolvable"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -27,11 +25,12 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.xml" id="airportsFileShape">
-                <links hrefXP="//@href"
-                       recursive="true"
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="69" minCountTargetDocsMsg="Less links than expected"/>
+            <file foxpath="*.json" id="airportsFileShape" mediatype="json">
+                <targetSize count="5" countMsg="Expected exactly five resources with @href"/>
+                <links hrefXP="//href" 
+                       mediatype="json"
+                       resolvable="true" resolvableMsg="Link cannot be resolved"
+                       minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>                
             </file>
         </folder>
     </domain>
