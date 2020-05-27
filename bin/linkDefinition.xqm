@@ -106,16 +106,16 @@ declare function f:resolveRelationship_foxpath(
     let $evaluationContext := $context?_evaluationContext
     let $reqDocs := $context?_reqDocs    
 
-    let $linkContextURI := $filePath
-    let $linkContextDoc := $reqDocs?doc
-    let $linkContextXP := $ldo?linkContextXP
+    let $contextURI := $filePath
+    let $contextDoc := $reqDocs?doc
+    let $contextXP := $ldo?contextXP
     let $foxpath := $ldo?foxpath
-    let $linkTargetXP := $ldo?linkTargetXP
+    let $targetXP := $ldo?targetXP
     let $targetMediatype := $ldo?mediatype
     return
         link:resolveFoxLinks(
-             $linkContextURI, $linkContextDoc, $linkContextXP, 
-             $foxpath, $linkTargetXP,
+             $contextURI, $contextDoc, $contextXP, 
+             $foxpath, $targetXP,
              $targetMediatype, $resultFormat, $context)
 };
 
@@ -130,116 +130,7 @@ declare function f:resolveRelationship_links(
     let $contextNode := $context?_reqDocs?doc
     return            
         link:resolveLinkDef($ldo, $resultFormat, $filePath, $contextNode, $context)                              
-
-(:        
-    let $evaluationContext := $context?_evaluationContext
-    let $reqDocs := $context?_reqDocs
-    
-    let $linkContextURI := $filePath
-    let $linkContextDoc := $reqDocs?doc    
-    let $linkContextXP := $ldo?linkContextXP
-    let $linkXP := $ldo?linkXP
-    let $linkTargetXP := $ldo?linkTargetXP    
-    let $mediatype := f:getLinkTargetMediatype($ldo, (), $constraintElems)
-(:    
-        let $explicit := $ldo?mediatype
-        return if (not($explicit) and $linkTargetXP) then 'xml' else $explicit
- :)        
-    let $recursive := $ldo?recursive
-    return
-        link:resolveUriLinks(
-                      $linkContextURI, $linkContextDoc, $linkContextXP, $linkXP, $linkTargetXP,
-                      $mediatype, $recursive, $context)
-:)                      
 };   
-
-(:
-(:~
- : Resolves a resource relationship name to a set of target resources. Resolution
- : context is the file path of the focus resource. The target resources may
- : be represented by file paths or by nodes, dependent on the specification
- : of the resource relationship.
- :
- : @param relName relationship name
- : @param filePath file path of the focus resource
- : @param context processing context
- : @return the target documents of the relationship, resolved in the
- :   context of the file path
- :)
-declare function f:relationshipTargets($relName as xs:string,
-                                       $filePath as xs:string,
-                                       $context as map(xs:string, item()*))
-        as item()* {
-    
-    let $relDef := $context?_resourceRelationships($relName)
-    let $connector := $relDef?connector
-    let $targets :=
-        if (empty($relDef)) then error()
-        else if ($connector eq 'foxpath') then
-            f:relationshipTargets_foxpath($relDef, $filePath, $context)
-        else if ($connector eq 'links') then
-            f:relationshipTargets_links($relDef, $filePath, $context)
-        else error()
-    return
-        $targets
-};
-
-(:~
- : Resolves a resource relationship name to a set of target resources, in the case
- : of relationship kind 'foxpath'. 
- :
- : @param relName relationship name
- : @param filePath file path of the focus resource
- : @param context processing context
- : @return the target documents of the relationship, resolved in the
- :   context of the file path
- :)
-declare function f:relationshipTargets_foxpath(
-                                       $resourceRelationship as map(xs:string, item()*),
-                                       $filePath as xs:string,
-                                       $context as map(xs:string, item()*))
-        as item()* {
-    let $evaluationContext := $context?_evaluationContext
-    let $foxpath := $resourceRelationship?foxpath 
-    return    
-        if ($foxpath) then
-            f:evaluateFoxpath($foxpath, $filePath, $evaluationContext, true())
-        else error()
-};
-
-declare function f:relationshipTargets_links(
-                                       $resourceRelationship as map(xs:string, item()*),
-                                       $filePath as xs:string,
-                                       $context as map(xs:string, item()*))
-        as item()* {
-    let $evaluationContext := $context?_evaluationContext
-    let $reqDocs := $context?_reqDocs
-    
-    let $linkContextExpr := $resourceRelationship?linkContextXP
-    let $linkExpr := $resourceRelationship?linkXP
-    let $linkTargetExpr := $resourceRelationship?linkTargetXP
-    let $mediatype := $resourceRelationship?mediatype
-    let $recursive := $resourceRelationship?recursive    
-    let $contextNode := $reqDocs?doc
-    
-    let $lrObjects := link:resolveLinks(
-                             $filePath,
-                             $contextNode,
-                             $linkContextExpr,
-                             $linkExpr,
-                             $linkTargetExpr,
-                             $mediatype,
-                             $recursive,
-                             $context)
-    return
-        $lrObjects
-        (:
-        if ($mediatype eq 'xml') then $lrObjects?targetResource
-        else if ($mediatype eq 'json') then $lrObjects?targetResource
-        else $lrObjects?uri
-        :)
-};
-:)
 
 (:~
  : Parses resource relationships defined by <linkDef> elements into a
@@ -269,8 +160,8 @@ declare function f:parseLinkDefs($linkDefs as element()*)
 declare function f:parseLinkDef($linkDef as element())
         as map(*) {
     let $recursive := $linkDef/(@linkRecursive, @recursive)[1]/string()
-    let $linkContextXP := $linkDef/@linkContextXP/string()
-    let $linkTargetXP := $linkDef/@linkTargetXP/string()            
+    let $contextXP := $linkDef/@contextXP/string()
+    let $targetXP := $linkDef/@targetXP/string()            
     let $foxpath := $linkDef/@foxpath/string() 
     let $hrefXP := $linkDef/@hrefXP/string()
     let $uriXP := $linkDef/@uriXP/string()
@@ -299,13 +190,13 @@ declare function f:parseLinkDef($linkDef as element())
         
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
-                    or $linkContextXP
+                    or $contextXP
             let $mediatype :=
                 let $mediatypeExplicit := $linkDef/@mediatype/string()
                 return
                     if ($mediatypeExplicit) then $mediatypeExplicit
                     else if ($recursive and $requiresContextNode
-                             or $linkTargetXP)
+                             or $targetXP)
                         then 'xml'
                     else () 
             return
@@ -314,8 +205,8 @@ declare function f:parseLinkDef($linkDef as element())
                     $mediatype ! map:entry('mediatype', .),
                     $recursive ! map:entry('recursive', .),
                     $requiresContextNode ! map:entry('requiresContextNode', .),
-                    $linkContextXP ! map:entry('linkContextXP', .),
-                    $linkTargetXP ! map:entry('linkTargetXP', .),                   
+                    $contextXP ! map:entry('contextXP', .),
+                    $targetXP ! map:entry('targetXP', .),                   
                     $foxpath ! map:entry('foxpath', .),
                     $hrefXP ! map:entry('hrefXP', .),
                     $uriXP ! map:entry('uriXP', .),

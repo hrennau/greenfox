@@ -22,8 +22,7 @@
     </context>
     
     <linkDef name="airportDetails"
-             connector="links"
-             linkContextXP="//airport"
+             contextXP="//airport"
              hrefXP="@href"
              mediatype="xml"/>
     

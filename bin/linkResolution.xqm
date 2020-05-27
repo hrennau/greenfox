@@ -70,18 +70,18 @@ declare function f:resolveLdoRC(
                              
         as map(xs:string, item()*)* {
         
-    let $linkContextExpr := $ldo?linkContextXP
+    let $contextExpr := $ldo?contextXP
     let $mediatype := $ldo?mediatype
     
     (: The mapping of the context node to Link Context Nodes is optional:
        the default link context is the context resource, represented
        by the context resource URI and, optionally, a context node :)        
     let $linkContextItems :=
-        if (not($linkContextExpr)) then ($contextNode, $contextURI)[1]
+        if (not($contextExpr)) then ($contextNode, $contextURI)[1]
         else if (not($contextNode)) then error((), 
             concat('Link context expression requires a context node; expression: ', 
-                   $linkContextExpr))                       
-        else f:resolveLinkExpression($linkContextExpr, $contextNode, $context)
+                   $contextExpr))                       
+        else f:resolveLinkExpression($contextExpr, $contextNode, $context)
 
     (: Apply connector to each link context item :)
     for $linkContextItem in $linkContextItems
@@ -132,7 +132,7 @@ declare function f:resolveLdoRC(
                 else
                     let $text := i:fox-unparsed-text($targetURI, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
-                    let $linkTargetNodes := f:getLinkTargetNodes($jdoc, $ldo?linkTargetXP, $linkContextItem, $context)
+                    let $targetNodes := f:getLinkTargetNodes($jdoc, $ldo?targetXP, $linkContextItem, $context)
                     return 
                         if (not($jdoc)) then 
                             map{'type': 'linkResolutionObject',
@@ -151,7 +151,7 @@ declare function f:resolveLdoRC(
                                 map:entry('targetURI', $targetURI),
                                 map:entry('targetExists', true()),
                                 map:entry('targetDoc', $jdoc),
-                                $ldo?linkTargetXP ! map:entry('targetNodes', $linkTargetNodes)))
+                                $ldo?targetXP ! map:entry('targetNodes', $targetNodes)))
             
             (: Mediatype: xml :)            
             else if ($mediatype = 'xml') then
@@ -168,7 +168,7 @@ declare function f:resolveLdoRC(
                             'errorCode': $errorCode}
                 else 
                     let $targetDoc := i:fox-doc($targetURI)
-                    let $linkTargetNodes := f:getLinkTargetNodes($targetDoc, $ldo?linkTargetXP, $linkContextItem, $context)  
+                    let $targetNodes := f:getLinkTargetNodes($targetDoc, $ldo?targetXP, $linkContextItem, $context)  
                     return
                         map:merge((
                             map:entry('type', 'linkResolutionObject'),
@@ -178,7 +178,7 @@ declare function f:resolveLdoRC(
                             map:entry('targetURI', $targetURI), 
                             map:entry('targetExists', true()),
                             map:entry('targetDoc', $targetDoc),
-                            $ldo?linkTargetXP ! map:entry('targetNodes', $linkTargetNodes)
+                            $ldo?targetXP ! map:entry('targetNodes', $targetNodes)
                         ))
             else
                 if (i:fox-resource-exists($targetURI)) then
@@ -207,21 +207,21 @@ declare function f:resolveLdoRC(
         let $includedRootNode := $root[. intersect $connectorNode]
         
         (: target nodes: 
-               if expr linkTargetXP is specified: 
+               if expr targetXP is specified: 
                    union of the expression values obtained for each context node;
                    context nodes: 
                        all non-root nodes, if there are any,
                        the root node otherwise
                otherwise: all non-root nodes obtained from the foxpath
          :)
-        let $linkTargetXP := $ldo?linkTargetXP
-        let $linkTargetNodes :=
-            if (not($linkTargetXP)) then $nonRootNodes
+        let $targetXP := $ldo?targetXP
+        let $targetNodes :=
+            if (not($targetXP)) then $nonRootNodes
             else if (count($connectorNode) eq 1) then $connectorNode
             else
                 let $myConnectorNodes := ($nonRootNodes, $includedRootNode)
                 return
-                    f:getLinkTargetNodes($myConnectorNodes, $ldo?linkTargetXP, $linkContextItem, $context)                    
+                    f:getLinkTargetNodes($myConnectorNodes, $ldo?targetXP, $linkContextItem, $context)                    
         return
             map:merge((
                 map:entry('type', 'linkResolutionObject'),
@@ -229,10 +229,10 @@ declare function f:resolveLdoRC(
                 map:entry('contextItem', $linkContextItem),
                 map:entry('targetExists', true()),
                 map:entry('targetDoc', $root),
-                (: Target nodes: only if linkTargetXP specified, or if foxpath produces non-root nodes :)
-                if (not($ldo?linkTargetXP) and not($nonRootNodes)) then () 
+                (: Target nodes: only if targetXP specified, or if foxpath produces non-root nodes :)
+                if (not($ldo?targetXP) and not($nonRootNodes)) then () 
                 else
-                    map:entry('targetNodes', $linkTargetNodes)
+                    map:entry('targetNodes', $targetNodes)
             ))
     let $lros := ($lrosAtomicItems, $lrosNodeItems)
     let $newUrisSofar := ($urisSofar, $lros?targetURI) => distinct-values()
@@ -280,21 +280,21 @@ declare function f:applyLinkConnector($ldo as map(*),
 (:~
  : Resolves a Foxpath-based link definition.
  :
- : @param linkContextURI the URI of the link context resource
- : @param linkContextDoc the root node of the context resource, represented as node tree
- : @param linkContextXP expression mapping the link context doc to link context items
+ : @param contextURI the URI of the link context resource
+ : @param contextDoc the root node of the context resource, represented as node tree
+ : @param contextXP expression mapping the link context doc to link context items
  : @param foxpath the Foxpath expression used by the link
- : @param linkTargetXP expression mapping the foxpath value items to target items
+ : @param targetXP expression mapping the foxpath value items to target items
  : @param targetMediatype mediatype of the link targets
  : @param resultFormat the representation of the Link Resolution Objects
  : @param context the processing context
  :)
 declare function f:resolveFoxLinks(
-                        $linkContextURI as xs:string,
-                        $linkContextDoc as node()?,
-                        $linkContextXP as xs:string?,
+                        $contextURI as xs:string,
+                        $contextDoc as node()?,
+                        $contextXP as xs:string?,
                         $foxpath as xs:string,
-                        $linkTargetXP as xs:string?,
+                        $targetXP as xs:string?,
                         $targetMediatype as xs:string?,
                         $resultFormat as xs:string,  (: uri | doc | lro :)
                         $context as map(xs:string, item()*))
@@ -302,17 +302,17 @@ declare function f:resolveFoxLinks(
     let $evaluationContext := $context?_evaluationContext
     let $unparsedTextEncoding := ()
     let $targetMediatype := 
-        if (not($targetMediatype) and ($linkTargetXP or $resultFormat eq 'doc')) then 
+        if (not($targetMediatype) and ($targetXP or $resultFormat eq 'doc')) then 
             'xml'
         else 
             $targetMediatype
     
     (: Link context items:
-       - unless $linkContextXP is provided: the context resource URI
-       - otherwise: the value items of $linkContextXP :)
+       - unless $contextXP is provided: the context resource URI
+       - otherwise: the value items of $contextXP :)
     let $linkContextItems :=
-        if (not($linkContextXP)) then $linkContextURI
-        else i:evaluateXPath($linkContextXP, $linkContextDoc, $evaluationContext, true(), true())
+        if (not($contextXP)) then $contextURI
+        else i:evaluateXPath($contextXP, $contextDoc, $evaluationContext, true(), true())
 
     (: For each Link Context Item ... :)
     for $linkContextItem in $linkContextItems
@@ -352,19 +352,19 @@ declare function f:resolveFoxLinks(
                 else ()
                     
             (: Flag indicating that link target nodes should be determined :)
-            let $linkTargetNodesExpected := $linkTargetXP and $targetDoc instance of node()
+            let $targetNodesExpected := $targetXP and $targetDoc instance of node()
                     
             (: Determine link target nodes :)
-            let $linkTargetNodes :=
-                if (not($linkTargetNodesExpected)) then ()
+            let $targetNodes :=
+                if (not($targetNodesExpected)) then ()
                 else
                     (: Evaluation requires binding of variable 'linkContext' to the link context item :)
                     let $evaluationContextNext := map:put($evaluationContext, QName('', 'linkContext'), $linkContextItem)
-                    return i:evaluateXPath($linkTargetXP, $targetDoc, $evaluationContextNext, true(), true())
+                    return i:evaluateXPath($targetXP, $targetDoc, $evaluationContextNext, true(), true())
             return
                 map:merge((
                     map:entry('type', 'linkResolutionObject'),
-                    map:entry('contextURI', $linkContextURI),
+                    map:entry('contextURI', $contextURI),
                     if ($linkContextItem instance of xs:anyAtomicType) then ()
                     else
                         map:entry('contextNode', $linkContextItem),
@@ -375,8 +375,8 @@ declare function f:resolveFoxLinks(
                         map:entry('errorCode', $targetDoc)
                     else
                         map:entry('targetDoc', $targetDoc),
-                    if (not($linkTargetNodesExpected)) then () else
-                        map:entry('targetNodes', $linkTargetNodes)
+                    if (not($targetNodesExpected)) then () else
+                        map:entry('targetNodes', $targetNodes)
                 ))
        
     (: Link Resolution Objects for node items: grouped by containing root node :)                    
@@ -387,37 +387,37 @@ declare function f:resolveFoxLinks(
         let $nonRootNodes := $target except $root[1]
         
         (: target nodes: 
-               if expr linkTargetXP is specified: 
+               if expr targetXP is specified: 
                    union of the expression values obtained for each context node;
                    context nodes: 
                        all non-root nodes, if there are any,
                        the root node otherwise
                otherwise: all non-root nodes obtained from the foxpath
          :)
-        let $linkTargetNodes :=
-            if (not($linkTargetXP)) then $nonRootNodes
+        let $targetNodes :=
+            if (not($targetXP)) then $nonRootNodes
             else
                 let $evaluationContextNodes :=
                     if (count($target) eq 1) then $target
                     else $nonRootNodes
-                (: Evaluate $linkTargetXP in each appropriate context :)
+                (: Evaluate $targetXP in each appropriate context :)
                 for $ecn in $evaluationContextNodes
                 let $evaluationContextNext := map:put($evaluationContext, QName('', 'linkContext'), $linkContextItem)
                 return
-                    i:evaluateXPath($linkTargetXP, $ecn, $evaluationContextNext, false(), true())        
+                    i:evaluateXPath($targetXP, $ecn, $evaluationContextNext, false(), true())        
         return
             map:merge((
                 map:entry('type', 'linkResolutionObject'),
-                map:entry('contextURI', $linkContextURI),
+                map:entry('contextURI', $contextURI),
                 if ($linkContextItem instance of xs:anyAtomicType) then ()
                 else
                     map:entry('contextNode', $linkContextItem),
                 map:entry('targetExists', true()),
                 map:entry('targetDoc', $root),
-                (: Target nodes: only if linkTargetXP specified, or if foxpath produces non-root nodes :)
-                if (not($linkTargetXP) and not($nonRootNodes)) then () 
+                (: Target nodes: only if targetXP specified, or if foxpath produces non-root nodes :)
+                if (not($targetXP) and not($nonRootNodes)) then () 
                 else
-                    map:entry('targetNodes', $linkTargetNodes)
+                    map:entry('targetNodes', $targetNodes)
             ))
 
     let $lros := ($lrosAtomicItems, $lrosNodeItems)
@@ -452,7 +452,7 @@ declare function f:resolveFoxLinks(
  :
  : @param contextURI the file path of the resource currently investigated
  : @param contextNode context node to be used when evaluating the link producing expression
- : @param linkContextExpr expression mapping the context node to link context nodes
+ : @param contextExpr expression mapping the context node to link context nodes
  : @param linkExpr expression mapping a link context node to the link value items
  : @param mediatype the mediatype of link targets
  : @param recursive flag indicating if links are resolved recursively
@@ -463,15 +463,15 @@ declare function f:resolveFoxLinks(
 declare function f:resolveUriLinks(
                              $contextURI as xs:string,
                              $contextNode as node()?,
-                             $linkContextExpr as xs:string?,
+                             $contextExpr as xs:string?,
                              $linkExpr as xs:string,
-                             $linkTargetExpr as xs:string?,
+                             $targetExpr as xs:string?,
                              $mediatype as xs:string?,
                              $recursive as xs:boolean?,
                              $context as map(xs:string, item()*))
         as map(xs:string, item()*)* {
     let $lros := f:resolveUriLinksRC($contextURI, $contextNode, 
-                                     $linkContextExpr, $linkExpr, $linkTargetExpr, 
+                                     $contextExpr, $linkExpr, $targetExpr, 
                                      $mediatype, $recursive, 
                                      $context, (), ())
     
@@ -494,7 +494,7 @@ declare function f:resolveUriLinks(
  :
  : @param contextURI the file path of the resource currently investigated
  : @param contextNode context node to be used when evaluating the link producing expression
- : @param linkContextExpr expression mapping the context node to link context nodes
+ : @param contextExpr expression mapping the context node to link context nodes
  : @param linkExpr expression mapping a link context node to the link value items
  : @param mediatype the mediatype of link targets
  : @param recursive flag indicating if links are resolved recursively
@@ -505,9 +505,9 @@ declare function f:resolveUriLinks(
 declare function f:resolveUriLinksRC(
                              $contextURI as xs:string,
                              $contextNode as node()?,
-                             $linkContextExpr as xs:string?,
+                             $contextExpr as xs:string?,
                              $linkExpr as xs:string,
-                             $linkTargetExpr as xs:string?,
+                             $targetExpr as xs:string?,
                              $mediatype as xs:string?,
                              $recursive as xs:boolean?,
                              $context as map(xs:string, item()*),
@@ -519,8 +519,8 @@ declare function f:resolveUriLinksRC(
     (: The mapping of the context node to Link Context Nodes is optional:
        the default link context is the context node itself. :)        
     let $linkContextNodes :=
-        if (not($linkContextExpr)) then $contextNode
-        else f:resolveLinkExpression($linkContextExpr, $contextNode, $context)
+        if (not($contextExpr)) then $contextNode
+        else f:resolveLinkExpression($contextExpr, $contextNode, $context)
         
     for $linkContextNode in $linkContextNodes
     let $linkValues := f:resolveLinkExpression($linkExpr, $linkContextNode, $context)
@@ -558,7 +558,7 @@ declare function f:resolveUriLinksRC(
                 else
                     let $text := i:fox-unparsed-text($targetURI, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
-                    let $linkTargetNodes := f:getLinkTargetNodes($jdoc, $linkTargetExpr, $linkContextNode, $context)
+                    let $targetNodes := f:getLinkTargetNodes($jdoc, $targetExpr, $linkContextNode, $context)
                     return 
                         if (not($jdoc)) then 
                             map{'type': 'linkResolutionObject',
@@ -577,7 +577,7 @@ declare function f:resolveUriLinksRC(
                                 map:entry('targetURI', $targetURI),
                                 map:entry('targetExists', true()),
                                 map:entry('targetDoc', $jdoc),
-                                $linkTargetExpr ! map:entry('targetNodes', $linkTargetNodes)))
+                                $targetExpr ! map:entry('targetNodes', $targetNodes)))
             
             (: Mediatype: xml :)            
             else if ($mediatype = 'xml') then
@@ -596,7 +596,7 @@ declare function f:resolveUriLinksRC(
                 else 
                     let $_DEBUG := i:DEBUG($targetURI, 'links', 1, '_LINK_RESOLVING_XML#SUCCESS: ') 
                     let $targetDoc := i:fox-doc($targetURI)
-                    let $linkTargetNodes := f:getLinkTargetNodes($targetDoc, $linkTargetExpr, $linkContextNode, $context)  
+                    let $targetNodes := f:getLinkTargetNodes($targetDoc, $targetExpr, $linkContextNode, $context)  
                     return
                         map:merge((
                             map:entry('type', 'linkResolutionObject'),
@@ -606,7 +606,7 @@ declare function f:resolveUriLinksRC(
                             map:entry('targetURI', $targetURI), 
                             map:entry('targetExists', true()),
                             map:entry('targetDoc', $targetDoc),
-                            $linkTargetExpr ! map:entry('targetNodes', $linkTargetNodes)
+                            $targetExpr ! map:entry('targetNodes', $targetNodes)
                         ))
             else
                 if (i:fox-resource-exists($targetURI)) then
@@ -637,7 +637,7 @@ declare function f:resolveUriLinksRC(
         if (not($recursive)) then () else
             $lrosSuccess 
             ! f:resolveUriLinksRC(?targetURI, ?targetDoc, 
-                                  $linkContextExpr, $linkExpr, $linkTargetExpr, 
+                                  $contextExpr, $linkExpr, $targetExpr, 
                                   $mediatype, $recursive, 
                                   $context, 
                                   $newPathsSofar, $newErrorsSofar)            
@@ -655,23 +655,23 @@ declare function f:resolveUriLinksRC(
  : variable 'linkContext'.
  :
  : @param connectorNodes the connector nodes
- : @param linkTargetExpr an expression mapping the connector nodes to
+ : @param targetExpr an expression mapping the connector nodes to
  :   the link target nodes
  : @param linkContextItem the link context item of the link
  : @param context the processing context
  : @return the link target nodes of the link
  :) 
 declare function f:getLinkTargetNodes($connectorNodes as node()+, 
-                                      $linkTargetExpr as xs:string?, 
+                                      $targetExpr as xs:string?, 
                                       $linkContextItem as node(), 
                                       $context as map(xs:string, item()*))
         as node()* {
-    if (not($linkTargetExpr)) then () else
+    if (not($targetExpr)) then () else
  
     let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
     for $connectorNode in $connectorNodes        
     return
-        i:evaluateXPath($linkTargetExpr, $connectorNode, $evaluationContextNext, true(), true())        
+        i:evaluateXPath($targetExpr, $connectorNode, $evaluationContextNext, true(), true())        
 };        
 
 (:~
@@ -709,7 +709,7 @@ declare function f:resolveLinkExpression($expr as xs:string,
  :)
 declare function f:linkRequiresContextNode($ldo as map(xs:string, item()*))
         as xs:string? {
-    if ($ldo?linkContextXP) then
+    if ($ldo?contextXP) then
         'Link context expression requires a context node.'
     else if ($ldo?linkXP) then 
         'Link expression requires a context node.'

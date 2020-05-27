@@ -10,10 +10,9 @@
     </context>
 
     <setRel name="airportGeoDetails"
-            connector="links"
-            linkXP="@href"
-            linkContextXP="//airport"
-            linkTargetXP="/*/geo">
+            hrefXP="@href"
+            contextXP="//airport"
+            targetXP="/*/geo">
         <constraints 
             minCountContextNodes="14" 
             countTargetResources="1" 

@@ -12,8 +12,8 @@
     <setRel name="articleExpectations"
             connector="foxpath"
             foxpath="$this\..\fox-sibling('expectation')\expectation-articles.xml"
-            linkContextXP="//article"
-            linkTargetXP="//article[@id eq $linkContext/articleID]"
+            contextXP="//article"
+            targetXP="//article[@id eq $linkContext/articleID]"
             >
         <constraints 
             minCountContextNodes="2" 

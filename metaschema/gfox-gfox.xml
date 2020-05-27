@@ -97,9 +97,9 @@ return
                      ======================================== -->
                 
                 <focusNode xpath="*:linkDef">
-                    <ex:allowedAtts attNames="name connector hrefXP uriXP linkXP linkContextXP linkTargetXP foxpath mediatype recursive"
+                    <ex:allowedAtts attNames="name connector hrefXP uriXP linkXP contextXP targetXP foxpath mediatype recursive"
                         msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP linkXP 
-                             linkContextXP linkTargetXP foxpath mediatype recursive"
+                             contextXP targetXP foxpath mediatype recursive"
                         msgOK="OK - 'linkDef' element: no unexpected attributes"/>                    
                 </focusNode>
                     
