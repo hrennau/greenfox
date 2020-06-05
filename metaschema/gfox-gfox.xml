@@ -418,6 +418,16 @@ return
             </focusNode>
 
             <!-- ========================================
+                       <docSimilar>
+                 ======================================== -->
+            <focusNode xpath="//*:docSimilar">
+                <ex:allowedAtts
+                    attNames="foxpath linkName redReport count countMsg countMsgOK"   
+                    
+                />    
+            </focusNode>
+            
+            <!-- ========================================
                        <xpath>
                  ======================================== -->
             <focusNode xpath="//*:xpath">

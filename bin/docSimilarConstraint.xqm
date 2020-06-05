@@ -56,11 +56,13 @@ declare function f:validateDocSimilar($filePath as xs:string,
     ))
 
     (: Adhoc addition of $filePath and $fileName :)
+    (:
     let $evaluationContext := $context?_evaluationContext
     let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
     let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($filePath, '.*[/\\]', ''))
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
-
+     :)
+     
     (: Determine items representing the documents with which to compare;
        each item should be either a node or a URI :)
     let $targets := f:validateDocSimilar_targets($filePath, $constraintElem, $context)
@@ -89,17 +91,17 @@ declare function f:validateDocSimilar_targets($filePath as xs:string,
                                               $context as map(xs:string, item()*))
         as item()* {
     let $evaluationContext := $context?_evaluationContext
-    let $otherFoxpath := $constraintElem/@otherFoxpath
+    let $foxpath := $constraintElem/@foxpath
     return    
-        if ($otherFoxpath) then f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
+        if ($foxpath) then f:evaluateFoxpath($foxpath, $filePath, $evaluationContext, true())
         else 
             let $ldo :=
-                if ($constraintElem/@link) then $constraintElem/@link/link:linkDefObject(., $context)
+                if ($constraintElem/@linkName) then $constraintElem/@linkName/link:linkDefObject(., $context)
                 else link:parseLinkDef($constraintElem)
             return
                 if (empty($ldo)) then error((), 
-                    concat('docSimilar constraint element does not identify comparison target; ',
-                           'use @otherFoxpath, @link or link defining attributes like @hrefXP'))
+                    concat('docSimilar constraint element does not identify link targets; ',
+                           'use @foxpath, @link or link defining attributes like @hrefXP'))
                 else
                     link:resolveLinkDef($ldo, 'doc', $filePath, (), $context)
 };
@@ -173,7 +175,7 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         return
             f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
-                                          $constraintElem/(@otherFoxpath, @link)[1], 
+                                          $constraintElem/(@foxpath, @linkName)[1], 
                                           $comparisonReports,
                                           $otherDocIdentities, (), (), $contextInfo)
 };
@@ -238,15 +240,13 @@ declare function f:validationResult_docSimilar($colour as xs:string,
                                                $constraintElem as element(gx:docSimilar),
                                                $constraint as attribute(),
                                                $comparisonReports as map(xs:string, item()*)*,
-                                               $otherDocIdentities as xs:string*,
+                                               $targetDocURIs as xs:string*,
                                                $additionalAtts as attribute()*,
                                                $additionalElems as element()*,
                                                $contextInfo as map(xs:string, item()*))
         as element() {
     let $elemName := 'gx:' || $colour
-    let $constraintComponent :=
-        $constraintElem/f:firstCharToUpperCase(local-name(.)) ||
-        $constraint/f:firstCharToUpperCase(local-name(.))
+    let $constraintComponent := 'DocSimilarConstraint'
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
@@ -256,7 +256,7 @@ declare function f:validationResult_docSimilar($colour as xs:string,
         else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
         
     let $reports := $comparisonReports[?report] ! 
-            <gx:report otherDocIdentity="{?otherDocIdentity}">{?report}</gx:report>
+            <gx:report targetDocURI="{?targetDocURIs}">{?report}</gx:report>
     return
         element {$elemName}{
             $msg ! attribute msg {$msg},
@@ -267,7 +267,7 @@ declare function f:validationResult_docSimilar($colour as xs:string,
             $focusNode,            
             $additionalAtts,
             $constraintElem/*,
-            $otherDocIdentities ! <gx:targetDoc>{.}</gx:targetDoc>,
+            $targetDocURIs ! <gx:targetDocURI>{.}</gx:targetDocURI>,
             $additionalElems,
             if (empty($reports)) then () else
                 <gx:reports>{$reports}</gx:reports>
@@ -296,7 +296,7 @@ declare function f:validationResult_docSimilarCount($colour as xs:string,
                                                     $contextInfo as map(xs:string, item()*),
                                                     $options as map(*)?)
         as element() {
-    let $exprAtt := $constraintElem/(@otherFoxpath, @otherXPath)        
+    let $exprAtt := $constraintElem/(@foxpath, @hrefXP)        
     let $expr := $exprAtt/normalize-space(.)
     let $exprLang := $exprAtt ! local-name(.) ! replace(., '^other', '') ! lower-case(.)     
     let $constraint1 := $constraint[1]
