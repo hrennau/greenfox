@@ -63,8 +63,7 @@ declare function f:validateDocSimilar($filePath as xs:string,
     let $context := map:put($context, '_evaluationContext', $evaluationContext)
      :)
      
-    (: Determine items representing the documents with which to compare;
-       each item should be either a node or a URI :)
+    (: Determine the targets of document comparison; each item should be a node or a URI :)
     let $targets := f:validateDocSimilar_targets($filePath, $constraintElem, $context)
 
     (: Check the number of items representing the documents with which to compare :)
@@ -79,11 +78,11 @@ declare function f:validateDocSimilar($filePath as xs:string,
 };   
 
 (:~
- : Returns the items representing the other documents with which to compare.
- : The items may be nodes or URIs.
+ : Returns the items representing the targets of document comparison. The items may be 
+ : nodes or URIs.
  :
  : @param filePath filePath of the context document
- : @param constraintElem the element representing the DocumentSimilar constraint
+ : @param constraintElem the element declaring the DocSimilar constraint
  : @param context the processing context
  :)
 declare function f:validateDocSimilar_targets($filePath as xs:string,
@@ -110,13 +109,13 @@ declare function f:validateDocSimilar_targets($filePath as xs:string,
  : Validates document similarity.
  :
  : @param contextItem the context item
- : @param otherDocReps the documents with which to compare
+ : @param targetDocReps the documents with which to compare
  : @param constraintElem the schema element declaring the constraint
  : @param contextInfo information about the resource context
  : @return validation results, red or green
  :)
 declare function f:validateDocSimilar_similarity($contextItem as node(),
-                                                 $otherDocReps as item()*,
+                                                 $targetDocReps as item()*,
                                                  $constraintElem as element(),
                                                  $contextInfo as map(xs:string, item()*))
         as element()* {
@@ -133,8 +132,8 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
     let $redReport := $constraintElem/@redReport
     
     (: Provide the documents with which to compare :)
-    let $otherDocs :=
-        for $rep in $otherDocReps 
+    let $targetDocs :=
+        for $rep in $targetDocReps 
         return
             typeswitch($rep)
             case node() return $rep
@@ -146,18 +145,18 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
 
     (: Check document similarity :)
     let $results :=
-        for $otherDoc at $pos in $otherDocs
-        let $otherDocRep := $otherDocReps[$pos]
-        let $otherDocIdentity := (
-            if ($otherDocRep instance of xs:anyAtomicType) then $otherDocRep
+        for $targetDoc at $pos in $targetDocs
+        let $targetDocRep := $targetDocReps[$pos]
+        let $targetDocIdentity := (
+            if ($targetDocRep instance of xs:anyAtomicType) then $targetDocRep
             else
-                let $baseUri := $otherDocRep/i:fox-base-uri(.)
-                let $datapath := i:datapath($otherDocRep)
+                let $baseUri := $targetDocRep/i:fox-base-uri(.)
+                let $datapath := i:datapath($targetDocRep)
                 return
                     concat($baseUri, '#', $datapath)
         )
-        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $otherDoc)
-        let $d2 := f:normalizeDocForComparison($otherDoc, $constraintElem/*, $normOptions, $contextItem)
+        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $targetDoc)
+        let $d2 := f:normalizeDocForComparison($targetDoc, $constraintElem/*, $normOptions, $contextItem)
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
@@ -165,29 +164,9 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
             f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
                                           $reports,
-                                          $otherDocIdentity, 
-                                          (), (), $contextInfo)
+                                          $targetDocIdentity, 
+                                          $contextInfo)
     return $results
-    
-(:        
-        return
-            map:merge((
-                map:entry('colour', $colour),
-                map:entry('otherDocIdentity', $otherDocIdentity),
-                if (not($report)) then () else map:entry('report', $report)
-            ))
-
-    return
-        let $colour := if (some $r in $comparisonReports satisfies $r?colour eq 'red') then 'red' else 'green'
-        let $otherDocIdentities := 
-            if ($colour eq 'red') then $comparisonReports[?colour eq 'red'] ! ?otherDocIdentity
-            else $comparisonReports?otherDocIdentity
-        return
-            f:validationResult_docSimilar($colour, 
-                                          $constraintElem, 
-                                          $comparisonReports,
-                                          $otherDocIdentities, (), (), $contextInfo)
-:)                                          
 };
 
 
@@ -205,7 +184,6 @@ declare function f:validateDocSimilarCount($exprValue as item()*,
                                            $constraintElem as element(),
                                            $contextInfo as map(xs:string, item()*))
         as element()* {
-    let $resultAdditionalAtts := ()
     let $resultOptions := ()
     
     let $valueCount := count($exprValue)
@@ -222,13 +200,19 @@ declare function f:validateDocSimilarCount($exprValue as item()*,
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
     return        
         if ($cmpTrue($valueCount, $cmp)) then  
-            f:validationResult_docSimilarCount('green', $constraintElem, $cmp, $valueCount, 
-                                               $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+            f:validationResult_docSimilarCount('green', $constraintElem, $cmp, $valueCount, (), $contextInfo, $resultOptions)
         else 
-            let $values := $exprValue ! xs:string(.) ! <gx:value>{.}</gx:value>
+            let $values := 
+                for $v in $exprValue
+                let $rep :=
+                    typeswitch($v)
+                    case map(*) return $v?targetURI
+                    case xs:anyAtomicType return string($v)
+                    default return ()
+                where $rep
+                return $rep ! <gx:value>{.}</gx:value>
             return
-                f:validationResult_docSimilarCount('red', $constraintElem, $cmp, $exprValue, 
-                                                   $resultAdditionalAtts, $values, $contextInfo, $resultOptions)
+                f:validationResult_docSimilarCount('red', $constraintElem, $cmp, $valueCount, $values, $contextInfo, $resultOptions)
 };
 
 (: ============================================================================
@@ -254,8 +238,6 @@ declare function f:validationResult_docSimilar($colour as xs:string,
                                                $constraintElem as element(gx:docSimilar),
                                                $comparisonReports as element()*,
                                                $targetDocURI as xs:string?,
-                                               $additionalAtts as attribute()*,
-                                               $additionalElems as element()*,
                                                $contextInfo as map(xs:string, item()*))
         as element() {
     let $elemName := 'gx:' || $colour
@@ -290,79 +272,56 @@ declare function f:validationResult_docSimilar($colour as xs:string,
             attribute targetDocURI {$targetDocURI},
             $filePath,
             $focusNode,            
-            $additionalAtts,
-            $additionalElems,            
             $modifiers,
             $reports
         }        
 };
 
 (:~
- : Creates a validation result for a LinkCount related constraint (LinkMinCount,
- : LinkMaxCount, LinkCount.
+ : Creates a validation result for a DocSimilar count related constraint (DocSimilarCount,
+ : DocSimilarMinCount, DocSimilarMaxCount).
  :
  : @param colour 'green' or 'red', indicating violation or conformance
- : @param valueShape the shape declaring the constraint
- : @param exprValue expression value producing the links
- : @param additionalAtts additional attributes to be included in the validation result
- : @param additionalElems additional elements to be included in the validation result 
+ : @param constraintElem element declaring the constraint
+ : @param constraintAtt attribute declaring the constraint
+ : @param valueCount the actual number of comparison targets
+ : @param values describes the comparison targets (e.g. URIs) 
  : @param contextInfo information about the resource context
  : @param options options controling details of the validation result
  : @return a validation result, red or green
  :)
 declare function f:validationResult_docSimilarCount($colour as xs:string,
                                                     $constraintElem as element(),
-                                                    $constraint as attribute(),
-                                                    $exprValue as item()*,
-                                                    $additionalAtts as attribute()*,
-                                                    $additionalElems as element()*,
+                                                    $constraintAtt as attribute(),
+                                                    $valueCount as xs:integer,
+                                                    $values as element()*,
                                                     $contextInfo as map(xs:string, item()*),
                                                     $options as map(*)?)
         as element() {
-    let $exprAtt := $constraintElem/(@foxpath, @hrefXP)        
-    let $expr := $exprAtt/normalize-space(.)
-    let $exprLang := $exprAtt ! local-name(.) ! replace(., '^other', '') ! lower-case(.)     
-    let $constraint1 := $constraint[1]
-    let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(count) return map{'constraintComp': 'DocSimilarCount', 'atts': ('count')}
-        case attribute(minCount) return map{'constraintComp': 'DocSimilarMinCount', 'atts': ('minCount')}
-        case attribute(maxCount) return map{'constraintComp': 'DocSimilarMaxCount', 'atts': ('maxCount')}
-        default return error()
-    
-    let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := 
-        let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
-        return
-            (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraint[not(. intersect $explicit)])
-    let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
-    let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    
+    let $atts := $constraintAtt
+    let $constraintName := $constraintAtt/local-name()
+    let $constraintComp := 'DocSimilar' || f:firstCharToUpperCase($constraintName)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint1/local-name(.))
+    let $constraintId := concat($constraintElemId, '-', $constraintName)
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
 
     let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintName, ())
+        else i:getErrorMsg($constraintElem, $constraintName, ())
     let $elemName := 'gx:' || $colour
     return
         element {$elemName} {
             $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
+            attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
             attribute resourceShapeID {$resourceShapeId},            
             $filePath,
             $focusNode,
-            $standardAtts,
-            $useAdditionalAtts,
-            $valueCountAtt,            
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},
-            $additionalElems
+            $atts,
+            attribute valueCount {$valueCount},
+            $values
         }       
 };
 

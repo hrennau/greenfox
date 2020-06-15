@@ -40,7 +40,7 @@ declare function f:resolveLinkDef($linkDef as item(),
                                   $contextURI as xs:string,
                                   $contextNode as node()?,                              
                                   $context as map(xs:string, item()*))
-        as map(xs:string, item()*)* {
+        as item()* {
     let $ldo := link:getLinkDefObject($linkDef, $context)        
     let $contextNode :=
         if ($contextNode) then $contextNode
@@ -57,7 +57,12 @@ declare function f:resolveLinkDef($linkDef as item(),
         else ()
     let $ldoAugmented := map:put($ldo, 'mediatype', $mediatype)
     let $lros := f:resolveLdoRC($ldoAugmented, $contextURI, $contextNode, $context, (), ()) 
-    return $lros 
+    return 
+        switch($resultFormat)
+        case 'lro' return $lros
+        case 'uri' return $lros?targetURI
+        case 'doc' return $lros?targetDoc
+        default return error()
 };
 
 declare function f:resolveLdoRC(
