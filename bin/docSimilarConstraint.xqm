@@ -55,23 +55,17 @@ declare function f:validateDocSimilar($filePath as xs:string,
         $focusPath ! map:entry('nodePath', .)
     ))
 
-    (: Adhoc addition of $filePath and $fileName :)
-    (:
-    let $evaluationContext := $context?_evaluationContext
-    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
-    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($filePath, '.*[/\\]', ''))
-    let $context := map:put($context, '_evaluationContext', $evaluationContext)
-     :)
-     
     (: Determine the targets of document comparison; each item should be a node or a URI :)
-    let $targets := f:validateDocSimilar_targets($filePath, $constraintElem, $context)
+    let $targets := f:validateDocSimilar_targets($contextItem, $filePath, $constraintElem, $context)
+    let $targetLdo := $targets?ldo
+    let $targetLros := $targets?lros
 
     (: Check the number of items representing the documents with which to compare :)
-    let $results_count := f:validateDocSimilarCount($targets, $constraintElem, $contextInfo)
+    let $results_count := f:validateDocSimilarCount($targetLros, $constraintElem, $contextInfo)
     
     (: Check the similarity :)
     let $results_comparison := 
-        f:validateDocSimilar_similarity($contextItem, $targets, $constraintElem, $contextInfo)
+        f:validateDocSimilar_similarity($contextItem, $targetLros, $constraintElem, $contextInfo)
         
     return
         ($results_count, $results_comparison)
@@ -85,24 +79,18 @@ declare function f:validateDocSimilar($filePath as xs:string,
  : @param constraintElem the element declaring the DocSimilar constraint
  : @param context the processing context
  :)
-declare function f:validateDocSimilar_targets($filePath as xs:string,
+declare function f:validateDocSimilar_targets($contextItem as item(),
+                                              $filePath as xs:string,
                                               $constraintElem as element(),
                                               $context as map(xs:string, item()*))
         as item()* {
-    let $evaluationContext := $context?_evaluationContext
-    let $foxpath := $constraintElem/@foxpath
-    return    
-        if ($foxpath) then f:evaluateFoxpath($foxpath, $filePath, $evaluationContext, true())
-        else 
-            let $ldo :=
-                if ($constraintElem/@linkName) then $constraintElem/@linkName/link:linkDefObject(., $context)
-                else link:parseLinkDef($constraintElem)
-            return
-                if (empty($ldo)) then error((), 
-                    concat('docSimilar constraint element does not identify link targets; ',
-                           'use @foxpath, @link or link defining attributes like @hrefXP'))
-                else
-                    link:resolveLinkDef($ldo, 'doc', $filePath, (), $context)
+    (: Link definition object :)
+    let $ldo := link:getLinkDefObject($constraintElem, $context)
+    
+    (: Link resolution objects :)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context)
+    return
+        map{'ldo': $ldo, 'lros': $lros}
 };
 
 (:~
@@ -136,19 +124,31 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         for $rep in $targetDocReps 
         return
             typeswitch($rep)
+            case $lro as map(*) return
+                if ($lro?targetDoc) then $lro?targetDoc
+                else if ($lro?targetURI) then
+                    let $targetUri := $lro?targetURI
+                    return
+                        if (i:fox-doc-available($targetUri)) then i:fox-doc($targetUri) 
+                        else error(QName((), 'UNEXPECTED_ERROR'), concat('Document cannot be parsed: ', $targetUri))  
+                        (: _TO_DO_ - create red result :)
+                else error()    
+            (:    
             case node() return $rep
             case xs:anyAtomicType return 
                 if (i:fox-doc-available($rep)) then i:fox-doc($rep) 
                 else error(QName((), 'UNEXPECTED_ERROR'), concat('Document cannot be parsed: ', $rep))  
                 (: _TO_DO_ - create red result :)
-            default return ()
+            :)
+            default return error()
 
     (: Check document similarity :)
     let $results :=
         for $targetDoc at $pos in $targetDocs
         let $targetDocRep := $targetDocReps[$pos]
         let $targetDocIdentity := (
-            if ($targetDocRep instance of xs:anyAtomicType) then $targetDocRep
+            if ($targetDocRep instance of map(*)) then $targetDocRep?targetURI
+            else if ($targetDocRep instance of xs:anyAtomicType) then $targetDocRep
             else
                 let $baseUri := $targetDocRep/i:fox-base-uri(.)
                 let $datapath := i:datapath($targetDocRep)

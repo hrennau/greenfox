@@ -33,22 +33,38 @@ declare function f:linkDefObject($linkName as xs:string,
     $context?_resourceRelationships($linkName)        
 };        
 
+(:~
+ : Returns the link definition defined or referenced by a given item.
+ : The item can be the link name, given by a string or attribute; it
+ : may be a Link Definition Object; and it may be an element either
+ : referencing a link definition (via @linkName) or providing a
+ : local link definition.
+ :
+ : @param linkDef link definition providing item
+ : @param context processing context
+ : @return Link Definition Object, or the empty sequence if no object
+ :   can be found or constructed
+ :)
 declare function f:getLinkDefObject($linkDef as item(),
                                     $context as map(xs:string, item()*))
         as map(*)? {
     let $ldo :=        
         typeswitch($linkDef)
+        (: Link name, as a string :)
         case $linkName as xs:string return
             let $lookup := link:linkDefObject($linkName, $context)
             return
                 if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
                 else $lookup
+        (: Link name, as an attribute :)
         case $linkName as attribute() return
             let $lookup := link:linkDefObject($linkName, $context)
             return
                 if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
                 else $lookup
+        (: Link Definition Object :)
         case $linkDefObject as map(*) return $linkDefObject
+        (: Element referencing or providing a local link definition :)
         case $linkDefElem as element() return
             let $linkName := $linkDefElem/(@linkName, @link)[1]
             return
@@ -152,7 +168,13 @@ declare function f:parseLinkDefs($linkDefs as element()*)
 };    
 
 (:~
- : Parses a link definition into a Link Definition Object.
+ : Parses a link definition into a Link Definition Object. Parsing
+ : fails if none of the following items is found:
+ : - @uriXP
+ : - @hrefXP
+ : - @foxpath
+ : - @uriReflectionBase
+ : - gx:uriTemplate
  :
  : @param linkDef an element defining a link
  : @return a Link Definition Object
@@ -168,8 +190,8 @@ declare function f:parseLinkDef($linkDef as element())
     let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
     let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
     let $linkXP := $linkDef/@linkXP/string()
-    let $constraints := $linkDef/gx:constraints
     let $uriTemplate := $linkDef/gx:uriTemplate
+    let $constraints := $linkDef/gx:constraints    
     return
         if (empty((
             $hrefXP, $uriXP, $uriReflectionBase, $linkXP, $uriTemplate, $foxpath))) then () else

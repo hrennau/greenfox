@@ -81,8 +81,10 @@ declare function f:resolveLdoRC(
     (: The mapping of the context node to Link Context Nodes is optional:
        the default link context is the context resource, represented
        by the context resource URI and, optionally, a context node :)        
-    let $linkContextItems :=
-        if (not($contextExpr)) then ($contextNode, $contextURI)[1]
+    let $linkContextItems :=        
+        if (not($contextExpr)) then 
+            if ($ldo?requiresContextNode) then ($contextNode, $contextURI)[1]
+            else $contextURI
         else if (not($contextNode)) then error((), 
             concat('Link context expression requires a context node; expression: ', 
                    $contextExpr))                       
