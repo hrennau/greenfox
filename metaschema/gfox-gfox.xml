@@ -422,7 +422,28 @@ return
                  ======================================== -->
             <focusNode xpath="//*:docSimilar">
                 <ex:allowedAtts
-                    attNames="foxpath linkName redReport count countMsg countMsgOK similarMsg similarMsgOK"   
+                    attNames="foxpath linkName redReport 
+                              similarMsg similarMsgOK
+                              count countMsg countMsgOK
+                              
+                              countContextNodes countContextNodesMsg contContextNodesMsgOK
+                              minCountContextNodes minCountContextNodesMsg minCountContextNodesMsgOK
+                              maxCountContextNodes maxCountContextNodesMsg maxCountContextNodesMsgOK
+                              
+                              countTargetResources countTargetResourcesMsg countTargetResourcesMsgOK
+                              minCountTargetResources minCountTargetResourcesMsg minCountTargetResourcesMsgOK
+                              maxCountTargetResources maxCountTargetResourcesMsg maxCountTargetResourcesMsgOK                              
+                              
+                              countTargetDocs countTargetDocsMsg countTargetDocsMsgOK
+                              minCountTargetDocs minCountTargetDocsMsg minCountTargetDocsMsgOK
+                              maxCountTargetDocs maxCountTargetDocsMsg maxCountTargetDocsMsgOK
+                              
+                              countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
+                              minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
+                              maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
+                        />
+                
+   
                     
                 />    
             </focusNode>

@@ -61,14 +61,14 @@ declare function f:validateDocSimilar($filePath as xs:string,
     let $targetLros := $targets?lros
 
     (: Check the number of items representing the documents with which to compare :)
-    let $results_count := f:validateDocSimilarCount($targetLros, $constraintElem, $contextInfo)
+    let $results_link := link:validateLinkConstraints($targetLros, $targetLdo, $constraintElem, $contextInfo) 
     
     (: Check the similarity :)
     let $results_comparison := 
         f:validateDocSimilar_similarity($contextItem, $targetLros, $constraintElem, $contextInfo)
         
     return
-        ($results_count, $results_comparison)
+        ($results_link, $results_comparison)
 };   
 
 (:~
@@ -103,7 +103,7 @@ declare function f:validateDocSimilar_targets($contextItem as item(),
  : @return validation results, red or green
  :)
 declare function f:validateDocSimilar_similarity($contextItem as node(),
-                                                 $targetDocReps as item()*,
+                                                 $lros as map(*)*,
                                                  $constraintElem as element(),
                                                  $contextInfo as map(xs:string, item()*))
         as element()* {
@@ -119,49 +119,37 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
     
     let $redReport := $constraintElem/@redReport
     
-    (: Provide the documents with which to compare :)
-    let $targetDocs :=
-        for $rep in $targetDocReps 
-        return
-            typeswitch($rep)
-            case $lro as map(*) return
-                if ($lro?targetDoc) then $lro?targetDoc
-                else if ($lro?targetURI) then
-                    let $targetUri := $lro?targetURI
-                    return
-                        if (i:fox-doc-available($targetUri)) then i:fox-doc($targetUri) 
-                        else error(QName((), 'UNEXPECTED_ERROR'), concat('Document cannot be parsed: ', $targetUri))  
-                        (: _TO_DO_ - create red result :)
-                else error()    
-            (:    
-            case node() return $rep
-            case xs:anyAtomicType return 
-                if (i:fox-doc-available($rep)) then i:fox-doc($rep) 
-                else error(QName((), 'UNEXPECTED_ERROR'), concat('Document cannot be parsed: ', $rep))  
-                (: _TO_DO_ - create red result :)
-            :)
-            default return error()
-
     (: Check document similarity :)
     let $results :=
-        for $targetDoc at $pos in $targetDocs
-        let $targetDocRep := $targetDocReps[$pos]
-        let $targetDocIdentity := (
-            if ($targetDocRep instance of map(*)) then $targetDocRep?targetURI
-            else if ($targetDocRep instance of xs:anyAtomicType) then $targetDocRep
-            else
-                let $baseUri := $targetDocRep/i:fox-base-uri(.)
-                let $datapath := i:datapath($targetDocRep)
-                return
-                    concat($baseUri, '#', $datapath)
-        )
-        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $targetDoc)
-        let $d2 := f:normalizeDocForComparison($targetDoc, $constraintElem/*, $normOptions, $contextItem)
-        let $isDocSimilar := deep-equal($d1, $d2)
-        let $colour := if ($isDocSimilar) then 'green' else 'red'
-        let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
+        for $lro in $lros return
+        
+        (: Link error :)
+        if ($lro?errorCode) then
+                () (: _TO_DO_ - create red result :)
+        else
+        
+        (: Get target document :)
+        let $targetDoc :=
+            if ($lro?targetDoc) then $lro?targetDoc
+            else if ($lro?targetURI) then
+                let $targetUri := $lro?targetURI
+                where i:fox-doc-available($targetUri)
+                return i:fox-doc($targetUri) 
         return
-            f:validationResult_docSimilar($colour, 
+            (: Error - no target document (e.g. not well-formed) :)
+            if (not($targetDoc)) then ()            
+                    (: _TO_DO_ - create red result :)
+            else
+                (: Perform comparison :)
+                let $targetDocIdentity := $lro?targetURI
+                let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $targetDoc)
+                let $d2 := f:normalizeDocForComparison($targetDoc, $constraintElem/*, $normOptions, $contextItem)
+                let $isDocSimilar := deep-equal($d1, $d2)
+                let $colour := if ($isDocSimilar) then 'green' else 'red'
+                let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
+                return
+                    (: Write result :)
+                    f:validationResult_docSimilar($colour, 
                                           $constraintElem, 
                                           $reports,
                                           $targetDocIdentity, 
@@ -180,6 +168,7 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
  : @param contextInfo information about the resource context
  : @return a validation result, red or green
  :)
+ (:
 declare function f:validateDocSimilarCount($exprValue as item()*,
                                            $constraintElem as element(),
                                            $contextInfo as map(xs:string, item()*))
@@ -214,6 +203,7 @@ declare function f:validateDocSimilarCount($exprValue as item()*,
             return
                 f:validationResult_docSimilarCount('red', $constraintElem, $cmp, $valueCount, $values, $contextInfo, $resultOptions)
 };
+:)
 
 (: ============================================================================
  :
@@ -277,6 +267,7 @@ declare function f:validationResult_docSimilar($colour as xs:string,
         }        
 };
 
+(:
 (:~
  : Creates a validation result for a DocSimilar count related constraint (DocSimilarCount,
  : DocSimilarMinCount, DocSimilarMaxCount).
@@ -324,7 +315,7 @@ declare function f:validationResult_docSimilarCount($colour as xs:string,
             $values
         }       
 };
-
+:)
 
 (: ============================================================================
  :

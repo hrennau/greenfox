@@ -1,36 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component DocSimilar.
+    Demonstrates the use of constraint component DocSimilar. The constraint is declared
+    by a <docSimilar> element. The document(s) with which to compare are selected by
+    a link definition. The link definition is either locally defined or referenced via 
+    @linkName. Here, the documents are selected by a local link definition, consisting 
+    of a Foxpath expression (@foxpath).
     
-    Constraint components:
-    * Name:  DocSimilar
-    - XML:   docSimilar/(@foxpath, @linkName, @hrefXP, skipItem*, roundItem*)
-    - Check: The current file must be represented by a node tree which is equal to the 
-             node tree(s) provided by the Foxpath expression (either as node trees or
-             as URIs to be resolved), taking into consideration exceptions defined 
-             by child elements <skipItem> and <roundItem>.
-             
-    * Name:  DocSimilarCount
-    - XML:   docSimilar/@count
-    - Check: The number of node trees with which to compare must be equal to the specified 
-             value
-             
-    * Name:  DocSimilarMinCount
-    - XML:   docSimilar/@minCount
-    - Check: The number of node trees with which to compare must be greater than or equal to 
-             the specified value
-             
-    * Name:  DocSimilarMaxCount
-    - XML:   docSimilar/@maxCount
-    - Check: The number of node trees with which to compare must be less than or equal to the 
-             specified value
-
-    When attributes @count, @minCount or @maxCount are used, they constrain the number
-    of node trees with which to compare. By default, there must be exactly one node
-    tree with which to compare.
+    Documents are compared by comparing their node trees. Two documents are similar if
+    their node trees, modified as described below, are deep-equal.
     
-    When comparing node trees, both trees are modified before comparing, as indicated by
-    modifier elements, which are child elements of the <docSimilar> element:
+    Node trees to be compared are modified as indicated by modifier elements, which are 
+    child elements of the <docSimilar> element:
     * <skipItem> elements identify items to be removed
     * <roundItem> elements identify items the text value of which is replaced with a rounded value
     
@@ -43,9 +23,20 @@
     * parent namespace - @parentNamespace
     
     In this example, validation catches an 'executionSummary1.xml' file ...
-    * for which no sibling file 'executionSummary2.xml' can be found
-    * which is not similar to a sibling file 'executionSummary2.xml', ignoring 'articleNumber' and 
-     'timestamp' elements and @fileSize attributes on 'articleBook' elements.
+    * for which no sibling file 'executionSummary-reference.xml' can be found
+    * which is not similar to a sibling file 'executionSummary-reference.xml', 
+      ignoring 'articleNumber' and 'timestamp' elements and @fileSize attributes 
+      on 'articleBook' elements.
+      
+    Ancillary constraints may be declared which refer to the number of target documents
+    selected for comparison. More precisely, these constraints refer to the link
+    resolution yielding the comparison targets. Constraint attributes:
+    * countContextNodes, minCount..., maxCount... 
+    * countTargetResources, minCount..., maxCount... 
+    * countTargetDocs, minCount..., maxCount...
+    * countTargetNodes, minCount..., maxCount...
+    These constraints may be declared in the <docSimilar> element or in a <linkDef>
+    element which is referenced via @linkName.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -59,9 +50,8 @@
             <targetSize countMsg="Missing folder: docSimilar" count="1"/>            
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
-                <docSimilar foxpath="..\executionSummary-reference.xml"
-                            redReport="localIndexedPath"
-                            count="1" countMsg="Document with which to compare is missing">
+                <docSimilar foxpath="..\executionSummary-reference.xml" redReport="localIndexedPath"
+                            countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>
                     <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>

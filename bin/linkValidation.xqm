@@ -29,6 +29,28 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 
 (:~
+ : Validates the result of resolving a link definition. The constraints may be declared
+ : in the link defining element or in an element which references the link definition. 
+ : A constraint declared in a link referencing element overrides a constraint of the
+ : same kind declared in the link definition.
+ :
+ : @param lros link resolution objects
+ : @param ldo link definition object
+ : @param constraintElem constraint element, defining constraints which may override
+ :   any constraints specified by the link definition element
+  : @param contextInfo information about the resource context
+ : @return a validation result, red or green
+ :)
+declare function f:validateLinkConstraints($lros as map(*)*,
+                                           $ldo as map(*)?,                                      
+                                           $constraintElem as element()?,
+                                           $contextInfo as map(xs:string, item()*))
+        as element()* {
+    f:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
+    f:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
+};
+
+(:~
  : Validates the constraint that links must be resolvable. A resolvable link is a link
  : involving a URI which can be resolved to a resource.
  :
