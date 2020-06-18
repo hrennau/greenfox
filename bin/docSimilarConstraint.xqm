@@ -15,12 +15,16 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "greenfoxUtil.xqm",
     "resourceAccess.xqm";
 
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
     "linkDefinition.xqm",
     "linkResolution.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 declare namespace fox="http://www.foxpath.org/ns/annotations";
+
 
 (:~
  : Validates a DocSimilar constraint and accompanying constraints.
@@ -88,13 +92,14 @@ declare function f:validateDocSimilar_targets($contextItem as item(),
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     
     (: Link resolution objects :)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context)
+    let $lros := trace(link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context) , '_LROS: ')
     return
         map{'ldo': $ldo, 'lros': $lros}
 };
 
 (:~
- : Validates document similarity.
+ : Validates document similarity. The node to compare with other nodes is given
+ : by 'contextItem', which is either the current document or a focus node from it.
  :
  : @param contextItem the context item
  : @param targetDocReps the documents with which to compare
@@ -125,20 +130,33 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
         
         (: Link error :)
         if ($lro?errorCode) then
-                () (: _TO_DO_ - create red result :)
+            result:validationResult_docSimilar('red', 
+                $constraintElem, 
+                (),
+                $lro?targetURI, 
+                attribute exception {$lro?errorCode},
+                $contextInfo)
+
         else
         
-        (: Get target document :)
+        (: Get target node or document :)
         let $targetDoc :=
-            if ($lro?targetDoc) then $lro?targetDoc
+            if ($lro?targetNodes) then $lro?targetNodes[1]
+            else if ($lro?targetDoc) then $lro?targetDoc
             else if ($lro?targetURI) then
                 let $targetUri := $lro?targetURI
                 where i:fox-doc-available($targetUri)
                 return i:fox-doc($targetUri) 
         return
-            (: Error - no target document (e.g. not well-formed) :)
-            if (not($targetDoc)) then ()            
-                    (: _TO_DO_ - create red result :)
+            (: Error - no target document (parsing failed) :)
+            if (not($targetDoc)) then            
+                result:validationResult_docSimilar('red', 
+                    $constraintElem, 
+                    (),
+                    $lro?targetURI, 
+                    attribute exception {"Target document cannot be parsed"},
+                    $contextInfo)
+
             else
                 (: Perform comparison :)
                 let $targetDocIdentity := $lro?targetURI
@@ -149,173 +167,14 @@ declare function f:validateDocSimilar_similarity($contextItem as node(),
                 let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
                 return
                     (: Write result :)
-                    f:validationResult_docSimilar($colour, 
+                    result:validationResult_docSimilar($colour, 
                                           $constraintElem, 
                                           $reports,
                                           $targetDocIdentity, 
+                                          (),
                                           $contextInfo)
     return $results
 };
-
-
-(:~
- : Validates a link count related constraint (LinkCountMinCount, LinkCountMaxCount, LinkCountCount).
- : It is not checked if the links can be resolved - only their number is considered.
- :
- : @param exprValue expression value producing the links
- : @param cmp link count related constraint
- : @param valueShape the value shape containing the constraint
- : @param contextInfo information about the resource context
- : @return a validation result, red or green
- :)
- (:
-declare function f:validateDocSimilarCount($exprValue as item()*,
-                                           $constraintElem as element(),
-                                           $contextInfo as map(xs:string, item()*))
-        as element()* {
-    let $resultOptions := ()
-    
-    let $valueCount := count($exprValue)
-    let $countConstraints :=
-        let $explicit := $constraintElem/(@count, @minCount, @maxCount)
-        return
-            if ($explicit) then $explicit else attribute count {1}
-    for $cmp in $countConstraints
-    let $cmpTrue :=
-        typeswitch($cmp)
-        case attribute(count) return function($count, $cmp) {$count = $cmp}        
-        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
-        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
-    return        
-        if ($cmpTrue($valueCount, $cmp)) then  
-            f:validationResult_docSimilarCount('green', $constraintElem, $cmp, $valueCount, (), $contextInfo, $resultOptions)
-        else 
-            let $values := 
-                for $v in $exprValue
-                let $rep :=
-                    typeswitch($v)
-                    case map(*) return $v?targetURI
-                    case xs:anyAtomicType return string($v)
-                    default return ()
-                where $rep
-                return $rep ! <gx:value>{.}</gx:value>
-            return
-                f:validationResult_docSimilarCount('red', $constraintElem, $cmp, $valueCount, $values, $contextInfo, $resultOptions)
-};
-:)
-
-(: ============================================================================
- :
- :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
- :
- : ============================================================================ :)
-
-(:~
- : Creates a validation result for a DocSimilar constraint.
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param constraintElem the schema element declarating the constraint
- : @param comparisonReports optional reports of document differences
- : @param targetDocURI the URI of the target document of the comparison
- : @param additionalAtts additional attributes to be included in the validation result
- : @param additionalElems additional elements to be included in the validation result 
- : @param contextInfo information about the resource context
- : @return a validation result, red or green
- :)
-
-declare function f:validationResult_docSimilar($colour as xs:string,
-                                               $constraintElem as element(gx:docSimilar),
-                                               $comparisonReports as element()*,
-                                               $targetDocURI as xs:string?,
-                                               $contextInfo as map(xs:string, item()*))
-        as element() {
-    let $elemName := 'gx:' || $colour
-    let $constraintComponent := 'DocSimilarConstraint'
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id
-    
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'similar', ())
-        else i:getErrorMsg($constraintElem, 'similar', ())
-    let $reports :=
-        if (not($comparisonReports)) then () else
-            <gx:reports>{
-                $comparisonReports
-            }</gx:reports>
-    let $modifiers :=
-        if (not($constraintElem/*)) then () else
-        <gx:modifiers>{
-            $constraintElem/*
-        }</gx:modifiers>
-        
-    let $reports := $comparisonReports
-    return
-        element {$elemName}{
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComponent},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},    
-            attribute targetDocURI {$targetDocURI},
-            $filePath,
-            $focusNode,            
-            $modifiers,
-            $reports
-        }        
-};
-
-(:
-(:~
- : Creates a validation result for a DocSimilar count related constraint (DocSimilarCount,
- : DocSimilarMinCount, DocSimilarMaxCount).
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param constraintElem element declaring the constraint
- : @param constraintAtt attribute declaring the constraint
- : @param valueCount the actual number of comparison targets
- : @param values describes the comparison targets (e.g. URIs) 
- : @param contextInfo information about the resource context
- : @param options options controling details of the validation result
- : @return a validation result, red or green
- :)
-declare function f:validationResult_docSimilarCount($colour as xs:string,
-                                                    $constraintElem as element(),
-                                                    $constraintAtt as attribute(),
-                                                    $valueCount as xs:integer,
-                                                    $values as element()*,
-                                                    $contextInfo as map(xs:string, item()*),
-                                                    $options as map(*)?)
-        as element() {
-    let $atts := $constraintAtt
-    let $constraintName := $constraintAtt/local-name()
-    let $constraintComp := 'DocSimilar' || f:firstCharToUpperCase($constraintName)
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraintName)
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintName, ())
-        else i:getErrorMsg($constraintElem, $constraintName, ())
-    let $elemName := 'gx:' || $colour
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
-            $focusNode,
-            $atts,
-            attribute valueCount {$valueCount},
-            $values
-        }       
-};
-:)
 
 (: ============================================================================
  :

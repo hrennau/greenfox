@@ -218,6 +218,62 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         }       
 };
 
+(:~
+ : Creates a validation result for a DocSimilar constraint.
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param constraintElem the schema element declarating the constraint
+ : @param comparisonReports reports describing document differences
+ : @param targetDocURI the URI of the target document of the comparison
+ : @param exception an exception event precluding normal validation
+ : @param contextInfo information about the resource context
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_docSimilar($colour as xs:string,
+                                               $constraintElem as element(gx:docSimilar),
+                                               $comparisonReports as element()*,
+                                               $targetDocURI as xs:string?,
+                                               $exception as attribute(exception)?,
+                                               $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $elemName := 'gx:' || $colour
+    let $constraintComponent := 'DocSimilarConstraint'
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintId := $constraintElem/@id
+    
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+    
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'similar', ())
+        else i:getErrorMsg($constraintElem, 'similar', ())
+    let $reports :=
+        if (not($comparisonReports)) then () else
+            <gx:reports>{
+                $comparisonReports
+            }</gx:reports>
+    let $modifiers :=
+        if (not($constraintElem/*)) then () else
+        <gx:modifiers>{
+            $constraintElem/*
+        }</gx:modifiers>
+        
+    let $reports := $comparisonReports
+    return
+        element {$elemName}{
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComponent},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},    
+            attribute targetDocURI {$targetDocURI},
+            $exception,
+            $filePath,
+            $focusNode,            
+            $modifiers,
+            $reports
+        }        
+};
+
 declare function f:validateResult_linkDefAtts($ldo as map(*)?,
                                               $constraintElem as element()?)
         as attribute()* {

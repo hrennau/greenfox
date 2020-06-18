@@ -209,7 +209,8 @@ declare function f:resolveLdoRC(
     let $lrosNodeItems :=
         for $connectorNode in $connectorNodes
         let $root := $connectorNode/root()
-        group by $rootID := $root/generate-id(.)        
+        group by $rootID := $root/generate-id(.)  
+        let $targetURI := $root/base-uri(.)
         let $nonRootNodes := $connectorNode except $root[1]
         let $includedRootNode := $root[. intersect $connectorNode]
         
@@ -235,6 +236,7 @@ declare function f:resolveLdoRC(
                 map:entry('contextURI', $contextURI),
                 map:entry('contextItem', $linkContextItem),
                 map:entry('targetExists', true()),
+                map:entry('targetURI', $targetURI),
                 map:entry('targetDoc', $root),
                 (: Target nodes: only if targetXP specified, or if foxpath produces non-root nodes :)
                 if (not($ldo?targetXP) and not($nonRootNodes)) then () 

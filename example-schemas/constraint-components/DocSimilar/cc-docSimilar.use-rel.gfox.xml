@@ -2,7 +2,7 @@
 <!-- 
     Demonstrates the use of constraint component DocSimilar. This example shows how the
     targets of comparison can be selected by referencing a link definition via @linkName.
-    Show example 'cc-docSimilar.gfox.xml' for more information about DocSimilar constraints.
+    See example 'cc-docSimilar.gfox.xml' for more information about DocSimilar constraints.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar"
           xmlns="http://www.greenfox.org/ns/schema">

@@ -26,7 +26,8 @@
                 <focusNode xpath="//input">
                     <targetSize countMsg="Missing element: input" count="1"/>
                     <!-- Compare the <input> element with the <input> element found in another file -->
-                    <docSimilar otherFoxpath="..\executionSummary2.xml//input" count="1">
+                    <docSimilar foxpath="..\executionSummary2.xml//input"  redReport="localIndexedPath"
+                                countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                         <!-- When comparing the elements, ignore @fileName and @fileSize, 
                              and normalize the value of <articleNumber>. -->
                         <editText localName="articleNumber" replaceSubstring="^678.*$" replaceWith="678XXX"/>
