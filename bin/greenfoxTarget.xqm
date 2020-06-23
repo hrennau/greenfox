@@ -153,7 +153,7 @@ declare function f:getTargetPaths_link($resourceShape as element(),
         as item()* {
     let $contextURI := $context?_contextPath
     let $contextNode := $context?_reqDocs?doc
-    let $lros := link:resolveLinkDef($resourceShape, 'lro', $contextURI, $contextNode, $context) 
+    let $lros := link:resolveLinkDef($resourceShape, 'lro', $contextURI, $contextNode, $context, ()) 
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1    

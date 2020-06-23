@@ -35,13 +35,13 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : The $contextItem is either the current resource, or a focus node.
  :
  : @param contextFilePath the file path of the file containing the initial context item 
- : @param shape the value shape declaring the constraints
+ : @param constraintElem the element declaring the constraint
  : @param contextItem the initial context item to be used in expressions
  : @param contextDoc the XML document containing the initial context item
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateConcord($contextFilePath as xs:string,
+declare function f:validateConcord($filePath as xs:string,
                                    $constraintElem as element(), 
                                    $contextItem as item()?,                                 
                                    $contextDoc as document-node()?,
@@ -57,42 +57,47 @@ declare function f:validateConcord($contextFilePath as xs:string,
             else ()
         return  
             map:merge((
-                $contextFilePath ! map:entry('filePath', .),
+                $filePath ! map:entry('filePath', .),
                 $focusPath ! map:entry('nodePath', .)
             ))
+
+    return
+        (: Error case - no context document :)
+        if (not($contextDoc)) then
+            f:validationResult_concordValues_exception('Context resource could not be parsed', $constraintElem, $contextInfo)
+        else
         
-    let $linkName := $constraintElem/@link
+    (: Link definition object, link resolution objects :)
+    let $ldo := link:getLinkDefObject($constraintElem, $context)
+    (: Resolve link definition (use 'xml' as default mediatype) :)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     
-    (: Resolve: relationship name -> Link Resolution Objects :)
-    let $ldo := link:linkDefObject($linkName, $context)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $contextFilePath, $contextNode, $context)
-    let $results_count := link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
+    (: Perform link based checks :)
+    let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 
     
     let $evaluationContext := $context?_evaluationContext    
-    let $results := 
+    let $results_correspondence := 
         (: Loop over content elements - each one provides constraints ... :)
-        for $content in $constraintElem/gx:content
-        let $cmp := $content/@corr
-        let $quantifier := ($content/@quant, 'all')[1]
-        let $sourceExpr := $content/@sourceXP
-        let $targetExpr := $content/@targetXP      
-        
-        (: Repeat for each instance of the relationship (mapping of a source node to a target resource);
-           note that an instance may contain multiple target nodes
-         :)
+        for $content in $constraintElem/gx:content        
+        (: Repeat for each link target :)
         for $lro in $lros
-        let $contextNode := $lro?contextNode
-        let $targetNodes := $lro?targetNodes        
-        let $result :=
-            f:validateConcordValues($contextNode, $targetNodes,
-                                    $sourceExpr, $targetExpr,
-                                    $cmp, $quantifier,
-                                    $contextFilePath, $contextDoc,                   
-                                    $context,  
-                                    $content, 
+        let $contextItem := $lro?contextItem
+        let $targetNodes := 
+            if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
+            else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
+            else 
+                f:validationResult_concordValues_exception('Correspondence target could not be parsed', $constraintElem, $contextInfo)
+        return
+            if ($targetNodes/self::gx:red) then $targetNodes else
+
+            f:validateConcordValues($contextItem, 
+                                    $targetNodes,
+                                    $filePath, 
+                                    $contextDoc,                   
+                                    $content,
+                                    $context,                                    
                                     $contextInfo)
-        return $result                                              
-    return ($results, $results_count)
+    return ($results_correspondence, $results_link)
 };
 
 (:~
@@ -114,23 +119,32 @@ declare function f:validateConcord($contextFilePath as xs:string,
  : @param cmp specifies a comparison condition
  : @return
  :)
-declare function f:validateConcordValues($linkContextNode as node(), $linkTargetNodes as node()*,                                         
-                                         $sourceExpr as xs:string, $targetExpr as xs:string,
-                                         $cmp as xs:string, $quantifier as xs:string,
-                                         $contextFilePath as xs:string, $contextDoc as document-node()?,                                                   
-                                         $context as map(*),
+declare function f:validateConcordValues($linkContextItem as item(), 
+                                         $linkTargetNodes as node()*,                                         
+                                         $contextFilePath as xs:string, 
+                                         $contextDoc as document-node()?,                                                   
                                          $contentElem as element(),
+                                         $context as map(*),                                         
                                          $contextInfo as map(xs:string, item()*))
         as element()* {
+    let $cmp := $contentElem/@corr
+    let $quantifier := ($contentElem/@quant, 'all')[1]
+    let $sourceExpr := $contentElem/@sourceXP
+    let $targetExpr := $contentElem/@targetXP      
+        
+    let $contextNode :=
+        if ($linkContextItem instance of node()) then $linkContextItem
+        else if ($contextDoc) then $contextDoc
+        else ()
+        
     let $sourceExprLang := 'xpath'
-    let $targetExprLang := 'xpath'
+    let $targetExprLang := 'xpath'    
     let $flags := string($contentElem/@flags)
     let $useDatatype := $contentElem/@useDatatype/resolve-QName(., ..)
     
     let $countSource := $contentElem/@countSource/xs:integer(.)
     let $minCountSource := $contentElem/@minCountSource/xs:integer(.)
-    let $maxCountSource := $contentElem/@maxCountSource/xs:integer(.)
-    
+    let $maxCountSource := $contentElem/@maxCountSource/xs:integer(.)    
     let $countTarget := $contentElem/@countTarget/xs:integer(.)
     let $minCountTarget := $contentElem/@minCountTarget/xs:integer(.)
     let $maxCountTarget := $contentElem/@maxCountTarget/xs:integer(.)
@@ -138,24 +152,24 @@ declare function f:validateConcordValues($linkContextNode as node(), $linkTarget
     let $evaluationContext := $context?_evaluationContext   
     
     (: Source expr value :)
-    let $sourceItemsRaw := 
-        i:evaluateXPath($sourceExpr, $linkContextNode, $evaluationContext, true(), true())    
+    let $sourceItemsRaw :=
+        i:evaluateXPath($sourceExpr, $contextNode, $evaluationContext, true(), true())    
     
     let $sourceItems :=
         if (empty($useDatatype)) then $sourceItemsRaw else 
         $sourceItemsRaw ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
     
     (: Evaluation source item count constraint :)
-    let $results_sourceCount := 
+    let $results_sourceCount :=
         f:validateConcordContentCount($sourceItems, 'source', $contentElem, $contextInfo)
     
     (: Target value generator function :)
-    let $getTargetItems := function($ctxtItem) {
+    let $getTargetItems := function($contextItem) {
         let $items := 
             if ($targetExprLang eq 'foxpath') then 
-                i:evaluateFoxpath($targetExpr, $ctxtItem, $evaluationContext, true())
-            else 
-                i:evaluateXPath($targetExpr, $ctxtItem, $evaluationContext, true(), true())
+                i:evaluateFoxpath($targetExpr, $contextItem, $evaluationContext, true())
+            else
+                i:evaluateXPath($targetExpr, $contextItem, $evaluationContext, true(), true())
         return
             if (empty($useDatatype)) then $items 
             else $items ! i:castAs(., $useDatatype, ()) 
@@ -163,6 +177,7 @@ declare function f:validateConcordValues($linkContextNode as node(), $linkTarget
     
     (: Comparison function :)
     let $cmpTrue :=
+        if ($cmp = ('in', 'notin')) then () else
         switch($cmp)
         case 'eq' return function($op1, $op2) {$op1 = $op2}        
         case 'ne' return function($op1, $op2) {$op1 != $op2}        
@@ -172,8 +187,16 @@ declare function f:validateConcordValues($linkContextNode as node(), $linkTarget
         case 'ge' return function($op1, $op2) {$op1 >= $op2}
         case 'in' return function($op1, $op2) {$op1 = $op2}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
-    
+
+    let $cmpTrueAgg :=
+        if (not($cmp = ('in', 'notin'))) then () else
+        switch($cmp)
+        case 'in' return function($op1, $op2) {$op1 = $op2}
+        case 'notin' return function($op1, $op2) {not($op1 = $op2)}        
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
+
     let $results :=
+        (: Loop over all link target nodes :)
         for $linkTargetNode in $linkTargetNodes
         let $targetItems := $getTargetItems($linkTargetNode)
         
@@ -182,13 +205,20 @@ declare function f:validateConcordValues($linkContextNode as node(), $linkTarget
             f:validateConcordContentCount($targetItems, 'target', $contentElem, $contextInfo)
         
         let $violations :=
-            if ($quantifier eq 'all') then
+            if ($cmp = ('in', 'notin')) then
                 for $sourceItem at $pos in $sourceItems
-                where exists($targetItems[not($cmpTrue(., $sourceItem)) or $sourceItem instance of element(gx:red)])
+                where $sourceItem instance of element(gx:red) or 
+                      not($cmpTrueAgg($sourceItem, $targetItems))
+                return $sourceItemsRaw[$pos]
+            else if ($quantifier eq 'all') then
+                for $sourceItem at $pos in $sourceItems
+                where $sourceItem instance of element(gx:red) or 
+                      exists($targetItems[not($cmpTrue($sourceItem, .))])
                 return $sourceItemsRaw[$pos]
             else if ($quantifier eq 'some') then                
                 for $sourceItem at $pos in $sourceItems
-                where every $v in $targetItems satisfies (not($cmpTrue($v, $sourceItem)) or $sourceItem instance of element(gx:red))
+                where $sourceItem instance of element(gx:red) or
+                      (every $v in $targetItems satisfies not($cmpTrue($sourceItem, $v)))
                 return $sourceItemsRaw[$pos]
             else error()    
         let $colour := if (exists($violations)) then 'red' else 'green'                
@@ -280,6 +310,26 @@ declare function f:validationResult_concordValues($colour as xs:string,
             $useDatatypeAtt,
             $flagsAtt,
             $violations ! <gx:value>{.}</gx:value>
+        }
+       
+};
+
+declare function f:validationResult_concordValues_exception(
+                                                  $exception as xs:string,
+                                                  $constraintElem as element(),
+                                                  $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintComp := 'ContentCorrespondence'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    return
+        element {'gx:red'} {
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $filePathAtt,
+            $focusNodeAtt,
+            attribute exception {$exception}
         }
        
 };

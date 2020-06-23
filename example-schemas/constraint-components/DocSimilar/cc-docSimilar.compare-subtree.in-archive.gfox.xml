@@ -4,14 +4,6 @@
     of substrees. 
     
     This example checks resources contained by an archive file.
-    
-    See example schema 'cc-docSimilar.gfox.xml' for a general explanation of the
-    DocSimilar constraint.
-    
-    In this example, validation catches a file which does not have a single <input> element 
-    with content similar to the <input> element of a given other file. When comparing the <input>
-    subtrees, a couple of attributes are ignored (@fileName and @fileSize), and the value of 
-    an element is normalized (<articleNumber>).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.subtree"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -28,7 +20,8 @@
                 <focusNode xpath="//input">
                     <targetSize countMsg="Missing element: input" count="1"/>
                     <!-- Compare the <input> element with the <input> element found in another file -->
-                    <docSimilar otherFoxpath="..\executionSummary2.xml//input" count="1">
+                    <docSimilar foxpath="..\executionSummary2.xml//input"  redReport="localIndexedPath"
+                        countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                         <!-- When comparing the elements, ignore @fileName and @fileSize, 
                              and normalize the value of <articleNumber>. -->
                         <editText localName="articleNumber" replaceSubstring="^678.*$" replaceWith="678XXX"/>

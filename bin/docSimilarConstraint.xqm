@@ -64,7 +64,7 @@ declare function f:validateDocSimilar($filePath as xs:string,
     let $targetLdo := $targets?ldo
     let $targetLros := $targets?lros
 
-    (: Check the number of items representing the documents with which to compare :)
+    (: Perform link based checks :)
     let $results_link := link:validateLinkConstraints($targetLros, $targetLdo, $constraintElem, $contextInfo) 
     
     (: Check the similarity :)
@@ -91,8 +91,9 @@ declare function f:validateDocSimilar_targets($contextItem as item(),
     (: Link definition object :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     
-    (: Link resolution objects :)
-    let $lros := trace(link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context) , '_LROS: ')
+    (: Link resolution objects
+       (using xml as default mediatype) :)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     return
         map{'ldo': $ldo, 'lros': $lros}
 };

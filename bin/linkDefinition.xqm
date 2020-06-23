@@ -83,6 +83,7 @@ declare function f:getLinkDefObject($linkDef as item(),
     return $ldo        
 };
 
+(:
 declare function f:resolveRelationship($relName as xs:string,
                                        $resultFormat as xs:string, (: uri | doc | lro :)
                                        $constraintElems as element()*,  (: required when inferring mediatype :)
@@ -147,6 +148,7 @@ declare function f:resolveRelationship_links(
     return            
         link:resolveLinkDef($ldo, $resultFormat, $filePath, $contextNode, $context)                              
 };   
+:)
 
 (:~
  : Parses resource relationships defined by <linkDef> elements into a

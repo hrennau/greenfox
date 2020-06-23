@@ -681,20 +681,13 @@ declare function f:fox-json-doc($uri as xs:string,
                     let $text := trace(f:fox-unparsed-text_archive($archive, $archivePath, (), $options) , '_TEXT: ')
                     return try {$text ! json:parse(.)} catch * {()}
                     :)
-    else
-        let $text := unparsed-text($uri)
-        return json:parse($text)
-    (: unparsed-text($uri) ! json:parse(.) :)
-    (:
+    else 
         let $jdoc := function-lookup(QName('http://basex.org/modules/json', 'doc'), 1)
-        let $_DEBUG := trace(exists($jdoc), '_JSON-DOC EXISTS: ')
-        let $_DEBUG := trace($uri, '__URI: ')
         return
             try {
-                if (exists($jdoc)) then $jdoc($uri)
-                else unparsed-text($uri) ! json:parse(.)
-            } catch * {()}
-    :)            
+                if (exists($jdoc)) then $jdoc($uri) else
+                    unparsed-text($uri) ! json:parse(.)
+            } catch * {()}        
 };
 
 (:~

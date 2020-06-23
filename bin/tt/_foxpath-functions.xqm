@@ -241,6 +241,17 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 f:foxfunc_fox-sibling($context, $name, $fromSubstring, $toSubstring)
 
+        (: function `fox-parent-sibling` 
+           ============================= :)
+        else if ($fname eq 'fox-parent-sibling') then
+            let $name := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $fromSubstring := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $toSubstring := 
+                if (not($fromSubstring)) then () else
+                    $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return
+                f:foxfunc_fox-parent-sibling($context, $name, $fromSubstring, $toSubstring)
+
         (: function `fox-parent` 
            ===================== :)
         else if ($fname eq 'fox-parent') then

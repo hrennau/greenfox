@@ -73,9 +73,12 @@ declare function f:validateLinkResolvable($lros as map(*)*,
         if (not((($constraintElem, $linkConstraints)/(@resolvable))[1] eq 'true')) then ()   
         else
     
-    (: Link Resolution Objects are grouped by context node :)
+    (: Link Resolution Objects are grouped by context item :)
     for $lro in $lros
-    group by $sourceNode := $lro?contextNode/generate-id(.)
+    let $contextItem := $lro?contextItem
+    let $contextPoint :=   typeswitch($contextItem) 
+        case $n as node() return $n/generate-id(.) default return $contextItem
+    group by $contextPoint
     let $lro1 := $lro[1]
     let $contextItem := $lro1?contextItem  
     return
@@ -103,7 +106,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
  :
  : It is not checked if the links can be resolved - only their number is considered.
  :
- : @param lros link resolution objects
+ : @param lros link resolution objects, obtained by applying the link definition to a single context resource
  : @param ldo link definition object
  : @param constraintElem constraint element, defining constraints which may override
  :   any constraints specified by the link definition element
@@ -123,7 +126,9 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $linkConstraints := $ldo?constraints    
     
     (: Cardinality: contextNodes 
-       ------------------------- :)
+       ------------------------- 
+       The context items are collected from all LROs; nodes are de-duplicated.       
+     :)
     let $countConstraintsContextNodes := (
         ($constraintElem/@countContextNodes, $linkConstraints/@countContextNodes)[1],
         ($constraintElem/@minCountContextNodes, $linkConstraints/@minCountContextNodes)[1],
@@ -132,11 +137,11 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $resultsContextNodes :=
         if (not($countConstraintsContextNodes)) then () else
         
-        (: let $_DEBUG := trace($lros, '___LROS: ') :)
-        (: determine count :)
         let $valueCount := 
-            let $contextNodes := ($lros?contextNode)/.
-            return count($contextNodes)
+            let $contextItems := $lros?contextItem
+            let $nodes := $contextItems[. instance of node()]/.
+            let $atoms := $contextItems[not(. instance of node())]
+            return count($nodes) + count($atoms)
             
         (: evaluate constraints :)
         for $countConstraint in $countConstraintsContextNodes
@@ -164,7 +169,11 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@maxCountTargetResources, $linkConstraints/@maxCountTargetResources)[1]
         )
         for $lro allowing empty in $lros
-        group by $sourceNode := $lro?contextNode/generate-id(.)
+        
+        let $contextItem := $lro?contextItem
+        let $contextPoint:=   typeswitch($contextItem) 
+            case $n as node() return $n/generate-id(.) default return $contextItem
+        group by $contextPoint
         let $targetResources := ($lro[?targetExists]?targetURI) => distinct-values()
         let $lro1 := $lro[1]
         
@@ -197,7 +206,9 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@maxCountTargetDocs, $linkConstraints/@maxCountTargetDocs)[1]
         )
         for $lro allowing empty in $lros
-        group by $sourceNode := $lro?contextNode/generate-id(.)
+        let $contextItem := $lro?contextItem
+        let $contextPoint :=   typeswitch($contextItem) 
+            case $n as node() return $n/generate-id(.) default return $contextItem
         let $targetDocs := ($lro?targetDoc)/.
         let $lro1 := $lro[1]
         
@@ -231,7 +242,10 @@ declare function f:validateLinkCounts($lros as map(*)*,
             ($constraintElem/@maxCountTargetNodes, $linkConstraints/@maxCountTargetNodes)[1]
         )
         for $lro allowing empty in $lros
-        group by $sourceNode := $lro?contextNode/generate-id(.)
+        let $contextItem := $lro?contextItem
+        let $contextPoint :=   typeswitch($contextItem) 
+            case $n as node() return $n/generate-id(.) default return $contextItem        
+        group by $contextPoint
         let $targetNodes := ($lro?targetNodes)/.
         let $lro1 := $lro[1]
         where $lro1?errorCode or $lro1 ! map:contains(., 'targetNodes')

@@ -24,6 +24,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
  : Resolves a Link Definition Object to a sequence of Link Resolution Objects.
+ : These LROs are the objects obtained by applying the LDO to a single context
+ : resource or context node.
  : 
  : @param linkDef link definition represented by name, Link Definition Object or
  :   an element which can be parsed into a Link Definition Object
@@ -39,24 +41,39 @@ declare function f:resolveLinkDef($linkDef as item(),
                                   $resultFormat as xs:string?, (: lro | uri | doc :)
                                   $contextURI as xs:string,
                                   $contextNode as node()?,                              
-                                  $context as map(xs:string, item()*))
+                                  $context as map(xs:string, item()*),
+                                  $options as map(*)?)
         as item()* {
-    let $ldo := link:getLinkDefObject($linkDef, $context)        
+    let $ldo := link:getLinkDefObject($linkDef, $context)     
+    
+    (: Determine context node, if not provided, yet required :)
     let $contextNode :=
         if ($contextNode) then $contextNode
-        else if ($ldo?requiresContextNode) then
+        else if (not($ldo?requiresContextNode)) then ()
+        else
             let $doc := $context?_reqDocs?doc
             return
                 if (not($doc)) then  
                     error((), concat('Invalid call - Link Definition "', $ldo?name, '" requires context node.'))
                 else $doc
-                
-    let $mediatype :=
-        if ($ldo?mediatype) then $ldo?mediatype 
-        else if ($resultFormat eq 'doc') then 'xml'
-        else ()
-    let $ldoAugmented := map:put($ldo, 'mediatype', $mediatype)
-    let $lros := f:resolveLdoRC($ldoAugmented, $contextURI, $contextNode, $context, (), ()) 
+    
+    (: Result format 'doc' implies a structured mediatype, which defaults to 'xml'. :)
+    let $ldoAugmented :=
+        if ($ldo?mediatype) then $ldo
+        else
+            let $mediatype := 
+                if ($options?mediatype) then $options?mediatype
+                else if ($resultFormat eq 'doc') then 'xml'
+                else ()
+            return
+                if (not($mediatype)) then $ldo
+                else
+                    map:put($ldo, 'mediatype', $mediatype)
+        
+    (: Determine Link Resolution Objects :)
+    let $lros := f:resolveLinkDefRC($ldoAugmented, $contextURI, $contextNode, $context, (), ())
+    
+    (: Determine result to be delivered :)
     return 
         switch($resultFormat)
         case 'lro' return $lros
@@ -65,7 +82,10 @@ declare function f:resolveLinkDef($linkDef as item(),
         default return error()
 };
 
-declare function f:resolveLdoRC(
+(:~
+ : Recursive helper function of `resolveLinkDef`.
+ :)
+declare function f:resolveLinkDefRC(
                               $ldo as map(*),
                               $contextURI as xs:string,
                               $contextNode as node()?,                              
@@ -250,7 +270,7 @@ declare function f:resolveLdoRC(
         $lros,
         if (not($ldo?recursive)) then () else
             $lros[not(?errorCode)] 
-            !f:resolveLdoRC($ldo, ?targetURI, ?targetDoc, $context, $newUrisSofar, $newNodesSofar)            
+            !f:resolveLinkDefRC($ldo, ?targetURI, ?targetDoc, $context, $newUrisSofar, $newNodesSofar)            
     )
 };
 
@@ -282,10 +302,15 @@ declare function f:applyLinkConnector($ldo as map(*),
     else if ($ldo?foxpath) then
         let $evaluationContext := $context?_evaluationContext
         return
-            i:evaluateFoxpath($ldo?foxpath, $contextItem, $evaluationContext, true())    
+            (: _TO_DO_ CLARIFY - should the Foxpath context be the contextItem or the contextURI?
+               Temptative decision: the contextURI, as the context is typically not useful
+               for a Foxpath expression; note that the contextItem is accessible via
+               variable $linkContext :)
+            i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContext, true())
+            (: i:evaluateFoxpath($ldo?foxpath, $contextItem, $evaluationContext, true()) :)
     else ()
 };
-
+(:
 (:~
  : Resolves a Foxpath-based link definition.
  :
@@ -325,7 +350,7 @@ declare function f:resolveFoxLinks(
 
     (: For each Link Context Item ... :)
     for $linkContextItem in $linkContextItems
-    
+
     (: Determine targets - may be URIs, may be documents, may be within-document nodes :)
     let $targets := i:evaluateFoxpath($foxpath, $linkContextItem, $evaluationContext, true())    
     let $targetsAtomic := $targets[. instance of xs:anyAtomicType]
@@ -438,6 +463,7 @@ declare function f:resolveFoxLinks(
         else error(QName((), 'INVALID_ARG'), 
             concat('Invalid value of "resultFormat": ', $resultFormat, ' ; must be one of: lro, doc, uri'))
 };
+:)
 
 (: ============================================================================
  :
@@ -445,6 +471,7 @@ declare function f:resolveFoxLinks(
  :
  : ============================================================================ :)
 
+(:
 (:~
  : Resolves links specified in terms of a URI expression, an optional Link Context Expression
  : and an optional Link Target Expression. Returns for each link a link resolution object.
@@ -652,6 +679,7 @@ declare function f:resolveUriLinksRC(
                                   $newPathsSofar, $newErrorsSofar)            
     )
 };
+:)
 
 (:~
  : Returns the link target nodes of a link. If no link target expression is

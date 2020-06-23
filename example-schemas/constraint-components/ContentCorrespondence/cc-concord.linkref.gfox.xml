@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component Concord (ContentCorrespondence). In this simple
-    example, all names and all prices in the context document must also occur in the target document.
+    Demonstrates the use of constraint component Concord (ContentCorrespondence). In this example,
+    the correspondence target is identified by a referenced link definition (@linkName). Note that
+    the link definition contains an additional constraint to be checked (@countTargetDocs).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -10,12 +11,18 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
 
+    <linkDef name="expectations"
+             foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
+        <constraints 
+             countTargetDocs="1"/>
+    </linkDef>
+    
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="msgs1\response" id="responseFolderShape">
             <targetSize countMsg="Missing folder: msgs1\response" count="1"/>            
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
-                <contentCorrespondence foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
+                <contentCorrespondence linkName="expectations">
                     <content sourceXP="//articleName" targetXP="//article/@name" corr="in"/>
                     <content sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" corr="in"/>
                 </contentCorrespondence>

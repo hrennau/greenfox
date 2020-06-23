@@ -129,7 +129,7 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
             if (not($linkName)) then $contextInfo
             else
                 (: _TO_DO_ Probably it will become necessary to replace 'doc' with 'node' :)
-                let $linkTargets := link:resolveLinkDef($linkName, 'doc', $contextFilePath, $contextNode, $context)
+                let $linkTargets := link:resolveLinkDef($linkName, 'doc', $contextFilePath, $contextNode, $context, ())
                 for $linkTarget in $linkTargets
                 return
                     map:put($contextInfo, 'linkTarget', $linkTarget)
