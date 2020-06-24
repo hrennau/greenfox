@@ -159,7 +159,7 @@ declare function f:resolveLinkDefRC(
                 else
                     let $text := i:fox-unparsed-text($targetURI, ())
                     let $jdoc := try {json:parse($text)} catch * {()}
-                    let $targetNodes := f:getLinkTargetNodes($jdoc, $ldo?targetXP, $linkContextItem, $context)
+                    let $targetNodes := $jdoc ! f:getLinkTargetNodes(., $ldo?targetXP, $linkContextItem, $context)
                     return 
                         if (not($jdoc)) then 
                             map{'type': 'linkResolutionObject',

@@ -14,7 +14,8 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm",
-    "log.xqm";
+    "log.xqm",
+    "resourceAccess.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
     "linkDefinition.xqm",
@@ -49,6 +50,7 @@ declare function f:validateConcord($filePath as xs:string,
         as element()* {
     
     let $contextNode := $contextItem[. instance of node()]
+    
     (: context info - a container for current file path and datapath of the focus node :)    
     let $contextInfo := 
         let $focusPath :=
@@ -64,11 +66,17 @@ declare function f:validateConcord($filePath as xs:string,
     return
         (: Error case - no context document :)
         if (not($contextDoc)) then
-            f:validationResult_concordValues_exception('Context resource could not be parsed', $constraintElem, $contextInfo)
+            f:validationResult_concordValues_exception(
+                $constraintElem,
+                (),
+                'Context resource could not be parsed', 
+                (),
+                $contextInfo)
         else
         
     (: Link definition object, link resolution objects :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
+    
     (: Resolve link definition (use 'xml' as default mediatype) :)
     let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     
@@ -77,19 +85,49 @@ declare function f:validateConcord($filePath as xs:string,
     
     let $evaluationContext := $context?_evaluationContext    
     let $results_correspondence := 
-        (: Loop over content elements - each one provides constraints ... :)
-        for $content in $constraintElem/gx:content        
+    
+        (: Loop over constraint child elements - each one provides constraints ... :)
+        for $content in $constraintElem/gx:content
+        
         (: Repeat for each link target :)
         for $lro in $lros
+        
+        (: Fetch context item :)
         let $contextItem := $lro?contextItem
+        return
+            if ($lro?errorCode) then
+                f:validationResult_concordValues_exception(
+                        $constraintElem,
+                        $lro,
+                        (),
+                        (),
+                        $contextInfo)
+            else
+           
+        (: Fetch target nodes :)
         let $targetNodes := 
             if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
             else 
-                f:validationResult_concordValues_exception('Correspondence target could not be parsed', $constraintElem, $contextInfo)
+                let $msg :=
+                    if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                        'Correspondence target resource cannot be parsed'
+                    else 
+                        'Correspondence target resource not found'
+                let $addAtts := (
+                    $lro?targetURI ! attribute targetURI {.}
+                )
+                return
+                    f:validationResult_concordValues_exception(
+                        $constraintElem, 
+                        $lro, 
+                        'Correspondence target resource not found',
+                        (),
+                        $contextInfo)
         return
             if ($targetNodes/self::gx:red) then $targetNodes else
 
+            (: Check correspondence :)
             f:validateConcordValues($contextItem, 
                                     $targetNodes,
                                     $filePath, 
@@ -315,21 +353,55 @@ declare function f:validationResult_concordValues($colour as xs:string,
 };
 
 declare function f:validationResult_concordValues_exception(
-                                                  $exception as xs:string,
                                                   $constraintElem as element(),
+                                                  $lro as map(*)?,        
+                                                  $exception as xs:string?,                                                  
+                                                  $addAtts as attribute()*,
                                                   $contextInfo as map(xs:string, item()*))
         as element() {
     let $constraintComp := 'ContentCorrespondence'        
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
     let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $contextItemInfo :=
+        if (empty($lro)) then ()
+        else
+            let $contextItem := $lro?contextItem
+            return
+                if (not($contextItem instance of node())) then ()
+                else attribute contextItem {i:datapath($contextItem)}
+    let $targetInfo := $lro?targetURI ! attribute targetURI {.}    
+    let $msg :=
+        if ($exception) then $exception
+        else if (exists($lro)) then
+            let $errorCode := $lro?errorCode
+            return
+                if ($errorCode) then
+                    switch($errorCode)
+                    case 'no_resource' return 'Correspondence target resource not found'
+                    case 'no_text' return 'Correspondence target resource not a text file'
+                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
+                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
+                    case 'href_selection_not_nodes' return
+                        'Link error - href expression does not select nodes'
+                    case 'uri' return
+                        'Target URI not a valid URI'
+                    default return concat('Unexpected error code: ', $errorCode)
+                else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 
+                    'Correspondence target resource not found'
+        
     return
         element {'gx:red'} {
+            attribute exception {$msg},
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
+            $contextItemInfo,
+            $targetInfo,
+            $addAtts,
             $filePathAtt,
-            $focusNodeAtt,
-            attribute exception {$exception}
+            $focusNodeAtt
         }
        
 };

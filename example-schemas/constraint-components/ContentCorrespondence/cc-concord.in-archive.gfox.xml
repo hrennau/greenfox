@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of constraint component Concord (ContentCorrespondence). This example 
+    checks resources contained by an archive file. See example 'cc-concord.gfox.xml' for more 
+    information about ContentCorrespondence constraints.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <linkDef name="airportGeoDetails"
+             hrefXP="@href"
+             contextXP="//airport"
+             targetXP="/*/geo">
+        <constraints 
+            minCountContextNodes="14" 
+            countTargetResources="1" 
+            countTargetDocs="1"
+            countTargetNodes="1"/>
+    </linkDef>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports-ireland.xml" id="contryFileShape">
+                <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
+                
+                <contentCorrespondence linkName="airportGeoDetails">
+                    <content sourceXP="@latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                    <content sourceXP="@longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                </contentCorrespondence>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
