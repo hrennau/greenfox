@@ -14,7 +14,6 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm",
-    "log.xqm",
     "resourceAccess.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
@@ -43,8 +42,6 @@ declare function f:validateConcord($filePath as xs:string,
                                    $context as map(xs:string, item()*))
         as element()* {
     
-    let $contextNode := $contextItem[. instance of node()]
-    
     (: context info - a container for current file path and datapath of the focus node :)    
     let $contextInfo := 
         let $focusPath :=
@@ -54,8 +51,7 @@ declare function f:validateConcord($filePath as xs:string,
         return  
             map:merge((
                 $filePath ! map:entry('filePath', .),
-                $focusPath ! map:entry('nodePath', .)
-            ))
+                $focusPath ! map:entry('nodePath', .)))
 
     return
         (: Exception - no context document :)
@@ -107,15 +103,9 @@ declare function f:validateConcord($filePath as xs:string,
         for $valuePair in $constraintElem/gx:constraint
         return
             (: Check correspondence :)
-            f:validateConcordValues($valuePair,
-                                    $contextItem, 
-                                    $targetNodes,
-                                    $filePath, 
-                                    $contextDoc,                   
-                                    $context,                                    
-                                    $contextInfo)
-    return ($results_link, 
-            $results_correspondence)
+            f:validateConcordValues($valuePair, $contextItem, $targetNodes,
+                                    $filePath, $contextDoc, $context, $contextInfo)
+    return ($results_link, $results_correspondence)
 };
 
 (:~
@@ -185,11 +175,10 @@ declare function f:validateConcordValues($valuePair as element(),
     
     (: Check the number of items of the source expression value :)
     let $results_sourceCount :=
-        f:validateConcordContentCount($sourceItems, 'source', $valuePair, $contextInfo)
+        f:validateConcordCounts($sourceItems, 'source', $valuePair, $contextInfo)
     
     (: Function items
-       ============== :)
-       
+       ============== :)       
     (: (1) Target value generator function :)
     let $getTargetItems := function($contextItem) {
         let $items := 
@@ -236,7 +225,7 @@ declare function f:validateConcordValues($valuePair as element(),
         
         (: Check the number of items of the source expression value :)
         let $results_targetCount :=
-            f:validateConcordContentCount($targetItems, 'target', $valuePair, $contextInfo)
+            f:validateConcordCounts($targetItems, 'target', $valuePair, $contextInfo)
         
         (:
          : Identify source expression items for which the correspondence 
@@ -281,17 +270,16 @@ declare function f:validateConcordValues($valuePair as element(),
  : @param contextInfo informs about the focus document and focus node
  : @return validation results
  :)
-declare function f:validateConcordContentCount($items as item()*,
-                                               $exprRole as xs:string, (: source | target :)
-                                               $valuePair as element(),
-                                               $contextInfo as map(xs:string, item()*))
+declare function f:validateConcordCounts($items as item()*,
+                                         $exprRole as xs:string, (: source | target :)
+                                         $valuePair as element(),
+                                         $contextInfo as map(xs:string, item()*))
         as element()* {
         
     let $countConstraints := $valuePair/(
         if ($exprRole eq 'source') then (@countSource, @minCountSource, @maxCountSource)
         else if ($exprRole eq 'target') then (@countTarget, @minCountTarget, @maxCountTarget)
-        else error()
-        )
+        else error())
     let $results :=
         if (empty($countConstraints)) then () else
         
@@ -322,8 +310,8 @@ declare function f:validateConcordContentCount($items as item()*,
  :)
  
 (:~
- : Constructs a validation result obtained from the validation of a Content Correspondence
- : constraint.
+ : Constructs a validation result obtained from the validation of a Content 
+ : Correspondence sconstraint.
  :
  : @param colour describes the success status - success, failure, warning
  : @param violations items violating the constraint
@@ -495,12 +483,3 @@ declare function f:validationResult_concord_exception(
         }
        
 };
-
-
-
-
-
-
-
-
-
