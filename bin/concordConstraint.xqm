@@ -60,12 +60,8 @@ declare function f:validateConcord($filePath as xs:string,
     return
         (: Exception - no context document :)
         if (not($contextDoc)) then
-            f:validationResult_concordValues_exception(
-                $constraintElem,
-                (),
-                'Context resource could not be parsed', 
-                (),
-                $contextInfo)
+            f:validationResult_concord_exception($constraintElem, (),
+                'Context resource could not be parsed', (), $contextInfo)
         else
         
     (: Link definition object, link resolution objects :)
@@ -87,8 +83,7 @@ declare function f:validateConcord($filePath as xs:string,
         (: Check for link error :)
         return
             if ($lro?errorCode) then
-                f:validationResult_concordValues_exception(
-                    $constraintElem, $lro, (), (), $contextInfo)
+                f:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
             else
            
         (: Fetch target nodes :)
@@ -101,9 +96,8 @@ declare function f:validateConcord($filePath as xs:string,
                         'Correspondence target resource cannot be parsed'
                     else 'Correspondence target resource not found'
                 return
-                    f:validationResult_concordValues_exception(
-                        $constraintElem, 
-                        $lro, 'Correspondence target resource not found', (), $contextInfo)                        
+                    f:validationResult_concord_exception($constraintElem, $lro, 
+                        'Correspondence target resource not found', (), $contextInfo)                        
         return if ($targetNodes/self::gx:red) then $targetNodes else
 
         (: Fetch context item :)
@@ -268,7 +262,7 @@ declare function f:validateConcordValues($valuePair as element(),
         let $colour := if (exists($violations)) then 'red' else 'green'                
         return (
             $results_targetCount,
-            f:validationResult_concordValues($colour, $violations, $cmp, $valuePair, $contextInfo)
+            f:validationResult_concord($colour, $violations, $cmp, $valuePair, $contextInfo)
         )                                             
     return ($results_sourceCount, $results)            
 };    
@@ -313,7 +307,7 @@ declare function f:validateConcordContentCount($items as item()*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            f:validationResult_concordValues_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
+            f:validationResult_concord_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
 
     return $results        
 };
@@ -338,11 +332,11 @@ declare function f:validateConcordContentCount($items as item()*,
  :   pair of content values
  : @contextInfo informs about the focus document and focus node
  :)
-declare function f:validationResult_concordValues($colour as xs:string,
-                                                  $violations as item()*,
-                                                  $cmp as xs:string,
-                                                  $valuePair as element(),
-                                                  $contextInfo as map(xs:string, item()*))
+declare function f:validationResult_concord($colour as xs:string,
+                                            $violations as item()*,
+                                            $cmp as xs:string,
+                                            $valuePair as element(),
+                                            $contextInfo as map(xs:string, item()*))
         as element() {
     let $constraintId := $valuePair/@id
     let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
@@ -389,11 +383,11 @@ declare function f:validationResult_concordValues($colour as xs:string,
  : @param contextInfo informs about the focus document and focus node
  : @return a validation result, red or green
  :)
-declare function f:validationResult_concordValues_counts($colour as xs:string,
-                                                         $valuePair as element(),
-                                                         $constraint as attribute(),
-                                                         $valueCount as item()*,
-                                                         $contextInfo as map(xs:string, item()*))
+declare function f:validationResult_concord_counts($colour as xs:string,
+                                                   $valuePair as element(),
+                                                   $constraint as attribute(),
+                                                   $valueCount as item()*,
+                                                   $contextInfo as map(xs:string, item()*))
         as element() {
     let $constraintConfig :=
         typeswitch($constraint)
@@ -448,12 +442,12 @@ declare function f:validationResult_concordValues_counts($colour as xs:string,
  : @param contextInfo informs about the focus document and focus node
  : @return a red validation result
  :)
-declare function f:validationResult_concordValues_exception(
-                                                  $valuePair as element(),
-                                                  $lro as map(*)?,        
-                                                  $exception as xs:string?,                                                  
-                                                  $addAtts as attribute()*,
-                                                  $contextInfo as map(xs:string, item()*))
+declare function f:validationResult_concord_exception(
+                                            $valuePair as element(),
+                                            $lro as map(*)?,        
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $contextInfo as map(xs:string, item()*))
         as element() {
     let $constraintComp := 'ContentCorrespondence'        
     let $constraintId := $valuePair/@id
