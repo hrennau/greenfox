@@ -111,7 +111,7 @@ declare function f:validateConcord($filePath as xs:string,
 (:~
  : ===============================================================================
  :
- :     P e r f o r n    v a l i d a t i o n s
+ :     P e r f o r m    v a l i d a t i o n s
  :
  : ===============================================================================
  :)
@@ -296,7 +296,6 @@ declare function f:validateConcordCounts($items as item()*,
         let $colour := if ($green) then 'green' else 'red'        
         return  
             f:validationResult_concord_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
-
     return $results        
 };
 
