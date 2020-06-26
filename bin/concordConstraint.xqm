@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : concordConstraint.xqm - validates against a Content Correspondence constraint
+ : concordConstraint.xqm - validates a resource against a Content Correspondence constraint
  :
  : -------------------------------------------------------------------------
  :)
@@ -23,12 +23,6 @@ import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenl
     "linkValidation.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
-
-(: ============================================================================
- :
- :     f u n c t i o n s    v a l i d a t i n g    c o n t e n t    c o r r e s p o n d e n c e
- :
- : ============================================================================ :)
 
 (:~
  : Validates a Content Correspondence constraint.
@@ -148,7 +142,8 @@ declare function f:validateConcord($filePath as xs:string,
  : The validation is repeated for each link target node - thus effectively
  : every combination of link context node and link target node is checked.
  :
- : @param valuePair an element declaring a constraint on content values 
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
  : @param linkContextNode the link context node
  : @param linkTargetNodes the link target nodes
  : @param contextFilePath the file path of the context resource
@@ -326,7 +321,8 @@ declare function f:validateConcordContentCount($items as item()*,
 (:~
  : ===============================================================================
  :
- :     V a l i d a t i o n    r e s u l t s :   c o n t e n t C o r r e s p o n d e n c e
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         C o n t e n t    C o r r e s p o n d e n c e    c o n s t r a i n t
  :
  : ===============================================================================
  :)
@@ -338,7 +334,8 @@ declare function f:validateConcordContentCount($items as item()*,
  : @param colour describes the success status - success, failure, warning
  : @param violations items violating the constraint
  : @param cmp operator of comparison
- : @param valuePair element declaring a constraint referring to a pair of values
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
  : @contextInfo informs about the focus document and focus node
  :)
 declare function f:validationResult_concordValues($colour as xs:string,
@@ -385,7 +382,8 @@ declare function f:validationResult_concordValues($colour as xs:string,
  : ContentCorrespondenceTargetCount, ...TargetMinCount, ...TargetMaxCount).
  :
  : @param colour 'green' or 'red', indicating violation or conformance
- : @param $valuePair a constraint declaring element, part of a composite ContentCorrespondence constraint
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
  : @param constraint a constraint expressing attribute (e.g. @sourceMinCount)
  : @param valueCount the actual number of values 
  : @param contextInfo informs about the focus document and focus node
@@ -434,6 +432,22 @@ declare function f:validationResult_concordValues_counts($colour as xs:string,
         }       
 };
 
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a Content Correspondence 
+ : constraint. Such an exceptional condition is, for example, a 
+ : failure to resolve a link definition used to identify the target 
+ : resource taking part in the correspondence checking.
+ :
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
+ : @param lro Link Resolution Object describing the attempt to resolve 
+ :   a link description
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
 declare function f:validationResult_concordValues_exception(
                                                   $valuePair as element(),
                                                   $lro as map(*)?,        
