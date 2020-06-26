@@ -16,8 +16,8 @@
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 <contentCorrespondence foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
-                    <content sourceXP="//articleName" targetXP="//article/@name" corr="in"/>
-                    <content sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" corr="in"/>
+                    <valuePair sourceXP="//articleName" targetXP="//article/@name" corr="in"/>
+                    <valuePair sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" corr="in"/>
                 </contentCorrespondence>
             </file>
         </folder>

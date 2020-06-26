@@ -441,11 +441,48 @@ return
                               countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
                               minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
                               maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
-                        />
-                
-   
-                    
+                        />                    
                 />    
+            </focusNode>
+
+            <!-- ========================================
+                       <contentCorrespondence>
+                 ======================================== -->
+            <focusNode xpath="//*:contentCorrespondence">
+                <ex:allowedAtts
+                    attNames="foxpath contextXP targetXP linkName
+                    
+                    countContextNodes countContextNodesMsg contContextNodesMsgOK
+                    minCountContextNodes minCountContextNodesMsg minCountContextNodesMsgOK
+                    maxCountContextNodes maxCountContextNodesMsg maxCountContextNodesMsgOK
+                    
+                    countTargetResources countTargetResourcesMsg countTargetResourcesMsgOK
+                    minCountTargetResources minCountTargetResourcesMsg minCountTargetResourcesMsgOK
+                    maxCountTargetResources maxCountTargetResourcesMsg maxCountTargetResourcesMsgOK                              
+                    
+                    countTargetDocs countTargetDocsMsg countTargetDocsMsgOK
+                    minCountTargetDocs minCountTargetDocsMsg minCountTargetDocsMsgOK
+                    maxCountTargetDocs maxCountTargetDocsMsg maxCountTargetDocsMsgOK
+                    
+                    countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
+                    minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
+                    maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
+                />
+                <ex:allowedElems elemNames="valuePair"
+                    msg="Unexpected content of the 'contentCorrespondence' element; expected: only 'valuePair' allowed"
+                    msgOK="OK - 'contentCorrespondence' element: no unexpected child elements"/>
+                />  
+                
+                <focusNode xpath="*:valuePair">
+                    <ex:allowedAtts attNames="sourceXP targetXP corr useDatatype
+                         countSource minCountSource maxCountSource
+                         countSourceMsg minCountSourceMsg maxCountSourceMsg
+                         countSourceMsgOK minCountSourceMsgOK maxCountSourceMsgOK
+                         countTarget minCountTarget maxCountTarget
+                         countTargetMsg minCountTargetMsg maxCountTargetMsg
+                         countTargetMsgOK minCountTargetMsgOK maxCountTargetMsgOK
+                         "/>
+                </focusNode>
             </focusNode>
             
             <!-- ========================================

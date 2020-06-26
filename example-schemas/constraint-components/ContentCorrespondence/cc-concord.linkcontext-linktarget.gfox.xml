@@ -24,8 +24,8 @@
                 <contentCorrespondence foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
                                        contextXP="//article"
                                        targetXP="//article[@id eq $linkContext/articleID]">
-                    <content sourceXP="articleName" targetXP="@name" countSource="1" countTarget="1" corr="eq"/>
-                    <content sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" countSource="1" countTarget="1" corr="eq"/>
+                    <valuePair sourceXP="articleName" targetXP="@name" countSource="1" countTarget="1" corr="eq"/>
+                    <valuePair sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" countSource="1" countTarget="1" corr="eq"/>
                 </contentCorrespondence>
             </file>
         </folder>

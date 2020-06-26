@@ -29,8 +29,8 @@
                 <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
                 
                 <contentCorrespondence linkName="airportGeoDetails">
-                    <content sourceXP="latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
-                    <content sourceXP="longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                    <valuePair sourceXP="latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                    <valuePair sourceXP="longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
                 </contentCorrespondence>
                 
             </file>
