@@ -218,6 +218,29 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         }       
 };
 
+declare function f:validateResult_linkDefAtts($ldo as map(*)?,
+                                              $constraintElem as element()?)
+        as attribute()* {
+    let $exprAtts := ( 
+        $constraintElem/@link ! attribute link {.},
+        ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
+        ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
+        ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
+        ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
+        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1]
+    )
+    return $exprAtts
+        
+};        
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         D o c S i m i l a r    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
 (:~
  : Creates a validation result for a DocSimilar constraint.
  :
@@ -274,19 +297,255 @@ declare function f:validationResult_docSimilar($colour as xs:string,
         }        
 };
 
-declare function f:validateResult_linkDefAtts($ldo as map(*)?,
-                                              $constraintElem as element()?)
-        as attribute()* {
-    let $exprAtts := ( 
-        $constraintElem/@link ! attribute link {.},
-        ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
-        ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
-        ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
-        ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
-        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1]
-    )
-    return $exprAtts
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a DocSimilar constraint. Such 
+ : an exceptional condition is, for example, a failure to resolve a 
+ : link definition used to identify the target resource taking part 
+ : in the similarity checking.
+ :
+ : @param constraintElem an element declaring a DocSimilar constraint 
+ : @param lro Link Resolution Object describing the attempt to resolve 
+ :   a link description
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
+declare function f:validationResult_docSimilar_exception(
+                                            $constraintElem as element(),
+                                            $lro as map(*)?,        
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintComp := 'DocSimilarConstraint'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $contextItemInfo :=
+        if (empty($lro)) then ()
+        else
+            let $contextItem := $lro?contextItem
+            return
+                if (not($contextItem instance of node())) then ()
+                else attribute contextItem {i:datapath($contextItem)}
+    let $targetInfo := $lro?targetURI ! attribute targetURI {.}    
+    let $msg :=
+        if ($exception) then $exception
+        else if (exists($lro)) then
+            let $errorCode := $lro?errorCode
+            return
+                if ($errorCode) then
+                    switch($errorCode)
+                    case 'no_resource' return 'Correspondence target resource not found'
+                    case 'no_text' return 'Correspondence target resource not a text file'
+                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
+                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
+                    case 'href_selection_not_nodes' return
+                        'Link error - href expression does not select nodes'
+                    case 'uri' return
+                        'Target URI not a valid URI'
+                    default return concat('Unexpected error code: ', $errorCode)
+                else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 
+                    'Correspondence target resource not found'
         
-};        
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $contextItemInfo,
+            $targetInfo,
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }       
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         C o n t e n t    C o r r e s p o n d e n c e    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
+ 
+(:~
+ : Constructs a validation result obtained from the validation of a Content 
+ : Correspondence sconstraint.
+ :
+ : @param colour describes the success status - success, failure, warning
+ : @param violations items violating the constraint
+ : @param cmp operator of comparison
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
+ : @contextInfo informs about the focus document and focus node
+ :)
+declare function f:validationResult_concord($colour as xs:string,
+                                            $violations as item()*,
+                                            $cmp as xs:string,
+                                            $valuePair as element(),
+                                            $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintId := $valuePair/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $cmpAtt := $cmp ! attribute correspondence {.}
+    let $useDatatypeAtt := $valuePair/@useDatatype ! attribute useDatatype {.}
+    let $flagsAtt := $valuePair/@flags[string()] ! attribute flags {.}
+    let $constraintComp := 'ContentCorrespondence-' || $cmp
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($valuePair, $cmp, ())
+        else i:getErrorMsg($valuePair, $cmp, ())
+    let $elemName := concat('gx:', $colour)
+    let $sourceExprLang := 'xpath'
+    let $targetExprLang := 'xpath'    
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $filePathAtt,
+            $focusNodeAtt,
+            $valuePair/@sourceXP ! attribute expr {.},
+            attribute exprLang {$sourceExprLang},            
+            $valuePair/@targetXP ! attribute targetExpr {.},
+            attribute targetExprLang {$targetExprLang},
+            $cmpAtt,
+            $useDatatypeAtt,
+            $flagsAtt,
+            $violations ! <gx:value>{.}</gx:value>
+        }
+       
+};
+
+(:~
+ : Creates a validation result for a ContentCorrespondenceCount related 
+ : constraint (ContentCorrespondenceSourceCount, ...SourceMinCount, ...SourceMaxCount, 
+ : ContentCorrespondenceTargetCount, ...TargetMinCount, ...TargetMaxCount).
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
+ : @param constraint a constraint expressing attribute (e.g. @sourceMinCount)
+ : @param valueCount the actual number of values 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_concord_counts($colour as xs:string,
+                                                   $valuePair as element(),
+                                                   $constraint as attribute(),
+                                                   $valueCount as item()*,
+                                                   $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintConfig :=
+        typeswitch($constraint)
+        case attribute(countSource)    return map{'constraintComp': 'ContentCorrespondenceSourceValueCount',    'atts': ('countSource')}
+        case attribute(minCountSource) return map{'constraintComp': 'ContentCorrespondenceSourceValueMinCount', 'atts': ('minCountSource')}        
+        case attribute(maxCountSource) return map{'constraintComp': 'ContentCorrespondenceSourceValueMaxCount', 'atts': ('maxCountSource')}        
+        case attribute(countTarget)    return map{'constraintComp': 'ContentCorrespondenceTargetValueCount',    'atts': ('countTarget')}
+        case attribute(minCountTarget) return map{'constraintComp': 'ContentCorrespondenceTargetValueMinCount', 'atts': ('minCountTarget')}        
+        case attribute(maxCountTarget) return map{'constraintComp': 'ContentCorrespondenceTargetValueMaxCount', 'atts': ('maxCountTarget')}        
+        default return error()
+    
+    let $standardAttNames := $constraintConfig?atts
+    let $standardAtts := $valuePair/@*[local-name(.) = $standardAttNames]
+    let $valueCountAtt := attribute valueCount {$valueCount} 
+    
+    let $resourceShapeId := $valuePair/@resourceShapeID
+    let $constraintElemId := $valuePair/@id
+    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($valuePair, $constraint/local-name(.), ())
+        else i:getErrorMsg($valuePair, $constraint/local-name(.), ())
+    let $elemName := 'gx:' || $colour
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintConfig?constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            $filePath,
+            $focusNode,
+            $standardAtts,
+            $valueCountAtt            
+        }       
+};
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a Content Correspondence 
+ : constraint. Such an exceptional condition is, for example, a 
+ : failure to resolve a link definition used to identify the target 
+ : resource taking part in the correspondence checking.
+ :
+ : @param constraintElem an element declaring a DocSimilar constraint
+ : @param lro Link Resolution Object describing the attempt to resolve 
+ :   a link description
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
+declare function f:validationResult_concord_exception(
+                                            $constraintElem as element(),
+                                            $lro as map(*)?,        
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintComp := 'ContentCorrespondence'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $contextItemInfo :=
+        if (empty($lro)) then ()
+        else
+            let $contextItem := $lro?contextItem
+            return
+                if (not($contextItem instance of node())) then ()
+                else attribute contextItem {i:datapath($contextItem)}
+    let $targetInfo := $lro?targetURI ! attribute targetURI {.}    
+    let $msg :=
+        if ($exception) then $exception
+        else if (exists($lro)) then
+            let $errorCode := $lro?errorCode
+            return
+                if ($errorCode) then
+                    switch($errorCode)
+                    case 'no_resource' return 'Correspondence target resource not found'
+                    case 'no_text' return 'Correspondence target resource not a text file'
+                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
+                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
+                    case 'href_selection_not_nodes' return
+                        'Link error - href expression does not select nodes'
+                    case 'uri' return
+                        'Target URI not a valid URI'
+                    default return concat('Unexpected error code: ', $errorCode)
+                else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 
+                    'Correspondence target resource not found'
+        
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $contextItemInfo,
+            $targetInfo,
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
+       
+};
 
 

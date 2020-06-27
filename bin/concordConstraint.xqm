@@ -21,6 +21,9 @@ import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenl
     "linkResolution.xqm",
     "linkValidation.xqm";
 
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+    "validationResult.xqm";
+
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -44,28 +47,23 @@ declare function f:validateConcord($filePath as xs:string,
     
     (: context info - a container for current file path and datapath of the focus node :)    
     let $contextInfo := 
-        let $focusPath :=
-            if ($contextItem instance of node() and not($contextItem is $contextDoc)) then
-                $contextItem/i:datapath(.)
-            else ()
+        let $focusPath := 
+            $contextItem[. instance of node()][not(. is $contextDoc)] ! i:datapath(.)
         return  
             map:merge((
                 $filePath ! map:entry('filePath', .),
                 $focusPath ! map:entry('nodePath', .)))
-
     return
         (: Exception - no context document :)
         if (not($contextDoc)) then
-            f:validationResult_concord_exception($constraintElem, (),
+            result:validationResult_concord_exception($constraintElem, (),
                 'Context resource could not be parsed', (), $contextInfo)
         else
         
-    (: Link definition object, link resolution objects :)
+    (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
-    
-    (: Resolve link definition (use 'xml' as default mediatype) :)
-    let $lros := link:resolveLinkDef(
-        $ldo, 'lro', $filePath, $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
+    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, 
+        $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     
     (: Check link constraints :)
     let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 
@@ -79,22 +77,24 @@ declare function f:validateConcord($filePath as xs:string,
         (: Check for link error :)
         return
             if ($lro?errorCode) then
-                f:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
+                result:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
             else
            
         (: Fetch target nodes :)
         let $targetNodes := 
             if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
-            else 
+            else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.) 
+        return
+            if (not($targetNodes)) then            
                 let $msg :=
                     if ($lro?targetURI ! i:fox-resource-exists(.)) then 
                         'Correspondence target resource cannot be parsed'
                     else 'Correspondence target resource not found'
                 return
-                    f:validationResult_concord_exception($constraintElem, $lro, 
-                        'Correspondence target resource not found', (), $contextInfo)                        
-        return if ($targetNodes/self::gx:red) then $targetNodes else
+                    result:validationResult_concord_exception(
+                        $constraintElem, $lro, $msg, (), $contextInfo)                        
+            else
 
         (: Fetch context item :)
         let $contextItem := $lro?contextItem
@@ -251,7 +251,7 @@ declare function f:validateConcordValues($valuePair as element(),
         let $colour := if (exists($violations)) then 'red' else 'green'                
         return (
             $results_targetCount,
-            f:validationResult_concord($colour, $violations, $cmp, $valuePair, $contextInfo)
+            result:validationResult_concord($colour, $violations, $cmp, $valuePair, $contextInfo)
         )                                             
     return ($results_sourceCount, $results)            
 };    
@@ -295,190 +295,7 @@ declare function f:validateConcordCounts($items as item()*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            f:validationResult_concord_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
+            result:validationResult_concord_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
     return $results        
 };
 
-(:~
- : ===============================================================================
- :
- :     V a l i d a t i o n    r e s u l t s :   
- :         C o n t e n t    C o r r e s p o n d e n c e    c o n s t r a i n t
- :
- : ===============================================================================
- :)
- 
-(:~
- : Constructs a validation result obtained from the validation of a Content 
- : Correspondence sconstraint.
- :
- : @param colour describes the success status - success, failure, warning
- : @param violations items violating the constraint
- : @param cmp operator of comparison
- : @param valuePair an element declaring a Correspondence Constraint on a 
- :   pair of content values
- : @contextInfo informs about the focus document and focus node
- :)
-declare function f:validationResult_concord($colour as xs:string,
-                                            $violations as item()*,
-                                            $cmp as xs:string,
-                                            $valuePair as element(),
-                                            $contextInfo as map(xs:string, item()*))
-        as element() {
-    let $constraintId := $valuePair/@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
-    let $cmpAtt := $cmp ! attribute correspondence {.}
-    let $useDatatypeAtt := $valuePair/@useDatatype ! attribute useDatatype {.}
-    let $flagsAtt := $valuePair/@flags[string()] ! attribute flags {.}
-    let $constraintComp := 'ContentCorrespondence-' || $cmp
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($valuePair, $cmp, ())
-        else i:getErrorMsg($valuePair, $cmp, ())
-    let $elemName := concat('gx:', $colour)
-    let $sourceExprLang := 'xpath'
-    let $targetExprLang := 'xpath'    
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            $filePathAtt,
-            $focusNodeAtt,
-            $valuePair/@sourceXP ! attribute expr {.},
-            attribute exprLang {$sourceExprLang},            
-            $valuePair/@targetXP ! attribute targetExpr {.},
-            attribute targetExprLang {$targetExprLang},
-            $cmpAtt,
-            $useDatatypeAtt,
-            $flagsAtt,
-            $violations ! <gx:value>{.}</gx:value>
-        }
-       
-};
-
-(:~
- : Creates a validation result for a ContentCorrespondenceCount related 
- : constraint (ContentCorrespondenceSourceCount, ...SourceMinCount, ...SourceMaxCount, 
- : ContentCorrespondenceTargetCount, ...TargetMinCount, ...TargetMaxCount).
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param valuePair an element declaring a Correspondence Constraint on a 
- :   pair of content values
- : @param constraint a constraint expressing attribute (e.g. @sourceMinCount)
- : @param valueCount the actual number of values 
- : @param contextInfo informs about the focus document and focus node
- : @return a validation result, red or green
- :)
-declare function f:validationResult_concord_counts($colour as xs:string,
-                                                   $valuePair as element(),
-                                                   $constraint as attribute(),
-                                                   $valueCount as item()*,
-                                                   $contextInfo as map(xs:string, item()*))
-        as element() {
-    let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(countSource)    return map{'constraintComp': 'ContentCorrespondenceSourceValueCount',    'atts': ('countSource')}
-        case attribute(minCountSource) return map{'constraintComp': 'ContentCorrespondenceSourceValueMinCount', 'atts': ('minCountSource')}        
-        case attribute(maxCountSource) return map{'constraintComp': 'ContentCorrespondenceSourceValueMaxCount', 'atts': ('maxCountSource')}        
-        case attribute(countTarget)    return map{'constraintComp': 'ContentCorrespondenceTargetValueCount',    'atts': ('countTarget')}
-        case attribute(minCountTarget) return map{'constraintComp': 'ContentCorrespondenceTargetValueMinCount', 'atts': ('minCountTarget')}        
-        case attribute(maxCountTarget) return map{'constraintComp': 'ContentCorrespondenceTargetValueMaxCount', 'atts': ('maxCountTarget')}        
-        default return error()
-    
-    let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := $valuePair/@*[local-name(.) = $standardAttNames]
-    let $valueCountAtt := attribute valueCount {$valueCount} 
-    
-    let $resourceShapeId := $valuePair/@resourceShapeID
-    let $constraintElemId := $valuePair/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($valuePair, $constraint/local-name(.), ())
-        else i:getErrorMsg($valuePair, $constraint/local-name(.), ())
-    let $elemName := 'gx:' || $colour
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
-            $focusNode,
-            $standardAtts,
-            $valueCountAtt            
-        }       
-};
-
-(:~
- : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of a Content Correspondence 
- : constraint. Such an exceptional condition is, for example, a 
- : failure to resolve a link definition used to identify the target 
- : resource taking part in the correspondence checking.
- :
- : @param valuePair an element declaring a Correspondence Constraint on a 
- :   pair of content values
- : @param lro Link Resolution Object describing the attempt to resolve 
- :   a link description
- : @param exception an optional message string
- : @param addAtts additional attributes 
- : @param contextInfo informs about the focus document and focus node
- : @return a red validation result
- :)
-declare function f:validationResult_concord_exception(
-                                            $valuePair as element(),
-                                            $lro as map(*)?,        
-                                            $exception as xs:string?,                                                  
-                                            $addAtts as attribute()*,
-                                            $contextInfo as map(xs:string, item()*))
-        as element() {
-    let $constraintComp := 'ContentCorrespondence'        
-    let $constraintId := $valuePair/@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
-    let $contextItemInfo :=
-        if (empty($lro)) then ()
-        else
-            let $contextItem := $lro?contextItem
-            return
-                if (not($contextItem instance of node())) then ()
-                else attribute contextItem {i:datapath($contextItem)}
-    let $targetInfo := $lro?targetURI ! attribute targetURI {.}    
-    let $msg :=
-        if ($exception) then $exception
-        else if (exists($lro)) then
-            let $errorCode := $lro?errorCode
-            return
-                if ($errorCode) then
-                    switch($errorCode)
-                    case 'no_resource' return 'Correspondence target resource not found'
-                    case 'no_text' return 'Correspondence target resource not a text file'
-                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
-                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
-                    case 'href_selection_not_nodes' return
-                        'Link error - href expression does not select nodes'
-                    case 'uri' return
-                        'Target URI not a valid URI'
-                    default return concat('Unexpected error code: ', $errorCode)
-                else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
-                    'Correspondence target resource cannot be parsed'
-                else 
-                    'Correspondence target resource not found'
-        
-    return
-        element {'gx:red'} {
-            attribute exception {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            $contextItemInfo,
-            $targetInfo,
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
-        }
-       
-};
