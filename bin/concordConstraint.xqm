@@ -52,10 +52,11 @@ declare function f:validateConcord($filePath as xs:string,
         return  
             map:merge((
                 $filePath ! map:entry('filePath', .),
+                $contextDoc ! map:entry('doc', .),
                 $focusPath ! map:entry('nodePath', .)))
     return
         (: Exception - no context document :)
-        if (not($contextDoc)) then
+        if (not($contextInfo?doc)) then
             result:validationResult_concord_exception($constraintElem, (),
                 'Context resource could not be parsed', (), $contextInfo)
         else
@@ -69,16 +70,32 @@ declare function f:validateConcord($filePath as xs:string,
     let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 
     
     (: Check correspondences :)    
-    let $results_correspondence := 
-    
-        (: Repeat for each combination of link context node and link target document :)
-        for $lro in $lros
+    let $results_correspondence := f:validateConcordPairs($constraintElem, $lros, $contextInfo, $context)
+    return ($results_link, $results_correspondence)
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     P e r f o r m    v a l i d a t i o n s
+ :
+ : ===============================================================================
+ :)
+
+declare function f:validateConcordPairs($constraintElem as element(),
+                                        $lros as map(*)*,
+                                        $contextInfo as map(*),
+                                        $context as map(xs:string, item()*))
+        as element()* {
         
-        (: Check for link error :)
-        return
-            if ($lro?errorCode) then
-                result:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
-            else
+    (: Repeat for each combination of link context node and link target document :)
+    for $lro in $lros
+        
+    (: Check for link error :)
+    return
+        if ($lro?errorCode) then
+            result:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
+        else
            
         (: Fetch target nodes :)
         let $targetNodes := 
@@ -100,21 +117,10 @@ declare function f:validateConcord($filePath as xs:string,
         let $contextItem := $lro?contextItem
         
         (: Repeat for each constraint defining child of the constraint element :)
-        for $valuePair in $constraintElem/gx:constraint
         return
-            (: Check correspondence :)
-            f:validateConcordValues($valuePair, $contextItem, $targetNodes,
-                                    $filePath, $contextDoc, $context, $contextInfo)
-    return ($results_link, $results_correspondence)
+            $constraintElem/gx:valuePair
+                /f:validateConcordPair(., $contextItem, $targetNodes, $contextInfo, $context)
 };
-
-(:~
- : ===============================================================================
- :
- :     P e r f o r m    v a l i d a t i o n s
- :
- : ===============================================================================
- :)
 
 (:~
  : Validates the constraints expressed by a `valuePair` element contained
@@ -130,21 +136,17 @@ declare function f:validateConcord($filePath as xs:string,
  :   pair of content values
  : @param linkContextNode the link context node
  : @param linkTargetNodes the link target nodes
- : @param contextFilePath the file path of the context resource
- : @param contextDoc the document representation of the context resource
+ : @param contextInfo informs about the focus document and focus node 
  : @param context the processing context
- : @param contextInfo informs about the focus document and focus node
  : @return validation results
  :)
-declare function f:validateConcordValues($valuePair as element(),
-                                         $linkContextItem as item(), 
-                                         $linkTargetNodes as node()*,                                         
-                                         $contextFilePath as xs:string, 
-                                         $contextDoc as document-node()?,                                                   
-                                         $context as map(*),                                         
-                                         $contextInfo as map(xs:string, item()*))
+declare function f:validateConcordPair($valuePair as element(gx:valuePair),
+                                       $linkContextItem as item(), 
+                                       $linkTargetNodes as node()*,                                         
+                                       $contextInfo as map(xs:string, item()*),
+                                       $context as map(*))
         as element()* {
-    let $contextNode := ($linkContextItem[. instance of node()], $contextDoc)[1]
+    let $contextNode := ($linkContextItem[. instance of node()], $contextInfo?doc)[1]
     let $evaluationContext := $context?_evaluationContext
     
     (: Definition of the correspondence :)

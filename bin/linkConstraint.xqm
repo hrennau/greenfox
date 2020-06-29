@@ -59,10 +59,11 @@ declare function f:validateLinks($contextFilePath as xs:string,
         return
             map:merge((
                 $contextFilePath ! map:entry('filePath', .),
+                $contextDoc ! map:entry('doc', .),                
                 $focusPath ! map:entry('nodePath', .)
         ))
     return
-        f:resolveAndValidateLinks($contextItem, $contextFilePath, $constraintElem, $context, $contextInfo)
+        f:resolveAndValidateLinks($contextItem, $constraintElem, $contextInfo, $context)
 };
 
 (:~
@@ -77,17 +78,16 @@ declare function f:validateLinks($contextFilePath as xs:string,
  :)
 declare function f:resolveAndValidateLinks(
                              $contextItem as item(),
-                             $filepath as xs:string,
                              $constraintElem as element(),
-                             $context as map(xs:string, item()*),
-                             $contextInfo as map(xs:string, item()*))
+                             $contextInfo as map(xs:string, item()*),
+                             $context as map(xs:string, item()*))
         as item()* {
         
     (: Link definition object :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     
     (: Link resolution objects :)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $filepath, $contextItem[. instance of node()], $context, ())
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextInfo?filePath, $contextItem[. instance of node()], $context, ())
     
     (: Write validation results :)
     return (

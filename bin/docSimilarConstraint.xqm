@@ -52,10 +52,11 @@ declare function f:validateDocSimilar($filePath as xs:string,
         return  
             map:merge((
                 $filePath ! map:entry('filePath', .),
+                $contextDoc ! map:entry('doc', .),                
                 $focusPath ! map:entry('nodePath', .)))
     return
         (: Exception - no context document :)
-        if (not($contextDoc)) then
+        if (not($contextInfo?doc)) then
             result:validationResult_docSimilar_exception($constraintElem, (),
                 'Context resource could not be parsed', (), $contextInfo)
         else
