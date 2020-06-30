@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components Link*, which are represented
-    by a <links> element. This example checks resources contained by an archive file. 
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. The optional @mediatype parameter requires 
+    link resolution to include a parsing of the link targets into a node tree.
+    This example checks resources contained by an archive file. 
     
-    The optional @mediatype parameter requires link resolution
-    to include a parsing of the link targets into a node tree.
-    
-    A LinksResolvable constraint (@resolvable = true) is violated if any target 
-    URIs cannot be resolved. 
-    
-    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
-    - target resources (* = TargetResources)
-    - target docs (* = TargetDocs)    
-    - target nodes (* = TargetNodes)
-    - link context nodes (* = ContextNodes)
-    Target resources and target docs are counted per link context node.
-    
-    Demonstrates the use of constraint component LinksResolvable, which is represented
-    by a <Link> element. The constraint is violated if any links produced by a given 
-    expression cannot be resolved. The optional @mediatype attribute further constrains 
-    the link target to have the specified mediatype (xml, json, text). The optional 
-    attributes @minCount, @maxCount, @count constraint the number of items returned by 
-    the expression producing the links.    
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/links-href.xml-mediatype.in-archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

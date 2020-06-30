@@ -31,17 +31,17 @@ declare namespace fox="http://www.foxpath.org/ns/annotations";
  : Supplementary constraints refer to the number of items representing
  : the documents with which to compare.
  :
- : @param filepath the file path of the resource currently investigated
- : @param constraintElem an element representing the constraints
- : @param node the node to be validated (not necessarily the root node)
- : @param doc the document node of the node tree representing the resource
- : @param context the processing context 
+ : @param contextURI the file path of the file containing the initial context item 
+ : @param contextDoc the XML document containing the initial context item
+ : @param contextItem the initial context item to be used in expressions
+ : @param constraintElem the element declaring the constraint
+ : @param context the processing context
  : @return validation results, red and/or green
 :)
-declare function f:validateDocSimilar($filePath as xs:string,
-                                      $constraintElem as element(gx:docSimilar),
+declare function f:validateDocSimilar($contextURI as xs:string,
+                                      $contextDoc as document-node()?,                                      
                                       $contextItem as node(),
-                                      $contextDoc as document-node()?,
+                                      $constraintElem as element(gx:docSimilar),                                      
                                       $context as map(xs:string, item()*))
         as element()* {
 
@@ -51,7 +51,7 @@ declare function f:validateDocSimilar($filePath as xs:string,
             $contextItem[. instance of node()][not(. is $contextDoc)] ! i:datapath(.)
         return  
             map:merge((
-                $filePath ! map:entry('filePath', .),
+                $contextURI ! map:entry('filePath', .),
                 $contextDoc ! map:entry('doc', .),                
                 $focusPath ! map:entry('nodePath', .)))
     return
@@ -63,7 +63,7 @@ declare function f:validateDocSimilar($filePath as xs:string,
 
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, 
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, 
         $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
         
     (: Check link constraints :)
@@ -207,7 +207,7 @@ declare function f:normalizeDocForComparison($node as node(),
         return
             typeswitch($normItem)
             case $skipItem as element(gx:skipItem) return
-                let $selected := $selectedItems($node_, $skipItem)            
+                let $selected := trace( $selectedItems($node_, $skipItem) , '_SELECTED: ')            
                 return
                     if (empty($selected)) then () else delete node $selected
             case $roundItem as element(gx:roundItem) return

@@ -441,7 +441,16 @@ return
                               countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
                               minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
                               maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
-                        />                    
+                        />    
+                <ex:allowedElems elemNames="skipItem roundItem editText"
+                    msg="Unexpected elements in 'docSimilar' element; expected: $elemNames"
+                    msgOK="OK - 'docSimilar' element: no unexpected child elements"/>
+                
+                    <focusNode xpath="*:skipItem">
+                        <ex:allowedAtts attNames="kind localName namespace parentLocalName parentNamespace"
+                            msg="Unexpected attributes in 'skipItem' element; expected: $attNames"
+                            msgOK="OK - 'skipItem' element: no unexpected attributes"/>
+                    </focusNode>
                 />    
             </focusNode>
 
@@ -644,16 +653,19 @@ return
                     countTargetResources minCountTargetResources maxCountTargetResources
                     countTargetDocs minCountTargetDocs maxCountTargetDocs
                     countTargetNodes minCountTargetNodes maxCountTargetNodes
+                    countAllTargetResources minCountAllTargetResources maxCountAllTargetResources
                     
                     countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
                     countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
                     countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
                     countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                    countAllTargetResourcesMsg minCountAllTargetResourcesMsg maxCountAllTargetResourcesMsg
                     
                     countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
                     countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
                     countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
                     countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                    countAllTargetResourcesMsgOK minCountAllTargetResourcesMsgOK maxCountAllTargetResourcesMsgOK
                     
                     reporterXPath"                    
                     msg="Unexpected attributes in 'links' element"

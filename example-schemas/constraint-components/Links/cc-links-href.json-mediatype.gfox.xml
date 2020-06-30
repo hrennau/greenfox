@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <!-- 
-    Demonstrates the use of constraint components Link*, which are represented
-    by a <links> element. The optional @mediatype parameter requires link resolution
-    to include a parsing of the link targets into a node tree. This example checks
-    links connecting JSON documents.
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. The optional @mediatype parameter requires 
+    link resolution to include a parsing of the link targets into a node tree. This
+    example checks links connecting JSON documents.
     
-    A LinksResolvable constraint (@resolvable = true) is violated if any target 
-    URIs cannot be resolved. 
-    
-    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
-    - target resources (* = TargetResources)
-    - target docs (* = TargetDocs)    
-    - target nodes (* = TargetNodes)
-    - link context nodes (* = ContextNodes)
-    Target resources and target docs are counted per link context node.
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/links-href.json-mediatype"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

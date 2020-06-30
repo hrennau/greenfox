@@ -30,63 +30,63 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Validates constraints referring to links. The link is either referenced (@linkName)
- : or defined by attributes on the constraints element ('links'). Possible
- : constraints:
+ : Validates LinksResolvable constraints and supplementary constraints referring to
+ : link-related cardinalities. The link definition is either referenced (@linkName)
+ : or provided by attributes on the element declaring the constraints (<links>). 
+ : Possible constraints (attribute names):
  : - resolvable 
  : - countContextNodes, minCountContextNodes, maxCountContextNodes 
  : - countTargetResources, minCountTargetResources, maxCountTargetResources
  : - countTargetDocs, minCountTargetDocs, maxCountTargetDocs
  : - countTargetNodes, minCountTargetNodes, maxCountTargetNodes
  :
- : @param contextFilePath the file path of the file containing the initial context item 
- : @param constraintElem element defining the constraints
- : @param contextItem the initial context item to be used in expressions
+ : @param contextURI the file path of the file containing the initial context item 
  : @param contextDoc the XML document containing the initial context item
+ : @param contextItem the initial context item to be used in expressions
+ : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateLinks($contextFilePath as xs:string,
-                                 $constraintElem as element(), 
-                                 $contextItem as item()?,                                 
+declare function f:validateLinks($contextURI as xs:string,
                                  $contextDoc as document-node()?,
+                                 $contextItem as item()?,
+                                 $constraintElem as element(),
                                  $context as map(xs:string, item()*))
         as element()* {
         
-    (: The "context info" gives access to the context file path and the focus path :)        
+    (: context info - a container for current file path, current document and datapath of the focus node :)        
     let $contextInfo := 
         let $focusPath := $contextItem[. instance of node()][not(. is $contextDoc)]/f:datapath(.)
         return
             map:merge((
-                $contextFilePath ! map:entry('filePath', .),
+                $contextURI ! map:entry('filePath', .),
                 $contextDoc ! map:entry('doc', .),                
                 $focusPath ! map:entry('nodePath', .)
         ))
     return
-        f:resolveAndValidateLinks($contextItem, $constraintElem, $contextInfo, $context)
+        f:resolveAndValidateLinks($constraintElem, $contextItem, $contextInfo, $context)
 };
 
 (:~
  : Resolves and validates links.
  :
- : @param contextNode context node to be used when evaluating the link producing expression
- : @param filepath the file path of the resource currently investigated
- : @param valueShape the value shape containing the constraint
- : @param context the processing context
- : @param contextInfo information about the resource context 
+ : @param constraintElem the element declaring the constraint 
+ : @param contextItem the initial context item to be used in expressions 
+ : @param contextInfo information about the resource context
+ : @param context the processing context 
  : @return validation results, red and/or green
  :)
 declare function f:resolveAndValidateLinks(
-                             $contextItem as item(),
                              $constraintElem as element(),
+                             $contextItem as item(),                             
                              $contextInfo as map(xs:string, item()*),
                              $context as map(xs:string, item()*))
         as item()* {
         
-    (: Link definition object :)
+    (: Link Definition object :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     
-    (: Link resolution objects :)
+    (: Link Resolution objects :)
     let $lros := link:resolveLinkDef($ldo, 'lro', $contextInfo?filePath, $contextItem[. instance of node()], $context, ())
     
     (: Write validation results :)

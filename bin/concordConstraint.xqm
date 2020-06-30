@@ -31,27 +31,27 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : The $contextItem is either the current resource, or a focus node.
  :
- : @param contextFilePath the file path of the file containing the initial context item 
- : @param constraintElem the element declaring the constraint
- : @param contextItem the initial context item to be used in expressions
+ : @param contextURI the file path of the file containing the initial context item 
  : @param contextDoc the XML document containing the initial context item
+ : @param contextItem the initial context item to be used in expressions
+ : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateConcord($filePath as xs:string,
-                                   $constraintElem as element(), 
-                                   $contextItem as item()?,                                 
+declare function f:validateConcord($contextURI as xs:string,
                                    $contextDoc as document-node()?,
+                                   $contextItem as item()?,
+                                   $constraintElem as element(),
                                    $context as map(xs:string, item()*))
         as element()* {
     
-    (: context info - a container for current file path and datapath of the focus node :)    
+    (: context info - a container for current file path, current document and datapath of the focus node :)    
     let $contextInfo := 
         let $focusPath := 
             $contextItem[. instance of node()][not(. is $contextDoc)] ! i:datapath(.)
         return  
             map:merge((
-                $filePath ! map:entry('filePath', .),
+                $contextURI ! map:entry('filePath', .),
                 $contextDoc ! map:entry('doc', .),
                 $focusPath ! map:entry('nodePath', .)))
     return
@@ -63,7 +63,7 @@ declare function f:validateConcord($filePath as xs:string,
         
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $filePath, 
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, 
         $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     
     (: Check link constraints :)

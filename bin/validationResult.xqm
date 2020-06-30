@@ -176,6 +176,9 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         case attribute(countTargetNodes)        return map{'constraintComp': 'LinkTargetNodesCount',        'atts': ('countTargetNodes')}
         case attribute(minCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMinCount',     'atts': ('minCountTargetNodes')}
         case attribute(maxCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMaxCount',     'atts': ('maxCountTargetNodes')}
+        case attribute(countAllTargetResources)    return map{'constraintComp': 'LinkAllTargetResourcesCount',    'atts': ('countAllTargetResources')}
+        case attribute(minCountAllTargetResources) return map{'constraintComp': 'LinkAllTargetResourcesMinCount', 'atts': ('minCountAllTargetResources')}
+        case attribute(maxCountAllTargetResources) return map{'constraintComp': 'LinkAllTargetResourcesMaxCount', 'atts': ('maxCountAllTargetResources')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts

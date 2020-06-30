@@ -150,10 +150,10 @@ declare function f:validateFileInstanceComponents($filePath as xs:string,
             case $mediatype as element(gx:mediatype) return i:validateMediatype($filePath, $mediatype, $context)     
             case $xpath as element(gx:xpath) return i:validateExpressionValue($filePath, $xpath, $contextItem, $contextDoc, $context)
             case $foxpath as element(gx:foxpath) return i:validateExpressionValue($filePath, $foxpath, $contextItem, $contextDoc, $context)            
-            case $links as element(gx:links) return i:validateLinks($filePath, $links, $contextItem, $contextDoc, $context)                
             case $xsdValid as element(gx:xsdValid) return i:xsdValidate($filePath, $xsdValid, $context)
-            case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $docSimilar, $contextItem, $contextDoc, $context)
-            case $concord as element(gx:contentCorrespondence) return concord:validateConcord($filePath, $concord, $contextItem, $contextDoc, $context)
+            case $links as element(gx:links) return i:validateLinks($filePath, $contextDoc, $contextItem, $links, $context)            
+            case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $contextDoc, $contextItem, $docSimilar, $context)
+            case $concord as element(gx:contentCorrespondence) return concord:validateConcord($filePath, $contextDoc, $contextItem, $concord, $context)
             
             case $ifMediatype as element(gx:ifMediatype) return
                 $ifMediatype

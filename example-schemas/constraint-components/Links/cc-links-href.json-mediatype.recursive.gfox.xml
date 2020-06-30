@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components Link*, which are represented
-    by a <links> element. This example highlights recursive link checking in
-    JSON documents. 
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. This example highlights the checking of
+    a recursive link definition (@recursive) in JSON documents (@mediatype). 
+    A recursive link definition is recursively applied to the target resources. 
     
-    A LinksResolvable constraint (@resolvable = true) is violated if any target 
-    URIs cannot be resolved. 
-    
-    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
-    - target resources (* = TargetResources)
-    - target docs (* = TargetDocs)    
-    - target nodes (* = TargetNodes)
-    - link context nodes (* = ContextNodes)
-    Target resources, target docs and target nodes are counted per link context node.
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/recursiveLinksResolvable"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/json-mediatype.recursive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -29,7 +23,7 @@
                        recursive="true"
                        mediatype="json"                       
                        resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="69" minCountTargetDocsMsg="Less links than expected"/>
+                       minCountAllTargetResources="69" minCountAllTargetResourcesMsg="Less target docs than expected"/>
             </file>
         </folder>
     </domain>
