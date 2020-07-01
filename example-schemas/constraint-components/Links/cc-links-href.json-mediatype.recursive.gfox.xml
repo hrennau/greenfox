@@ -23,7 +23,9 @@
                        recursive="true"
                        mediatype="json"                       
                        resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountAllTargetResources="69" minCountAllTargetResourcesMsg="Less target docs than expected"/>
+                       minCountTargetDocs="69" minCountTargetDocsMsg="Less target docs than expected"
+                       minCountTargetDocsPerContextNode="1" minCountTargetDocsPerContextNodeMsg="Less target docs per context item than expected"
+                />
             </file>
         </folder>
     </domain>

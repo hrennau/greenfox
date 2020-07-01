@@ -653,19 +653,25 @@ return
                     countTargetResources minCountTargetResources maxCountTargetResources
                     countTargetDocs minCountTargetDocs maxCountTargetDocs
                     countTargetNodes minCountTargetNodes maxCountTargetNodes
-                    countAllTargetResources minCountAllTargetResources maxCountAllTargetResources
+                    countTargetResourcesPerContextNode minCountTargetResourcesPerContextNode maxCountTargetResourcesPerContextNode
+                    countTargetDocsPerContextNode minCountTargetDocsPerContextNode maxCountTargetDocsPerContextNode
+                    countTargetNodesPerContextNode minCountTargetNodesPerContextNode maxCountTargetNodesPerContextNode
                     
                     countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
                     countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
                     countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
                     countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
-                    countAllTargetResourcesMsg minCountAllTargetResourcesMsg maxCountAllTargetResourcesMsg
+                    countTargetResourcesPerContextNodeMsg minCountTargetResourcesPerContextNodeMsg maxCountTargetResourcesPerContextNodeMsg
+                    countTargetDocsPerContextNodeMsg minCountTargetDocsPerContextNodeMsg maxCountTargetDocsPerContextNodeMsg
+                    countTargetNodesPerContextNodeMsg minCountTargetNodesPerContextNodeMsg maxCountTargetNodesPerContextNodeMsg
                     
                     countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
                     countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
                     countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
                     countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
-                    countAllTargetResourcesMsgOK minCountAllTargetResourcesMsgOK maxCountAllTargetResourcesMsgOK
+                    countTargetResourcesPerContextNodeMsgOK minCountTargetResourcesPerContextNodeMsgOK maxCountTargetResourcesPerContextNodeMsgOK
+                    countTargetDocsPerContextNodeMsgOK minCountTargetDocsPerContextNodeMsgOK maxCountTargetDocsPerContextNodeMsgOK
+                    countTargetNodesPerContextNodeMsgOK minCountTargetNodesPerContextNodeMsgOK maxCountTargetNodesPerContextNodeMsgOK
                     
                     reporterXPath"                    
                     msg="Unexpected attributes in 'links' element"

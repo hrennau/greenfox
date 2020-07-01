@@ -96,6 +96,10 @@ declare function f:validateLinkResolvable($lros as map(*)*,
  : @minCountTargetResources - LinkTargetResourcesMinCount
  : @maxCountTargetResources - LinkTargetResourcesMaxCount
  :
+ : @countAllTargetResources -    LinkAllTargetResourcesCount
+ : @minCountAllTargetResources - LinkAllTargetResourcesMinCount
+ : @maxCountAllTargetResources - LinkAllTargetResourcesMaxCount
+ :
  : @countTargetDocs -         LinkTargetDocsCount
  : @minCountTargetDocs -      LinkTargetDocsMinCount
  : @maxCountTargetDocs -      LinkTargetDocsMaxCount
@@ -123,7 +127,108 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
     
+    let $_DEBUG := trace( $lros?contextItem ! (if (. instance of node()) then generate-id(.) else .) , '_CONTEXT_ITEMS: ')
     let $linkConstraints := $ldo?constraints    
+    let $constraintAtts := ($linkConstraints, $constraintElem)/@*
+    let $constraintMap :=
+        map:merge((
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)ContextNodes$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCount :=
+                    let $contextItems := $lros?contextItem
+                    let $nodes := $contextItems[. instance of node()]/.
+                    let $atoms := $contextItems[not(. instance of node())]
+                    return count($nodes) + count($atoms)
+                return 
+                    map{'contextNodes': map{'actCount': $valueCount, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResources$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCount := $lros[?targetExists]?targetURI => distinct-values() => count()
+                return 
+                    map{'targetResources': map{'actCount': $valueCount, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocs$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCount := $lros?targetDoc/. => count()
+                return 
+                    map{'targetDocs': map{'actCount': $valueCount, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodes$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCount := $lros?targetNodes/. => count()
+                return 
+                    map{'targetNodes': map{'actCount': $valueCount, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResourcesPerContextNode$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCounts :=
+                    for $lro allowing empty in $lros        
+                    let $contextItem := $lro?contextItem
+                    let $contextPoint:= ($contextItem[. instance of node()]/generate-id(.), $contextItem)[1]                    
+                    group by $contextPoint
+                    let $targetResources := trace(($lro[?targetExists]?targetURI) => distinct-values(), concat('___CONTEXT_POINT=', $contextPoint, '; TARGET_URIS: '))
+                    return count($targetResources)
+                return
+                    map{'targetResourcesPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocsPerContextNode$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCounts :=
+                    for $lro allowing empty in $lros        
+                    let $contextItem := $lro?contextItem
+                    let $contextPoint:= ($contextItem[. instance of node()]/generate-id(.), $contextItem)[1] 
+                    group by $contextPoint
+                    let $targetDocs := $lro?targetDoc/.
+                    return count($targetDocs)
+                return
+                    map{'targetDocsPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodesPerContextNode$')]
+            return
+                if (empty($constraints)) then () else
+                let $valueCounts :=
+                    for $lro allowing empty in $lros        
+                    let $contextItem := $lro?contextItem
+                    let $contextPoint:= ($contextItem[. instance of node()]/generate-id(.), $contextItem)[1]                    
+                    group by $contextPoint
+                    let $targetNodes := $lro?targetNodes/.
+                    return count($targetNodes)
+                return
+                    map{'targetNodesPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}}
+        ))
+        let $_DEBUG := trace($constraintMap, '___CONSTRAINT_MAP: ')
+        let $fn_write_results := function($constraintObject) {
+            if (empty($constraintObject)) then () else
+            
+            let $vcounts := $constraintObject?actCount
+            for $countConstraint in $constraintObject?constraints
+            let $cstValue := $countConstraint/xs:integer(.)
+            let $cstName := $countConstraint/name()
+            let $green :=
+                if (starts-with($cstName, 'count')) then every $v in $vcounts satisfies $v eq $cstValue
+                else if (starts-with($cstName, 'minCount')) then every $v in $vcounts satisfies $v ge $cstValue
+                else if (starts-with($cstName, 'maxCount')) then every $v in $vcounts satisfies $v le $cstValue
+                else error()
+            let $colour := if ($green) then 'green' else 'red'        
+            return  
+                vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
+                    $colour, $vcounts, (), $contextInfo, $resultOptions)            
+        }
+        
+        let $results := (
+            $constraintMap?contextNodes ! $fn_write_results(.),
+            $constraintMap?targetResources ! $fn_write_results(.),
+            $constraintMap?targetDocs ! $fn_write_results(.),
+            $constraintMap?targetNodes ! $fn_write_results(.),
+            $constraintMap?targetResourcesPerContextNode ! $fn_write_results(.),
+            $constraintMap?targetDocsPerContextNode ! $fn_write_results(.),
+            $constraintMap?targetNodesPerContextNode ! $fn_write_results(.)
+        ) 
+        return $results
+
+(:
+        
     (: let $_DEBUG := trace($lros?contextItem ! (if (. instance of document-node()) then 'doc-node' else .), '_CONTEXT_ITEMS: ') :)
     
     (: Cardinality: contextNodes 
@@ -172,7 +277,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
         for $lro allowing empty in $lros
         
         let $contextItem := $lro?contextItem
-        let $contextPoint:=   typeswitch($contextItem) 
+        let $contextPoint:= typeswitch($contextItem) 
             case $n as node() return $n/generate-id(.) default return $contextItem
         group by $contextPoint
         let $targetResources := ($lro[?targetExists]?targetURI) => distinct-values()
@@ -257,6 +362,10 @@ declare function f:validateLinkCounts($lros as map(*)*,
             vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
                 $colour, $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
         
+    (: Cardinality: all target docs 
+       ---------------------------- :)            
+    let $resultsAllTargetDocs := ()
+
     (: Cardinality: target nodes per context node 
        ------------------------------------------ :)            
     let $resultsTargetNodes :=
@@ -294,15 +403,21 @@ declare function f:validateLinkCounts($lros as map(*)*,
             return  
                 vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
                     $colour, $valueCount, $lro1?contextNode, $contextInfo, $resultOptions)
-        
+
+    (: Cardinality: all target nodes 
+       ------------------------------ :)            
+    let $resultsAllTargetNodes := ()
+    
     return (
         $resultsContextNodes,
         $resultsTargetResources,
         $resultsTargetDocs,
         $resultsTargetNodes,
-        $resultsAllTargetResources
+        $resultsAllTargetResources,
+        $resultsAllTargetDocs,
+        $resultsAllTargetNodes
     )
-        
+        :)
 };
 
 (:~

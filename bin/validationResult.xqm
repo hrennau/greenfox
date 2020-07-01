@@ -176,9 +176,15 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         case attribute(countTargetNodes)        return map{'constraintComp': 'LinkTargetNodesCount',        'atts': ('countTargetNodes')}
         case attribute(minCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMinCount',     'atts': ('minCountTargetNodes')}
         case attribute(maxCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMaxCount',     'atts': ('maxCountTargetNodes')}
-        case attribute(countAllTargetResources)    return map{'constraintComp': 'LinkAllTargetResourcesCount',    'atts': ('countAllTargetResources')}
-        case attribute(minCountAllTargetResources) return map{'constraintComp': 'LinkAllTargetResourcesMinCount', 'atts': ('minCountAllTargetResources')}
-        case attribute(maxCountAllTargetResources) return map{'constraintComp': 'LinkAllTargetResourcesMaxCount', 'atts': ('maxCountAllTargetResources')}
+        case attribute(countTargetResourcesPerContextNode)    return map{'constraintComp': 'LinkTargetResourcesPerContextNodeCount',    'atts': ('countAllTargetResourcesPerContextNode')}
+        case attribute(minCountTargetResourcesPerContextNode) return map{'constraintComp': 'LinkTargetResourcesPerContextNodeMinCount', 'atts': ('minCountAllTargetResourcesPerContextNode')}
+        case attribute(maxCountTargetResourcesPerContextNode) return map{'constraintComp': 'LinkTargetResourcesPerContextNodeMaxCount', 'atts': ('maxCountAllTargetResourcesPerContextNode')}
+        case attribute(countTargetDocsPerContextNode)    return map{'constraintComp': 'LinkTargetDocsPerContextNodeCount',    'atts': ('countAllTargetDocsPerContextNode')}
+        case attribute(minCountTargetDocsPerContextNode) return map{'constraintComp': 'LinkTargetDocsPerContextNodeMinCount', 'atts': ('minCountAllTargetDocsPerContextNode')}
+        case attribute(maxCountTargetDocsPerContextNode) return map{'constraintComp': 'LinkTargetDocsPerContextNodeMaxCount', 'atts': ('maxCountAllTargetDocsPerContextNode')}
+        case attribute(countTargetNodesPerContextNode)    return map{'constraintComp': 'LinkTargetNodesPerContextNodeCount',    'atts': ('countAllTargetNodesPerContextNode')}
+        case attribute(minCountTargetNodesPerContextNode) return map{'constraintComp': 'LinkTargetNodesPerContextNodeMinCount', 'atts': ('minCountAllTargetNodesPerContextNode')}
+        case attribute(maxCountTargetNodesPerContextNode) return map{'constraintComp': 'LinkTargetNodesPerContextNodeMaxCount', 'atts': ('maxCountAllTargetNodesPerContextNode')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
