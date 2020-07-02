@@ -79,10 +79,9 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     let $contextPoint :=   typeswitch($contextItem) 
         case $n as node() return $n/generate-id(.) default return $contextItem
     group by $contextPoint
-    let $lro1 := $lro[1]
-    let $contextItem := $lro1?contextItem  
+    let $contextItem := $lro[1]?contextItem  
     return
-        vr:validationResult_linksResolvable($ldo, $constraintElem, $contextItem, $lro1, $contextInfo, ())
+        vr:validationResult_linksResolvable($ldo, $constraintElem, $contextItem, $lro, $contextInfo, ())
 };        
 
 (:~
@@ -127,7 +126,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $resultAdditionalAtts := ()
     let $resultOptions := ()
     
-    let $_DEBUG := trace( $lros?contextItem ! (if (. instance of node()) then generate-id(.) else .) , '_CONTEXT_ITEMS: ')
+    (: let $_DEBUG := trace( $lros?contextItem ! (if (. instance of node()) then generate-id(.) else .) , '_CONTEXT_ITEMS: '):)
     let $linkConstraints := $ldo?constraints    
     let $constraintAtts := ($linkConstraints, $constraintElem)/@*
     let $constraintMap :=
@@ -160,7 +159,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
                 let $valueCount := $lros?targetNodes/. => count()
                 return 
                     map{'targetNodes': map{'actCount': $valueCount, 'constraints': $constraints}},
-            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResourcesPerContextNode$')]
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResourcesPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
                 let $valueCounts :=
@@ -168,11 +167,11 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     let $contextItem := $lro?contextItem
                     let $contextPoint:= ($contextItem[. instance of node()]/generate-id(.), $contextItem)[1]                    
                     group by $contextPoint
-                    let $targetResources := trace(($lro[?targetExists]?targetURI) => distinct-values(), concat('___CONTEXT_POINT=', $contextPoint, '; TARGET_URIS: '))
+                    let $targetResources := ($lro[?targetExists]?targetURI) => distinct-values()
                     return count($targetResources)
                 return
-                    map{'targetResourcesPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}},
-            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocsPerContextNode$')]
+                    map{'targetResourcesPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocsPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
                 let $valueCounts :=
@@ -183,8 +182,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     let $targetDocs := $lro?targetDoc/.
                     return count($targetDocs)
                 return
-                    map{'targetDocsPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}},
-            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodesPerContextNode$')]
+                    map{'targetDocsPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}},
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodesPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
                 let $valueCounts :=
@@ -195,9 +194,9 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     let $targetNodes := $lro?targetNodes/.
                     return count($targetNodes)
                 return
-                    map{'targetNodesPerContextNode': map{'actCount': $valueCounts, 'constraints': $constraints}}
+                    map{'targetNodesPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}}
         ))
-        let $_DEBUG := trace($constraintMap, '___CONSTRAINT_MAP: ')
+        (:  let $_DEBUG := trace($constraintMap, '___CONSTRAINT_MAP: '):)
         let $fn_write_results := function($constraintObject) {
             if (empty($constraintObject)) then () else
             
@@ -221,9 +220,9 @@ declare function f:validateLinkCounts($lros as map(*)*,
             $constraintMap?targetResources ! $fn_write_results(.),
             $constraintMap?targetDocs ! $fn_write_results(.),
             $constraintMap?targetNodes ! $fn_write_results(.),
-            $constraintMap?targetResourcesPerContextNode ! $fn_write_results(.),
-            $constraintMap?targetDocsPerContextNode ! $fn_write_results(.),
-            $constraintMap?targetNodesPerContextNode ! $fn_write_results(.)
+            $constraintMap?targetResourcesPerContextPoint ! $fn_write_results(.),
+            $constraintMap?targetDocsPerContextPoint ! $fn_write_results(.),
+            $constraintMap?targetNodesPerContextPoint ! $fn_write_results(.)
         ) 
         return $results
 

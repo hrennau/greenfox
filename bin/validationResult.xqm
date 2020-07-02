@@ -52,54 +52,49 @@ declare function f:validationResultValues($value as item()*,
 };     
 
 (:~
- : Creates a validation result for a LinksResolvable constraint.
+ : Creates a validation result for a LinksResolvable constraint. The result
+ : reports the outcome obtained for a single context point, which may be
+ : a document URI or a link context node.
  :
- : @param colour 'green' or 'red', indicating violation or conformance
  : @param ldo link definition element
  : @param constraintElem constraint element, defining constraints which may override
  :   any constraints specified by the link definition element
- : @param failures link resolution elements indicating a failed link resolution
- : @param successes link resolution elements indicating a successful link resolution
+ : @param linkContextItem the link context item
+ : @param lros Link Resolution objects obtained for a single context point
  : @param contextInfo information about the resource context
  : @param options options controling details of the validation result
  : @return a validation result, red or green
  :)
 declare function f:validationResult_linksResolvable($ldo as map(*)?,
                                                     $constraintElem as element(),
-                                                    $contextNode as node(),
+                                                    $linkContextItem as node(),
                                                     $lros as map(*)*,
                                                     $contextInfo as map(xs:string, item()*),
                                                     $options as map(*)?)
         as element() {
-        
+
     (: Successful and failing link resolutions :)
     let $failures := $lros[?errorCode]
     let $successes := $lros[not(?errorCode)]    
     let $colour := if (exists($failures)) then 'red' else 'green'
     
-    (: Recursive flag :)
-    let $recursiveAtt := ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
+    (: Link description attributes :)
+    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    let $recursiveAtt := $linkDefAtts/self::attribute(recursive)
     
     (: Values - link values of failing links :)
-    let $values :=  
-        if (empty($failures)) then () 
-        else if ($recursiveAtt eq 'true') then 
-            $failures ! <gx:value where="{?contextURI}">{?linkValue}</gx:value>
-        else 
-            $failures ! <gx:value>{?linkValue}</gx:value>
-    
-    (: Link description attributes :)
-    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    let $values := 
+        if (empty($failures)) then () else
+            $failures ! 
+            <gx:value>{
+                attribute where {?contextURI} [$recursiveAtt eq 'true'],
+                ?errorCode ! attribute errorCode {.},
+                ?targetURI            
+            }</gx:value>
     
     (: Counts of successful and failing link resolutions :)
-    let $failures := $lros[?errorCode]
-    let $successes := $lros[not(?errorCode)]    
     let $countResolved := attribute countResolved {count($successes)} 
     let $countUnresolved := attribute countUnresolved {count($failures)}
-    let $errorCodes := $failures?errorCode => distinct-values() => string-join('; ')
-    
-    (: Link description attributes :)
-    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     
     (: Error codes :)
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
@@ -111,9 +106,9 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
     let $constraintId := concat(($valueShapeId, $resourceShapeId)[1], '-linkResolvable')
     
     (: Data location :)
-    let $filePath := $contextInfo?filePath ! attribute contextURI {.}
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    let $contextNodeDataPath := $contextNode/i:datapath(.)
+    let $linkContextPath := $linkContextItem[. instance of node()] ! i:datapath(.)
 
     (: Message :)
     let $msg := 
@@ -130,11 +125,11 @@ declare function f:validationResult_linksResolvable($ldo as map(*)?,
             $resourceShapeId ! attribute resourceShapeID {.},
             $filePath,
             $focusNode,
-            $contextNodeDataPath ! attribute contextNodeDataPath {.},
+            $linkContextPath[string()] ! attribute linkContextNodePath {.},
             $countUnresolved,
             $countResolved,   
             $linkDefAtts,
-            $recursiveAtt,
+
             $values
         }       
 };
@@ -176,15 +171,15 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         case attribute(countTargetNodes)        return map{'constraintComp': 'LinkTargetNodesCount',        'atts': ('countTargetNodes')}
         case attribute(minCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMinCount',     'atts': ('minCountTargetNodes')}
         case attribute(maxCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMaxCount',     'atts': ('maxCountTargetNodes')}
-        case attribute(countTargetResourcesPerContextNode)    return map{'constraintComp': 'LinkTargetResourcesPerContextNodeCount',    'atts': ('countAllTargetResourcesPerContextNode')}
-        case attribute(minCountTargetResourcesPerContextNode) return map{'constraintComp': 'LinkTargetResourcesPerContextNodeMinCount', 'atts': ('minCountAllTargetResourcesPerContextNode')}
-        case attribute(maxCountTargetResourcesPerContextNode) return map{'constraintComp': 'LinkTargetResourcesPerContextNodeMaxCount', 'atts': ('maxCountAllTargetResourcesPerContextNode')}
-        case attribute(countTargetDocsPerContextNode)    return map{'constraintComp': 'LinkTargetDocsPerContextNodeCount',    'atts': ('countAllTargetDocsPerContextNode')}
-        case attribute(minCountTargetDocsPerContextNode) return map{'constraintComp': 'LinkTargetDocsPerContextNodeMinCount', 'atts': ('minCountAllTargetDocsPerContextNode')}
-        case attribute(maxCountTargetDocsPerContextNode) return map{'constraintComp': 'LinkTargetDocsPerContextNodeMaxCount', 'atts': ('maxCountAllTargetDocsPerContextNode')}
-        case attribute(countTargetNodesPerContextNode)    return map{'constraintComp': 'LinkTargetNodesPerContextNodeCount',    'atts': ('countAllTargetNodesPerContextNode')}
-        case attribute(minCountTargetNodesPerContextNode) return map{'constraintComp': 'LinkTargetNodesPerContextNodeMinCount', 'atts': ('minCountAllTargetNodesPerContextNode')}
-        case attribute(maxCountTargetNodesPerContextNode) return map{'constraintComp': 'LinkTargetNodesPerContextNodeMaxCount', 'atts': ('maxCountAllTargetNodesPerContextNode')}
+        case attribute(countTargetResourcesPerContextPoint)    return map{'constraintComp': 'LinkTargetResourcesPerContextPointCount',    'atts': ('countAllTargetResourcesPerContextPoint')}
+        case attribute(minCountTargetResourcesPerContextPoint) return map{'constraintComp': 'LinkTargetResourcesPerContextPointMinCount', 'atts': ('minCountAllTargetResourcesPerContextPoint')}
+        case attribute(maxCountTargetResourcesPerContextPoint) return map{'constraintComp': 'LinkTargetResourcesPerContextPointMaxCount', 'atts': ('maxCountAllTargetResourcesPerContextPoint')}
+        case attribute(countTargetDocsPerContextPoint)    return map{'constraintComp': 'LinkTargetDocsPerContextPointCount',    'atts': ('countAllTargetDocsPerContextPoint')}
+        case attribute(minCountTargetDocsPerContextPoint) return map{'constraintComp': 'LinkTargetDocsPerContextPointMinCount', 'atts': ('minCountAllTargetDocsPerContextPoint')}
+        case attribute(maxCountTargetDocsPerContextPoint) return map{'constraintComp': 'LinkTargetDocsPerContextPointMaxCount', 'atts': ('maxCountAllTargetDocsPerContextPoint')}
+        case attribute(countTargetNodesPerContextPoint)    return map{'constraintComp': 'LinkTargetNodesPerContextPointCount',    'atts': ('countAllTargetNodesPerContextPoint')}
+        case attribute(minCountTargetNodesPerContextPoint) return map{'constraintComp': 'LinkTargetNodesPerContextPointMinCount', 'atts': ('minCountAllTargetNodesPerContextPoint')}
+        case attribute(maxCountTargetNodesPerContextPoint) return map{'constraintComp': 'LinkTargetNodesPerContextPointMaxCount', 'atts': ('maxCountAllTargetNodesPerContextPoint')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
@@ -236,7 +231,8 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
         ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
         ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
-        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1]
+        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1],
+        ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
     )
     return $exprAtts
         

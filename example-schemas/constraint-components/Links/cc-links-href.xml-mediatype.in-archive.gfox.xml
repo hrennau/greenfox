@@ -22,7 +22,7 @@
                 <links hrefXP="//@href" 
                     mediatype="xml"
                     resolvable="true" resolvableMsg="Link cannot be resolved"
-                    minCountTargetDocs="0" minCountTargetDocsMsg="At least one target document expected"/>                
+                    minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>                
             </file>
         </folder>
     </domain>

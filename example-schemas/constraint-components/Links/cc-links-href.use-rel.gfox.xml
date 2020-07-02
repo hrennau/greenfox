@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components Link*, which are represented
-    by a <links> element. This example demonstrates how a <links> constraint
-    element can reference a link definition via @linkName.
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. This example demonstrates how a <links> 
+    constraint element can reference a link definition via @linkName.
     
-    A LinksResolvable constraint (@resolvable = true) is violated if any target 
-    URIs cannot be resolved. 
-    
-    A Link*Count constraint (@count*, @minCount*, @maxCount*) checks the number of
-    - target resources (* = TargetResources)
-    - target docs (* = TargetDocs)    
-    - target nodes (* = TargetNodes)
-    - link context nodes (* = ContextNodes)
-    Target resources, target docs and target nodes are counted per link context node.
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/links-resolvable01.use-rel"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -22,18 +15,21 @@
     </context>
     
     <linkDef name="airportDetails"
-             contextXP="//airport"
+             contextXP="//airportsForCountry"
              hrefXP="@href"
              mediatype="xml"/>
     
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports-*.xml" id="airportsFileShape">
-                <targetSize count="4" countMsg="Expected exactly four airports documents"/>
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing document, 'airports.xml'."/>
                 <links linkName="airportDetails"
                        resolvable="true" resolvableMsg="Link not resolvable"
-                       minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>                
+                       minCountTargetDocs="4" 
+                       minCountTargetDocsMsg="At least 4 target documents expected"
+                       countTargetDocsPerContextPoint="1" 
+                       countTargetDocsPerContextPointMsg="Exactly one target document per context point expected"/>                
             </file>
         </folder>
     </domain>

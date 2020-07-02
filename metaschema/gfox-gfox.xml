@@ -100,7 +100,43 @@ return
                     <ex:allowedAtts attNames="name connector hrefXP uriXP linkXP contextXP targetXP foxpath mediatype targetMediatype recursive"
                         msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP linkXP 
                              contextXP targetXP foxpath mediatype recursive"
-                        msgOK="OK - 'linkDef' element: no unexpected attributes"/>                    
+                        msgOK="OK - 'linkDef' element: no unexpected attributes"/>     
+                    
+                    <ex:allowedElems elemNames="constraints"
+                        msg="Unexpected child element in 'linkDef' element: only 'constraints' children allowed"
+                        msgOK="OK - 'linkDef' element: child element names"/>
+                    
+                    <focusNode xpath="*:constraints">
+                        <ex:allowedAtts attNames="
+                            id label 
+                            resolvable resolvableMsg resolvableMsgOK
+                        
+                            countContextNodes minCountContextNodes maxCountContextNodes
+                            countTargetResources minCountTargetResources maxCountTargetResources
+                            countTargetDocs minCountTargetDocs maxCountTargetDocs
+                            countTargetNodes minCountTargetNodes maxCountTargetNodes
+                            countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                            countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                            countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
+                        
+                            countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                            countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                            countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                            countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                            countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                            countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                            countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
+                        
+                            countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                            countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                            countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                            countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                            countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                            countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                            countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"                    
+                        msg="Unexpected attributes in 'constraints' element"
+                        msgOK="OK - 'constraints' element: no unexpected attributes"/>
+                    </focusNode>
                 </focusNode>
                     
                 <!-- ========================================
@@ -653,25 +689,25 @@ return
                     countTargetResources minCountTargetResources maxCountTargetResources
                     countTargetDocs minCountTargetDocs maxCountTargetDocs
                     countTargetNodes minCountTargetNodes maxCountTargetNodes
-                    countTargetResourcesPerContextNode minCountTargetResourcesPerContextNode maxCountTargetResourcesPerContextNode
-                    countTargetDocsPerContextNode minCountTargetDocsPerContextNode maxCountTargetDocsPerContextNode
-                    countTargetNodesPerContextNode minCountTargetNodesPerContextNode maxCountTargetNodesPerContextNode
+                    countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                    countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                    countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
                     
                     countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
                     countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
                     countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
                     countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
-                    countTargetResourcesPerContextNodeMsg minCountTargetResourcesPerContextNodeMsg maxCountTargetResourcesPerContextNodeMsg
-                    countTargetDocsPerContextNodeMsg minCountTargetDocsPerContextNodeMsg maxCountTargetDocsPerContextNodeMsg
-                    countTargetNodesPerContextNodeMsg minCountTargetNodesPerContextNodeMsg maxCountTargetNodesPerContextNodeMsg
+                    countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                    countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                    countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
                     
                     countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
                     countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
                     countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
                     countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
-                    countTargetResourcesPerContextNodeMsgOK minCountTargetResourcesPerContextNodeMsgOK maxCountTargetResourcesPerContextNodeMsgOK
-                    countTargetDocsPerContextNodeMsgOK minCountTargetDocsPerContextNodeMsgOK maxCountTargetDocsPerContextNodeMsgOK
-                    countTargetNodesPerContextNodeMsgOK minCountTargetNodesPerContextNodeMsgOK maxCountTargetNodesPerContextNodeMsgOK
+                    countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                    countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                    countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK
                     
                     reporterXPath"                    
                     msg="Unexpected attributes in 'links' element"
