@@ -18,12 +18,12 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="*.json" id="airportsFileShape" mediatype="json">
-                <targetSize count="5" countMsg="Expected exactly five resources with @href"/>
+            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+                <targetSize count="1" countMsg="Airports file missing"/>
                 <links hrefXP="//href" 
                        mediatype="json"
                        resolvable="true" resolvableMsg="Link cannot be resolved"
-                       minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>                
+                       countTargetDocs="4" countTargetDocsMsg="Expected exactly four links"/>                
             </file>
         </folder>
     </domain>

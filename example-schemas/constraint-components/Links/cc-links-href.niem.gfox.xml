@@ -4,7 +4,7 @@
     violated if any links selected by a given expression, applied recursively to the
     results of resolving, cannot be resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/recursiveLinksResolvable"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/niem"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. This example highlights the use of a
+    link context expression (@contextXP). It provides link context nodes, and the
+    link is applied to each of them. The 'countTargetDocsPerContextPointMsg'
+    constrains the number of target documents per link context node, whereas the
+    'countTargetDocs' connstrains the total number of target documents per context 
+    document.
+    
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/links-href.xml-mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <linkDef name="airports"
+             contextXP="//airport"
+             hrefXP="@href"             
+             mediatype="xml"/>
+        
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports-finland.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Finland airports file missing"/>
+                <links linkName="airports"
+                       resolvable="true" resolvableMsg="Link cannot be resolved"
+                       countTargetDocs="33" 
+                       countTargetDocsMsg="Expected 33 target documents"
+                       countTargetDocsPerContextPoint="1" 
+                       countTargetDocsPerContextPointMsg="Expected one target doc per context point"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

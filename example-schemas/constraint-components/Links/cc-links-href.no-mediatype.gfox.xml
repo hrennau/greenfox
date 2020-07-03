@@ -12,10 +12,15 @@
     - target nodes (* = TargetNodes)
     - link context nodes (* = ContextNodes)
     Target resources, target docs and target nodes are counted per link context document.
+    
     It is also possible to constrain numbers per link context point:
     - target resources per link context point (* = TargetResourcesPerContextPoint)
     - target docs per link context point (* = TargetDocsPerContextPoint)    
     - target nodes per link context point (* = TargetNodesPerContextPoint)
+    
+    The numbers per link context point may differ from the numbers per link context
+    document if the link is recursive or if a link context expression is used 
+    (@contextXP), which maps the context document to zero or more context nodes.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
           xmlns="http://www.greenfox.org/ns/schema">

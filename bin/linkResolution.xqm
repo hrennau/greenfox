@@ -27,13 +27,15 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : These LROs are the objects obtained by applying the LDO to a single context
  : resource or context node.
  : 
- : @param linkDef link definition represented by name, Link Definition Object or
- :   an element which can be parsed into a Link Definition Object
+ : @param linkDef link definition represented by Link Definition name, Link 
+ :   Definition Object or an element containing a Link Definition
  : @param resultFormat determines the result format; lro: Link Resolution Objects;
- :       uri: URI references; target documents
+ :       uri: URI references; doc: target documents
  : @param contextURI the URI of the context resource
- : @param contextNode the context node
+ : @param contextNode an optional context node
  : @param context processing context
+ : @param options processing options; option 'mediatype' specifies
+ :   a mediatype, to be added to the Link Definition
  : @return a sequence of Link Resolution Objects, or selected data retrieved
  :   from these
  :)
@@ -98,9 +100,12 @@ declare function f:resolveLinkDefRC(
     let $contextExpr := $ldo?contextXP
     let $mediatype := $ldo?mediatype
     
-    (: The mapping of the context node to Link Context Nodes is optional:
-       the default link context is the context resource, represented
-       by the context resource URI and, optionally, a context node :)        
+    (: Link Context items
+       ================== 
+       A Link Context expression is optional; the default link context is 
+       the context node or context URI, dependent on whether the link 
+       definition requires a context node :)
+       
     let $linkContextItems :=        
         if (not($contextExpr)) then 
             if ($ldo?requiresContextNode) then ($contextNode, $contextURI)[1]
@@ -110,11 +115,13 @@ declare function f:resolveLinkDefRC(
                    $contextExpr))                       
         else f:resolveLinkExpression($contextExpr, $contextNode, $context)
 
-    (: Apply connector to each link context item :)
+    (: Apply connector to each Link Context item
+       ========================================= :)
     for $linkContextItem in $linkContextItems
     let $connectorValue := f:applyLinkConnector($ldo, $contextURI, $linkContextItem, $context)
     return
-        (: Connector value a map with error :)
+        (: Connector error 
+           =============== :)
         if ($connectorValue[. instance of map(*)]?type eq 'connectorError') then
             map{'type': 'linkResolutionObject',
                 'contextURI': $contextURI,

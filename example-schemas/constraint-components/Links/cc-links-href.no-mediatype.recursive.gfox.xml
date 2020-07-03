@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of the LinksResolvable constraint component, as well as
+    supplementary constraint components. This example highlights the checking of
+    a recursive link definition (@recursive) when no mediatype is specified. In
+    this case a default mediatype of "xml" is assumed. 
+    
+    See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
+    LinksResolvable constraint. 
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links/recursiveLinksResolvable"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <links hrefXP="//@href"
+                       recursive="true"
+                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
+                       minCountTargetDocs="69" minCountTargetDocsMsg="Less target docs than expected"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
