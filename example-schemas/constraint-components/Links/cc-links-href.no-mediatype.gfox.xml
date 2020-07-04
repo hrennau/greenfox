@@ -22,7 +22,7 @@
     document if the link is recursive or if a link context expression is used 
     (@contextXP), which maps the context document to zero or more context nodes.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/links.href.no-mediatype"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

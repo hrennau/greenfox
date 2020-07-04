@@ -4,7 +4,7 @@
     resources contained by an archive file. See example 'cc-docSimilar.gfox.xml' 
     for more information about DocSimilar constraints.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc.similar/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc.similar.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

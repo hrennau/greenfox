@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component Concord (ContentCorrespondence).
+    Demonstrates the use of constraint component Concord (ContentCorrespondence). This example
+    uses JSON documents as link context as well as link target.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord.json"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,11 +16,8 @@
              targetXP="/json/airport/geo"
              mediatype="json">
         <constraints 
-            minCountContextNodes="14" 
-            countTargetResources="1" 
-            countTargetDocs="1"
-            countTargetNodes="1"/>
-
+            countTargetDocsPerContextPoint="1"
+            countTargetNodesPerContextPoint="1"/>
     </linkDef>
 
     <domain path="${domain}" name="greenfox-example-data">
@@ -28,9 +26,11 @@
             <file foxpath="airports-ireland.json" mediatype="json" id="countryFileShape">
                 <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
                 
-                <contentCorrespondence linkName="airportGeoDetails">
-                    <valuePair sourceXP="latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
-                    <valuePair sourceXP="longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                <contentCorrespondence linkName="airportGeoDetails"
+                                       minCountContextNodes="14" 
+                                       minCountTargetDocs="14">
+                    <valueCord sourceXP="latitude" targetXP="latitude" cmp="eq" maxCountSource="1" countTarget="1"/>
+                    <valueCord sourceXP="longitude" targetXP="longitude" cmp="eq" maxCountSource="1" countTarget="1"/>
                 </contentCorrespondence>
                 
             </file>

@@ -497,29 +497,39 @@ return
                 <ex:allowedAtts
                     attNames="foxpath contextXP targetXP linkName
                     
-                    countContextNodes countContextNodesMsg contContextNodesMsgOK
-                    minCountContextNodes minCountContextNodesMsg minCountContextNodesMsgOK
-                    maxCountContextNodes maxCountContextNodesMsg maxCountContextNodesMsgOK
+                    resolvable resolvableMsg resolvableMsgOK
                     
-                    countTargetResources countTargetResourcesMsg countTargetResourcesMsgOK
-                    minCountTargetResources minCountTargetResourcesMsg minCountTargetResourcesMsgOK
-                    maxCountTargetResources maxCountTargetResourcesMsg maxCountTargetResourcesMsgOK                              
+                    countContextNodes minCountContextNodes maxCountContextNodes
+                    countTargetResources minCountTargetResources maxCountTargetResources
+                    countTargetDocs minCountTargetDocs maxCountTargetDocs
+                    countTargetNodes minCountTargetNodes maxCountTargetNodes
+                    countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                    countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                    countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
                     
-                    countTargetDocs countTargetDocsMsg countTargetDocsMsgOK
-                    minCountTargetDocs minCountTargetDocsMsg minCountTargetDocsMsgOK
-                    maxCountTargetDocs maxCountTargetDocsMsg maxCountTargetDocsMsgOK
+                    countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                    countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                    countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                    countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                    countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                    countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                    countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
                     
-                    countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
-                    minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
-                    maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
+                    countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                    countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                    countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                    countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                    countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                    countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                    countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"
                 />
-                <ex:allowedElems elemNames="valuePair"
+                <ex:allowedElems elemNames="valueCord"
                     msg="Unexpected content of the 'contentCorrespondence' element; expected: only 'valuePair' allowed"
                     msgOK="OK - 'contentCorrespondence' element: no unexpected child elements"/>
                 />  
                 
-                <focusNode xpath="*:valuePair">
-                    <ex:allowedAtts attNames="sourceXP targetXP corr useDatatype
+                <focusNode xpath="*:valueCord">
+                    <ex:allowedAtts attNames="sourceXP targetXP cmp useDatatype
                          countSource minCountSource maxCountSource
                          countSourceMsg minCountSourceMsg maxCountSourceMsg
                          countSourceMsgOK minCountSourceMsgOK maxCountSourceMsgOK

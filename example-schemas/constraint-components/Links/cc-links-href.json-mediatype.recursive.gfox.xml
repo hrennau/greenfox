@@ -8,7 +8,7 @@
     See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
     LinksResolvable constraint. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/json-mediatype.recursive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href.json-mediatype.recursive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

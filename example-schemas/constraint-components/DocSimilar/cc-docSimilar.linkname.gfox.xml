@@ -4,7 +4,7 @@
     targets of comparison can be selected by referencing a link definition via @linkName.
     See example 'cc-docSimilar.gfox.xml' for more information about DocSimilar constraints.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

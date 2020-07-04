@@ -7,7 +7,7 @@
     context node, the target expression (@targetXP) is evaluated in the context of the
     target document.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord.linkcontext"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -20,9 +20,10 @@
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 <contentCorrespondence foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
-                                       contextXP="//article">
-                    <valuePair sourceXP="articleName" targetXP="//article/@name" corr="in"/>
-                    <valuePair sourceXP="articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" corr="in"/>
+                                       contextXP="//article"
+                                       minCountContextNodes="1" minCountContextNodesMsg="Expected article elements">
+                    <valueCord sourceXP="articleName" targetXP="//article/@name" cmp="in"/>
+                    <valueCord sourceXP="articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" cmp="in"/>
                 </contentCorrespondence>
             </file>
         </folder>

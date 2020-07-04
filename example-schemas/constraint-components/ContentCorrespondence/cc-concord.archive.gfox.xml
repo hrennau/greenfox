@@ -3,8 +3,11 @@
     Demonstrates the use of constraint component Concord (ContentCorrespondence). This example 
     checks resources contained by an archive file. See example 'cc-concord.gfox.xml' for more 
     information about ContentCorrespondence constraints.
+    
+    The example also demonstrates how link-defined cardinality constraints can be complemented
+    by further cardinality constraints declared in a link-using element.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -16,10 +19,9 @@
              contextXP="//airport"
              targetXP="/*/geo">
         <constraints 
-            minCountContextNodes="14" 
-            countTargetResources="1" 
-            countTargetDocs="1"
-            countTargetNodes="1"/>
+            countTargetResourcesPerContextPoint="1" 
+            countTargetDocsPerContextPoint="1"
+            countTargetNodesPerContextPoint="1"/>
     </linkDef>
 
     <domain path="${domain}" name="greenfox-example-data">
@@ -28,9 +30,11 @@
             <file foxpath="airports-ireland.xml" id="contryFileShape">
                 <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
                 
-                <contentCorrespondence linkName="airportGeoDetails">
-                    <valuePair sourceXP="@latitude" targetXP="latitude" corr="eq" maxCountSource="1" countTarget="1"/>
-                    <valuePair sourceXP="@longitude" targetXP="longitude" corr="eq" maxCountSource="1" countTarget="1"/>
+                <contentCorrespondence linkName="airportGeoDetails"
+                                       minCountContextNodes="14"
+                                       minCountTargetNodes="14">
+                    <valueCord sourceXP="@latitude" targetXP="latitude" cmp="eq" maxCountSource="1" countTarget="1"/>
+                    <valueCord sourceXP="@longitude" targetXP="longitude" cmp="eq" maxCountSource="1" countTarget="1"/>
                 </contentCorrespondence>
                 
             </file>

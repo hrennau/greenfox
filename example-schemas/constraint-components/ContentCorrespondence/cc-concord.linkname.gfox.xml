@@ -4,7 +4,7 @@
     the correspondence target is identified by a referenced link definition (@linkName). Note that
     the link definition contains an additional constraint to be checked (@countTargetDocs).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -13,8 +13,7 @@
 
     <linkDef name="expectations"
              foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
-        <constraints 
-             countTargetDocs="1"/>
+        <constraints countTargetDocs="1"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
@@ -23,8 +22,8 @@
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 <contentCorrespondence linkName="expectations">
-                    <valuePair sourceXP="//articleName" targetXP="//article/@name" corr="in"/>
-                    <valuePair sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" corr="in"/>
+                    <valueCord sourceXP="//articleName" targetXP="//article/@name" cmp="in"/>
+                    <valueCord sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" cmp="in"/>
                 </contentCorrespondence>
             </file>
         </folder>

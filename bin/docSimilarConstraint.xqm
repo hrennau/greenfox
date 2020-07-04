@@ -207,7 +207,7 @@ declare function f:normalizeDocForComparison($node as node(),
         return
             typeswitch($normItem)
             case $skipItem as element(gx:skipItem) return
-                let $selected := trace( $selectedItems($node_, $skipItem) , '_SELECTED: ')            
+                let $selected := $selectedItems($node_, $skipItem)            
                 return
                     if (empty($selected)) then () else delete node $selected
             case $roundItem as element(gx:roundItem) return

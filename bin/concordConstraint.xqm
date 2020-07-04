@@ -118,21 +118,21 @@ declare function f:validateConcordPairs($constraintElem as element(),
         
         (: Repeat for each constraint defining child of the constraint element :)
         return
-            $constraintElem/gx:valuePair
+            $constraintElem/gx:valueCord
                 /f:validateConcordPair(., $contextItem, $targetNodes, $contextInfo, $context)
 };
 
 (:~
- : Validates the constraints expressed by a `valuePair` element contained
+ : Validates the constraints expressed by a `valueCord` element contained
  : by a Content Correspondence Constraint. These constraints are ...
- : - a correspondence constraint, defined by @corr, @sourceXP, @targetXP and further attributes
+ : - a correspondence constraint, defined by @cmp, @sourceXP, @targetXP and further attributes
  : - count constraints, referring to the number of items returned by the source and
  :   target expression
  :
  : The validation is repeated for each link target node - thus effectively
  : every combination of link context node and link target node is checked.
  :
- : @param valuePair an element declaring a Correspondence Constraint on a 
+ : @param valueCord an element declaring a Correspondence Constraint on a 
  :   pair of content values
  : @param linkContextNode the link context node
  : @param linkTargetNodes the link target nodes
@@ -140,7 +140,7 @@ declare function f:validateConcordPairs($constraintElem as element(),
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateConcordPair($valuePair as element(gx:valuePair),
+declare function f:validateConcordPair($valueCord as element(gx:valueCord),
                                        $linkContextItem as item(), 
                                        $linkTargetNodes as node()*,                                         
                                        $contextInfo as map(xs:string, item()*),
@@ -150,22 +150,22 @@ declare function f:validateConcordPair($valuePair as element(gx:valuePair),
     let $evaluationContext := $context?_evaluationContext
     
     (: Definition of the correspondence :)
-    let $cmp := $valuePair/@corr
-    let $quantifier := ($valuePair/@quant, 'all')[1]
-    let $sourceExpr := $valuePair/@sourceXP
-    let $targetExpr := $valuePair/@targetXP      
-    let $flags := string($valuePair/@flags)
-    let $useDatatype := $valuePair/@useDatatype/resolve-QName(., ..)        
+    let $cmp := $valueCord/@cmp
+    let $quantifier := ($valueCord/@quant, 'all')[1]
+    let $sourceExpr := $valueCord/@sourceXP
+    let $targetExpr := $valueCord/@targetXP      
+    let $flags := string($valueCord/@flags)
+    let $useDatatype := $valueCord/@useDatatype/resolve-QName(., ..)        
     let $sourceExprLang := 'xpath'
     let $targetExprLang := 'xpath'    
     
     (: Count constraints, referring the values of source and target expression :)
-    let $countSource := $valuePair/@countSource/xs:integer(.)
-    let $minCountSource := $valuePair/@minCountSource/xs:integer(.)
-    let $maxCountSource := $valuePair/@maxCountSource/xs:integer(.)    
-    let $countTarget := $valuePair/@countTarget/xs:integer(.)
-    let $minCountTarget := $valuePair/@minCountTarget/xs:integer(.)
-    let $maxCountTarget := $valuePair/@maxCountTarget/xs:integer(.)
+    let $countSource := $valueCord/@countSource/xs:integer(.)
+    let $minCountSource := $valueCord/@minCountSource/xs:integer(.)
+    let $maxCountSource := $valueCord/@maxCountSource/xs:integer(.)    
+    let $countTarget := $valueCord/@countTarget/xs:integer(.)
+    let $minCountTarget := $valueCord/@minCountTarget/xs:integer(.)
+    let $maxCountTarget := $valueCord/@maxCountTarget/xs:integer(.)
     
     (: Source expr value :)
     let $sourceItemsRaw :=
@@ -177,7 +177,7 @@ declare function f:validateConcordPair($valuePair as element(gx:valuePair),
     
     (: Check the number of items of the source expression value :)
     let $results_sourceCount :=
-        f:validateConcordCounts($sourceItems, 'source', $valuePair, $contextInfo)
+        f:validateConcordCounts($sourceItems, 'source', $valueCord, $contextInfo)
     
     (: Function items
        ============== :)       
@@ -227,7 +227,7 @@ declare function f:validateConcordPair($valuePair as element(gx:valuePair),
         
         (: Check the number of items of the source expression value :)
         let $results_targetCount :=
-            f:validateConcordCounts($targetItems, 'target', $valuePair, $contextInfo)
+            f:validateConcordCounts($targetItems, 'target', $valueCord, $contextInfo)
         
         (:
          : Identify source expression items for which the correspondence 
@@ -253,13 +253,13 @@ declare function f:validateConcordPair($valuePair as element(gx:valuePair),
         let $colour := if (exists($violations)) then 'red' else 'green'                
         return (
             $results_targetCount,
-            result:validationResult_concord($colour, $violations, $cmp, $valuePair, $contextInfo)
+            result:validationResult_concord($colour, $violations, $cmp, $valueCord, $contextInfo)
         )                                             
     return ($results_sourceCount, $results)            
 };    
 
 (:~
- : Validates the count constraints expressed by a `valuePair` element contained
+ : Validates the count constraints expressed by a `valueCord` element contained
  : by a Content Correspondence Constraint. These constraints are ...
  : - source count constraints, referring to the number of items returned by the 
  :   source expresssion, defined by @countSource, @minCountSource, @maxCountSource
@@ -268,17 +268,17 @@ declare function f:validateConcordPair($valuePair as element(gx:valuePair),
  :
  : @param items the items returned by an expression
  : @param exprRole the role of the expression - source or target expression
- : @valuePair the element declaring the count constraint
+ : @valueCord the element declaring the count constraint
  : @param contextInfo informs about the focus document and focus node
  : @return validation results
  :)
 declare function f:validateConcordCounts($items as item()*,
                                          $exprRole as xs:string, (: source | target :)
-                                         $valuePair as element(),
+                                         $valueCord as element(),
                                          $contextInfo as map(xs:string, item()*))
         as element()* {
         
-    let $countConstraints := $valuePair/(
+    let $countConstraints := $valueCord/(
         if ($exprRole eq 'source') then (@countSource, @minCountSource, @maxCountSource)
         else if ($exprRole eq 'target') then (@countTarget, @minCountTarget, @maxCountTarget)
         else error())
@@ -297,7 +297,7 @@ declare function f:validateConcordCounts($items as item()*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            result:validationResult_concord_counts($colour, $valuePair, $countConstraint, $valueCount, $contextInfo)
+            result:validationResult_concord_counts($colour, $valueCord, $countConstraint, $valueCount, $contextInfo)
     return $results        
 };
 

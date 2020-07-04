@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
     Demonstrates the use of the LinksResolvable constraint component, as well as
-    supplementary constraint components. This example is similar to 
-    'cc-link-href.use-rel.gfox.xml', but checks resources contained by an archive file.
+    supplementary constraint components. This example demonstrates how a <links> 
+    constraint element can reference a link definition via @linkName.
     
     See 'cc-link-href.no-mediatype.gfox.xml' for more basic facts about the
     LinksResolvable constraint. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/links-resolvable01.use-rel"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -20,7 +20,7 @@
              mediatype="xml"/>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing document, 'airports.xml'."/>
@@ -33,4 +33,5 @@
             </file>
         </folder>
     </domain>
+
 </greenfox>

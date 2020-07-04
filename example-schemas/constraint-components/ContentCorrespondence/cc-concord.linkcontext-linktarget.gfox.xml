@@ -9,7 +9,7 @@
     Additional constraints refer to the number of items returned by the expressions whose results
     are compared (@countSource, @countTarget).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord.linkcontext-linktarget"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -23,9 +23,11 @@
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 <contentCorrespondence foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
                                        contextXP="//article"
-                                       targetXP="//article[@id eq $linkContext/articleID]">
-                    <valuePair sourceXP="articleName" targetXP="@name" countSource="1" countTarget="1" corr="eq"/>
-                    <valuePair sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" countSource="1" countTarget="1" corr="eq"/>
+                                       targetXP="//article[@id eq $linkContext/articleID]"
+                                       minCountContextNodes="1"
+                                       minCountTargetNodes="1">
+                    <valueCord sourceXP="articleName" targetXP="@name" countSource="1" countTarget="1" cmp="eq"/>
+                    <valueCord sourceXP="articlePrice" targetXP="@price" useDatatype="xs:decimal" countSource="1" countTarget="1" cmp="eq"/>
                 </contentCorrespondence>
             </file>
         </folder>

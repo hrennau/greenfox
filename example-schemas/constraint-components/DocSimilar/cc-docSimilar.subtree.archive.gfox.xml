@@ -5,7 +5,7 @@
     
     This example checks resources contained by an archive file.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.subtree"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.subtree.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
