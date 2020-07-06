@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of link targets. This example demonstrates how to reference 
+    a link definition.
+    
+    For some basic facts about link targets, see `link-targets.gfox.xml`
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.linkname"
+          xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <linkDef name="countryAirports"
+             hrefXP="//@href">
+        <constraints resolvable="true"/>
+    </linkDef>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+                <file linkName="countryAirports" id="linkTargetsFileShape">
+                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
+                                resolvableMsg="Target links could not be resolved"/>
+                    <xpath expr="/airports/airport"
+                           exists="true"
+                           existsMsg="Country airports document without airports"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>

@@ -74,11 +74,9 @@ declare function f:getLinkDefObject($linkDef as item(),
                         if (empty($try)) then error((), concat('Unknown link name: ', $linkName))
                         else $try
                 else
-                    let $parsed := link:parseLinkDef($linkDefElem)
-                    return
-                        if (empty($parsed)) then error((), 
-                            concat('Element cannot be parsed into a link definition object; element name: ', $linkDefElem/name()))
-                        else $parsed
+                    (: Try to parse the element into a Link Definition; if not possible,
+                       the empty sequence is returned :)
+                    link:parseLinkDef($linkDefElem)
         default return error((), 'Parameter $linkDef must be a string, an object or an element')
     return $ldo        
 };
@@ -170,20 +168,24 @@ declare function f:parseLinkDefs($linkDefs as element()*)
 };    
 
 (:~
- : Parses a link definition into a Link Definition Object. Parsing
- : fails if none of the following items is found:
+ : Parses an element into a Link Definition Object. Parsing fails if none
+ : of the following items is found:
  : - @uriXP
  : - @hrefXP
  : - @foxpath
  : - @uriReflectionBase
  : - gx:uriTemplate
  :
+ : When parsing fails, the element does not represent a Link Definition and
+ : the empty sequence is returned.
+ :
  : @param linkDef an element defining a link
- : @return a Link Definition Object
+ : @return a Link Definition Object, or the empty sequence if the element does not
+ :   represent a Link Definition
  :)
 declare function f:parseLinkDef($linkDef as element())
         as map(*) {
-    let $recursive := $linkDef/(@linkRecursive, @recursive)[1]/string()
+    let $recursive := $linkDef/@recursive/string()
     let $contextXP := $linkDef/@contextXP/string()
     let $targetXP := $linkDef/@targetXP/string()            
     let $foxpath := $linkDef/@foxpath/string() 
@@ -191,12 +193,11 @@ declare function f:parseLinkDef($linkDef as element())
     let $uriXP := $linkDef/@uriXP/string()
     let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
     let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
-    let $linkXP := $linkDef/@linkXP/string()
     let $uriTemplate := $linkDef/gx:uriTemplate
     let $constraints := $linkDef/gx:constraints    
     return
         if (empty((
-            $hrefXP, $uriXP, $uriReflectionBase, $linkXP, $uriTemplate, $foxpath))) then () else
+            $hrefXP, $uriXP, $uriReflectionBase, $uriTemplate, $foxpath))) then () else
             
     let $ldo :=        
         map:merge(        
@@ -204,7 +205,6 @@ declare function f:parseLinkDef($linkDef as element())
                 let $connectorExplicit := $linkDef/@connector/string()
                 return
                     if ($connectorExplicit) then $connectorExplicit
-                    else if ($linkXP) then 'links'
                     else if ($foxpath) then 'foxpath'
                     else if ($hrefXP) then 'hrefExpr'
                     else if ($uriXP) then 'uriExpr'
@@ -238,7 +238,6 @@ declare function f:parseLinkDef($linkDef as element())
                     $uriReflectionBase ! map:entry('uriReflection', 
                         map{'base': $uriReflectionBase, 
                             'shift': $uriReflectionShift}),
-                    $linkXP ! map:entry('linkXP', .),                            
                     $constraints ! map:entry('constraints', $constraints)
                 ))
     )

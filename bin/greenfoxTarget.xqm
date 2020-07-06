@@ -38,15 +38,17 @@ declare function f:getTargetPaths($resourceShape as element(),
     
     (: Retrieve target paths :)
     let $constraintElem := $resourceShape/gx:targetSize
-    let $targetPathsAndLros := f:resolveTargetDeclaration($resourceShape, $context)
-    let $targetPaths := $targetPathsAndLros[. instance of xs:anyAtomicType]
-    return if (not($constraintElem)) then $targetPaths else
+    let $targetPathsEtc := f:resolveTargetDeclaration($resourceShape, $context)
+    let $targetPaths := $targetPathsEtc?targetPaths
+    let $ldo := $targetPathsEtc?ldo
+    return if (not(($constraintElem, $ldo?constraints))) then $targetPaths else
     
     (: Perform validation of target paths :)
-    let $lros := $targetPathsAndLros[. instance of map(*)]
+    let $lros := $targetPathsEtc?lros
     let $validationResults := i:validateTargetConstraints(
                                         $resourceShape,
-                                        $targetPaths, 
+                                        $targetPaths,
+                                        $ldo, 
                                         $lros,
                                         $context)
     (: Return target paths and validation results :)                                        
@@ -64,47 +66,39 @@ declare function f:getTargetPaths($resourceShape as element(),
  : Link Resolution Objects. 
  :
  : The target is identified either by a path (@path) or
- : by a foxpath expression (@foxpath), or by an expression
- : producing link targets (@linkXP, @linkRecursive).
+ : by a foxpath expression (@foxpath) or by a link definition
+ : (@hrefXP, @recursive).
  :
  : The path is appended to the context path. The foxpath is
- : evaluated. Link targets are resolved.
+ : evaluated. Link definitions are resolved.
  :
- : Whether evaluation reports are returned depends on the kind 
+ : Whether Link Resolution Objects are returned depends on the kind 
  : of target declaration:
  : - if path of foxpath: no reports
- : - if links or recursive links: with reports
+ : - if link definition: with Link Resolution Objects
  : 
  : @param resourceShape a file or folder shape
  : @param context a map of variable bindings
  : @return the target paths :)
 declare function f:resolveTargetDeclaration($resourceShape as element(), 
                                             $context as map(xs:string, item()*))
-        as item()* {
-    let $contextPath := $context?_contextPath  
-    
-    (: Adhoc addition of $filePath and $fileName :)
-    (:
-    let $evaluationContext := $context?_evaluationContext
-    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $contextPath)
-    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($contextPath, '.*[/\\]', ''))
-    let $context := map:put($context, '_evaluationContext', $evaluationContext)
-     :)
-    let $targetPathsAndEvaluationReports :=       
+        as map(xs:string, item()*) {
+    let $contextPath := $context?_contextPath    
+    let $urisAndLros :=       
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $link := $resourceShape/(@link, @linkName, @hrefXP, @uriXP, @linkReflectionBase)         
+        let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @linkReflectionBase)         
         return
-            if ($path) then f:getTargetPaths_path($path, $resourceShape, $context)
-            else if ($foxpath) then f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)
+            if ($path) then map{'targetPaths': f:getTargetPaths_path($path, $resourceShape, $context)}
+            else if ($foxpath) then map{'targetPaths': f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)}
             else if ($link) then f:getTargetPaths_link($resourceShape, $context)            
             else error()
-    let $urisFromLros := $targetPathsAndEvaluationReports[. instance of map(*)][not(?errorCode)]?targetURI             
-    return ($urisFromLros, $targetPathsAndEvaluationReports)
+    return $urisAndLros
 };        
 
 (:~
- : Evaluates the target path given by a plain path expression.
+ : Returns the target paths of a resource shape, identified by a plain path 
+ : expression. Note that the plain path may contain wildcards.
  :
  : @param path plain path expression
  : @param resourceShape the resource shape 
@@ -117,22 +111,22 @@ declare function f:getTargetPaths_path($path as xs:string,
         as xs:string* {
     let $contextPath := $context?_contextPath        
     let $isExpectedResourceKind := 
-        (: if ($resourceShape/self::gx:folder) then file:is-dir#1 else file:is-file#1 :)
-        if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 else i:fox-resource-is-file#1
+        if ($resourceShape/self::gx:folder) 
+        then i:fox-resource-is-dir#1 
+        else i:fox-resource-is-file#1
     return    
-        concat($contextPath, '\', $path)[i:fox-resource-exists(.)]
+        concat($contextPath, '\', $path)
+        [i:fox-resource-exists(.)]
         [$isExpectedResourceKind(.)]        
 };
 
 (:~
- : Evaluates the target paths which are the items of a foxpath
- : expression value.
+ : Returns the target paths of a resource shape, identified by a foxpath
+ : expression.
  :
  : @param foxpath foxpath expression producing the target paths
  : @param resourceShape the resource shape
- : @param contextPath file path of the context item
  : @param context the processing context
- : 
  : @return the target paths corresponding to the link targets
  :)
 declare function f:getTargetPaths_foxpath($foxpath as xs:string, 
@@ -148,16 +142,27 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
         [$isExpectedResourceKind(.)]
 };
 
+(:~
+ : Returns the target paths of a resource shape, identified by a Link
+ : Definition; also returns the Link Resolution Objects, which are
+ : map items.
+ :
+ : @param resourceShape the resource shape
+ : @param context the processing context
+ : @return the target paths corresponding to the link targets
+ :)
 declare function f:getTargetPaths_link($resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as item()* {
     let $contextURI := $context?_contextPath
     let $contextNode := $context?_reqDocs?doc
-    let $lros := link:resolveLinkDef($resourceShape, 'lro', $contextURI, $contextNode, $context, ()) 
+    let $ldo := link:getLinkDefObject($resourceShape, $context)
+    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, ()) 
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1    
-    let $uris := $lros[not(?errorCode)]?targetURI [$isExpectedResourceKind(.)] 
+    let $uris := $lros[not(?errorCode)]?targetURI 
+                 [$isExpectedResourceKind(.)] 
                  => distinct-values()
-    return ($uris, $lros)    
+    return map{'targetPaths': $uris, 'ldo': $ldo, 'lros': $lros}    
 };        

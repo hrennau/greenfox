@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : greenfoxTarget.xqm - functions for determining the target of a resource shape
+ : targetConstraint.xqm - functions checking the result of resolving the target declaration of a resource shape
  :
  : -------------------------------------------------------------------------
  :)
@@ -28,24 +28,23 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : ============================================================================ :)
 (:~
- : Validates the target constraints. These may be count constraints, as well as a TargetLinkResolvable
- : constraint.
+ : Validates the target constraints. These may be count constraints, as well as 
+ : link constraints.
  :
- : @param constraints `targetSize` element representing the target constraints
- : @param targetDeclaration attribute selecting the target, which may be one of the 
- :     following - @foxpath, @path, @linkXPath, @recursiveLinkXPath
+ : @param resourceShape the resource shape
  : @param targetResources the target resources selected by the target declaration
  : @param contextPath the file path of the context in which the target was selected
- : @param targetLinkInfos maps describing all attempts at resolving a target link, successful or failed
+ : @param lros Link Definition Objects obtained when resolving a link definition
  : @return validation results describing conformance to or violations of target constraints
  :) 
 declare function f:validateTargetConstraints($resourceShape as element(), 
-                                             $targetResources as item()*,                                             
+                                             $targetResources as item()*,   
+                                             $ldo as map(*)?,
                                              $lros as map(*)*,
                                              $context as map(xs:string, item()*))
         as element()* {
     let $countResults := f:validateTargetCount($resourceShape, $targetResources, $context)
-    let $linkResults := f:validateTargetLinks($resourceShape, $lros, $context)   
+    let $linkResults := f:validateLinkConstraints($resourceShape, $ldo, $lros, $context)   
     return ($countResults, $linkResults)
 };        
 
@@ -56,25 +55,17 @@ declare function f:validateTargetConstraints($resourceShape as element(),
  : @targetCount the number of focus resources belonging to the target of the shape
  : @return validation results describing conformance to or violations of target count constraints
  :) 
-declare function f:validateTargetLinks($resourceShape as element(),
-                                       $lros as map(*)*,
-                                       $context as map(xs:string, item()*))
+declare function f:validateLinkConstraints($resourceShape as element(),
+                                           $ldo as map(*)?,
+                                           $lros as map(*)*,
+                                           $context as map(xs:string, item()*))
         as element()* {
-    
-    if (not($resourceShape/(@link, @linkXP))) then () else
+    if (empty($lros)) then () else
        
-    let $_DEBUG := trace(count($lros), '_LROS_COUNT: ')
-    let $contextPath := $context?_contextPath       
     let $constraintElem := $resourceShape/gx:targetSize
-    let $ldo := $resourceShape/@link/link:linkDefObject(., $context)
-    let $contextInfo :=
-        map:merge((
-            map:entry('filePath', $contextPath)
-        ))
-    return (
-        link:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
-        link:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)                                      
-    )
+    let $contextInfo := map:merge((map:entry('filePath', $context?_contextPath)))
+    return 
+        link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo)
 };
 
 (:~

@@ -437,7 +437,7 @@ return
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
                 <ex:xoneAtts attNames="foxpath path linkName hrefXP uriXP"
-                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, link, hrefXP, uriXP"
+                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkName, hrefXP, uriXP"
                     msgOK="OK - 'file' element: has expected attribute (one of: foxpath path link hrefXP uriXP)"/>
 
                 <!-- element names -->

@@ -4,16 +4,21 @@
     defines or references a link definition. In this example, the link is defined by the
     <file> shape, rather than referenced.
        
-    The <targetSize> constraint element may declare link-related constraints: @resolvable,
+    The <targetSize> constraint element may declare link-related constraints: 
+    - @resolvable
     as well as the link-related cardinality constraints:
     - countContextNodes, minCount..., maxCount...
     - countTargetResources, minCount..., maxCount...
     - countTargetDocs, minCount..., maxCount...
     - countTargetNodes, minCount..., maxCount...
     
-    Note that the non-link-related cardinality constraints of the <targetSize> element (e.g. @count, 
-    @minCount, @maxCount) refer to the number of target resources found, not to the number of links 
-    attempted to resolve, which may be higher. Use @resolvable to ensure all links could be resolved.
+    - countTargetResourcesPerContextPoint, minCount..., maxCount...
+    - countTargetDocsPerContextPoint, minCount..., maxCount...
+    - countTargetNodesPerContextPoint, minCount..., maxCount...
+    
+    Note that the non-link-related cardinality constraints of the <targetSize> element (@count, 
+    @minCount, @maxCount) are synonyms of (count|minCount|maxCount)TargetResources, or of
+    (count|minCount|maxCount)TargetDocs.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -30,7 +35,7 @@
                 <file hrefXP="//@href" id="linkTargetsFileShape">
                     <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 resolvable="true" resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="/*/airport"
+                    <xpath expr="/airports/airport"
                            exists="true"
                            existsMsg="Country airports document without airports"/>
                 </file>

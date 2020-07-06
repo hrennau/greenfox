@@ -250,7 +250,7 @@ declare function f:resolveLinkDefRC(
                                 'errorCode': 'not_xml'}
                 else 
                     let $targetDoc := i:fox-doc($targetURI)
-                    let $targetNodes := f:getLinkTargetNodes($targetDoc, $ldo?targetXP, $linkContextItem, $context)  
+                    let $targetNodes := $targetDoc ! f:getLinkTargetNodes(., $ldo?targetXP, $linkContextItem, $context)  
                     return
                        (: Result: XML document, optionally also selected target nodes
                           =========================================================== :)
@@ -366,8 +366,10 @@ declare function f:getLinkTargetNodes($connectorNodes as node()+,
         as node()* {
     if (not($targetExpr)) then () else
  
-    let $evaluationContextNext := map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
-    for $connectorNode in $connectorNodes        
-    return
-        i:evaluateXPath($targetExpr, $connectorNode, $evaluationContextNext, true(), true())        
+    let $nodes :=
+        let $evaluationContextNext := 
+            map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
+        for $connectorNode in $connectorNodes return
+            i:evaluateXPath($targetExpr, $connectorNode, $evaluationContextNext, true(), true())
+    return $nodes/.            
 };        
