@@ -52,7 +52,7 @@ declare function f:validationResultValues($value as item()*,
 };     
 
 (:~
- : Creates a validation result for a LinksResolvable constraint. The result
+ : Creates a validation result for a LinkResolvable constraint. The result
  : reports the outcome obtained for a single context point, which may be
  : a document URI or a link context node.
  :
@@ -65,12 +65,12 @@ declare function f:validationResultValues($value as item()*,
  : @param options options controling details of the validation result
  : @return a validation result, red or green
  :)
-declare function f:validationResult_linksResolvable($ldo as map(*)?,
-                                                    $constraintElem as element(),
-                                                    $linkContextItem as node(),
-                                                    $lros as map(*)*,
-                                                    $contextInfo as map(xs:string, item()*),
-                                                    $options as map(*)?)
+declare function f:validationResult_linkResolvable($ldo as map(*)?,
+                                                   $constraintElem as element(),
+                                                   $linkContextItem as node(),
+                                                   $lros as map(*)*,
+                                                   $contextInfo as map(xs:string, item()*),
+                                                   $options as map(*)?)
         as element() {
 
     (: Successful and failing link resolutions :)

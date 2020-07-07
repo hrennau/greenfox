@@ -3,18 +3,9 @@
     Demonstrates the use of link targets. This example checks JSON resources contained by 
     an archive file.    
     
-    A link target is a target consisting of the resources found by resolving links. The links 
-    are provided by an XPath expression. Here, the target declaration is:
-       @linkXP="//@href"
-       
-    The <targetSize> constraint element may declare a special constraint, @targetLinkResolvable, 
-    which requires all links found by the target declaration to be resolvable.
-    
-    Note that count-related constraints of the <targetSize> element (e.g. @count or @minCount)
-    refer to the number of target resources found, not to the number of links attempted to resolve,
-    which may be higher. Use @targetLinkResolvable to ensure all links could be resolved.
+    For some basic facts about link targets see example schema `link-targets.gfox.xml`.    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets/json/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json.archive"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
@@ -28,8 +19,8 @@
                 <file hrefXP="//href" id="linkTargetsFileShape" mediatype="json">
                     <targetSize minCount="4" 
                                 minCountMsg="Not expected number of link targets"
-                                targetLinkResolvable="true"
-                                targetLinkResolvableMsg="Target links could not be resolved"/>
+                                resolvable="true"
+                                resolvableMsg="Target links could not be resolved"/>
                     <xpath expr="//airport"
                            exists="true"
                            existsMsg="Country airports document without airports"/>

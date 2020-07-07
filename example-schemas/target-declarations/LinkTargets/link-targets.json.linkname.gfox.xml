@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. This example checks JSON targets referenced by JSON 
+    Demonstrates the use of link targets. Same check as in example schema `link-target.json.gfox.xml`,
+    except for the Link Definition being referenced via @linkName, rather than locally defined.    
     documents.
+    
+    Note that the constraint element @targetSize adds a validation message (@resolvableMsg) to
+    a constraint defined in the Link Definition (@resolvable).
     
     For some basic facts about link targets see example schema `link-targets.gfox.xml`.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <linkDef name="airports"
+             hrefXP="//href"
+             mediatype="json">
+        <constraints resolvable="true"/>
+    </linkDef>
+    
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
-                <file hrefXP="//href" id="linkTargetsFileShape" mediatype="json">
+                <file linkName="airports" id="linkTargetsFileShape">
                     <targetSize minCount="4" 
                                 minCountMsg="Not expected number of link targets"
-                                resolvable="true"
                                 resolvableMsg="Target links could not be resolved"/>
                     <xpath expr="//airport"
                            exists="true"

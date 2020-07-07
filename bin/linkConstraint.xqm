@@ -30,7 +30,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Validates LinksResolvable constraints and supplementary constraints referring to
+ : Validates LinkResolvable constraints and supplementary constraints referring to
  : link-related cardinalities. The link definition is either referenced (@linkName)
  : or provided by attributes on the element declaring the constraints (<links>). 
  : Possible constraints (attribute names):
