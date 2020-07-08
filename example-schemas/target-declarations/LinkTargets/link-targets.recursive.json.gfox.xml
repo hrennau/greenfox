@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of recursive link targets. This example checks JSON targets referenced by JSON 
+    documents.
+    
+    For some basic facts about link targets see example schema `link-targets.gfox.xml`.    
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.json"
+          xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <linkDef name="airportsJson"
+             hrefXP="//href"
+             recursive="true"
+             mediatype="json" >
+        <constraints resolvable="true"
+                     resolvableMsg="Target links could not be resolved"/>        
+    </linkDef>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+                <file linkName="airportsJson" id="linkTargetsFileShape">
+                    <targetSize minCount="60" minCountMsg="Not expected number of link targets"/>
+                    <xpath expr="//airport"
+                           exists="true"
+                           existsMsg="Airport(s) document without airport"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>

@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of recursive link targets. A recursive link target is a target consisting 
-    of the resources found by resolving links recursively. The links are provided by an XPath 
-    expression. Here, the target declaration is:
+    Demonstrates the use of recursive link targets. A recursive link target contains all resources 
+    found by resolving links recursively. The links are provided by an XPath expression. Here, the 
+    target declaration is:
        @hrefXP="//@href"
        
-    The <targetSize> constraint element may declare a special constraint, @resolvable, which 
-    requires all links found by the target declaration to be resolvable.
-    
-    Note that count-related constraints of the <targetSize> element (e.g. @count or @minCount)
-    refer to the number of target resources found, not to the number of links attempted to resolve,
-    which may be higher. Use @resolvable to ensure all links could be resolved.
+    For some basic facts about link targets see example schema `link-targets.gfox.xml`.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets-recursive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>

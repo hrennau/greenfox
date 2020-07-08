@@ -74,3 +74,29 @@ declare function f:DEBUG_CONTEXT_RC($item as item()) as item()* {
     default return $item            
 };
 
+(:~
+ : Return a concise description of LROs.
+ :)
+declare function f:DEBUG_LROS($lros as map(*)*) 
+        as element()? {
+    let $entries :=
+        for $lro in $lros
+        let $keys := map:keys($lro) => sort()
+        return
+            <lro>{
+                for $key in $keys
+                let $items :=
+                    for $item in $lro($key)
+                    return
+                        typeswitch($item)
+                        case element() return 'elem(' || $item/name() || ')'
+                        case attribute() return '@' || $item/name() || '=' || $item
+                        case document-node() return 'doc(' || $item/*/name() || ')'
+                        default return $item
+                where not($key eq 'type' and $items = 'linkResolutionObject')
+                return attribute {$key} {string-join($items, ', ')}
+            }</lro>
+    return
+        <lros count="{count($entries)}">{$entries}</lros>
+};        
+

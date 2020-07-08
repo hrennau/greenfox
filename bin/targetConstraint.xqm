@@ -33,8 +33,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : @param resourceShape the resource shape
  : @param targetResources the target resources selected by the target declaration
- : @param contextPath the file path of the context in which the target was selected
- : @param lros Link Definition Objects obtained when resolving a link definition
+ : @param ldo Link Definition Object used as a target declaration
+ : @param lros Link Resolution Objects obtained when resolving a link definition
+ : @param context the processing context
  : @return validation results describing conformance to or violations of target constraints
  :) 
 declare function f:validateTargetConstraints($resourceShape as element(), 
@@ -43,8 +44,12 @@ declare function f:validateTargetConstraints($resourceShape as element(),
                                              $lros as map(*)*,
                                              $context as map(xs:string, item()*))
         as element()* {
+    (: Validate the simple target size constraints :)
     let $countResults := f:validateTargetCount($resourceShape, $targetResources, $context)
-    let $linkResults := f:validateLinkConstraints($resourceShape, $ldo, $lros, $context)   
+    
+    (: Validate any link constraints :)
+    let $linkResults := f:validateLinkConstraints($resourceShape, $ldo, $lros, $context)
+    
     return ($countResults, $linkResults)
 };        
 
@@ -71,9 +76,10 @@ declare function f:validateLinkConstraints($resourceShape as element(),
 (:~
  : Validates the target count of a resource shape or a focus node.
  :
- : @param constraint definition of a target constraint
- : @targetCount the number of focus resources belonging to the target of the shape
- : @return validation results describing conformance to or violations of target count constraints
+ : @param resourceShape resource shape owning the target declaration
+ : @param targetItems the target resources obtained by resolving the target declaration
+ : @param context the processing context
+ : @return validation results obtained for the target count constraints
  :) 
 declare function f:validateTargetCount($resourceShape as element(), 
                                        $targetItems as item()*,
@@ -86,32 +92,32 @@ declare function f:validateTargetCount($resourceShape as element(),
         let $constraint := $constraintElem/@count
         return if (not($constraint)) then () else
         
-        let $value := $constraint/xs:integer(.)
-        let $ok := $value eq $targetCount
+        let $checkValue := $constraint/xs:integer(.)
+        let $ok := $targetCount eq $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetCount', $constraint, 
-                $targetItems, $contextPath)
+            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetCount', 
+                $constraint, $targetItems, $contextPath)
         ,
         let $constraint := $constraintElem/@minCount
         return if (not($constraint)) then () else
         
-        let $value := $constraint/xs:integer(.)
-        let $ok := $value le $targetCount
+        let $checkValue := $constraint/xs:integer(.)
+        let $ok := $targetCount ge $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMinCount', $constraint, 
-                $targetItems, $contextPath)
+            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMinCount', 
+                $constraint, $targetItems, $contextPath)
         ,        
         let $constraint := $constraintElem/@maxCount
         return if (not($constraint)) then () else
         
-        let $value := $constraint/xs:integer(.)
-        let $ok := $value ge $targetCount
+        let $checkValue := $constraint/xs:integer(.)
+        let $ok := $targetCount le $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMaxCount', $constraint, 
-                $targetItems, $contextPath)
+            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMaxCount', 
+                $constraint, $targetItems, $contextPath)
     )
     return $results
 };
@@ -152,7 +158,7 @@ declare function f:validationResult_targetCount(
         else 
             $constraintElem/i:getErrorMsg(., $constraint/local-name(.), ())
     let $navigationAtt :=
-        let $navigationSpec := $resourceShape/(@foxpath, @path, @linkXP)    
+        let $navigationSpec := $resourceShape/(@foxpath, @path, @hrefXP)    
         let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
         let $name := if (contains($name, 'Xpath')) then replace($name, 'Xpath', 'XPath') else $name
         return attribute {$name} {$navigationSpec}
@@ -173,65 +179,3 @@ declare function f:validationResult_targetCount(
             $values
         }
 };
-
-(:
-(:~
- : Creates a validation result for a TargetLinkResolvable constraint.
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param targetDeclaration a @linkXPath or @recursiveLinkXPath attribute
- : @param constraints element defining the target constraints
- : @param evaluationReports evaluation reports as obtained for all link values
- : @param additionalAtts additional attributes to be included in the validation result
- : @param additionalElems additional elements to be included in the validation result 
- : @param contextInfo information about the resource context
- : @param options options controling details of the validation result
- : @return a validation result, red or green
- :)
-declare function f:validationResult_targetLinks(
-                                    $colour as xs:string,
-                                    $constraintElem as element(),
-                                    $evaluationReports as item()*,
-                                    $additionalAtts as attribute()*,
-                                    $additionalElems as element()*,
-                                    $contextInfo as map(xs:string, item()*),
-                                    $options as map(*)?)
-        as element() {
-    let $exprAtt := $constraintElem/@linkXP        
-    let $expr := $exprAtt/normalize-space(.)
-    let $exprLang := $exprAtt ! local-name(.) ! replace(., '^.*link', '') ! lower-case(.)    
-    let $constraintConfig := 
-        map{'constraintComp': 'TargetLinkResolvableConstraint', 'atts': ('mediatype')}
-    
-    let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
-    let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
-    let $valueCountAtt := attribute valueCount {count($evaluationReports)} 
-    
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := concat($resourceShapeId, '-targetLinkResolvable')
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'targetLinkResolvable', ())
-        else i:getErrorMsg($constraintElem, 'targetLinkResolvable', ())
-    let $elemName := 'gx:' || $colour 
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},  
-            $filePath,
-            $focusNode,
-            $standardAtts,
-            $useAdditionalAtts,
-            $valueCountAtt,            
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},
-            $additionalElems
-        }       
-};
-:)
-

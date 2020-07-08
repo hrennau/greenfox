@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of recursive link targets. This example checks resources contained by an 
-    archive file. For more information, see example schema: link-targets-recursive.gfox.xml
+    Demonstrates the use of link targets. This example checks resources contained by an archive file. 
+    
+    For some basic facts about link targets see example schema `link-targets.gfox.xml`.    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets-recursive/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.archive"
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
@@ -14,11 +15,11 @@
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>    
-                <file hrefXP="//@href" recursive="true" id="linkTargetsFileShape">
-                    <targetSize minCount="9" minCountMsg="Not expected number of link targets"
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
+                <file hrefXP="//@href" id="linkTargetsFileShape">
+                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 resolvable="true" resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="//airport"
+                    <xpath expr="/*/airport"
                         exists="true"
                         existsMsg="Country airports document without airports"/>
                 </file>
