@@ -211,8 +211,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
                 else error()
             let $colour := if ($green) then 'green' else 'red'        
             return  
-                vr:validationResult_linkCount($ldo, $constraintElem, $countConstraint, $lros, 
-                    $colour, $vcounts, (), $contextInfo, $resultOptions)            
+                vr:validationResult_linkCount($colour, $ldo, $lros, $constraintElem, $countConstraint, 
+                    $vcounts, (), $contextInfo, $resultOptions)            
         }
         
         let $results := (
@@ -240,85 +240,3 @@ declare function f:getLinkConstraintAtts($constraintElem as element())
         '(ContextNodes|TargetResources|TargetDocs|TargetDocs)' ||
         '(PerContextPoint)?$', 'x')]        
 };
-
-(:~
- : ===============================================================================
- :
- :     W r i t e    v a l i d a t i o n    r e s u l t s
- :
- : ===============================================================================
- :)
-
-(:
-(:~
- : Creates a validation result for a LinkCount related constraint (LinkMinCount,
- : LinkMaxCount, LinkCount.
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param valueShape the shape declaring the constraint
- : @param exprValue expression value producing the links
- : @param additionalAtts additional attributes to be included in the validation result
- : @param additionalElems additional elements to be included in the validation result 
- : @param contextInfo information about the resource context
- : @param options options controling details of the validation result
- : @return a validation result, red or green
- :)
-declare function f:validationResult_linkCount($colour as xs:string,
-                                              $constraintElem as element(),
-                                              $constraint as attribute(),
-                                              $valueCount as item()*,
-                                              $contextNode as node()?,
-                                              $contextInfo as map(xs:string, item()*),
-                                              $options as map(*)?)
-        as element() {
-    let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
-        case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
-        case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}
-        case attribute(countTargetResources)    return map{'constraintComp': 'LinkTargetResourcesCount',    'atts': ('countTargetResources')}
-        case attribute(minCountTargetResources) return map{'constraintComp': 'LinkTargetResourcesMinCount', 'atts': ('minCountTargetResources')}
-        case attribute(maxCountTargetResources) return map{'constraintComp': 'LinkTargetResourcesMaxCount', 'atts': ('maxCountTargetResources')}
-        case attribute(countTargetDocs)         return map{'constraintComp': 'LinkTargetDocsCount',         'atts': ('countTargetDocs')}
-        case attribute(minCountTargetDocs)      return map{'constraintComp': 'LinkTargetDocsMinCount',      'atts': ('minCountTargetDocs')}
-        case attribute(maxCountTargetDocs)      return map{'constraintComp': 'LinkTargetDocsMaxCount',      'atts': ('maxCountTargetDocs')}
-        case attribute(countTargetNodes)        return map{'constraintComp': 'LinkTargetNodesCount',        'atts': ('countTargetNodes')}
-        case attribute(minCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMinCount',     'atts': ('minCountTargetNodes')}
-        case attribute(maxCountTargetNodes)     return map{'constraintComp': 'LinkTargetNodesMaxCount',     'atts': ('maxCountTargetNodes')}
-        default return error()
-    
-    let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := 
-        let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
-        return
-            (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraint[not(. intersect $explicit)])
-    let $valueCountAtt := attribute valueCount {$valueCount} 
-    let $rel := $constraintElem/@rel
-    
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    let $contextNodeDataPath := $contextNode/i:datapath(.)
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
-    let $elemName := 'gx:' || $colour
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
-            $focusNode,
-            $rel ! attribute rel {.},
-            $contextNodeDataPath ! attribute contextNodeDataPath {.},
-            $standardAtts,
-            $valueCountAtt            
-        }       
-};
-:)

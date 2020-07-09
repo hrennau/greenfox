@@ -8,7 +8,8 @@
  
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions/validation-result";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at
     "tt/_request.xqm",
     "tt/_reportAssistent.xqm",
     "tt/_errorAssistent.xqm",
@@ -16,7 +17,9 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
     "tt/_nameFilter.xqm",
     "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
+    "greenfoxUtil.xqm",
     "greenfoxEditUtil.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
@@ -147,18 +150,18 @@ declare function f:validationResult_linkResolvable($ldo as map(*)?,
  : @param options options controling details of the validation result
  : @return a validation result, red or green
  :)
-declare function f:validationResult_linkCount($ldo as map(*)?,
+declare function f:validationResult_linkCount($colour as xs:string,
+                                              $ldo as map(*)?,
+                                              $lros as map(*)*,
                                               $constraintElem as element(),
-                                              $constraint as attribute(),                                              
-                                              $lros as map(*)*,                                              
-                                              $colour as xs:string,
+                                              $constraintAtt as attribute(),                                             
                                               $valueCount as item()*,
                                               $contextNode as node()?,
                                               $contextInfo as map(xs:string, item()*),
                                               $options as map(*)?)
         as element() {
     let $constraintConfig :=
-        typeswitch($constraint)
+        typeswitch($constraintAtt)
         case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
         case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
         case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}
@@ -187,11 +190,11 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
         let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
         return
             (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraint[not(. intersect $explicit)])
+            ($explicit, $constraintAtt[not(. intersect $explicit)])
     let $valueCountAtt := attribute valueCount {$valueCount} 
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
+    let $constraintId := concat($constraintElemId, '-', $constraintAtt/local-name(.))
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
     let $contextNodeDataPath := $contextNode/i:datapath(.)
@@ -203,8 +206,8 @@ declare function f:validationResult_linkCount($ldo as map(*)?,
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
     
     let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintAtt/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraintAtt/local-name(.), ())
     let $elemName := 'gx:' || $colour
     return
         element {$elemName} {
@@ -226,7 +229,7 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
                                               $constraintElem as element()?)
         as attribute()* {
     let $exprAtts := ( 
-        $constraintElem/@link ! attribute link {.},
+        $constraintElem/@linkName ! attribute linkName {.},
         ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
         ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
         ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
@@ -237,6 +240,64 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
     return $exprAtts
         
 };        
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         t a r g e t    c o u n t    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+(:~
+ : Creates a validation result for constraint components TargetCount, TargetMinCount, 
+ : TargetMaxCount.
+ :
+ : @param constraint element defining the constraint
+ : @param colour the kind of results - green or red
+ : @param msg a message overriding the message read from the constraint element
+ : @param constraintComp string identifying the constraint component
+ : @param constraint an attribute specifying a constraint (e.g. @minCount=...)
+ : @param the actual number of target instances
+ : @return a result element 
+ :)
+declare function f:validationResult_targetCount(
+                                    $colour as xs:string,
+                                    $ldo as map(*)?,
+                                    $resourceShape as element(),
+                                    $constraintElem as element(gx:targetSize),
+                                    $constraintAtt as attribute(),
+                                    $targetItems as item()*,
+                                    $targetContextPath as xs:string)
+        as element() {
+    let $actCount := count($targetItems)        
+    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
+    let $constraintComp := 'Target' || $constraintAtt/i:firstCharToUpperCase(local-name(.))
+    let $msg :=
+        if ($colour eq 'green') then $constraintElem/i:getOkMsg(., $constraintAtt/local-name(.), ())
+        else $constraintElem/i:getErrorMsg(., $constraintAtt/local-name(.), ())
+        
+    (: Link description attributes :)
+    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    
+    (: Values :)
+    let $values :=
+        if (not($colour = ('red', 'yellow'))) then ()
+        else f:validationResultValues($targetItems, $constraintElem)
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute filePath {$targetContextPath},
+            attribute constraintComp {$constraintComp},
+            $constraintElem/@id/attribute constraintID {. || '-' || $constraintAtt/local-name(.)},                    
+            $constraintElem/@resourceShapeID,
+            $constraintAtt,
+            attribute valueCount {$actCount},
+            attribute targetContextPath {$targetContextPath},
+            $linkDefAtts,
+            $values
+        }
+};
 
 (:~
  : ===============================================================================

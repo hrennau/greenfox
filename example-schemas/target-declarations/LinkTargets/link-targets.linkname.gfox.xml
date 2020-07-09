@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. This example demonstrates how to reference 
-    a link definition.
+    Demonstrates the use of link targets. This example shows how to reference a link definition.
     
     For some basic facts about link targets, see `link-targets.gfox.xml`
 -->

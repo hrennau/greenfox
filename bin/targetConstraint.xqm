@@ -8,16 +8,19 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
     "constants.xqm",
     "greenfoxUtil.xqm",
     "resourceAccess.xqm",
     "log.xqm" ;
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at
     "linkValidation.xqm";
 
-import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at
     "validationResult.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -45,7 +48,7 @@ declare function f:validateTargetConstraints($resourceShape as element(),
                                              $context as map(xs:string, item()*))
         as element()* {
     (: Validate the simple target size constraints :)
-    let $countResults := f:validateTargetCount($resourceShape, $targetResources, $context)
+    let $countResults := f:validateTargetCount($resourceShape, $ldo, $lros, $targetResources, $context)
     
     (: Validate any link constraints :)
     let $linkResults := f:validateLinkConstraints($resourceShape, $ldo, $lros, $context)
@@ -54,7 +57,7 @@ declare function f:validateTargetConstraints($resourceShape as element(),
 };        
 
 (:~
- : Validates the link targets obtained for a resource shape.
+ : Validates the results of resolving a Link Definition used as target declaration.
  :
  : @param constraint definition of a target constraint
  : @targetCount the number of focus resources belonging to the target of the shape
@@ -82,6 +85,8 @@ declare function f:validateLinkConstraints($resourceShape as element(),
  : @return validation results obtained for the target count constraints
  :) 
 declare function f:validateTargetCount($resourceShape as element(), 
+                                       $ldo as map(*)?,
+                                       $lros as map(*)*,
                                        $targetItems as item()*,
                                        $context as map(xs:string, item()*))
         as element()* {
@@ -96,7 +101,7 @@ declare function f:validateTargetCount($resourceShape as element(),
         let $ok := $targetCount eq $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetCount', 
+            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem,  
                 $constraint, $targetItems, $contextPath)
         ,
         let $constraint := $constraintElem/@minCount
@@ -106,7 +111,7 @@ declare function f:validateTargetCount($resourceShape as element(),
         let $ok := $targetCount ge $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMinCount', 
+            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem, 
                 $constraint, $targetItems, $contextPath)
         ,        
         let $constraint := $constraintElem/@maxCount
@@ -116,66 +121,8 @@ declare function f:validateTargetCount($resourceShape as element(),
         let $ok := $targetCount le $checkValue
         let $colour := if ($ok) then 'green' else 'red'
         return
-            f:validationResult_targetCount($resourceShape, $constraintElem, $colour, (), 'TargetMaxCount', 
+            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem, 
                 $constraint, $targetItems, $contextPath)
     )
     return $results
-};
-
-(: ============================================================================
- :
- :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
- :
- : ============================================================================ :)
-
-(:~
- : Creates a validation result for constraints from TargetCount, TargetMinCount, TargetMaxCount.
- :
- : @param constraint element defining the constraint
- : @param colour the kind of results - green or red
- : @param msg a message overriding the message read from the constraint element
- : @param constraintComp string identifying the constraint component
- : @param constraint an attribute specifying a constraint (e.g. @minCount=...)
- : @param the actual number of target instances
- : @return a result element 
- :)
-declare function f:validationResult_targetCount(
-                                    $resourceShape as element(),
-                                    $constraintElem as element(gx:targetSize),
-                                    $colour as xs:string,
-                                    $msg as attribute()?,
-                                    $constraintComp as xs:string,
-                                    $constraint as attribute(),
-                                    $targetItems as item()*,
-                                    $targetContextPath as xs:string)
-        as element() {
-    let $actCount := count($targetItems)        
-    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
-    let $useMsg :=
-        if ($msg) then $msg
-        else if ($colour eq 'green') then 
-            $constraintElem/i:getOkMsg(., $constraint/local-name(.), ())
-        else 
-            $constraintElem/i:getErrorMsg(., $constraint/local-name(.), ())
-    let $navigationAtt :=
-        let $navigationSpec := $resourceShape/(@foxpath, @path, @hrefXP)    
-        let $name := 'target' || $navigationSpec/f:firstCharToUpperCase(local-name(.))
-        let $name := if (contains($name, 'Xpath')) then replace($name, 'Xpath', 'XPath') else $name
-        return attribute {$name} {$navigationSpec}
-    let $values :=
-        if (not($colour = ('red', 'yellow'))) then ()
-        else vr:validationResultValues($targetItems, $constraintElem)
-    return
-        element {$elemName} {
-            $useMsg ! attribute msg {.},
-            attribute filePath {$targetContextPath},
-            attribute constraintComp {$constraintComp},
-            $constraint/@id/attribute constraintID {. || '-' || $constraint/local-name(.)},                    
-            $constraint/@resourceShapeID,
-            $constraint,
-            attribute valueCount {$actCount},
-            attribute targetContextPath {$targetContextPath},
-            $navigationAtt,
-            $values
-        }
 };

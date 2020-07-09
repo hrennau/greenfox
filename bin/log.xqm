@@ -89,12 +89,13 @@ declare function f:DEBUG_LROS($lros as map(*)*)
                     for $item in $lro($key)
                     return
                         typeswitch($item)
-                        case element() return 'elem(' || $item/name() || ')'
-                        case attribute() return '@' || $item/name() || '=' || $item
-                        case document-node() return 'doc(' || $item/*/name() || ')'
+                        case element() return attribute itemType {'element(' || $item/name() || ')'}
+                        case attribute() return attribute itemType {'attribute(' || $item/name() || ')=' || $item}
+                        case document-node() return 
+                            attribute itemType {'document-node(' || $item/*/name() || ')'}
                         default return $item
                 where not($key eq 'type' and $items = 'linkResolutionObject')
-                return attribute {$key} {string-join($items, ', ')}
+                return element {$key} {$items}
             }</lro>
     return
         <lros count="{count($entries)}">{$entries}</lros>

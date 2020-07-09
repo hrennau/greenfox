@@ -102,7 +102,7 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
             (: Missing target declaration :)
             else 
                 error()
-    (: let $_DEBUG := trace($urisAndLros?lros => f:DEBUG_LROS() , '_LROS: ') :)              
+    let $_DEBUG := trace($urisAndLros?lros => f:DEBUG_LROS() , '_LROS: ')              
     return $urisAndLros
 };        
 
