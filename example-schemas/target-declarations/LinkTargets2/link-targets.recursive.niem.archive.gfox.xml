@@ -6,7 +6,7 @@
     For some basic facts about link targets, see `link-targets.gfox.xml`
 -->
 
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets-recursive.in-archive/niem"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem.archive"
     xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
@@ -14,10 +14,10 @@
     </context>
     
     <linkDef name="imports"
-        hrefXP="/xs:schema/xs:import/@schemaLocation" 
-        recursive="true" >
+             hrefXP="/xs:schema/xs:import/@schemaLocation" 
+             recursive="true" >
         <constraints resolvable="true"
-            resolvableMsg="Target links could not be resolved"/>
+                     resolvableMsg="Target links could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

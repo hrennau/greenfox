@@ -48,7 +48,7 @@ declare function f:validateTargetConstraints($resourceShape as element(),
                                              $context as map(xs:string, item()*))
         as element()* {
     (: Validate the simple target size constraints :)
-    let $countResults := f:validateTargetCount($resourceShape, $ldo, $lros, $targetResources, $context)
+    let $countResults := f:validateTargetCount($resourceShape, $ldo, $targetResources, $context)
     
     (: Validate any link constraints :)
     let $linkResults := f:validateLinkConstraints($resourceShape, $ldo, $lros, $context)
@@ -86,13 +86,28 @@ declare function f:validateLinkConstraints($resourceShape as element(),
  :) 
 declare function f:validateTargetCount($resourceShape as element(), 
                                        $ldo as map(*)?,
-                                       $lros as map(*)*,
                                        $targetItems as item()*,
                                        $context as map(xs:string, item()*))
         as element()* {
     let $contextPath := $context?_contextPath        
     let $constraintElem := $resourceShape/gx:targetSize        
-    let $targetCount := count($targetItems)        
+    let $targetCount := count($targetItems)    
+    let $countConstraints := $constraintElem/(@count, @minCount, @maxCount)
+    return if (empty($countConstraints)) then () else
+    
+    for $cmp in $countConstraints
+    let $cmpTrue :=
+        typeswitch($cmp)
+        case attribute(count) return function($count, $cmp) {$count = $cmp}        
+        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
+        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
+        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
+    let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
+    return        
+        vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem,  
+            $cmp, $targetItems, $contextPath)
+    
+(:    
     let $results := (
         let $constraint := $constraintElem/@count
         return if (not($constraint)) then () else
@@ -125,4 +140,5 @@ declare function f:validateTargetCount($resourceShape as element(),
                 $constraint, $targetItems, $contextPath)
     )
     return $results
+:)    
 };

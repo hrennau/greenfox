@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
     Demonstrates the use of recursive link targets. For each XSD in the OpenTravel repository,
-    the target consists of all XSDs included, recursively.
+    the target consists of all XSDs included, recursively. The resources are contained in an
+    archive.
     
     For some basic facts about link targets, see `link-targets.gfox.xml`
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.opentravel"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.opentravel.archive"
     xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
-        <field name="domain"/>
+        <field name="domain" value="\projects\xsdbase"/>/>
     </context>
     
     <linkDef name="includes"
@@ -20,12 +21,11 @@
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder path="OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
+        <folder foxpath="archives\OpenTravel.zip\#archive#\OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
             <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>            
-            <file foxpath="*.xsd except (OTA_SimpleTypes.xsd, OTA_Lists.xsd)" id="xsdFileShape">
-                <targetSize minCount="100" minCountMsg="Not as many XSDs as expected"/>
+            <file foxpath="OTA_AirAvail*.xsd" id="xsdFileShape">
                 <file linkName="includes" id="xsdFileShape">
-                    <targetSize minCount="2" minCountMsg="Not expected number of link targets"/>
+                    <targetSize count="6" minCountMsg="Not expected number of link targets"/>
                     <xpath expr="/xs:schema/@elementFormDefault"
                            eq="qualified"
                            count="1"/>

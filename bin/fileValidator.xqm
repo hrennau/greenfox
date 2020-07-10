@@ -218,7 +218,7 @@ declare function f:validateFocusNode($filePath as xs:string,
     
     (: Validation results - target size :)
     let $results_target :=
-        $focusNodeShape/i:validateTargetCount(., (), (), $focusNodes, $context)
+        $focusNodeShape/i:validateTargetCount(., (), $focusNodes, $context)
 
     (: Other validation results :)
     let $results_other :=

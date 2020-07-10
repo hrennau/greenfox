@@ -7,21 +7,25 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions/concord";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at 
     "tt/_foxpath.xqm";    
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
     "constants.xqm",
     "expressionEvaluator.xqm",
     "greenfoxUtil.xqm",
     "resourceAccess.xqm";
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at
     "linkDefinition.xqm",
     "linkResolution.xqm",
     "linkValidation.xqm";
 
-import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at
     "validationResult.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";

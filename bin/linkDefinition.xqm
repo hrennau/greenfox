@@ -117,7 +117,7 @@ declare function f:parseLinkDefs($linkDefs as element()*)
  :   represent a Link Definition
  :)
 declare function f:parseLinkDef($linkDef as element())
-        as map(*) {
+        as map(*)? {
     let $recursive := $linkDef/@recursive/string()
     let $contextXP := $linkDef/@contextXP/string()
     let $targetXP := $linkDef/@targetXP/string()            

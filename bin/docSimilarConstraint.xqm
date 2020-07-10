@@ -7,18 +7,22 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at 
     "tt/_foxpath.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
     "docSimilarConstraintReports.xqm",
     "greenfoxUtil.xqm",
     "resourceAccess.xqm";
 
-import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at
     "validationResult.xqm";
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at
     "linkDefinition.xqm",
     "linkResolution.xqm";
     

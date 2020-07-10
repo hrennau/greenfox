@@ -435,6 +435,63 @@ declare function f:validationResult_docSimilar_exception(
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
+ :         F o l d e r S i m i l a r    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
+(:~
+ : Creates a validation result for constraint components TargetCount, TargetMinCount, 
+ : TargetMaxCount.
+ :
+ : @param constraint element defining the constraint
+ : @param colour the kind of results - green or red
+ : @param msg a message overriding the message read from the constraint element
+ : @param constraintComp string identifying the constraint component
+ : @param constraint an attribute specifying a constraint (e.g. @minCount=...)
+ : @param the actual number of target instances
+ : @return a result element 
+ :)
+declare function f:validationResult_folderSimilar_count(
+                                    $colour as xs:string,
+                                    $ldo as map(*)?,
+                                    $constraintElem as element(gx:folderSimilar),
+                                    $constraintAtt as attribute(),
+                                    $targetItems as item()*,
+                                    $targetContextPath as xs:string)
+        as element() {
+    let $actCount := count($targetItems)        
+    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
+    let $constraintComp := 'FolderSimilarTarget' || $constraintAtt/i:firstCharToUpperCase(local-name(.))
+    let $msg :=
+        if ($colour eq 'green') then $constraintElem/i:getOkMsg(., $constraintAtt/local-name(.), ())
+        else $constraintElem/i:getErrorMsg(., $constraintAtt/local-name(.), ())
+        
+    (: Link description attributes :)
+    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    
+    (: Values :)
+    let $values :=
+        if (not($colour = ('red', 'yellow'))) then ()
+        else f:validationResultValues($targetItems, $constraintElem)
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute filePath {$targetContextPath},
+            attribute constraintComp {$constraintComp},
+            $constraintElem/@id/attribute constraintID {. || '-' || $constraintAtt/local-name(.)},                    
+            $constraintElem/@resourceShapeID,
+            $constraintAtt,
+            attribute valueCount {$actCount},
+            attribute targetContextPath {$targetContextPath},
+            $linkDefAtts,
+            $values
+        }
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
  :         C o n t e n t    C o r r e s p o n d e n c e    c o n s t r a i n t
  :
  : ===============================================================================
