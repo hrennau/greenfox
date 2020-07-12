@@ -42,8 +42,8 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderSimilar foxpath="..\airports-copy" count="1">
-                <skipFiles names="airport-max.*"/>
-                <skipFolders names="user-extensions2"/>
+                <skipFiles names="*.sav.*"/>
+                <skipFolders names="*.sav" where="there"/>
             </folderSimilar>
         </folder>                
     </domain>

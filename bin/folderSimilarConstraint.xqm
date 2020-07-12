@@ -90,28 +90,41 @@ declare function f:validateFolderSimilar_count($constraintElem as element(),
         case attribute(count) return function($count, $cmp) {$count = $cmp}        
         case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
         case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
+        default return error(QName((), 'INVALID_SCHEMA'), 
+            concat('Unknown count comparison operator: ', $cmp))
     let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
     return        
-        vr:validationResult_folderSimilar_count($colour, $ldo, $constraintElem, $cmp, $targetItems, $contextPath)
+        vr:validationResult_folderSimilar_count(
+            $colour, $ldo, $constraintElem, $cmp, $targetItems, $contextPath)
 };
 
+(:~
+ : Validates the similarity between a folder and other folders.
+ :
+ : @param contextURI the file path of the folder to be checked
+ : @param constraintElem element declaring the constraints
+ : @param targetFolders the target folders with which to compare
+ : @param evaluationContext the evaluation context
+ : @return validation results obtained for the target count constraints
+ :) 
 declare function f:validateFolderSimilar_similarity(
                                 $contextURI as xs:string,
                                 $constraintElem as element(gx:folderSimilar),
                                 $targetFolders as xs:string*,
                                 $evaluationContext as map(*))
         as element()* {
-    let $config := f:validateFolderSimilar_config($constraintElem)
+    let $config := f:getFolderSimilarityConfig($constraintElem)
+    let $additionalAtts := ()
+    
     for $targetFolder in $targetFolders
-    let $additionalAtts := attribute otherFolder {$targetFolder}
     let $results12 := f:compareFolders($contextURI, $targetFolder, $config, "12", $evaluationContext)
     let $results21 := f:compareFolders($targetFolder, $contextURI, $config, "21", $evaluationContext)
     let $keys12 := map:keys($results12)
     let $keys21 := map:keys($results21)
     return
         if (empty($keys12) and empty($keys21)) then 
-            f:validationResult_folderSimilar('green', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, ())
+            f:validationResult_folderSimilar(
+                'green', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, ())
         else
             let $values := (
                 if (not(map:contains($results12, 'files1Only'))) then () else
@@ -127,79 +140,30 @@ declare function f:validateFolderSimilar_similarity(
                     $results21?dirs1Only ! <gx:value kind="folder" where="otherFolder">{.}</gx:value>
             )
             return
-                f:validationResult_folderSimilar('red', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, $values)
+                f:validationResult_folderSimilar(
+                    'red', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, $values)
 };
-
-(:
-(:~
- : Validates a link count related constraint (LinkCountMinCount, LinkCountMaxCount, LinkCountCount).
- : It is not checked if the links can be resolved - only their number is considered.
- :
- : @param exprValue expression value producing the links
- : @param cmp link count related constraint
- : @param valueShape the value shape containing the constraint
- : @param contextInfo information about the resource context
- : @return a validation result, red or green
- :)
-declare function f:validateFolderSimilar_count(
-                                        $exprValue as item()*,
-                                        $constraintElem as element(),
-                                        $filePath as xs:string)
-        as element()* {
-    let $resultAdditionalAtts := ()
-    let $resultOptions := ()
-    
-    let $valueCount := count($exprValue)
-    let $countConstraints :=
-        let $explicit := $constraintElem/(@count, @minCount, @maxCount)
-        return
-            if ($explicit) then $explicit else attribute count {1}
-    for $cmp in $countConstraints
-    let $cmpTrue :=
-        typeswitch($cmp)
-        case attribute(count) return function($count, $cmp) {$count = $cmp}        
-        case attribute(minCount) return function($count, $cmp) {$count >= $cmp}        
-        case attribute(maxCount) return function($count, $cmp) {$count <= $cmp}
-        default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
-    return        
-        if ($cmpTrue($valueCount, $cmp)) then  
-            f:validationResult_folderSimilarCount('green', $constraintElem, $cmp, $valueCount, 
-                                                  $resultAdditionalAtts, (), $filePath, $resultOptions)
-        else 
-            let $values := $exprValue ! xs:string(.) ! <gx:value>{.}</gx:value>
-            return
-                f:validationResult_folderSimilarCount('red', $constraintElem, $cmp, $exprValue, 
-                                                      $resultAdditionalAtts, $values, $filePath, $resultOptions)
-};
-:)
 
 (:~
- : Returns the items representing the other documents with which to compare.
- : The items may be nodes or URIs.
- :
- : @param filePath filePath of the context document
- : @param constraintElem the element representing the DocumentSimilar constraint
- : @param context the processing context
+ : Compares two folders, returning files and folders occurring in the first one.
+ : 
+ : @param folder1 the first folder
+ : @param folder2 the second folder
+ : @param config configuration of the comparison, specifying files and folders to be ignored
+ : @param direction specifies if $folder1 is the local folder (12) or the target folder (21)
+ : @return a map with possible entries 'files1Only' and 'drs1Only'
  :)
-declare function f:validateFolderContentsSimilar_otherFolderReps(
-                                                   $filePath as xs:string,
-                                                   $constraintElem as element(),
-                                                   $context as map(xs:string, item()*))
-        as item()* {
-    let $evaluationContext := $context?_evaluationContext
-    let $otherFoxpath := $constraintElem/@foxpath 
-    return    
-        if ($otherFoxpath) then 
-            f:evaluateFoxpath($otherFoxpath, $filePath, $evaluationContext, true())
-        else error()
-};
-
 declare function f:compareFolders($folder1 as xs:string, 
                                   $folder2 as xs:string, 
                                   $config as element(),
                                   $direction as xs:string,   (: '12' or '21' :)
                                   $evaluationContext as map(xs:QName, item()*))
         as item()* {
+    let $ignoredFiles :=
+        $config/(ignoredFiles, if ($direction eq '12') then ignoredFilesHere else ignoredFilesThere)/*
+    let $ignoredFolders := 
+        $config/(ignoredFolders, if ($direction eq '12') then ignoredFoldersHere else ignoredFoldersThere)/*
+
     let $files1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-file(.)]  
     let $files2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-file(.)]
     let $dirs1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-dir(.)]  
@@ -208,27 +172,16 @@ declare function f:compareFolders($folder1 as xs:string,
     let $fileNames1 := $files1 ! replace(., '^.*[/\\]', '')
     let $fileNames2 := $files2 ! replace(., '^.*[/\\]', '')
     let $fileNames1Only := $fileNames1[not(. = $fileNames2)]
-        [not(some $ignoredFile in $config/ignoredFiles/ignoredFile 
-             satisfies matches(., $ignoredFile/@regex, 'i'))]
-    (:
-         [$direction eq '12' and not(
-            some $ignoredFile in $config/ignoredFiles1/ignoredFile1 satisfies matches(., $ignoredFile/@regex, 'i'))
-          or $direction eq '21' and not(            
-            some $ignoredFile in $config/ignoredFiles2/ignoredFile2 satisfies matches(., $ignoredFile/@regex, 'i'))          
-         ]
-     :)
+        [   
+            not(some $ignoredFile in $ignoredFiles satisfies 
+                matches(., $ignoredFile/@regex, 'i'))
+        ]
     let $dirNames1 := $dirs1 ! replace(., '^.*[/\\]', '')
     let $dirNames2 := $dirs2 ! replace(., '^.*[/\\]', '')
     let $dirNames1Only := $dirNames1[not(. = $dirNames2)]
-       [not(some $ignoredFile in $config/ignoredFolders/ignoredFolder 
-            satisfies matches(., $ignoredFile/@regex, 'i'))]    
-(:    
-         [$direction eq '12' and not(
-            some $ignoredFolder in $config/ignoredFolders1/ignoredFolder1 satisfies matches(., $ignoredFolder/@regex, 'i'))
-          or $direction eq '21' and not(            
-            some $ignoredFolder in $config/ignoredFolders2/ignoredFolder2 satisfies matches(., $ignoredFolder/@regex, 'i'))          
-         ]
- :)         
+       [
+            not(some $ignoredFile in $ignoredFolders satisfies 
+                matches(., $ignoredFile/@regex, 'i'))]    
     return
         map:merge((
             if (empty($fileNames1Only)) then () else map{'files1Only': $fileNames1Only},
@@ -236,41 +189,50 @@ declare function f:compareFolders($folder1 as xs:string,
         ))
 };
 
-declare function f:validateFolderSimilar_config($folderSimilar as element(gx:folderSimilar))
+(:~
+ : Writes a configuration capturing details of a FolderSimilar constraint.
+ : The configuration contains regular expressions matched by the names of
+ : files and folders to be ignored.
+ :
+ : @param folderSimilar an element declaring a Folder Similar constraint
+ : @return a configuration
+ :) 
+declare function f:getFolderSimilarityConfig($folderSimilar as element(gx:folderSimilar))
         as element() {
     let $ignoredFiles :=
-        for $name in string-join($folderSimilar/gx:skipFiles/@names, ' ') ! tokenize(.)
+        for $elem in $folderSimilar/gx:skipFiles    
+        for $name in $elem/@names/tokenize(.)
         let $regex := $name ! i:glob2regex(.)
-        return <ignoredFile name="{$name}" regex="{$regex}"/>
-        
+        return 
+            <ignoredFile name="{$name}" regex="{$regex}">{
+                $elem/@where
+            }</ignoredFile>
     let $ignoredFolders :=
-        for $name in string-join($folderSimilar/gx:skipFolders/@names, ' ') ! tokenize(.)
+        for $elem in $folderSimilar/gx:skipFolders    
+        for $name in $elem/@names/tokenize(.)
         let $regex := $name ! i:glob2regex(.)
-        return <ignoredFolder name="{$name}" regex="{$regex}"/>
-(:
-    let $ignoredOtherFiles :=
-        for $name in string-join($folderSimilar/gx:skipForeignFiles/@names, ' ') ! tokenize(.)
-        let $regex := $name ! i:glob2regex(.)
-        return <ignoredFile2 name="{$name}" regex="{$regex}"/>
-        
-    let $ignoredOtherFolders :=
-        for $name in string-join($folderSimilar/gx:skipForeignFolders/@names, ' ') ! tokenize(.)
-        let $regex := $name ! i:glob2regex(.)
-        return <ignoredFolder2 name="{$name}" regex="{$regex}"/>
-:)        
+        return 
+            <ignoredFolder name="{$name}" regex="{$regex}">{
+                $elem/@where
+            }</ignoredFolder>
+            
+    let $ignoredFilesAny := $ignoredFiles[not(@where)]            
+    let $ignoredFilesHere := $ignoredFiles[@where eq 'here']
+    let $ignoredFilesThere := $ignoredFiles[@where eq 'there']
+    let $ignoredFoldersAny := $ignoredFolders[not(@where)]            
+    let $ignoredFoldersHere := $ignoredFolders[@where eq 'here']
+    let $ignoredFoldersThere := $ignoredFolders[@where eq 'there']
+            
     return
         <config>{
-            <ignoredFiles>{$ignoredFiles}</ignoredFiles>,
-            <ignoredFolders>{$ignoredFolders}</ignoredFolders>           
-(:        
-            <ignoredFiles1>{$ignoredFiles}</ignoredFiles1>,
-            <ignoredFolders1>{$ignoredFolders}</ignoredFolders1>,            
-            <ignoredFiles2>{$ignoredOtherFiles}</ignoredFiles2>,
-            <ignoredFolders2>{$ignoredOtherFolders}</ignoredFolders2>
-:)            
-        }</config>
-        
+            <ignoredFiles>{$ignoredFilesAny}</ignoredFiles>[$ignoredFilesAny],
+            <ignoredFilesHere>{$ignoredFilesHere}</ignoredFilesHere>[$ignoredFilesHere],
+            <ignoredFilesThere>{$ignoredFilesThere}</ignoredFilesThere>[$ignoredFilesThere],
 
+            <ignoredFolders>{$ignoredFoldersAny}</ignoredFolders>[$ignoredFoldersAny],
+            <ignoredFoldersHere>{$ignoredFoldersHere}</ignoredFoldersHere>[$ignoredFoldersHere],
+            <ignoredFoldersThere>{$ignoredFoldersThere}</ignoredFoldersThere>[$ignoredFoldersThere]
+        }</config>
 };
 
 (: ============================================================================
@@ -318,73 +280,3 @@ declare function f:validationResult_folderSimilar(
             $additionalElems
         }        
 };
-
-(:
-(:~
- : Creates a validation result for a LinkCount related constraint (LinkMinCount,
- : LinkMaxCount, LinkCount.
- :
- : @param colour 'green' or 'red', indicating violation or conformance
- : @param valueShape the shape declaring the constraint
- : @param exprValue expression value producing the links
- : @param additionalAtts additional attributes to be included in the validation result
- : @param additionalElems additional elements to be included in the validation result 
- : @param contextInfo information about the resource context
- : @param options options controling details of the validation result
- : @return a validation result, red or green
- :)
-declare function f:validationResult_folderSimilarCount(
-                                          $colour as xs:string,
-                                          $constraintElem as element(),
-                                          $constraint as attribute(),
-                                          $exprValue as item()*,
-                                          $additionalAtts as attribute()*,
-                                          $additionalElems as element()*,
-                                          $filePath as xs:string,
-                                          $options as map(*)?)
-        as element() {
-    let $exprAtt := $constraintElem/(@foxpath, @otherXPath)        
-    let $expr := $exprAtt/normalize-space(.)
-    let $exprLang := $exprAtt ! local-name(.) ! replace(., '^other', '') ! lower-case(.)     
-    let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(count) return map{'constraintComp': 'FolderSimilarCount', 'atts': ('count')}
-        case attribute(minCount) return map{'constraintComp': 'FolderSimilarMinCount', 'atts': ('minCount')}
-        case attribute(maxCount) return map{'constraintComp': 'FolderSimilarMaxCount', 'atts': ('maxCount')}
-        default return error()
-    
-    let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := 
-        let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
-        return
-            (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraint[not(. intersect $explicit)])
-    let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
-    let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePathAtt := $filePath ! attribute filePath {.}
-
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
-    let $elemName := 'gx:' || $colour
-    return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePathAtt,
-            $standardAtts,
-            $useAdditionalAtts,
-            $valueCountAtt,            
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},
-            $additionalElems
-        }       
-};
-:)
-
