@@ -227,11 +227,10 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:fileSize, 
                     self::gx:lastModified, 
                     self::gx:mediatype,
-                    self::gx:folderContentSimilar,
-                    self::gx:docSimilar,
                     self::gx:contentCorrespondence,
                     self::gx:content,
-                    self::gx:deepSimilar,
+                    self::gx:docSimilar,
+                    self::gx:folderSimilar,
                     self::gx:folderContent,
                     self::gx:xsdValid)) then  
                 $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID

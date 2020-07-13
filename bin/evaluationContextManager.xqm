@@ -68,7 +68,9 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
-    let $linkDefs := link:getLinkDefs($components, $context)
+    let $_DEBUG := trace($filePath, '_FILE_PATH: ')
+    let $_DEBUG := trace($components/name() => distinct-values(), '_COMP_NAMES: ')
+    let $linkDefs := trace( link:getLinkDefs($components, $context) , '_LINK_DEFS: ')
     (: Extension constraint components :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return

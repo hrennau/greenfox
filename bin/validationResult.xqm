@@ -230,6 +230,7 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         as attribute()* {
     let $exprAtts := ( 
         $constraintElem/@linkName ! attribute linkName {.},
+        ($constraintElem/@foxpath, $ldo?foxpath ! attribute foxpath {.})[1],
         ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
         ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
         ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
@@ -439,6 +440,51 @@ declare function f:validationResult_docSimilar_exception(
  :
  : ===============================================================================
  :)
+ 
+(:~
+ : Writes a validation result for a FolderSimilar constraint.
+ :
+ : @param colour indicates success or error
+ : @param constraintElem the element representing the constraint
+ : @param constraint an attribute representing the main properties of the constraint
+ : @param reasons strings identifying reasons of violation
+ : @return validation result
+ :) 
+declare function f:validationResult_folderSimilar(
+                                          $colour as xs:string,
+                                          $ldo as map(*)?,                                          
+                                          $constraintElem as element(gx:folderSimilar),
+                                          $values as element()*)
+        as element() {
+    let $elemName := 'gx:' || $colour
+    let $constraintComponent := 'FolderSimilarConstraint'
+    (:
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraint/i:firstCharToUpperCase(local-name(.))
+     :)
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintId := $constraintElem/@id
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'folderSimilar', ())
+        else i:getErrorMsg($constraintElem, 'folderSimilar', ())
+        
+    (: Link description attributes :)
+    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+
+    let $modifiers := $constraintElem/<gx:modifiers>{*}</gx:modifiers>[*]
+        
+    return
+        element {$elemName}{
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComponent},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},      
+            $linkDefAtts,
+            $modifiers,
+            $values
+        }        
+};
+ 
 (:~
  : Creates a validation result for constraint components TargetCount, TargetMinCount, 
  : TargetMaxCount.
@@ -670,5 +716,4 @@ declare function f:validationResult_concord_exception(
         }
        
 };
-
 

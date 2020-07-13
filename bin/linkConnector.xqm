@@ -60,6 +60,7 @@ declare function f:applyLinkConnector($ldo as map(*),
     (: Connector: foxpath expression 
        ============================= :)
     else if ($ldo?foxpath) then
+        let $_DEBUG := trace($ldo, '_LDO: ')
         let $evaluationContext := $context?_evaluationContext
         return
             (: _TO_DO_ CLARIFY - should the Foxpath context be the contextItem or the contextURI?

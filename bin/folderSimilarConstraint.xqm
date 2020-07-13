@@ -60,7 +60,7 @@ declare function f:validateFolderSimilar($contextURI as xs:string,
     
     (: Check similarity :)
     let $results_comparison := f:validateFolderSimilar_similarity(
-        $contextURI, $constraintElem, $targetFolders, $evaluationContext)
+        $contextURI, $constraintElem, $ldo, $targetFolders, $evaluationContext)
     return
         ($results_count, $results_comparison)
                    
@@ -110,11 +110,11 @@ declare function f:validateFolderSimilar_count($constraintElem as element(),
 declare function f:validateFolderSimilar_similarity(
                                 $contextURI as xs:string,
                                 $constraintElem as element(gx:folderSimilar),
+                                $ldo as map(*)?,                                
                                 $targetFolders as xs:string*,
                                 $evaluationContext as map(*))
         as element()* {
     let $config := f:getFolderSimilarityConfig($constraintElem)
-    let $additionalAtts := ()
     
     for $targetFolder in $targetFolders
     let $results12 := f:compareFolders($contextURI, $targetFolder, $config, "12", $evaluationContext)
@@ -123,8 +123,7 @@ declare function f:validateFolderSimilar_similarity(
     let $keys21 := map:keys($results21)
     return
         if (empty($keys12) and empty($keys21)) then 
-            f:validationResult_folderSimilar(
-                'green', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, ())
+            vr:validationResult_folderSimilar('green', $ldo, $constraintElem, ())
         else
             let $values := (
                 if (not(map:contains($results12, 'files1Only'))) then () else
@@ -140,8 +139,7 @@ declare function f:validateFolderSimilar_similarity(
                     $results21?dirs1Only ! <gx:value kind="folder" where="otherFolder">{.}</gx:value>
             )
             return
-                f:validationResult_folderSimilar(
-                    'red', $constraintElem, $constraintElem/@foxpath, (), $additionalAtts, $values)
+                vr:validationResult_folderSimilar('red', $ldo, $constraintElem, $values)
 };
 
 (:~
@@ -235,48 +233,3 @@ declare function f:getFolderSimilarityConfig($folderSimilar as element(gx:folder
         }</config>
 };
 
-(: ============================================================================
- :
- :     f u n c t i o n s    c r e a t i n g    v a l i d a t i o n    r e s u l t s
- :
- : ============================================================================ :)
-
-(:~
- : Writes a validation result for a DeepSimilar constraint.
- :
- : @param colour indicates success or error
- : @param constraintElem the element representing the constraint
- : @param constraint an attribute representing the main properties of the constraint
- : @param reasons strings identifying reasons of violation
- : @param additionalAtts additional attributes to be included in the validation result
- :) 
-declare function f:validationResult_folderSimilar(
-                                          $colour as xs:string,
-                                          $constraintElem as element(gx:folderSimilar),
-                                          $constraint as attribute(),
-                                          $reasonCodes as xs:string*,
-                                          $additionalAtts as attribute()*,
-                                          $additionalElems as element()*)
-        as element() {
-    let $elemName := 'gx:' || $colour
-    let $constraintComponent :=
-        $constraintElem/f:firstCharToUpperCase(local-name(.)) ||
-        $constraint/f:firstCharToUpperCase(local-name(.))
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@constraintID
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraint/local-name(.), ())
-        
-    return
-        element {$elemName}{
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComponent},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            if (empty($reasonCodes)) then () else attribute reasonCodes {$reasonCodes},
-            $additionalAtts,
-            $constraintElem/*,
-            $additionalElems
-        }        
-};
