@@ -102,7 +102,7 @@ declare function f:validateExtensionConstraint($contextFilePath as xs:string,
 };  
 
 (:~
- : Returns the extension constraints contained in a list of constraint definitions.
+ : Returns the extension constraints contained in a list of constraint declarations.
  :
  : @param constraints constraint definitions
  : @return the extension constraints

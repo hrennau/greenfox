@@ -52,7 +52,7 @@ declare function f:validateFolderSimilar($contextURI as xs:string,
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, (), $context, ())
     let $targetFolders := $lros?targetURI    
-    let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ')
+    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
 
     (: Check the number of items representing the folders with which to compare :)
     let $results_count := f:validateFolderSimilar_count(

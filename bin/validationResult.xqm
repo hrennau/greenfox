@@ -69,9 +69,9 @@ declare function f:validationResultValues($value as item()*,
  : @return a validation result, red or green
  :)
 declare function f:validationResult_linkResolvable($ldo as map(*)?,
+                                                   $lros as map(*)*,
                                                    $constraintElem as element(),
                                                    $linkContextItem as node(),
-                                                   $lros as map(*)*,
                                                    $contextInfo as map(xs:string, item()*),
                                                    $options as map(*)?)
         as element() {
@@ -224,23 +224,6 @@ declare function f:validationResult_linkCount($colour as xs:string,
             $valueCountAtt            
         }       
 };
-
-declare function f:validateResult_linkDefAtts($ldo as map(*)?,
-                                              $constraintElem as element()?)
-        as attribute()* {
-    let $exprAtts := ( 
-        $constraintElem/@linkName ! attribute linkName {.},
-        ($constraintElem/@foxpath, $ldo?foxpath ! attribute foxpath {.})[1],
-        ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
-        ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
-        ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
-        ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
-        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1],
-        ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
-    )
-    return $exprAtts
-        
-};        
 
 (:~
  : ===============================================================================
@@ -445,9 +428,9 @@ declare function f:validationResult_docSimilar_exception(
  : Writes a validation result for a FolderSimilar constraint.
  :
  : @param colour indicates success or error
- : @param constraintElem the element representing the constraint
- : @param constraint an attribute representing the main properties of the constraint
- : @param reasons strings identifying reasons of violation
+ : @param ldo Link Definition Object, used to identify the target folders
+ : @param constraintElem the element declaring the constraint
+ : @param values values violating the constraint
  : @return validation result
  :) 
 declare function f:validationResult_folderSimilar(
@@ -458,19 +441,12 @@ declare function f:validationResult_folderSimilar(
         as element() {
     let $elemName := 'gx:' || $colour
     let $constraintComponent := 'FolderSimilarConstraint'
-    (:
-        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
-        $constraint/i:firstCharToUpperCase(local-name(.))
-     :)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($constraintElem, 'folderSimilar', ())
         else i:getErrorMsg($constraintElem, 'folderSimilar', ())
-        
-    (: Link description attributes :)
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
-
     let $modifiers := $constraintElem/<gx:modifiers>{*}</gx:modifiers>[*]
         
     return
@@ -489,12 +465,12 @@ declare function f:validationResult_folderSimilar(
  : Creates a validation result for constraint components TargetCount, TargetMinCount, 
  : TargetMaxCount.
  :
- : @param constraint element defining the constraint
  : @param colour the kind of results - green or red
- : @param msg a message overriding the message read from the constraint element
- : @param constraintComp string identifying the constraint component
- : @param constraint an attribute specifying a constraint (e.g. @minCount=...)
- : @param the actual number of target instances
+ : @param ldo Link Definition Object, used to identify the target folders 
+ : @param constraintElem the element declaring the constraint
+ : @param constraintAtt an attribute specifying a constraint (e.g. @minCount=...)
+ : @param targetItems the items representing target resources 
+ : @param targetContextPath  
  : @return a result element 
  :)
 declare function f:validationResult_folderSimilar_count(
@@ -528,7 +504,6 @@ declare function f:validationResult_folderSimilar_count(
             $constraintElem/@resourceShapeID,
             $constraintAtt,
             attribute valueCount {$actCount},
-            attribute targetContextPath {$targetContextPath},
             $linkDefAtts,
             $values
         }
@@ -716,4 +691,30 @@ declare function f:validationResult_concord_exception(
         }
        
 };
+
+(:~
+ : ===============================================================================
+ :
+ :     U t i l i t i e s   
+ :
+ : ===============================================================================
+ :)
+
+declare function f:validateResult_linkDefAtts($ldo as map(*)?,
+                                              $constraintElem as element()?)
+        as attribute()* {
+    let $exprAtts := ( 
+        $constraintElem/@linkName ! attribute linkName {.},
+        ($constraintElem/@foxpath, $ldo?foxpath ! attribute foxpath {.})[1],
+        ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
+        ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
+        ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
+        ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
+        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1],
+        ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
+    )
+    return $exprAtts
+        
+};        
+
 

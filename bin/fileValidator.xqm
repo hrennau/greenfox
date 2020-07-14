@@ -73,9 +73,10 @@ declare function f:validateFileInstance($filePath as xs:string,
 
     (: Update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
-    
-    (: Determine "in-scope components" 
-       - all components to be evaluated in the context of this file resource :)
+    let $context := i:adaptContext($filePath, $fileShape, $context)
+(:    
+    (: Determine in-scope components 
+         = all components to be evaluated in the context of this file resource :)
     let $componentsMap := i:getEvaluationContextScope($filePath, $fileShape, $context)
     
     let $resourceShapes := $componentsMap?resourceShapes
@@ -111,10 +112,13 @@ declare function f:validateFileInstance($filePath as xs:string,
     (: Update the evaluation context so that it contains an entry for each
        variable reference found in the in-scope components :)
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())        
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())
+:)        
     let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id || '_DOCNR_' || $position, $context)
-    
-    let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]        
+(:    
+    let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]
+:)    
+    let $contextDoc := $context?_reqDocs?doc
     let $results := f:validateFileInstanceComponents($filePath, $fileShape, $contextDoc, $contextDoc, $context)
     return $results
 };

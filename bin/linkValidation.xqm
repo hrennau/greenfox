@@ -81,7 +81,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     group by $contextPoint
     let $contextItem := $lro[1]?contextItem  
     return
-        vr:validationResult_linkResolvable($ldo, $constraintElem, $contextItem, $lro, $contextInfo, ())
+        vr:validationResult_linkResolvable($ldo, $lro, $constraintElem, $contextItem, $contextInfo, ())
 };        
 
 (:~

@@ -38,16 +38,70 @@ declare function f:getPotentialBindings() as xs:string+ {
     'linkContext'
 };
 
+declare function f:adaptContext($filePath as xs:string, 
+                                $resourceShape as element(), 
+                                $context as map(*))
+        as map(*) {
+    (: Determine in-scope components 
+         = all components to be evaluated in the context of this file resource :)
+    let $componentsMap := i:getEvaluationContextScope($filePath, $resourceShape, $context)
+    
+    let $resourceShapes := $componentsMap?resourceShapes
+    let $focusNodes := $componentsMap?focusNodes
+    let $coreConstraints := $componentsMap?coreConstraints
+    let $extensionConstraints := $componentsMap?extensionConstraints
+    let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
+    let $ldos := $componentsMap?linkDefs
+    let $constraints := ($coreConstraints, $extensionConstraints)
+    
+    (: Required bindings are a subset of potential bindings :)
+    let $reqBindingsAndDocs := 
+        f:getRequiredBindingsAndDocs(
+            $filePath, 
+            $resourceShape, 
+            $coreConstraints, 
+            $extensionConstraints, 
+            $extensionConstraintComponents,
+            $ldos,
+            $resourceShapes,
+            $focusNodes,
+            $context)
+            
+    let $reqBindings := $reqBindingsAndDocs?requiredBindings
+    let $reqDocs := 
+        map:merge((
+            $reqBindingsAndDocs?xdoc ! map:entry('xdoc', .),
+            $reqBindingsAndDocs?jdoc ! map:entry('jdoc', .),
+            $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .),
+            $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .)
+        ))        
+    
+    (: Update the evaluation context so that it contains an entry for each
+       variable reference found in the in-scope components :)
+    let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())        
+    return $context   
+};
+
 (:~
- : Returns for a given shape the components within the scope of  its evaluation 
+ : ===============================================================================
+ :
+ :     G e t    a l l    i n - s c o p e    c o m p o n e n t s
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Returns for a given shape the components within the scope of its evaluation 
  : context.
  :
- : Returns a map with five fields:
+ : The components are returned in groups, contained by a map with five fields:
  : - resource shapes
  : - focus nodes
  : - core components: all components which are not extension constraints
  : - extensionConstraints: constraints based on extension constraint components
  : - extensionConstraintComponents: extension constraint components referenced by extension constraints
+ : - link definitions
  :
  : @param filePath file path of the focus resource
  : @param shape the shape currently processed
@@ -68,9 +122,12 @@ declare function f:getEvaluationContextScope($filePath as xs:string,
     (: Subset of the constraints which are extension constraint definitions :)
     let $extensionConstraints := f:getExtensionConstraints($constraints)     
     let $coreConstraints := $constraints except $extensionConstraints
+    let $linkDefs := link:getLinkDefs($components, $context)
+    (:
     let $_DEBUG := trace($filePath, '_FILE_PATH: ')
     let $_DEBUG := trace($components/name() => distinct-values(), '_COMP_NAMES: ')
-    let $linkDefs := trace( link:getLinkDefs($components, $context) , '_LINK_DEFS: ')
+    let $_DEBUG := trace($linkDefs?name => distinct-values(), 'LINK_DEF_NAMES: ')
+     :)
     (: Extension constraint components :)
     let $extensionConstraintComponents := f:getExtensionConstraintComponents($extensionConstraints)
     return
@@ -110,11 +167,13 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:folderContent) |
          element(gx:docSimilar) | 
          element(gx:contentCorrespondence) |
-         element(gx:folderSimilar)
+         element(gx:folderSimilar) |
+         element(gx:links)
         return $component
         
     case element(gx:focusNode) return $component
-        
+    
+    (: ifMediatype - continue with children, if mediatype matched :)    
     case $ifMediatype as element(gx:ifMediatype) return
         $ifMediatype
         [i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
@@ -125,6 +184,14 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
         $component/*/f:getEvaluationContextScopeRC($filePath, $shape, .)
     )        
 };        
+
+(:~
+ : ===============================================================================
+ :
+ :     G e t    r e q u i r e d    b i n d i n g s    &    d o c s
+ :
+ : ===============================================================================
+ :)
 
 (:~
  : Provides the names of required variable bindings and required documents.
@@ -146,7 +213,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
  :   document, key 'csvdoc' an XML representation of the CSV document
  :)
 declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
-                                              $gxFile as element(gx:file),
+                                              $resourceShape as element(),
                                               $coreComponents as element()*,
                                               $extensionConstraints as element()*,
                                               $extensionConstraintComponents as element()*,
@@ -157,7 +224,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         as map(*) {
     let $allComponents := ($coreComponents, $extensionConstraints, $extensionConstraintComponents, $resourceShapes, $focusNodes)
     let $focusNodes := $allComponents[. instance of node()]/descendant-or-self::gx:focusNode
-    let $mediatype := $gxFile/@mediatype        
+    let $mediatype := $resourceShape/@mediatype        
     
     (: Required bindings :)
     let $requiredBindings :=
@@ -172,84 +239,89 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $resourceShapes,
                                      $focusNodes,
                                      $context) 
-    (: Required documents :)                                    
-    let $xdoc :=
-        let $required :=            
-            $mediatype = ('xml', 'xml-or-json')
-            or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
-            or not($mediatype) and (
-                $allComponents/(self::gx:xpath, 
-                                self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
-                                self::gx:docSimilar,
-                                self::gx:contentCorrespondence,                                
-                                self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
-                                self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
-                                self::gx:folder/@linkXP,
-                                gx:validatorXPath, 
-                                @validatorXPath) 
-            or exists($ldos[?requiresContextNode])                               
-            or $focusNodes/@xpath)
-        return
-            if (not($required)) then () 
-            else if (not(i:fox-doc-available($filePath))) then ()
-            else i:fox-doc($filePath)
-    let $jdoc :=
-        if ($xdoc) then () else
+    (: Required documents :)   
+    let $requiredDocs :=
+        if (not($resourceShape/self::gx:file)) then () else
         
-        let $required :=
-            $requiredBindings = 'json'
-            or
-            $mediatype = ('json', 'xml-or-json')
-            or 
-            not($mediatype) and (
-                (: Listing reasons for loading JSON document :)
-                $coreComponents/(self::gx:xpath,
-                                 self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
-                                 self::gx:links,
-                                 self::gx:docSimilar,
-                                 self::gx:contentCorrespondence,
-                                 gx:validatorXPath,
-                                 @validatorXPath),
-                $focusNodes/@xpath
-            )
-        return
-            if (not($required)) then ()
-            else
-                let $text := i:fox-unparsed-text($filePath, ())
-                return try {json:parse($text)} catch * {()}
-           
-    let $htmldoc :=
-        if ($xdoc or $jdoc) then () else
+        let $xdoc :=
+            let $required :=            
+                $mediatype = ('xml', 'xml-or-json')
+                or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
+                or not($mediatype) and (
+                    $allComponents/(
+                      self::gx:xpath, 
+                      self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
+                      self::gx:docSimilar,
+                      self::gx:contentCorrespondence,                                
+                      self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
+                      self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
+                      self::gx:folder/@linkXP,
+                      gx:validatorXPath, 
+                      @validatorXPath) 
+                or exists($ldos[?requiresContextNode])                               
+                or $focusNodes/@xpath)
+            return
+                if (not($required)) then () 
+                else if (not(i:fox-doc-available($filePath))) then ()
+                else i:fox-doc($filePath)
+        let $jdoc :=
+            if ($xdoc) then () else
         
-        let $required :=
-            $requiredBindings = 'html'
-            or
-            $mediatype = ('html', 'xml-or-html')
-        return
-            if (not($required)) then ()
-            else
-                let $text := i:fox-unparsed-text($filePath, ())
-                return try {html:parse($text)} catch * {()}
+            let $required :=
+                $requiredBindings = 'json' or
+                $mediatype = ('json', 'xml-or-json') or 
+                not($mediatype) and (
+                    (: Listing reasons for loading JSON document :)
+                    $coreComponents/(
+                      self::gx:xpath,
+                      self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
+                      self::gx:links,
+                      self::gx:docSimilar,
+                      self::gx:contentCorrespondence,
+                      gx:validatorXPath,
+                      @validatorXPath),
+                    $focusNodes/@xpath
+                )
+                return
+                if (not($required)) then ()
+                else
+                    let $text := i:fox-unparsed-text($filePath, ())
+                    return try {json:parse($text)} catch * {()}
            
-    let $csvdoc :=
-        let $required :=
-            $requiredBindings = 'csvdoc'
-            or
-            $mediatype eq 'csv'
-        return
-            if (not($required)) then ()
-            else f:csvDoc($filePath, $gxFile)
+        let $htmldoc :=
+            if ($xdoc or $jdoc) then () else
+        
+            let $required :=
+                $requiredBindings = 'html' or
+                $mediatype = ('html', 'xml-or-html')
+            return
+                if (not($required)) then ()
+                else
+                    let $text := i:fox-unparsed-text($filePath, ())
+                    return try {html:parse($text)} catch * {()}
+           
+        let $csvdoc :=
+            let $required :=
+                $requiredBindings = 'csvdoc' or
+                $mediatype eq 'csv'
+            return
+                if (not($required)) then ()
+                else f:csvDoc($filePath, $resourceShape)
          
-    let $doc := ($xdoc, $jdoc, $htmldoc, $csvdoc) 
-
+        let $doc := ($xdoc, $jdoc, $htmldoc, $csvdoc) 
+        return
+            map:merge((
+                $doc ! map:entry('doc', .),
+                $xdoc ! map:entry('xdoc', .),
+                $jdoc ! map:entry('jdoc', .),
+                $csvdoc ! map:entry('csvdoc', .),
+                $htmldoc ! map:entry('htmldoc', .)
+            ))
+    
     return
         map:merge((
             map:entry('requiredBindings', $requiredBindings),
-            $doc ! map:entry('doc', .),
-            $xdoc ! map:entry('xdoc', .),
-            $jdoc ! map:entry('jdoc', .),
-            $csvdoc ! map:entry('csvdoc', .),
-            $htmldoc ! map:entry('htmldoc', .)
+            $requiredDocs
         ))
 };        
 
