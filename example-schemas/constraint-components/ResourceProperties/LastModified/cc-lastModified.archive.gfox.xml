@@ -42,7 +42,7 @@
     * LastModifiedMatches - lastModified/@matches   
     * LastModifiedNotMatches - lastModified/@notMatches
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified/archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

@@ -57,40 +57,54 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
  : @return validation results
  :)
 declare function f:validateFolderInstance($folderPath as xs:string, 
-                                          $gxFolder as element(), 
+                                          $folderShape as element(), 
                                           $context as map(*)) 
         as element()* {
-    (: update context - new value of _contextPath :)
+    (: update context :)
     let $context := map:put($context, '_contextPath', $folderPath)
-    let $components := $gxFolder/*[not(@deactivated eq 'true')]
+    let $context := i:adaptContext($folderPath, $folderShape, $context)
+        
+    let $childComponents := $folderShape/*[not(@deactivated eq 'true')]
+    
+    let $files := $childComponents/self::gx:file
+    let $folders := $childComponents/self::gx:folder
+    let $focusNodes := $childComponents/self::gx:focusNode
+    
+    let $constraints := $childComponents except ($files, $folders, $focusNodes)
+    let $extensionConstraints := f:getExtensionConstraints($constraints)
+    let $coreConstraints := $constraints except $extensionConstraints
     
     (: collect results :)
     let $results := (
+    
         (: validate - member resources :)
         let $resourceShapeResults := (
-            $components/self::gx:file/i:validateFile(., $context),
-            $components/self::gx:folder/i:validateFolder(., $context)
+            $files/i:validateFile(., $context),
+            $folders/i:validateFolder(., $context)
         )
+        
         (: validate - constraints and value shapes :)
         let $valueShapeResults :=
-            for $child in $components[not((self::gx:targetSize, self::gx:folderSubset, self::gx:file, self::gx:folder))]
+            for $constraint in $constraints[not(self::gx:targetSize)]
             let $error :=
-                typeswitch($child)
+                typeswitch($constraint)
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($folderPath, $folderContent, $context)
                 case $folderSimilar as element(gx:folderSimilar) return f:validateFolderSimilar($folderPath, $folderSimilar, $context)
                 case $lastModified as element(gx:lastModified) return i:validateLastModified($folderPath, $lastModified, $context)
                 case $folderName as element(gx:folderName) return i:validateFileName($folderPath, $folderName, $context)
                 case $foxpath as element(gx:foxpath) return i:validateExpressionValue($folderPath, $foxpath, $folderPath, (), $context)                
-                default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($child)))
+                default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraint)))
             return
                 if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$folderPath}), 'first')
-                else
+                else (
+                    error(QName((), 'SYSTEM_ERROR'), 'Unexpected event: validation without result'),
                     <gx:green>{
-                        attribute constraintComp {$child/local-name()},                    
-                        $child/@id/attribute constraintID {.},
-                        $child/@label/attribute constraintLabel {.},
+                        attribute constraintComp {$constraint/local-name()},                    
+                        $constraint/@id/attribute constraintID {.},
+                        $constraint/@label/attribute constraintLabel {.},
                         attribute folderPath {$folderPath}
                     }</gx:green>
+                )
         return ($resourceShapeResults, $valueShapeResults)                    
     )
     return

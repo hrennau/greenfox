@@ -45,7 +45,6 @@ declare function f:adaptContext($filePath as xs:string,
     (: Determine in-scope components 
          = all components to be evaluated in the context of this file resource :)
     let $componentsMap := i:getEvaluationContextScope($filePath, $resourceShape, $context)
-    
     let $resourceShapes := $componentsMap?resourceShapes
     let $focusNodes := $componentsMap?focusNodes
     let $coreConstraints := $componentsMap?coreConstraints

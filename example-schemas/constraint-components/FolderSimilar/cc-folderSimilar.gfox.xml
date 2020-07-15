@@ -17,7 +17,7 @@
     In this example, any files *.sav.* are ignored, and any *.sav folders are ignored if occurring 
     in the target folder.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder.similar"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

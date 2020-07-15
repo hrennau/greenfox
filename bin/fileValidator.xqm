@@ -69,75 +69,33 @@ declare function f:validateFileInstance($filePath as xs:string,
                                         $position as xs:integer?,
                                         $context as map(*)) 
         as element()* {
-    (: let $_LOG := trace($filePath, 'FILE_PATH: ') :) 
-
     (: Update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $filePath)
     let $context := i:adaptContext($filePath, $fileShape, $context)
-(:    
-    (: Determine in-scope components 
-         = all components to be evaluated in the context of this file resource :)
-    let $componentsMap := i:getEvaluationContextScope($filePath, $fileShape, $context)
-    
-    let $resourceShapes := $componentsMap?resourceShapes
-    let $focusNodes := $componentsMap?focusNodes
-    let $coreConstraints := $componentsMap?coreConstraints
-    let $extensionConstraints := $componentsMap?extensionConstraints
-    let $extensionConstraintComponents := $componentsMap?extensionConstraintComponents
-    let $ldos := $componentsMap?linkDefs
-    let $constraints := ($coreConstraints, $extensionConstraints)
-    
-    (: Required bindings are a subset of potential bindings :)
-    let $reqBindingsAndDocs := 
-        f:getRequiredBindingsAndDocs(
-            $filePath, 
-            $fileShape, 
-            $coreConstraints, 
-            $extensionConstraints, 
-            $extensionConstraintComponents,
-            $ldos,
-            $resourceShapes,
-            $focusNodes,
-            $context)
-            
-    let $reqBindings := $reqBindingsAndDocs?requiredBindings
-    let $reqDocs := 
-        map:merge((
-            $reqBindingsAndDocs?xdoc ! map:entry('xdoc', .),
-            $reqBindingsAndDocs?jdoc ! map:entry('jdoc', .),
-            $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .),
-            $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .)
-        ))        
-    
-    (: Update the evaluation context so that it contains an entry for each
-       variable reference found in the in-scope components :)
-    let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())
-:)        
     let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id || '_DOCNR_' || $position, $context)
-(:    
-    let $contextDoc := ($reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc)[1]
-:)    
     let $contextDoc := $context?_reqDocs?doc
     let $results := f:validateFileInstanceComponents($filePath, $fileShape, $contextDoc, $contextDoc, $context)
     return $results
 };
 
 declare function f:validateFileInstanceComponents($filePath as xs:string,
-                                                  $component as element(),
+                                                  $fileShape as element(),
                                                   $nodeContextItem as node()?,                                                                                                    
                                                   $contextDoc as document-node()?, 
                                                   $context as map(*))
         as element()* {
-    let $contextItem := ($nodeContextItem, $filePath)[1]        
-    let $childComponents := $component/*[not(@deactivated eq 'true')]
+    let $contextItem := ($nodeContextItem, $filePath)[1]
+    
+    let $childComponents := $fileShape/*[not(@deactivated eq 'true')]
+    
     let $files := $childComponents/self::gx:file
     let $folders := $childComponents/self::gx:folder
     let $focusNodes := $childComponents/self::gx:focusNode
+    
     let $constraints := $childComponents except ($files, $folders, $focusNodes)
     let $extensionConstraints := f:getExtensionConstraints($constraints)
     let $coreConstraints := $constraints except $extensionConstraints
-    
+
     let $resourceShapeResults := (
         $files/i:validateFile(., $context),
         $folders/i:validateFolder(., $context)
@@ -158,18 +116,15 @@ declare function f:validateFileInstanceComponents($filePath as xs:string,
             case $links as element(gx:links) return i:validateLinks($filePath, $contextDoc, $contextItem, $links, $context)            
             case $docSimilar as element(gx:docSimilar) return i:validateDocSimilar($filePath, $contextDoc, $contextItem, $docSimilar, $context)
             case $concord as element(gx:contentCorrespondence) return concord:validateConcord($filePath, $contextDoc, $contextItem, $concord, $context)
-            
             case $ifMediatype as element(gx:ifMediatype) return
                 $ifMediatype
                 [i:matchesMediatype((@eq, @in/tokenize(.)), $filePath)]
                 /f:validateFileInstanceComponents($filePath, ., $nodeContextItem, $contextDoc, $context)
-            
             default return 
                 error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
                       concat('Unexpected shape or constraint element, name: ', $constraint/name()))
         let $extensionConstraintResults := 
-            $extensionConstraints/f:validateExtensionConstraint($filePath, ., $contextItem, $contextDoc, $context)
-         
+            $extensionConstraints/f:validateExtensionConstraint($filePath, ., $contextItem, $contextDoc, $context)         
         return (
             $resourceShapeResults, 
             $focusNodeResults,
