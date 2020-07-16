@@ -23,12 +23,10 @@
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
-    <!--
+
     <linkDef name="copyFolder"
-             foxpath="fox-sibling(concat($fileName, '-copy'))"/>
-    -->
-    <linkDef name="copyFolder"
-             foxpath="..\airports-copy"/>
+             foxpath="fox-sibling($fileName || '-copy')"/>
+
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>

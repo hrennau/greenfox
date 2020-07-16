@@ -13,7 +13,7 @@
     
     <linkDef name="summaryReference"
              connector="foxpath"
-             foxpath="fox-sibling($fileName, '\d*.xml$', '-reference.xml')">
+             foxpath="fox-sibling(trace($fileName, '_FILE_NAME: '), '\d*.xml$', '-reference.xml')">
         <constraints countTargetResources="1"/>        
     </linkDef>
     

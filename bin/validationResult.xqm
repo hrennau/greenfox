@@ -435,6 +435,7 @@ declare function f:validationResult_docSimilar_exception(
  :) 
 declare function f:validationResult_folderSimilar(
                                           $colour as xs:string,
+                                          $targetFolder as xs:string,
                                           $ldo as map(*)?,                                          
                                           $constraintElem as element(gx:folderSimilar),
                                           $values as element()*)
@@ -443,6 +444,7 @@ declare function f:validationResult_folderSimilar(
     let $constraintComponent := 'FolderSimilarConstraint'
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id
+ 
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($constraintElem, 'folderSimilar', ())
         else i:getErrorMsg($constraintElem, 'folderSimilar', ())
@@ -454,7 +456,8 @@ declare function f:validationResult_folderSimilar(
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComponent},
             attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},      
+            attribute resourceShapeID {$resourceShapeId},
+            attribute targetURI {$targetFolder},
             $linkDefAtts,
             $modifiers,
             $values

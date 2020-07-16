@@ -451,7 +451,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
     let $context := 
         let $evaluationContext :=
             map:merge((
-                $context?_evaluationContext,
+                $context?_evaluationContext, 
                 
                 (: Add in-scope document :)
                 if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
@@ -469,7 +469,9 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                 
                 (: Add parameter element values :)
                 $params ! map:entry(QName('', @name), string(.))                
-            ))    
+            ),
+            map{'duplicates': 'use-last'}   (: New values override old values :)
+            )  
         return map:put($context, '_evaluationContext', $evaluationContext) !
                map:put(., '_reqDocs', $reqDocs)
     return $context        

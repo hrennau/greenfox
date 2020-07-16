@@ -67,8 +67,12 @@ declare function f:validateDocSimilar($contextURI as xs:string,
 
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
-    let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, 
-        $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
+    let $lros := 
+        let $contextNode := $contextItem[. instance of node()]
+        let $defaultMediatype := map{'mediatype': 'xml'}
+        return
+            link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $defaultMediatype) 
+            [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)
         
     (: Check link constraints :)
     let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 

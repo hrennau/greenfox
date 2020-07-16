@@ -42,17 +42,12 @@ declare function f:validateFolderSimilar($contextURI as xs:string,
         as element()* {
 
     let $evaluationContext := $context?_evaluationContext
-(:
-    (: Adhoc addition of $filePath and $fileName :)
-    let $evaluationContext := map:put($evaluationContext, QName((),'filePath'), $filePath)
-    let $evaluationContext := map:put($evaluationContext, QName((), 'fileName'), replace($filePath, '.*[/\\]', ''))
-    let $context := map:put($context, '_evaluationContext', $evaluationContext)
-:)    
+    
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, (), $context, ())
+                 [not(?targetURI ! i:fox-resource-is-file(.))] (: ignore files :)
     let $targetFolders := $lros?targetURI    
-    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
 
     (: Check the number of items representing the folders with which to compare :)
     let $results_count := f:validateFolderSimilar_count(
@@ -123,7 +118,7 @@ declare function f:validateFolderSimilar_similarity(
     let $keys21 := map:keys($results21)
     return
         if (empty($keys12) and empty($keys21)) then 
-            vr:validationResult_folderSimilar('green', $ldo, $constraintElem, ())
+            vr:validationResult_folderSimilar('green', $targetFolder, $ldo, $constraintElem, ())
         else
             let $values := (
                 if (not(map:contains($results12, 'files1Only'))) then () else
@@ -139,7 +134,7 @@ declare function f:validateFolderSimilar_similarity(
                     $results21?dirs1Only ! <gx:value kind="folder" where="otherFolder">{.}</gx:value>
             )
             return
-                vr:validationResult_folderSimilar('red', $ldo, $constraintElem, $values)
+                vr:validationResult_folderSimilar('red', $targetFolder, $ldo, $constraintElem, $values)
 };
 
 (:~
