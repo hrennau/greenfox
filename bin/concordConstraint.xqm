@@ -49,7 +49,8 @@ declare function f:validateConcord($contextURI as xs:string,
                                    $context as map(xs:string, item()*))
         as element()* {
     
-    (: context info - a container for current file path, current document and datapath of the focus node :)    
+    (: context info - a container for current file path, current document and 
+                      datapath of the focus node :)    
     let $contextInfo := 
         let $focusPath := 
             $contextItem[. instance of node()][not(. is $contextDoc)] ! i:datapath(.)
@@ -75,6 +76,7 @@ declare function f:validateConcord($contextURI as xs:string,
     
     (: Check correspondences :)    
     let $results_correspondence := f:validateConcordPairs($constraintElem, $lros, $contextInfo, $context)
+    
     return ($results_link, $results_correspondence)
 };
 
@@ -86,44 +88,57 @@ declare function f:validateConcord($contextURI as xs:string,
  : ===============================================================================
  :)
 
+(:~
+ : Validates the correspondences defined by 'valueCord' elements.
+ :
+ : @param constraintElem constraint defining element
+ : @param lros Linke Result Objects
+ : @param contextInfo context information
+ : @param context the processing context
+ :)
 declare function f:validateConcordPairs($constraintElem as element(),
                                         $lros as map(*)*,
                                         $contextInfo as map(*),
                                         $context as map(xs:string, item()*))
         as element()* {
         
-    (: Repeat for each combination of link context node and link target document :)
-    for $lro in $lros
+    (: Handle link errors :) 
+    $lros[?errorCode]
+    ! result:validationResult_concord_exception($constraintElem, ., (), (), $contextInfo),
         
-    (: Check for link error :)
+    (: Repeat validation for each combination of link context node and link target document 
+       (represented by a Link Result Object) 
+     :)
+    for $lro in $lros[not(?errorCode)]
+    
+    (: Fetch target nodes :)
+    let $targetNodes := 
+        if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
+        else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
+        else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
+        
     return
-        if ($lro?errorCode) then
-            result:validationResult_concord_exception($constraintElem, $lro, (), (), $contextInfo)
+        (: No target nodes? exception! :)
+        if (not($targetNodes)) then            
+            let $msg :=
+                if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 'Correspondence target resource not found'
+            return
+                result:validationResult_concord_exception(
+                    $constraintElem, $lro, $msg, (), $contextInfo)  
+                        
+        (: Target nodes found :)
         else
-           
-        (: Fetch target nodes :)
-        let $targetNodes := 
-            if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
-            else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
-            else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.) 
-        return
-            if (not($targetNodes)) then            
-                let $msg :=
-                    if ($lro?targetURI ! i:fox-resource-exists(.)) then 
-                        'Correspondence target resource cannot be parsed'
-                    else 'Correspondence target resource not found'
-                return
-                    result:validationResult_concord_exception(
-                        $constraintElem, $lro, $msg, (), $contextInfo)                        
-            else
-
-        (: Fetch context item :)
-        let $contextItem := $lro?contextItem
+            (: Fetch context item :)
+            let $contextItem := $lro?contextItem
         
-        (: Repeat for each constraint defining child of the constraint element :)
-        return
-            $constraintElem/gx:valueCord
-                /f:validateConcordPair(., $contextItem, $targetNodes, $contextInfo, $context)
+            (: Validate each definition of correspondence :)
+            let $results := 
+                $constraintElem/gx:valueCord/f:validateConcordPair(
+                    ., $contextItem, $targetNodes, $contextInfo, $context)
+                               
+            return $results                                
 };
 
 (:~
@@ -163,7 +178,7 @@ declare function f:validateConcordPair($valueCord as element(gx:valueCord),
     let $sourceExprLang := 'xpath'
     let $targetExprLang := 'xpath'    
     
-    (: Count constraints, referring the values of source and target expression :)
+    (: Count constraints, referring to the values of source and target expression :)
     let $countSource := $valueCord/@countSource/xs:integer(.)
     let $minCountSource := $valueCord/@minCountSource/xs:integer(.)
     let $maxCountSource := $valueCord/@maxCountSource/xs:integer(.)    

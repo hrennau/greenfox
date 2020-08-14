@@ -54,7 +54,7 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
     let $results :=        
         for $gfox in $gfox
         let $uri := $gfox/@greenfoxURI
-        let $prefix := $prefixMap($uri)
+        let $prefix := $uri ! $prefixMap(.)
         let $results := $gfox//(gx:red, gx:yellow, gx:green)
         for $result in $results
         let $filePath := $result/../(@folder, @file)
@@ -112,7 +112,7 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
             <gx:greenfoxSchemas>{
                 $gfox/<xs:greenfoxSchema documentURI="{@greenfoxDocumentURI}" 
                                          greenfoxURI="{@greenfoxURI}"
-                                         greenfoxPrefix="{$prefixMap(@greenfoxURI)}"
+                                         greenfoxPrefix="{@greenfoxURI ! $prefixMap(.)}"
                                          countErrors="{@countErrors}"/>
             }</gx:greenfoxSchemas>,
             $resources

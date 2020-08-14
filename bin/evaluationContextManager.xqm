@@ -165,6 +165,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:foxpath) | 
          element(gx:folderContent) |
          element(gx:docSimilar) | 
+         element(gx:expressionPairs) |
          element(gx:contentCorrespondence) |
          element(gx:folderSimilar) |
          element(gx:links)
@@ -251,6 +252,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:xpath, 
                       self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
                       self::gx:docSimilar,
+                      self::gx:expressionPairs,
                       self::gx:contentCorrespondence,                                
                       self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
                       self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
@@ -276,6 +278,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
                       self::gx:links,
                       self::gx:docSimilar,
+                      self::gx:expressionPairs,
                       self::gx:contentCorrespondence,
                       gx:validatorXPath,
                       @validatorXPath),

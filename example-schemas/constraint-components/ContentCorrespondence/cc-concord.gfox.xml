@@ -2,6 +2,9 @@
 <!-- 
     Demonstrates the use of constraint component Concord (ContentCorrespondence). In this simple
     example, all names and all prices in the context document must also occur in the target document.
+    This is checked using the value comparator 'in'.
+    
+    The target document is selected by a link definition (here: Foxpath expression).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/concord"
           xmlns="http://www.greenfox.org/ns/schema">

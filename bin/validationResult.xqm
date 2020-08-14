@@ -516,6 +516,106 @@ declare function f:validationResult_folderSimilar_count(
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
+ :         E x p r e s s i o n   P a i r    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of an Expression Pair constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node.
+ :
+ : @param constraintElem an element declaring an ExpressionPair constraint
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
+declare function f:validationResult_expressionPair_exception(
+                                            $constraintElem as element(),
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintComp := 'ExpressionPair'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
+       
+};
+
+(:~
+ : Creates a validation result for a ContentCorrespondenceCount related 
+ : constraint (ContentCorrespondenceSourceCount, ...SourceMinCount, ...SourceMaxCount, 
+ : ContentCorrespondenceTargetCount, ...TargetMinCount, ...TargetMaxCount).
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
+ : @param constraint a constraint expressing attribute (e.g. @sourceMinCount)
+ : @param valueCount the actual number of values 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_expressionPair_counts($colour as xs:string,
+                                                          $valuePair as element(),
+                                                          $constraint as attribute(),
+                                                          $valueCount as item()*,
+                                                          $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintConfig :=
+        typeswitch($constraint)
+        case attribute(count1)    return map{'constraintComp': 'ExpressionPairValue1Count',    'atts': ('count1')}
+        case attribute(minCount1) return map{'constraintComp': 'ExpressionPairValue1MinCount', 'atts': ('minCount1')}        
+        case attribute(maxCount1) return map{'constraintComp': 'ExpressionPairValue1MaxCount', 'atts': ('maxCount1')}        
+        case attribute(count2)    return map{'constraintComp': 'ExpressionPairValue2Count',    'atts': ('count2')}
+        case attribute(minCount2) return map{'constraintComp': 'ExpressionPairValue2MinCount', 'atts': ('minCount2')}        
+        case attribute(maxCount2) return map{'constraintComp': 'ExpressionPairValue2MaxCount', 'atts': ('maxCount2')}        
+        default return error()
+    
+    let $standardAttNames := $constraintConfig?atts
+    let $standardAtts := $valuePair/@*[local-name(.) = $standardAttNames]
+    let $valueCountAtt := attribute valueCount {$valueCount} 
+    
+    let $resourceShapeId := $valuePair/@resourceShapeID
+    let $constraintElemId := $valuePair/@id
+    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($valuePair, $constraint/local-name(.), ())
+        else i:getErrorMsg($valuePair, $constraint/local-name(.), ())
+    let $elemName := 'gx:' || $colour
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintConfig?constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            $filePath,
+            $focusNode,
+            $standardAtts,
+            $valueCountAtt            
+        }       
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
  :         C o n t e n t    C o r r e s p o n d e n c e    c o n s t r a i n t
  :
  : ===============================================================================
