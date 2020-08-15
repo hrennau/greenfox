@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<projects>
+<projects minDate="2018-01-01" maxDate="2020-05-31">
     <project name="P1" startDate="2020-01-01" endDate="2020-12-31">
         <milestone date="2020-04-01"/>
     </project>

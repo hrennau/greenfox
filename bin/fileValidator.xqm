@@ -79,17 +79,17 @@ declare function f:validateFileInstance($contextURI as xs:string,
     let $context := i:adaptContext($contextURI, $fileShape, $context)
     let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id || '_DOCNR_' || $position, $context)
     let $contextDoc := $context?_reqDocs?doc
-    let $results := f:validateFileInstanceComponents($contextURI, $fileShape, $contextDoc, $contextDoc, $context)
+    let $results := f:validateFileInstanceComponents($contextURI, $contextDoc, $contextDoc, $fileShape, $context)
     return $results
 };
 
 declare function f:validateFileInstanceComponents($contextURI as xs:string,
-                                                  $fileShape as element(),
-                                                  $nodeContextItem as node()?,                                                                                                    
-                                                  $contextDoc as document-node()?, 
+                                                  $contextDoc as document-node()?,
+                                                  $contextNode as node()?,                                                  
+                                                  $fileShape as element(),                                                                                                    
                                                   $context as map(*))
         as element()* {
-    let $contextItem := ($nodeContextItem, $contextURI)[1]
+    let $contextItem := ($contextNode, $contextURI)[1]
     
     let $childComponents := $fileShape/*[not(@deactivated eq 'true')]
     
@@ -130,18 +130,18 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
             case $docSimilar as element(gx:docSimilar) return 
                 i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
             case $expressionPairs as element(gx:expressionPairs) return 
-                expair:validateExpressionPairConstraint($contextURI, $contextDoc, $nodeContextItem, $expressionPairs, $context)            
+                expair:validateExpressionPairConstraint($contextURI, $contextDoc, $contextNode, $expressionPairs, $context)            
             case $concord as element(gx:contentCorrespondence) return 
                 concord:validateConcord($contextURI, $contextDoc, $contextItem, $concord, $context)
             case $ifMediatype as element(gx:ifMediatype) return
                 $ifMediatype
                 [i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]
-                /f:validateFileInstanceComponents($contextURI, ., $nodeContextItem, $contextDoc, $context)
+                /f:validateFileInstanceComponents($contextURI, $contextDoc, $contextNode, ., $context)
             default return 
                 error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
                       concat('Unexpected shape or constraint element, name: ', $constraint/name()))
         let $extensionConstraintResults := 
-            $extensionConstraints/f:validateExtensionConstraint($contextURI, ., $contextItem, $contextDoc, $context)         
+            $extensionConstraints/f:validateExtensionConstraint($contextURI, $contextDoc, $contextNode, ., $context)         
         return (
             $resourceShapeResults, 
             $focusNodeResults,
@@ -204,9 +204,9 @@ declare function f:validateFocusNode($contextURI as xs:string,
             else $focusNode/root()
         return
             f:validateFileInstanceComponents($contextURI, 
-                                             $focusNodeShape, 
-                                             $focusNode, 
-                                             $focusNodeDoc, 
+                                             $focusNodeDoc,
+                                             $focusNode,
+                                             $focusNodeShape,                                             
                                              $context)
     return
         ($results_target, $results_other)

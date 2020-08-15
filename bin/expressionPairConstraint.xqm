@@ -160,7 +160,6 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
         case 'le' return function($op1, $op2) {$op1 <= $op2}
         case 'gt' return function($op1, $op2) {$op1 > $op2}
         case 'ge' return function($op1, $op2) {$op1 >= $op2}
-        case 'in' return function($op1, $op2) {$op1 = $op2}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))
 
     (: (2.2) Function processing multiple items second operand :)
@@ -205,7 +204,7 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
         let $colour := if (exists($violations)) then 'red' else 'green'                
         return (
             $results_expr2Count,
-            result:validationResult_concord($colour, $violations, $cmp, $expressionPair, $contextInfo)
+            result:validationResult_expressionPair($colour, $violations, $cmp, $expressionPair, $contextInfo)
         )                                             
     return ($results_expr1Count, $results)            
 };    

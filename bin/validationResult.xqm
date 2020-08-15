@@ -522,6 +522,53 @@ declare function f:validationResult_folderSimilar_count(
  :)
 
 (:~
+ : Constructs a validation result obtained from an ExpressionPair constraint.
+ :
+ : @param colour describes the success status - success, failure, warning
+ : @param violations items violating the constraint
+ : @param cmp operator of comparison
+ : @param valuePair an element declaring an ExpressionValue Constraint
+ : @contextInfo informs about the focus document and focus node
+ :)
+declare function f:validationResult_expressionPair($colour as xs:string,
+                                                   $violations as item()*,
+                                                   $cmp as xs:string,
+                                                   $expressionPair as element(),
+                                                   $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintId := $expressionPair/../@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $cmpAtt := $cmp ! attribute valueRelationship {.}
+    let $useDatatypeAtt := $expressionPair/@useDatatype ! attribute useDatatype {.}
+    let $flagsAtt := $expressionPair/@flags[string()] ! attribute flags {.}
+    let $constraintComp := 'ExpressionPair-' || $cmp
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($expressionPair, $cmp, ())
+        else i:getErrorMsg($expressionPair, $cmp, ())
+    let $elemName := concat('gx:', $colour)
+    let $expr1Lang := 'xpath'
+    let $expr2Lang := 'xpath'    
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $filePathAtt,
+            $focusNodeAtt,
+            $expressionPair/@expr1XP ! attribute expr1 {.},
+            attribute expr1Lang {$expr1Lang},            
+            $expressionPair/@expr2XP ! attribute expr2 {.},
+            attribute expr2Lang {$expr2Lang},
+            $cmpAtt,
+            $useDatatypeAtt,
+            $flagsAtt,
+            $violations ! <gx:value>{.}</gx:value>
+        }
+       
+};
+
+(:~
  : Creates a validation result expressing an exceptional condition 
  : which prevents normal evaluation of an Expression Pair constraint.
  : Such an exceptional condition is, for example, a failure to parse 
