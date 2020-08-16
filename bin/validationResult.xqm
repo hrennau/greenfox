@@ -534,7 +534,8 @@ declare function f:validationResult_expressionPair($colour as xs:string,
                                                    $violations as item()*,
                                                    $cmp as xs:string,
                                                    $expressionPair as element(),
-                                                   $contextInfo as map(xs:string, item()*))
+                                                   $contextInfo as map(xs:string, item()*),
+                                                   $additionalAtts as attribute()*)
         as element() {
     let $constraintId := $expressionPair/../@id
     let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
@@ -563,6 +564,7 @@ declare function f:validationResult_expressionPair($colour as xs:string,
             $cmpAtt,
             $useDatatypeAtt,
             $flagsAtt,
+            $additionalAtts,
             $violations ! <gx:value>{.}</gx:value>
         }
        
@@ -620,7 +622,8 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
                                                           $valuePair as element(),
                                                           $constraint as attribute(),
                                                           $valueCount as item()*,
-                                                          $contextInfo as map(xs:string, item()*))
+                                                          $contextInfo as map(xs:string, item()*),
+                                                          $additionalAtts as attribute()*)
         as element() {
     let $constraintConfig :=
         typeswitch($constraint)
@@ -655,7 +658,8 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
             $filePath,
             $focusNode,
             $standardAtts,
-            $valueCountAtt            
+            $valueCountAtt,
+            $additionalAtts            
         }       
 };
 
