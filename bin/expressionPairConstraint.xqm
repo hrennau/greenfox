@@ -124,10 +124,9 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
     let $useDatatype := $expressionPair/@useDatatype/resolve-QName(., ..)     
     
     (: Context kind :)
-    let $expr2Context := trace(
+    let $expr2Context :=
         let $attName := local-name($cmp) || 'Context'
         return $expressionPair/@*[local-name(.) eq $attName]
-, '_EXPR2_CONTEXT: ')
     let $expr1 := $expr1XP
     let $expr2 := $expr2XP
    
@@ -135,27 +134,25 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
     let $expr2Lang := 'xpath'    
     
     (: Source expr value :)
-    let $expr1ItemsRaw := i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())    
+    let $items1 := i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())    
     
-    let $expr1Items :=
-        if (empty($useDatatype)) then $expr1ItemsRaw else 
-        $expr1ItemsRaw ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
+    let $items1Typed :=
+        if (empty($useDatatype)) then $items1 else 
+        $items1 ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
     
     (: Check the number of items of the source expression value :)
     let $results_expr1Count :=
-        f:validateExpressionPairCounts($expr1Items, 'expr1', $expressionPair, $contextInfo)
+        f:validateExpressionPairCounts($items1, 'expr1', $expressionPair, (), $contextInfo)
     
     (: Function items
        ============== :)       
     (: (1) Expression 2 value generator function :)
-    let $getExpr2Items := function($contextItem) {
-        let $_DEBUG := trace($contextItem, '_CONTEXT_ITEM: ')
-        let $_DEBUG := trace($expr2, '_EXPR2: ')
+    let $getItems2 := function($contextItem) {
         let $items := 
             if ($expr2Lang eq 'foxpath') then 
                 i:evaluateFoxpath($expr2, $contextInfo?filePath, $evaluationContext, true())
-            else trace(
-                i:evaluateXPath($expr2, $contextItem, $evaluationContext, true(), true()) , 'ITEMS2: ')
+            else
+                i:evaluateXPath($expr2, $contextItem, $evaluationContext, true(), true())
         return
             if (empty($useDatatype)) then $items 
             else $items ! i:castAs(., $useDatatype, ()) 
@@ -186,38 +183,79 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
     (: Produce results
        =============== :)       
     let $results :=
-        (: context 2 = item from value 1        
-           ----------------------------- :)
+        (: expression 2 context = item from expression 1        
+           --------------------------------------------- :)
         if ($expr2Context eq '#item') then
+            (: quantifier 'all' :)
             if ($quantifier eq 'all') then
-                for $item at $pos in $expr1ItemsRaw
-                let $cmpItem := $expr1Items[$pos]
+                for $item1 at $pos in $items1
+                let $item1Typed := $items1Typed[$pos]
                 return
-                    if ($cmpItem instance of element(gx:red)) then
+                    if ($item1Typed instance of element(gx:red)) then
                         result:validationResult_expressionPair(
-                            'red', $cmpItem, $cmp, $expressionPair, $contextInfo, ())
+                            'red', $item1Typed, $cmp, $expressionPair, $contextInfo, ())
                     else (
-                        let $items2 := $getExpr2Items($item)
-                        let $violation := $item[not($cmpTrue($cmpItem, $items2))]
+                        let $items2 := $getItems2($item1)
+                        let $violation := $item1[not($cmpTrue($item1Typed, $items2))]
                         let $colour := if (exists($violation)) then 'red' else 'green'                        
                         return (
                             result:validationResult_expressionPair(
                                 $colour, $violation, $cmp, $expressionPair, $contextInfo, ()),
-                            f:validateExpressionPairCounts(
-                                $items2, 'expr2', $expressionPair, $contextInfo)
+                            f:validateExpressionPairCounts($items2, 'expr2', $expressionPair, $item1, $contextInfo)
                         )
                     )                                
-            else error()                        
-        
-        
-        (: expression 2 context: independent of expression 1 items :)
+            else
+                (: quantifier: 'some' or 'forEachSome' :)
+                let $itemReports :=
+                    for $item1 at $pos in $items1
+                    let $item1Typed := $items1Typed[$pos]
+                    return
+                        map:merge((
+                            map:entry('item1', $item1),
+                            if ($item1Typed instance of element(gx:red)) then
+                                map:entry('datatypeError', 
+                                    result:validationResult_expressionPair(
+                                        'red', $item1Typed, $cmp, $expressionPair, $contextInfo, ()))
+                            else
+                                let $items2 := $getItems2($item1)
+                                let $countResults :=
+                                    f:validateExpressionPairCounts(
+                                        $items2, 'expr2', $expressionPair, $item1, $contextInfo)
+                                let $match := $cmpTrue($item1Typed, $items2)
+                                return (
+                                    map:entry('countResults', $countResults),
+                                    map:entry('match', $match)
+                                )
+                        ))
+                return (
+                    $itemReports?countResults,
+                    $itemReports?datatypeError,
+
+                    if ($quantifier eq 'some') then
+                        let $match := exists($itemReports[?match])
+                        let $colour := if ($match) then 'green' else 'red'
+                        return
+                            result:validationResult_expressionPair(
+                                $colour, (), $cmp, $expressionPair, $contextInfo, ())
+                    else if ($quantifier eq 'forEachItemSome') then        
+                        let $violations := 
+                            for $itemReport at $pos in $itemReports
+                            return if ($itemReport?match) then () else $items1Typed[$pos]
+                        let $colour := if (empty($violations)) then 'green' else 'red'
+                        return (
+                            result:validationResult_expressionPair(
+                                $colour, $violations, $cmp, $expressionPair, $contextInfo, ())
+                        )
+                    else error(QName((), 'SCHEMA_ERROR'), concat('Unknown quantifier @quant: ', $quantifier))                        
+                )
+        (: expression 2 context: independent of expression 1 items 
+           ------------------------------------------------------- :)
         else
-            (: Get expr#2 value items :)
-            let $expr2Items := $contextNode/$getExpr2Items(.)
-        
+            (: Get value of expression 2 :)
+            let $items2 := $contextNode/$getItems2(.)
+
             (: Check the number of items of the source expression value :)
-            let $results_expr2Count :=
-                f:validateExpressionPairCounts($expr2Items, 'expr2', $expressionPair, $contextInfo)
+            let $results_expr2Count := f:validateExpressionPairCounts($items2, 'expr2', $expressionPair, (), $contextInfo)
     
             (:
              : Identify source expression items for which the correspondence 
@@ -225,21 +263,21 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
              :) 
             let $violations :=
                 if ($cmp = ('in', 'notin')) then
-                    for $expr1Item at $pos in $expr1Items
-                    where $expr1Item instance of element(gx:red) or 
-                          not($cmpTrueAgg($expr1Item, $expr2Items))
-                    return $expr1ItemsRaw[$pos]
+                    for $item1Typed at $pos in $items1Typed
+                    where $item1Typed instance of element(gx:red) or 
+                          not($cmpTrueAgg($item1Typed, $items2))
+                    return $items1[$pos]
                 else if ($quantifier eq 'all') then
-                    for $expr1Item at $pos in $expr1Items
-                    where $expr1Item instance of element(gx:red) or 
-                          exists($expr2Items[not($cmpTrue($expr1Item, .))])
-                    return $expr1ItemsRaw[$pos]
+                    for $item1Typed at $pos in $items1Typed
+                    where $item1Typed instance of element(gx:red) or 
+                          exists($items2[not($cmpTrue($item1Typed, .))])
+                    return $items1[$pos]
                 else if ($quantifier eq 'some') then                
-                    for $expr1Item at $pos in $expr1Items
-                    where $expr1Item instance of element(gx:red) or
-                          (every $v in $expr2Items satisfies not($cmpTrue($expr1Item, $v)))
-                    return $expr1ItemsRaw[$pos]
-                else error()    
+                    for $item1Typed at $pos in $items1Typed
+                    where $item1Typed instance of element(gx:red) or
+                          (every $v in $items2 satisfies not($cmpTrue($item1Typed, $v)))
+                    return $items1[$pos]
+                else error(QName((), 'SCHEMA_ERROR'), concat('Unexpected quantifier: ', $quantifier))    
             let $colour := if (exists($violations)) then 'red' else 'green'                
             return (
                 $results_expr2Count,
@@ -260,12 +298,14 @@ declare function f:validateExpressionPair($expressionPair as element(gx:expressi
  : @param items the items returned by an expression
  : @param exprRole the role of the expression - source or target expression
  : @valueCord the element declaring the count constraint
+ : @item1 the value from expression 1 serving as context item when evaluating expession 2
  : @param contextInfo informs about the focus document and focus node
  : @return validation results
  :)
 declare function f:validateExpressionPairCounts($items as item()*,
                                                 $exprRole as xs:string, (: source | target :)
                                                 $expressionPair as element(),
+                                                $contextItem1 as item()?,
                                                 $contextInfo as map(xs:string, item()*))
         as element()* {
         
@@ -288,7 +328,8 @@ declare function f:validateExpressionPairCounts($items as item()*,
             default return error()
         let $colour := if ($green) then 'green' else 'red'        
         return  
-            result:validationResult_expressionPair_counts($colour, $expressionPair, $countConstraint, $valueCount, $contextInfo, ())
+            result:validationResult_expressionPair_counts(
+                $colour, $expressionPair, $countConstraint, $valueCount, $contextItem1, $contextInfo, ())
     return $results        
 };
 

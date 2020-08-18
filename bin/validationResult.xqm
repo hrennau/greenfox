@@ -543,6 +543,7 @@ declare function f:validationResult_expressionPair($colour as xs:string,
     let $cmpAtt := $cmp ! attribute valueRelationship {.}
     let $useDatatypeAtt := $expressionPair/@useDatatype ! attribute useDatatype {.}
     let $flagsAtt := $expressionPair/@flags[string()] ! attribute flags {.}
+    let $quantifierAtt := ($expressionPair/@quant, 'all')[1] ! attribute quantifier {.}
     let $constraintComp := 'ExpressionPair-' || $cmp
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($expressionPair, $cmp, ())
@@ -564,6 +565,7 @@ declare function f:validationResult_expressionPair($colour as xs:string,
             $cmpAtt,
             $useDatatypeAtt,
             $flagsAtt,
+            $quantifierAtt,
             $additionalAtts,
             $violations ! <gx:value>{.}</gx:value>
         }
@@ -622,6 +624,7 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
                                                           $valuePair as element(),
                                                           $constraint as attribute(),
                                                           $valueCount as item()*,
+                                                          $contextItem1 as item()?,
                                                           $contextInfo as map(xs:string, item()*),
                                                           $additionalAtts as attribute()*)
         as element() {
@@ -644,6 +647,14 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
     let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+    
+    let $contextItem1Att :=
+        if (empty($contextItem1)) then ()
+        else 
+            let $attValue := if (not($contextItem1 instance of node())) then $contextItem1
+                             else if (not($contextItem1/*)) then $contextItem1
+                             else $contextItem1/i:datapath(.)
+            return attribute contextItem1 {$attValue}                             
 
     let $msg := 
         if ($colour eq 'green') then i:getOkMsg($valuePair, $constraint/local-name(.), ())
@@ -659,6 +670,7 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
             $focusNode,
             $standardAtts,
             $valueCountAtt,
+            $contextItem1Att,
             $additionalAtts            
         }       
 };
