@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<projects minDate="2018-01-01" maxDate="2020-05-31">
+<projects minDate="2018-01-01" maxDate="2020-08-19">
     <project name="P1" startDate="2020-01-01" endDate="2020-12-31">
-        <milestone date="2020-04-01"/>
         <milestone date="2020-01-02"/>
+        <milestone date="2020-04-01"/>        
     </project>
-    <project name="P2" startDate="2018-01-01" endDate="2020-12-31">
-        <milestone date="2019-06-01"/>
+    <project name="P2" startDate="2018-01-01" endDate="2018-12-31">
+        <milestone date="2018-06-01"/>
+    </project>
+    <project name="P3" startDate="2020-08-18">
+        <milestone date="2020-08-19"/>
     </project>
 </projects>
