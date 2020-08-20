@@ -516,6 +516,134 @@ declare function f:validationResult_folderSimilar_count(
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
+ :         E x p r e s s i o n   c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
+declare function f:validationResult_expression($constraintElem as element(),
+                                               $colour as xs:string,
+                                               $exprValue as item()*,                                               
+                                               $expr as xs:string,
+                                               $exprLang as xs:string,                                               
+                                               $constraint as node()*,
+                                               $additionalAtts as attribute()*,
+                                               $additionalElems as element()*,
+                                               $contextInfo as map(xs:string, item()*),
+                                               $options as map(*)?)
+        as element() {
+    let $constraint1 := $constraint[1]    
+    let $constraintConfig :=
+        typeswitch($constraint1)
+        case attribute(eq) return map{'constraintComp': 'ExpressionEq', 'atts': ('eq', 'useDatatype', 'quant')}
+        case attribute(ne) return map{'constraintComp': 'ExpressionNe', 'atts': ('ne', 'useDatatype', 'quant')}
+        case element(gx:in) return map{'constraintComp': 'ExpressionIn', 'atts': ('useDatatype')}
+        case element(gx:notin) return map{'constraintComp': 'ExpressionNotin', 'atts': ('useDatatype')}
+        case element(gx:contains) return map{'constraintComp': 'ExpressionContains', 'atts': ('useDatatype')}
+        case attribute(lt) return map{'constraintComp': 'ExpressionLt', 'atts': ('lt', 'useDatatype', 'quant')}        
+        case attribute(le) return map{'constraintComp': 'ExpressionLe', 'atts': ('le', 'useDatatype', 'quant')}        
+        case attribute(gt) return map{'constraintComp': 'ExpressionGt', 'atts': ('gt', 'useDatatype', 'quant')}        
+        case attribute(ge) return map{'constraintComp': 'ExpressionGe', 'atts': ('ge', 'useDatatype', 'quant')}
+        
+        case attribute(datatype) return map{'constraintComp': 'ExprValueDatatype', 'atts': ('datatype', 'useDatatype', 'quant')}
+        case attribute(matches) return map{'constraintComp': 'ExprValueMatches', 'atts': ('matches', 'useDatatype', 'quant')}
+        case attribute(notMatches) return map{'constraintComp': 'ExprValueNotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
+        case attribute(like) return map{'constraintComp': 'ExprValueLike', 'atts': ('like', 'useDatatype', 'quant')}        
+        case attribute(notLike) return map{'constraintComp': 'ExprValueNotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
+        case attribute(length) return map{'constraintComp': 'ExprValueLength', 'atts': ('length', 'quant')}
+        case attribute(minLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('minLength', 'quant')}        
+        case attribute(maxLength) return map{'constraintComp': 'ExprValueMinLength', 'atts': ('maxLength', 'quant')}        
+        case attribute(eqXPath) return map{'constraintComp': 'ExprValueEqXPath', 'atts': ('eqXPath', 'useDatatype', 'quant')}
+        case attribute(neXPath) return map{'constraintComp': 'ExprValueNeXPath', 'atts': ('neXPath', 'useDatatype', 'quant')}
+        case attribute(leXPath) return map{'constraintComp': 'ExprValueLeXPath', 'atts': ('leXPath', 'useDatatype', 'quant')}
+        case attribute(ltXPath) return map{'constraintComp': 'ExprValueLtXPath', 'atts': ('ltXPath', 'useDatatype', 'quant')}
+        case attribute(geXPath) return map{'constraintComp': 'ExprValueGeXPath', 'atts': ('geXPath', 'useDatatype', 'quant')}
+        case attribute(gtXPath) return map{'constraintComp': 'ExprValueGtXPath', 'atts': ('gtXPath', 'useDatatype', 'quant')}
+        case attribute(inXPath) return map{'constraintComp': 'ExprValueInXPath', 'atts': ('inXPath', 'useDatatype', 'quant')}        
+        case attribute(containsXPath) return map{'constraintComp': 'ExprValueContainsXPath', 'atts': ('containsXPath', 'useDatatype')}
+        case attribute(containsFoxpath) return map{'constraintComp': 'ExprValueContainsFoxpath', 'atts': ('containsFoxpath', 'useDatatype')}
+        case attribute(eqFoxpath) return map{'constraintComp': 'ExprValueEqFoxpath', 'atts': ('eqFoxpath', 'useDatatype', 'quant')}
+        case attribute(neFoxpath) return map{'constraintComp': 'ExprValueNeFoxpath', 'atts': ('neFoxpath', 'useDatatype', 'quant')}
+        case attribute(ltFoxpath) return map{'constraintComp': 'ExprValueLtFoxpath', 'atts': ('ltFoxpath', 'useDatatype', 'quant')}
+        case attribute(leFoxpath) return map{'constraintComp': 'ExprValueLeFoxpath', 'atts': ('leFoxpath', 'useDatatype', 'quant')}
+        case attribute(gtFoxpath) return map{'constraintComp': 'ExprValueGtFoxpath', 'atts': ('gtFoxpath', 'useDatatype', 'quant')}
+        case attribute(geFoxpath) return map{'constraintComp': 'ExprValueGeFoxpath', 'atts': ('geFoxpath', 'useDatatype', 'quant')}
+        case attribute(inFoxpath) return map{'constraintComp': 'ExprValueInFoxpath', 'atts': ('inFoxpath', 'useDatatype', 'quant')}        
+        case attribute(itemsUnique) return map{'constraintComp': 'ExprValueItemsUnique', 'atts': ('itemsUnique')}
+        default return error()
+    let $valueShapeId := $constraintElem/@valueShapeID
+    let $constraintId := concat($valueShapeId, '-', $constraint1/local-name(.))
+    let $filePath := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
+    
+    let $standardAttNames := $constraintConfig?atts
+    let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
+    let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
+    let $valueCountAtt := attribute valueCount {count($exprValue)} 
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint1/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraint1/local-name(.), ())
+    let $elemName := 
+        switch($colour)
+        case 'red' return 'gx:red'
+        default return concat('gx:', $colour)
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintConfig?constraintComp},
+            attribute constraintID {$constraintId},
+            attribute valueShapeID {$valueShapeId},            
+            $constraintElem/@label/attribute constraintLabel {.},
+            $filePath,
+            $focusNode,
+            $standardAtts,
+            $additionalAtts,
+            $valueCountAtt,            
+            attribute exprLang {$exprLang},
+            attribute expr {$expr},
+            $additionalElems
+        }       
+};
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of an Expression Pair constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node.
+ :
+ : @param constraintElem an element declaring an ExpressionPair constraint
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
+declare function f:validationResult_expression_exception(
+                                            $constraintElem as element(),
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraintComp := 'Expression'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
+    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
+       
+};
+
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
  :         E x p r e s s i o n   P a i r    c o n s t r a i n t
  :
  : ===============================================================================

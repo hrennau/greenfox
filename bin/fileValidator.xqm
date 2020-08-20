@@ -21,12 +21,16 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "resourcePropertiesConstraint.xqm",    
     "xsdValidator.xqm";
 
-import module namespace concord="http://www.greenfox.org/ns/xquery-functions/concord" at
-
+import module namespace concord="http://www.greenfox.org/ns/xquery-functions/concord" 
+at
     "concordConstraint.xqm";
 
-import module namespace expair="http://www.greenfox.org/ns/xquery-functions/expression-pair" at
-
+import module namespace expr="http://www.greenfox.org/ns/xquery-functions/expression" 
+at
+    "expressionConstraint.xqm";
+    
+import module namespace expair="http://www.greenfox.org/ns/xquery-functions/expression-pair" 
+at
     "expressionPairConstraint.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -129,6 +133,8 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 i:validateLinks($contextURI, $contextDoc, $contextItem, $links, $context)            
             case $docSimilar as element(gx:docSimilar) return 
                 i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
+            case $expressions as element(gx:expressions) return 
+                expr:validateExpressionConstraint($contextURI, $contextDoc, $contextNode, $expressions, $context)            
             case $expressionPairs as element(gx:expressionPairs) return 
                 expair:validateExpressionPairConstraint($contextURI, $contextDoc, $contextNode, $expressionPairs, $context)            
             case $concord as element(gx:contentCorrespondence) return 
