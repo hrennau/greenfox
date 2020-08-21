@@ -25,6 +25,38 @@ declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
+ : Returns the name of a validation result element.
+ :
+ : @param colour the validation result colour (green, yellow, red)
+ : @return the element name, as a lexical QName
+ :)
+declare function f:getResultElemName($colour as xs:string)
+        as xs:string {
+    'gx:' || $colour
+}; 
+
+(:~
+ : Returns the text of an error message or of an OK message. The message name is the 
+ : concatenation of a prefix and the substring 'Msg' or 'MsgOK' - for example 'minCountMsg',
+ : or 'minCountMsgOK'.
+ :
+ : @param elems one or more elements which may contain the message attribute
+ : @param msgNamePrefix the first part of the message attribute name
+ : @param defaultMsg a default message, in case there is no explicit message
+ : @return the first message text found, checking the elements in order
+ :)
+declare function f:getResultMsg($colour as xs:string,
+                                $elems as element()+, 
+                                $msgNamePrefix as xs:string,
+                                $defaultMsg as xs:string?)
+        as xs:string? {
+    if ($colour eq 'red') then f:getErrorMsg($elems, $msgNamePrefix, $defaultMsg)
+    else if ($colour eq 'yellow') then f:getErrorMsg($elems, $msgNamePrefix, $defaultMsg)
+    else if ($colour eq 'green') then f:getOkMsg($elems, $msgNamePrefix, $defaultMsg)
+    else error()    
+};
+
+(:~
  : Returns the text of an error message. The message name is the concatenation
  : of a prefix and the substring 'Msg' - for example 'minCountMsg'.
  :

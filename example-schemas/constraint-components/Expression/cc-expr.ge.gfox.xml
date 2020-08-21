@@ -2,7 +2,7 @@
 <!-- 
     Demonstrates the use of constraint component Expression.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression-pairs.ge"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression.ge"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,9 +15,9 @@
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <expressions>
-                    <expression exprXP="//project/@startDate" 
+                    <expression exprXP="//project/(@startDate, @endDate, milestone/@date)" 
                                 minCount="1" minCountMsg="At least one start date expected."  
-                                ge="2018-01-01" geMsg="Start date should be > 2018-01-01"/>
+                                datatype="date"/>
                 </expressions>
             </file>
         </folder>
