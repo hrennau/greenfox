@@ -582,7 +582,7 @@ declare function f:validationResult_expression($constraintElem as element(),
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraint1/local-name(.), ())
+    let $msg := i:getResultMsg($colour, $constraintElem, trace($constraint1/local-name(.), '_CONSTRAINT_NAME: '), ())
     let $elemName := i:getResultElemName($colour)
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}

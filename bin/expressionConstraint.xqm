@@ -162,6 +162,7 @@ declare function f:validateExpression($constraintElem as element(gx:expression),
     (
         f:validateExpressionCounts($exprValue, $constraintElem, $contextInfo),
         f:validateExpression_cmp($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $contextInfo),    
+        f:validateExpression_in($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $contextInfo),
         ()
     )
     return
@@ -174,16 +175,20 @@ declare function f:validateExpression_cmp($exprValue as item()*,
                                           $quantifier as xs:string,                                               
                                           $constraintElem as element(),
                                           $contextInfo as map(xs:string, item()*))
-        as element() {
+        as element()* {
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()    
+    let $flags := string($constraintElem/@flags)
+    let $useDatatype := $constraintElem/@useDatatype/resolve-QName(., ..)
+    let $typedItems := 
+        if (empty($useDatatype)) then $exprValue else 
+            $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
+    
     for $cmp in $constraintElem/(
         @eq, @ne, @lt, @le, @gt, @ge, 
         @matches, @notMatches, @like, @notLike, 
         @length, @minLength, @maxLength, 
-        @datatype)
-    let $resultAdditionalAtts := ()
-    let $resultOptions := ()    
-    let $flags := string($constraintElem/@flags)
-    
+        @datatype)    
     let $cmpTrue :=
         typeswitch($cmp)
         case attribute(eq) return function($op1, $op2) {$op1 = $op2}        
@@ -201,17 +206,12 @@ declare function f:validateExpression_cmp($exprValue as item()*,
         case attribute(maxLength) return function($op1, $op2) {string-length($op1) <= $op2}        
         case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}       
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))        
-    
-    let $useDatatype := $constraintElem/@useDatatype/resolve-QName(., ..)
     let $useCmp :=
         if ($cmp/self::attribute(like)) then $cmp/i:glob2regex(.)
         else if ($cmp/self::attribute(notLike)) then $cmp/i:glob2regex(.)
         else if ($cmp/self::attribute(datatype)) then $cmp        
         else if (empty($useDatatype)) then $cmp 
         else i:castAs($cmp, $useDatatype, ())
-    let $typedItems := 
-        if (empty($useDatatype)) then $exprValue else 
-            $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
     let $results :=
         if ($quantifier eq 'all') then 
             let $violations := $typedItems ! (
@@ -233,6 +233,174 @@ declare function f:validateExpression_cmp($exprValue as item()*,
     return
         $results
 };      
+
+(:~
+ : Validates ExpressionIn and ExpressionNotin constraints.
+ :)
+declare function f:validateExpression_in($exprValue as item()*,
+                                          $expr as xs:string,
+                                          $exprLang as xs:string,
+                                          $quantifier as xs:string,                                               
+                                          $constraintElem as element(),
+                                          $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $constraints := $constraintElem/(gx:in, gx:notin)
+    return if (not($constraints)) then () else
+    
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()    
+    let $fn_matches := function($item, $constraint) {
+        some $alternative in $constraint/* satisfies
+        typeswitch($alternative)
+        case element(gx:eq) return $item = $alternative
+        case element(gx:ne) return $item != $alternative
+        case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
+        case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+        default return error()    
+    }
+    let $flags := string($constraintElem/@flags)        
+    for $cmp in $constraints
+    return
+        typeswitch($cmp)
+        case element(gx:in) return
+            if ($quantifier eq 'all') then            
+                let $violations := $exprValue[not($fn_matches(., $cmp))]
+                let $colour := if (exists($violations)) then 'red' else 'green'
+                return
+                    result:validationResult_expression(
+                        $constraintElem, $colour, $exprValue, $violations, $expr, $exprLang, $cmp,
+                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+            else if ($quantifier eq 'some') then
+                let $conforms := some $item in $exprValue satisfies $fn_matches($item, $cmp)
+                let $colour := if ($conforms) then 'green' else 'red'                
+                return
+                    result:validationResult_expression(
+                        $constraintElem, $colour, $exprValue, $exprValue[not($conforms)], $expr, $exprLang, $cmp,
+                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+            else error()                        
+        case element(gx:notin) return
+            if ($quantifier eq 'all') then
+                let $violations := $exprValue[$fn_matches(., $cmp)]
+                let $colour := if (exists($violations)) then 'red' else 'green'
+                return
+                    result:validationResult_expression(
+                        $constraintElem, $colour, $exprValue, $violations, $expr, $exprLang, $cmp,
+                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+            else if ($quantifier eq 'some') then
+                let $conforms := some $item in $exprValue satisfies not($fn_matches($item, $cmp))
+                let $colour := if ($conforms) then 'green' else 'red'                
+                return
+                    result:validationResult_expression(
+                        $constraintElem, $colour, $exprValue, $exprValue[not($conforms)], $expr, $exprLang, $cmp,
+                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                
+        default return error()
+};        
+
+(:
+declare function f:validateExpression_in($exprValue as item()*,
+                                         $quantifier as xs:string,
+                                         $valueShape as element(),
+                                         $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $in := $valueShape/gx:in
+    return
+    
+    if (not($in)) then () else
+    
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[not(
+                some $alternative in $in/* satisfies
+                    typeswitch($alternative)
+                        case element(gx:eq) return . = $alternative
+                        case element(gx:ne) return . != $alternative
+                        case element(gx:like) return i:matchesLike(., $alternative, $alternative/@flags)
+                        case element(gx:notLike) return not(i:matchesLike(., $alternative, $alternative/@flags))                        
+                        default return error(QName((), 'ILLFORMED_GREENFOX_SCHEMA'), concat("Unexpected child of 'in': ", name($alternative)))                
+            )]                    
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $in, $exprValue, 
+                                                   $resultAdditionalAtts,
+                                                   ($violations => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                   $contextInfo, $resultOptions)
+        else if ($quantifier eq 'some') then
+            let $conforms :=
+                some $item in $exprValue, $alternative in $in/* satisfies
+                typeswitch($alternative)
+                    case element(gx:eq) return $item = $alternative
+                    case element(gx:ne) return $item != $alternative
+                    case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
+                    case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+                    default return error()                
+            return
+                if ($conforms) then ()
+                else f:validationResult_expression('red', $valueShape, $in, $exprValue, 
+                                                   $resultAdditionalAtts, 
+                                                   ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                   $contextInfo, $resultOptions)
+    return
+        if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $in, $exprValue, 
+                                                                     $resultAdditionalAtts, (), 
+                                                                     $contextInfo, $resultOptions)
+};        
+
+declare function f:validateExpressionValue_notin($exprValue as item()*,
+                                                 $quantifier as xs:string,
+                                                 $valueShape as element(),
+                                                 $contextInfo as map(xs:string, item()*))
+        as element() {
+    let $notin := $valueShape/gx:notin
+    return
+    
+    if (not($notin)) then () else
+    
+    let $resultAdditionalAtts := ()
+    let $resultOptions := ()
+    
+    let $errors :=
+        if ($quantifier eq 'all') then 
+            let $violations := $exprValue[
+                some $alternative in $notin/* satisfies
+                    typeswitch($alternative)
+                        case element(gx:eq) return . = $alternative
+                        case element(gx:ne) return . != $alternative
+                        case element(gx:like) return i:matchesLike(., $alternative, $alternative/@flags)
+                        case element(gx:notLike) return not(i:matchesLike(., $alternative, $alternative/@flags))                        
+                        default return error()                
+            ]                    
+            return
+                if (empty($violations)) then () 
+                else f:validationResult_expression('red', $valueShape, $notin, $exprValue, 
+                                                   $resultAdditionalAtts, 
+                                                   ($violations => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                   $contextInfo, $resultOptions)
+        else if ($quantifier eq 'some') then
+            let $conforms :=
+                some $item in $exprValue, $alternative in $notin/* satisfies not(
+                typeswitch($alternative)
+                    case element(gx:eq) return $item = $alternative
+                    case element(gx:ne) return $item != $alternative
+                    case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
+                    case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+                    default return error()
+                )
+            return
+                if ($conforms) then ()
+                else f:validationResult_expression('red', $valueShape, $notin, $exprValue, 
+                                                   $resultAdditionalAtts, 
+                                                   ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, 
+                                                   $contextInfo, $resultOptions)
+    return
+        if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $notin, $exprValue, 
+                                                                     $resultAdditionalAtts, (), 
+                                                                     $contextInfo, $resultOptions)
+};        
+:)
 
 (:~
  : Validates the count constraints expressed by an `expression` element:

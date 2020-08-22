@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component Expression, declaring a 'matches' constraint.
+    Demonstrates the use of constraint component Expression, declaring an 'in' constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression.matches"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression.in"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,9 +15,16 @@
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <expressions>
-                    <expression exprXP="//project/@name" 
-                                minCount="1" minCountMsg="At least one start date expected."  
-                                matches="[A-Z]\d+" matchesMsg="Project name must start with uc letter followed by digits"/>
+                    <expression exprXP="/projects/project/@name" 
+                                minCount="1" minCountMsg="At least one project expected."  
+                                inMsg="Project name not whitelisted.">
+                        <in>
+                            <eq>P1</eq>
+                            <eq>P2</eq>
+                            <eq>P3</eq>
+                            <like>YY*</like>
+                        </in>
+                    </expression>
                 </expressions>
             </file>
         </folder>
