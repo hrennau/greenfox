@@ -72,7 +72,7 @@ declare function f:validateLastModified($filePath as xs:string,
             else attribute flags {$flags}
         )
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -114,7 +114,7 @@ declare function f:validateFileSize($filePath as xs:string,
         let $colour := if ($violation) then 'red' else 'green'
         let $additionalAtts := ()
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -164,7 +164,7 @@ declare function f:validateFileName($filePath as xs:string,
             else attribute flags {$flags}
         )
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
     return $results                        
 };
 

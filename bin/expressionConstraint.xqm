@@ -49,23 +49,14 @@ declare function f:validateExpressionConstraint($contextURI as xs:string,
                                                 $context as map(xs:string, item()*))
         as element()* {
     
-    (: context info - a container for current file path, current document and datapath of the focus node :)    
-    let $contextInfo := 
-        let $focusPath := $contextNode[not(. is $contextDoc)] ! i:datapath(.)
-        return  
-            map:merge((
-                $contextURI ! map:entry('filePath', .),
-                $contextDoc ! map:entry('doc', .),
-                $focusPath ! map:entry('nodePath', .)))
-    return
-        (: Exception - no context document :)
-        if (not($contextInfo?doc)) then
-            result:validationResult_expression_exception($constraintElem,
-                'Context resource could not be parsed', (), $contextInfo)
-        else
+    (: Exception - no context document :)
+    if (not($context?_targetInfo?doc)) then
+        result:validationResult_expression_exception($constraintElem,
+            'Context resource could not be parsed', (), $context)
+    else
         
     (: Check expression pairs :)    
-    let $results := f:validateExpressions($constraintElem, $contextNode, $contextInfo, $context)
+    let $results := f:validateExpressions($constraintElem, $contextNode, $context)
     
     return $results
 };
@@ -80,11 +71,10 @@ declare function f:validateExpressionConstraint($contextURI as xs:string,
 
 declare function f:validateExpressions($constraintElem as element(),
                                        $contextNode as node()?,
-                                       $contextInfo as map(*),
                                        $context as map(xs:string, item()*))
         as element()* {
         
-    $constraintElem/gx:expression/f:validateExpression(., $contextNode, $contextInfo, $context)
+    $constraintElem/gx:expression/f:validateExpression(., $contextNode, $context)
 };
 
 (:~
@@ -96,17 +86,16 @@ declare function f:validateExpressions($constraintElem as element(),
  :
  : @param expressionPair element declaring an ExpressionPair constraint
  : @param contextNode a context node to be used instead of the document root element
- : @param contextInfo informs about the focus document and focus node 
  : @param context the processing context
  : @return validation results
  :)
 declare function f:validateExpression($constraintElem as element(gx:expression),
                                       $contextNode as node()?,
-                                      $contextInfo as map(xs:string, item()*),
                                       $context as map(*))
         as element()* {
-    let $contextURI := $contextInfo?filePath
-    let $contextNode := ($contextNode, $contextInfo?doc)[1]
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
     let $evaluationContext := $context?_evaluationContext
     
     (: Read expression :)
@@ -160,9 +149,9 @@ declare function f:validateExpression($constraintElem as element(gx:expression),
     
     let $results := 
     (
-        f:validateExpressionCounts($exprValue, $constraintElem, $contextInfo),
-        f:validateExpression_cmp($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $contextInfo),    
-        f:validateExpression_in($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $contextInfo),
+        f:validateExpressionCounts($exprValue, $constraintElem, $context),
+        f:validateExpression_cmp($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $context),    
+        f:validateExpression_in($exprValue, $expr, $exprLang, $quantifier, $constraintElem, $context),
         ()
     )
     return
@@ -174,8 +163,9 @@ declare function f:validateExpression_cmp($exprValue as item()*,
                                           $exprLang as xs:string,
                                           $quantifier as xs:string,                                               
                                           $constraintElem as element(),
-                                          $contextInfo as map(xs:string, item()*))
+                                          $context as map(xs:string, item()*))
         as element()* {
+    let $targetInfo := $context?_targetInfo        
     let $resultAdditionalAtts := ()
     let $resultOptions := ()    
     let $flags := string($constraintElem/@flags)
@@ -222,14 +212,14 @@ declare function f:validateExpression_cmp($exprValue as item()*,
             return 
                 result:validationResult_expression($constraintElem, $colour, $exprValue, $violations, $expr, $exprLang, $cmp,
                                               $resultAdditionalAtts, (),                                            
-                                              $contextInfo, $resultOptions)
+                                              $context, $resultOptions)
         else if ($quantifier eq 'some') then 
             let $match := exists($typedItems[$cmpTrue(., $useCmp)]) 
             let $colour := if ($match) then 'green' else 'red'
             return
                 result:validationResult_expression($constraintElem, $colour, $exprValue, (), $expr, $exprLang, $cmp,
                                               $resultAdditionalAtts, (), 
-                                              $contextInfo, $resultOptions)
+                                              $context, $resultOptions)
     return
         $results
 };      
@@ -242,8 +232,9 @@ declare function f:validateExpression_in($exprValue as item()*,
                                           $exprLang as xs:string,
                                           $quantifier as xs:string,                                               
                                           $constraintElem as element(),
-                                          $contextInfo as map(xs:string, item()*))
-        as element() {
+                                          $context as map(xs:string, item()*))
+        as element()* {
+    let $targetInfo := $context?_targetInfo        
     let $constraints := $constraintElem/(gx:in, gx:notin)
     return if (not($constraints)) then () else
     
@@ -269,14 +260,14 @@ declare function f:validateExpression_in($exprValue as item()*,
                 return
                     result:validationResult_expression(
                         $constraintElem, $colour, $exprValue, $violations, $expr, $exprLang, $cmp,
-                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                        $resultAdditionalAtts, (), $context, $resultOptions)
             else if ($quantifier eq 'some') then
                 let $conforms := some $item in $exprValue satisfies $fn_matches($item, $cmp)
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_expression(
                         $constraintElem, $colour, $exprValue, $exprValue[not($conforms)], $expr, $exprLang, $cmp,
-                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                        $resultAdditionalAtts, (), $context, $resultOptions)
             else error()                        
         case element(gx:notin) return
             if ($quantifier eq 'all') then
@@ -285,14 +276,14 @@ declare function f:validateExpression_in($exprValue as item()*,
                 return
                     result:validationResult_expression(
                         $constraintElem, $colour, $exprValue, $violations, $expr, $exprLang, $cmp,
-                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                        $resultAdditionalAtts, (), $context, $resultOptions)
             else if ($quantifier eq 'some') then
                 let $conforms := some $item in $exprValue satisfies not($fn_matches($item, $cmp))
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_expression(
                         $constraintElem, $colour, $exprValue, $exprValue[not($conforms)], $expr, $exprLang, $cmp,
-                        $resultAdditionalAtts, (), $contextInfo, $resultOptions)
+                        $resultAdditionalAtts, (), $context, $resultOptions)
                 
         default return error()
 };        
@@ -413,9 +404,9 @@ declare function f:validateExpressionValue_notin($exprValue as item()*,
  :)
 declare function f:validateExpressionCounts($items as item()*,
                                             $constraintElem as element(),
-                                            $contextInfo as map(xs:string, item()*))
+                                            $context as map(xs:string, item()*))
         as element()* {
-        
+    let $targetInfo := $context?_targetInfo        
     let $countConstraints := $constraintElem/(@count, @minCount, @maxCount)
     let $results :=
         if (empty($countConstraints)) then () else
@@ -433,7 +424,7 @@ declare function f:validateExpressionCounts($items as item()*,
         let $colour := if ($green) then 'green' else 'red'        
         return  
             result:validationResult_expression_counts(
-                $colour, $constraintElem, $countConstraint, $valueCount, $contextInfo, ())
+                $colour, $constraintElem, $countConstraint, $valueCount, $context, ())
     return $results        
 };
 

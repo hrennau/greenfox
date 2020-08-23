@@ -205,6 +205,8 @@ declare function f:validateFocusNode($contextURI as xs:string,
     (: Other validation results :)
     let $results_other :=
         for $focusNode in $focusNodes
+        let $context := i:updateEvaluationContext_focusNode($focusNode, $context)
+        (: let $_DEBUG := f:DEBUG_CONTEXT($focusNodeShape/@id || '-AFTER_UPD_FOCUSNODE', $context) :)
         let $focusNodeDoc :=
             if ($focusNode/ancestor::node() intersect $contextDoc) then $contextDoc
             else $focusNode/root()

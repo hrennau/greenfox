@@ -95,10 +95,11 @@ declare function f:validationResultValues($value as item()*,
 declare function f:validationResult_fileProperties($colour as xs:string,
                                                    $constraintElem as element(),
                                                    $constraint as attribute(),
-                                                   $filePath as xs:string,
+                                                   $context as map(xs:string, item()*),
                                                    $actualValue as item(),
                                                    $additionalAtts as attribute()*) 
         as element() {
+    let $contextURI := $context?_targetInfo?contextURI        
     let $constraintComp :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
         $constraint/i:firstCharToUpperCase(local-name(.))
@@ -142,7 +143,7 @@ declare function f:validationResult_fileProperties($colour as xs:string,
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
             attribute resourceShapeID {$resourceShapeId},   
-            $filePath ! attribute filePath {.},
+            $contextURI ! attribute filePath {.},
             $constraint,
             $additionalAtts,
             $values
@@ -705,9 +706,10 @@ declare function f:validationResult_expression_counts($colour as xs:string,
                                                       $constraintElem as element(),
                                                       $constraint as attribute(),
                                                       $valueCount as item()*,
-                                                      $contextInfo as map(xs:string, item()*),
+                                                      $context as map(xs:string, item()*),
                                                       $additionalAtts as attribute()*)
         as element() {
+    let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
         typeswitch($constraint)
         case attribute(count)    return map{'constraintComp': 'ExpressionCount',    'atts': ('count')}
@@ -722,8 +724,8 @@ declare function f:validationResult_expression_counts($colour as xs:string,
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintElemId := $constraintElem/@id
     let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}    
+    let $filePath := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNode := $targetInfo?focusNodePath ! attribute nodePath {.}    
     let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.), ())
     let $elemName := i:getResultElemName($colour)
     return
@@ -749,19 +751,20 @@ declare function f:validationResult_expression_counts($colour as xs:string,
  : @param constraintElem an element declaring an ExpressionPair constraint
  : @param exception an optional message string
  : @param addAtts additional attributes 
- : @param contextInfo informs about the focus document and focus node
+ : @param context processing context
  : @return a red validation result
  :)
 declare function f:validationResult_expression_exception(
                                             $constraintElem as element(),
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
-                                            $contextInfo as map(xs:string, item()*))
+                                            $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo        
     let $constraintComp := 'Expression'        
     let $constraintId := $constraintElem/@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
     let $msg := $exception
     return
         element {'gx:red'} {

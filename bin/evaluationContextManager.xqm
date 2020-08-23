@@ -479,7 +479,22 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
             map{'duplicates': 'use-last'}   (: New values override old values :)
             )  
         return map:put($context, '_evaluationContext', $evaluationContext) !
-               map:put(., '_reqDocs', $reqDocs)
+               map:put(., '_reqDocs', $reqDocs) !
+               map:put(., '_targetInfo', map{'contextURI': $context?_contextPath, 'doc': $doc})
     return $context        
-};  
+}; 
+
+(:~
+ : Extends the evaluation context, adding the current focus node.
+ :
+ : @param focusNode current focus node
+ : @param context the evaluation context
+ : @return updated evaluation context
+ :)
+declare function f:updateEvaluationContext_focusNode($focusNode as node(), $context as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    let $targetInfo := $context?_targetInfo
+    let $newTargetInfo := map:put($targetInfo, 'focusNode', $focusNode) ! map:put(., 'focusNodePath', $focusNode/i:datapath(.))
+    return map:put($context, '_targetInfo', $newTargetInfo)
+};        
 
