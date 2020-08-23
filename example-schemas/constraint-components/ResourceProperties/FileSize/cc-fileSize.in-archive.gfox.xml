@@ -1,31 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components FileSizeXY.
-    
-    This example checks resources contained by an archive file.
-    
-    Constraint components:
-    * Name:  FileSizeGt 
-    - XML:   fileSize/@gt 
-    - Check: The file size must be greater than the specified limit
-    
-    * Name:  FileSizeLe 
-    - XML:   fileSize/@le 
-    - Check: The file size must be less than or equal to the specified limit
-    
-    In this example, validation catches 
-    * empty files (with size "0").
-    * files larger 1000 Bytes
-    
-    The complete set of file size related constraint components is:
-    * FileNameGt - fileSize/@gt
-    * FileNameGe - fileSize/@ge
-    * FileNameLt - fileSize/@lt
-    * FileNameLe - fileSize/@le
-    * FileNameEq - fileSize/@eq
-    * FileNameNe - fileSize/@ne    
+    Demonstrates the use of constraint components FileSize... . See
+    example 'cc-fileSize.gfox.xml' for further details.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-size"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-size.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

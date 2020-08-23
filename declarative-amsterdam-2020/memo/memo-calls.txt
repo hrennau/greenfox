@@ -1,0 +1,9 @@
+# emptyFiles
+greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles.gfox.xml
+
+# emptyFiles-ignFlagFiles
+greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles-ignFlagFiles.gfox.xml
+greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles-ignFlagFiles2.gfox.xml
+
+# specify domain explicitly
+greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles.gfox.xml,domain=/projects/sap

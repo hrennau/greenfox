@@ -8,13 +8,16 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at 
     "tt/_foxpath.xqm";    
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
     "greenfoxUtil.xqm";
 
-import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at
     "validationResult.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -27,22 +30,24 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateLastModified($filePath as xs:string, $constraint as element(gx:lastModified), $context)
+declare function f:validateLastModified($filePath as xs:string, 
+                                        $constraintElem as element(gx:lastModified), 
+                                        $context as map(*))
         as element()* {
-    let $constraintId := $constraint/@id
-    let $constraintLabel := $constraint/@label
+    let $constraintId := $constraintElem/@id
+    let $constraintLabel := $constraintElem/@label
     
-    let $lt := $constraint/@lt
-    let $gt := $constraint/@gt
-    let $le := $constraint/@le
-    let $ge := $constraint/@ge
-    let $eq := $constraint/@eq
-    let $like := $constraint/@like
-    let $notLike := $constraint/@notLike
-    let $matches := $constraint/@matches
-    let $notMatches := $constraint/@notMatches
+    let $lt := $constraintElem/@lt
+    let $gt := $constraintElem/@gt
+    let $le := $constraintElem/@le
+    let $ge := $constraintElem/@ge
+    let $eq := $constraintElem/@eq
+    let $like := $constraintElem/@like
+    let $notLike := $constraintElem/@notLike
+    let $matches := $constraintElem/@matches
+    let $notMatches := $constraintElem/@notMatches
     
-    let $flags := string($constraint/@flags)
+    let $flags := string($constraintElem/@flags)
     
     (: let $actValue := file:last-modified($filePath) ! string(.) :)
     let $actValue := i:resourceLastModified($filePath) ! string(.)
@@ -67,7 +72,7 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
             else attribute flags {$flags}
         )
         return   
-            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -79,19 +84,20 @@ declare function f:validateLastModified($filePath as xs:string, $constraint as e
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateFileSize($filePath as xs:string, $constraint as element(gx:fileSize), $context)
+declare function f:validateFileSize($filePath as xs:string, 
+                                    $constraintElem as element(gx:fileSize), 
+                                    $context as map(*))
         as element()* {
-    let $constraintId := $constraint/@id
-    let $constraintLabel := $constraint/@label
+    let $constraintId := $constraintElem/@id
+    let $constraintLabel := $constraintElem/@label
 
-    let $eq := $constraint/@eq
-    let $ne := $constraint/@ne
-    let $lt := $constraint/@lt
-    let $le := $constraint/@le    
-    let $gt := $constraint/@gt
-    let $ge := $constraint/@ge
+    let $eq := $constraintElem/@eq
+    let $ne := $constraintElem/@ne
+    let $lt := $constraintElem/@lt
+    let $le := $constraintElem/@le    
+    let $gt := $constraintElem/@gt
+    let $ge := $constraintElem/@ge
     
-    (: let $actValue := file:size($filePath) :)
     let $actValue := i:resourceFileSize($filePath)
     
     let $results := 
@@ -108,7 +114,7 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
         let $colour := if ($violation) then 'red' else 'green'
         let $additionalAtts := ()
         return   
-            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
     return $results                        
 };
 
@@ -120,22 +126,23 @@ declare function f:validateFileSize($filePath as xs:string, $constraint as eleme
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateFileName($filePath as xs:string, $constraint as element(gx:fileName), $context)
+declare function f:validateFileName($filePath as xs:string, 
+                                    $constraintElem as element(gx:fileName), 
+                                    $context as map(*))
         as element()* {
-    let $constraintId := $constraint/@id
-    let $constraintLabel := $constraint/@label
+    let $constraintId := $constraintElem/@id
+    let $constraintLabel := $constraintElem/@label
     
-    let $eq := $constraint/@eq
-    let $ne := $constraint/@ne    
-    let $like := $constraint/@like
-    let $notLike := $constraint/@notLike    
-    let $matches := $constraint/@matches
-    let $notMatches := $constraint/@notMatches
+    let $eq := $constraintElem/@eq
+    let $ne := $constraintElem/@ne    
+    let $like := $constraintElem/@like
+    let $notLike := $constraintElem/@notLike    
+    let $matches := $constraintElem/@matches
+    let $notMatches := $constraintElem/@notMatches
     
-    let $flags := ($constraint/@flags, '')[1]
-    let $case := ($constraint/@case/xs:boolean(.), false())[1]
+    let $flags := ($constraintElem/@flags, '')[1]
+    let $case := ($constraintElem/@case/xs:boolean(.), false())[1]
 
-    (: let $actValue := file:name($filePath) :)
     let $actValue := i:resourceName($filePath)
     let $actValueED := if ($case) then $actValue else lower-case($actValue)
     let $results := 
@@ -157,10 +164,11 @@ declare function f:validateFileName($filePath as xs:string, $constraint as eleme
             else attribute flags {$flags}
         )
         return   
-            f:constructError_fileProperties($filePath, $colour, $constraint, $facet, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $filePath, $actValue, $additionalAtts)
     return $results                        
 };
 
+(:
 (:~
  : Writes a validation result, for constraint components FileName*, FileSize*,
  : LastModified*.
@@ -212,7 +220,7 @@ declare function f:constructError_fileProperties($filePath as xs:string,
                           $constraint/local-name(.), 
                           concat($resourcePropertyName, ' should ', $compare,
                           " '", $constraint, "'"))
-    let $values := vr:validationResultValues($actualValue, $constraintElem)
+    let $values := result:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
     return
@@ -228,3 +236,4 @@ declare function f:constructError_fileProperties($filePath as xs:string,
             $values
         }                                          
 };
+:)

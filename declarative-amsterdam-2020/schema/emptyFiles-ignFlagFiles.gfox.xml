@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Detects empty files, but ignores any files with a name "flag*". Note the @foxpath
+    attribute on the file shape, which exclues files "flag*" from the target resources.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/declarative-amsterdam2020/emptyFiles-ignFlagFiles"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\with-empty-file"/>
+    </context>
+    
+    <domain path="${domain}" name="Some root folder">
+        <folder foxpath="." id="rootFolderShape">
+            <targetSize countMsg="Missing folder" count="1"/>            
+            <file foxpath=".\\(* except flag*)" id="fileShape">
+                <targetSize minCount="1" minCountMsg="At least one file expected"/>
+                <fileSize gt="0" gtMsg="Empty files not allowed"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

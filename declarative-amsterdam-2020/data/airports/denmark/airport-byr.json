@@ -1,0 +1,22 @@
+{
+  "airport":{
+    "id":613,
+    "iata":"BYR",
+    "icao":"EKLS",
+    "name":"Læsø Airport",
+    "city":"Laeso",
+    "country":"Denmark",
+    "geo":{
+      "latitude":57.277198791503906,
+      "longitude":11.000100135803223,
+      "altitude":25
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

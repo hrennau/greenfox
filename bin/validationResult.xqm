@@ -72,6 +72,82 @@ declare function f:validationResultValues($value as item()*,
         default return ()                
 };     
 
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         t a r g e t    c o u n t    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Writes a validation result, for constraint components FileName*, FileSize*,
+ : LastModified*.
+ :
+ : @param colour the colour of the result
+ : @param constraintElem the element containing the attributes declaring the constraint
+ : @param constraint the main attribute declaring the constraint 
+ : @param actualValue the actual value of the file property
+ : @param additionalAtts additional attributes to be included in the result
+ : @return an element representing a 'red' or 'green' validation result
+ :)
+declare function f:validationResult_fileProperties($colour as xs:string,
+                                                   $constraintElem as element(),
+                                                   $constraint as attribute(),
+                                                   $filePath as xs:string,
+                                                   $actualValue as item(),
+                                                   $additionalAtts as attribute()*) 
+        as element() {
+    let $constraintComp :=
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraint/i:firstCharToUpperCase(local-name(.))
+        
+    let $resourcePropertyName :=
+        switch(local-name($constraintElem))
+        case 'fileName' return 'File name'
+        case 'fileSize' return 'File size'
+        case 'lastModified' return 'Last modified time'
+        default return error()
+        
+    let $compare :=
+        switch(local-name($constraint))
+        case 'eq' return 'be equal to'
+        case 'ne' return 'not be equal to'
+        case 'lt' return 'be less than'
+        case 'le' return 'be less than or equal to'        
+        case 'gt' return 'be greater than'
+        case 'ge' return 'be greater than or equal to'        
+        case 'like' return 'match the pattern'
+        case 'notLike' return 'not match the pattern'
+        case 'matches' return 'match the regex'
+        case 'notMatches' return 'not match the regex'
+        default return 'satisfy'
+        
+    let $elemName := 'gx:' || $colour    
+    let $msg := 
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
+        else 
+            i:getErrorMsg($constraintElem, 
+                          $constraint/local-name(.), 
+                          concat($resourcePropertyName, ' should ', $compare,
+                          " '", $constraint, "'"))
+    let $values := f:validationResultValues($actualValue, $constraintElem)
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
+    return
+    
+        element {$elemName} {
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},   
+            $filePath ! attribute filePath {.},
+            $constraint,
+            $additionalAtts,
+            $values
+        }                                          
+};
 
 (:~
  : Creates a validation result for a LinkResolvable constraint. The result

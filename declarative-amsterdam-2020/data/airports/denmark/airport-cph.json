@@ -1,0 +1,22 @@
+{
+  "airport":{
+    "id":609,
+    "iata":"CPH",
+    "icao":"EKCH",
+    "name":"Copenhagen Kastrup Airport",
+    "city":"Copenhagen",
+    "country":"Denmark",
+    "geo":{
+      "latitude":55.617900848389,
+      "longitude":12.656000137329,
+      "altitude":17
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

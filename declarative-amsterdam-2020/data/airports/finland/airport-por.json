@@ -1,0 +1,22 @@
+{
+  "airport":{
+    "id":448,
+    "iata":"POR",
+    "icao":"EFPO",
+    "name":"Pori Airport",
+    "city":"Pori",
+    "country":"Finland",
+    "geo":{
+      "latitude":61.461700439453,
+      "longitude":21.799999237061,
+      "altitude":44
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}
