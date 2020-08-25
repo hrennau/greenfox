@@ -171,9 +171,11 @@ declare function f:compileGreenfox_addIds($gfox as element(gx:greenfox)) {
             (: Add further attributes, if applicable (@resourceShapeID, @valueShapeID) :)
             let $furtherAtts:=
                 typeswitch($elem[1])
-                case element(gx:file) | element(gx:folder) return
+                case element(gx:file) | element(gx:folder) return (
+                    attribute resourceShapePath {f:getSchemaPath($elem[1], ())},
                     if ($elem/@resourceShapeID) then ()
                     else attribute resourceShapeID {$idValue}
+                )
                 case element(gx:xpath) | element(gx:foxpath) | element(gx:links) return
                     if ($elem/@valueShapeID) then ()
                     else attribute valueShapeID {$idValue}
@@ -219,7 +221,9 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
     (: Divers elements - add @resourceShapeID :)
     case element() return
         let $resourceShapeID :=
-            if ($n/(self::gx:expressions,
+            if ($n/(self::gx:expression,
+                    self::gx:expressions,
+                    self::gx:expressionPair,
                     self::gx:expressionPairs,
                     self::gx:xpath,
                     self::gx:foxpath,
@@ -235,7 +239,7 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:folderSimilar,
                     self::gx:folderContent,
                     self::gx:xsdValid)) then  
-                $n/ancestor::*[self::gx:file, self::gx:folder][1]/@resourceShapeID
+                $n/ancestor::*[self::gx:file, self::gx:folder][1]/(@resourceShapeID, @resourceShapePath)
             else ()                
         return
             element {node-name($n)} {
@@ -274,5 +278,6 @@ declare function f:compileGreenfox_resolveReference($gxComponent as element()) a
     return
         $target
 };
+
 
 

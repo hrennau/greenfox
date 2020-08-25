@@ -622,15 +622,18 @@ declare function f:validationResult_expression($constraintElem as element(),
                                                $violations as item()*,
                                                $expr as xs:string,
                                                $exprLang as xs:string,                                               
-                                               $constraint as node()+,
+                                               $constraint as node(),
                                                $additionalAtts as attribute()*,
                                                $additionalElems as element()*,
                                                $contextInfo as map(xs:string, item()*),
                                                $options as map(*)?)
         as element() {
-    let $constraint1 := $constraint[1]        
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraint)
+    
     let $constraintConfig :=
-        typeswitch($constraint1)
+        typeswitch($constraint)
         case attribute(eq) return map{'constraintComp': 'ExpressionEq', 'atts': ('eq', 'useDatatype', 'quant')}
         case attribute(ne) return map{'constraintComp': 'ExpressionNe', 'atts': ('ne', 'useDatatype', 'quant')}
         case attribute(lt) return map{'constraintComp': 'ExpressionLt', 'atts': ('lt', 'useDatatype', 'quant')}        
@@ -652,14 +655,14 @@ declare function f:validationResult_expression($constraintElem as element(),
         case attribute(itemsUnique) return map{'constraintComp': 'ExprValueItemsUnique', 'atts': ('itemsUnique')}
         default return error()
     let $constraintIdBase := $constraintElem/@id
-    let $constraintId := concat($constraintIdBase, '-', $constraint1/local-name(.))
+    let $constraintId := concat($constraintIdBase, '-', $constraint/local-name(.))
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}    
     let $standardAttNames := $constraintConfig?atts
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    let $msg := i:getResultMsg($colour, $constraintElem, trace($constraint1/local-name(.), '_CONSTRAINT_NAME: '), ())
+    let $msg := i:getResultMsg($colour, $constraintElem, trace($constraint/local-name(.), '_CONSTRAINT_NAME: '), ())
     let $elemName := i:getResultElemName($colour)
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}
@@ -674,8 +677,11 @@ declare function f:validationResult_expression($constraintElem as element(),
         element {$elemName} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            $constraintElem/@label/attribute constraintLabel {.},
+            (: $constraintId ! attribute constraintID {.}, :)            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
             $filePath,
             $focusNode,
             $standardAtts,
@@ -709,6 +715,10 @@ declare function f:validationResult_expression_counts($colour as xs:string,
                                                       $context as map(xs:string, item()*),
                                                       $additionalAtts as attribute()*)
         as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraint)
+        
     let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
         typeswitch($constraint)
@@ -731,9 +741,12 @@ declare function f:validationResult_expression_counts($colour as xs:string,
     return
         element {$elemName} {
             $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
+            attribute constraintComp {$constraintConfig?constraintComp},            
+            (: attribute constraintID {$constraintId}, :)
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
             $filePath,
             $focusNode,
             $standardAtts,
@@ -760,6 +773,10 @@ declare function f:validationResult_expression_exception(
                                             $addAtts as attribute()*,
                                             $context as map(xs:string, item()*))
         as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+        
     let $targetInfo := $context?_targetInfo        
     let $constraintComp := 'Expression'        
     let $constraintId := $constraintElem/@id
@@ -768,9 +785,13 @@ declare function f:validationResult_expression_exception(
     let $msg := $exception
     return
         element {'gx:red'} {
-            attribute exception {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
+            attribute exception {$msg},            
+            attribute constraintComp {$constraintComp},            
+            (: attribute constraintID {$constraintId}, :)
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
             $addAtts,
             $filePathAtt,
             $focusNodeAtt
@@ -1149,5 +1170,4 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
     return $exprAtts
         
 };        
-
 

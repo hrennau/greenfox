@@ -486,3 +486,43 @@ declare function f:hashKey($path as xs:string, $keyKind as xs:string)
     return xs:hexBinary($rawHash) ! xs:string(.)
 };
 
+(:~
+ : Returns the data path of a schema component.
+ :)
+declare function f:getSchemaPath($node as node(), $context as element()?)
+        as xs:string {
+    let $raw :=
+        string-join(
+            for $aos in $node/ancestor-or-self::node()[not($context) or . >> $context]
+            return
+                typeswitch($aos)
+                case element() return
+                    concat('gx:', local-name($aos),  
+                        (1 + count($aos/preceding-sibling::*[node-name(.) eq $aos/node-name(.)]))
+                        ! concat('[', ., ']')
+                    )
+                case attribute() return concat('@', local-name($aos))            
+                default return ''
+        , '/')
+    let $path := '/'[not($context)][not(substring($raw, 1, 1) eq '/')] || $raw
+    return $path
+};        
+
+(:~
+ : Returns the relative path leading from a resource shape to a constraint node.
+ : If the constraint is not contained by a file or folder, the absolute path
+ : will be returned
+ :
+ : _TO_DO_ - this is a simplistic implementation, expecting the resource shape element
+ : to be the first file or folder ancestor; think of extension constraints in order
+ : to see that this will not always be appropriate.
+ :)
+declare function f:getSchemaConstraintPath($constraintNode as node())
+        as xs:string {
+    let $resourceShape := $constraintNode/(ancestor::gx:file, ancestor::gx:folder)[1]
+    return i:getSchemaPath($constraintNode, $resourceShape)
+};        
+
+
+
+
