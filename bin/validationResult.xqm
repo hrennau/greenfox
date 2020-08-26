@@ -76,7 +76,7 @@ declare function f:validationResultValues($value as item()*,
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
- :         t a r g e t    c o u n t    c o n s t r a i n t s
+ :         f i l e    p r o p e r t i e s    c o n s t r a i n t s
  :
  : ===============================================================================
  :)
@@ -149,6 +149,176 @@ declare function f:validationResult_fileProperties($colour as xs:string,
             $values
         }                                          
 };
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         f o l d e r    c o n t e n t    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Writes a validation result for constraint component FolderContentClosed.
+ :
+ : @param colour the colour of the result
+ : @param constraintElem the element containing the attributes and child elements declaring the constraint
+ : @param paths the file paths of violating resources 
+ : @param additionalAtts additional attributes to be included in the result
+ : @param additionalElems additional elements to be included in the result 
+ : @return an element representing a 'red' or 'green' validation result
+ :)
+declare function f:constructError_folderContentClosed($colour as xs:string,
+                                                      $constraintElem as element(),
+                                                      $paths as xs:string*,
+                                                      $additionalAtts as attribute()*,
+                                                      $additionalElems as element()*                                                    
+                                                     ) 
+        as element() {
+    let $constraintComp := 'FolderContentClosed'
+    let $elemName := 'gx:' || $colour
+    let $msg := 
+        if ($colour eq 'red') then i:getErrorMsg($constraintElem, 'closed', 'Unexpected folder contents.')
+        else i:getOkMsg($constraintElem, 'closed', ())
+    let $constraintId := $constraintElem/@id
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    
+    let $valueElems :=
+        for $path in $paths
+        let $kind := if (i:fox-resource-is-dir($path)) then 'folder' else 'file'
+        return
+            <gx:value resoureKind="{$kind}">{$path}</gx:value>
+    
+    return
+        element {$elemName} {
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            $additionalAtts,
+            $additionalElems,
+            $valueElems
+        }
+};
+
+(:~
+ : Writes a validation result for constraint components FolderContentMinCount and FolderContentMaxCount.
+ :
+ : @param colour the colour of the result
+ : @param constraintElem the element containing the attributes and child elements declaring the constraint
+ : @param constraint attribute representing the maximum or minimum count allowed
+ : @param resourceName the resource name or name pattern used by the constraint declaration
+ : @param paths the file paths of resources matching the name or name pattern 
+ : @param additionalAtts additional attributes to be included in the result
+ : @param additionalElems additional elements to be included in the result 
+ : @return an element representing a 'red' or 'green' validation result
+ :)
+declare function f:constructError_folderContentCount($colour as xs:string,
+                                                     $constraintElem as element(),
+                                                     $constraint as attribute(),
+                                                     $resourceName as xs:string,
+                                                     $paths as xs:string*,
+                                                     $additionalAtts as attribute()*,
+                                                     $additionalElems as element()*                                                    
+                                                     ) 
+        as element() {
+    let $elemName := 'gx:' || $colour        
+    let $constraintComp :=
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraint/i:firstCharToUpperCase(local-name(.))    
+    let $msg := 
+        if ($colour eq 'red') then i:getErrorMsg($constraintElem, 'minCount', ())
+        else i:getOkMsg($constraintElem, 'minCount', ())
+    let $constraintId := $constraintElem/@id
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    
+    let $valueElems :=
+        for $path in $paths
+        let $kind := if (i:fox-resource-is-dir($path)) then 'folder' else 'file'
+        return
+            <gx:value resoureKind="{$kind}">{$path}</gx:value>
+    let $actCount := count($paths)            
+    
+    return
+        element {$elemName} {
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},    
+            attribute resourceName {$resourceName},
+            $constraint,
+            attribute actCount {$actCount},
+            $additionalAtts,
+            $additionalElems,
+            $valueElems[$colour eq 'red']
+        }
+};
+
+
+
+(:~
+ : Writes a validation result for constraint components FolderContentMinCount and FolderContentMaxCount.
+ :
+ : @param colour the colour of the result
+ : @param constraintElem the element containing the attributes and child elements declaring the constraint
+ : @param constraint attribute representing the maximum or minimum count allowed
+ : @param resourceName the resource name or name pattern used by the constraint declaration
+ : @param paths the file paths of resources matching the name or name pattern 
+ : @param additionalAtts additional attributes to be included in the result
+ : @param additionalElems additional elements to be included in the result 
+ : @return an element representing a 'red' or 'green' validation result
+ :)
+declare function f:constructError_folderContentHash($colour as xs:string,
+                                                    $constraintElem as element(),
+                                                    $constraint as attribute(),
+                                                    $constraintValue as xs:string,
+                                                    $resourceName as xs:string,
+                                                    $foundHashKeys as xs:string*,                                                   
+                                                    $paths as xs:string*,
+                                                    $additionalAtts as attribute()*,
+                                                    $additionalElems as element()*                                                    
+                                                    ) 
+        as element() {
+
+    let $elemName := 'gx:' || $colour
+    let $constraintComp :=
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraint/i:firstCharToUpperCase(local-name(.))
+    let $constraintId := $constraintElem/@id
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $hashKind := $constraint/local-name(.)
+    let $actValueAtt := 
+        if (count($paths) gt 1) then () else attribute {concat($hashKind, 'Found')} {$foundHashKeys}
+
+    let $msg := 
+        if ($colour eq 'green') then 
+            i:getOkMsg(($constraint/.., $constraint/../..), $hashKind, concat('Expected ', $hashKind, ' value found.'))
+        else
+            i:getErrorMsg(($constraint/.., $constraint/../..), $hashKind, concat('Not expected  ', $hashKind, ' value.'))
+    let $constraintId := $constraintElem/@id
+    let $resourceShapeId := $constraintElem/@resourceShapeID
+            
+    return
+        element {$elemName} {
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComp},
+            attribute constraintID {$constraintId},
+            attribute resourceShapeID {$resourceShapeId},            
+            attribute resourceName {$resourceName},
+            $actValueAtt,
+            attribute {$constraint/name()} {$constraintValue}
+        }
+};        
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         l i n k    r e s o l v a b l e    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
 
 (:~
  : Creates a validation result for a LinkResolvable constraint. The result
@@ -232,6 +402,15 @@ declare function f:validationResult_linkResolvable($ldo as map(*)?,
             $values
         }       
 };
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         l i n k    c o u n t    c o n s t r a i n t
+ :
+ : ===============================================================================
+ :)
 
 (:~
  : Creates a validation result for a LinkCount related constraint (LinkMinCount,
