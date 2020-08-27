@@ -519,7 +519,7 @@ declare function f:getSchemaPath($node as node(), $context as element()?)
  :)
 declare function f:getSchemaConstraintPath($constraintNode as node())
         as xs:string {
-    let $resourceShape := $constraintNode/(ancestor::gx:file, ancestor::gx:folder)[1]
+    let $resourceShape := $constraintNode/ancestor::*[self::gx:file, self::gx:folder][1]
     return i:getSchemaPath($constraintNode, $resourceShape)
 };        
 

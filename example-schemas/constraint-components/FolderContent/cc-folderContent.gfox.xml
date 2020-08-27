@@ -26,8 +26,8 @@
                 <memberFile name="airports.xml" count="1"/>
                 <memberFile name="airports.json" count="1"/>
                 <memberFile name="airports-*.xml" maxCount="4"/>
-                <memberFile name="airports-*.json" maxCount="4"/>
-                <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
+                <memberFile name="airports-*.json" maxCount="4" minCount="1"/>
+                <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385x"/>
                 <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
             </folderContent>  
             <folder foxpath="denmark">

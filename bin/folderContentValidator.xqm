@@ -46,9 +46,9 @@ declare function f:validateFolderContent($contextURI as xs:string,
         as element()* {
         
     (: determine expectations :)
-    let $_constraintElem := f:validateFolderContent_compile($constraintElem)
-    let $closed := $_constraintElem/@closed
-    let $msgFolderContent := $_constraintElem/@msg
+    let $constraintElemCompiled := f:validateFolderContent_compile($constraintElem)
+    let $closed := $constraintElemCompiled/@closed
+    let $msgFolderContent := $constraintElemCompiled/@msg
 
     (: determine member file names, member folder names :)
     let $members := i:resourceChildResources($contextURI, '*') ! replace(., '[/\\]$', '')
@@ -57,18 +57,18 @@ declare function f:validateFolderContent($contextURI as xs:string,
 
     (: results: folder closed :)
     let $results_folderContentClosed := f:validateFolderContent_closed(
-        $contextURI, $_constraintElem, $memberFiles, $memberFolders)
+        $contextURI, $constraintElem, $constraintElemCompiled, $memberFiles, $memberFolders)
     (: results: counts :)
     let $results_counts := f:validateFolderContentCounts(
-        $contextURI, $_constraintElem, $memberFiles, $memberFolders)
+        $contextURI, $constraintElem, $constraintElemCompiled, $memberFiles, $memberFolders)
     (: results: hash keys :)        
     let $results_hash := f:validateFolderContent_hash(
-        $contextURI, $_constraintElem, $memberFiles)
+        $contextURI, $constraintElem, $constraintElemCompiled, $memberFiles)
     let $errors := ($results_folderContentClosed, $results_counts, $results_hash)
     
     return
         if ($errors) then $errors
-        else $_constraintElem/
+        else $constraintElemCompiled/
             <gx:green>{
                 attribute constraintComp {local-name()},
                 @id/attribute constraintID {.},
@@ -84,20 +84,22 @@ declare function f:validateFolderContent($contextURI as xs:string,
  :
  : @param contextURI the file path of the folder
  : @param constraintElem the schema element representing the constraint
+ : @param constraintElemCompiled the compiled constraint element 
  : @param memberFiles names of the member files of the folder
  : @param memberFolders names of the member folders of the folder
  : @return validation results
  :)
  declare function f:validateFolderContent_closed($contextURI as xs:string,
                                                  $constraintElem as element(),
+                                                 $constraintElemCompiled as element(),
                                                  $memberFiles as xs:string*,
                                                  $memberFolders as xs:string*)
         as element()* {
-    if (not($constraintElem/@closed eq 'true')) then () else
+    if (not($constraintElemCompiled/@closed eq 'true')) then () else
         
     let $unexpectedMembers :=
         for $member in ($memberFiles, $memberFolders)
-        let $descriptors := $constraintElem/(
+        let $descriptors := $constraintElemCompiled/(
             gx:member, gx:ignoreMember,
             if ($member = $memberFiles) then gx:memberFile else gx:memberFolder)
         let $expected := 
@@ -114,16 +116,19 @@ declare function f:validateFolderContent($contextURI as xs:string,
  :
  : @param contextURI the file path of the folder
  : @param constraintElem the schema element representing the constraint
+ : @param constraintElemCompiled the compiled constraint element 
  : @param memberFiles names of the member files of the folder
  : @param memberFolders names of the member folders of the folder
  : @return validation results
  :)
 declare function f:validateFolderContentCounts($contextURI as xs:string,
-                                               $constraintElem as element(),                                               
+                                               $constraintElem as element(),   
+                                               $constraintElemCompiled as element(),
                                                $memberFiles as xs:string*,
                                                $memberFolders as xs:string*)
         as element()* {
-    for $d in $constraintElem/(* except gx:ignoreMember)
+    for $d at $pos in $constraintElemCompiled/(* except gx:ignoreMember)
+    let $d_orig := $constraintElem/(* except gx:ignoreMember)[$pos]    
     let $minCount := $d/@minCount/number(.)
     let $maxCount := 
         let $raw := $d/@maxCount/number(.)
@@ -140,18 +145,24 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
         (: results: minCount :)
         if ($minCount eq 0) then () else 
             let $ok := $count ge $minCount
-            let $colour := if ($ok) then 'green' else 'red'            
+            let $colour := if ($ok) then 'green' else 'red'  
+            let $constraintPath := 
+                let $constraintNode := ($d_orig/@minCount, $d_orig/@count, $d_orig)[1]
+                return f:getSchemaConstraintPath($constraintNode)
             return
                 result:constructError_folderContentCount(
-                    $colour, $constraintElem, $d/@minCount, $resourceName, $foundPaths, (), ())
+                    $colour, $constraintElem, $d/@minCount, $constraintPath, $resourceName, $foundPaths, (), ())
         ,                        
         (: results: maxCount :)                        
         if ($maxCount eq -1) then () else
             let $ok := $count le $maxCount
             let $colour := if ($ok) then 'green' else 'red'            
+            let $constraintPath := 
+                let $constraintNode := ($d_orig/@maxCount, $d_orig/@count, $d_orig)[1]
+                return f:getSchemaConstraintPath($constraintNode)
             return
                 result:constructError_folderContentCount(
-                    $colour, $constraintElem, $d/@maxCount, $resourceName, $foundPaths, (), ())
+                    $colour, $constraintElem, $d/@maxCount, $constraintPath, $resourceName, $foundPaths, (), ())
     )        
 };
 
@@ -165,15 +176,18 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
  :)
 declare function f:validateFolderContent_hash($contextURI as xs:string,
                                               $constraintElem as element(), 
+                                              $constraintElemCompiled as element(),                                              
                                               $memberFiles as xs:string*)
         as element()* {
-        for $d in $constraintElem/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
+        for $d at $pos in $constraintElemCompiled/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
+        let $d_orig := ($constraintElem/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder])[$pos]
         let $resourceName := $d/@name
         let $relevantMembers := $memberFiles 
         let $found := $relevantMembers[matches(., $d/@regex, 'i')]
         let $foundPaths := $found ! concat($contextURI, '/', .)
         
-        for $expectedHashKeys in $d/(@md5, @sha1, @sha256)
+        for $expectedHashKeys at $pos in $d/(@md5, @sha1, @sha256)
+        let $expectedHashKeys_orig := ($d_orig/(@md5, @sha1, @sha256))[$pos]
         let $hashKind := $expectedHashKeys/local-name(.)
         
         (: map: hashkey -> file path :)
@@ -190,7 +204,7 @@ declare function f:validateFolderContent_hash($contextURI as xs:string,
         return        
             result:constructError_folderContentHash($colour, 
                                                     $constraintElem, 
-                                                    $expectedHashKeys, 
+                                                    $expectedHashKeys_orig, 
                                                     $expectedHashKey, 
                                                     $resourceName, 
                                                     $foundHashKeys, 
