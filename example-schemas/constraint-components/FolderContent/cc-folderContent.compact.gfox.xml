@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of FolderContent constraints:
-    - @closed
-    - <memberFile> and <memberFolder>
-    - @minCount, @maxCount, @count
-    - @md5
+    Same checks as in cc-folderContent.gfox.xml, but written more compactly - using plural forms
+    (memberFolders and memberFiles).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.compact"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -18,12 +15,8 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <folderContent closed="true">
-                <memberFolder name="denmark"/>
-                <memberFolder name="ireland"/>
-                <memberFolder name="finland"/>
-                <memberFolder name="luxembourg"/>                
-                <memberFile name="airports.xml"/>
-                <memberFile name="airports.json"/>
+                <memberFolders names="denmark ireland finland luxembourg"/>                
+                <memberFiles names="airports.xml airports.json"/>
                 <memberFile name="airports-*.xml" count="4"/>
                 <memberFile name="airports-*.json" maxCount="4" minCount="1"/>
                 <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
@@ -33,8 +26,7 @@
             <folder foxpath="denmark">
                 <targetSize countMsg="Missing folder: denmark" count="1"/>
                 <folderContent closed="true">
-                    <memberFile name="airport-???.xml" minCount="17"/>
-                    <memberFile name="airport-???.json" minCount="17"/>
+                    <memberFiles names="airport-???.xml airport-???.json" minCount="17"/>
                 </folderContent>
             </folder>
         </folder>

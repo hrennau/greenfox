@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates use of constraint components FolderContent...
-    
-    This example checks resources contained by an archive file.
-    
-    Constraint components:
-    * FolderContentClosed - @closed
-    
-    Validation catches 
-    * ?
+    Demonstrates use of FolderContent constraints. This example checks resources contained by an 
+    archive file. Same checks as in cc-folderContent.gfox.xml.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraints-mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -20,18 +13,20 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
+            
             <folderContent closed="true">
                 <memberFolder name="denmark"/>
                 <memberFolder name="ireland"/>
                 <memberFolder name="finland"/>
-                <memberFolder name="luxembourg"/>
-                <memberFile name="airports.xml" count="1"/>
-                <memberFile name="airports.json" count="1"/>
-                <memberFile name="airports-*.xml" maxCount="4"/>
-                <memberFile name="airports-*.json" maxCount="4"/>
+                <memberFolder name="luxembourg"/>                
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" count="4"/>
+                <memberFile name="airports-*.json" maxCount="4" minCount="1"/>
                 <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
                 <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
             </folderContent>  
+            
             <folder foxpath="denmark">
                 <targetSize countMsg="Missing folder: denmark" count="1"/>
                 <folderContent closed="true">
@@ -39,6 +34,7 @@
                     <memberFile name="airport-???.json" minCount="17"/>
                 </folderContent>
             </folder>
+            
         </folder>
     </domain>
 </greenfox>

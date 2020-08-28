@@ -294,10 +294,11 @@ return
 
                 <!-- mandatory attributes -->
                 <ex:allowedElems
-                    elemNames="memberFile memberFiles 
-                                   memberFolder memberFolders 
-                                   excludedMemberFile excludedMemberFiles 
-                                   excludedMemberFolder excludedMemberFolders"
+                    elemNames="member members
+                               memberFile memberFiles 
+                               memberFolder memberFolders 
+                               excludedMemberFile excludedMemberFiles 
+                               excludedMemberFolder excludedMemberFolders"
                     msg="Unexpected elements in 'folderContent' element; expected: $elemNames"
                     msgOK="OK - 'folderContent' element: no unexpected child elements"/>
 
