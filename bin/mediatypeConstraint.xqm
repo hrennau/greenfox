@@ -55,7 +55,7 @@ declare function f:validateMediatype($contextURI as xs:string,
                             
                     (: Check CSV :)
                     case 'csv' return 
-                        let $doc := f:csvDoc($contextURI, $constraintElem)
+                        let $doc := f:csvDoc($contextURI, $constraintElem/(., ancestor::gx:file[1]))
                         let $facetResults := if (not($doc)) then () else
                             let $checkAtts := $constraintElem/(
                                 @csv.minColumnCount, @csv.maxColumnCount, @csv.minRowCount, @csv.maxRowCount)

@@ -443,7 +443,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar expressions expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep"
+                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar expressions expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
@@ -808,7 +808,8 @@ return
             <focusNode xpath="//*:mediatype">
                 <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK 
                                           csv.minColumnCount csv.maxColumnCount
-                                          csv.minRowCount csv.maxRowCount"
+                                          csv.minRowCount csv.maxRowCount
+                                          csv.separator"
                     msg="Unexpected attributes in 'mediatype' element; expected: $attNames"
                     msgOK="OK - 'mediatype' element: no unexpected attributes"/>
                 <ex:xoneAtts attNames="eq in"

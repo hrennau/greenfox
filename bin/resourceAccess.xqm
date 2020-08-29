@@ -102,12 +102,12 @@ declare function f:fox-csv-doc($uri as xs:string,
  : Returns an XML representation of the CSV record identified by URI or file path.
  :
  : @param filePath the file path
- : @param params an element which may have attributes controllig the parsing
+ : @param params one or several elements which may have attributes controllig the parsing
  : @return the csv document, or the empty sequence of parsing is not successful
  :)
-declare function f:csvDoc($filePath as xs:string, $params as element())
+declare function f:csvDoc($filePath as xs:string, $params as element()+)
         as document-node()? {
-    let $separator := ($params/@csv.separator, 'comma')[1]
+    let $separator := ($params/@csv.separator,  'comma')[1]
     let $withHeader := ($params/@csv.withHeader, 'no')[1]
     let $names := ($params/@csv.names, 'direct')[1]
     let $withQuotes := ($params/@csv.withQuotes, 'yes')[1]

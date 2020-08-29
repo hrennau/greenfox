@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : domainValidator.xqm - validates file resources against a file shape
+ : fileValidator.xqm - validates file resources against a file shape
  :
  : -------------------------------------------------------------------------
  :)
@@ -21,17 +21,17 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "resourcePropertiesConstraint.xqm",    
     "xsdValidator.xqm";
 
+import module namespace dcont="http://www.greenfox.org/ns/xquery-functions/doc-content" 
+at "docContentConstraint.xqm";
+
 import module namespace concord="http://www.greenfox.org/ns/xquery-functions/concord" 
-at
-    "concordConstraint.xqm";
+at "concordConstraint.xqm";
 
 import module namespace expr="http://www.greenfox.org/ns/xquery-functions/expression" 
-at
-    "expressionConstraint.xqm";
+at "expressionConstraint.xqm";
     
 import module namespace expair="http://www.greenfox.org/ns/xquery-functions/expression-pair" 
-at
-    "expressionPairConstraint.xqm";
+at "expressionPairConstraint.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -133,6 +133,8 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 i:validateLinks($contextURI, $contextDoc, $contextItem, $links, $context)            
             case $docSimilar as element(gx:docSimilar) return 
                 i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
+            case $expressions as element(gx:docContent) return 
+                dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $expressions, $context)            
             case $expressions as element(gx:expressions) return 
                 expr:validateExpressionConstraint($contextURI, $contextDoc, $contextNode, $expressions, $context)            
             case $expressionPairs as element(gx:expressionPairs) return 

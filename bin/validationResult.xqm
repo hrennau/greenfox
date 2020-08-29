@@ -181,15 +181,95 @@ declare function f:validationResult_mediatype($colour as xs:string,
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     return
         element {f:resultElemName($colour)}{
+            $contextURI ! attribute filePath {.},        
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComponent},
             $constraintPath ! attribute constraintPath {.},
             $resourceShapePath ! attribute resourceShapePath {.},
             $resourceShapeId ! attribute resourceShapeID {.},            
-            $contextURI ! attribute filePath {.},
             $constraintNode,
             $additionalAtts
         }        
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         d o c    c o n t e n t    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+
+declare function f:validationResult_docContent_counts($colour as xs:string,
+                                                      $constraintElem as element(),
+                                                      $constraintNode as node(),
+                                                      $valueCount as xs:integer,                                                      
+                                                      $additionalAtts as attribute()*,
+                                                      $context as map(xs:string, item()*))
+        as element() {
+    let $contextURI := $context?_targetInfo?contextURI
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
+    let $constraintComponent :=
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraintNode/i:firstCharToUpperCase(local-name(.))    
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    return
+        element {f:resultElemName($colour)} {
+            $contextURI ! attribute filePath {.},
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComponent},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $constraintNode[self::attribute()],
+            $valueCount ! attribute valueCount {.},            
+            $additionalAtts            
+        }       
+};
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a DocContent constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node tree.
+ :
+ : @param constraintElem an element declaring an ExpressionPair constraint
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param context processing context
+ : @return a red validation result
+ :)
+declare function f:validationResult_docContent_exception(
+                                            $constraintElem as element(),
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $context as map(xs:string, item()*))
+        as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := trace($constraintElem/@resourceShapePath , '_RESOURCE_SHAPE_PATH: ')      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+        
+    let $targetInfo := $context?_targetInfo        
+    let $constraintComp := 'DocContent'        
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element gx:red {
+            attribute exception {$msg},            
+            attribute constraintComp {$constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
 };
 
 (:~
@@ -990,9 +1070,9 @@ declare function f:validationResult_expression_counts($colour as xs:string,
 
 (:~
  : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of an Expression Pair constraint.
+ : which prevents normal evaluation of an Expression constraint.
  : Such an exceptional condition is, for example, a failure to parse 
- . the context resource into a node.
+ . the context resource into a node tree.
  :
  : @param constraintElem an element declaring an ExpressionPair constraint
  : @param exception an optional message string

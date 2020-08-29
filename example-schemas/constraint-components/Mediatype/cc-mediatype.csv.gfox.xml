@@ -21,6 +21,10 @@
                 <mediatype eq="csv" csv.minColumnCount="4" csv.maxColumnCount="4" 
                                     csv.minRowCount="2" csv.maxRowCount="30"/>
             </file>
+            <file foxpath="simple-csv.semicolon.csv" id="simpleCsvSemicolonFileShape" csv.separator="semicolon">
+                <mediatype eq="csv" csv.minColumnCount="4" csv.maxColumnCount="4" 
+                                    csv.minRowCount="2" csv.maxRowCount="30"/>
+            </file>
         </folder>
     </domain>
 
