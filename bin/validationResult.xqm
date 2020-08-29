@@ -94,25 +94,28 @@ declare function f:validationResultValues($value as item()*,
  :)
 declare function f:validationResult_fileProperties($colour as xs:string,
                                                    $constraintElem as element(),
-                                                   $constraint as attribute(),
+                                                   $constraintNode as attribute(),
                                                    $context as map(xs:string, item()*),
                                                    $actualValue as item(),
                                                    $additionalAtts as attribute()*) 
         as element() {
+    let $resourceShapeId := $constraintElem/@resourceShapeID        
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
     let $contextURI := $context?_targetInfo?contextURI        
     let $constraintComp :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
-        $constraint/i:firstCharToUpperCase(local-name(.))
+        $constraintNode/i:firstCharToUpperCase(local-name(.))
         
-    let $resourcePropertyName :=
+    let $fn_msg := function() {
+        concat(
         switch(local-name($constraintElem))
         case 'fileName' return 'File name'
         case 'fileSize' return 'File size'
         case 'lastModified' return 'Last modified time'
-        default return error()
-        
-    let $compare :=
-        switch(local-name($constraint))
+        default return error(),    
+        ' must ',
+        switch(local-name($constraintNode))
         case 'eq' return 'be equal to'
         case 'ne' return 'not be equal to'
         case 'lt' return 'be less than'
@@ -123,31 +126,70 @@ declare function f:validationResult_fileProperties($colour as xs:string,
         case 'notLike' return 'not match the pattern'
         case 'matches' return 'match the regex'
         case 'notMatches' return 'not match the regex'
-        default return 'satisfy'
-        
-    let $elemName := 'gx:' || $colour    
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else 
-            i:getErrorMsg($constraintElem, 
-                          $constraint/local-name(.), 
-                          concat($resourcePropertyName, ' should ', $compare,
-                          " '", $constraint, "'"))
+        default return 'satisfy',
+        " '", $constraintNode, "'")}
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.), $fn_msg(), (), ())
     let $values := f:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
     return
     
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},   
+            $constraintPath ! attribute constraintPath {.},
+            $resourceShapePath ! attribute resourceShapePath {.},
+            attribute resourceShapeID {$resourceShapeId},            
             $contextURI ! attribute filePath {.},
-            $constraint,
+            $constraintNode,
             $additionalAtts,
             $values
         }                                          
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
+ :         m e d i a t y p e    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Writes a validation result for a mediatype constraint.
+ :
+ : @param colour indicates success or error
+ : @param constraintElem the element representing the constraint
+ : @param constraintNode an attribute representing the constraint facet
+ : @param context the processing context
+ : @param additionalAtts additional attributes to be included in the validation result
+ :) 
+declare function f:validationResult_mediatype($colour as xs:string,
+                                              $constraintElem as element(gx:mediatype),
+                                              $constraintNode as attribute(),
+                                              $context as map(xs:string, item()*),
+                                              $additionalAtts as attribute()*)
+        as element() {
+    let $resourceShapeId := $constraintElem/@resourceShapeID        
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
+    let $contextURI := $context?_targetInfo?contextURI        
+    let $constraintComponent :=
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+        $constraintNode/i:firstCharToUpperCase(local-name(.))
+        ! replace(., '\.', '') ! replace(., 'm(in|ax)', 'M$1')
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    return
+        element {f:resultElemName($colour)}{
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComponent},
+            $constraintPath ! attribute constraintPath {.},
+            $resourceShapePath ! attribute resourceShapePath {.},
+            $resourceShapeId ! attribute resourceShapeID {.},            
+            $contextURI ! attribute filePath {.},
+            $constraintNode,
+            $additionalAtts
+        }        
 };
 
 (:~
@@ -172,6 +214,7 @@ declare function f:validationResult_fileProperties($colour as xs:string,
 declare function f:constructError_folderContentClosed($colour as xs:string,
                                                       $constraintElem as element(),
                                                       $constraintNode as node(),
+                                                      $context as map(xs:string, item()*), 
                                                       $paths as xs:string*,
                                                       $additionalAtts as attribute()*,
                                                       $additionalElems as element()*                                                    
@@ -221,6 +264,7 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
 declare function f:constructError_folderContentCount($colour as xs:string,
                                                      $constraintElem as element(),
                                                      $constraintNode as node(),
+                                                     $context as map(xs:string, item()*),                                                     
                                                      $resourceName as xs:string,
                                                      $paths as xs:string*,
                                                      $additionalAtts as attribute()*,
@@ -282,6 +326,7 @@ declare function f:constructError_folderContentHash($colour as xs:string,
                                                     $constraintElem as element(),
                                                     $constraintNode as attribute(),
                                                     $constraintValue as xs:string,
+                                                    $context as map(xs:string, item()*),                                                    
                                                     $resourceName as xs:string,
                                                     $foundHashKeys as xs:string*,                                                   
                                                     $fileNames as xs:string*,
@@ -850,7 +895,7 @@ declare function f:validationResult_expression($constraintElem as element(),
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    let $msg := i:getResultMsg($colour, $constraintElem, trace($constraint/local-name(.), '_CONSTRAINT_NAME: '), ())
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.))
     let $elemName := i:getResultElemName($colour)
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}
@@ -924,7 +969,7 @@ declare function f:validationResult_expression_counts($colour as xs:string,
     let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
     let $filePath := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNode := $targetInfo?focusNodePath ! attribute nodePath {.}    
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.), ())
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.))
     let $elemName := i:getResultElemName($colour)
     return
         element {$elemName} {
@@ -1341,6 +1386,8 @@ declare function f:validationResult_concord_exception(
  :
  : ===============================================================================
  :)
+
+declare function f:resultElemName($colour as xs:string) {'gx:' || $colour};
 
 declare function f:validateResult_linkDefAtts($ldo as map(*)?,
                                               $constraintElem as element()?)

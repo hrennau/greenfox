@@ -3,7 +3,7 @@
     Demonstrates the use of constraint components FileSize... . See
     example 'cc-fileSize.gfox.xml' for further details.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-size.archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

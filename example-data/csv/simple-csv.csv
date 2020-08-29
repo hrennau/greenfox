@@ -1,0 +1,5 @@
+label, key, conformance, city
+"a", 1, true, Berlin
+"b", 2, true, Berlin
+"c", 8, false, Hamburg
+"d", 2, true, Heidelberg

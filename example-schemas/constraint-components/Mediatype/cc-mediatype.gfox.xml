@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component MediatypeEq.
-    
-    Constraint component:
-    * Name:  MediatypeEq 
-    - XML:   mediatype/@eq
-    - Check: The mediatype must be equal to the specified value; if the attribute
-             value contains whitespace, the mediatype must be equal to one of the
-             whitespace separated values   
-             
-    Supported values for mediatypes are: xml, json, csv.
+    Demonstrates the use of Mediatype constraints. Supported values for mediatypes are: xml, json, csv.
     
     In this example, validation catches 
     * .json files which are not well-formed JSON
@@ -23,14 +14,14 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <file foxpath=".\\*.json" id="jsonFileShape">
-                <mediatype eq="json"/>
+                <mediatype eq="xml"/>
             </file>
             <file foxpath=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>

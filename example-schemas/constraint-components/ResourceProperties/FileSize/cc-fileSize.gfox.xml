@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components FileSize.... Constraints
-    are declared by attributes named after the kind of comparison to be 
-    applied to the file size: @gt, @ge, @lt, @le, @eq, @ne. The element 
-    may declare multiple constraints. 
+    Demonstrates the use of FileSIze constraints. The constraints are declared by 
+    attributes named after the kind of comparison to be applied to the file size: 
+    @gt, @ge, @lt, @le, @eq, @ne. The element may declare multiple constraints. 
     
     Error messages can be specified by attributes gtMsg, geMsg, ltMsg, etc. 
     Success messages can be specified by attributes gtMsgOK, geMsgOK, ...
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression.maxLength"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

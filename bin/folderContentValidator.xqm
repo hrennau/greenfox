@@ -57,13 +57,13 @@ declare function f:validateFolderContent($contextURI as xs:string,
 
     (: results: folder closed :)
     let $results_folderContentClosed := f:validateFolderContent_closed(
-        $contextURI, $constraintElem, $nameRegexMap, $memberFiles, $memberFolders)
+        $contextURI, $constraintElem, $nameRegexMap, $memberFiles, $memberFolders, $context)
     (: results: counts :)
     let $results_counts := f:validateFolderContentCounts(
-        $contextURI, $constraintElem, $nameRegexMap, $memberFiles, $memberFolders)
+        $contextURI, $constraintElem, $nameRegexMap, $memberFiles, $memberFolders, $context)
     (: results: hash keys :)        
     let $results_hash := f:validateFolderContent_hash(
-        $contextURI, $constraintElem, $nameRegexMap, $memberFiles)
+        $contextURI, $constraintElem, $nameRegexMap, $memberFiles, $context)
     return ($results_folderContentClosed, $results_counts, $results_hash)
 };
 
@@ -81,7 +81,8 @@ declare function f:validateFolderContent($contextURI as xs:string,
                                                  $constraintElem as element(),
                                                  $nameRegexMap as map(xs:string, xs:string),
                                                  $memberFiles as xs:string*,
-                                                 $memberFolders as xs:string*)
+                                                 $memberFolders as xs:string*,
+                                                 $context as map(xs:string, item()*))
         as element()* {
     if (not($constraintElem/@closed eq 'true')) then () else
 
@@ -106,7 +107,7 @@ declare function f:validateFolderContent($contextURI as xs:string,
     let $colour := if (exists($unexpectedMembers)) then 'red' else 'green'      
     return        
         result:constructError_folderContentClosed(
-            $colour, $constraintElem, $constraintElem/@closed, $unexpectedMembers, (), ())        
+            $colour, $constraintElem, $constraintElem/@closed, $context, $unexpectedMembers, (), ())        
 };        
 
 (:~
@@ -123,7 +124,8 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                                                $constraintElem as element(),   
                                                $nameRegexMap as map(xs:string, xs:string),
                                                $memberFiles as xs:string*,
-                                               $memberFolders as xs:string*)
+                                               $memberFolders as xs:string*,
+                                               $context as map(xs:string, item()*))                                               
         as element()* {
     (: Loop over constraint components :)
     for $d in $constraintElem/(
@@ -161,7 +163,7 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
             let $colour := trace( if ($count gt 0) then 'red' else 'green' , '_COLOUR')
             return
                 result:constructError_folderContentCount(
-                    $colour, $constraintElem, $d, $resourceName, $found, (), ())
+                    $colour, $constraintElem, $d, $context, $resourceName, $found, (), ())
                     
         (: cardinality constraints :)            
         default return    
@@ -180,14 +182,14 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                 let $colour := if ($fn_check($att, $count)) then 'green' else 'red'
                 return
                     result:constructError_folderContentCount(
-                        $colour, $constraintElem, $att, $resourceName, $found, (), ())
+                        $colour, $constraintElem, $att, $context, $resourceName, $found, (), ())
                         
             (: implicit constraints :)                        
             else
                 let $colour := if ($count eq 1) then 'green' else 'red'
                 return
                     result:constructError_folderContentCount(
-                        $colour, $constraintElem, $d, $resourceName, $found, 
+                        $colour, $constraintElem, $d, $context, $resourceName, $found, 
                             attribute implicitCount {1}, ())
 };
 
@@ -202,7 +204,8 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
 declare function f:validateFolderContent_hash($contextURI as xs:string,
                                               $constraintElem as element(), 
                                               $nameRegexMap as map(xs:string, xs:string),                                              
-                                              $memberFiles as xs:string*)
+                                              $memberFiles as xs:string*,
+                                              $context as map(xs:string, item()*))                                             
         as element()* {
         for $d in $constraintElem/*[@md5, @sha1, @sha256][self::gx:memberFile, self::gx:memberFolder]
         let $resourceName := $d/@name
@@ -220,6 +223,7 @@ declare function f:validateFolderContent_hash($contextURI as xs:string,
                                                     $constraintElem,
                                                     $hashAtt,
                                                     $expectedHashKey, 
+                                                    $context,
                                                     $resourceName, 
                                                     $foundHashKeys, 
                                                     $found, (), ())
