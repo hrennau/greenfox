@@ -1,0 +1,17 @@
+<airport id="628" iata="AAL" icao="EKYT">
+  <name>Aalborg Airport</name>
+  <city>Aalborg</city>
+  <country>Denmark</country>
+  <geo xmlns="http://example.org/geo">
+    <latitude>57.0927589138</latitude>
+    <longitude>9.84924316406</longitude>
+    <altitude>10</altitude>
+  </geo>
+  <temporal xmlns="http://example.org/time">
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

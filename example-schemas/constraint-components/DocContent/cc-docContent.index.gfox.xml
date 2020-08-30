@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocContent constraints. This example shows the use of indexes.
+    ...[i] returns the i-th item.
+    ...[-i] returns the i-th item, counted from the end (-1 = last item, -2 = second last, ...)
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>          
+
+            <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
+                <targetSize minCountMsg="Missing airport file" minCount="1"/>
+                <docContent>
+                    <node locNP="/airport/*[-3]">
+                        <node locNP="dst"/>
+                    </node>
+                    <node locNP="//temporal/dst">
+                        <node locNP="...[2]">
+                            <node locNP="name"/>
+                        </node>
+                    </node>
+
+                </docContent>
+            </file>
+
+        </folder>
+    </domain>
+
+</greenfox>

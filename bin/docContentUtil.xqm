@@ -19,21 +19,132 @@ at "constants.xqm",
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
+ : ===============================================================================
+ :
+ :     E v a l u a t e    n o d e    p a t h   
+ :
+ : =============================================================================== 
+ :)
+
+(:~
  : Evaluates a node path.
  :
  :)
 declare function f:evaluateNodePath($nodePath as xs:string,
                                     $contextNode as node()?,
+                                    $namespaceContext as element()?,
                                     $options as map(xs:string, item()*)?,
                                     $context as map(xs:string, item()*))
         as node()* {
     
     if (not($contextNode)) then () else
     
-    let $steps := trace(f:parseNodePath($nodePath, $options, $context) , '_STEPS: ')
-    let $value := f:evaluateNodePathRC($steps, $contextNode, $options, $context)
+    (: Enhance options, adding namespace bindings namespaces.prefix.namespace-uri :)
+    let $options :=
+        if (not($namespaceContext)) then $options
+        else
+            let $namespaces := map:merge(
+                for $prefix in in-scope-prefixes($namespaceContext)
+                return map:entry($prefix, namespace-uri-for-prefix($prefix, $namespaceContext)))
+            return map:put($options, 'namespaces', $namespaces)
+    (:            
+    let $_DEBUG := trace($options, '___OPTIONS: ')                
+    let $_DEBUG := trace($options?namespaces?geo, '___URI_FOR_PREFIX_GEO: ')
+    let $_DEBUG := trace($nodePath, '### NODE_PATH: ')
+     :)
+    let $steps := f:parseNodePath($nodePath, $options, $context)
+    (:
+    let $_DEBUG := trace($steps, '_STEPS: ')
+    let $_DEBUG := trace((), '----')
+     :)
+    let $value := f:evaluateNodePathRC($steps, $contextNode, $namespaceContext, $options, $context)
     return $value
 };
+
+(:~
+ : Recursive helper function of `f:evaluateNodePath`.
+ :
+ : @param steps elements representing the steps of the parsed node path
+ : @param contextNode the current context node
+ : @param options options controling the interpretation of the node path
+ : @param context the evaluation context
+ : @return the nodes identified by the node path
+ :)
+declare function f:evaluateNodePathRC($steps as element()+,                                      
+                                      $contextNode as node()?,
+                                      $namespaceContext as element()?,
+                                      $options as map(xs:string, item()*)?,
+                                      $context as map(xs:string, item()*))
+        as node()* {
+    let $withNamespaces := $options?withNamespaces
+    let $head := head($steps)
+    let $tail := tail($steps)
+    let $nextNodesRaw :=
+        typeswitch($head)
+        case element(root) return $contextNode/root()
+        case element(child) return
+            if ($head/@regex) then $contextNode/*[matches(local-name(.), $head/@regex)]
+            else $contextNode/*[local-name(.) eq $head/@name]
+        case element(attribute) return
+            if ($head/@regex) then $contextNode/@*[matches(local-name(.), $head/@regex)]
+            else $contextNode/@*[local-name(.) eq $head/@name]
+        case element(descendant) return
+            if ($head/@regex) then $contextNode/descendant::*[matches(local-name(.), $head/@regex)]
+            else $contextNode/descendant::*[local-name(.) eq $head/@name]
+        case element(descendant-attribute) return
+            if ($head/@regex) then $contextNode//@*[matches(local-name(.), $head/@regex)]
+            else $contextNode//@*[local-name(.) eq $head/@name]
+        case element(ancestor) return
+            if ($head/@regex) then $contextNode/ancestor::*[matches(local-name(.), $head/@regex)]
+            else if ($head/@name) then  $contextNode/ancestor::*[local-name(.) eq $head/@name]
+            else $contextNode/ancestor::*
+        case element(parent) return
+            if ($head/@regex) then $contextNode/ancestor::*[matches(local-name(.), $head/@regex)]
+            else if ($head/@name) then $contextNode/parent::*[local-name(.) eq $head/@name]
+            else $contextNode/..
+        default return error()
+        
+    (: Evaluate prefix :)
+    let $nextNodes :=
+        if (not($head/@name)) then $nextNodesRaw else
+        
+        let $prefix := $head/@prefix return
+
+        if (not($prefix)) then
+            if (not($withNamespaces)) then $nextNodesRaw
+            else $nextNodesRaw[not(namespace-uri(.))]
+        else if ($prefix eq '*') then $nextNodesRaw
+        else
+            let $namespace := $options?namespaces($head/@prefix)
+            return
+                if (empty($namespace)) then 
+                    error(QName((), 'INVALID_NODE_PATH'), concat('No namespace binding for prefix: ', 
+                        $head/@prefix))
+                else $nextNodesRaw[namespace-uri(.) eq $namespace]
+    let $nextNodes :=
+        let $index := $head/@index/xs:integer(.)
+        return
+            if (empty($index)) then $nextNodes
+            else
+                let $nodes :=
+                    typeswitch($head)
+                    case element(ancestor) | element(parent) return reverse($nextNodes)
+                    default return $nextNodes
+                return
+                    if ($index lt 0) then $nodes[last() + 1 + $index]
+                    else $nodes[$index]
+    return 
+        if (not($tail)) then $nextNodes/.
+        else $nextNodes/f:evaluateNodePathRC($tail, ., $namespaceContext, $options, $context)/.
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     P a r s e    n o d e    p a t h   
+ :
+ : ===============================================================================
+ :)
 
 (:~
  : Parses a node path.
@@ -55,9 +166,15 @@ declare function f:parseNodePath($nodePath as xs:string,
     ) else if (starts-with($nodePath, '/')) then (
         <root/>,
         $nodePath ! f:parseNodePathRC(., $options, $context)
-    (: .../foo, ../foo, .//foo :)
+    (: .../foo :)
     ) else if (starts-with($nodePath, '...')) then (
         $nodePath ! f:parseNodePathRC(., $options, $context)
+    (: ../foo :)
+    ) else if (starts-with($nodePath, '..')) then (
+        $nodePath ! f:parseNodePathRC(., $options, $context)
+    (: ./foo :)
+    ) else if (starts-with($nodePath, '.')) then (
+        $nodePath ! replace(., '^\.\s*', '') ! f:parseNodePathRC(., $options, $context)
     (: foo... :)        
     ) else ('/' || $nodePath) ! f:parseNodePathRC(., $options, $context)
 };
@@ -74,18 +191,39 @@ declare function f:parseNodePathRC($nodePath as xs:string,
                                    $options as map(xs:string, item()*)?,
                                    $context as map(xs:string, item()*))
         as element()+ {
-    let $sep := codepoints-to-string(30000) return   
-    let $_DEBUG := trace($nodePath, '_NODE_PATH: ')
-    let $fn_parseStep :=        
+    let $withNamespaces := $options?withNamespaces        
+    let $sep := codepoints-to-string(30000) return
+    
+    let $fn_parseStep := 
+        (: $char1 is / or \. :)
         function($text, $char1) {
-            let $cont := trace(replace($text, '^'||$char1||'+\s*', '') , '_CONT: ')
-            let $nameEtc := trace(replace($cont, '^(.*)?([./].*)', '$1'||$sep||'$2') , '_NAME_PLUS: ')
-            let $name := if (contains($nameEtc, $sep)) then substring-before($nameEtc, $sep) else $nameEtc
-            let $regex := i:glob2regex($name)
+            let $cont := replace($text, '^'||$char1||'+\s*', '')
+            let $nameEtc := replace($cont, '^(.*)?([./].*)', '$1'||$sep||'$2')
+            let $nameIndex := (if (contains($nameEtc, $sep)) then substring-before($nameEtc, $sep) else $nameEtc)
+                         [string()]
+            let $name := (
+                if (not(contains($nameIndex, '['))) then $nameIndex
+                else replace($nameIndex, '\s*\[.+', '') )[string()]
+            let $index :=
+                if (not(contains($nameIndex, '['))) then ()
+                else replace($nameIndex, '^.*\[\s*(-?\d+).*', '$1')
+            let $localNameAndPrefix := 
+                if (not(contains($name, ':'))) then $name
+                else (substring-after($name, ':'), substring-before($name, ':'))
+            let $localNameRaw := $localNameAndPrefix[1]
+            let $isAttribute := starts-with($localNameRaw, '@')[.]            
+            let $localName := 
+                if ($isAttribute) then substring($localNameRaw, 2) else $localNameRaw
+                
+            let $prefix := $localNameAndPrefix[2]
+            let $regex := $localName ! i:glob2regex(.)
             let $remains := substring-after($nameEtc, $sep)[string()]
             return
-                map{'name': attribute name {$name},
-                    'regex': attribute regex {$regex} [$name ne $regex],
+                map{'name': $name ! attribute name {.},
+                    'prefix': $prefix ! attribute prefix {.},   
+                    'regex': attribute regex {$regex} [$localName ne $regex],
+                    'index': $index ! attribute index {.},
+                    'isAttribute': $isAttribute ! attribute isAttribute {.},
                     'remains': $remains} 
          
         }
@@ -94,59 +232,35 @@ declare function f:parseNodePathRC($nodePath as xs:string,
     if (starts-with($nodePath, '//')) then
         let $parts := $fn_parseStep($nodePath, '/')
         return (
-            <descendant>{$parts?name, $parts?regex}</descendant>,
+            if ($parts?isAttribute) then
+                <descendant-attribute>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</descendant-attribute>
+            else
+                <descendant>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</descendant>,
             $parts?remains ! f:parseNodePathRC(., $options, $context)
         )    
     else if (starts-with($nodePath, '/')) then
         let $parts := $fn_parseStep($nodePath, '/')
         return (
-            <child>{$parts?name, $parts?regex}</child>,
+            if ($parts?isAttribute) then
+                <attribute>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</attribute>
+            else
+                <child>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</child>,
             $parts?remains ! f:parseNodePathRC(., $options, $context)
         )    
     else if (starts-with($nodePath, '...')) then
         let $parts := $fn_parseStep($nodePath, '\.')
         return (
-            <ancestor>{$parts?name, $parts?regex}</ancestor>,
+            <ancestor>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</ancestor>,
             $parts?remains ! f:parseNodePathRC(., $options, $context)
         )    
     else if (starts-with($nodePath, '..')) then
         let $parts := $fn_parseStep($nodePath, '\.')
         return (
-            <parent>{$parts?name, $parts?regex}</parent>,
-            $parts?remains ! (., $options, $context)
+            <parent>{$parts?name, $parts?regex, $parts?prefix, $parts?index}</parent>,
+            $parts?remains ! f:parseNodePathRC(., $options, $context)
         )    
     else if (starts-with($nodePath, '.')) then
         replace($nodePath, '^\.\s*', '')[string()] ! f:parseNodePathRC(., $options, $context)
     else error()    
 };
 
-(:~
- : Recursive helper function of `f:evaluateNodePath`.
- :
- : @param steps elements representing the steps of the parsed node path
- : @param contextNode the current context node
- : @param options options controling the interpretation of the node path
- : @param context the evaluation context
- : @return the nodes identified by the node path
- :)
-declare function f:evaluateNodePathRC($steps as element()+,
-                                      $contextNode as node()?,
-                                      $options as map(xs:string, item()*)?,
-                                      $context as map(xs:string, item()*))
-        as node()* {
-    let $head := trace(head($steps) , '_HEAD: ')
-    let $tail := tail($steps)
-    let $nextNodes :=
-        typeswitch($head)
-        case element(root) return $contextNode/root()
-        case element(child) return
-            if ($head/@regex) then $contextNode/*[matches(local-name(.), $head/@regex)]
-            else $contextNode/*[local-name(.) eq $head/@name]
-        case element(descendant) return
-            if ($head/@regex) then $contextNode/descendant::*[matches(local-name(.), $head/@regex)]
-            else $contextNode/descendant::*[local-name(.) eq $head/@name]
-        default return error()  
-    return 
-        if (not($tail)) then $nextNodes/.
-        else $nextNodes/f:evaluateNodePathRC($tail, ., $options, $context)/.
-};

@@ -204,7 +204,9 @@ declare function f:validationResult_mediatype($colour as xs:string,
 declare function f:validationResult_docContent_counts($colour as xs:string,
                                                       $constraintElem as element(),
                                                       $constraintNode as node(),
-                                                      $valueCount as xs:integer,                                                      
+                                                      $contextNode as node(),
+                                                      $valueCount as xs:integer,   
+                                                      $nodeTrail as xs:string,
                                                       $additionalAtts as attribute()*,
                                                       $context as map(xs:string, item()*))
         as element() {
@@ -215,6 +217,8 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
     let $constraintComponent :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
         $constraintNode/i:firstCharToUpperCase(local-name(.))    
+    let $nodePath := $contextNode/i:datapath(.)
+    let $implicitCount := 1[not($constraintNode/self::attribute())]
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     return
         element {f:resultElemName($colour)} {
@@ -225,7 +229,10 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
             $constraintNode[self::attribute()],
-            $valueCount ! attribute valueCount {.},            
+            $implicitCount ! attribute implicitCount {1},
+            $valueCount ! attribute valueCount {.},
+            $nodePath ! attribute nodePath {.},
+            $nodeTrail ! attribute nodeTrail {.},
             $additionalAtts            
         }       
 };

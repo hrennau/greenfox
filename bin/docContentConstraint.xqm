@@ -55,31 +55,69 @@ declare function f:validateDocContentConstraint($contextURI as xs:string,
     else
     
     (: Normal processing :)
-    for $constraint in $constraintElem/gx:node 
+    let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
+    let $options := map{'withNamespaces': $withNamespaces}
+    for $constraintNode in $constraintElem/gx:node 
     let $contextNode := ($contextNode, $contextDoc)[1]
     return
-        f:validateNodeContentConstraint($contextURI, $contextNode, $constraint, $context)
+        f:validateNodeContentConstraint($constraintElem, $constraintNode, $contextNode, (), (), $options, $context)
 };
 
-declare function f:validateNodeContentConstraint($contextURI as xs:string,
+declare function f:validateNodeContentConstraint($constraintElem as element(gx:docContent),
+                                                 $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
-                                                 $constraintNode as element(gx:node),
+                                                 $contextPosition as xs:integer?,
+                                                 $contextTrail as xs:string?,
+                                                 $options as map(xs:string, item()*),
                                                  $context as map(xs:string, item()*))
         as element()* {
-    let $constraintElem := $constraintNode/ancestor::gx:docContent[1]        
     let $locNP := $constraintNode/@locNP
-    let $closed := $contextNode/@closed
+    let $closed := $contextNode/@closed/xs:boolean(.)
+    let $trail := string-join(($contextTrail ! concat(., '(', $contextPosition, ')'), $constraintNode/@locNP), '#')
     
     (: Find nodes :)
-    let $nodes := dcont:evaluateNodePath($locNP, $contextNode, (), $context)
+    let $nodes := dcont:evaluateNodePath($locNP, $contextNode, $constraintNode, $options, $context)
     
     (: Check count :)
-    let $valueCount := count($nodes)
-    let $countAtts := $constraintNode/(@count, @minOccurs, @maxOccurs)
-    let $results_counts :=
+    let $results_counts := f:validateNodeContentConstraint_counts(
+        $constraintElem, $constraintNode, $contextNode, $nodes, $trail, $options, $context)
+
+    (: Check children :)
+    let $results_children :=
+        for $node at $pos in $nodes
+        for $constraintNode in $constraintNode/gx:node 
+        return
+            f:validateNodeContentConstraint($constraintElem, $constraintNode, $node, $pos, $trail, $options, $context)
+            
+    (: Check closed :)
+    let $results_closed :=
+        if (not($closed)) then () else
+        
+        let $attNames := $contextNode/@*/node-name(.)
+        let $childNames := $contextNode/*/node-name(.)
+        return ()
+        
+    return (
+        $results_counts,
+        $results_children,
+        $results_closed
+    )
+};
+
+declare function f:validateNodeContentConstraint_counts(
+                                                 $constraintElem as element(gx:docContent),
+                                                 $constraintNode as element(gx:node),                                                 
+                                                 $contextNode as node()?,
+                                                 $valueNodes as node()*,
+                                                 $trail as xs:string,
+                                                 $options as map(xs:string, item()*),
+                                                 $context as map(xs:string, item()*))
+        as element()* {
+    let $valueCount := count($valueNodes)
+    let $countAtts := $constraintNode/(@count, @minCount, @maxCount)
+    return    
         (: explicit constraints :)
         if ($countAtts) then
-
             for $countAtt in $countAtts
             let $ok :=
                 switch ($countAtt/local-name(.))
@@ -89,23 +127,13 @@ declare function f:validateNodeContentConstraint($contextURI as xs:string,
                 default return error()
             let $colour := if ($ok) then 'green' else 'red'
             return
-                result:validationResult_docContent_counts($colour, $constraintElem, $countAtt, $valueCount, (), $context)
+                result:validationResult_docContent_counts(
+                    $colour, $constraintElem, $countAtt, $contextNode, $valueCount, $trail, (), $context)
                 
         (: implicit constraints :)                        
         else
             let $colour := if ($valueCount eq 1) then 'green' else 'red'
             return
                 result:validationResult_docContent_counts(
-                    $colour, $constraintElem, $constraintNode, $valueCount, attribute implicitCount {1}, $context)
-                    
-    (: Check children :)
-    let $results_children :=
-        for $node in $nodes
-        for $constraint in $constraintNode/gx:node 
-        return
-            f:validateNodeContentConstraint($contextURI, $node, $constraint, $context)
-    return (
-        $results_counts,
-        $results_children
-    )
-};
+                    $colour, $constraintElem, $constraintNode, $contextNode, $valueCount, $trail, (), $context) 
+};        
