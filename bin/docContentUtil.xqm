@@ -38,6 +38,19 @@ declare function f:evaluateNodePath($nodePath as xs:string,
         as node()* {
     
     if (not($contextNode)) then () else
+    let $steps := f:parseNodePath($nodePath, $options, $context)
+    return
+        f:evaluateCompiledNodePath($steps, $contextNode, $namespaceContext, $options, $context)
+};
+
+
+declare function f:evaluateCompiledNodePath($compiledNodePath as element()+,
+                                    $contextNode as node()?,
+                                    $namespaceContext as element()?,
+                                    $options as map(xs:string, item()*)?,
+                                    $context as map(xs:string, item()*))
+        as node()* {
+    if (not($contextNode)) then () else
     
     (: Enhance options, adding namespace bindings namespaces.prefix.namespace-uri :)
     let $options :=
@@ -47,17 +60,7 @@ declare function f:evaluateNodePath($nodePath as xs:string,
                 for $prefix in in-scope-prefixes($namespaceContext)
                 return map:entry($prefix, namespace-uri-for-prefix($prefix, $namespaceContext)))
             return map:put($options, 'namespaces', $namespaces)
-    (:            
-    let $_DEBUG := trace($options, '___OPTIONS: ')                
-    let $_DEBUG := trace($options?namespaces?geo, '___URI_FOR_PREFIX_GEO: ')
-    let $_DEBUG := trace($nodePath, '### NODE_PATH: ')
-     :)
-    let $steps := f:parseNodePath($nodePath, $options, $context)
-    (:
-    let $_DEBUG := trace($steps, '_STEPS: ')
-    let $_DEBUG := trace((), '----')
-     :)
-    let $value := f:evaluateNodePathRC($steps, $contextNode, $namespaceContext, $options, $context)
+    let $value := f:evaluateNodePathRC($compiledNodePath, $contextNode, $namespaceContext, $options, $context)
     return $value
 };
 
@@ -191,7 +194,6 @@ declare function f:parseNodePathRC($nodePath as xs:string,
                                    $options as map(xs:string, item()*)?,
                                    $context as map(xs:string, item()*))
         as element()+ {
-    let $withNamespaces := $options?withNamespaces        
     let $sep := codepoints-to-string(30000) return
     
     let $fn_parseStep := 
@@ -219,9 +221,9 @@ declare function f:parseNodePathRC($nodePath as xs:string,
             let $regex := $localName ! i:glob2regex(.)
             let $remains := substring-after($nameEtc, $sep)[string()]
             return
-                map{'name': $name ! attribute name {.},
+                map{'name': $localName ! attribute name {.},
                     'prefix': $prefix ! attribute prefix {.},   
-                    'regex': attribute regex {$regex} [$localName ne $regex],
+                    'regex': attribute regex {$regex} ['^'||$localName||'$' ne $regex],
                     'index': $index ! attribute index {.},
                     'isAttribute': $isAttribute ! attribute isAttribute {.},
                     'remains': $remains} 
@@ -263,4 +265,46 @@ declare function f:parseNodePathRC($nodePath as xs:string,
         replace($nodePath, '^\.\s*', '')[string()] ! f:parseNodePathRC(., $options, $context)
     else error()    
 };
+
+(:~
+ : ===============================================================================
+ :
+ :     U t i l i t y    f u n c t i o n s   
+ :
+ : =============================================================================== 
+ :)
+
+(:~
+ : Returns true if the name of a given node matches the name constraints
+ : of at least one compiled node path steps. This function is used
+ : when checking closed constraints, comparing the names of attributes
+ : and elements against the child and attribute paths used by the
+ : <node> child elements of the <node> element to be checked, representing
+ : the content model to be checked.
+ :
+ : @param node the name whose name is checked
+ : @param steps compiled node path steps
+ : @param withNamespaces if true, lack of prefix means no target namespace
+ : @param namespaceContext element used as namespace context
+ : @return true if the node name matches at least one step
+ :)
+declare function f:nodeNameMatchesNodePathStep($node as node(), 
+                                               $steps as element()*, 
+                                               $withNamespaces as xs:boolean?, 
+                                               $namespaceContext as element())
+        as xs:boolean {
+not(
+    some $step in $steps satisfies
+    (
+        $step/@regex/matches($node/local-name(.), .) or
+        $step/@name eq $node/local-name(.)
+    ) and 
+    (
+        not($step/@prefix) and (not($withNamespaces) or not($step/namespace-uri(.)))
+        or
+        $step/@prefix/namespace-uri-for-prefix(., $namespaceContext) eq $node/namespace-uri(.)
+    )
+)
+       
+};        
 

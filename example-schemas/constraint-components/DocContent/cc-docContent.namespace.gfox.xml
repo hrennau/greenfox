@@ -34,7 +34,7 @@
                         <node locNP="name"/>
                         <node locNP="city"/>
                         <node locNP="country"/>
-                        <node locNP="g:geo">
+                        <node locNP="g:geo" closed="true">
                             <node locNP="g:latitude"/>
                             <node locNP="g:longitude"/>
                             <node locNP="g:altitude"/>

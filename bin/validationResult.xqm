@@ -215,8 +215,9 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
     let $constraintComponent :=
-        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
-        $constraintNode/i:firstCharToUpperCase(local-name(.))    
+        $constraintElem/i:firstCharToUpperCase(local-name(.)) || (
+        if ($constraintNode/self::attribute()) then $constraintNode/i:firstCharToUpperCase(local-name(.))
+        else 'Count')
     let $nodePath := $contextNode/i:datapath(.)
     let $implicitCount := 1[not($constraintNode/self::attribute())]
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
@@ -236,6 +237,44 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
             $additionalAtts            
         }       
 };
+
+declare function f:validationResult_docContent_closed($colour as xs:string,
+                                                      $constraintElem as element(),
+                                                      $constraintNode as node(),
+                                                      $contextNode as node(),
+                                                      $unexpectedNode as node()?,   
+                                                      $nodeTrail as xs:string,
+                                                      $additionalAtts as attribute()*,
+                                                      $context as map(xs:string, item()*))
+        as element() {
+    let $contextURI := $context?_targetInfo?contextURI
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
+    let $constraintComponent := 'DocContentClosed'
+    let $nodePath := $contextNode/i:datapath(.)
+    let $unexpectedNodeLocalName := $unexpectedNode/local-name(.)
+    let $unexpectedNodeNamespace := $unexpectedNode/namespace-uri(.)[string()]
+    let $unexpectedAttNamePrefix := if ($unexpectedNode/self::attribute()) then 'unexpectedAttribute' 
+                                    else 'unexpectedElement'
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    return
+        element {f:resultElemName($colour)} {
+            $contextURI ! attribute filePath {.},
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComponent},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $constraintNode[self::attribute()],
+            $unexpectedNodeLocalName ! attribute {$unexpectedAttNamePrefix || 'Name'} {$unexpectedNodeLocalName},
+            $unexpectedNodeNamespace ! attribute {$unexpectedAttNamePrefix || 'Namespace'} {$unexpectedNodeNamespace},
+            $nodePath ! attribute nodePath {.},
+            $nodeTrail ! attribute nodeTrail {.},
+            $additionalAtts            
+        }       
+};
+
 
 (:~
  : Creates a validation result expressing an exceptional condition 

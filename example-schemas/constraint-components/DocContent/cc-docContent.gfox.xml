@@ -26,7 +26,7 @@
                 <docContent>
                     
                     <!-- Document structure -->
-                    <node locNP="/airport">
+                    <node locNP="/airport" closed="true">
                         <node locNP="@id"/>
                         <node locNP="@iata"/>
                         <node locNP="@icao"/>
@@ -39,12 +39,13 @@
                             <node locNP="longitude"/>
                             <node locNP="altitude"/>
                         </node>
-                        <node locNP="temporal">
+                        <node locNP="temporal" closed="true">
                             <node locNP="timezone"/>
                             <node locNP="tzTimezone"/>
                             <node locNP="dst"/>                                
                         </node>
-                        <node locNP=".//*zone" maxCount="2"/>
+                        <node locNP="type"/>
+                        <node locNP="source1"/>
                     </node>
 
                     <!-- Total number of attributes -->
