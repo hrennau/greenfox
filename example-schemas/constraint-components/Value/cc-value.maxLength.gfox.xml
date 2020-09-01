@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component Expression.
+    Demonstrates the use of Value constraints. Declares a ValueMaxLength and a ValueCount constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression-pairs.ge"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.maxLength"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -14,11 +14,11 @@
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
-                <expressions>
-                    <expression exprXP="//project/@startDate" 
-                                minCount="1" minCountMsg="At least one start date expected."  
-                                ge="2018-01-01" geMsg="Start date should be > 2018-01-01"/>
-                </expressions>
+                <values>
+                    <value exprXP="/projects/@department" 
+                           count="1" countMsg="Missing @department attribute."  
+                           maxLength="8" maxLengthMsg="Department ID must not have more then 8 characters"/>
+                </values>
             </file>
         </folder>
     </domain>

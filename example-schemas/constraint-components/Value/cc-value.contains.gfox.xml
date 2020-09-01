@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. Declares a ValueContains constraint. 
+    
+    The constraint is satisfied if the expression value contains all items specified 
+    by the <item> children of <contains>. Note that the expression value may also
+    contain further items.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.contains"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="projectDates" id="projectDatesFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>            
+            <file foxpath="projectDates.xml" id="projectDatesShape">
+                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+                <values>
+                    <value exprXP="/projects/project/@name" 
+                           containsMsg="Expected projects missing.">
+                        <contains>
+                            <item>P1</item>
+                            <item>P2</item>
+                            <item>P3</item>
+                            <item>YY1</item>
+                        </contains>
+                    </value>
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

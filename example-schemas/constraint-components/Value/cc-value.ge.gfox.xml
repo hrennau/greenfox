@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component Expression.
+    Demonstrates the use of Value constraints. Declares a ValueGe and a ValueMinCount contraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/expression.ge"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.ge"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -14,11 +14,11 @@
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
-                <expressions>
-                    <expression exprXP="//project/(@startDate, @endDate, milestone/@date)" 
-                                minCount="1" minCountMsg="At least one start date expected."  
-                                datatype="date"/>
-                </expressions>
+                <values>
+                    <value exprXP="//project/@startDate" 
+                           minCount="1" minCountMsg="At least one start date expected."  
+                           ge="2018-01-01" geMsg="Start date should be > 2018-01-01"/>
+                </values>
             </file>
         </folder>
     </domain>

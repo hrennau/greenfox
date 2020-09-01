@@ -222,8 +222,8 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
     case element() return
         let $resourceShapeID :=
             if ($n/(self::gx:docContent,
-                    self::gx:expression,
-                    self::gx:expressions,
+                    self::gx:value,
+                    self::gx:values,
                     self::gx:expressionPair,
                     self::gx:expressionPairs,
                     self::gx:xpath,

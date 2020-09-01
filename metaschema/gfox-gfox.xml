@@ -443,7 +443,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar expressions expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent"
+                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar values expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 

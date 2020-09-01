@@ -27,8 +27,8 @@ at "docContentConstraint.xqm";
 import module namespace concord="http://www.greenfox.org/ns/xquery-functions/concord" 
 at "concordConstraint.xqm";
 
-import module namespace expr="http://www.greenfox.org/ns/xquery-functions/expression" 
-at "expressionConstraint.xqm";
+import module namespace expr="http://www.greenfox.org/ns/xquery-functions/value" 
+at "valueConstraint.xqm";
     
 import module namespace expair="http://www.greenfox.org/ns/xquery-functions/expression-pair" 
 at "expressionPairConstraint.xqm";
@@ -123,6 +123,10 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 i:validateFileName($contextURI, $fileName, $context)
             case $mediatype as element(gx:mediatype) return 
                 i:validateMediatype($contextURI, $mediatype, $context)     
+            case $docContent as element(gx:docContent) return 
+                dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $docContent, $context)            
+            case $values as element(gx:values) return 
+                expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $values, $context)            
             case $xpath as element(gx:xpath) return 
                 i:validateExpressionValue($contextURI, $xpath, $contextItem, $contextDoc, $context)
             case $foxpath as element(gx:foxpath) return 
@@ -133,10 +137,6 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 i:validateLinks($contextURI, $contextDoc, $contextItem, $links, $context)            
             case $docSimilar as element(gx:docSimilar) return 
                 i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
-            case $expressions as element(gx:docContent) return 
-                dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $expressions, $context)            
-            case $expressions as element(gx:expressions) return 
-                expr:validateExpressionConstraint($contextURI, $contextDoc, $contextNode, $expressions, $context)            
             case $expressionPairs as element(gx:expressionPairs) return 
                 expair:validateExpressionPairConstraint($contextURI, $contextDoc, $contextNode, $expressionPairs, $context)            
             case $concord as element(gx:contentCorrespondence) return 

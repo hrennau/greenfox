@@ -36,7 +36,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:validationResultValues($value as item()*, 
                                           $controller as element())
         as element()* {
-    let $reporterXPath := $controller/@reporterXPath        
+    let $reporterXPath := $controller/@reporterXPath   
     return
         if ($reporterXPath) then
             for $item in $value
@@ -58,13 +58,15 @@ declare function f:validationResultValues($value as item()*,
                                           $constraintElem as element(),
                                           $contextDoc as node()?)
         as element()* {
+    let $_DEBUG := trace($value, '___VALUE: ')
+    let $_DEBUG := trace($contextDoc, '___CONTEXT_DOC: ')
     let $nodePath := function($item) {trace(i:datapath($item), '_DATAPATH: ')[$item/ancestor::node() intersect $contextDoc]}        
     for $item in $value
     return
-        typeswitch(trace($item, '_ITEM: ')  )
+        typeswitch($item)
         case xs:anyAtomicType return string($item) ! <gx:value>{.}</gx:value>
         case element() return
-            if ($item/not((@*, *))) then 
+            if ($item/not((@*, *))) then
                 string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, $item}</gx:value>
             else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
         case attribute() return
@@ -282,7 +284,7 @@ declare function f:validationResult_docContent_closed($colour as xs:string,
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node tree.
  :
- : @param constraintElem an element declaring an ExpressionPair constraint
+ : @param constraintElem an element declaring a DocContentconstraint
  : @param exception an optional message string
  : @param addAtts additional attributes 
  : @param context processing context
@@ -975,53 +977,54 @@ declare function f:validationResult_folderSimilar_count(
  :
  : ===============================================================================
  :)
-declare function f:validationResult_expression($constraintElem as element(),
-                                               $colour as xs:string,
-                                               $exprValue as item()*,    
-                                               $violations as item()*,
-                                               $expr as xs:string,
-                                               $exprLang as xs:string,                                               
-                                               $constraint as node(),
-                                               $additionalAtts as attribute()*,
-                                               $additionalElems as element()*,
-                                               $contextInfo as map(xs:string, item()*),
-                                               $options as map(*)?)
+declare function f:validationResult_value($colour as xs:string,
+                                          $constraintElem as element(),
+                                          $constraintNode as node(),
+                                          $exprValue as item()*,    
+                                          $violations as item()*,
+                                          $expr as xs:string,
+                                          $exprLang as xs:string,                                          
+                                          $additionalAtts as attribute()*,
+                                          $additionalElems as element()*,
+                                          $options as map(*)?,
+                                          $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
-    let $constraintPath := i:getSchemaConstraintPath($constraint)
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
     
     let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(eq) return map{'constraintComp': 'ExpressionEq', 'atts': ('eq', 'useDatatype', 'quant')}
-        case attribute(ne) return map{'constraintComp': 'ExpressionNe', 'atts': ('ne', 'useDatatype', 'quant')}
-        case attribute(lt) return map{'constraintComp': 'ExpressionLt', 'atts': ('lt', 'useDatatype', 'quant')}        
-        case attribute(le) return map{'constraintComp': 'ExpressionLe', 'atts': ('le', 'useDatatype', 'quant')}        
-        case attribute(gt) return map{'constraintComp': 'ExpressionGt', 'atts': ('gt', 'useDatatype', 'quant')}        
-        case attribute(ge) return map{'constraintComp': 'ExpressionGe', 'atts': ('ge', 'useDatatype', 'quant')}
-        case element(gx:in) return map{'constraintComp': 'ExpressionIn', 'atts': ('useDatatype')}
-        case element(gx:notin) return map{'constraintComp': 'ExpressionNotin', 'atts': ('useDatatype')}
-        case element(gx:contains) return map{'constraintComp': 'ExpressionContains', 'atts': ('useDatatype')}
+        typeswitch($constraintNode)
+        case attribute(eq) return map{'constraintComp': 'ValueEq', 'atts': ('eq', 'useDatatype', 'quant')}
+        case attribute(ne) return map{'constraintComp': 'ValueNe', 'atts': ('ne', 'useDatatype', 'quant')}
+        case attribute(lt) return map{'constraintComp': 'ValueLt', 'atts': ('lt', 'useDatatype', 'quant')}        
+        case attribute(le) return map{'constraintComp': 'ValueLe', 'atts': ('le', 'useDatatype', 'quant')}        
+        case attribute(gt) return map{'constraintComp': 'ValueGt', 'atts': ('gt', 'useDatatype', 'quant')}        
+        case attribute(ge) return map{'constraintComp': 'ValueGe', 'atts': ('ge', 'useDatatype', 'quant')}
+        case element(gx:in) return map{'constraintComp': 'ValueIn', 'atts': ('useDatatype')}
+        case element(gx:notin) return map{'constraintComp': 'ValueNotin', 'atts': ('useDatatype')}
+        case element(gx:contains) return map{'constraintComp': 'ValueContains', 'atts': ('useDatatype', 'quant')}
         
-        case attribute(datatype) return map{'constraintComp': 'ExpressionDatatype', 'atts': ('datatype', 'useDatatype', 'quant')}
-        case attribute(matches) return map{'constraintComp': 'ExpressionMatches', 'atts': ('matches', 'useDatatype', 'quant')}
-        case attribute(notMatches) return map{'constraintComp': 'ExpressionNotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
-        case attribute(like) return map{'constraintComp': 'ExpressionLike', 'atts': ('like', 'useDatatype', 'quant')}        
-        case attribute(notLike) return map{'constraintComp': 'ExpressionNotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
-        case attribute(length) return map{'constraintComp': 'ExpressionLength', 'atts': ('length', 'quant')}
-        case attribute(minLength) return map{'constraintComp': 'ExpressionMinLength', 'atts': ('minLength', 'quant')}        
-        case attribute(maxLength) return map{'constraintComp': 'ExpressionMaxLength', 'atts': ('maxLength', 'quant')}        
-        case attribute(itemsUnique) return map{'constraintComp': 'ExprValueItemsUnique', 'atts': ('itemsUnique')}
+        case attribute(datatype) return map{'constraintComp': 'ValueDatatype', 'atts': ('datatype', 'useDatatype', 'quant')}
+        case attribute(matches) return map{'constraintComp': 'ValueMatches', 'atts': ('matches', 'useDatatype', 'quant')}
+        case attribute(notMatches) return map{'constraintComp': 'ValueNotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
+        case attribute(like) return map{'constraintComp': 'ValueLike', 'atts': ('like', 'useDatatype', 'quant')}        
+        case attribute(notLike) return map{'constraintComp': 'ValueNotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
+        case attribute(length) return map{'constraintComp': 'ValueLength', 'atts': ('length', 'quant')}
+        case attribute(minLength) return map{'constraintComp': 'ValueMinLength', 'atts': ('minLength', 'quant')}        
+        case attribute(maxLength) return map{'constraintComp': 'ValueMaxLength', 'atts': ('maxLength', 'quant')}        
+        case attribute(itemsUnique) return map{'constraintComp': 'ValueItemsUnique', 'atts': ('itemsUnique')}
         default return error()
     let $constraintIdBase := $constraintElem/@id
-    let $constraintId := concat($constraintIdBase, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}    
+    let $constraintId := concat($constraintIdBase, '-', $constraintNode/local-name(.))
+    let $filePath := $context?_targetInfo?contextURI ! attribute filePath {.}
+    let $focusNode := $context?_targetInfo?focusNodePath ! attribute nodePath {.}    
     let $standardAttNames := $constraintConfig?atts
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.))
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     let $elemName := i:getResultElemName($colour)
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}
@@ -1031,12 +1034,11 @@ declare function f:validationResult_expression($constraintElem as element(),
                       else ()
         return 
             if (empty($items)) then () else
-                f:validationResultValues($items, $constraintElem, $contextInfo?doc)
+                f:validationResultValues($items, $constraintElem, $targetInfo?doc)
     return
         element {$elemName} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintConfig?constraintComp},
-            (: $constraintId ! attribute constraintID {.}, :)            
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
@@ -1067,12 +1069,12 @@ declare function f:validationResult_expression($constraintElem as element(),
  : @param contextInfo informs about the focus document and focus node
  : @return a validation result, red or green
  :)
-declare function f:validationResult_expression_counts($colour as xs:string,
-                                                      $constraintElem as element(),
-                                                      $constraint as attribute(),
-                                                      $valueCount as item()*,
-                                                      $context as map(xs:string, item()*),
-                                                      $additionalAtts as attribute()*)
+declare function f:validationResult_value_counts($colour as xs:string,
+                                                 $constraintElem as element(),
+                                                 $constraint as attribute(),
+                                                 $valueCount as item()*,                                                 
+                                                 $additionalAtts as attribute()*,
+                                                 $context as map(xs:string, item()*))
         as element() {
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
@@ -1081,9 +1083,9 @@ declare function f:validationResult_expression_counts($colour as xs:string,
     let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
         typeswitch($constraint)
-        case attribute(count)    return map{'constraintComp': 'ExpressionCount',    'atts': ('count')}
-        case attribute(minCount) return map{'constraintComp': 'ExpressionMinCount', 'atts': ('minCount')}        
-        case attribute(maxCount) return map{'constraintComp': 'ExpressionMaxCount', 'atts': ('maxCount')}        
+        case attribute(count)    return map{'constraintComp': 'ValueCount',    'atts': ('count')}
+        case attribute(minCount) return map{'constraintComp': 'ValueMinCount', 'atts': ('minCount')}        
+        case attribute(maxCount) return map{'constraintComp': 'ValueMaxCount', 'atts': ('maxCount')}        
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
@@ -1116,7 +1118,7 @@ declare function f:validationResult_expression_counts($colour as xs:string,
 
 (:~
  : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of an Expression constraint.
+ : which prevents normal evaluation of a Value constraint.
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node tree.
  :
@@ -1126,7 +1128,7 @@ declare function f:validationResult_expression_counts($colour as xs:string,
  : @param context processing context
  : @return a red validation result
  :)
-declare function f:validationResult_expression_exception(
+declare function f:validationResult_value_exception(
                                             $constraintElem as element(),
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
@@ -1137,7 +1139,7 @@ declare function f:validationResult_expression_exception(
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
         
     let $targetInfo := $context?_targetInfo        
-    let $constraintComp := 'Expression'        
+    let $constraintComp := 'Value'        
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
