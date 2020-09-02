@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. Declares a ValueNotIn and a ValueMinCount constraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.distinct"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="projectDates" id="projectDatesFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>            
+            <file foxpath="projectDates.xml" id="projectDatesShape">
+                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+                <values>
+                    <value exprXP="/projects/project/@name" 
+                           minCount="1" minCountMsg="At least one project expected."  
+                           distinct="true" distinctMsg="Project names must be distinct.">
+                        <notin>
+                            <eq>Z1</eq>
+                            <eq>Z2</eq>
+                            <eq>Z3</eq>
+                            <like>BB*</like>
+                        </notin>
+                    </value>
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

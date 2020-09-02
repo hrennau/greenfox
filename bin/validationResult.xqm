@@ -1071,48 +1071,57 @@ declare function f:validationResult_value($colour as xs:string,
  :)
 declare function f:validationResult_value_counts($colour as xs:string,
                                                  $constraintElem as element(),
-                                                 $constraint as attribute(),
-                                                 $valueCount as item()*,                                                 
+                                                 $constraintNode as attribute(),
+                                                 $exprValue as item()*,                                                 
                                                  $additionalAtts as attribute()*,
                                                  $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
-    let $constraintPath := i:getSchemaConstraintPath($constraint)
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
         
     let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
-        typeswitch($constraint)
+        typeswitch($constraintNode)
         case attribute(count)    return map{'constraintComp': 'ValueCount',    'atts': ('count')}
         case attribute(minCount) return map{'constraintComp': 'ValueMinCount', 'atts': ('minCount')}        
         case attribute(maxCount) return map{'constraintComp': 'ValueMaxCount', 'atts': ('maxCount')}        
+        case attribute(exists) return map{'constraintComp': 'ValueExists', 'atts': ('exists')}        
+        case attribute(empty) return map{'constraintComp': 'ValueEmpty', 'atts': ('empty')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
-    let $valueCountAtt := attribute valueCount {$valueCount} 
-    
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $targetInfo?contextURI ! attribute filePath {.}
-    let $focusNode := $targetInfo?focusNodePath ! attribute nodePath {.}    
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraint/local-name(.))
+    let $valueCountAtt := attribute valueCount {count($exprValue)} 
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     let $elemName := i:getResultElemName($colour)
+    
+    let $values :=
+        let $items :=
+            if ($constraintNode/self::attribute(maxCount)/xs:integer(.) eq 0 or
+                $constraintNode/self::attribute(empty)/xs:boolean(.) or
+                $constraintNode/self::attribute(exists)/xs:boolean(.) eq false()) then $exprValue
+            else ()
+        return 
+            if (empty($items)) then () else
+                f:validationResultValues($items, $constraintElem, $targetInfo?doc)
+    
     return
         element {$elemName} {
-            $msg ! attribute msg {.},
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
             attribute constraintComp {$constraintConfig?constraintComp},            
-            (: attribute constraintID {$constraintId}, :)
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
-            $filePath,
-            $focusNode,
             $standardAtts,
             $valueCountAtt,
-            $additionalAtts            
+            $additionalAtts,
+            $values            
         }       
 };
 

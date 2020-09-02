@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Value constraints. Declares a ValueLike and a ValueCount constraint.
+    Demonstrates the use of Value constraints. Declares a ValueItemsUnique constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.like"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.itemsUnique"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,9 +15,9 @@
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="/projects/@department" 
-                           count="1" countMsg="The department must be specified."  
-                           like="KK*-JU" likeMsg="Department ID should match pattern KK*-JU"/>
+                    <value exprXP="/projects/project/@name" 
+                           minCount="1" minCountMsg="At least one project expected."  
+                           itemsUnique="true" itemsUniqueMsg="Project names must be distinct."/>
                 </values>
             </file>
         </folder>

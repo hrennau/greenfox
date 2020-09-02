@@ -15,9 +15,9 @@
             <file foxpath="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="//project/@name" 
-                           minCount="1" minCountMsg="At least one start date expected."  
-                           matches="[A-Z]\d+" matchesMsg="Project name must start with uc letter followed by digits"/>
+                    <value exprXP="/projects/@department" 
+                           count="1" countMsg="The department must be specified."  
+                           matches="[A-Z]{2}\d{2}[A-Z]-[A-Z]" matchesMsg="Department name has an unexpected structure."/>
                 </values>
             </file>
         </folder>

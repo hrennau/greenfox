@@ -115,6 +115,7 @@ declare function f:validateValue($constraintElem as element(gx:value),
         f:validateValue_cmp($exprValue, $expr, $exprLang, $constraintElem, $context),    
         f:validateValue_in($exprValue, $expr, $exprLang, $constraintElem, $context),
         f:validateValue_contains($exprValue, $expr, $exprLang, $constraintElem, $context),
+        f:validateValue_itemsUnique($exprValue, $expr, $exprLang, $constraintElem, $context),
         ()
     )
     return
@@ -286,6 +287,40 @@ declare function f:validateValue_contains($exprValue as item()*,
 };        
 
 (:~
+ : Validates ValueItemsUnique constraints.
+ :)
+declare function f:validateValue_itemsUnique($exprValue as item()*,
+                                          $expr as xs:string,
+                                          $exprLang as xs:string,                                              
+                                          $constraintElem as element(),
+                                          $context as map(xs:string, item()*))
+        as element()* {
+    let $itemsUnique := $constraintElem/@itemsUnique
+    return if (empty($itemsUnique)) then () else
+    
+    let $itemsUniqueExp := $itemsUnique/xs:boolean(.)
+    let $itemsUniqueAct := count($exprValue) eq $exprValue => distinct-values() => count()
+    let $colour :=
+        if ($itemsUniqueExp and $itemsUniqueAct or
+            not($itemsUniqueExp) and not($itemsUniqueAct)) then 'green'
+            else 'red'
+            
+    let $violations :=
+        let $values :=
+            if (not($itemsUniqueExp)) then () else
+                for $item in $exprValue
+                group by $v := $item
+                where count($item) gt 1
+                return $v
+        return $exprValue[. = $values]                
+    return            
+        result:validationResult_value(
+            $colour, $constraintElem, $itemsUnique, $exprValue, $violations, $expr, $exprLang,
+                (), (), (), $context)
+};        
+
+
+(:~
  : Validates the count constraints expressed by an `expression` element:
  : @count, @minCount, @maxCount. 
  :
@@ -298,26 +333,44 @@ declare function f:validateValue_counts($items as item()*,
                                         $constraintElem as element(),
                                         $context as map(xs:string, item()*))
         as element()* {
-    let $targetInfo := $context?_targetInfo        
-    let $constraintNodes := $constraintElem/(@count, @minCount, @maxCount)
-    let $results :=
-        if (empty($constraintNodes)) then () else
+    let $targetInfo := $context?_targetInfo
+    let $valueCount := count($items)    
+    let $constraintNodes1 := $constraintElem/(@count, @minCount, @maxCount)
+    let $constraintNodes2 := $constraintElem/(@exists, @empty)
+    let $results1 :=
+        if (empty($constraintNodes1)) then () else
         
         (: evaluate constraints :)
-        let $valueCount := count($items)        
-        for $constraintNode in $constraintNodes
+        for $constraintNode in $constraintNodes1
         let $cmpWith := $constraintNode/xs:integer(.)
-        let $green :=
+        let $ok :=
             typeswitch($constraintNode)
             case attribute(count)    return $valueCount eq $cmpWith
             case attribute(minCount) return $valueCount ge $cmpWith
             case attribute(maxCount) return $valueCount le $cmpWith
             default return error()
-        let $colour := if ($green) then 'green' else 'red'        
+        let $colour := if ($ok) then 'green' else 'red'        
         return  
             result:validationResult_value_counts(
-                $colour, $constraintElem, $constraintNode, $valueCount, (), $context)
-    return $results        
+                $colour, $constraintElem, $constraintNode, $items, (), $context)
+                
+    let $results2 :=
+        if (empty($constraintNodes2)) then () else
+        for $constraintNode in $constraintNodes2
+        let $ok :=
+            typeswitch($constraintNode)
+            case attribute(exists) return 
+                $constraintNode/xs:boolean(.) and $valueCount or 
+                not($constraintNode/xs:boolean(.)) and not($valueCount)
+            case attribute(empty) return
+                $constraintNode/xs:boolean(.) and not($valueCount) or 
+                not($constraintNode/xs:boolean(.)) and $valueCount
+            default return error()
+        let $colour := if ($ok) then 'green' else 'red'
+        return
+            result:validationResult_value_counts(
+                $colour, $constraintElem, $constraintNode, $items, (), $context)
+    return ($results1, $results2)        
 };
 
 

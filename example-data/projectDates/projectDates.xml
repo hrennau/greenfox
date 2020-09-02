@@ -10,5 +10,8 @@
     <project name="P3" startDate="2020-08-18">
         <milestone date="2020-08-19"/>
     </project>
+    <project name="P3b" startDate="2020-08-18">
+        <milestone date="2020-08-19"/>
+    </project>
     <project name="YY1" startDate="2020-05-01"/>
 </projects>
