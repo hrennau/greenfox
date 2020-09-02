@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxvalueEq and a FoxvalueCount contraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\denmark" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/denmark" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//country"
+                          minCount="1" minCountMsg="At least one airport expected."
+                          eq="Denmarc" eqMsg="Airports in the denmark folder must have country 'Denmark'."/>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

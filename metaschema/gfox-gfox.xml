@@ -412,7 +412,7 @@ return
                     msgOK="OK - 'folder' element: has foxpath or path"/>
 
                 <!-- element names -->
-                <ex:allowedElems elemNames="targetSize file folder folderContent  folderSimilar foxpath lastModified fileName"
+                <ex:allowedElems elemNames="targetSize file folder folderContent folderSimilar foxvalues lastModified fileName foxpath"
                     msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
                     msgOK="OK - 'folder' element: no unexpected elements"/>
 
@@ -443,7 +443,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file xpath foxpath links lastModified fileSize fileName docSimilar values expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent"
+                    elemNames="targetSize folder file links lastModified fileSize fileName docSimilar values foxvalues expressionPairs contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent xpath foxpath"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 

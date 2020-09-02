@@ -2,7 +2,7 @@
 <!-- 
     Demonstrates the use of Value constraints. Declares a ValueEq and a ValueCount contraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.ge"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.eq"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

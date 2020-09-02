@@ -993,28 +993,30 @@ declare function f:validationResult_value($colour as xs:string,
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-    
+     
     let $constraintConfig :=
-        typeswitch($constraintNode)
-        case attribute(eq) return map{'constraintComp': 'ValueEq', 'atts': ('eq', 'useDatatype', 'quant')}
-        case attribute(ne) return map{'constraintComp': 'ValueNe', 'atts': ('ne', 'useDatatype', 'quant')}
-        case attribute(lt) return map{'constraintComp': 'ValueLt', 'atts': ('lt', 'useDatatype', 'quant')}        
-        case attribute(le) return map{'constraintComp': 'ValueLe', 'atts': ('le', 'useDatatype', 'quant')}        
-        case attribute(gt) return map{'constraintComp': 'ValueGt', 'atts': ('gt', 'useDatatype', 'quant')}        
-        case attribute(ge) return map{'constraintComp': 'ValueGe', 'atts': ('ge', 'useDatatype', 'quant')}
-        case element(gx:in) return map{'constraintComp': 'ValueIn', 'atts': ('useDatatype')}
-        case element(gx:notin) return map{'constraintComp': 'ValueNotin', 'atts': ('useDatatype')}
-        case element(gx:contains) return map{'constraintComp': 'ValueContains', 'atts': ('useDatatype', 'quant')}
+        let $ccPrefix := if ($exprLang eq 'foxpath') then 'Foxvalue' else 'Value' return
         
-        case attribute(datatype) return map{'constraintComp': 'ValueDatatype', 'atts': ('datatype', 'useDatatype', 'quant')}
-        case attribute(matches) return map{'constraintComp': 'ValueMatches', 'atts': ('matches', 'useDatatype', 'quant')}
-        case attribute(notMatches) return map{'constraintComp': 'ValueNotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
-        case attribute(like) return map{'constraintComp': 'ValueLike', 'atts': ('like', 'useDatatype', 'quant')}        
-        case attribute(notLike) return map{'constraintComp': 'ValueNotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
-        case attribute(length) return map{'constraintComp': 'ValueLength', 'atts': ('length', 'quant')}
-        case attribute(minLength) return map{'constraintComp': 'ValueMinLength', 'atts': ('minLength', 'quant')}        
-        case attribute(maxLength) return map{'constraintComp': 'ValueMaxLength', 'atts': ('maxLength', 'quant')}        
-        case attribute(itemsUnique) return map{'constraintComp': 'ValueItemsUnique', 'atts': ('itemsUnique')}
+        typeswitch($constraintNode)
+        case attribute(eq) return map{'constraintComp': $ccPrefix || 'Eq', 'atts': ('eq', 'useDatatype', 'quant')}
+        case attribute(ne) return map{'constraintComp': $ccPrefix || 'Ne', 'atts': ('ne', 'useDatatype', 'quant')}
+        case attribute(lt) return map{'constraintComp': $ccPrefix || 'Lt', 'atts': ('lt', 'useDatatype', 'quant')}        
+        case attribute(le) return map{'constraintComp': $ccPrefix || 'Le', 'atts': ('le', 'useDatatype', 'quant')}        
+        case attribute(gt) return map{'constraintComp': $ccPrefix || 'Gt', 'atts': ('gt', 'useDatatype', 'quant')}        
+        case attribute(ge) return map{'constraintComp': $ccPrefix || 'Ge', 'atts': ('ge', 'useDatatype', 'quant')}
+        case element(gx:in) return map{'constraintComp': $ccPrefix || 'In', 'atts': ('useDatatype')}
+        case element(gx:notin) return map{'constraintComp': $ccPrefix || 'Notin', 'atts': ('useDatatype')}
+        case element(gx:contains) return map{'constraintComp': $ccPrefix || 'Contains', 'atts': ('useDatatype', 'quant')}
+        
+        case attribute(datatype) return map{'constraintComp': $ccPrefix || 'Datatype', 'atts': ('datatype', 'useDatatype', 'quant')}
+        case attribute(matches) return map{'constraintComp': $ccPrefix || 'Matches', 'atts': ('matches', 'useDatatype', 'quant')}
+        case attribute(notMatches) return map{'constraintComp': $ccPrefix || 'NotMatches', 'atts': ('notMatches', 'useDatatype', 'quant')}
+        case attribute(like) return map{'constraintComp': $ccPrefix || 'Like', 'atts': ('like', 'useDatatype', 'quant')}        
+        case attribute(notLike) return map{'constraintComp': $ccPrefix || 'NotLike', 'atts': ('notLike', 'useDatatype', 'quant')}
+        case attribute(length) return map{'constraintComp': $ccPrefix || 'Length', 'atts': ('length', 'quant')}
+        case attribute(minLength) return map{'constraintComp': $ccPrefix || 'MinLength', 'atts': ('minLength', 'quant')}        
+        case attribute(maxLength) return map{'constraintComp': $ccPrefix || 'MaxLength', 'atts': ('maxLength', 'quant')}        
+        case attribute(itemsUnique) return map{'constraintComp': $ccPrefix || 'ItemsUnique', 'atts': ('itemsUnique')}
         default return error()
     let $constraintIdBase := $constraintElem/@id
     let $constraintId := concat($constraintIdBase, '-', $constraintNode/local-name(.))
