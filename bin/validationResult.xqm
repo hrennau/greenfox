@@ -60,14 +60,19 @@ declare function f:validationResultValues($value as item()*,
         as element()* {
     let $_DEBUG := trace($value, '___VALUE: ')
     let $_DEBUG := trace($contextDoc, '___CONTEXT_DOC: ')
-    let $nodePath := function($item) {trace(i:datapath($item), '_DATAPATH: ')[$item/ancestor::node() intersect $contextDoc]}        
+    let $nodePath := 
+        function($item) {
+            let $dpath := trace(i:datapath($item), '_DATAPATH: ') (: [$item/ancestor::node() intersect $contextDoc] :)
+            let $prefix := if ($item/ancestor::node() intersect $contextDoc) then () else ($item/base-uri(.) || '/')
+            return $prefix || $dpath
+        }        
     for $item in $value
     return
         typeswitch($item)
         case xs:anyAtomicType return string($item) ! <gx:value>{.}</gx:value>
         case element() return
             if ($item/not((@*, *))) then
-                string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, $item}</gx:value>
+                string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, string($item)}</gx:value>
             else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
         case attribute() return
             <gx:value>{attribute nodePath {trace($nodePath($item), '_NODEPATH: ')}, string($item)}</gx:value>
@@ -995,7 +1000,7 @@ declare function f:validationResult_value($colour as xs:string,
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
      
     let $constraintConfig :=
-        let $ccPrefix := if ($exprLang eq 'foxpath') then 'Foxvalue' else 'Value' return
+        let $ccPrefix := if ($exprLang eq 'foxpath') then 'FoxValue' else 'Value' return
         
         typeswitch($constraintNode)
         case attribute(eq) return map{'constraintComp': $ccPrefix || 'Eq', 'atts': ('eq', 'useDatatype', 'quant')}
