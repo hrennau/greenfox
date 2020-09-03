@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueLike and a FoxValueCount contraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.like"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//tzTimezone"
+                          minCount="1" minCountMsg="At least one timezone expected."
+                          like="Europe/*" likeMsg="Timezoe must match pattern 'Europe/*'."/>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

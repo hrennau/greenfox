@@ -144,6 +144,7 @@ declare function f:matchesLike($string as xs:string, $like as xs:string, $flags 
     let $useFlags := ($flags[string()], 'i')[1]
     let $regex :=
         $like !
+        replace(., '[(){}\[\]]', '\\$0') !
         replace(., '\*', '.*') !
         replace(., '\?', '.') !
         concat('^', ., '$')

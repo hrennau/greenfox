@@ -115,6 +115,7 @@ declare function f:validateValue($constraintElem as element(),
         f:validateValue_cmp($exprValue, $expr, $exprLang, $constraintElem, $context),    
         f:validateValue_in($exprValue, $expr, $exprLang, $constraintElem, $context),
         f:validateValue_contains($exprValue, $expr, $exprLang, $constraintElem, $context),
+        f:validateValue_eqeq($exprValue, $expr, $exprLang, $constraintElem, $context),
         f:validateValue_itemsUnique($exprValue, $expr, $exprLang, $constraintElem, $context),
         ()
     )
@@ -133,7 +134,9 @@ declare function f:validateValue_cmp($exprValue as item()*,
     let $resultOptions := ()    
     let $flags := string($constraintElem/@flags)
     let $quantifier := ($constraintElem/@quant, 'all')[1]
-    let $useDatatype := $constraintElem/@useDatatype/resolve-QName(., ..)
+    let $useDatatype := $constraintElem/@useDatatype/(
+        if (not(contains(., ':'))) then QName($i:URI_XSD, .)
+        else resolve-QName(., ..))
     let $typedItems := 
         if (empty($useDatatype)) then $exprValue else 
             $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
@@ -161,17 +164,20 @@ declare function f:validateValue_cmp($exprValue as item()*,
         case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}       
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))        
     let $useCmp :=
-        if ($cmp/self::attribute(like)) then $cmp/i:glob2regex(.)
+        if ($cmp/self::attribute(like)) then trace( $cmp/i:glob2regex(.) , '_USECMP: ')
         else if ($cmp/self::attribute(notLike)) then $cmp/i:glob2regex(.)
         else if ($cmp/self::attribute(datatype)) then $cmp        
         else if (empty($useDatatype)) then $cmp 
         else i:castAs($cmp, $useDatatype, ())
     let $results :=
         if ($quantifier eq 'all') then 
-            let $violations := $typedItems ! (
-                if (. instance of element(gx:red)) then .
-                else if (not($cmpTrue(., $useCmp))) then .
-                else ())
+            let $violations := 
+                for $ti at $pos in $typedItems
+                return
+                    if ($ti instance of element(gx:red)) then $ti
+                    else if (not($cmpTrue($ti, $useCmp))) then 
+                        if (empty($useDatatype)) then $ti else $exprValue[$pos]
+                    else ()
             let $colour := if (empty($violations)) then 'green' else 'red'
             return 
                 result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
@@ -208,6 +214,8 @@ declare function f:validateValue_in($exprValue as item()*,
         case element(gx:ne) return $item != $alternative
         case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
         case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
+        case element(gx:matches) return matches($item, $alternative, string($alternative/@flags))
+        case element(gx:notMatches) return not(matches($item, $alternative, string($alternative/@flags)))                        
         default return error()    
     }
     let $flags := string($constraintElem/@flags)    
@@ -261,7 +269,7 @@ declare function f:validateValue_contains($exprValue as item()*,
         as element()* {
     let $targetInfo := $context?_targetInfo  
     let $constraintNode := $constraintElem/gx:contains
-    let $expectedItems := $constraintElem/gx:contains/gx:item
+    let $expectedItems := $constraintElem/gx:contains/gx:term
     return if (not($expectedItems)) then () else
 
     let $quantifier := ($constraintElem/@quant, 'all')[1] return
@@ -287,6 +295,31 @@ declare function f:validateValue_contains($exprValue as item()*,
 };        
 
 (:~
+ : Validates ValueEqEq constraints.
+ :)
+declare function f:validateValue_eqeq($exprValue as item()*,
+                                      $expr as xs:string,
+                                      $exprLang as xs:string,                                              
+                                      $constraintElem as element(),
+                                      $context as map(xs:string, item()*))
+        as element()* {
+    let $targetInfo := $context?_targetInfo  
+    let $constraintNode := $constraintElem/gx:eqeq
+    let $expectedItems := $constraintElem/gx:eqeq/gx:term
+    return if (not($expectedItems)) then () else
+
+    let $violations1 := $exprValue[not(. = $expectedItems)]
+    let $violations2 := $expectedItems[not(. = $exprValue)]
+    let $colour := if (exists(($violations1, $violations2))) then 'red' else 'green' 
+    let $violations := $violations1
+    let $additionalElems := $violations2/string() ! <gx:missingValue>{.}</gx:missingValue>
+    return
+        result:validationResult_value(
+            $colour, $constraintElem, $constraintNode, $exprValue, $violations, $expr, $exprLang,
+            (), $additionalElems, (), $context)
+};        
+
+(:~
  : Validates ValueItemsUnique constraints.
  :)
 declare function f:validateValue_itemsUnique($exprValue as item()*,
@@ -298,8 +331,15 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
     let $itemsUnique := $constraintElem/@itemsUnique
     return if (empty($itemsUnique)) then () else
     
+    let $useDatatype := $constraintElem/@useDatatype/(
+        if (not(contains(., ':'))) then QName($i:URI_XSD, .)
+        else resolve-QName(., ..))
+    let $typedItems := 
+        if (empty($useDatatype)) then $exprValue else 
+            $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
+    
     let $itemsUniqueExp := $itemsUnique/xs:boolean(.)
-    let $itemsUniqueAct := count($exprValue) eq $exprValue => distinct-values() => count()
+    let $itemsUniqueAct := count($typedItems) eq $typedItems => distinct-values() => count()
     let $colour :=
         if ($itemsUniqueExp and $itemsUniqueAct or
             not($itemsUniqueExp) and not($itemsUniqueAct)) then 'green'
@@ -309,7 +349,7 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
         let $values :=
             if (not($itemsUniqueExp)) then () else
                 for $item in $exprValue
-                group by $v := $item
+                group by $v := $item ! (if (empty($useDatatype)) then . else i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red')))
                 where count($item) gt 1
                 return $v
         return $exprValue[. = $values]                

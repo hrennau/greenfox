@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueGe and a FoxValueMinCount contraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ge"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//latitude"
+                          minCount="1" minCountMsg="At least one latitude expected."
+                          ge="51.6" geMsg="Latitude must be ge 51.6."
+                          le="55.1" leMsg="Latitude must be le 55.1."
+                          useDatatype="decimal"/>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

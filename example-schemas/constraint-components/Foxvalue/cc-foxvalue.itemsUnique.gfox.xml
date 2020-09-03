@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueItemsUnique and a FoxValueCount contraint.
+    
+    Their must not be two expression value items with the same string value. If 'useDatatype' is used,
+    the typed values are compared, rather than the string values.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.itemsUnique"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//latitude"
+                          minCount="1" minCountMsg="At least one latitude expected."
+                          useDatatype="decimal"
+                          itemsUnique="true" itemsUniqueMsg="Data error - latitudes must be unique."
+                          datatype="decimal" datatypeMsg="Latitude must be a decimal value">
+                </foxvalue>
+                <foxvalue exprFOX=".\\airport-*.xml//longitude"
+                          minCount="1" minCountMsg="At least one longitude expected."
+                          useDatatype="decimal"
+                          itemsUnique="true" itemsUniqueMsg="Data error - longitude must be unique."
+                          datatype="decimal" datatypeMsg="Longitude must be a decimal value">
+                </foxvalue>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints. Declares a FoxvalueEq and a FoxvalueCount contraint.
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueEq and a FoxValueCount contraint.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -15,7 +15,7 @@
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//country"
                           minCount="1" minCountMsg="At least one airport expected."
-                          eq="Denmarc" eqMsg="Airports in the denmark folder must have country 'Denmark'."/>
+                          eq="Denmark" eqMsg="Airports in the denmark folder must have country 'Denmark'."/>
             </foxvalues>            
         </folder>
     </domain>

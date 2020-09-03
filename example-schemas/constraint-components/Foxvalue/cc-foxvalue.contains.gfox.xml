@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueContains and a FoxValueCount contraint.
+    
+    The expression value must contain each term from the term list in contains/term.
+    Note that the expression value may also contain other terms.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.contains"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//city"
+                          minCount="1" minCountMsg="At least one city expected."
+                          containsMsg="Did not find all expected cities.">
+                    <contains>
+                        <term>Dublin</term>
+                        <term>Galway</term>
+                        <term>Kerry</term>
+                        <term>Cork</term>
+                    </contains>
+                </foxvalue>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

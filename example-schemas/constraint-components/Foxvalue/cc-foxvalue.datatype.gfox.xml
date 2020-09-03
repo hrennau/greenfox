@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Declares a FoxValueDatatype and a FoxValueMinCount contraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.datatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//(latitude, longitude)"
+                          minCount="1" minCountMsg="At least one airport expected."
+                          datatype="decimal" datatypeMsg="Latitude and longitude values must be decimal."/>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

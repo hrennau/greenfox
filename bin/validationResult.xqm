@@ -1000,7 +1000,7 @@ declare function f:validationResult_value($colour as xs:string,
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
      
     let $constraintConfig :=
-        let $ccPrefix := if ($exprLang eq 'foxpath') then 'FoxValue' else 'Value' return
+        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value' return
         
         typeswitch($constraintNode)
         case attribute(eq) return map{'constraintComp': $ccPrefix || 'Eq', 'atts': ('eq', 'useDatatype', 'quant')}
@@ -1012,6 +1012,7 @@ declare function f:validationResult_value($colour as xs:string,
         case element(gx:in) return map{'constraintComp': $ccPrefix || 'In', 'atts': ('useDatatype')}
         case element(gx:notin) return map{'constraintComp': $ccPrefix || 'Notin', 'atts': ('useDatatype')}
         case element(gx:contains) return map{'constraintComp': $ccPrefix || 'Contains', 'atts': ('useDatatype', 'quant')}
+        case element(gx:eqeq) return map{'constraintComp': $ccPrefix || 'Eqeq', 'atts': ('useDatatype', 'quant')}
         
         case attribute(datatype) return map{'constraintComp': $ccPrefix || 'Datatype', 'atts': ('datatype', 'useDatatype', 'quant')}
         case attribute(matches) return map{'constraintComp': $ccPrefix || 'Matches', 'atts': ('matches', 'useDatatype', 'quant')}
@@ -1036,7 +1037,7 @@ declare function f:validationResult_value($colour as xs:string,
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}
     let $values := 
-        let $items := if ($violations) then $violations
+        let $items := if (exists($violations)) then $violations
                       else if ($colour eq 'red' and $quantifier eq 'some') then $exprValue
                       else ()
         return 
@@ -1092,12 +1093,13 @@ declare function f:validationResult_value_counts($colour as xs:string,
         
     let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
+        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value' return
         typeswitch($constraintNode)
-        case attribute(count)    return map{'constraintComp': 'ValueCount',    'atts': ('count')}
-        case attribute(minCount) return map{'constraintComp': 'ValueMinCount', 'atts': ('minCount')}        
-        case attribute(maxCount) return map{'constraintComp': 'ValueMaxCount', 'atts': ('maxCount')}        
-        case attribute(exists) return map{'constraintComp': 'ValueExists', 'atts': ('exists')}        
-        case attribute(empty) return map{'constraintComp': 'ValueEmpty', 'atts': ('empty')}
+        case attribute(count)    return map{'constraintComp': $ccPrefix || 'Count',    'atts': ('count')}
+        case attribute(minCount) return map{'constraintComp': $ccPrefix || 'MinCount', 'atts': ('minCount')}        
+        case attribute(maxCount) return map{'constraintComp': $ccPrefix || 'MaxCount', 'atts': ('maxCount')}        
+        case attribute(exists) return map{'constraintComp': $ccPrefix || 'Exists', 'atts': ('exists')}        
+        case attribute(empty) return map{'constraintComp': $ccPrefix || 'Empty', 'atts': ('empty')}
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
@@ -1154,8 +1156,8 @@ declare function f:validationResult_value_exception(
     let $resourceShapePath := $constraintElem/@resourceShapePath      
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
         
-    let $targetInfo := $context?_targetInfo        
-    let $constraintComp := 'Value'        
+    let $targetInfo := $context?_targetInfo  
+    let $constraintComp := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value'
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}

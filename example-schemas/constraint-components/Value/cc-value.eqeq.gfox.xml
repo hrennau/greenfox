@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Value constraints. Declares a ValueContains constraint. 
+    Demonstrates the use of Value constraints. Declares a ValueEqeq constraint. 
     
-    The expression value must contain each term from the term list in contains/term.
-    Note that the expression value may also contain other terms.
+    Each value item must be found in the term list eqeq/item, and each item found there must occur in the list
+    of distinct value items. Note that this does not mean "deep equal", as neither the order nor the
+    number of occurrences are checked. The expression value may, for example, contain for each term from
+    the term list any number of repetitions.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.contains"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.eqeq"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -19,13 +21,14 @@
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
                     <value exprXP="/projects/project/@name" 
-                           containsMsg="Expected projects missing.">
-                        <contains>
+                           eqeqMsg="Not the expected list of projects.">
+                        <eqeq>
                             <term>P1</term>
                             <term>P2</term>
                             <term>P3</term>
+                            <term>P3b</term>
                             <term>YY1</term>
-                        </contains>
+                        </eqeq>
                     </value>
                 </values>
             </file>
