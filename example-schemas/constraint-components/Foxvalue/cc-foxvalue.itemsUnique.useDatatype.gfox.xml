@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxvalueItemsUnique constraint. As the
-    'useDatatype' option is not used, value items are compared as string values.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueItemsUnique constraint. As the 
+    'useDatatype' option is used, values are compared as numbers, rather than string values.
     
     The value items must be distinct, that is, there must not be two equal items. If 'useDatatype' 
     is used, items are compared as typed items, otherwise as string values.
@@ -18,11 +18,13 @@
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
+                          useDatatype="decimal"                    
                           minCount="1" minCountMsg="At least one latitude expected."
                           itemsUnique="true" itemsUniqueMsg="Data error - latitudes must be unique."
                           datatype="decimal" datatypeMsg="Latitude must be a decimal value">
                 </foxvalue>
                 <foxvalue exprFOX=".\\airport-*.xml//longitude"
+                          useDatatype="decimal"                    
                           minCount="1" minCountMsg="At least one longitude expected."
                           itemsUnique="true" itemsUniqueMsg="Data error - longitude must be unique."
                           datatype="decimal" datatypeMsg="Longitude must be a decimal value">

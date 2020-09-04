@@ -3,7 +3,7 @@
     Demonstrates the use of Foxvalue constraints: declares a FoxValueGe contraint. As the 
     'useDatatype' option is used, values are compared as numbers, rather than string values.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ge"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ge.useDatatype"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xs="http://www.w3.org/2001/XMLSchema">
 

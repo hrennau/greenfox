@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueIn contraint. As the 
+    'useDatatype' option is used, term comparisons <eq> and <ne> compare typed values,
+    rather than string values.
+    
+    The value items must match a term comparison from the list contained by the 
+    <in> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 
+    and <notMatches> elements.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.in.useDatatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports\ireland" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            <foxvalues>
+                <foxvalue exprFOX=".\\airport-*.xml//latitude"
+                          useDatatype="decimal"
+                          minCount="1" minCountMsg="At least one latitude expected."
+                          inMsg="Unexpected latitude.">
+                    <in>
+                        <like>51.*</like>
+                        <!-- The eq values are compared as decimal, see 'useDatatype' -->
+                        <eq>52.18090057373047</eq>
+                        <eq>52.187198638916016</eq>
+                        <eq>52.70200</eq>
+                        <like>53.*</like>
+                        <like>54.*</like>
+                        <like>55.*</like>
+                    </in>
+                </foxvalue>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>

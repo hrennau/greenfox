@@ -134,12 +134,8 @@ declare function f:validateValue_cmp($exprValue as item()*,
     let $resultOptions := ()    
     let $flags := string($constraintElem/@flags)
     let $quantifier := ($constraintElem/@quant, 'all')[1]
-    let $useDatatype := $constraintElem/@useDatatype/(
-        if (not(contains(., ':'))) then QName($i:URI_XSD, .)
-        else resolve-QName(., ..))
-    let $typedItems := 
-        if (empty($useDatatype)) then $exprValue else 
-            $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype) 
     
     for $cmp in $constraintElem/(
         @eq, @ne, @lt, @le, @gt, @ge, 
@@ -172,7 +168,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
     let $results :=
         if ($quantifier eq 'all') then 
             let $violations := 
-                for $ti at $pos in $typedItems
+                for $ti at $pos in $exprValueTY
                 return
                     if ($ti instance of element(gx:red)) then $ti
                     else if (not($cmpTrue($ti, $useCmp))) then 
@@ -183,7 +179,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
                 result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
                                               $resultAdditionalAtts, (), $resultOptions, $context)
         else if ($quantifier eq 'some') then 
-            let $match := exists($typedItems[$cmpTrue(., $useCmp)]) 
+            let $match := exists($exprValueTY[$cmpTrue(., $useCmp)]) 
             let $colour := if ($match) then 'green' else 'red'
             return
                 result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, (), $expr, $exprLang,
@@ -206,12 +202,21 @@ declare function f:validateValue_in($exprValue as item()*,
     return if (not($constraints)) then () else
     
     let $resultAdditionalAtts := ()
-    let $resultOptions := ()    
-    let $fn_matches := function($item, $constraint) {
-        some $alternative in $constraint/* satisfies
+    let $resultOptions := ()   
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
+    
+    let $fn_matches := function($item, $itemTY, $alternatives) {
+        some $alternative in $alternatives satisfies
         typeswitch($alternative)
-        case element(gx:eq) return $item = $alternative
-        case element(gx:ne) return $item != $alternative
+        case element(gx:eq) return 
+            if (exists($useDatatype)) then 
+                $itemTY eq $alternative/@valueTY 
+                else $item eq $alternative
+        case element(gx:ne) return 
+            if (exists($useDatatype)) then
+                $itemTY != $alternative/@valueTY
+                else $item ne $alternative
         case element(gx:like) return i:matchesLike($item, $alternative, $alternative/@flags)
         case element(gx:notLike) return not(i:matchesLike($item, $alternative, $alternative/@flags))                        
         case element(gx:matches) return matches($item, $alternative, string($alternative/@flags))
@@ -221,18 +226,43 @@ declare function f:validateValue_in($exprValue as item()*,
     let $flags := string($constraintElem/@flags)    
     let $quantifier := ($constraintElem/@quant, 'all')[1]
     for $cmp in $constraints
+    
+    (: Alternatives are enhanced by typed values (if appropriate) :)
+    let $alternatives :=
+        if (empty($useDatatype)) then $cmp/*
+        else
+            for $alternative in $cmp/*
+            return
+                typeswitch($alternative)
+                case element(gx:eq) | element(gx:ne) return
+                    element {node-name($alternative)} {
+                        $alternative/@*, attribute valueTY {$alternative/i:applyUseDatatype(., $useDatatype)},
+                        $alternative/node()
+                    }
+                default return $alternative
     return
         typeswitch($cmp)
         case element(gx:in) return
             if ($quantifier eq 'all') then            
-                let $violations := $exprValue[not($fn_matches(., $cmp))]
+                let $violations := 
+                    if (empty($useDatatype)) then $exprValue[not($fn_matches(., ., $alternatives))]
+                    else
+                        for $item at $pos in $exprValue
+                        let $itemTY := $exprValue[$pos]
+                        where not($fn_matches($item, $itemTY, $alternatives))
+                        return $item
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
                         $colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
-                let $conforms := some $item in $exprValue satisfies $fn_matches($item, $cmp)
+                let $conforms :=
+                    if (empty($useDatatype)) then 
+                        some $item in $exprValue satisfies $fn_matches($item, $item, $alternatives)
+                    else
+                        some $pos in 1 to count($exprValue)
+                        satisfies $fn_matches($exprValue[$pos], $exprValueTY[$pos], $alternatives)
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
@@ -241,14 +271,25 @@ declare function f:validateValue_in($exprValue as item()*,
             else error()                        
         case element(gx:notin) return
             if ($quantifier eq 'all') then
-                let $violations := $exprValue[$fn_matches(., $cmp)]
+                let $violations := 
+                    if (empty($useDatatype)) then $exprValue[$fn_matches(., ., $alternatives)]
+                    else
+                        for $item at $pos in $exprValue
+                        let $itemTY := $exprValue[$pos]
+                        where $fn_matches($item, $itemTY, $alternatives)
+                        return $item                    
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
                         $colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
-                let $conforms := some $item in $exprValue satisfies not($fn_matches($item, $cmp))
+                let $conforms := 
+                    if (empty($useDatatype)) then
+                        some $item in $exprValue satisfies not($fn_matches($item, $cmp))
+                    else                        
+                        some $pos in 1 to count($exprValue)
+                        satisfies not($fn_matches($exprValue[$pos], $exprValueTY[$pos], $alternatives))
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
@@ -272,26 +313,18 @@ declare function f:validateValue_contains($exprValue as item()*,
     let $expectedItems := $constraintElem/gx:contains/gx:term
     return if (not($expectedItems)) then () else
 
-    let $quantifier := ($constraintElem/@quant, 'all')[1] return
-    
-    if ($quantifier eq 'all') then
-        let $notContained := $expectedItems[not(. = $exprValue)]
-        let $colour := if (exists($notContained)) then 'red' else 'green'
-        let $additionalElems :=
-            if ($colour eq 'green') then () else
-                $notContained/string() ! <gx:missingValue>{.}</gx:missingValue>
-        return
-            result:validationResult_value(
-                $colour, $constraintElem, $constraintNode, $exprValue, (), $expr, $exprLang,
-                (), $additionalElems, (), $context)
-    else if ($quantifier eq 'some') then
-        let $contained := $expectedItems[. = $exprValue]
-        let $colour := if (exists($contained)) then 'green' else 'red'
-        return
-            result:validationResult_value(
-                $colour, $constraintElem, $constraintNode, $exprValue, (), $expr, $exprLang,
-                (), (), (), $context)
-    else error()        
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
+    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype)
+    let $notContainedTY := $expectedItemsTY[not(. = $exprValueTY)]
+    let $colour := if (exists($notContainedTY)) then 'red' else 'green'
+    let $additionalElems :=
+        if ($colour eq 'green') then () else
+            $notContainedTY ! string() ! <gx:missingValue>{.}</gx:missingValue>
+    return
+        result:validationResult_value(
+            $colour, $constraintElem, $constraintNode, $exprValue, (), $expr, $exprLang,
+            (), $additionalElems, (), $context)
 };        
 
 (:~
@@ -307,12 +340,20 @@ declare function f:validateValue_eqeq($exprValue as item()*,
     let $constraintNode := $constraintElem/gx:eqeq
     let $expectedItems := $constraintElem/gx:eqeq/gx:term
     return if (not($expectedItems)) then () else
-
-    let $violations1 := $exprValue[not(. = $expectedItems)]
-    let $violations2 := $expectedItems[not(. = $exprValue)]
+    
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
+    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype)
+    let $violations1 := 
+        if (empty($useDatatype)) then $exprValue[not(. = $expectedItems)]
+        else 
+            for $pos in 1 to count($exprValue)
+            where not($exprValueTY[$pos] = $expectedItemsTY)
+            return $exprValue[$pos]
+    let $violations2 := $expectedItemsTY[not(. = $exprValueTY)]
     let $colour := if (exists(($violations1, $violations2))) then 'red' else 'green' 
     let $violations := $violations1
-    let $additionalElems := $violations2/string() ! <gx:missingValue>{.}</gx:missingValue>
+    let $additionalElems := $violations2 ! string(.) ! <gx:missingValue>{.}</gx:missingValue>
     return
         result:validationResult_value(
             $colour, $constraintElem, $constraintNode, $exprValue, $violations, $expr, $exprLang,
@@ -331,15 +372,10 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
     let $itemsUnique := $constraintElem/@itemsUnique
     return if (empty($itemsUnique)) then () else
     
-    let $useDatatype := $constraintElem/@useDatatype/(
-        if (not(contains(., ':'))) then QName($i:URI_XSD, .)
-        else resolve-QName(., ..))
-    let $typedItems := 
-        if (empty($useDatatype)) then $exprValue else 
-            $exprValue ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))
-    
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
     let $itemsUniqueExp := $itemsUnique/xs:boolean(.)
-    let $itemsUniqueAct := count($typedItems) eq $typedItems => distinct-values() => count()
+    let $itemsUniqueAct := count($exprValueTY) eq $exprValueTY => distinct-values() => count()
     let $colour :=
         if ($itemsUniqueExp and $itemsUniqueAct or
             not($itemsUniqueExp) and not($itemsUniqueAct)) then 'green'
@@ -349,7 +385,7 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
         let $values :=
             if (not($itemsUniqueExp)) then () else
                 for $item in $exprValue
-                group by $v := $item ! (if (empty($useDatatype)) then . else i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red')))
+                group by $v := $item ! i:applyUseDatatype(., $useDatatype)
                 where count($item) gt 1
                 return $v
         return $exprValue[. = $values]                

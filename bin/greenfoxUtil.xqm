@@ -572,8 +572,34 @@ declare function f:getSchemaConstraintPath($constraintNode as node())
         as xs:string {
     let $resourceShape := $constraintNode/ancestor::*[self::gx:file, self::gx:folder][1]
     return i:getSchemaPath($constraintNode, $resourceShape)
-};        
+};   
 
+(:~
+ : Resolves a @useDatatype attribute to a qualified name. Rule: if the value has
+ : no prefix, the XSD namespace is assumed.
+ :
+ : @param useDatatype attribute with a datatype to be used
+ : @return the qualified type name
+ :)
+declare function f:resolveUseDatatype($useDatatype as attribute(useDatatype)?)
+        as xs:QName? {
+    $useDatatype/(
+    if (not(contains(., ':'))) then QName($i:URI_XSD, .) else resolve-QName(., ..))
+};
+
+(:~
+ : Casts the items of a value to a datatype. In case of an error, the item is 
+ : represented by an error element.
+ :
+ : @param value the value to be c
+ : @param useDatatype attribute with a datatype to be used
+ : @return the qualified type name
+ :)
+declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?)
+        as item()* {
+    if (empty($useDatatype)) then $value else 
+        $value ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))        
+};        
 
 
 

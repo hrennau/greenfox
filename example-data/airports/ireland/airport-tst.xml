@@ -5,13 +5,13 @@
   <geo>
     <latitude>51.668598175048830</latitude>
     <longitude>-9.4841699600219730</longitude>
-    <altitude>2001</altitude>
+    <altitude>600</altitude>
   </geo>
   <temporal>
     <timezone>0</timezone>
-    <tzTimezone>Europex/Dublin</tzTimezone>
-    <dst></dst>
+    <tzTimezone>Europe/Dublin</tzTimezone>
+    <dst>E</dst>
   </temporal>
   <type>airport</type>
-  <source1>#unknown</source1>
+  <source1>%unknown</source1>
 </airport>

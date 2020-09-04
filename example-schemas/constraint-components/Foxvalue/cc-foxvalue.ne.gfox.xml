@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints. Declares a FoxValueNe and a FoxValueMinCount contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxValueNe contraint. 
+    
+    The value items must be different from the value specified by @ne.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ne"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -14,7 +16,7 @@
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//source1"
-                          minCount="1" minCountMsg="At least one airport expected."
+                          minCount="1" minCountMsg="At least one source1 value expected."
                           ne="#unknown" neMsg="Source1 value '#unknown' not allowed."/>
             </foxvalues>            
         </folder>

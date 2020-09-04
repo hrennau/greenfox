@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxvalueContains contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueContains contraint. As the 
+    'useDatatype' option is used, values are compared as numbers, rather than string values.
     
     The value must contain each term from the term list in contains/term. The value may also 
     contain other terms.
@@ -16,14 +17,14 @@
         <folder foxpath="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
-                <foxvalue exprFOX=".\\airport-*.xml//city"
-                          minCount="1" minCountMsg="At least one city expected."
-                          containsMsg="Did not find all expected cities.">
+                <foxvalue exprFOX=".\\airport-*.xml//latitude"
+                          useDatatype="decimal"
+                          minCount="1" minCountMsg="At least one latitude expected."
+                          containsMsg="Did not find all expected latitudes.">
                     <contains>
-                        <term>Dublin</term>
-                        <term>Galway</term>
-                        <term>Kerry</term>
-                        <term>Cork</term>
+                        <term>53.42129900</term>
+                        <term>53.300201416015625</term>
+                        <term>52.18090057373047</term>
                     </contains>
                 </foxvalue>
             </foxvalues>            

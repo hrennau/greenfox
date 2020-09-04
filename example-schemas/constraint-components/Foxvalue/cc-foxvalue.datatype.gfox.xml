@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints. Declares a FoxValueDatatype and a FoxValueMinCount contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueDatatype contraint.
+    
+    The value items must be castable to the datatype specified by @datatype. Type names
+    without prefix are assumed to be in the XSD namespace.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.datatype"
           xmlns="http://www.greenfox.org/ns/schema">

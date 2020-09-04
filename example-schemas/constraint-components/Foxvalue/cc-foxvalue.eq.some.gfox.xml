@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxvalueContains contraint.
-    
-    The value must contain each term from the term list in contains/term. The value may also 
-    contain other terms.
+    Demonstrates the use of Foxvalue constraints: declares a FoxValueEq contraint. As the
+    quantifier 'some' is used, it suffices if at least one value item matches the value
+    specified by @eq. By contrast, the default quantifier 'all' requires all value items 
+    to match.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.contains"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq.some"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -17,15 +17,9 @@
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//city"
+                          quant="some"
                           minCount="1" minCountMsg="At least one city expected."
-                          containsMsg="Did not find all expected cities.">
-                    <contains>
-                        <term>Dublin</term>
-                        <term>Galway</term>
-                        <term>Kerry</term>
-                        <term>Cork</term>
-                    </contains>
-                </foxvalue>
+                          eq="Dublin" eqMsg="Cities must contain city 'Dublin'."/>
             </foxvalues>            
         </folder>
     </domain>

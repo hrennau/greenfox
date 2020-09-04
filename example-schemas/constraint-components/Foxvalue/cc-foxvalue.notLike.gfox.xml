@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints. Declares a FoxValueNotLike and a FoxValueCount contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxValueNotLike contraint.
+    
+    The value items must not match the pattern provided by @notLike.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notLike"
           xmlns="http://www.greenfox.org/ns/schema">

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints. Declares a FoxValueMinLength and a FoxValueCount contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxValueMinLength contraint.
+    
+    The value items must have a length greater than or equal to the length specified by @minLength.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.minLength"
           xmlns="http://www.greenfox.org/ns/schema">
