@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<projects minDate="2018-01-01" maxDate="2020-08-19" department="KK22A-JU">
-    <project name="P1" startDate="2020-01-01" endDate="2020-12-31">
+<projects minDate="2018-01-01" maxDate="2020-12-31" department="KK22A-JU">
+    <project name="P1" startDate="2020-01-01" endDate="2020-12-30">
         <milestone date="2020-01-02"/>
         <milestone date="2020-04-01"/>        
     </project>

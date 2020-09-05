@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueNotLike contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueNotLike contraint.
     
     The value items must not match the pattern provided by @notLike.
 -->

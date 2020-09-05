@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueEq contraint. As the 
-    'useDatatype' option is used, values are compared as numbers, rather than string values.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueEq contraint. As the 
+    'useDatatype' option is used, values are compared as numbers, rather than strings.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq.useDatatype"
           xmlns="http://www.greenfox.org/ns/schema">

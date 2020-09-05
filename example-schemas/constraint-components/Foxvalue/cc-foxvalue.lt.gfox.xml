@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueLt contraint. As the 
-    'useDatatype' option is not used, values are compared as string values, rather than
-    numbers. This may produce unexpected results if the items to be checked are numeric.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueLt contraint. As the 
+    'useDatatype' option is NOT used, values are compared as strings, rather than numbers
+    This may produce unexpected results if the items to be checked are numeric.
+    
     In this example, an altitude of 3000 would pass the check!
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.lt"

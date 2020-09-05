@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairGe contraint. As the
+    'exprContext2' option is set to '#item', the second expression is reevaluated in the
+    context of each item returned by the first expression.
+    
+    In this example, date consistencies are checked:
+    - project end date must be greater or equal the project start date
+    - milestone dates must be greater or equal the project start date 
+    - milestone dates must be less or equal the project end date.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.item1-is-context2"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="projectDates" id="projectDatesFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>            
+            <file foxpath="projectDates.xml" id="projectDatesShape">
+                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+                <valuePairs>
+                    <valuePair expr1XP="//project/@endDate" minCount1="0" 
+                               expr2XP="../@startDate" count2="1"                                    
+                               expr2Context="#item"
+                               cmp="ge" geMsg="Project end date must be greater or equal project start date"
+                               />
+                    <valuePair expr1XP="//milestone/@date" minCount1="0" 
+                               expr2XP="../../@startDate" count2="1" 
+                               expr2Context="#item"
+                               cmp="ge" geMsg="Milestone date must be greater or equal project start date"
+                               />
+                    <valuePair expr1XP="//milestone/@date" minCount1="0" 
+                               expr2XP="../../@endDate" minCount2="0" 
+                               expr2Context="#item"
+                               cmp="le" leMsg="Milestone date must be less or equal project end date"
+                               />
+                </valuePairs>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

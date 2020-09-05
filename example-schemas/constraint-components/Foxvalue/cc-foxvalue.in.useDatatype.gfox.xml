@@ -2,7 +2,7 @@
 <!-- 
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueIn contraint. As the 
     'useDatatype' option is used, term comparisons <eq> and <ne> compare typed values,
-    rather than string values.
+    rather than strings.
     
     The value items must match a term comparison from the list contained by the 
     <in> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 

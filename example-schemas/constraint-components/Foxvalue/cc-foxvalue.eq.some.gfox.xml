@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueEq contraint. As the
-    quantifier 'some' is used, it suffices if at least one value item matches the value
-    specified by @eq. By contrast, the default quantifier 'all' requires all value items 
-    to match.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueEq contraint. 
+    As the quantifier 'some' is used, conformance requires only at least one value 
+    item to be equal to the value provided by @eq. By contrast, the default quantifier 
+    'all' requires all value items to match.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq.some"
           xmlns="http://www.greenfox.org/ns/schema">

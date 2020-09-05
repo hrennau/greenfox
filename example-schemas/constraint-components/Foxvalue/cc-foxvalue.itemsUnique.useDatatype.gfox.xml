@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxvalueItemsUnique constraint. As the 
-    'useDatatype' option is used, values are compared as numbers, rather than string values.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueItemsUnique constraint. 
+    As the 'useDatatype' option is used, values are compared as numbers, rather than strings.
     
-    The value items must be distinct, that is, there must not be two equal items. If 'useDatatype' 
-    is used, items are compared as typed items, otherwise as string values.
+    The value items must be distinct, that is, there must not be two equal items.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.itemsUnique"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.itemsUnique.useDatatype"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

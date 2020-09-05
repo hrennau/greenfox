@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueContains contraint. As the 
-    'useDatatype' option is used, values are compared as numbers, rather than string values.
+    'useDatatype' option is used, values are compared as numbers, rather than strings.
     
-    The value must contain each term from the term list in contains/term. The value may also 
-    contain other terms.
+    The value must contain each term from the term list contained by the <contains>
+    element. The value may also contain other terms.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.contains"
           xmlns="http://www.greenfox.org/ns/schema">

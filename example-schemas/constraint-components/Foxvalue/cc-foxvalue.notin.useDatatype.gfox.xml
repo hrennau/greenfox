@@ -2,10 +2,10 @@
 <!-- 
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueNotIn contraint. As the 
     'useDatatype' option is used, term comparisons <eq> and <ne> compare typed values,
-    rather than string values.
+    rather than strings.
     
     The value items must not match a term comparison from the list contained by the 
-    <in> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 
+    <notin> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 
     and <notMatches> elements.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notIn.useDatatype"

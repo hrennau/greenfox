@@ -58,13 +58,23 @@ declare function f:validationResultValues($value as item()*,
                                           $constraintElem as element(),
                                           $contextDoc as node()?)
         as element()* {
-    let $_DEBUG := trace($value, '___VALUE: ')
-    let $_DEBUG := trace($contextDoc, '___CONTEXT_DOC: ')
     let $nodePath := 
         function($item) {
-            let $dpath := trace(i:datapath($item), '_DATAPATH: ') (: [$item/ancestor::node() intersect $contextDoc] :)
-            let $prefix := if ($item/ancestor::node() intersect $contextDoc) then () else ($item/base-uri(.) || '/')
+            let $dpath := i:datapath($item)
+            let $prefix := 
+                if ($item/ancestor::node() intersect $contextDoc) then () 
+                    else ($item/base-uri(.) || '#')
             return $prefix || $dpath
+        }        
+    let $mapNodePath := 
+        function($map) {
+            let $node := $map?item[. instance of node()] return
+            if (not($node)) then () else
+            let $dpath := $node/i:datapath(.)
+            let $prefix := 
+                if ($node/ancestor::node() intersect $contextDoc) then () 
+                else ($node/base-uri(.) || '#')
+             return $prefix || $dpath
         }        
     for $item in $value
     return
@@ -75,7 +85,11 @@ declare function f:validationResultValues($value as item()*,
                 string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, string($item)}</gx:value>
             else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
         case attribute() return
-            <gx:value>{attribute nodePath {trace($nodePath($item), '_NODEPATH: ')}, string($item)}</gx:value>
+            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
+        case map(xs:string, item()*) return
+            let $dpath := $mapNodePath($item)
+            return
+                <gx:value>{$dpath ! attribute nodePath {.}, attribute cannotConvertTo {$item?type}, string($item?item)}</gx:value>
         default return ()                
 };     
 
@@ -302,7 +316,7 @@ declare function f:validationResult_docContent_exception(
                                             $context as map(xs:string, item()*))
         as element() {
     let $resourceShapeID := $constraintElem/@resourceShapeID
-    let $resourceShapePath := trace($constraintElem/@resourceShapePath , '_RESOURCE_SHAPE_PATH: ')      
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
         
     let $targetInfo := $context?_targetInfo        
@@ -1000,7 +1014,7 @@ declare function f:validationResult_value($colour as xs:string,
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
      
     let $constraintConfig :=
-        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value' return
+        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'Foxvalue' else 'Value' return
         
         typeswitch($constraintNode)
         case attribute(eq) return map{'constraintComp': $ccPrefix || 'Eq', 'atts': ('eq', 'useDatatype', 'quant')}
@@ -1093,7 +1107,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
         
     let $targetInfo := $context?_targetInfo        
     let $constraintConfig :=
-        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value' return
+        let $ccPrefix := if ($constraintElem/self::element(gx:foxvalue)) then 'Foxvalue' else 'Value' return
         typeswitch($constraintNode)
         case attribute(count)    return map{'constraintComp': $ccPrefix || 'Count',    'atts': ('count')}
         case attribute(minCount) return map{'constraintComp': $ccPrefix || 'MinCount', 'atts': ('minCount')}        
@@ -1127,6 +1141,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
+            
             $standardAtts,
             $valueCountAtt,
             $additionalAtts,
@@ -1140,7 +1155,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node tree.
  :
- : @param constraintElem an element declaring an ExpressionPair constraint
+ : @param constraintElem an element declaring Value constraints
  : @param exception an optional message string
  : @param addAtts additional attributes 
  : @param context processing context
@@ -1157,7 +1172,7 @@ declare function f:validationResult_value_exception(
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
         
     let $targetInfo := $context?_targetInfo  
-    let $constraintComp := if ($constraintElem/self::element(gx:foxvalue)) then 'FoxValue' else 'Value'
+    let $constraintComp := if ($constraintElem/self::element(gx:foxvalue)) then 'Foxvalue' else 'Value'
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
@@ -1183,13 +1198,13 @@ declare function f:validationResult_value_exception(
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
- :         E x p r e s s i o n   P a i r    c o n s t r a i n t
+ :         V a l u e    P a i r    c o n s t r a i n t
  :
  : ===============================================================================
  :)
 
 (:~
- : Constructs a validation result obtained from an ExpressionPair constraint.
+ : Constructs a validation result obtained from a ValuePair constraint.
  :
  : @param colour describes the success status - success, failure, warning
  : @param violations items violating the constraint
@@ -1197,51 +1212,66 @@ declare function f:validationResult_value_exception(
  : @param valuePair an element declaring an ExpressionValue Constraint
  : @contextInfo informs about the focus document and focus node
  :)
-declare function f:validationResult_expressionPair($colour as xs:string,
-                                                   $violations as item()*,
-                                                   $cmp as xs:string,
-                                                   $expressionPair as element(),
-                                                   $contextInfo as map(xs:string, item()*),
-                                                   $additionalAtts as attribute()*)
-        as element() {
-    let $constraintId := $expressionPair/../@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
-    let $cmpAtt := $cmp ! attribute valueRelationship {.}
-    let $useDatatypeAtt := $expressionPair/@useDatatype ! attribute useDatatype {.}
-    let $flagsAtt := $expressionPair/@flags[string()] ! attribute flags {.}
-    let $quantifierAtt := ($expressionPair/@quant, 'all')[1] ! attribute quantifier {.}
-    let $constraintComp := 'ExpressionPair-' || $cmp
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($expressionPair, $cmp, ())
-        else i:getErrorMsg($expressionPair, $cmp, ())
-    let $elemName := concat('gx:', $colour)
+declare function f:validationResult_valuePair($colour as xs:string,
+                                              $constraintElem,
+                                              $constraintNode as node(),
+                                              $violations as item()*,
+                                              $additionalAtts as attribute()*,
+                                              $context as map(xs:string, item()*))
+        as element() { 
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
+    let $constraintKind := $constraintNode/(if (self::attribute()) then string() else local-name(.))
+    
+    let $cmpAtt := $constraintNode ! attribute valueRelationship {.}
+    let $useDatatypeAtt := $constraintElem/@useDatatype ! attribute useDatatype {.}
+    let $flagsAtt := $constraintElem/@flags[string()] ! attribute flags {.}
+    let $quantifierAtt := ($constraintElem/@quant, 'all')[1] ! attribute quantifier {.}
+    let $constraintComp := 'ValuePair' || $constraintNode/i:firstCharToUpperCase($constraintKind)
+    
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintKind)
+    let $elemName := i:getResultElemName($colour)
+    
     let $expr1Lang := 'xpath'
     let $expr2Lang := 'xpath'    
+    
+    let $values := 
+        let $items := if (exists($violations)) then $violations else ()
+        return 
+            if (empty($items)) then () else
+                f:validationResultValues($items, $constraintElem, $targetInfo?doc)
+    
     return
         element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            $filePathAtt,
-            $focusNodeAtt,
-            $expressionPair/@expr1XP ! attribute expr1 {.},
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+        
+            $constraintElem/@expr1XP ! attribute expr1 {.},
             attribute expr1Lang {$expr1Lang},            
-            $expressionPair/@expr2XP ! attribute expr2 {.},
+            $constraintElem/@expr2XP ! attribute expr2 {.},
             attribute expr2Lang {$expr2Lang},
             $cmpAtt,
             $useDatatypeAtt,
             $flagsAtt,
             $quantifierAtt,
             $additionalAtts,
-            $violations ! <gx:value>{.}</gx:value>
+            $values
         }
        
 };
 
 (:~
  : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of an Expression Pair constraint.
+ : which prevents normal evaluation of a ValuePair constraint.
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node.
  :
@@ -1251,7 +1281,8 @@ declare function f:validationResult_expressionPair($colour as xs:string,
  : @param contextInfo informs about the focus document and focus node
  : @return a red validation result
  :)
-declare function f:validationResult_expressionPair_exception(
+ (:
+declare function f:validationResult_valuePair_exception(
                                             $constraintElem as element(),
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
@@ -1273,11 +1304,12 @@ declare function f:validationResult_expressionPair_exception(
         }
        
 };
+:)
 
 (:~
- : Creates a validation result for a ContentCorrespondenceCount related 
- : constraint (ContentCorrespondenceSourceCount, ...SourceMinCount, ...SourceMaxCount, 
- : ContentCorrespondenceTargetCount, ...TargetMinCount, ...TargetMaxCount).
+ : Creates a validation result for a ValuePair*Count constraint (ValuePairCount1,
+ : ValuePairMinCount1, ValuePairMaxCount1, ValuePairCount2, ValuePairMinCount2,
+ : ValuePairMaxCount2).
  :
  : @param colour 'green' or 'red', indicating violation or conformance
  : @param valuePair an element declaring a Correspondence Constraint on a 
@@ -1287,33 +1319,37 @@ declare function f:validationResult_expressionPair_exception(
  : @param contextInfo informs about the focus document and focus node
  : @return a validation result, red or green
  :)
-declare function f:validationResult_expressionPair_counts($colour as xs:string,
-                                                          $valuePair as element(),
-                                                          $constraint as attribute(),
-                                                          $valueCount as item()*,
-                                                          $contextItem1 as item()?,
-                                                          $contextInfo as map(xs:string, item()*),
-                                                          $additionalAtts as attribute()*)
+declare function f:validationResult_valuePair_counts($colour as xs:string,
+                                                     $constraintElem as element(),
+                                                     $constraintNode as attribute(),
+                                                     $exprRole as xs:string,
+                                                     $expr as xs:string,
+                                                     $exprLang as xs:string,
+                                                     $valueCount as item()*,
+                                                     $contextItem1 as item()?,
+                                                     $additionalAtts as attribute()*,
+                                                     $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
+        
     let $constraintConfig :=
-        typeswitch($constraint)
-        case attribute(count1)    return map{'constraintComp': 'ExpressionPairValue1Count',    'atts': ('count1')}
-        case attribute(minCount1) return map{'constraintComp': 'ExpressionPairValue1MinCount', 'atts': ('minCount1')}        
-        case attribute(maxCount1) return map{'constraintComp': 'ExpressionPairValue1MaxCount', 'atts': ('maxCount1')}        
-        case attribute(count2)    return map{'constraintComp': 'ExpressionPairValue2Count',    'atts': ('count2')}
-        case attribute(minCount2) return map{'constraintComp': 'ExpressionPairValue2MinCount', 'atts': ('minCount2')}        
-        case attribute(maxCount2) return map{'constraintComp': 'ExpressionPairValue2MaxCount', 'atts': ('maxCount2')}        
+        typeswitch($constraintNode)
+        case attribute(count1)    return map{'constraintComp': 'ValuePairValue1Count',    'atts': ('count1')}
+        case attribute(minCount1) return map{'constraintComp': 'ValuePairValue1MinCount', 'atts': ('minCount1')}        
+        case attribute(maxCount1) return map{'constraintComp': 'ValuePairValue1MaxCount', 'atts': ('maxCount1')}        
+        case attribute(count2)    return map{'constraintComp': 'ValuePairValue2Count',    'atts': ('count2')}
+        case attribute(minCount2) return map{'constraintComp': 'ValuePairValue2MinCount', 'atts': ('minCount2')}        
+        case attribute(maxCount2) return map{'constraintComp': 'ValuePairValue2MaxCount', 'atts': ('maxCount2')}        
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := $valuePair/@*[local-name(.) = $standardAttNames]
+    let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $valueCountAtt := attribute valueCount {$valueCount} 
-    
-    let $resourceShapeId := $valuePair/@resourceShapeID
-    let $constraintElemId := $valuePair/@id
-    let $constraintId := concat($constraintElemId, '-', $constraint/local-name(.))
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
     
     let $contextItem1Att :=
         if (empty($contextItem1)) then ()
@@ -1323,23 +1359,70 @@ declare function f:validationResult_expressionPair_counts($colour as xs:string,
                              else $contextItem1/i:datapath(.)
             return attribute contextItem1 {$attValue}                             
 
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($valuePair, $constraint/local-name(.), ())
-        else i:getErrorMsg($valuePair, $constraint/local-name(.), ())
-    let $elemName := 'gx:' || $colour
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    let $elemName := i:getResultElemName($colour)
+    
     return
         element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
-            $focusNode,
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            attribute constraintComp {$constraintConfig?constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $exprRole ! attribute exprRole {.},
+            $expr ! attribute expr {.},
+            $exprLang ! attribute exprLang {.},
+        
             $standardAtts,
             $valueCountAtt,
             $contextItem1Att,
             $additionalAtts            
         }       
+};
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a ValuePair constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node tree.
+ :
+ : @param constraintElem an element declaring Value constraints
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param context processing context
+ : @return a red validation result
+ :)
+declare function f:validationResult_valuePair_exception(
+                                            $constraintElem as element(),
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $context as map(xs:string, item()*))
+        as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+        
+    let $targetInfo := $context?_targetInfo  
+    let $constraintComp := if ($constraintElem/self::element(gx:foxvaluePair)) then 'FoxvaluePair' else 'ValuePair'
+    let $constraintId := $constraintElem/@id
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},            
+            attribute constraintComp {$constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
+       
 };
 
 (:~

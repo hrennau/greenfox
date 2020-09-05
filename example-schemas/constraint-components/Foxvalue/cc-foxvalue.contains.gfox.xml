@@ -2,8 +2,8 @@
 <!-- 
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueContains contraint.
     
-    The value must contain each term from the term list in contains/term. The value may also 
-    contain other terms.
+    The value must contain each term from the term list contained by the <contains>
+    element. The value may also contain other terms.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.contains"
           xmlns="http://www.greenfox.org/ns/schema">

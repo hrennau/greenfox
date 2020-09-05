@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueNotMatches contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueNotMatches contraint.
     
     The value items must not match the regular expression provided by @notMatches.
 -->

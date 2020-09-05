@@ -2,10 +2,11 @@
 <!-- 
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueEqeq contraint.
     
-    Each value item must be found in the term list contained by <eqeq>, and each item found 
-    there must be equal to a value item. Note that this does not mean "deep equal", as neither 
-    the order nor the number of occurrences are checked. The value may, for example, contain 
-    for each term from the term list any number of repetitions.
+    Each value item must be found in the term list contained by the <eqeq> element, 
+    and each term in the list must be equal to a value item. Note that this does 
+    not mean "deep equal", as neither the order nor the number of occurrences are 
+    checked. The value may, for example, contain for each term from the term list 
+    any number of repetitions.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eqeq"
           xmlns="http://www.greenfox.org/ns/schema">

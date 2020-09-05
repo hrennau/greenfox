@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueLike contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueLike contraint.
     
     The value items must match the pattern provided by @like.
 -->

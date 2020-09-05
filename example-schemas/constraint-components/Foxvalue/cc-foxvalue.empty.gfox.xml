@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxvalueLength contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueEmpty contraint.
     
-    The value items must have the length provided by @length.
+    The value must be empty.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.length"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.empty"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,9 +15,8 @@
         <folder foxpath="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
-                <foxvalue exprFOX=".\\airport-*.xml//dst"
-                          minCount="1" minCountMsg="At least one dst expected."
-                          length="1" lengthMsg="dst must be a single character."/>
+                <foxvalue exprFOX=".\\airport-*.xml[//name[not(string())]]"
+                          empty="true" emptyMsg="Resources without non-empty name not allowed."/>
             </foxvalues>            
         </folder>
     </domain>

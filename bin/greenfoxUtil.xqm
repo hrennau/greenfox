@@ -224,6 +224,39 @@ declare function f:matchesMediatype($mediatypes as xs:string+, $filePath as xs:s
     )
 };
 
+declare function f:castAs($item as item(), $type as xs:QName)
+        as item()? {
+    try {        
+        switch($type)
+        case QName($i:URI_XSD, 'integer') return $item cast as xs:integer 
+        case QName($i:URI_XSD, 'int') return $item cast as xs:int        
+        case QName($i:URI_XSD, 'decimal') return $item cast as xs:decimal
+        case QName($i:URI_XSD, 'long') return $item cast as xs:long
+        case QName($i:URI_XSD, 'short') return $item cast as xs:short
+        case QName($i:URI_XSD, 'date') return $item cast as xs:date
+        case QName($i:URI_XSD, 'dateTime') return $item cast as xs:dateTime
+        case QName($i:URI_XSD, 'duration') return $item cast as xs:duration
+        case QName($i:URI_XSD, 'dayTimeDuration') return $item cast as xs:dayTimeDuration
+        case QName($i:URI_XSD, 'boolean') return $item cast as xs:boolean
+        case QName($i:URI_XSD, 'NCName') return $item cast as xs:NCName        
+        default return error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
+    } catch *:UNKNOWN_TYPE_NAME {error(QName((), 'UNKNOWN_TYPE_NAME'), 'Unknown type name: ', $type)
+    } catch * {
+        map{
+            'errorCode': 'GREENFOX_CAST_ERROR',
+            'item': $item,
+            'type': $type
+        }
+    } 
+}; 
+
+(:~
+ : Returns true if a given item is a map describing a data conversion error.
+ :)
+declare function f:isCastError($item as item()) as xs:boolean? {
+    $item[. instance of map(xs:string, item()*)]?errorCode eq 'GREENFOX_CAST_ERROR'        
+};
+
 declare function f:castAs($s as xs:anyAtomicType, $type as xs:QName, $errorElemName as xs:QName?)
         as item()? {
     try {        
@@ -598,7 +631,7 @@ declare function f:resolveUseDatatype($useDatatype as attribute(useDatatype)?)
 declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?)
         as item()* {
     if (empty($useDatatype)) then $value else 
-        $value ! i:castAs(., $useDatatype, QName($i:URI_GX, 'gx:red'))        
+        $value ! i:castAs(., $useDatatype)        
 };        
 
 

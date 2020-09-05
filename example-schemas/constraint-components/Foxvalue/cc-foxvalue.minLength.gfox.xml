@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of Foxvalue constraints: declares a FoxValueMinLength contraint.
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueMinLength contraint. The
+    constraint is used in order to detect empty elements.
     
-    The value items must have a length greater than or equal to the length specified by @minLength.
+    The value items must have a length greater than or equal to the length provided by @minLength.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.minLength"
           xmlns="http://www.greenfox.org/ns/schema">
