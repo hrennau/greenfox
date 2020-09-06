@@ -628,10 +628,17 @@ declare function f:resolveUseDatatype($useDatatype as attribute(useDatatype)?)
  : @param useDatatype attribute with a datatype to be used
  : @return the qualified type name
  :)
-declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?)
+declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?, $useString as xs:string*)
         as item()* {
-    if (empty($useDatatype)) then $value else 
-        $value ! i:castAs(., $useDatatype)        
+    if (empty($useDatatype)) then 
+        if (empty($useString)) then $value
+        else
+            let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
+            let $interm := if ($useString eq 'uc') then $value ! upper-case(.) else $interm
+            let $interm := if ($useString eq 'ns') then $value ! normalize-space(.) else $interm
+            return $interm
+    
+    else $value ! i:castAs(., $useDatatype)        
 };        
 
 

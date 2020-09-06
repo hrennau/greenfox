@@ -170,11 +170,15 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:values) |    
          element(gx:valuePair) |
          element(gx:valuePairs) |
+         element(gx:foxvalue) |
+         element(gx:foxvalues) |    
+         element(gx:foxvaluePair) |
+         element(gx:foxvaluePairs) |
          element(gx:contentCorrespondence) |
          element(gx:folderSimilar) |
          element(gx:links)
         return $component
-        
+       
     case element(gx:focusNode) return $component
     
     (: ifMediatype - continue with children, if mediatype matched :)    
@@ -261,6 +265,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:values,    
                       self::gx:valuePair,
                       self::gx:valuePairs,
+                      self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,                                
                       self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
                       self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
@@ -291,6 +297,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:values,    
                       self::gx:valuePair,
                       self::gx:valuePairs,
+                      self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,
                       gx:validatorXPath,
                       @validatorXPath),
@@ -376,7 +384,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                 self::gx:validatorXPath,
                 @xpath,
                 @*[ends-with(name(), 'XPath')],
-                @*[ends-with(name(), 'XP')]
+                (., gx:value, gx:valuePair)/@*[ends-with(name(), 'XP')]
             )
         ) => distinct-values()            
         let $foxpathExpressions := (
@@ -385,7 +393,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                 self::gx:foxpath/@expr,
                 self::gx:validatorFoxpath,
                 @foxpath,
-                @*[ends-with(name(), 'Foxpath')]
+                (., gx:foxvalue, gx:foxvaluePair)/@*[ends-with(name(), 'FOX')]
             )
         ) => distinct-values()
         return (

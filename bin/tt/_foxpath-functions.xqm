@@ -555,6 +555,21 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 f:fox-unparsed-text-lines($uri, $encoding, $options)
                         
+        (: function `ps.copy` 
+           ===================== :)
+        else if ($fname eq 'ps.copy') then
+            let $items := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $targetDir := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)            
+            let $silent := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)            
+            let $useItems :=
+                for $item in $items return replace($item, '/', '\\')
+            let $copies := $useItems ! concat('Copy-Item ', ., ' ', $targetDir)
+            return
+                string-join((
+                    'Param($odir = $targetDir)',
+                    $copies
+                ), '&#xA;')
+                            
         (: function `win.copy` 
            ===================== :)
         else if ($fname eq 'win.copy') then

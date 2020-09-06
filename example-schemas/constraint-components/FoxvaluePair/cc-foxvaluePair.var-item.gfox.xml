@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    
+    All items of value 1 must be equal to an item from value 2. Here, invalid references
+    are detected: all @country references in <city> elements must be an @id value in <country>.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.in"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports-*.xml" id="airportsFileShape">
+                <targetSize minCount="1" minCountMsg="Missing file: airports-*.xml"/>
+                <foxvaluePairs>
+                    <foxvaluePair expr1XP="/airports/airport/@iata"
+                                  expr2FOX="..\*\fox-child('airport-'||$item||'*.xml')"     
+                                  expr2Context="#item"
+                                  minCount1="1" minCount1Msg="Expected more airports."
+                                  minCount2="1" minCount2Msg="Airport file not found."/>
+                </foxvaluePairs>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

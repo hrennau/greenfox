@@ -135,7 +135,8 @@ declare function f:validateValue_cmp($exprValue as item()*,
     let $flags := string($constraintElem/@flags)
     let $quantifier := ($constraintElem/@quant, 'all')[1]
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype) 
+    let $useString := $constraintElem/@useString/tokenize(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString) 
     
     for $cmp in $constraintElem/(
         @eq, @ne, @lt, @le, @gt, @ge, 
@@ -204,7 +205,8 @@ declare function f:validateValue_in($exprValue as item()*,
     let $resultAdditionalAtts := ()
     let $resultOptions := ()   
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
+    let $useString := $constraintElem/@useString/tokenize(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
     
     let $fn_matches := function($item, $itemTY, $alternatives) {
         some $alternative in $alternatives satisfies
@@ -236,7 +238,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 typeswitch($alternative)
                 case element(gx:eq) | element(gx:ne) return
                     element {node-name($alternative)} {
-                        $alternative/@*, attribute valueTY {$alternative/i:applyUseDatatype(., $useDatatype)},
+                        $alternative/@*, attribute valueTY {$alternative/i:applyUseDatatype(., $useDatatype, $useString)},
                         $alternative/node()
                     }
                 default return $alternative
@@ -314,8 +316,9 @@ declare function f:validateValue_contains($exprValue as item()*,
     return if (not($expectedItems)) then () else
 
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
-    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype)
+    let $useString := $constraintElem/@useString/tokenize(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
+    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype, $useString)
     let $notContainedTY := $expectedItemsTY[not(. = $exprValueTY)]
     let $colour := if (exists($notContainedTY)) then 'red' else 'green'
     let $additionalElems :=
@@ -342,8 +345,9 @@ declare function f:validateValue_eqeq($exprValue as item()*,
     return if (not($expectedItems)) then () else
     
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
-    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype)
+    let $useString := $constraintElem/@useString/tokenize(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
+    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype, $useString)
     let $violations1 := 
         if (empty($useDatatype)) then $exprValue[not(. = $expectedItems)]
         else 
@@ -373,7 +377,8 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
     return if (empty($itemsUnique)) then () else
     
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype)
+    let $useString := $constraintElem/@useString/tokenize(.)
+    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
     let $itemsUniqueExp := $itemsUnique/xs:boolean(.)
     let $itemsUniqueAct := count($exprValueTY) eq $exprValueTY => distinct-values() => count()
     let $colour :=
@@ -385,7 +390,7 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
         let $values :=
             if (not($itemsUniqueExp)) then () else
                 for $item in $exprValue
-                group by $v := $item ! i:applyUseDatatype(., $useDatatype)
+                group by $v := $item ! i:applyUseDatatype(., $useDatatype, $useString)
                 where count($item) gt 1
                 return $v
         return $exprValue[. = $values]                
