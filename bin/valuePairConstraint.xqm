@@ -113,11 +113,11 @@ declare function f:validateValuePair($constraintElem as element(),
     let $expr2Lang := if ($expr2 eq $expr2FOX) then 'foxpath' else 'xpath'    
     
     (: Value 1 :)
-    let $items1Raw := trace(
+    let $items1Raw :=
         switch($expr1Lang)
         case ('xpath') return i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())
         case 'foxpath' return i:evaluateFoxpath($expr1, $contextURI, $evaluationContext, true())        
-        default return error() , '_ITEMS1_RAW: ')
+        default return error()
     let $items1TYRaw := i:applyUseDatatype($items1Raw, $useDatatype)
 
     (: results: value counts 1 :)
@@ -143,9 +143,9 @@ declare function f:validateValuePair($constraintElem as element(),
     let $items1 :=
         if (empty($useDatatype)) then $items1Raw
         else $items1Raw[not(position() = $indexes_conversionError1)]
-    let $items1TY := trace(
+    let $items1TY :=
         if (empty($useDatatype)) then $items1TYRaw
-        else $items1TYRaw[not(position() = $indexes_conversionError1)]   , '_ITEMS1: ')   
+        else $items1TYRaw[not(position() = $indexes_conversionError1)]   
         
 
     (: Function items
@@ -162,7 +162,7 @@ declare function f:validateValuePair($constraintElem as element(),
     
     (: (2.1) Function processing a single item second operand :)
     let $cmpTrue :=
-        if ($constraintNode = ('in', 'notin')) then () else
+        if ($constraintNode = ('in', 'notin', 'includes', 'inin', 'eqeq')) then () else
         switch($constraintNode)
         case 'eq' return function($op1, $op2) {$op1 = $op2}        
         case 'ne' return function($op1, $op2) {$op1 != $op2}        
@@ -174,24 +174,28 @@ declare function f:validateValuePair($constraintElem as element(),
 
     (: (2.2) Function processing multiple items second operand :)
     let $cmpTrueAgg :=
-        if (not($constraintNode = ('in', 'notin'))) then () else
+        if (not($constraintNode = ('in', 'notin', 'includes', 'inin', 'eqeq'))) then () else
         switch($constraintNode)
+        (: $op1: item; $op2: sequence :) 
         case 'in' return function($op1, $op2) {$op1 = $op2}
-        case 'notin' return function($op1, $op2) {not($op1 = $op2)}        
+        case 'notin' return function($op1, $op2) {not($op1 = $op2)}
+        (: $op1: sequence; $op2: item :)
+        case 'includes' return function($op1, $op2) {every $item in $op2 satisfies $item = $op1}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $constraintNode))
 
     (: Produce results
        =============== :)       
-    let $results :=
+    let $results_pair :=
         (: expression 2 context = item from expression 1        
            --------------------------------------------- :)
         if ($expr2Context eq '#item') then
-            f:validateValuePair_context2($constraintElem, $constraintNode,
-                                         $quantifier, $useDatatype,
-                                         $expr2, $expr2Lang,
-                                         $items1, $items1TY,
-                                         $getItems2, $cmpTrue,
-                                         $context)
+            f:validateValuePair_context2_iterating(
+                 $constraintElem, $constraintNode,
+                 $quantifier, $useDatatype,
+                 $expr2, $expr2Lang,
+                 $items1, $items1TY,
+                 $getItems2, $cmpTrue,
+                 $context)
 
 (:
         
@@ -269,9 +273,25 @@ declare function f:validateValuePair($constraintElem as element(),
         (: expression 2 context: independent of expression 1 items 
            ------------------------------------------------------- :)
         else
+            f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $contextNode,
+                $quantifier, $useDatatype, $expr2, $expr2Lang,
+                $items1, $items1TY, $results_expr1Conversion,
+                $getItems2, $cmpTrue, $cmpTrueAgg,
+                $context) 
+        
+(:        
             (: Get value of expression 2 :)
             let $items2 := $contextNode/$getItems2(.)
-            let $items2TY := i:applyUseDatatype($items2, $useDatatype)
+            let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype)
+            let $items2TY := 
+                if (empty($useDatatype)) then $items2TYRaw else $items2TYRaw[not(. instance of map(*))]
+            let $items2ConversionError := 
+                if (empty($useDatatype)) then () else $items2TYRaw[. instance of map(*)]
+                
+            (: Check results: conversion error value 2 :)
+            let $results_expr2Conversion :=
+                $items2ConversionError ! result:validationResult_valuePair(
+                    'red', $constraintElem, $constraintNode, ., (), $context)
 
             (: Check the items count :)
             let $results_expr2Count := 
@@ -286,10 +306,37 @@ declare function f:validateValuePair($constraintElem as element(),
                 
                 if ($constraintNode = ('in', 'notin')) then
                     for $item1TY at $pos in $items1TY
-                    where exists($useDatatype) and i:isCastError($item1TY) or 
-                          not($cmpTrueAgg($item1TY, $items2TY))
+                    where not($cmpTrueAgg($item1TY, $items2TY))
                     return $items1[$pos]
                     
+                else if ($constraintNode eq 'includes') then
+                    for $item2TY at $pos in $items2TY
+                    where not($cmpTrueAgg($items1TY, $item2TY))
+                    return $items2[$pos]
+
+                else if ($constraintNode eq 'inin') then (
+                    for $item1TY at $pos in $items1TY
+                    where not($item1TY = $items2TY)
+                    return $items1[$pos],                
+                    for $item2TY at $pos in $items2TY
+                    where not($item2TY = $items1TY)
+                    return $items2[$pos]
+                )
+                else if ($constraintNode eq 'eqeq') then
+                    (: In case of conversion errors, do not check eqeq :)
+                    if (($results_expr1Conversion, $results_expr2Conversion)) then () 
+                    else if (deep-equal($items1TY, $items2TY)) then () 
+                    else
+                        (: In case of not deep-equal: deliver first deviating pair 
+                           (or single item without corresponding item :)
+                        let $maxIndex := max((count($items1TY), count($items2TY)))
+                        let $minIndexDeviation :=
+                            min(
+                                for $pos in 1 to $maxIndex
+                                where not($items1TY[$pos] eq $items2TY[$pos])
+                                return $pos)
+                        return ($items1TY[$minIndexDeviation], $items2TY[$minIndexDeviation])
+                
                 (: quantifier 'all' :)
                 
                 else if ($quantifier eq 'all') then
@@ -309,9 +356,9 @@ declare function f:validateValuePair($constraintElem as element(),
                         if (exists($match)) then ()
                         else $items1
                         
-                (: quantifier 'forEachItemSome' :)
+                (: quantifier 'someForEach' :)
                 
-                else if ($quantifier eq 'forEachItemSome') then                    
+                else if ($quantifier eq 'someForEach') then                    
                     for $item1TY at $pos in $items1TY
                     where exists($useDatatype) and i:isCastError($item1TY) or                    
                         (every $v in $items2TY satisfies not($cmpTrue($item1TY, $v)))
@@ -323,14 +370,15 @@ declare function f:validateValuePair($constraintElem as element(),
                 $results_expr2Count,
                 result:validationResult_valuePair($colour, $constraintElem, $constraintNode, $violations, (), $context)
             )
-            
+:)            
     return (
         $results_expr1Count, 
         $results_expr1Conversion,
-        $results)            
+        $results_pair)
+        
 };    
 
-declare function f:validateValuePair_context2(
+declare function f:validateValuePair_context2_iterating(
 $constraintElem,
 $constraintNode,
 $quantifier,
@@ -372,7 +420,7 @@ $context
                     result:validationResult_valuePair(
                         $colour, $constraintElem, $constraintNode, $violation, (), $context)
         )       
-    (: quantifier: 'some' or 'forEachItemSome' :)           
+    (: quantifier: 'some' or 'someForEach' :)           
     else            
         let $itemReports :=
             for $item1 at $pos in $items1
@@ -420,8 +468,8 @@ $context
                     result:validationResult_valuePair(
                         $colour, $constraintElem, $constraintNode, (), (), $context)
                         
-            (: Quantifier: forEachItemSome :)                        
-            else if ($quantifier eq 'forEachItemSome') then        
+            (: Quantifier: someForEach :)                        
+            else if ($quantifier eq 'someForEach') then        
                 let $violations := 
                     for $itemReport at $pos in $itemReports
                     return if ($itemReport?match) then () else $items1[$pos]
@@ -433,6 +481,131 @@ $context
             else error(QName((), 'SCHEMA_ERROR'), concat('Unknown quantifier @quant: ', $quantifier))                        
         )
         
+};
+
+declare function f:validateValuePair_context2_fixed(
+$constraintElem,
+$constraintNode,
+$contextNode,
+
+$quantifier,
+$useDatatype,
+$expr2,
+$expr2Lang,
+
+$items1,
+$items1TY,
+$results_expr1Conversion,
+
+$getItems2,
+$cmpTrue,
+$cmpTrueAgg,
+
+$context
+) 
+as element()* {
+    (: Get value of expression 2 :)
+    let $items2 := $contextNode/$getItems2(.)
+    let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype)
+    let $items2TY := 
+        if (empty($useDatatype)) then $items2TYRaw else $items2TYRaw[not(. instance of map(*))]
+    let $items2ConversionError := 
+        if (empty($useDatatype)) then () else $items2TYRaw[. instance of map(*)]
+                
+    (: Check results: conversion error value 2 :)
+    let $results_expr2Conversion :=
+        $items2ConversionError ! result:validationResult_valuePair(
+            'red', $constraintElem, $constraintNode, ., (), $context)
+
+    (: Check the items count :)
+    let $results_expr2Count := 
+        f:validateValuePair_counts(
+            $constraintElem, $items2, 'expr2', $expr2, $expr2Lang, (), $context)
+    
+    (:
+     : Identify items for which the correspondence check fails;
+       in case of includes, these are value 2 items;
+       in case of inin and eqeq, these are value 1 and/or value 2 items
+       otherwise these are value 1 items
+     :) 
+    let $violations :=
+        (: aggregate comparison :)
+
+        if ($constraintNode eq 'in') then
+            for $item1TY at $pos in $items1TY
+            where not($item1TY = $items2TY)
+            return $items1[$pos]                
+        
+        else if ($constraintNode eq 'notin') then
+            for $item1TY at $pos in $items1TY
+            where $item1TY = $items2TY
+            return $items1[$pos]                
+        
+        else if ($constraintNode eq 'includes') then
+            for $item2TY at $pos in $items2TY
+            where not($cmpTrueAgg($items1TY, $item2TY))
+            return $items2[$pos]
+
+        else if ($constraintNode eq 'inin') then (
+            for $item1TY at $pos in $items1TY
+            where not($item1TY = $items2TY)
+            return $items1[$pos],                
+            for $item2TY at $pos in $items2TY
+            where not($item2TY = $items1TY)
+            return $items2[$pos]
+        )
+        else if ($constraintNode eq 'eqeq') then
+            (: In case of conversion errors, do not check eqeq :)
+            if (($results_expr1Conversion, $results_expr2Conversion)) then () 
+            else if (deep-equal($items1TY, $items2TY)) then () 
+            else
+                (: In case of not deep-equal: deliver first deviating pair 
+                   (or single item without corresponding item :)
+                let $maxIndex := max((count($items1TY), count($items2TY)))
+                let $minIndexDeviation :=
+                    min(
+                        for $pos in 1 to $maxIndex
+                        where not($items1TY[$pos] eq $items2TY[$pos])
+                        return $pos)
+                return ($items1TY[$minIndexDeviation], $items2TY[$minIndexDeviation])
+                
+            (: quantifier 'all' :)
+                
+            else if ($quantifier eq 'all') then
+                for $item1TY at $pos in $items1TY
+                return
+                    if (exists($useDatatype) and i:isCastError($item1TY)) then $item1TY
+                    else if (exists($items2TY[not($cmpTrue($item1TY, .))])) then $items1[$pos]
+                    else ()
+                    
+                (: quantifier 'some' :)
+                
+            else if ($quantifier eq 'some') then    
+                let $match := $items1TY[
+                    not(exists($useDatatype) and i:isCastError(.))                    
+                    and (some $v in $items2TY satisfies $cmpTrue(., $v))]
+                return
+                    if (exists($match)) then ()
+                    else $items1
+                        
+            (: quantifier 'someForEach' :)
+                
+            else if ($quantifier eq 'someForEach') then                    
+                for $item1TY at $pos in $items1TY
+                where exists($useDatatype) and i:isCastError($item1TY) or                    
+                (every $v in $items2TY satisfies not($cmpTrue($item1TY, $v)))
+                return $items1[$pos]
+                
+            else error(QName((), 'SCHEMA_ERROR'), concat('Unexpected quantifier: ', $quantifier))
+            
+        let $colour := if (exists($violations)) then 'red' else 'green'                
+        return (
+            $results_expr2Count,
+            $results_expr2Conversion,
+            result:validationResult_valuePair(
+                $colour, $constraintElem, $constraintNode, $violations, (), $context)
+        )
+
 };
 
 (:~

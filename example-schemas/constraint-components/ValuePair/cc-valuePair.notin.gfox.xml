@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    Demonstrates the use of ValuePair constraints: declares a ValuePairNotIn contraint.
     
-    All items of value 1 must be equal to an item from value 2. Here, invalid references
-    are detected: all @country references in <city> elements must be an @id value in <country>.
+    The items of value 1 must not be equal to an item from value 2. Here, city IDs must
+    not be used also as country IDs.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.in"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.notin"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -18,9 +18,9 @@
             <file foxpath="factbook.xml" id="factbookFileShape">
                 <targetSize count="1" countMsg="Missing file: factbook.xml"/>
                 <valuePairs>
-                    <valuePair expr1XP="//city/@country" minCount1="3144" minCount1Msg="Expected more cities."
+                    <valuePair expr1XP="//city/@id" minCount1="3144" minCount1Msg="Expected more cities."
                                expr2XP="//country/@id" minCount2="231" minCount2Msg="Expected more countries." 
-                               cmp="in" inMsg="City contains invalid country reference - value not a country ID."/>
+                               cmp="notin" notinMsg="City IDs must not be used also as country IDs."/>
                 </valuePairs>
             </file>
         </folder>

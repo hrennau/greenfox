@@ -7,12 +7,12 @@
   <continent id="f0_132" name="Africa"/>
   <country id="f0_136" name="Albania" capital="f0_1461" population="3249136" datacode="AL" total_area="28750" population_growth="1.34" infant_mortality="49.2" gdp_agri="55" gdp_total="4100" inflation="16" indep_date="28 11 1912" government="emerging democracy" car_code="AL">
     <name>Albania</name>
-    
-    <city id="f0_999" country="f0_136" longitude="10.7" latitude="46.2">
+    <!--
+    <city id="f0_136" country="f0_136" longitude="10.7" latitude="46.2">
       <name>Testcity</name>
       <population year="87">192000</population>
     </city>
-    
+    -->
     <city id="f0_1461" country="f0_136" longitude="10.7" latitude="46.2">
       <name>Tirane</name>
       <population year="87">192000</population>

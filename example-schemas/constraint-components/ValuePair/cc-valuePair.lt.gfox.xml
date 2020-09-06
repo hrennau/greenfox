@@ -2,7 +2,7 @@
 <!-- 
     Demonstrates the use of ValuePair constraints: declares a ValuePairLt contraint. 
     
-    All items of value 1 must be less than the items of value 2. Here, all project start 
+    All items of value 1 must be less than the items of value 2. Here, all project end 
     dates (value 1) must be less than a maximum date (value 2).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.lt"
