@@ -213,6 +213,10 @@ declare function f:validateValuePair($constraintElem as element(),
         
 };    
 
+(:~
+ : Validations of ValuePair constraints, the case where the
+ : second expression is evaluated for each item from value 1.
+ :)
 declare function f:validateValuePair_context2_iterating(
     $constraintElem as element(),
     $constraintNode as node(),
@@ -317,27 +321,31 @@ declare function f:validateValuePair_context2_iterating(
         
 };
 
+(:~
+ : Validations of ValuePair constraints, the case where the
+ : second expression is evaluated only once not for each item 
+ : from value 1.
+ :)
 declare function f:validateValuePair_context2_fixed(
-$constraintElem,
-$constraintNode,
-$contextNode,
+    $constraintElem as element(),
+    $constraintNode as node(),
+    $contextNode as node(),
 
-$quantifier,
-$useDatatype,
-$expr2,
-$expr2Lang,
+    $quantifier as xs:string,
+    $useDatatype as xs:QName?,
+    $expr2 as xs:string,
+    $expr2Lang as xs:string,
 
-$items1,
-$items1TY,
-$results_expr1Conversion,
+    $items1 as item()*,
+    $items1TY as item()*,
+    $results_expr1Conversion as element()*,
 
-$getItems2,
-$cmpTrue,
-$cmpTrueAgg,
-
-$context
-) 
-as element()* {
+    $getItems2 as function(*),
+    $cmpTrue as function(*),
+    $cmpTrueAgg as function(*),
+    $context as map(xs:string, item()*)) 
+        as element()* {
+        
     (: Get value of expression 2 :)
     let $items2 := $contextNode/$getItems2(.)
     let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype)
