@@ -230,6 +230,8 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:foxvalues,
                     self::gx:foxvaluePair, 
                     self::gx:foxvaluePairs,
+                    self::gx:valueCompared,
+                    self::gx:valuesCompared,                    
                     self::gx:xpath,
                     self::gx:foxpath,
                     self::gx:links,   

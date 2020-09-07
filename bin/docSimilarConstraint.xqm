@@ -75,7 +75,7 @@ declare function f:validateDocSimilar($contextURI as xs:string,
             [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)
         
     (: Check link constraints :)
-    let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 
+    let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $context) 
     
     (: Check similarity :)
     let $results_comparison := 

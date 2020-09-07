@@ -46,15 +46,28 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
         as element()* {
         
     (: Exception - no context document :)
-    if ($constraintElem/(gx:valuePair, gx:foxvaluePair)/(@expr1XP, @expr2XP) and not($context?_targetInfo?doc)) then
+    if ($constraintElem/(gx:valuePair, gx:foxvaluePair, gx:valueCompared)/(@expr1XP, @expr2XP) and not($context?_targetInfo?doc)) then
         result:validationResult_valuePair_exception($constraintElem,
             'Context resource could not be parsed', (), $context)
     else
-    
-    (: Check expression pairs :)    
-    let $results := f:validateValuePairs($constraintElem, $contextNode, $context)
-    
-    return $results
+        (: ValuesCompared :)    
+        if ($constraintElem/
+            (self::gx:valuesCompared, self::gx:valueCompared, 
+             self::gx:foxvaluesCompared, self::gx:foxvalueCompared))
+        then 
+            let $ldo := link:getLinkDefObject($constraintElem, $context)
+            let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, 
+                             $contextNode, $context, map{'mediatype': 'xml'})
+            let $results_link :=
+                link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
+            let $results_pairs :=
+                f:validateValuesCompared($constraintElem, $lros, $context)
+                
+            return ($results_link, $results_pairs)
+            
+        (: ValuePairs :)
+        else 
+            f:validateValuePairs($constraintElem, $contextNode, $context)
 };
 
 (:~
@@ -64,6 +77,59 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
  :
  : ===============================================================================
  :)
+
+(:~
+ : Validates the correspondences defined by 'valueCord' elements.
+ :
+ : @param constraintElem constraint defining element
+ : @param lros Linke Result Objects
+ : @param contextInfo context information
+ : @param context the processing context
+ :)
+declare function f:validateValuesCompared($constraintElem as element(),
+                                          $lros as map(*)*,
+                                          $context as map(xs:string, item()*))
+        as element()* {
+        
+    (: Handle link errors :) 
+    $lros[?errorCode]
+    ! result:validationResult_valueCompared_exception($constraintElem, ., (), (), $context),
+        
+    (: Repeat validation for each combination of link context node and link target document 
+       (represented by a Link Result Object) 
+     :)
+    for $lro in $lros[not(?errorCode)]
+    
+    (: Fetch target nodes :)
+    let $targetNodes := 
+        if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
+        else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
+        else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
+        
+    return
+        (: No target nodes? exception! :)
+        if (not($targetNodes)) then            
+            let $msg :=
+                if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 'Correspondence target resource not found'
+            return
+                result:validationResult_valueCompared_exception(
+                    $constraintElem, $lro, $msg, (), $context)  
+                        
+        (: Target nodes found :)
+        else trace(
+            (: Fetch context item :)
+            let $contextItem := $lro?contextItem
+        
+            (: Validate each definition of correspondence :)
+            let $results := ()
+            (:
+                $constraintElem/gx:valueCompared/f:validateConcordPair(
+                    ., $contextItem, $targetNodes, $contextInfo, $context)
+            :)                   
+            return $results , '___RESULTS: ')                                
+};
 
 declare function f:validateValuePairs($constraintElem as element(),
                                       $contextNode as node(),
@@ -375,10 +441,9 @@ declare function f:validateValuePair_context2_fixed(
             'red', $constraintElem, $constraintNode, ., (), $context)
 
     (: *** Check results: counts :)
-    let $results_expr2Count := trace(
+    let $results_expr2Count :=
         f:validateValuePair_counts(
             $constraintElem, $items2, 'expr2', $expr2, $expr2Lang, (), $context)
-    , '_COUNTS: ')
     
     (: *** Check results: pair :)    
     let $results_pair :=

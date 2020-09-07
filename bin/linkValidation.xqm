@@ -38,16 +38,16 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param ldo link definition object
  : @param constraintElem constraint element, defining constraints which may override
  :   any constraints specified by the link definition element
-  : @param contextInfo information about the resource context
+  : @param context the processing context
  : @return a validation result, red or green
  :)
 declare function f:validateLinkConstraints($lros as map(*)*,
                                            $ldo as map(*)?,                                      
                                            $constraintElem as element()?,
-                                           $contextInfo as map(xs:string, item()*))
+                                           $context as map(xs:string, item()*))
         as element()* {
-    f:validateLinkResolvable($lros, $ldo, $constraintElem, $contextInfo),
-    f:validateLinkCounts($lros, $ldo, $constraintElem, $contextInfo)
+    f:validateLinkResolvable($lros, $ldo, $constraintElem, $context),
+    f:validateLinkCounts($lros, $ldo, $constraintElem, $context)
 };
 
 (:~
@@ -64,7 +64,7 @@ declare function f:validateLinkConstraints($lros as map(*)*,
 declare function f:validateLinkResolvable($lros as map(*)*,
                                           $ldo as map(*)?,                                      
                                           $constraintElem as element()?,
-                                          $contextInfo as map(xs:string, item()*))
+                                          $context as map(xs:string, item()*))
         as element()* {
     if (empty(($ldo, $constraintElem))) then () else
     
@@ -81,7 +81,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     group by $contextPoint
     let $contextItem := $lro[1]?contextItem  
     return
-        vr:validationResult_linkResolvable($ldo, $lro, $constraintElem, $contextItem, $contextInfo, ())
+        vr:validationResult_linkResolvable($ldo, $lro, $constraintElem, $contextItem, $context, ())
 };        
 
 (:~
@@ -119,7 +119,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
 declare function f:validateLinkCounts($lros as map(*)*,
                                       $ldo as map(*)?,                                      
                                       $constraintElem as element()?,
-                                      $contextInfo as map(xs:string, item()*))
+                                      $context as map(xs:string, item()*))
         as element()* {
     if (empty(($ldo, $constraintElem))) then () else
     
@@ -212,7 +212,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
             let $colour := if ($green) then 'green' else 'red'        
             return  
                 vr:validationResult_linkCount($colour, $ldo, $lros, $constraintElem, $countConstraint, 
-                    $vcounts, (), $contextInfo, $resultOptions)            
+                    $vcounts, (), $resultOptions, $context)            
         }
         
         let $results := (

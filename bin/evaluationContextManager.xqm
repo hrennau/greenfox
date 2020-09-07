@@ -170,6 +170,8 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:values) |    
          element(gx:valuePair) |
          element(gx:valuePairs) |
+         element(gx:valueCompared) |
+         element(gx:valuesCompared) |
          element(gx:foxvalue) |
          element(gx:foxvalues) |    
          element(gx:foxvaluePair) |
@@ -265,6 +267,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:values,    
                       self::gx:valuePair,
                       self::gx:valuePairs,
+                      self::gx:valueCompared,
+                      self::gx:valuesCompared,
                       self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
                       self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,                                
@@ -297,6 +301,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:values,    
                       self::gx:valuePair,
                       self::gx:valuePairs,
+                      self::gx:valueCompared,
+                      self::gx:valuesCompared,    
                       self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
                       self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,

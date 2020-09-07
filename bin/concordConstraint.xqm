@@ -72,7 +72,7 @@ declare function f:validateConcord($contextURI as xs:string,
         $contextItem[. instance of node()], $context, map{'mediatype': 'xml'})
     
     (: Check link constraints :)
-    let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo) 
+    let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $context) 
     
     (: Check correspondences :)    
     let $results_correspondence := f:validateConcordPairs($constraintElem, $lros, $contextInfo, $context)

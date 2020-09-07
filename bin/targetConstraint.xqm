@@ -73,7 +73,7 @@ declare function f:validateLinkConstraints($resourceShape as element(),
     let $constraintElem := $resourceShape/gx:targetSize
     let $contextInfo := map:merge((map:entry('filePath', $context?_contextPath)))
     return 
-        link:validateLinkConstraints($lros, $ldo, $constraintElem, $contextInfo)
+        link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
 };
 
 (:~

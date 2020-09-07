@@ -630,14 +630,21 @@ declare function f:validationResult_linkCount($colour as xs:string,
                                               $ldo as map(*)?,
                                               $lros as map(*)*,
                                               $constraintElem as element(),
-                                              $constraintAtt as attribute(),                                             
+                                              $constraintNode as attribute(),                                             
                                               $valueCount as item()*,
-                                              $contextNode as node()?,
-                                              $contextInfo as map(xs:string, item()*),
-                                              $options as map(*)?)
+                                              $contextNode as node()?,                                              
+                                              $options as map(*)?,
+                                              $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
+        
     let $constraintConfig :=
-        typeswitch($constraintAtt)
+        typeswitch($constraintNode)
         case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
         case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
         case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}
@@ -666,15 +673,18 @@ declare function f:validationResult_linkCount($colour as xs:string,
         let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
         return
             (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraintAtt[not(. intersect $explicit)])
+            ($explicit, $constraintNode[not(. intersect $explicit)])
     let $valueCountAtt := attribute valueCount {$valueCount} 
+    (:
     let $resourceShapeId := $constraintElem/@resourceShapeID
     let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraintAtt/local-name(.))
+    let $constraintId := concat($constraintElemId, '-', $constraintAtt/local-name(.)
     let $filePath := $contextInfo?filePath ! attribute filePath {.}
     let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    let $contextNodeDataPath := $contextNode/i:datapath(.)
+    :)
 
+    let $contextNodeDataPath := $contextNode/i:datapath(.)
+    
     (: Link description attributes :)
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     
@@ -682,20 +692,31 @@ declare function f:validationResult_linkCount($colour as xs:string,
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
     
     let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintAtt/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraintAtt/local-name(.), ())
+        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintNode/local-name(.), ())
+        else i:getErrorMsg($constraintElem, $constraintNode/local-name(.), ())
     let $elemName := 'gx:' || $colour
     return
         element {$elemName} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $contextNodeDataPath ! attribute contextNodeDataPath {.},            
+            attribute constraintComp {$constraintConfig?constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+(:        
             $msg ! attribute msg {.},
-            $errorCodes ! attribute errorCode {.},            
+:)            
+            $errorCodes ! attribute errorCode {.},
+(:            
             attribute constraintComp {$constraintConfig?constraintComp},
             attribute constraintID {$constraintId},
             attribute resourceShapeID {$resourceShapeId},            
             $filePath,
             $focusNode,
+:)            
             $linkDefAtts,
-            $contextNodeDataPath ! attribute contextNodeDataPath {.},
             $standardAtts,
             $valueCountAtt            
         }       
@@ -1384,14 +1405,14 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
 
 (:~
  : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of a ValuePair constraint.
+ : which prevents normal evaluation of a ValueCompared constraint.
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node tree.
  :
  : @param constraintElem an element declaring Value constraints
  : @param exception an optional message string
  : @param addAtts additional attributes 
- : @param context processing context
+ : @param context the processing context
  : @return a red validation result
  :)
 declare function f:validationResult_valuePair_exception(
@@ -1400,20 +1421,23 @@ declare function f:validationResult_valuePair_exception(
                                             $addAtts as attribute()*,
                                             $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
     let $resourceShapeID := $constraintElem/@resourceShapeID
-    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
-        
-    let $targetInfo := $context?_targetInfo  
     let $constraintComp := if ($constraintElem/self::element(gx:foxvaluePair)) then 'FoxvaluePair' else 'ValuePair'
-    let $constraintId := $constraintElem/@id
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+    
     let $msg := $exception
     return
         element {'gx:red'} {
-            attribute exception {$msg},            
-            attribute constraintComp {$constraintComp},            
+            $exception ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
@@ -1422,8 +1446,90 @@ declare function f:validationResult_valuePair_exception(
             $filePathAtt,
             $focusNodeAtt
         }
-       
 };
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a Content Correspondence 
+ : constraint. Such an exceptional condition is, for example, a 
+ : failure to resolve a link definition used to identify the target 
+ : resource taking part in the correspondence checking.
+ :
+ : @param constraintElem an element declaring a DocSimilar constraint
+ : @param lro Link Resolution Object describing the attempt to resolve 
+ :   a link description
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a red validation result
+ :)
+declare function f:validationResult_valueCompared_exception(
+                                            $constraintElem as element(),
+                                            $lro as map(*)?,        
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $context as map(xs:string, item()*))
+        as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+    let $constraintComp := $constraintElem/i:firstCharToUpperCase(local-name(.))
+    let $msg := $exception
+    
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+        
+    let $contextItemInfo :=
+        if (empty($lro)) then ()
+        else
+            let $contextItem := $lro?contextItem
+            return
+                if (not($contextItem instance of node())) then ()
+                else attribute contextItem {i:datapath($contextItem)}
+    let $targetInfo := $lro?targetURI ! attribute targetURI {.}    
+    let $msg :=
+        if ($exception) then $exception
+        else if (exists($lro)) then
+            let $errorCode := $lro?errorCode
+            return
+                if ($errorCode) then
+                    switch($errorCode)
+                    case 'no_resource' return 'Correspondence target resource not found'
+                    case 'no_text' return 'Correspondence target resource not a text file'
+                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
+                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
+                    case 'href_selection_not_nodes' return
+                        'Link error - href expression does not select nodes'
+                    case 'uri' return
+                        'Target URI not a valid URI'
+                    default return concat('Unexpected error code: ', $errorCode)
+                else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
+                    'Correspondence target resource cannot be parsed'
+                else 
+                    'Correspondence target resource not found'
+        
+    return
+        element {'gx:red'} {
+            $exception ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
+            $contextItemInfo,
+            $targetInfo,
+            
+            $addAtts,
+            $filePathAtt,
+            $focusNodeAtt
+        }
+};
+
 
 (:~
  : ===============================================================================

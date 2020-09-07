@@ -133,6 +133,8 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $foxvalues, $context)            
             case $foxvaluePairs as element(gx:foxvaluePairs) return 
                 expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $foxvaluePairs, $context)            
+            case $valuesCompared as element(gx:valuesCompared) return 
+                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuesCompared, $context)            
             case $xpath as element(gx:xpath) return 
                 i:validateExpressionValue($contextURI, $xpath, $contextItem, $contextDoc, $context)
             case $foxpath as element(gx:foxpath) return 

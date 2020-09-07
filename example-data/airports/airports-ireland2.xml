@@ -63,5 +63,5 @@
     <type>airport</type>
     <source1>OurAirports</source1>
   </airport>
-  <airport id="8698" iata="BY" icao="EIBN" latitude="51.66859817504883" longitude="-9.484169960021973" href="ireland/airport-byt.xml"/>
+  <airport id="8698" iata="BYT" icao="EIBN" latitude="51.66859817504883" longitude="-9.484169960021973" href="ireland/airport-byt.xml"/>
 </airports>
