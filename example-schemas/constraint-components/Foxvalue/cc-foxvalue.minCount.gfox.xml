@@ -16,7 +16,7 @@
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml[//altitude/xs:integer(.) gt 300]"
-                          minCount="3" minCountMsg="Not enough airports with altitude gt 300."/>
+                          minCount="2" minCountMsg="Not enough airports with altitude gt 300."/>
             </foxvalues>            
         </folder>
     </domain>

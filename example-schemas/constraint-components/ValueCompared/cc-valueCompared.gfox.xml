@@ -20,8 +20,12 @@
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 <valuesCompared foxpath="fox-parent-sibling('expectation')\expectation-articles.xml" 
                                 countTargetDocs="1">
-                    <valueCompared sourceXP="//articleName" targetXP="//article/@name" cmp="in"/>
-                    <valueCompared sourceXP="//articlePrice" targetXP="//article/@price" useDatatype="xs:decimal" cmp="in"/>
+                    <valueCompared expr1XP="//articleName" 
+                                   expr2XP="//article/@name" 
+                                   cmp="in" inMsg="Article name not expected."/>
+                    <valueCompared expr1XP="//articlePrice" 
+                                   expr2XP="//article/@price" 
+                                   useDatatype="xs:decimal" cmp="in" inMsg="Price not expected"/>
                 </valuesCompared>
             </file>
         </folder>

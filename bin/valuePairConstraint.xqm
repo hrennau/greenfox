@@ -100,6 +100,7 @@ declare function f:validateValuesCompared($constraintElem as element(),
      :)
     for $lro in $lros[not(?errorCode)]
     
+    let $_DEBUG := trace($lro, '___LRO: ')
     (: Fetch target nodes :)
     let $targetNodes := 
         if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
@@ -118,17 +119,22 @@ declare function f:validateValuesCompared($constraintElem as element(),
                     $constraintElem, $lro, $msg, (), $context)  
                         
         (: Target nodes found :)
-        else trace(
-            (: Fetch context item :)
-            let $contextItem := $lro?contextItem
-        
-            (: Validate each definition of correspondence :)
-            let $results := ()
-            (:
-                $constraintElem/gx:valueCompared/f:validateConcordPair(
-                    ., $contextItem, $targetNodes, $contextInfo, $context)
-            :)                   
-            return $results , '___RESULTS: ')                                
+        else
+            (: Context node (context doc or a node in the context doc) :)
+            let $contextNode := 
+                let $contextItem := $lro?contextItem
+                return
+                    if ($contextItem instance of node()) then $contextItem
+                    else
+                        let $contextDoc := $context?_targetInfo?doc
+                        return
+                            if ($contextDoc) then $contextDoc else
+                                result:validationResult_valuePair_exception($constraintElem,
+                                    'No context node available', (), $context)
+            return
+                $constraintElem/gx:valueCompared/
+                    f:validateValuePair(., $contextNode, $targetNodes, $context)            
+                               
 };
 
 declare function f:validateValuePairs($constraintElem as element(),
@@ -136,7 +142,7 @@ declare function f:validateValuePairs($constraintElem as element(),
                                       $context as map(xs:string, item()*))
         as element()* {
         
-    $constraintElem/(gx:valuePair, gx:foxvaluePair)/f:validateValuePair(., $contextNode, $context)
+    $constraintElem/(gx:valuePair, gx:foxvaluePair)/f:validateValuePair(., $contextNode, (), $context)
 };
 
 (:~
@@ -154,6 +160,7 @@ declare function f:validateValuePairs($constraintElem as element(),
  :)
 declare function f:validateValuePair($constraintElem as element(),
                                      $contextNode as node(),
+                                     $targetNodes as node()*,
                                      $context as map(*))
         as element()* {
     let $targetInfo := $context?_targetInfo        
@@ -247,14 +254,50 @@ declare function f:validateValuePair($constraintElem as element(),
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $constraintNode))
 
     (: (2.2) Function processing multiple items second operand :)
-    let $cmpTrueAgg :=
+    let $findViolations :=
         if (not($constraintNode = ('in', 'notin', 'includes', 'inin', 'eqeq'))) then () else
         switch($constraintNode)
-        (: $op1: item; $op2: sequence :) 
-        case 'in' return function($op1, $op2) {$op1 = $op2}
-        case 'notin' return function($op1, $op2) {not($op1 = $op2)}
-        (: $op1: sequence; $op2: item :)
-        case 'includes' return function($op1, $op2) {every $item in $op2 satisfies $item = $op1}
+ 
+        case 'in' return function($items1, $items1TY, $items2, $items2TY) {
+            for $item1TY at $pos in $items1TY
+            where not($item1TY = $items2TY)
+            return $items1[$pos]}
+
+        case 'notin' return function($items1, $items1TY, $items2, $items2TY) {
+            for $item1TY at $pos in $items1TY
+            where $item1TY = $items2TY
+            return $items1[$pos]}
+
+        case 'includes' return function($items1, $items1TY, $items2, $items2TY) {
+            for $item2TY at $pos in $items2TY
+            where not($item2TY = $items1TY)
+            return $items2[$pos]}
+
+        case 'inin' return function($items1, $items1TY, $items2, $items2TY) {
+            for $item1TY at $pos in $items1TY
+            where not($item1TY = $items2TY)
+            return $items1[$pos],
+            for $item2TY at $pos in $items2TY
+            where not($item2TY = $items1TY)
+            return $items2[$pos]}
+            
+        case 'eqeq' return function($items1, $items1TY, $items2, $items2TY) {
+            (: In case of conversion errors - do not check :)
+            if (count($items1) ne count($items1TY) or 
+                count($items2) ne count($items2TY)) then ()
+            else
+                if (deep-equal($items1TY, $items2TY)) then () else
+                
+                (: Deliver first deviating pair 
+                   or single item without corresponding item :)
+                let $maxIndex := max((count($items1TY), count($items2TY)))
+                let $minIndexDeviation :=
+                    min(
+                        for $pos in 1 to $maxIndex
+                        where not($items1TY[$pos] eq $items2TY[$pos])
+                        return $pos)
+                return ($items1TY[$minIndexDeviation], $items2TY[$minIndexDeviation])
+        }        
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $constraintNode))
 
     (: Produce results
@@ -271,15 +314,25 @@ declare function f:validateValuePair($constraintElem as element(),
                  $getItems2, $cmpTrue,
                  $context)
 
-        (: expression 2 context: independent of expression 1 items 
-           ------------------------------------------------------- :)
-        else
+        (: expression 2 context: independent of expression 1 items; single document 
+           ------------------------------------------------------------------------ :)
+        else if (empty($targetNodes)) then
             f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $contextNode,
                 $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
                 $items1, $items1TY, $results_expr1Conversion,
-                $getItems2, $cmpTrue, $cmpTrueAgg,
+                $getItems2, $cmpTrue, $findViolations,
                 $context) 
         
+        (: loop over target nodes 
+           ---------------------- :)
+        else
+            for $targetNode in $targetNodes return
+                f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $targetNode,
+                    $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
+                    $items1, $items1TY, $results_expr1Conversion,
+                    $getItems2, $cmpTrue, $findViolations,
+                    $context) 
+            
     return (
         $results_expr1Count, 
         $results_expr1Conversion,
@@ -422,7 +475,7 @@ declare function f:validateValuePair_context2_fixed(
 
     $getItems2 as function(*),
     $cmpTrue as function(*)?,
-    $cmpTrueAgg as function(*)?,
+    $findViolations as function(*)?,
     $context as map(xs:string, item()*)) 
         as element()* {
         
@@ -458,7 +511,9 @@ declare function f:validateValuePair_context2_fixed(
         let $violations :=
     
             (: aggregate comparison :)
-
+            if (exists($findViolations)) then
+                $findViolations($items1, $items1TY, $items2, $items2TY)
+(:                
             (: in :)
             if ($constraintNode eq 'in') then
                 for $item1TY at $pos in $items1TY
@@ -502,7 +557,7 @@ declare function f:validateValuePair_context2_fixed(
                             where not($items1TY[$pos] eq $items2TY[$pos])
                             return $pos)
                     return ($items1TY[$minIndexDeviation], $items2TY[$minIndexDeviation])
-                
+:)                
             (: quantifier 'all' :)
                     
             else if ($quantifier eq 'all') then

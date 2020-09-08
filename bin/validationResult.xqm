@@ -1252,7 +1252,8 @@ declare function f:validationResult_valuePair($colour as xs:string,
     let $useDatatypeAtt := $constraintElem/@useDatatype ! attribute useDatatype {.}
     let $flagsAtt := $constraintElem/@flags[string()] ! attribute flags {.}
     let $quantifierAtt := ($constraintElem/@quant, 'all')[1] ! attribute quantifier {.}
-    let $constraintComp := 'ValuePair' || $constraintNode/i:firstCharToUpperCase($constraintKind)
+    let $constraintComp := $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
+                           $constraintNode/i:firstCharToUpperCase($constraintKind)
     
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintKind)
     let $elemName := i:getResultElemName($colour)
@@ -1442,9 +1443,7 @@ declare function f:validationResult_valuePair_exception(
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
             
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
+            $addAtts
         }
 };
 
