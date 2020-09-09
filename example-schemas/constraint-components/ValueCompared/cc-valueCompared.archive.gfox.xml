@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints: declares a ValueComparedEq contraint.
+    
+    The example checks archive contents. 
+    
+    The constraint references a named link definition (@linkName). The link definition includes 
+    a context expression (@contextXP) and a target node expression (@targetXP). The constraint 
+    is re-evaluated for each combination of link context node and each one of its target nodes.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.archive"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <linkDef name="airportGeoDetails"
+             contextXP="//airport"
+             hrefXP="@href"             
+             targetXP="/*/geo">
+        <constraints countTargetNodesPerContextPoint="1"/>
+    </linkDef>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports-ireland.xml" id="contryFileShape">
+                <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
+                
+                <valuesCompared linkName="airportGeoDetails"
+                                minCountContextNodes="14" minCountContextNodesMsg="Less airport elements than expected."
+                                minCountTargetNodes="14" minCountTargetNodesMsg="Less target geo elements than expected.">
+                    <valueCompared expr1XP="@latitude" expr2XP="latitude" cmp="eq" maxCount1="1" count2="1"/>
+                    <valueCompared expr1XP="@longitude" expr2XP="longitude" cmp="eq" maxCount1="1" count2="1"/>
+                </valuesCompared>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

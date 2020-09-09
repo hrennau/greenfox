@@ -107,8 +107,8 @@ declare function f:resolveLinkDefRC(
        A Link Context expression is optional; the default link context is 
        the context node or context URI, dependent on whether the link 
        definition requires a context node :)
-       
-    let $linkContextItems :=        
+    
+    let $linkContextItems :=     
         if (not($contextExpr)) then 
             if ($ldo?requiresContextNode) then ($contextNode, $contextURI)[1]
             else $contextURI

@@ -691,18 +691,22 @@ declare function f:validationResult_linkCount($colour as xs:string,
     (: Error codes :)
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
     
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraintNode/local-name(.), ())
-        else i:getErrorMsg($constraintElem, $constraintNode/local-name(.), ())
-    let $elemName := 'gx:' || $colour
+    let $msg := i:getResultMsg($colour, $constraintNode/.., $constraintNode/local-name(.))
+    
+    (: If the constraint is part of the link definition, the path of the referencing
+       constraint element is given :)
+    let $constraintElemPath :=
+        if ($constraintElem/@* intersect $constraintNode) then ()
+        else $constraintElem/i:getSchemaConstraintPath(.) ! attribute constraintElemPath {.}
     return
-        element {$elemName} {
+        element {i:getResultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
             $contextNodeDataPath ! attribute contextNodeDataPath {.},            
             attribute constraintComp {$constraintConfig?constraintComp},            
             $constraintPath ! attribute constraintPath {.},            
+            $constraintElemPath,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
 (:        
@@ -1496,19 +1500,19 @@ declare function f:validationResult_valueCompared_exception(
             return
                 if ($errorCode) then
                     switch($errorCode)
-                    case 'no_resource' return 'Correspondence target resource not found'
-                    case 'no_text' return 'Correspondence target resource not a text file'
-                    case 'not_json' return 'Correspondence target resource not a valid JSON document'
-                    case 'not_xml' return 'Correspondence target resource not a valid XML document'
+                    case 'no_resource' return 'Comparison target resource not found'
+                    case 'no_text' return 'Comparison target resource not a text file'
+                    case 'not_json' return 'Comparison target resource not a valid JSON document'
+                    case 'not_xml' return 'Comparison target target resource not a valid XML document'
                     case 'href_selection_not_nodes' return
                         'Link error - href expression does not select nodes'
                     case 'uri' return
                         'Target URI not a valid URI'
                     default return concat('Unexpected error code: ', $errorCode)
                 else if ($lro?targetURI ! i:fox-resource-exists(.)) then 
-                    'Correspondence target resource cannot be parsed'
+                    'Comparison target resource cannot be parsed'
                 else 
-                    'Correspondence target resource not found'
+                    'Comparison target target resource not found'
         
     return
         element {'gx:red'} {
@@ -1523,9 +1527,7 @@ declare function f:validationResult_valueCompared_exception(
             $contextItemInfo,
             $targetInfo,
             
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
+            $addAtts
         }
 };
 

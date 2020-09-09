@@ -2,36 +2,40 @@
 <!-- 
     Demonstrates the use of ValueCompared constraints: declares a ValueComparedIn contraint.
     
-    All items of value 1 must be equal to an item from value 2. Value 1 is obtained from the
-    document being validated, value 2 is obtained from a document related to it. Related
-    documents are identified by a link definition. The example uses a local link definition -
-    here given by the @foxpath attribute. An alternative would be to reference the link definition 
-    via @linkName. 
+    This example shows how the constraint element may reference a link definition by name
+    (@linkName). ValueCompared constraints are applied to pairs of resources, and the
+    pairs can be defined either by a local link definition (e.g. via @foxpath or @linkXP)
+    or by referencing a global link definition.
     
-    Note the principal separation between the link definition identifying pairs of related documents 
-    and the definition of constraints applying to those pairs.
+    This example is similar to 'cc-valueCompared.gfox.xml', the only difference being the
+    reference of a link definition.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompaired"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompaired.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
 
+    <linkDef name="expectations"
+             foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
+        <constraints countTargetDocs="1"/>
+    </linkDef>
+    
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="msgs1\response" id="responseFolderShape">
             <targetSize countMsg="Missing folder: msgs1\response" count="1"/>            
             <file foxpath="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <valuesCompared foxpath="fox-parent-sibling('expectation')\expectation-articles.xml" 
-                                countTargetDocs="1">
+                <valuesCompared linkName="expectations">
                     <valueCompared expr1XP="//articleName" 
                                    expr2XP="//article/@name" 
                                    cmp="in" inMsg="Article name not expected."/>
                     <valueCompared expr1XP="//articlePrice" 
                                    expr2XP="//article/@price" 
-                                   useDatatype="xs:decimal" cmp="in" inMsg="Price not expected"/>
+                                   useDatatype="xs:decimal" 
+                                   cmp="in" inMsg="Price not expected"/>
                 </valuesCompared>
             </file>
         </folder>

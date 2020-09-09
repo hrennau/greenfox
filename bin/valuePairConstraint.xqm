@@ -14,6 +14,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at "constants.xqm",
    "expressionEvaluator.xqm",
    "greenfoxUtil.xqm",
+   "log.xqm",
    "resourceAccess.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
@@ -98,9 +99,9 @@ declare function f:validateValuesCompared($constraintElem as element(),
     (: Repeat validation for each combination of link context node and link target document 
        (represented by a Link Result Object) 
      :)
-    for $lro in $lros[not(?errorCode)]
+    for $lro in $lros[not(?errorCode)]    
+    (:let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
     
-    let $_DEBUG := trace($lro, '___LRO: ')
     (: Fetch target nodes :)
     let $targetNodes := 
         if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
@@ -108,12 +109,19 @@ declare function f:validateValuesCompared($constraintElem as element(),
         else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
         
     return
-        (: No target nodes? exception! :)
+        (: No target nodes? exception! 
+           We must treat this is a special constraint: when the link definition
+           includes a mapping of the target document to target nodes, the set
+           of target nodes must not be empty; rationale: the target nodes provide 
+           the context nodes for expression 2:)
         if (not($targetNodes)) then            
             let $msg :=
-                if ($lro?targetURI ! i:fox-resource-exists(.)) then 
-                    'Correspondence target resource cannot be parsed'
-                else 'Correspondence target resource not found'
+                if (not($lro?targetURI ! i:fox-resource-exists(.))) then 
+                    'Comparison target resource not found'
+                else if (not($lro?targetDoc)) then 
+                    'Comparison target resource cannot be parsed'
+                else 
+                    'No target nodes found'
             return
                 result:validationResult_valueCompared_exception(
                     $constraintElem, $lro, $msg, (), $context)  
@@ -148,7 +156,7 @@ declare function f:validateValuePairs($constraintElem as element(),
 (:~
  : Validates the ValuePair constraints expressed by a single `valuePair` element. These 
  : constraints are ...
- : - a correspondence constraint, defined by @cmp, @expr1XP, @expr2XP, @expr1FOX, @expr2FOX
+ : - a comparison constraint, defined by @cmp, @expr1XP, @expr2XP, @expr1FOX, @expr2FOX
  :   and further attributes (@quant, @useDatatype, @useString, @flags)
  : - count constraints, referring to the number of items returned by expression 1 and 2
  :
@@ -165,7 +173,7 @@ declare function f:validateValuePair($constraintElem as element(),
         as element()* {
     let $targetInfo := $context?_targetInfo        
     let $contextURI := $targetInfo?contextURI
-    let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
+    (: let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1] :)
     let $evaluationContext := $context?_evaluationContext
     
     (: Definition of an expression pair constraint :)
