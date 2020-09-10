@@ -47,9 +47,13 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
         as element()* {
         
     (: Exception - no context document :)
-    if ($constraintElem/(gx:valuePair, gx:foxvaluePair, gx:valueCompared)/(@expr1XP, @expr2XP) and not($context?_targetInfo?doc)) then
-        result:validationResult_valuePair_exception($constraintElem,
-            'Context resource could not be parsed', (), $context)
+    if ((
+            $constraintElem/(gx:valuePair, gx:valueCompared) or
+            $constraintElem/(gx:foxvaluePair, gx:foxvalueCompared)/@expr1XP
+        ) and 
+        not($context?_targetInfo?doc)) then
+            result:validationResult_valuePair_exception($constraintElem,
+                'Context resource could not be parsed', (), $context)
     else
         (: ValuesCompared :)    
         if ($constraintElem/
@@ -57,8 +61,12 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
              self::gx:foxvaluesCompared, self::gx:foxvalueCompared))
         then 
             let $ldo := link:getLinkDefObject($constraintElem, $context)
-            let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, 
-                             $contextNode, $context, map{'mediatype': 'xml'})
+            let $lros := 
+                let $requiresXml := exists($constraintElem/*/@expr2XP)
+                let $options := if (not($requiresXml)) then () else map{'mediatype': 'xml'}
+                return
+                    link:resolveLinkDef($ldo, 'lro', $contextURI, 
+                        $contextNode, $context, $options)
             let $results_link :=
                 link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
             let $results_pairs :=
@@ -96,53 +104,37 @@ declare function f:validateValuesCompared($constraintElem as element(),
     $lros[?errorCode]
     ! result:validationResult_valueCompared_exception($constraintElem, ., (), (), $context),
         
-    (: Repeat validation for each combination of link context node and link target document 
+    (: Repeat validation for each combination of link context node and link target resource or target nodes 
        (represented by a Link Result Object) 
      :)
     for $lro in $lros[not(?errorCode)]    
-    (:let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
+    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
     
-    (: Fetch target nodes :)
-    let $targetNodes := 
-        if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
-        else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
-        else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
-        
+    for $pair in $constraintElem/(gx:valueCompared, gx:foxvalueCompared)
+    let $requiresContextNode := exists($pair/@expr1XP)
+    let $requiresTargetNode := exists($pair/@expr2XP)
+            
+    let $contextItem :=
+        let $contextItemRaw := $lro?contextItem
+        return
+            if (not($requiresContextNode)) then $contextItemRaw
+            else if ($contextItemRaw instance of node()) then $contextItemRaw
+            else $context?_targetInfo?doc
+    let $targetItems :=
+        if ($requiresTargetNode) then
+            if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
+            else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
+            else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
+        else $lro?targetURI                    
     return
-        (: No target nodes? exception! 
-           We must treat this is a special constraint: when the link definition
-           includes a mapping of the target document to target nodes, the set
-           of target nodes must not be empty; rationale: the target nodes provide 
-           the context nodes for expression 2:)
-        if (not($targetNodes)) then            
-            let $msg :=
-                if (not($lro?targetURI ! i:fox-resource-exists(.))) then 
-                    'Comparison target resource not found'
-                else if (not($lro?targetDoc)) then 
-                    'Comparison target resource cannot be parsed'
-                else 
-                    'No target nodes found'
-            return
-                result:validationResult_valueCompared_exception(
-                    $constraintElem, $lro, $msg, (), $context)  
-                        
-        (: Target nodes found :)
+        if (empty($contextItem)) then
+            result:validationResult_valuePair_exception($constraintElem,
+                'No context node available', (), $context)
+        else if (empty($targetItems)) then
+            result:validationResult_valuePair_exception($constraintElem,
+                'No target resource or node available', (), $context)
         else
-            (: Context node (context doc or a node in the context doc) :)
-            let $contextNode := 
-                let $contextItem := $lro?contextItem
-                return
-                    if ($contextItem instance of node()) then $contextItem
-                    else
-                        let $contextDoc := $context?_targetInfo?doc
-                        return
-                            if ($contextDoc) then $contextDoc else
-                                result:validationResult_valuePair_exception($constraintElem,
-                                    'No context node available', (), $context)
-            return
-                $constraintElem/gx:valueCompared/
-                    f:validateValuePair(., $contextNode, $targetNodes, $context)            
-                               
+            $pair/f:validateValuePair(., $contextItem, $targetItems, $context)            
 };
 
 declare function f:validateValuePairs($constraintElem as element(),
@@ -150,7 +142,9 @@ declare function f:validateValuePairs($constraintElem as element(),
                                       $context as map(xs:string, item()*))
         as element()* {
         
-    $constraintElem/(gx:valuePair, gx:foxvaluePair)/f:validateValuePair(., $contextNode, (), $context)
+    for $pair in $constraintElem/(gx:valuePair, gx:foxvaluePair) 
+    return
+        $pair/f:validateValuePair(., $contextNode, (), $context)
 };
 
 (:~
@@ -167,13 +161,12 @@ declare function f:validateValuePairs($constraintElem as element(),
  : @return validation results
  :)
 declare function f:validateValuePair($constraintElem as element(),
-                                     $contextNode as node(),
-                                     $targetNodes as node()*,
+                                     $contextItem as item(),
+                                     $targetItems as item()*,
                                      $context as map(*))
         as element()* {
     let $targetInfo := $context?_targetInfo        
     let $contextURI := $targetInfo?contextURI
-    (: let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1] :)
     let $evaluationContext := $context?_evaluationContext
     
     (: Definition of an expression pair constraint :)
@@ -197,7 +190,7 @@ declare function f:validateValuePair($constraintElem as element(),
     (: Value 1 :)
     let $items1Raw :=
         switch($expr1Lang)
-        case ('xpath') return i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())
+        case 'xpath' return i:evaluateXPath($expr1, $contextItem, $evaluationContext, true(), true())
         case 'foxpath' return i:evaluateFoxpath($expr1, $contextURI, $evaluationContext, true())        
         default return error()
     let $items1TYRaw := i:applyUseDatatype($items1Raw, $useDatatype, $useString)
@@ -241,7 +234,7 @@ declare function f:validateValuePair($constraintElem as element(),
                 map:put($evaluationContext, QName((), $varName), $contextItem)
         return
             switch($expr2Lang)
-                case ('xpath') return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
+                case 'xpath' return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
                 case 'foxpath' return i:evaluateFoxpath($expr2, $contextURI, $econtext, true())        
                 default return error()
     }
@@ -324,18 +317,24 @@ declare function f:validateValuePair($constraintElem as element(),
 
         (: expression 2 context: independent of expression 1 items; single document 
            ------------------------------------------------------------------------ :)
-        else if (empty($targetNodes)) then
-            f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $contextNode,
-                $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
-                $items1, $items1TY, $results_expr1Conversion,
-                $getItems2, $cmpTrue, $findViolations,
-                $context) 
+        else if (empty($targetItems)) then
+            (: Context item ist context URI if Foxpath; context node or context URI, if XPath :)
+            let $useContextItem := 
+                if ($constraintElem/@expr2FOX) then $contextURI else $contextItem 
+                return
+            
+                    f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $useContextItem,
+                        $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
+                        $items1, $items1TY, $results_expr1Conversion,
+                        $getItems2, $cmpTrue, $findViolations,
+                        $context) 
         
-        (: loop over target nodes 
+        (: loop over target items 
            ---------------------- :)
         else
-            for $targetNode in $targetNodes return
-                f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $targetNode,
+            (: Target items can be target nodes, the target doc, or the target URI :)
+            for $targetItem in $targetItems return
+                f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $targetItem,
                     $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
                     $items1, $items1TY, $results_expr1Conversion,
                     $getItems2, $cmpTrue, $findViolations,
@@ -469,7 +468,7 @@ declare function f:validateValuePair_context2_iterating(
 declare function f:validateValuePair_context2_fixed(
     $constraintElem as element(),
     $constraintNode as node(),
-    $contextNode as node(),
+    $contextItem as item(),
 
     $quantifier as xs:string,
     $useDatatype as xs:QName?,
@@ -488,7 +487,7 @@ declare function f:validateValuePair_context2_fixed(
         as element()* {
         
     (: Get value of expression 2 :)
-    let $items2 := $contextNode/$getItems2(., ())
+    let $items2 := $contextItem ! $getItems2(., ())
     let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
     let $items2TY := 
         if (empty($useDatatype)) then $items2TYRaw
@@ -521,51 +520,7 @@ declare function f:validateValuePair_context2_fixed(
             (: aggregate comparison :)
             if (exists($findViolations)) then
                 $findViolations($items1, $items1TY, $items2, $items2TY)
-(:                
-            (: in :)
-            if ($constraintNode eq 'in') then
-                for $item1TY at $pos in $items1TY
-                where not($item1TY = $items2TY)
-                return $items1[$pos]                
-        
-            (: notin :)        
-            else if ($constraintNode eq 'notin') then
-                for $item1TY at $pos in $items1TY
-                where $item1TY = $items2TY
-                return $items1[$pos]                
-        
-            (: includes :)        
-            else if ($constraintNode eq 'includes') then
-                for $item2TY at $pos in $items2TY
-                where not($cmpTrueAgg($items1TY, $item2TY))
-                return $items2[$pos]
-
-            (: inin :)
-            else if ($constraintNode eq 'inin') then (
-                for $item1TY at $pos in $items1TY
-                where not($item1TY = $items2TY)
-                return $items1[$pos],                
-                for $item2TY at $pos in $items2TY
-                where not($item2TY = $items1TY)
-                return $items2[$pos]
-            )
-        
-            (: eqeq :)        
-            else if ($constraintNode eq 'eqeq') then
-                (: In case of conversion errors, do not check eqeq :)
-                if (($results_expr1Conversion, $results_expr2Conversion)) then () 
-                else if (deep-equal($items1TY, $items2TY)) then () 
-                else
-                    (: In case of not deep-equal: deliver first deviating pair 
-                       (or single item without corresponding item :)
-                    let $maxIndex := max((count($items1TY), count($items2TY)))
-                    let $minIndexDeviation :=
-                        min(
-                            for $pos in 1 to $maxIndex
-                            where not($items1TY[$pos] eq $items2TY[$pos])
-                            return $pos)
-                    return ($items1TY[$minIndexDeviation], $items2TY[$minIndexDeviation])
-:)                
+                
             (: quantifier 'all' :)
                     
             else if ($quantifier eq 'all') then

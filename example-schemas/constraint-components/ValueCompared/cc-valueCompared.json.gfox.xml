@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints: declares a ValueComparedEq contraint.
+    
+    This example uses a link definition which maps nodes in a JSON document to JSON documents.
+    Both expressions of the valueCompared constraints are thus evaluated in the context JSON
+    node tree.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.json"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <!-- Link definition:
+           - link start nodes - the child elements of the <airport> element
+           - connector - use the <href> child as href reference
+           - link end nodes - the <geo> element in the target doc
+      -->
+    <linkDef name="airportGeoDetails"
+             contextXP="//airport/_"
+             hrefXP="href"             
+             targetXP="/json/airport/geo"
+             mediatype="json">
+        <!-- Link constraints: 
+             per context point one target document with one <geo> element -->
+        <constraints 
+            countTargetDocsPerContextPoint="1"
+            countTargetNodesPerContextPoint="1"/>
+    </linkDef>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <file foxpath="airports-ireland.json" mediatype="json" id="countryFileShape">
+                <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
+                
+                <!-- The constraint is checked for each combination
+                     of a link context point and a link target node -->
+                <valuesCompared linkName="airportGeoDetails"
+                               minCountContextNodes="14" 
+                               minCountTargetDocs="14">
+                    <valueCompared expr1XP="latitude" expr2XP="latitude" cmp="eq" maxCount1="1" count2="1"/>
+                    <valueCompared expr1XP="longitude" expr2XP="longitude" cmp="eq" maxCount1="1" count2="1"/>
+                </valuesCompared>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

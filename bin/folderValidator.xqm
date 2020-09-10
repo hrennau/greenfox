@@ -28,6 +28,9 @@ at  "expressionEvaluator.xqm",
 import module namespace value="http://www.greenfox.org/ns/xquery-functions/value" 
 at "valueConstraint.xqm";    
     
+import module namespace vpair="http://www.greenfox.org/ns/xquery-functions/value-pair" 
+at "valuePairConstraint.xqm";    
+    
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -94,6 +97,10 @@ declare function f:validateFolderInstance($contextURI as xs:string,
                 
                 case $foxvalues as element(gx:foxvalues) return 
                     value:validateValueConstraint($contextURI, (), (), $foxvalues, $context)
+                case $foxvaluePairs as element(gx:foxvaluePairs) return 
+                    vpair:validateValuePairConstraint($contextURI, (), (), $foxvaluePairs, $context)
+                case $foxvaluesCompared as element(gx:foxvaluesCompared) return 
+                    vpair:validateValuePairConstraint($contextURI, (), (), $foxvaluesCompared, $context)
                     
                 case $folderContent as element(gx:folderContent) return f:validateFolderContent($contextURI, $folderContent, $context)
                 case $folderSimilar as element(gx:folderSimilar) return f:validateFolderSimilar($contextURI, $folderSimilar, $context)

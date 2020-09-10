@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints: declares a ValueComparedIn contraint.
+    
+    All items of value 1 must be equal to an item from value 2. Value 1 is obtained from the
+    document being validated, value 2 is obtained from a document related to it. Related
+    documents are identified by a link definition. The example uses a local link definition -
+    here given by the @foxpath attribute. An alternative would be to reference the link definition 
+    via @linkName. 
+    
+    Note the principal separation between the link definition identifying pairs of related documents 
+    and the definition of constraints applying to those pairs.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <foxvaluesCompared foxpath="fox-sibling('airports-copy')" 
+                               countTargetResources="1">                
+                <foxvalueCompared expr1FOX=".\\airport-*.xml//country" 
+                                  expr2FOX=".\\airport-*.xml//country" 
+                                  cmp="inin" ininMsg="Folders should contain same airport countries."/>
+            </foxvaluesCompared>
+        </folder>
+    </domain>
+
+</greenfox>

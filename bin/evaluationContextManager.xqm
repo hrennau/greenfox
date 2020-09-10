@@ -176,6 +176,8 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:foxvalues) |    
          element(gx:foxvaluePair) |
          element(gx:foxvaluePairs) |
+         element(gx:foxvalueCompared) |
+         element(gx:foxvaluesCompared) |
          element(gx:contentCorrespondence) |
          element(gx:folderSimilar) |
          element(gx:links)
@@ -271,6 +273,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:valuesCompared,
                       self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
                       self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,                                
                       self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
                       self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
@@ -305,6 +309,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                       self::gx:valuesCompared,    
                       self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
                       self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
+                      self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
                       self::gx:contentCorrespondence,
                       gx:validatorXPath,
                       @validatorXPath),
