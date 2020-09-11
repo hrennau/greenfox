@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FoxvalueCompared constraints: declares a FoxvalueComparedInin contraint.
+    
+    This examples uses Foxpath expressions containing a call of jdoc(.), navigating into
+    JSON documents.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.json"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <linkDef name="jsonVariant"
+             foxpath="fox-sibling($fname, '\.xml$', '.json')"
+             mediatype="json">
+        <!-- Link constraints: exactly one target resource -->
+        <constraints 
+            countTargetDocs="1"/>
+    </linkDef>
+    
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>     
+            <file foxpath=".\\airport-*.xml"> 
+                <targetSize minCount="50"/>
+                <foxvaluesCompared linkName="jsonVariant" 
+                                   countTargetResources="1">                
+                    <foxvalueCompared expr1FOX="//@iata"
+                                      expr2FOX="//iata" 
+                                      cmp="eq" ininMsg="XML and JSON version must have the same IATA code."/>
+                </foxvaluesCompared>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

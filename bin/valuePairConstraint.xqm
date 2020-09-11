@@ -114,27 +114,26 @@ declare function f:validateValuesCompared($constraintElem as element(),
     let $requiresContextNode := exists($pair/@expr1XP)
     let $requiresTargetNode := exists($pair/@expr2XP)
             
-    let $contextItem :=
-        let $contextItemRaw := $lro?contextItem
+    let $contextNode :=
+        let $contextItem := $lro?contextItem
         return
-            if (not($requiresContextNode)) then $contextItemRaw
-            else if ($contextItemRaw instance of node()) then $contextItemRaw
+            if ($contextItem instance of node()) then $contextItem
             else $context?_targetInfo?doc
     let $targetItems :=
         if ($requiresTargetNode) then
             if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
             else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
-        else $lro?targetURI                    
+        else $lro?targetURI                 
     return
-        if (empty($contextItem)) then
+        if ($requiresContextNode and empty($contextNode)) then
             result:validationResult_valuePair_exception($constraintElem,
                 'No context node available', (), $context)
         else if (empty($targetItems)) then
             result:validationResult_valuePair_exception($constraintElem,
                 'No target resource or node available', (), $context)
         else
-            $pair/f:validateValuePair(., $contextItem, $targetItems, $context)            
+            $pair/f:validateValuePair(., $contextNode, $targetItems, $context)            
 };
 
 declare function f:validateValuePairs($constraintElem as element(),
@@ -148,20 +147,19 @@ declare function f:validateValuePairs($constraintElem as element(),
 };
 
 (:~
- : Validates the ValuePair constraints expressed by a single `valuePair` element. These 
- : constraints are ...
- : - a comparison constraint, defined by @cmp, @expr1XP, @expr2XP, @expr1FOX, @expr2FOX
- :   and further attributes (@quant, @useDatatype, @useString, @flags)
- : - count constraints, referring to the number of items returned by expression 1 and 2
+ : Validates the ValuePair constraints expressed by a single "pair element" - `valuePair`,
+ : `foxvaluePair`, `valueCompared` or `foxvalueCompared` element.
  :
- : @param valuePair element declaring ValuePair constraints
- : @param contextNode a context node to be used instead of the document root element
- : @param contextInfo informs about the focus document and focus node 
+ : @param constraintElem element declaring the constraints
+ : @param contextNode context node to be used by XPath expressions, except
+ :   for expression 2 in case of $targetItems
+ : @param targetItems target items produced by the link definition used by a 
+ :   `valueCompared` or `foxvalueCompared` constraint 
  : @param context the processing context
  : @return validation results
  :)
 declare function f:validateValuePair($constraintElem as element(),
-                                     $contextItem as item(),
+                                     $contextNode as node()?,
                                      $targetItems as item()*,
                                      $context as map(*))
         as element()* {
@@ -190,7 +188,7 @@ declare function f:validateValuePair($constraintElem as element(),
     (: Value 1 :)
     let $items1Raw :=
         switch($expr1Lang)
-        case 'xpath' return i:evaluateXPath($expr1, $contextItem, $evaluationContext, true(), true())
+        case 'xpath' return i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())
         case 'foxpath' return i:evaluateFoxpath($expr1, $contextURI, $evaluationContext, true())        
         default return error()
     let $items1TYRaw := i:applyUseDatatype($items1Raw, $useDatatype, $useString)
@@ -228,14 +226,14 @@ declare function f:validateValuePair($constraintElem as element(),
     (: (1) Expression 2 value generator function
            If $varName is set, the contextItem is made available
              as variable binding $varName :)
-    let $getItems2 := function($contextItem, $varName) {
+    let $getItems2 := function($contextItem, $varName, $varValue) {
         let $econtext :=
             if (not($varName)) then $evaluationContext else
-                map:put($evaluationContext, QName((), $varName), $contextItem)
+                map:put($evaluationContext, QName((), $varName), $varValue)
         return
             switch($expr2Lang)
                 case 'xpath' return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
-                case 'foxpath' return i:evaluateFoxpath($expr2, $contextURI, $econtext, true())        
+                case 'foxpath' return i:evaluateFoxpath($expr2, $contextItem, $econtext, true())        
                 default return error()
     }
     
@@ -320,7 +318,7 @@ declare function f:validateValuePair($constraintElem as element(),
         else if (empty($targetItems)) then
             (: Context item ist context URI if Foxpath; context node or context URI, if XPath :)
             let $useContextItem := 
-                if ($constraintElem/@expr2FOX) then $contextURI else $contextItem 
+                if ($constraintElem/@expr2FOX) then $contextURI else $contextNode
                 return
             
                     f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $useContextItem,
@@ -371,7 +369,12 @@ declare function f:validateValuePair_context2_iterating(
     if ($quantifier eq 'all') then
         for $item1 at $pos in $items1
         let $item1TY := $items1TY[$pos]
-        let $items2 := $getItems2($item1, 'item')
+        let $contextItem :=
+            (: Foxpath is always in the context of the resource URI;
+               the actual context item is bound to $item :)
+            if ($expr2Lang eq 'foxpath') then $context?_targetInfo?contextURI 
+            else $item1
+        let $items2 := $getItems2($contextItem, 'item', $item1)
         let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
         let $items2TY := 
             if (empty($useDatatype)) then $items2TYRaw
@@ -402,7 +405,7 @@ declare function f:validateValuePair_context2_iterating(
         let $itemReports :=
             for $item1 at $pos in $items1
             let $item1TY := $items1TY[$pos]
-            let $items2 := $getItems2($item1, ())            
+            let $items2 := $getItems2($item1, (), ())            
             let $items2TYRaw := 
                 if (empty($useDatatype)) then $items2 else i:applyUseDatatype($items2, $useDatatype, $useString)
             let $items2TY := 
@@ -420,7 +423,7 @@ declare function f:validateValuePair_context2_iterating(
                     
             return
                 (: Write for each item from value 1 a map with keys:
-                       item1, conversionErrors2, conversionError1, countResults, match 
+                       item1, conversionErrors2, countResults, match 
                  :)
                 map:merge((                
                     (: item1 :)
@@ -487,7 +490,7 @@ declare function f:validateValuePair_context2_fixed(
         as element()* {
         
     (: Get value of expression 2 :)
-    let $items2 := $contextItem ! $getItems2(., ())
+    let $items2 := $contextItem ! $getItems2(., (), ())
     let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
     let $items2TY := 
         if (empty($useDatatype)) then $items2TYRaw

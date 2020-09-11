@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FoxvalueCompared constraints: declares a VoxvalueComparedInin contraint.
+    Demonstrates the use of FoxvalueCompared constraints: declares a FoxvalueComparedInin contraint.
     
-    All items of value 1 must be equal to an item from value 2, and all items of value 2 must be
-    equal to an item from value 1. Note that this "mutual inclusion" is not equivalent to
-    deep equality. The items may have different orders and different cardinalities.
+    This examples uses Foxpath expressions containing a call of jdoc(.), navigating into
+    JSON documents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.json"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -18,8 +17,8 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>            
             <foxvaluesCompared foxpath="fox-sibling('airports-copy')" 
                                countTargetResources="1">                
-                <foxvalueCompared expr1FOX=".\\airport-*.xml//country" 
-                                  expr2FOX=".\\airport-*.xml//country" 
+                <foxvalueCompared expr1FOX=".\\airport-*.json\jdoc(.)//country"
+                                  expr2FOX=".\\airport-*.json\jdoc(.)//country" 
                                   cmp="inin" ininMsg="Folders should contain same airport countries."/>
             </foxvaluesCompared>
         </folder>
