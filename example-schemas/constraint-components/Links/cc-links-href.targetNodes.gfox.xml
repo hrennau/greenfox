@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the validation of links. The link is defined by a href expression and 
+    must be resolvable.
+ 
+    Checks for each file in an image folder that it is referenced by a docbook @fileref.
+    
+    The link definition uses a Foxpath connector which navigates into target resources and
+    returns target nodes selected from their content. 
+    
+    Note that with a Foxpath connector, a LinkResolvable constraint cannot be used. The equivalent
+    check is an 'exists' constraint, which produces a red result if the Foxpath connector does
+    not return any resources.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.targetNodes"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: image folder -->
+        <folder foxpath="fileExistenceDependencies\\img" id="imageFileFolderShape">
+            <targetSize countMsg="Missing folder: fileExistenceDependencies\img" count="1"/>
+   
+            <!-- Visit: all files -->
+            <file foxpath="*" id="imageFileShape">
+                
+                <!-- Check: the file is referenced by a docbook @fileref -->
+                <links foxpath="${domain}\fileExistenceDependencies\\*[/docbook:*]
+                                //@fileref[ends-with(., '/' || $fileName)]"
+                       exists="true"/>
+                       
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

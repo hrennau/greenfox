@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a URI template and must be resolvable.        
+    
+    In this example the link definition is applied to focus nodes.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uriTemplate.focusNode"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: Irish airports file -->
+            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+                <targetSize minCount="1" minCountMsg="Airports file expected"/>
+
+                <!-- Visit: airport nodes with a @iata attribute -->
+                <focusNode xpath="//airport[@iata]">
+                    
+                    <!-- Check: corresponding JSON airport files exist -->
+                    <links uriTemplate="ireland/airport-{iata}.json"
+                           resolvable="true" resolvableMsg="Link cannot be resolved"                       
+                           exists="true">
+                        <templateVar name="iata" exprXP="@iata"/>                        
+                    </links>
+                </focusNode>
+               
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

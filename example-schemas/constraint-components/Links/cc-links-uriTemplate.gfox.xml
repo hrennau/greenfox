@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a URI template and must be resolvable.
+    
+    Checks that for each XML airport file a corresponding JSON airport file exists.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uriTemplate"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: all XML airport files -->
+            <file foxpath=".\\airport-*.xml" id="airportFileShape">
+                <targetSize minCount="1" minCountMsg="Airport files expected"/>
+                
+                <!-- Check: corresponding JSON airport file exists -->
+                <links uriTemplate="airport-{iata}.json" 
+                       resolvable="true" resolvableMsg="Link cannot be resolved">
+                    <templateVar name="iata" exprXP="/airport/@iata"/>
+                </links>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

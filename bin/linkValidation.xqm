@@ -8,15 +8,15 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "foxpathUtil.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "foxpathUtil.xqm",
+   "greenfoxUtil.xqm";
 
-import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
-    "validationResult.xqm";
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at "validationResult.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -69,11 +69,11 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     if (empty(($ldo, $constraintElem))) then () else
     
     let $linkConstraints := $ldo?constraints
-    return    
-        if (not((($constraintElem, $linkConstraints)/(@resolvable))[1] eq 'true')) then ()   
-        else
+    let $constraintNode := ($constraintElem, $linkConstraints)/@resolvable[1][. eq 'true']
+    return if (not($constraintNode)) then () else   
     
-    (: Link Resolution Objects are grouped by context item :)
+    (: Link Resolution Objects are grouped by link context item;
+       it may be a resource URI or a link context node :)
     for $lro in $lros
     let $contextItem := $lro?contextItem
     let $contextPoint :=   typeswitch($contextItem) 
@@ -81,7 +81,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     group by $contextPoint
     let $contextItem := $lro[1]?contextItem  
     return
-        vr:validationResult_linkResolvable($ldo, $lro, $constraintElem, $contextItem, $context, ())
+        vr:validationResult_linkResolvable($ldo, $lro, $constraintElem, $constraintNode, $contextItem, (), $context)
 };        
 
 (:~
@@ -107,6 +107,10 @@ declare function f:validateLinkResolvable($lros as map(*)*,
  : @minCountTargetNodes -     LinkTargetNodesMinCount
  : @maxCountTargetNodes -     LinkTargetNodesMaxCount
  :
+ : @countTargetResourcesPerContextPoint -    LinkTargetResourcesPerContextPointCount
+ : @minCountTargetResourcesPerContextPoint - LinkTargetResourcesPerContextPointMinCount
+ : @axnCountTargetResourcesPerContextPoint - LinkTargetResourcesPerContextPointMaxCount 
+ :
  : It is not checked if the links can be resolved - only their number is considered.
  :
  : @param lros link resolution objects, obtained by applying the link definition to a single context resource
@@ -131,6 +135,12 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $constraintAtts := ($linkConstraints, $constraintElem)/@*
     let $constraintMap :=
         map:merge((
+            let $constraints := $constraintAtts[name() eq 'exists'][. eq 'true']
+            return
+                if (empty($constraints)) then () else
+                let $valueCount := ($lros[?targetExists][not(?errorCode)]?targetURI => distinct-values() => count(), 0)[1]
+                return 
+                    map{'exists': map{'actCount': $valueCount, 'constraints': $constraints}},
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)ContextNodes$')]
             return
                 if (empty($constraints)) then () else
@@ -183,7 +193,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     return count($targetDocs)
                 return
                     map{'targetDocsPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}},
-            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodesPerContextPoint$')]
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)_$')]
             return
                 if (empty($constraints)) then () else
                 let $valueCounts :=
@@ -201,14 +211,16 @@ declare function f:validateLinkCounts($lros as map(*)*,
             if (empty($constraintObject)) then () else
             
             let $vcounts := $constraintObject?actCount
-            for $countConstraint in $constraintObject?constraints
-            let $cstValue := $countConstraint/xs:integer(.)
+            for $countConstraint in $constraintObject?constraints            
             let $cstName := $countConstraint/name()
             let $green :=
-                if (starts-with($cstName, 'count')) then every $v in $vcounts satisfies $v eq $cstValue
-                else if (starts-with($cstName, 'minCount')) then every $v in $vcounts satisfies $v ge $cstValue
-                else if (starts-with($cstName, 'maxCount')) then every $v in $vcounts satisfies $v le $cstValue
-                else error()
+                if ($cstName eq 'exists') then every $v in $vcounts satisfies $v gt 0
+                else 
+                    let $cstValue := $countConstraint/xs:integer(.) return
+                    if (starts-with($cstName, 'count')) then every $v in $vcounts satisfies $v eq $cstValue
+                    else if (starts-with($cstName, 'minCount')) then every $v in $vcounts satisfies $v ge $cstValue
+                    else if (starts-with($cstName, 'maxCount')) then every $v in $vcounts satisfies $v le $cstValue
+                    else error()
             let $colour := if ($green) then 'green' else 'red'        
             return  
                 vr:validationResult_linkCount($colour, $ldo, $lros, $constraintElem, $countConstraint, 
@@ -216,6 +228,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
         }
         
         let $results := (
+            $constraintMap?exists ! $fn_write_results(.),
             $constraintMap?contextNodes ! $fn_write_results(.),
             $constraintMap?targetResources ! $fn_write_results(.),
             $constraintMap?targetDocs ! $fn_write_results(.),

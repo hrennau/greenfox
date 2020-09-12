@@ -126,8 +126,9 @@ declare function f:parseLinkDef($linkDef as element())
     let $uriXP := $linkDef/@uriXP/string()
     let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
     let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
-    let $uriTemplate := $linkDef/gx:uriTemplate
+    let $uriTemplate := $linkDef/@uriTemplate
     let $constraints := $linkDef/gx:constraints    
+    let $templateVars := $linkDef/gx:templateVar
     return
         if (empty((
             $hrefXP, $uriXP, $uriReflectionBase, $uriTemplate, $foxpath))) then () else
@@ -149,7 +150,7 @@ declare function f:parseLinkDef($linkDef as element())
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
                     or $contextXP
             let $mediatype :=
-                let $mediatypeExplicit := $linkDef/@mediatype/string()
+                let $mediatypeExplicit := $linkDef/@targetMediatype/string()
                 return
                     if ($mediatypeExplicit) then $mediatypeExplicit
                     else if ($recursive and $requiresContextNode
@@ -159,7 +160,7 @@ declare function f:parseLinkDef($linkDef as element())
             return
                 map:merge((
                     $connector ! map:entry('connector', .),
-                    $mediatype ! map:entry('mediatype', .),
+                    $mediatype ! map:entry('targetMediatype', .),
                     $recursive ! map:entry('recursive', .),
                     $requiresContextNode ! map:entry('requiresContextNode', .),
                     $contextXP ! map:entry('contextXP', .),
@@ -167,11 +168,17 @@ declare function f:parseLinkDef($linkDef as element())
                     $foxpath ! map:entry('foxpath', .),
                     $hrefXP ! map:entry('hrefXP', .),
                     $uriXP ! map:entry('uriXP', .),
-                    $uriTemplate ! map:entry('uriTemplate', .),
+                    
+                    $uriTemplate ! map:entry('uriTemplate', .),                    
+                    if (not($templateVars)) then () else
+                    map:entry('templateVars',
+                        map:merge($templateVars ! map:entry(@name, .))),
+                        
                     $uriReflectionBase ! map:entry('uriReflection', 
                         map{'base': $uriReflectionBase, 
                             'shift': $uriReflectionShift}),
-                    $constraints ! map:entry('constraints', $constraints)
+                            
+                    $constraints ! map:entry('constraints', $constraints)                            
                 ))
     )
     return $ldo
@@ -218,7 +225,7 @@ declare function f:getLinkTargetMediatype($ldo as map(xs:string, item()*),
                                           $constraintElems as element()*)
         as xs:string? {
     let $allConstraintElems := ($ldo?constraints, $constraintElems)
-    let $explicit := $ldo?mediatype
+    let $explicit := $ldo?targetMediatype
     return
         if ($explicit) then $explicit
         else if ($ldo?recursive) then 'xml'

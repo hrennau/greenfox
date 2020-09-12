@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component LinksResolvable. The constraint is 
-    violated if any links selected by a given expression, applied recursively to the
-    results of resolving, cannot be resolved.
+    Demonstrates the validation of links. The link is defined by a href expression and 
+    must be resolvable.
+    
+    This example uses a recursive link resolution constraint in order to make
+    sure that all imports and includes in a set of XSDs can be recursively
+    resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href.niem"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.niem"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <field name="domain"/>
     </context>
-  
+    
+    <!-- Define link: recursive XSD import and include -->
+    <linkDef name="xsdImportInclude"
+             hrefXP="//(xs:import, xs:include)/@schemaLocation"/>
+    
     <domain path="${domain}" name="niem">
+        <!-- Visit: NIEM folder -->
         <folder foxpath="niem-4.2\niem" id="niemFolderShape">
-            <targetSize countMsg="Missing folder: niem" count="1"/>            
+            <targetSize countMsg="Missing folder: niem" count="1"/>
+
+            <!-- Visit: all XSDs contained -->
             <file foxpath=".\\*.xsd" id="niemDomainXsdFileShape">
-                <links hrefXP="//xs:import/@schemaLocation"
+                
+                <!-- Check: recursive import/include -->
+                <links linkName="xsdImportInclude"
                        recursive="true"
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."/>
+                       resolvable="true" resolvableMsg="Some recursive import/include cannot be resolved."/>
             </file>
         </folder>
     </domain>

@@ -68,5 +68,72 @@ declare function f:applyLinkConnector($ldo as map(*),
                variable $linkContext :)
             i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContext, true())
             (: i:evaluateFoxpath($ldo?foxpath, $contextPoint, $evaluationContext, true()) :)
+            
+            
+    else if ($ldo?uriTemplate) then
+        let $items := f:resolveUriTemplate($ldo, $contextPoint, $context)
+        return $items
     else ()
+};
+
+(:~
+ : Applies a URI template connector to a link context item. 
+ :  
+ : @param ldo Link Definition object
+ : @param contextPoint link context node
+ : @param context the processing context
+ : @return a sequence of URIss
+ :)
+declare function f:resolveUriTemplate($ldo as map(*),
+                                      $contextPoint as item(),
+                                      $context as map(xs:string, item()*))
+        as xs:string* {
+    (: let $_DEBUG := trace($contextPoint, '_CONTEXT_POINT: ') :)
+    
+    let $uriTemplate := $ldo?uriTemplate        
+    let $templateVarMap :=
+        let $templateVars := $ldo?templateVars
+        return
+            map:merge(
+                for $name in $templateVars ! map:keys(.)
+                let $templateVarElem := $templateVars($name) 
+                let $value := $templateVarElem/@exprXP/f:resolveLinkExpression(., $contextPoint, $context) ! string(.)
+                return map:entry($name, $value)
+            )
+    let $templateResolution := f:resolveUriTemplateRC($uriTemplate, $templateVarMap)
+    return $templateResolution
+};
+
+(:~
+ : Recursive helper function of 'resolveUriTemplate'.
+ :
+ : @param uriTemplate a URI template
+ : @param templateVarMap a map associating template variable names with values
+ : @return the resolve URI template, a sequence of one or more strings
+ :)
+declare function f:resolveUriTemplateRC($uriTemplate as xs:string, 
+                                        $templateVarMap as map(*))
+        as xs:string* {
+    let $sep := codepoints-to-string(30000)        
+    let $partsConcat := replace($uriTemplate, '^(.*)?\{(.*?)\}(.*)', '$1'||$sep||'$2'||$sep||'$3')
+    return
+        if ($partsConcat eq $uriTemplate) then $uriTemplate else
+        
+    
+    let $parts := tokenize($partsConcat, $sep)
+    let $prefix := $parts[1]
+    let $varName := $parts[2]
+    let $postfix := $parts[3]
+            
+    let $varValue := $templateVarMap($varName)
+    let $left :=
+        if (empty($varValue)) then $prefix else
+            $varValue ! concat($prefix, .)
+    let $right := 
+        if (not($postfix)) then ()
+        else f:resolveUriTemplateRC($postfix, $templateVarMap)
+    return
+        if (empty($postfix)) then $left else
+            for $item1 in $left, $item2 in $right
+            return concat($item1, $item2)
 };

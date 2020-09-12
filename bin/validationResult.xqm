@@ -538,11 +538,20 @@ declare function f:constructError_folderContentHash($colour as xs:string,
 declare function f:validationResult_linkResolvable($ldo as map(*)?,
                                                    $lros as map(*)*,
                                                    $constraintElem as element(),
-                                                   $linkContextItem as node(),
-                                                   $contextInfo as map(xs:string, item()*),
-                                                   $options as map(*)?)
+                                                   $constraintNode as node(),
+                                                   $linkContextItem as item(),
+                                                   $options as map(*)?,
+                                                   $context as map(xs:string, item()*))
         as element() {
 
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
+    let $constraintComp := 'LinkResolvable'
+    
     (: Successful and failing link resolutions :)
     let $failures := $lros[?errorCode]
     let $successes := $lros[not(?errorCode)]    
@@ -569,37 +578,26 @@ declare function f:validationResult_linkResolvable($ldo as map(*)?,
     (: Error codes :)
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
     
-    (: Component identification :)
-    let $constraintComp := 'LinkResolvable'
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $valueShapeId := $constraintElem/@valueShapeID
-    let $constraintId := concat(($valueShapeId, $resourceShapeId)[1], '-linkResolvable')
-    
     (: Data location :)
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    let $linkContextPath := $linkContextItem[. instance of node()] ! i:datapath(.)
+    let $linkContextNodePath := $linkContextItem[. instance of node()] ! i:datapath(.)
 
     (: Message :)
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'resolvable', ())
-        else i:getErrorMsg($constraintElem, 'resolvable', ())
-        
+    let $msg := i:getErrorMsg($constraintElem, 'resolvable', ())
     return
         element {'gx:' || $colour} {
-            $msg ! attribute msg {.},
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $linkContextNodePath[string()] ! attribute linkContextNodePath {.},            
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
             $errorCodes ! attribute errorCode {.},
-            attribute constraintComp {$constraintComp},
-            $constraintId ! attribute constraintID {.},
-            $valueShapeId ! attribute valueShapeID {.},
-            $resourceShapeId ! attribute resourceShapeID {.},
-            $filePath,
-            $focusNode,
-            $linkContextPath[string()] ! attribute linkContextNodePath {.},
             $countUnresolved,
             $countResolved,   
             $linkDefAtts,
-
             $values
         }       
 };
@@ -645,6 +643,7 @@ declare function f:validationResult_linkCount($colour as xs:string,
         
     let $constraintConfig :=
         typeswitch($constraintNode)
+        case attribute(exists)                  return map{'constraintComp': 'LinkTargetExists',         'atts': ('exists')}
         case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
         case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
         case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}
@@ -675,14 +674,6 @@ declare function f:validationResult_linkCount($colour as xs:string,
             (: make sure the constraint attribute is included, even if it is a default constraint :)
             ($explicit, $constraintNode[not(. intersect $explicit)])
     let $valueCountAtt := attribute valueCount {$valueCount} 
-    (:
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintElemId := $constraintElem/@id
-    let $constraintId := concat($constraintElemId, '-', $constraintAtt/local-name(.)
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    :)
-
     let $contextNodeDataPath := $contextNode/i:datapath(.)
     
     (: Link description attributes :)
@@ -709,17 +700,8 @@ declare function f:validationResult_linkCount($colour as xs:string,
             $constraintElemPath,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-(:        
-            $msg ! attribute msg {.},
-:)            
+            
             $errorCodes ! attribute errorCode {.},
-(:            
-            attribute constraintComp {$constraintConfig?constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},            
-            $filePath,
-            $focusNode,
-:)            
             $linkDefAtts,
             $standardAtts,
             $valueCountAtt            
@@ -1730,12 +1712,12 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         as attribute()* {
     let $exprAtts := ( 
         $constraintElem/@linkName ! attribute linkName {.},
-        ($constraintElem/@foxpath, $ldo?foxpath ! attribute foxpath {.})[1],
-        ($constraintElem/@hrefXP, $ldo?hrefXP ! attribute hrefXP {.})[1],    
-        ($constraintElem/@uriXP, $ldo?uriXP ! attribute uriXP {.})[1],        
-        ($constraintElem/@linkXP, $ldo?linkXP ! attribute linkXP {.})[1],        
-        ($constraintElem/@linkContextXP, $ldo?linkContextXP ! attribute linkContextXP {.})[1],
-        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP ! attribute linkTargetXP {.})[1],
+        ($constraintElem/@foxpath, $ldo?foxpath)[1] ! normalize-space(.) ! attribute foxpathXXX {.},
+        ($constraintElem/@hrefXP, $ldo?hrefXP)[1] ! normalize-space(.) ! attribute hrefXP {.},    
+        ($constraintElem/@uriXP, $ldo?uriXP)[1] ! normalize-space(.) ! attribute uriXP {.},        
+        ($constraintElem/@linkXP, $ldo?linkXP)[1] ! normalize-space(.) ! attribute linkXP {.},        
+        ($constraintElem/@linkContextXP, $ldo?linkContextXP)[1] ! normalize-space(.) ! attribute linkContextXP {.},
+        ($constraintElem/@linkTargetXP, $ldo?linkTargetXP)[1] ! normalize-space(.) ! attribute linkTargetXP {.},
         ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
     )
     return $exprAtts

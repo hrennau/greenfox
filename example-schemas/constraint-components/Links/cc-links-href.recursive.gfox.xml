@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the validation of links. The link is defined by a href expression and must be resolvable.
+    
+    This example highlights the checking of a recursive link definition (@recursive): the href expression 
+    is applied to the target resource of the file shape, as well as recursively applied to the link target
+    resources.
+    
+    Note that recursive link resolving requires the link targets to be node trees. As no target mediatype 
+    has been defined by the link definition (not @targetMediatype), XML is assumed.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: airports document -->
+            <file foxpath="airports.xml" id="airportsFileShape">
+                
+                <!-- Check: all href references can be recursively resoved -->
+                <links hrefXP="//@href"
+                       recursive="true"
+                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
+                       minCountTargetDocs="60" minCountTargetDocsMsg="More target docs expected"/>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a href expression 
+    and must be resolvable.
+   
+    In this example the link definition is contained by a <focusNode> declaration. The
+    link definition is therefore applied to the focus node, not to the document root
+    nodes. Note the href expression (@hrefXP), which is chosen correspondingly:
+    "@href", not "//@href".
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.focusNode"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <linkDef name="airports"
+             hrefXP="@href"             
+             targetMediatype="xml"/>
+        
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            
+            <!-- Visit: Finish airports document -->
+            <file foxpath="airports-finland.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Finland airports file missing"/>
+                
+                <!-- Visit: airport nodes -->
+                <focusNode xpath="//airport[@href]">
+                    
+                    <!-- Check: all href references can be resolved to XML documents -->
+                    <links linkName="airports"
+                        resolvable="true" resolvableMsg="Link cannot be resolved"
+                        countTargetDocs="1" 
+                        countTargetDocsMsg="One link target expected for each airport element with @href."/>
+                    
+                </focusNode>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

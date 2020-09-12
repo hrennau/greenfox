@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    Demonstrates the use of ValuePair constraints: declares a FoxvaluePairMinCount contraint.
     
-    All items of value 1 must be equal to an item from value 2. Here, invalid references
-    are detected: all @country references in <city> elements must be an @id value in <country>.
+    In this example option "expr2Context" is set to "#item", so that expression 2 is re-evaluated
+    once for each item from value 1. When re-evaluating expression 2, the context item does not 
+    change - it is always the target resource URI; however, the current item from value 1 is 
+    bound to variable $item.    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.in"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvaluePair.var-item"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,14 +17,17 @@
     <domain path="${domain}" name="greenfox-example-data">
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports-*.xml" id="airportsFileShape">
+            <file foxpath="airports-*.xml except airports-luxembourg.xml" id="airportsFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: airports-*.xml"/>
                 <foxvaluePairs>
+                    <!-- When evaluation expr 2, the current item from expr 1 is bound to $item;
+                         so for each IATA code in the context document, the sibling folders of
+                         the target file should contain exactly one file with a matching name -->
                     <foxvaluePair expr1XP="/airports/airport/@iata"
                                   expr2FOX="..\*\fox-child('airport-'||$item||'*.xml')"     
                                   expr2Context="#item"
-                                  minCount1="1" minCount1Msg="Expected more airports."
-                                  minCount2="1" minCount2Msg="Airport file not found."/>
+                                  minCount1="14" minCount1Msg="Expected more airports."
+                                  count2="1" count2Msg="Airport file not found."/>
                 </foxvaluePairs>
             </file>
         </folder>

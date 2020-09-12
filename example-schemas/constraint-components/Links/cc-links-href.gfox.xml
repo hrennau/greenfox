@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the validation of links. The link is defined by a href expression and must be resolvable.
+    
+    Checks @fileref references can be resolved. The target declaration of the containing file shape
+    selects any docbook documents in the parent target folder.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/links-href"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: folder 'fileExistenceDependencies'-->
+        <folder foxpath="fileExistenceDependencies" id="fileExistenceDependenciesFolderShape">
+            <targetSize countMsg="Missing folder: fileExistenceDependencies" count="1"/>
+
+            <!-- Visit: all files with docbook content -->
+            <file foxpath=".\\*.xml[/docbook:*]" id="docbookFileShape">
+                
+                <!-- Check: 'fileref' links can be resolved -->
+                <links hrefXP="//@fileref"
+                       resolvable="true" resolvableMsg="A 'fileref' link which cannot be resolved."/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

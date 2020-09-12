@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a href expression and must be resolvable.
+    
+    Note the @targetMediatype attribute on the link constraint. A link target which cannot be parsed 
+    as an XML document will cause a red result.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.xml"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            
+            <!-- Visit: all files containing href references -->
+            <file foxpath=".\\*[//@href]" id="airportsFileShape">
+                <targetSize minCount="5" countMsg="Expected at least five resources with @href"/>
+                
+                <!-- Check: all href references can be resolved to XML documents -->
+                <links hrefXP="//@href" 
+                       targetMediatype="xml"
+                       resolvable="true" resolvableMsg="Link cannot be resolved"
+                       minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

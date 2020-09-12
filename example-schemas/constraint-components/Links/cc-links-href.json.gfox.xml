@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a href expression and 
+    must be resolvable.
+    
+    This example uses a JSON document as link context resource. The href expression is resolved in the 
+    node tree representation of the JSON document.
+    
+    Distinguish between the @mediatype attribute on the file shape <file> and
+    the @targetMediatype attribute on the link constraint <links>. The @mediatype 
+    on <file> ensures that the target resources of the file shape are treated as 
+    JSON documents, which implies that links used by the shape have a link context
+    resource which is a JSON document. The @targetMediatype on <links> ensures that 
+    link target resources are JSON documents.
+    
+    Nota bene: the mediatypes of the link context resource and the link target resource
+    are independent. For example, a XML document may be linked to a JSON document.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.json"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            
+            <!-- Visit: JSON airports document -->
+            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+                <targetSize count="1" countMsg="Airports file missing"/>
+                
+                <!-- Check: all href references can be resolved to JSON documents -->
+                <links hrefXP="//href" 
+                       targetMediatype="json"
+                       resolvable="true" resolvableMsg="Link cannot be resolved"
+                       minCountTargetDocs="3" minCountTargetDocsMsg="At least three country airport files expected"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

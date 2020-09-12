@@ -36,7 +36,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param contextURI the URI of the context resource
  : @param contextNode an optional context node
  : @param context processing context
- : @param options processing options; option 'mediatype' specifies
+ : @param options processing options; option 'targetMediatype' specifies
  :   a mediatype, to be added to the Link Definition
  : @return a sequence of Link Resolution Objects, or selected data retrieved
  :   from these
@@ -61,18 +61,18 @@ declare function f:resolveLinkDef($linkDef as item(),
                     error((), concat('Invalid call - Link Definition "', $ldo?name, '" requires context node.'))
                 else $doc
     
-    (: Result format 'doc' implies a structured mediatype, which defaults to 'xml'. :)
+    (: Result format 'doc' implies a structured target mediatype, which defaults to 'xml'. :)
     let $ldoAugmented :=
-        if ($ldo?mediatype) then $ldo
+        if ($ldo?targetMediatype) then $ldo
         else
-            let $mediatype := 
-                if ($options?mediatype) then $options?mediatype
+            let $targetMediatype := 
+                if ($options?targetMediatype) then $options?targetMediatype
                 else if ($resultFormat eq 'doc') then 'xml'
                 else ()
             return
-                if (not($mediatype)) then $ldo
+                if (not($targetMediatype)) then $ldo
                 else
-                    map:put($ldo, 'mediatype', $mediatype)
+                    map:put($ldo, 'targetMediatype', $targetMediatype)
         
     (: Determine Link Resolution Objects :)
     let $lros := f:resolveLinkDefRC($ldoAugmented, $contextURI, $contextNode, $context, (), ())
@@ -100,7 +100,7 @@ declare function f:resolveLinkDefRC(
         as map(xs:string, item()*)* {
         
     let $contextExpr := $ldo?contextXP
-    let $mediatype := $ldo?mediatype
+    let $targetMediatype := $ldo?targetMediatype
     
     (: Link Context items
        ================== 
@@ -158,7 +158,7 @@ declare function f:resolveLinkDefRC(
                     'errorCode': 'no_uri'}            
         
             (: Mediatype: json :)
-            else if ($mediatype = 'json') then            
+            else if ($targetMediatype = 'json') then            
                 if (not(i:fox-unparsed-text-available($targetURI, ()))) then
                 
                     (: Result: resource not found
@@ -213,7 +213,7 @@ declare function f:resolveLinkDefRC(
                                     'targetNodes': $targetNodes}))
             
             (: Mediatype: xml :)            
-            else if ($mediatype = 'xml') then
+            else if ($targetMediatype = 'xml') then
                 if (not(i:fox-doc-available($targetURI))) then 
                     if (not(i:fox-resource-exists($targetURI))) then
                     

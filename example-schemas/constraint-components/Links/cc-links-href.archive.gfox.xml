@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the validation of links. The link is defined by a href expression 
+    and must be resolvable.
+    
+    This example checks resources contained by an archive file.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.archive"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+  
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: folder within archive -->
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/> 
+            
+            <!-- Visit: any file containing @href -->
+            <file foxpath=".\\*[//@href]" id="airportsFileShape">
+                
+                <!-- Check: all href references can be resolved to XML documents -->
+                <links hrefXP="//@href" 
+                    targetMediatype="xml"
+                    resolvable="true" resolvableMsg="Link cannot be resolved"
+                    minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

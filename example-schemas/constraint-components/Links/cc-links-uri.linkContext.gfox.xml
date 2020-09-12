@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a URI expression and must be resolvable.        
+    
+    In this example the link definition uses a link context expression (@contextXP). The URI expression
+    is resolved in the context of the nodes returned by @contextXP.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uri.linkContext"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <!-- Define link: the JSON airports files -->
+    <linkDef name="jsonAirports"
+             contextXP="//airport[@iata]"
+             uriXP="@iata/concat('ireland/airport-', ., '.json')"
+             targetMediatype="json"/>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: Irish airports file -->
+            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+                <targetSize minCount="1" minCountMsg="Airports file expected"/>
+                
+                <!-- Check: corresponding JSON airport files exist -->
+                <links linkName="jsonAirports"
+                       resolvable="true" resolvableMsg="Link cannot be resolved"                       
+                       exists="true"/>
+               
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

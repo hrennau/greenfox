@@ -97,12 +97,12 @@ return
                      ======================================== -->
                 
                 <focusNode xpath="*:linkDef">
-                    <ex:allowedAtts attNames="name connector hrefXP uriXP linkXP contextXP targetXP foxpath mediatype targetMediatype recursive"
-                        msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP linkXP 
-                             contextXP targetXP foxpath mediatype recursive"
+                    <ex:allowedAtts attNames="name connector hrefXP uriXP contextXP targetXP uriTemplate foxpath targetMediatype recursive"
+                        msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP uriTemplate 
+                             contextXP targetXP foxpath targetMediatype recursive"
                         msgOK="OK - 'linkDef' element: no unexpected attributes"/>     
                     
-                    <ex:allowedElems elemNames="constraints"
+                    <ex:allowedElems elemNames="constraints templateVar"
                         msg="Unexpected child element in 'linkDef' element: only 'constraints' children allowed"
                         msgOK="OK - 'linkDef' element: child element names"/>
                     
@@ -691,8 +691,10 @@ return
                 <!-- attribute names -->
                 <ex:allowedAtts
                     attNames="id description label 
-                    linkName mediatype recursive                     
-                    contextXP linkXP targetXP hrefXP uriXP
+                    linkName targetMediatype recursive                     
+                    foxpath contextXP targetXP hrefXP uriXP uriTemplate
+                    
+                    exists existsMsg existsMsgOK
                     
                     resolvable resolvableMsg resolvableMsgOK
                     
@@ -724,8 +726,12 @@ return
                     msg="Unexpected attributes in 'links' element"
                     msgOK="OK - 'links' element: no unexpected attributes"/>
                 
+                <ex:allowedElems elemNames="templateVar"
+                    msg="Unexpected elements in 'links' element; expected: ${elemNames}"
+                    msgOK="OK - 'links' element: no unexpected elements"/>
+                
                 <!-- mandatory attributes -->
-                <ex:oneOrMoreAtts attNames="linkName hrefXP uriXP linkXP hrefXP"
+                <ex:oneOrMoreAtts attNames="linkName foxpath hrefXP uriXP uriTemplate"
                     msg="A 'links' constraint must have one of these attributes: linkName, hrefXP, uriXP, linkXP"
                     msgOK="OK - 'links' element: has 'xpath' or 'link' attribute"/>
 
