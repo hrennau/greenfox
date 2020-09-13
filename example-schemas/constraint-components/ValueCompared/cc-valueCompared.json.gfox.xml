@@ -22,7 +22,7 @@
              contextXP="//airport/_"
              hrefXP="href"             
              targetXP="/json/airport/geo"
-             mediatype="json">
+             targetMediatype="json">
         <!-- Link constraints: 
              per context point one target document with one <geo> element -->
         <constraints 

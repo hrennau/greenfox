@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. This example checks JSON targets referenced by JSON 
+    Demonstrates a target declaration using a Link Definition. In this example the Link Definition
+    is applied to JSON documents, and the link targets are also treated as JSON documents. The
+    Link Definition is *applied* to JSON documents, as the parent shape of the shape using the 
+    Link Definition has the mediatype option set to JSON (@mediatype). As the shape using the Link
+    Definition also has the mediatype option set to JSON, the link targets are treated as JSON
     documents.
-    
-    For some basic facts about link targets see example schema `link-targets.gfox.xml`.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -13,17 +15,27 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>   
+            
+            <!-- Visit: airports file -->
             <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+                <targetSize count="1" countMsg="Missing file 'airports.json'."/>                
+                
+                <!-- Visit: link targets selected by href references and 
+                            treated as JSON documents --> 
                 <file hrefXP="//href" id="linkTargetsFileShape" mediatype="json">
-                    <targetSize minCount="4" 
-                                minCountMsg="Not expected number of link targets"
-                                resolvable="true"
-                                resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="//airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
+                                resolvable="true" resolvableMsg="Target links could not be resolved"/>
+                    
+                    <!-- Check: 'airport' elements -->
+                    <values>
+                        <value exprXP="/json/airports/airport"
+                            exists="true"
+                            existsMsg="Country airports document without airports"/>
+                    </values>
                 </file>
             </file>
         </folder>

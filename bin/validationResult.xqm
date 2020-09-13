@@ -730,21 +730,23 @@ declare function f:validationResult_linkCount($colour as xs:string,
  :)
 declare function f:validationResult_targetCount(
                                     $colour as xs:string,
-                                    $ldo as map(*)?,
-                                    $resourceShape as element(),
                                     $constraintElem as element(gx:targetSize),
-                                    $constraintAtt as attribute(),
+                                    $constraintNode as attribute(),
+                                    $ldo as map(*)?,
                                     $targetItems as item()*,
-                                    $targetContextPath as xs:string)
+                                    $targetContextPath as xs:string,
+                                    $context as map(xs:string, item()*))
         as element() {
-    let $actCount := count($targetItems)        
-    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
-    let $constraintComp := 'Target' || $constraintAtt/i:firstCharToUpperCase(local-name(.))
-    let $msg :=
-        if ($colour eq 'green') then $constraintElem/i:getOkMsg(., $constraintAtt/local-name(.), ())
-        else $constraintElem/i:getErrorMsg(., $constraintAtt/local-name(.), ())
-        
-    (: Link description attributes :)
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
+    let $constraintComp := 'Target' || $constraintNode/i:firstCharToUpperCase(local-name(.))
+    
+    let $actCount := count($targetItems)
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     
     (: Values :)
@@ -752,13 +754,15 @@ declare function f:validationResult_targetCount(
         if (not($colour = ('red', 'yellow'))) then ()
         else f:validationResultValues($targetItems, $constraintElem)
     return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute filePath {$targetContextPath},
-            attribute constraintComp {$constraintComp},
-            $constraintElem/@id/attribute constraintID {. || '-' || $constraintAtt/local-name(.)},                    
-            $constraintElem/@resourceShapeID,
-            $constraintAtt,
+        element {i:getResultElemName($colour)} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $constraintNode,
             attribute valueCount {$actCount},
             attribute targetContextPath {$targetContextPath},
             $linkDefAtts,
@@ -1101,7 +1105,9 @@ declare function f:validationResult_value($colour as xs:string,
 declare function f:validationResult_value_counts($colour as xs:string,
                                                  $constraintElem as element(),
                                                  $constraintNode as attribute(),
-                                                 $exprValue as item()*,                                                 
+                                                 $exprValue as item()*,  
+                                                 $expr as xs:string, 
+                                                 $exprLang as xs:string,                                                 
                                                  $additionalAtts as attribute()*,
                                                  $context as map(xs:string, item()*))
         as element() {
@@ -1151,6 +1157,8 @@ declare function f:validationResult_value_counts($colour as xs:string,
             
             $standardAtts,
             $valueCountAtt,
+            attribute exprLang {$exprLang},
+            attribute expr {$expr},            
             $additionalAtts,
             $values            
         }       

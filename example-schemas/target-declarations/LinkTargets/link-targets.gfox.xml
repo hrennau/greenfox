@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. A link target is defined by a resource shape which
-    defines or references a link definition. In this example, the link is defined by the
-    <file> shape, rather than referenced.
+    Demonstrates a target declaration using a Link Definition. The Link Definition can 
+    be referenced by name or locally specified by the resource shape element. In this 
+    example, the link is locally defined, using an @hrefXP attribute.
        
     The <targetSize> constraint element may declare link-related constraints: 
     - @resolvable
@@ -10,8 +10,7 @@
     - countContextNodes, minCount..., maxCount...
     - countTargetResources, minCount..., maxCount...
     - countTargetDocs, minCount..., maxCount...
-    - countTargetNodes, minCount..., maxCount...
-    
+    - countTargetNodes, minCount..., maxCount...    
     - countTargetResourcesPerContextPoint, minCount..., maxCount...
     - countTargetDocsPerContextPoint, minCount..., maxCount...
     - countTargetNodesPerContextPoint, minCount..., maxCount...
@@ -28,16 +27,28 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+            <targetSize countMsg="Missing folder: airports" count="1"/>    
+            
+            <!-- Visit: airports file -->
+            <file path="airports.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
+
+                <!-- Visit: link targets selected by href references -->
                 <file hrefXP="//@href" id="linkTargetsFileShape">
-                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
+                    
+                    <!-- Check: file target has expected size and href references could be resolved -->
+                    <targetSize minCount="4" minCountMsg="More link targets expected."
                                 resolvable="true" resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="/airports/airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                    
+                    <!-- Check: 'airport' elements -->
+                    <values>
+                        <value exprXP="/airports/airport"
+                               exists="true"
+                               existsMsg="Country airports document without airports"/>
+                    </values>
                 </file>
             </file>
         </folder>

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. This example checks resources contained by an archive file. 
+    Demonstrates a target declaration using a Link Definition. This example evaluates resources found
+    in an archive: the Link Definition is applied to a file contained by an archive, and the link 
+    targets are files in the same archive.
     
-    For some basic facts about link targets see example schema `link-targets.gfox.xml`.    
+    The Link Definition is specified locally (attribute @hrefXP on <file>.).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.archive"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -12,16 +14,26 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder in an archive file -->
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: airports file (in the archive file) -->
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
+                
+                <!-- Visit: link targets selected by href references (in the archive file) -->
                 <file hrefXP="//@href" id="linkTargetsFileShape">
                     <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 resolvable="true" resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="/*/airport"
-                        exists="true"
-                        existsMsg="Country airports document without airports"/>
+                    
+                    <!-- Check: 'airport' elements (in the archive file) -->
+                    <values>
+                        <value exprXP="//airport"
+                            exists="true"
+                            existsMsg="Airport element missing."/>
+                    </values>
                 </file>
             </file>
         </folder>

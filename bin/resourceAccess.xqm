@@ -61,6 +61,10 @@ declare function f:fox-doc($uri as xs:string, $options as map(xs:string, item()*
     tt:fox-doc($uri, $options)        
 };
 
+declare function f:fox-json-doc($uri as xs:string, $options as map(xs:string, item()*)?) as document-node()? {
+    tt:fox-json-doc($uri, $options)        
+};
+
 (:~
  : Returns true if a given URI or file path points to a well-formed XML document.
  :

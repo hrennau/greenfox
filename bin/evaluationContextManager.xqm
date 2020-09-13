@@ -259,30 +259,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             let $required :=            
                 $mediatype = ('xml', 'xml-or-json')
                 or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
-                or not($mediatype) and (
-                    $allComponents/(
-                      self::gx:xpath, 
-                      self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
-                      self::gx:docSimilar,
-                      self::gx:docContent,
-                      self::gx:value,
-                      self::gx:values,    
-                      self::gx:valuePair,
-                      self::gx:valuePairs,
-                      self::gx:valueCompared,
-                      self::gx:valuesCompared,
-                      self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
-                      self::gx:contentCorrespondence,                                
-                      self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
-                      self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
-                      self::gx:folder/@linkXP,
-                      gx:validatorXPath, 
-                      @validatorXPath) 
-                or exists($ldos[?requiresContextNode])                               
-                or $focusNodes/@xpath)
+                or not($mediatype) and (f:nodeTreeRequired($allComponents) or exists($ldos[?requiresContextNode]))
             return
                 if (not($required)) then () 
                 else if (not(i:fox-doc-available($filePath))) then ()
@@ -293,34 +270,10 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             let $required :=
                 $requiredBindings = 'json' or
                 $mediatype = ('json', 'xml-or-json') or 
-                not($mediatype) and (
-                    (: Listing reasons for loading JSON document :)
-                    $coreComponents/(
-                      self::gx:xpath,
-                      self::gx:foxpath/@*[ends-with(name(.), 'Foxpath')],
-                      self::gx:links,
-                      self::gx:docSimilar,
-                      self::gx:docContent,
-                      self::gx:value,
-                      self::gx:values,    
-                      self::gx:valuePair,
-                      self::gx:valuePairs,
-                      self::gx:valueCompared,
-                      self::gx:valuesCompared,    
-                      self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
-                      self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
-                      self::gx:contentCorrespondence,
-                      gx:validatorXPath,
-                      @validatorXPath),
-                    $focusNodes/@xpath
-                )
-                return
+                not($mediatype) and (f:nodeTreeRequired($allComponents) or exists($ldos[?requiresContextNode]))                    
+            return
                 if (not($required)) then ()
-                else
-                    let $text := i:fox-unparsed-text($filePath, ())
-                    return try {json:parse($text)} catch * {()}
+                else try {i:fox-json-doc($filePath, ())} catch * {()}
            
         let $htmldoc :=
             if ($xdoc or $jdoc) then () else
@@ -527,3 +480,35 @@ declare function f:updateEvaluationContext_focusNode($focusNode as node(), $cont
     return map:put($context, '_targetInfo', $newTargetInfo)
 };        
 
+(:~
+ : Returns true if a given set of schema components contains a component which
+ : requires a node tree, false otherwise.
+ :
+ : @param components a set of schema components, e.g. constraint elements and shapes
+ : @return true if the input contains a component which requires a node tree
+ :)
+declare function f:nodeTreeRequired($components as element()*)
+        as xs:boolean? { 
+    (: let $_DEBUG := trace($components/name() => string-join(', '), '_COMPONENT_NAMES: ') return :)        
+        
+    exists($components/(
+        self::gx:focusNode,
+        self::gx:docSimilar,
+        self::gx:docContent,
+        self::gx:value, self::gx:values,    
+        self::gx:valuePair, self::gx:valuePairs,
+        self::gx:valueCompared, self::gx:valuesCompared,
+        self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
+        self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
+        self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
+        self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
+        self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
+        self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
+        gx:validatorXPath, 
+        @validatorXPath,
+                      
+        self::gx:xpath, 
+        self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
+        self::gx:contentCorrespondence      
+    ))
+};        

@@ -21,23 +21,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Returns the Link Definition Object identified by a relationship name
- :
- : @param relName relationship name
- : @param context processing context
- : @return the Link Definition Object, or the empty sequence, if no object is found
- :)
-declare function f:linkDefObject($linkName as xs:string, 
-                                 $context as map(xs:string, item()*))
-        as map(*)? {
-    $context?_resourceRelationships($linkName)        
-};        
-
-(:~
- : Returns the link definition defined or referenced by a given item.
+ : Returns the Link Definition defined or referenced by a given item.
  : The item can be the link name, given by a string or attribute; it
- : may be a Link Definition Object; and it may be an element either
- : referencing a link definition (via @linkName) or providing a
+ : may be a Link Definition object; and it may be an element either
+ : referencing a Link Definition (via @linkName) or providing a
  : local link definition.
  :
  : @param linkDef link definition providing item
@@ -103,11 +90,11 @@ declare function f:parseLinkDefs($linkDefs as element()*)
 (:~
  : Parses an element into a Link Definition Object. Parsing fails if none
  : of the following items is found:
- : - @uriXP
- : - @hrefXP
  : - @foxpath
+ : - @hrefXP
+ : - @uriXP
+ : - @uriTemplate
  : - @uriReflectionBase
- : - gx:uriTemplate
  :
  : When parsing fails, the element does not represent a Link Definition and
  : the empty sequence is returned.
@@ -118,61 +105,56 @@ declare function f:parseLinkDefs($linkDefs as element()*)
  :)
 declare function f:parseLinkDef($linkDef as element())
         as map(*)? {
+    let $foxpath := $linkDef/@foxpath/string()
+    let $hrefXP := $linkDef/@hrefXP/string()
+    let $uriXP := $linkDef/@uriXP/string()
+    let $uriTemplate := $linkDef/@uriTemplate
+    let $uriReflectionBase := $linkDef/@uriReflectionBase/string()    
+    return
+        if (empty((
+            $foxpath, $hrefXP, $uriXP, $uriTemplate, $uriReflectionBase))) then () else
+            
     let $recursive := $linkDef/@recursive/string()
     let $contextXP := $linkDef/@contextXP/string()
     let $targetXP := $linkDef/@targetXP/string()            
-    let $foxpath := $linkDef/@foxpath/string() 
-    let $hrefXP := $linkDef/@hrefXP/string()
-    let $uriXP := $linkDef/@uriXP/string()
-    let $uriReflectionBase := $linkDef/@uriReflectionBase/string()
     let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
-    let $uriTemplate := $linkDef/@uriTemplate
     let $constraints := $linkDef/gx:constraints    
-    let $templateVars := $linkDef/gx:templateVar
-    return
-        if (empty((
-            $hrefXP, $uriXP, $uriReflectionBase, $uriTemplate, $foxpath))) then () else
-            
+    let $templateVars := $linkDef/gx:templateVar            
     let $ldo :=        
         map:merge(        
             let $connector :=
-                let $connectorExplicit := $linkDef/@connector/string()
-                return
-                    if ($connectorExplicit) then $connectorExplicit
-                    else if ($foxpath) then 'foxpath'
-                    else if ($hrefXP) then 'hrefExpr'
-                    else if ($uriXP) then 'uriExpr'
-                    else if ($uriTemplate) then 'uriTemplate'
-                    else if ($uriReflectionBase) then 'uriReflection'                    
-                    else error()
+                if ($foxpath) then 'foxpath'
+                else if ($hrefXP) then 'hrefExpr'
+                else if ($uriXP) then 'uriExpr'
+                else if ($uriTemplate) then 'uriTemplate'
+                else if ($uriReflectionBase) then 'uriReflection'                    
+                else error()
         
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
                     or $contextXP
-            let $mediatype :=
-                let $mediatypeExplicit := $linkDef/@targetMediatype/string()
+            let $targetMediatype :=
+                let $explicit := $linkDef/@targetMediatype/string()
                 return
-                    if ($mediatypeExplicit) then $mediatypeExplicit
-                    else if ($recursive and $requiresContextNode
-                             or $targetXP)
-                        then 'xml'
+                    if ($explicit) then $explicit 
+                    else if ($targetXP) then 'xml' 
+                    else if ($recursive and $requiresContextNode) then 'xml'
                     else () 
             return
                 map:merge((
                     $connector ! map:entry('connector', .),
-                    $mediatype ! map:entry('targetMediatype', .),
-                    $recursive ! map:entry('recursive', .),
-                    $requiresContextNode ! map:entry('requiresContextNode', .),
-                    $contextXP ! map:entry('contextXP', .),
-                    $targetXP ! map:entry('targetXP', .),                   
+                    $requiresContextNode ! map:entry('requiresContextNode', .),                    
                     $foxpath ! map:entry('foxpath', .),
                     $hrefXP ! map:entry('hrefXP', .),
                     $uriXP ! map:entry('uriXP', .),
-                    
                     $uriTemplate ! map:entry('uriTemplate', .),                    
+                    $targetMediatype ! map:entry('targetMediatype', .),
+                    $recursive ! map:entry('recursive', .),
+                    $contextXP ! map:entry('contextXP', .),
+                    $targetXP ! map:entry('targetXP', .),   
+                    
                     if (not($templateVars)) then () else
-                    map:entry('templateVars',
-                        map:merge($templateVars ! map:entry(@name, .))),
+                        map:entry('templateVars', map:merge($templateVars ! map:entry(@name, .))),
                         
                     $uriReflectionBase ! map:entry('uriReflection', 
                         map{'base': $uriReflectionBase, 
@@ -185,23 +167,27 @@ declare function f:parseLinkDef($linkDef as element())
 };    
 
 (:~
- : Returns the names of all resource relationships referenced within a
- : component.
+ : Returns the names of all Link Definitions referenced within a set of components.
  :
- : This function incapsulates the knowledge in items (attributes,
- : elements) contain relationship names. It is called, for example,
- : by function 'getRequiredBindings', which needs to find all expressions
- : used by a set of components.
+ : This function encapsulates the knowledge about items (attributes,
+ : elements) containing link names. It is called, for example, by function 
+ : 'getRequiredBindings', which needs to find all expressions used by a set 
+ : of components.
  :
- : @param component the component to be investigated
+ : @param component the components to be investigated
  : @return the relationship names
  :)
 declare function f:getLinkNamesReferenced($components as element()*)
         as xs:string* {
-    $components//(@link, @linkName)
-    => distinct-values()
+    $components//@linkName => distinct-values()
 }; 
 
+(:~
+ : Returns the Link Definition objects referenced within a set of components.
+ :
+ : @param component the components to be investigated
+ : @return the relationship names
+ :)
 declare function f:getLinkDefs($components as element()*, 
                                $context as map(xs:string, item()*))
         as map(*)* {
@@ -210,10 +196,24 @@ declare function f:getLinkDefs($components as element()*,
 }; 
 
 (:~
+ : Returns the Link Definition object identified by a link name.
+ :
+ : @param linkName link name
+ : @param context the processing context
+ : @return the Link Definition object, or the empty sequence, if no object is found
+ :)
+declare function f:linkDefObject($linkName as xs:string, 
+                                 $context as map(xs:string, item()*))
+        as map(*)? {
+    $context?_resourceRelationships($linkName)        
+};        
+
+(:~
  : Returns the expected mediatype of link targets. The mediatype is either
  : explicitly specified (@mediatype), or can be inferred from link
  : definition details (@recursive), or can be inferred from link
- : constraints (@countTargetDocs, @countTargetNodes)
+ : constraints (@countTargetDocs, @countTargetNodes, 
+ : @countTargetDocsPerContextPoint, @countTargetNodesPerContextPoint)
  :
  : @param ldo link definition object
  : @param lde link defining element
@@ -232,7 +232,9 @@ declare function f:getLinkTargetMediatype($ldo as map(xs:string, item()*),
         else if ($lde/@recursive) then 'xml'
         else if ($allConstraintElems/
             (@countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
-             @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes))
+             @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes,
+             @countTargetDocsPerContextPoint, @minCountTargetDocsPerContextPoint, @maxCountTargetDocsPerContextPoint,
+             @countTargetNodesPerContextPoint, @minCountTargetNodesPerContextPoint, @maxCountTargetDonesPerContextPoint))             
             then 'xml'
         else ()
 };        

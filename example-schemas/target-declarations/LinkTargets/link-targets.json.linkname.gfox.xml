@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. Same check as in example schema `link-target.json.gfox.xml`,
-    except for the Link Definition being referenced via @linkName, rather than locally defined.    
-    documents.
-    
-    Note that the constraint element @targetSize adds a validation message (@resolvableMsg) to
-    a constraint defined in the Link Definition (@resolvable).
-    
-    For some basic facts about link targets see example schema `link-targets.gfox.xml`.
+    Demonstrates a target declaration using a Link Definition. The Link Definition is referenced
+    by name. As the reference is combined with the shape option "mediatype" (@mediatype) set to 
+    JSON, the link targets are treated as JSON documents. As the parent shape also has @mediatype 
+    set to JSON, the Link Definition is applied to JSON documents.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -16,23 +12,34 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
-    <linkDef name="airports"
-             hrefXP="//href"
-             mediatype="json">
+    <!-- Define link: "countryAirports" -->
+    <linkDef name="countryAirports"
+             hrefXP="//href">
         <constraints resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: airports file -->
             <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
-                <file linkName="airports" id="linkTargetsFileShape">
-                    <targetSize minCount="4" 
-                                minCountMsg="Not expected number of link targets"
+                <targetSize count="1" countMsg="Missing file 'airports.json'."/>
+                
+                <!-- Visit: link targets obtained for link definition "countryAirports" and 
+                            treated as JSON documents -->                
+                <file linkName="countryAirports" id="linkTargetsFileShape">
+                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="//airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                    
+                    <!-- Check: 'airport' elements -->
+                    <values>
+                        <value exprXP="/json/airports/airport"
+                               exists="true"
+                               existsMsg="Country airports document without airports"/>
+                    </values>
                 </file>
             </file>
         </folder>

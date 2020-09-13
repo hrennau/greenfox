@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of link targets. This example shows how to reference a link definition.
-    
-    For some basic facts about link targets, see `link-targets.gfox.xml`
+    Demonstrates a target declaration using a Link Definition. In this example the target declaration 
+    references a Link Definition by name (@linkName).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -11,22 +10,35 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <!-- Define link: "countryAirports" -->
     <linkDef name="countryAirports"
              hrefXP="//@href">
         <constraints resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            
+            <!-- Visit: airports file -->
             <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
+                
+                <!-- Visit: link targets obtained for link definition "countryAirports" -->
                 <file linkName="countryAirports" id="linkTargetsFileShape">
-                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
+                    
+                    <!-- Check: file target has expected size and href references could be resolved -->
+                    <targetSize minCount="4" minCountMsg="More link targets expected."
                                 resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="/airports/airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                    
+                    <!-- Check: 'airport' elements -->
+                    <values>
+                        <value exprXP="/airports/airport"
+                            exists="true"
+                            existsMsg="Country airports document without airports"/>
+                    </values>
                 </file>
             </file>
         </folder>

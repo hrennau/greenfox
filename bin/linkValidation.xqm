@@ -111,6 +111,14 @@ declare function f:validateLinkResolvable($lros as map(*)*,
  : @minCountTargetResourcesPerContextPoint - LinkTargetResourcesPerContextPointMinCount
  : @axnCountTargetResourcesPerContextPoint - LinkTargetResourcesPerContextPointMaxCount 
  :
+ : @countTargetDocsPerContextPoint -         LinkTargetResourcesPerContextPointCount
+ : @minCountTargetDocsPerContextPoint -      LinkTargetResourcesPerContextPointMinCount
+ : @axnCountTargetDocsPerContextPoint -      LinkTargetResourcesPerContextPointMaxCount 
+ :
+ : @countTargetNodesPerContextPoint -        LinkTargetResourcesPerContextPointCount
+ : @minCountTargetNodesPerContextPoint -     LinkTargetResourcesPerContextPointMinCount
+ : @axnCountTargetNodesPerContextPoint -     LinkTargetResourcesPerContextPointMaxCount 
+ :
  : It is not checked if the links can be resolved - only their number is considered.
  :
  : @param lros link resolution objects, obtained by applying the link definition to a single context resource

@@ -17,14 +17,12 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "targetConstraint.xqm",
     "log.xqm" ;
     
-import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" at
-
-    "validationResult.xqm";
+import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at "validationResult.xqm";
     
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
-    
-    "linkResolution.xqm",
-    "linkValidation.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at "linkResolution.xqm",
+   "linkValidation.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -40,17 +38,22 @@ declare function f:getTargetPaths($resourceShape as element(),
                                   $context as map(xs:string, item()*))
         as item()* {   
     
-    (: Retrieve target paths :)
+    (: Retrieve target paths, optionally also ldo and lros :)
     let $constraintElem := $resourceShape/gx:targetSize
     let $targetPathsEtc := f:resolveTargetDeclaration($resourceShape, $context)
     let $targetPaths := $targetPathsEtc?targetPaths
     let $ldo := $targetPathsEtc?ldo
+    
+    (: No link definition -> return target paths :)
     return if (not(($constraintElem, $ldo?constraints))) then $targetPaths else
     
     (: Perform validation of target paths :)
     let $lros := $targetPathsEtc?lros
-    let $validationResults := i:validateTargetConstraints(
-                    $resourceShape, $targetPaths, $ldo, $lros, $context)
+    let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ')
+    let $validationResults := 
+        i:validateTargetConstraints(
+            $resourceShape, $targetPaths, $ldo, $lros, $context)
+                    
     (: Return target paths and validation results :)                                        
     return ($targetPaths, $validationResults)
 };
@@ -84,11 +87,10 @@ declare function f:getTargetPaths($resourceShape as element(),
 declare function f:resolveTargetDeclaration($resourceShape as element(), 
                                             $context as map(xs:string, item()*))
         as map(xs:string, item()*) {
-    let $contextPath := $context?_contextPath    
     let $urisAndLros :=       
         let $path := $resourceShape/@path
         let $foxpath := $resourceShape/@foxpath
-        let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @linkReflectionBase)         
+        let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @uriTemplate, @linkReflectionBase)         
         return
             (: Plain path :)
             if ($path) then 
@@ -119,13 +121,13 @@ declare function f:getTargetPaths_path($path as xs:string,
                                        $resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as xs:string* {
-    let $contextPath := $context?_contextPath        
+    let $contextPath := $context?_targetInfo?contextURI
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) 
         then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1
     return    
-        concat($contextPath, '\', $path)
+        trace( concat($contextPath, '/', $path) ,  '_PATH: ')
         [i:fox-resource-exists(.)]
         [$isExpectedResourceKind(.)]        
 };
@@ -148,14 +150,14 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
                                           $resourceShape as element(),
                                           $context as map(xs:string, item()*))
         as xs:string* {
-    let $contextPath := $context?_contextPath        
+    let $contextURI := $context?_targetInfo?contextURI        
     let $isExpectedResourceKind := 
         if ($resourceShape/self::gx:folder) 
         then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1
     let $evaluationContext := $context?_evaluationContext        
     return    
-        i:evaluateFoxpath($foxpath, $contextPath, $evaluationContext, true())       
+        i:evaluateFoxpath($foxpath, $contextURI, $evaluationContext, true())       
         [$isExpectedResourceKind(.)]
 };
 
@@ -173,7 +175,7 @@ declare function f:getTargetPaths_foxpath($foxpath as xs:string,
 declare function f:getTargetPaths_link($resourceShape as element(),
                                        $context as map(xs:string, item()*))
         as item()* {
-    let $contextURI := $context?_contextPath
+    let $contextURI := $context?_targetInfo?contextURI
     let $contextNode := $context?_reqDocs?doc
     let $ldo := link:getLinkDefObject($resourceShape, $context)
     let $lros := link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, ()) 

@@ -34,7 +34,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : Validates the target constraints. These may be count constraints, as well as 
  : link constraints.
  :
- : @param resourceShape the resource shape
+ : @param resourceShape a file shape or a folder shape
  : @param targetResources the target resources selected by the target declaration
  : @param ldo Link Definition Object used as a target declaration
  : @param lros Link Resolution Objects obtained when resolving a link definition
@@ -59,9 +59,11 @@ declare function f:validateTargetConstraints($resourceShape as element(),
 (:~
  : Validates the results of resolving a Link Definition used as target declaration.
  :
- : @param constraint definition of a target constraint
- : @targetCount the number of focus resources belonging to the target of the shape
- : @return validation results describing conformance to or violations of target count constraints
+ : @param resourceShape a file shape or a folder shape
+ : @param ldo Link Definition Object used as a target declaration
+ : @param lros Link Resolution Objects obtained when resolving the Link Definition Object
+ : @param context the processing context
+ : @return validation results for link constraints accompanying the target declaration
  :) 
 declare function f:validateLinkConstraints($resourceShape as element(),
                                            $ldo as map(*)?,
@@ -79,7 +81,8 @@ declare function f:validateLinkConstraints($resourceShape as element(),
 (:~
  : Validates the target count of a resource shape or a focus node.
  :
- : @param resourceShape resource shape owning the target declaration
+ : @param resourceShape a file shape or a folder shape
+ : @param ldo Link Definition Object used a target declaration
  : @param targetItems the target resources obtained by resolving the target declaration
  : @param context the processing context
  : @return validation results obtained for the target count constraints
@@ -104,41 +107,6 @@ declare function f:validateTargetCount($resourceShape as element(),
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown count comparison operator: ', $cmp))
     let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
     return        
-        vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem,  
-            $cmp, $targetItems, $contextPath)
-    
-(:    
-    let $results := (
-        let $constraint := $constraintElem/@count
-        return if (not($constraint)) then () else
-        
-        let $checkValue := $constraint/xs:integer(.)
-        let $ok := $targetCount eq $checkValue
-        let $colour := if ($ok) then 'green' else 'red'
-        return
-            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem,  
-                $constraint, $targetItems, $contextPath)
-        ,
-        let $constraint := $constraintElem/@minCount
-        return if (not($constraint)) then () else
-        
-        let $checkValue := $constraint/xs:integer(.)
-        let $ok := $targetCount ge $checkValue
-        let $colour := if ($ok) then 'green' else 'red'
-        return
-            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem, 
-                $constraint, $targetItems, $contextPath)
-        ,        
-        let $constraint := $constraintElem/@maxCount
-        return if (not($constraint)) then () else
-        
-        let $checkValue := $constraint/xs:integer(.)
-        let $ok := $targetCount le $checkValue
-        let $colour := if ($ok) then 'green' else 'red'
-        return
-            vr:validationResult_targetCount($colour, $ldo, $resourceShape, $constraintElem, 
-                $constraint, $targetItems, $contextPath)
-    )
-    return $results
-:)    
+        vr:validationResult_targetCount($colour, $constraintElem, $cmp, 
+            $ldo, $targetItems, $contextPath, $context)
 };

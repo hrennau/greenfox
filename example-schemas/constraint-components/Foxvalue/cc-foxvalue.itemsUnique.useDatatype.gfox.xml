@@ -13,8 +13,11 @@
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
+        <!-- Visit: Irish airports folder -->
         <folder foxpath="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            
+            <!-- Check: latitudes and longitudes distinct -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
                           useDatatype="decimal"                    

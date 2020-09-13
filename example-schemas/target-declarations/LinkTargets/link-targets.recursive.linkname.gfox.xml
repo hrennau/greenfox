@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of recursive link targets. Same as example schema 
-    `link-targets-recursive.linkname.gfox.xml', but referencing the Link Definition, rather than
-    using a local Link Definition.
-
-    For some basic facts about link targets see example schema `link-targets.gfox.xml`.
+    Demonstrates a target declaration using a Link Definition. This example uses a recursive 
+    Link Definition, which is referenced by name (@linkName).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -13,6 +10,7 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <!-- Define link: "airports" -->
     <linkDef name="airports"
              hrefXP="//@href"
              recursive="true">
@@ -20,16 +18,27 @@
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Visit: airports file -->
             <file foxpath="airports.xml" id="airportsFileShape">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>                
+                <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
+
+                <!-- Visit: link targets obtained for link definition "airports";
+                            note that the link definition is recursive -->                
                 <file linkName="airports" id="linkTargetsFileShape">
                     <targetSize minCount="69" minCountMsg="Not expected number of link targets"
-                                resolvable="true" resolvableMsg="Target links could not be resolved"/>
-                    <xpath expr="//airport"
-                           exists="true"
-                           existsMsg="Country airports document without airports"/>
+                                resolvableMsg="Target links could not be resolved"/>
+                    
+                    <!-- Check: 'airport' elements -->
+                    <values>
+                        <value exprXP="//airport"
+                            exists="true"
+                            existsMsg="Airport element missing."/>
+                    </values>
                 </file>
             </file>
         </folder>

@@ -94,7 +94,10 @@ declare function f:validateDomain($gxDomain as element(gx:domain),
             map:entry('_contextPath', $domainURI),
             map:entry('_evaluationContext', $evaluationContext),            
             map:entry('_domain', $domainPath),
-            map:entry('_domainName', $domainName)
+            map:entry('_domainName', $domainName),
+            map:entry('_targetInfo', map{'contextURI': $domainURI}),
+            map:entry('_resourceRelationships', ()),
+            map:entry('_reqDocs', ())
         ))   
         
     let $results :=

@@ -111,7 +111,7 @@ declare function f:validateValue($constraintElem as element(),
     
     let $results := 
     (
-        f:validateValue_counts($exprValue, $constraintElem, $context),
+        f:validateValue_counts($exprValue, $expr, $exprLang, $constraintElem, $context),
         f:validateValue_cmp($exprValue, $expr, $exprLang, $constraintElem, $context),    
         f:validateValue_in($exprValue, $expr, $exprLang, $constraintElem, $context),
         f:validateValue_contains($exprValue, $expr, $exprLang, $constraintElem, $context),
@@ -411,6 +411,8 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
  : @return validation results
  :)
 declare function f:validateValue_counts($items as item()*,
+                                        $expr as xs:string,
+                                        $exprLang as xs:string,
                                         $constraintElem as element(),
                                         $context as map(xs:string, item()*))
         as element()* {
@@ -433,7 +435,7 @@ declare function f:validateValue_counts($items as item()*,
         let $colour := if ($ok) then 'green' else 'red'        
         return  
             result:validationResult_value_counts(
-                $colour, $constraintElem, $constraintNode, $items, (), $context)
+                $colour, $constraintElem, $constraintNode, $items, $expr, $exprLang, (), $context)
                 
     let $results2 :=
         if (empty($constraintNodes2)) then () else
@@ -450,7 +452,7 @@ declare function f:validateValue_counts($items as item()*,
         let $colour := if ($ok) then 'green' else 'red'
         return
             result:validationResult_value_counts(
-                $colour, $constraintElem, $constraintNode, $items, (), $context)
+                $colour, $constraintElem, $constraintNode, $items, $expr, $exprLang, (), $context)
     return ($results1, $results2)        
 };
 
