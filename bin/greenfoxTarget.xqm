@@ -8,14 +8,13 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-
-    "constants.xqm",
-    "greenfoxUtil.xqm",
-    "linkConstraint.xqm",
-    "resourceAccess.xqm",
-    "targetConstraint.xqm",
-    "log.xqm" ;
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "greenfoxUtil.xqm",
+   "linkConstraint.xqm",
+   "resourceAccess.xqm",
+   "targetConstraint.xqm",
+   "log.xqm" ;
     
 import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" 
 at "validationResult.xqm";
@@ -49,7 +48,7 @@ declare function f:getTargetPaths($resourceShape as element(),
     
     (: Perform validation of target paths :)
     let $lros := $targetPathsEtc?lros
-    let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ')
+    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
     let $validationResults := 
         i:validateTargetConstraints(
             $resourceShape, $targetPaths, $ldo, $lros, $context)

@@ -9,19 +9,16 @@
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
-at
-    "constants.xqm",
-    "greenfoxUtil.xqm",
-    "resourceAccess.xqm",
-    "log.xqm" ;
+at "constants.xqm",
+   "greenfoxUtil.xqm",
+   "resourceAccess.xqm",
+   "log.xqm" ;
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
-at
-    "linkValidation.xqm";
+at "linkValidation.xqm";
 
 import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validation-result" 
-at
-    "validationResult.xqm";
+at "validationResult.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
