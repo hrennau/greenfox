@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of recursive link targets. The targets are the XSDs directly
-    or indirectly imported by a root schema.
-    
-    For some basic facts about link targets, see `link-targets.gfox.xml`
+    Demonstrates a target declaration using a Link Definition. This example checks XSDs
+    selected by resolving import references recursively.
+
+    NOTE: In order to use this schema, you must provide a domain folder containing folder
+          niem-4.2/niem.
+          
+          Example call: gfox .../link-targets.recursive.niem.gfox.xml /projects/xsdbase
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem"
     xmlns="http://www.greenfox.org/ns/schema">
@@ -12,22 +15,32 @@
         <field name="domain"/>
     </context>
     
-    <linkDef name="imports"
+    <!-- Define link: "schemaImport" -->    
+    <linkDef name="schemaImport"
              hrefXP="/xs:schema/xs:import/@schemaLocation" 
              recursive="true" >
         <constraints resolvable="true"
-                     resolvableMsg="Target links could not be resolved"/>
+                     resolvableMsg="Recursive imports could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: NIEM domains folder -->
         <folder foxpath="niem-4.2\niem\domains" id="niemCoreFolderShape">
-            <targetSize countMsg="Missing folder: domains" count="1"/>            
-            <file foxpath=".\\agriculture.xsd" id="intelligenceFileShape">
-                <file linkName="imports" id="niemCoreFileShape">
+            <targetSize countMsg="Missing folder: domains" count="1"/>
+
+            <!-- Visit: agriculture schema -->
+            <file foxpath=".\\agriculture.xsd" id="agricultureFileShape">
+                <targetSize count="1" countMsg="Agriculture file missing"/>
+                
+                <!-- Visit: link targets obtained for recursive link definition "schemaImport" -->
+                <file linkName="schemaImport" id="importedFilesShape">
                     <targetSize count="27" countMsg="Not expected number of link targets"/>
-                    <xpath expr="/xs:schema/@targetNamespace"
-                           exists="true"
-                           existsMsg="Missing tns"/>
+                    
+                    <!-- Check: all link targets have a target namespace -->
+                    <values>
+                        <value exprXP="/xs:schema/@targetNamespace" exists="true" existsMsg="Missing tns"/>
+                    </values>
                 </file>
             </file>
         </folder>

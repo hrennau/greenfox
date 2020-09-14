@@ -26,9 +26,9 @@
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
-            <!-- Visit: airports file -->
+            <!-- Visit: JSON airports file -->
             <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
-                <targetSize count="1" countMsg="Missing file 'airports.xml'."/> 
+                <targetSize count="1" countMsg="Missing file 'airports.json'."/> 
                 
                 <!-- Visit: link targets obtained for link definition "airportsJson";
                             note that the link definition is recursive -->                

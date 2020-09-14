@@ -15,20 +15,21 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: airports folder in an archive file -->
+        <!-- Visit archive contents: airports folder -->
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
-            <!-- Visit: airports file (in the archive file) -->
+            <!-- Visit archive contents: airports file -->
             <file foxpath="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
                 
-                <!-- Visit: link targets selected by href references (in the archive file) -->
+                <!-- Visit archive contents: 
+                         link targets selected by href references -->
                 <file hrefXP="//@href" id="linkTargetsFileShape">
                     <targetSize minCount="4" minCountMsg="Not expected number of link targets"
                                 resolvable="true" resolvableMsg="Target links could not be resolved"/>
                     
-                    <!-- Check: 'airport' elements (in the archive file) -->
+                    <!-- Check archive contents: 'airport' elements -->
                     <values>
                         <value exprXP="//airport"
                             exists="true"

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates a target declaration using a Link Definition. This example checks XSDs
+    selected by resolving include references recursively.
+
+    NOTE: In order to use this schema, you must provide a domain folder containing folder
+          OpenTravel/OpenTravel_2017B_XML.
+          
+          Example call: gfox .../link-targets.recursive.opentravel.gfox.xml /projects/xsdbase
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.opentravel"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <!-- Define link: "schemaInclude" -->    
+    <linkDef name="schemaInclude"
+             hrefXP="/xs:schema/xs:include/@schemaLocation"
+             recursive="true">
+        <constraints resolvable="true"
+                     resolvableMsg="Recursive includes could not be resolved"/>
+    </linkDef>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: OpenTravel schemas folder -->
+        <folder path="OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
+            <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>
+
+            <!-- Visit: XSD files -->    
+            <file foxpath="*.xsd except (OTA_SimpleTypes.xsd, OTA_Lists.xsd)" id="xsdFileShape">
+                <targetSize minCount="100" minCountMsg="Not as many XSDs as expected"/>
+                
+                <!-- Visit: link targets obtained for recursive link definition "schemaInclude" -->
+                <file linkName="schemaInclude" id="includedFilesShape">
+                    <targetSize minCount="2" minCountMsg="Not expected number of link targets"/>
+                    
+                    <!-- Check: all link targets have an element form default equal "qualified" -->
+                    <values>
+                        <value exprXP="/xs:schema/@elementFormDefault"
+                               eq="qualified" eqMsg="elementFormDefault must be 'qualified'."
+                               count="1" countMsg="@elementFormDefault attribute missing."/>
+                    </values>                        
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>

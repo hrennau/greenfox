@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates a target declaration using a Link Definition. This example checks archive
+    contents: XSDs selected by resolving include references recursively.
+
+    NOTE: In order to use this schema, you must provide a domain folder containing file
+          archives/OpenTravel.zip
+          
+          Example call: gfox .../link-targets.recursive.opentravel.archive.gfox.xml /projects/xsdbase
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.opentravel.archive"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <field name="domain" value="\projects\xsdbase"/>/>
+    </context>
+    
+    <!-- Define link: "schemaInclude" -->    
+    <linkDef name="schemaInclude"
+             hrefXP="/xs:schema/xs:include/@schemaLocation"
+             recursive="true">
+        <constraints resolvable="true"
+                     resolvableMsg="Recursive includes could not be resolved"/>
+    </linkDef>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit archive contents: OpenTravel schemas folder -->
+        <folder foxpath="archives\OpenTravel.zip\#archive#\OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
+            <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>
+
+            <!-- Visit archive contents: OTA_AirAvail*.xsd -->
+            <file foxpath="OTA_AirAvail*.xsd" id="airAvailFileShape">
+                <targetSize minCount="1" minCountMsg="Missing file OTA_AirAvail*.xsd"/>
+                
+                <!-- Visit archive contents: 
+                         link targets obtained for recursive link definition "schemaInclude" -->                
+                <file linkName="schemaInclude" id="xsdFileShape">
+                    <targetSize count="6" minCountMsg="Not expected number of link targets"/>
+                    
+                    <!-- Check: all link targets have an element form default equal "qualified" -->
+                    <values>
+                        <value exprXP="/xs:schema/@elementFormDefault"
+                            eq="qualified" eqMsg="elementFormDefault must be 'qualified'."
+                            count="1" countMsg="@elementFormDefault attribute missing."/>
+                    </values>                        
+                </file>
+            </file>
+        </folder>
+    </domain>
+    
+</greenfox>
