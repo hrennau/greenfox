@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component DocSimilar, in particular the comparison
-    of substrees. 
+    Demonstrates the use of DocSimilar constraints. This example highlights the possibility to
+    compare subtrees, rather than complete documents.
     
-    See example schema 'cc-docSimilar.gfox.xml' for a general explanation of the
-    DocSimilar constraint.
-    
-    In this example, validation catches a file which does not have a single <input> element 
-    with content similar to the <input> element of a given other file. When comparing the <input>
-    subtrees, a couple of attributes are ignored (@fileName and @fileSize), and the value of 
-    an element is normalized (<articleNumber>).
+    The comparison target is selected by a Foxpath. The path returns the subtree with which
+    to compare, rather than the full document.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.subtree"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -19,17 +14,23 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="docSimilar" id="docSimilarFolderShape">
-            <targetSize countMsg="Missing folder: docSimilar" count="1"/>            
+        
+        <!-- Visit: docSimilar folder -->
+        <folder foxpath="docSimilar" id="docSimilarFolderShape">            
+            <targetSize countMsg="Missing folder: docSimilar" count="1"/>
+
+            <!-- Visit: executionSummary1.xml -->
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
-                <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>      
+                <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
+                
+                <!-- Visit: <input> nodes -->
                 <focusNode xpath="//input">
                     <targetSize countMsg="Missing element: input" count="1"/>
-                    <!-- Compare the <input> element with the <input> element found in another file -->
-                    <docSimilar foxpath="..\executionSummary2.xml//input"  redReport="localIndexedPath"
-                                countTargetResources="1" countTargetResourcesMsg="Reference document missing">
-                        <!-- When comparing the elements, ignore @fileName and @fileSize, 
-                             and normalize the value of <articleNumber>. -->
+                    
+                    <!-- Check: node content similar? -->
+                    <docSimilar foxpath="..\executionSummary2.xml//input"
+                                docSimilarMsg="'input' elements not similar"
+                                countTargetResources="1" countTargetResourcesMsg="Summary 2 document missing">
                         <editText localName="articleNumber" replaceSubstring="^678.*$" replaceWith="678XXX"/>
                         <skipItem kind="attribute" localName="fileName"/>
                         <skipItem kind="attribute" localName="fileSize"/>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component DocSimilar. This example shows how the
-    targets of comparison can be selected by referencing a link definition via @linkName.
-    See example 'cc-docSimilar.gfox.xml' for more information about DocSimilar constraints.
+    Demonstrates the use of DocSimilar constraints. In this example the Link Definition selecting
+    the documents with which to compare is referenced by name (@linkName).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.linkname"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -11,18 +10,24 @@
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
+    <!-- Define link: "summaryReference" -->
     <linkDef name="summaryReference"
-             connector="foxpath"
-             foxpath="fox-sibling(trace($fileName, '_FILE_NAME: '), '\d*.xml$', '-reference.xml')">
+             foxpath="fox-sibling($fileName, '\d*.xml$', '-reference.xml')">
         <constraints countTargetResources="1"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: docSimilar folder -->
         <folder foxpath="docSimilar" id="docSimilarFolderShape">
-            <targetSize countMsg="Missing folder: docSimilar" count="1"/>            
+            <targetSize countMsg="Missing folder: docSimilar" count="1"/>
+
+            <!-- Visit: executionSummary1.xml -->
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
-                <docSimilar linkName="summaryReference" redReport="localIndexedPath">
+                
+                <!-- Check: doc similar? -->
+                <docSimilar linkName="summaryReference">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>
                     <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>

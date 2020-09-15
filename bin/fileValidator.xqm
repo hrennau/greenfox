@@ -127,32 +127,34 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
                 dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $docContent, $context)            
             case $values as element(gx:values) return 
                 expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $values, $context)            
-            case $valuePairs as element(gx:valuePairs) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuePairs, $context)            
-            case $valuesCompared as element(gx:valuesCompared) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuesCompared, $context)            
             case $foxvalues as element(gx:foxvalues) return 
                 expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $foxvalues, $context)            
+            case $valuePairs as element(gx:valuePairs) return 
+                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuePairs, $context)            
             case $foxvaluePairs as element(gx:foxvaluePairs) return 
                 expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $foxvaluePairs, $context)            
+            case $valuesCompared as element(gx:valuesCompared) return 
+                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuesCompared, $context)            
             case $foxvaluesCompared as element(gx:foxvaluesCompared) return 
                 expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $foxvaluesCompared, $context)            
-            case $xpath as element(gx:xpath) return 
-                i:validateExpressionValue($contextURI, $xpath, $contextItem, $contextDoc, $context)
-            case $foxpath as element(gx:foxpath) return 
-                i:validateExpressionValue($contextURI, $foxpath, $contextItem, $contextDoc, $context)            
-            case $xsdValid as element(gx:xsdValid) return 
-                i:xsdValidate($contextURI, $xsdValid, $context)
             case $links as element(gx:links) return 
                 i:validateLinks($contextURI, $contextDoc, $contextItem, $links, $context)            
             case $docSimilar as element(gx:docSimilar) return 
                 i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
-            case $concord as element(gx:contentCorrespondence) return 
-                concord:validateConcord($contextURI, $contextDoc, $contextItem, $concord, $context)
+            case $xsdValid as element(gx:xsdValid) return 
+                i:xsdValidate($contextURI, $xsdValid, $context)
             case $ifMediatype as element(gx:ifMediatype) return
                 $ifMediatype
                 [i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]
                 /f:validateFileInstanceComponents($contextURI, $contextDoc, $contextNode, ., $context)
+                
+            case $xpath as element(gx:xpath) return 
+                i:validateExpressionValue($contextURI, $xpath, $contextItem, $contextDoc, $context)
+            case $foxpath as element(gx:foxpath) return 
+                i:validateExpressionValue($contextURI, $foxpath, $contextItem, $contextDoc, $context)            
+            case $concord as element(gx:contentCorrespondence) return 
+                concord:validateConcord($contextURI, $contextDoc, $contextItem, $concord, $context)
+                
             default return 
                 error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
                       concat('Unexpected shape or constraint element, name: ', $constraint/name()))

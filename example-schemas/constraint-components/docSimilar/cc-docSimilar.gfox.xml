@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component DocSimilar. The constraint is declared
-    by a <docSimilar> element. The document(s) with which to compare are selected by
-    a link definition. The link definition is either locally defined or referenced via 
-    @linkName. Here, the documents are selected by a local link definition, consisting 
-    of a Foxpath expression (@foxpath).
+    Demonstrates the use of DocSimilar constraints. Document similarity means that their node 
+    trees, modified as described below, are deep-equal. 
     
-    Documents are compared by comparing their node trees. Two documents are similar if
-    their node trees, modified as described below, are deep-equal.
+    The target document is compared with document(s) selected by a Link Definition. The constraint
+    contains a local Link Definition or references a global definition by name (@linkName). Here, 
+    the Link Definition is local, consisting of a Foxpath expression (@foxpath).
     
     Node trees to be compared are modified as indicated by modifier elements, which are 
     child elements of the <docSimilar> element:
     * <skipItem> elements identify items to be removed
+    * <editText> elements identify items to be modified and defines their modification in terms
+    *   of a substring to be replaced and a string replacing it
     * <roundItem> elements identify items the text value of which is replaced with a rounded value
     
     Modifier elements identify the items to which they apply using selector attributes, all of
@@ -22,21 +22,9 @@
     * parent local name - @parentLocalName
     * parent namespace - @parentNamespace
     
-    In this example, validation catches an 'executionSummary1.xml' file ...
-    * for which no sibling file 'executionSummary-reference.xml' can be found
-    * which is not similar to a sibling file 'executionSummary-reference.xml', 
-      ignoring 'articleNumber' and 'timestamp' elements and @fileSize attributes 
-      on 'articleBook' elements.
-      
-    Ancillary constraints may be declared which refer to the number of target documents
-    selected for comparison. More precisely, these constraints refer to the link
-    resolution yielding the comparison targets. Constraint attributes:
-    * countContextNodes, minCount..., maxCount... 
-    * countTargetResources, minCount..., maxCount... 
-    * countTargetDocs, minCount..., maxCount...
-    * countTargetNodes, minCount..., maxCount...
-    These constraints may be declared in the <docSimilar> element or in a <linkDef>
-    element which is referenced via @linkName.
+    Ancillary constraints are possible which apply to the results of resolving 
+    the Link Definition. Here, the number of link target documents is checked
+    (@countTargetResources).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -46,11 +34,17 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: docSimilar folder -->
         <folder foxpath="docSimilar" id="docSimilarFolderShape">
-            <targetSize countMsg="Missing folder: docSimilar" count="1"/>            
+            <targetSize countMsg="Missing folder: docSimilar" count="1"/>
+
+            <!-- Visit: executionSummary1.xml -->
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
-                <docSimilar foxpath="..\executionSummary-reference.xml" redReport="localIndexedPath"
+                
+                <!-- Check: doc similar? -->
+                <docSimilar foxpath="..\executionSummary-reference.xml" 
                             countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>

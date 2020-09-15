@@ -20,14 +20,17 @@ declare function f:docSimilarConstraintReports(
                              $d2 as node(),
                              $colour as xs:string)
         as element()* {
-    let $redReports := $constraintElem/@redReport/tokenize(.)
+    let $redReports := 
+        let $control := $constraintElem/@redReport
+        return
+            if (not($control)) then 'localIndexedPath' else $constraintElem/@redReport/tokenize(.)
     let $report :=
         for $redReport in $redReports
         return
             if ($redReport = ('localPath', 'localIndexedPath')) then
                 let $fn_path := 
                     switch($redReport)
-                    case 'localPath' return f:localPath#1
+                    case 'localPath' return f:localPathWithData#1
                     case 'localIndexedPath' return f:localIndexedPathWithData#1
                     default return error()
                 let $pathFormat := $redReport                    
@@ -82,8 +85,28 @@ declare function f:localPath($node as node())
 };        
 
 (:~
+ : Representation of a node consisting of a local path,
+ : optionally followed by an equality sign and the node 
+ : string value.
+ :
+ : @param a node
+ : @return the path string
+ :)
+declare function f:localPathWithData($node as node())
+        as xs:string {
+    let $path := f:localPath($node)
+    let $data := 
+        typeswitch($node)
+        case element() return $node[not(*)]/string()
+        case attribute() return $node/string()
+        default return ()
+    return
+        string-join(($path, $data), '=')
+};        
+
+(:~
  : A simple data path representation, using local names
- : and ignoring indexes.
+ : and indexes, yet suppressing index "1".
  :
  : @param a node
  : @return the path string
@@ -92,8 +115,10 @@ declare function f:localIndexedPath($node as node())
         as xs:string {
     (
     for $n in $node/ancestor-or-self::node()
-    let $index := ($n/preceding-sibling::*[local-name(.) eq $n/local-name(.)] => count()) + 1
-    let $indexSuffix := (: if (not($countPS)) then () else :) '[' || $index || ']'
+    let $indexSuffix :=
+        if ($n instance of document-node()) then () else
+            let $index := ($n/preceding-sibling::*[local-name(.) eq $n/local-name(.)] => count()) + 1
+            return '[' || $index || ']'
     return
         $n/concat(self::attribute()/'@', local-name(.), $indexSuffix)
     ) => string-join('/')

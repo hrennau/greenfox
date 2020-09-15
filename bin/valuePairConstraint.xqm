@@ -65,18 +65,13 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
                 let $requiresXml := exists($constraintElem/*/@expr2XP)
                 let $options := if (not($requiresXml)) then () else map{'targetMediatype': 'xml'}
                 return
-                    link:resolveLinkDef($ldo, 'lro', $contextURI, 
-                        $contextNode, $context, $options)
-            let $results_link :=
-                link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
-            let $results_pairs :=
-                f:validateValuesCompared($constraintElem, $lros, $context)
-                
+                    link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $options)
+            let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
+            let $results_pairs := f:validateValuesCompared($constraintElem, $lros, $context)                
             return ($results_link, $results_pairs)
             
         (: ValuePairs :)
-        else 
-            f:validateValuePairs($constraintElem, $contextNode, $context)
+        else f:validateValuePairs($constraintElem, $contextNode, $context)
 };
 
 (:~

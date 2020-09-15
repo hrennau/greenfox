@@ -690,7 +690,7 @@ declare function f:validationResult_linkCount($colour as xs:string,
         if ($constraintElem/@* intersect $constraintNode) then ()
         else $constraintElem/i:getSchemaConstraintPath(.) ! attribute constraintElemPath {.}
     return
-        element {i:getResultElemName($colour)} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
@@ -754,7 +754,7 @@ declare function f:validationResult_targetCount(
         if (not($colour = ('red', 'yellow'))) then ()
         else f:validationResultValues($targetItems, $constraintElem)
     return
-        element {i:getResultElemName($colour)} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
@@ -794,41 +794,37 @@ declare function f:validationResult_docSimilar($colour as xs:string,
                                                $comparisonReports as element()*,
                                                $targetDocURI as xs:string?,
                                                $exception as attribute(exception)?,
-                                               $contextInfo as map(xs:string, item()*))
+                                               $context as map(xs:string, item()*))
         as element() {
-    let $elemName := 'gx:' || $colour
-    let $constraintComponent := 'DocSimilarConstraint'
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+    let $constraintComp := 'DocSimilar'
     
-    let $filePath := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNode := $contextInfo?nodePath ! attribute nodePath {.}
-    
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'similar', ())
-        else i:getErrorMsg($constraintElem, 'similar', ())
+    let $msg := i:getResultMsg($colour, $constraintElem, 'docSimilar')
     let $reports :=
         if (not($comparisonReports)) then () else
-            <gx:reports>{
-                $comparisonReports
-            }</gx:reports>
+            <gx:reports>{$comparisonReports}</gx:reports>
     let $modifiers :=
         if (not($constraintElem/*)) then () else
-        <gx:modifiers>{
-            $constraintElem/*
-        }</gx:modifiers>
+            <gx:modifiers>{$constraintElem/*}</gx:modifiers>
         
     let $reports := $comparisonReports
     return
-        element {$elemName}{
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComponent},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},    
-            attribute targetDocURI {$targetDocURI},
+        element {f:resultElemName($colour)}{
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+        
+            attribute comparisonTargetURI {$targetDocURI},
             $exception,
-            $filePath,
-            $focusNode,            
             $modifiers,
             $reports
         }        
@@ -854,12 +850,17 @@ declare function f:validationResult_docSimilar_exception(
                                             $lro as map(*)?,        
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
-                                            $contextInfo as map(xs:string, item()*))
+                                            $context as map(xs:string, item()*))
         as element() {
-    let $constraintComp := 'DocSimilarConstraint'        
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)        
+    let $constraintComp := 'DocSimilar'
     let $constraintId := $constraintElem/@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
+    
     let $contextItemInfo :=
         if (empty($lro)) then ()
         else
@@ -891,14 +892,17 @@ declare function f:validationResult_docSimilar_exception(
         
     return
         element {'gx:red'} {
-            attribute exception {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
+            $exception ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            
             $contextItemInfo,
             $targetInfo,
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
+            $addAtts
         }       
 };
 
@@ -1058,7 +1062,6 @@ declare function f:validationResult_value($colour as xs:string,
     let $useAdditionalAtts := $additionalAtts[not(local-name(.) = ('valueCount', $standardAttNames))]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $elemName := i:getResultElemName($colour)
     let $quantifier := $constraintElem/(@quant, 'all')[1]
     let $quantifierAtt := $quantifier ! attribute quantifier {.}
     let $values := 
@@ -1069,7 +1072,7 @@ declare function f:validationResult_value($colour as xs:string,
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintConfig?constraintComp},
             $constraintPath ! attribute constraintPath {.},            
@@ -1133,8 +1136,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
     let $standardAtts := $constraintElem/@*[local-name(.) = $standardAttNames]
     let $valueCountAtt := attribute valueCount {count($exprValue)} 
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $elemName := i:getResultElemName($colour)
-    
+   
     let $values :=
         let $items :=
             if ($constraintNode/self::attribute(maxCount)/xs:integer(.) eq 0 or
@@ -1146,7 +1148,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
     
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
@@ -1184,8 +1186,7 @@ declare function f:validationResult_value_exception(
         as element() {
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
-    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
-        
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)        
     let $targetInfo := $context?_targetInfo  
     let $constraintComp := if ($constraintElem/self::element(gx:foxvalue)) then 'Foxvalue' else 'Value'
     let $constraintId := $constraintElem/@id
@@ -1250,8 +1251,6 @@ declare function f:validationResult_valuePair($colour as xs:string,
                            $constraintNode/i:firstCharToUpperCase($constraintKind)
     
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintKind)
-    let $elemName := i:getResultElemName($colour)
-    
     let $expr1Lang := 'xpath'
     let $expr2Lang := 'xpath'    
     
@@ -1262,7 +1261,7 @@ declare function f:validationResult_valuePair($colour as xs:string,
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
     
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
@@ -1376,10 +1375,9 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
             return attribute contextItem1 {$attValue}                             
 
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $elemName := i:getResultElemName($colour)
     
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},

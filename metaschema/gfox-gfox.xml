@@ -460,7 +460,7 @@ return
             <focusNode xpath="//*:docSimilar">
                 <ex:allowedAtts
                     attNames="foxpath linkName redReport 
-                              similarMsg similarMsgOK
+                              docSimilarMsg docSimilarMsgOK
                               count countMsg countMsgOK
                               
                               countContextNodes countContextNodesMsg contContextNodesMsgOK

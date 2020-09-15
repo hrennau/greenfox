@@ -8,27 +8,22 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
-at 
-    "tt/_foxpath.xqm";    
+at "tt/_foxpath.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
-at
-    "docSimilarConstraintReports.xqm",
-    "greenfoxUtil.xqm",
-    "resourceAccess.xqm";
+at "docSimilarConstraintReports.xqm",
+   "greenfoxUtil.xqm",
+   "resourceAccess.xqm";
 
 import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
-at
-    "validationResult.xqm";
+at "validationResult.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
-at
-    "linkDefinition.xqm",
-    "linkResolution.xqm";
+at "linkDefinition.xqm",
+   "linkResolution.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 declare namespace fox="http://www.foxpath.org/ns/annotations";
-
 
 (:~
  : Validates a DocSimilar constraint and supplementary constraints.
@@ -44,34 +39,24 @@ declare namespace fox="http://www.foxpath.org/ns/annotations";
 :)
 declare function f:validateDocSimilar($contextURI as xs:string,
                                       $contextDoc as document-node()?,                                      
-                                      $contextItem as node(),
+                                      $contextNode as node()?,
                                       $constraintElem as element(gx:docSimilar),                                      
                                       $context as map(xs:string, item()*))
         as element()* {
 
-    (: context info - a container for current file path and datapath of the focus node :)    
-    let $contextInfo := 
-        let $focusPath := 
-            $contextItem[. instance of node()][not(. is $contextDoc)] ! i:datapath(.)
-        return  
-            map:merge((
-                $contextURI ! map:entry('filePath', .),
-                $contextDoc ! map:entry('doc', .),                
-                $focusPath ! map:entry('nodePath', .)))
-    return
-        (: Exception - no context document :)
-        if (not($contextInfo?doc)) then
-            result:validationResult_docSimilar_exception($constraintElem, (),
-                'Context resource could not be parsed', (), $contextInfo)
-        else
+    (: Exception - no context document :)
+    if (not($context?_targetInfo?doc)) then
+        result:validationResult_docSimilar_exception($constraintElem, (),
+            'Context resource could not be parsed', (), $context)
+    else
 
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     let $lros := 
-        let $contextNode := $contextItem[. instance of node()]
-        let $defaultMediatype := map{'mediatype': 'xml'}
+        let $contextNode := ($contextNode, $contextDoc)[1]
+        let $options := map{'targetMediatype': 'xml'}
         return
-            link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $defaultMediatype) 
+            link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $options) 
             [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)
         
     (: Check link constraints :)
@@ -79,72 +64,75 @@ declare function f:validateDocSimilar($contextURI as xs:string,
     
     (: Check similarity :)
     let $results_comparison := 
-        f:validateDocSimilar_similarity($contextItem, $lros, $constraintElem, $contextInfo)
+        f:validateDocSimilar_similarity($contextNode, $lros, $constraintElem, $context)
         
     return ($results_link, $results_comparison)
 };   
 
 (:~
  : Validates document similarity. The node to compare with other nodes is given
- : by 'contextItem', which is either the current document or a focus node from it.
+ : by 'contextNode', which is either the current document or a focus node from it.
  :
- : @param contextItem the context item
+ : @param contextNode the node to compare with other nodes
  : @param targetDocReps the documents with which to compare
  : @param constraintElem the schema element declaring the constraint
  : @param contextInfo information about the resource context
  : @return validation results, red or green
  :)
 declare function f:validateDocSimilar_similarity(
-                                      $contextItem as node(),
+                                      $contextNode as node(),
                                       $lros as map(*)*,
                                       $constraintElem as element(),
-                                      $contextInfo as map(xs:string, item()*))
+                                      $context as map(xs:string, item()*))
         as element()* {
         
     (: Normalization options.
          Currently, the options cannot be controlled by schema parameters;
          this will be changed when the need arises :)
-    let $normOptions :=
-        map{'skipPrettyWS': true(), 'keepXmlBase': false()}        
+    let $normOptions := map{'skipPrettyWS': true(), 'keepXmlBase': false()}        
     
     let $redReport := $constraintElem/@redReport
     
     (: Check document similarity :)
     let $results :=
+        (: For each Link Resolution objects :)
         for $lro in $lros
         
         (: Check for link error :)
         return
             if ($lro?errorCode) then
-                result:validationResult_docSimilar_exception($constraintElem, $lro, (), (), $contextInfo)
+                result:validationResult_docSimilar_exception($constraintElem, $lro, (), (), $context)
             else
             
         (: Fetch target nodes :)
-        let $targetDoc := 
-            if (map:contains($lro, 'targetNodes')) then $lro?targetNodes[1]
+        let $targetNodes := 
+            if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
             else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.) 
         return
-            if (not($targetDoc)) then            
+            (: Exception - no target doc :)
+            if (not($targetNodes)) then            
                 let $msg :=
                     if ($lro?targetURI ! i:fox-resource-exists(.)) then 
                         'Similarity target resource cannot be parsed'
                     else 'Similarity target resource not found'
                 return
                     result:validationResult_docSimilar_exception(
-                        $constraintElem, $lro, $msg, (), $contextInfo)                        
+                        $constraintElem, $lro, $msg, (), $context)  
+            (: Target doc available :)
             else
                     
         (: Perform comparison :)
-        let $targetDocIdentity := $lro?targetURI
-        let $d1 := f:normalizeDocForComparison($contextItem, $constraintElem/*, $normOptions, $targetDoc)
-        let $d2 := f:normalizeDocForComparison($targetDoc, $constraintElem/*, $normOptions, $contextItem)
+        for $targetNode in $targetNodes
+        let $targetURI := $lro?targetURI
+        let $d1 := f:normalizeDocForComparison($contextNode, $constraintElem/*, $normOptions, $targetNode)
+        let $d2 := f:normalizeDocForComparison($targetNode, $constraintElem/*, $normOptions, $contextNode)
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
         return
             result:validationResult_docSimilar(
-                $colour, $constraintElem, $reports, $targetDocIdentity, (), $contextInfo)
+                $colour, $constraintElem, $reports, $targetURI, (), $context)
                 
     return $results
 };
