@@ -67,6 +67,7 @@ declare function f:resolveLinkDef($linkDef as item(),
         else
             let $targetMediatype := 
                 if ($options?targetMediatype) then $options?targetMediatype
+                else if ($ldo?targetXP) then 'xml'
                 else if ($resultFormat eq 'doc') then 'xml'
                 else ()
             return
@@ -361,7 +362,7 @@ declare function f:resolveLinkDefRC(
  :) 
 declare function f:getLinkTargetNodes($connectorNodes as node()+, 
                                       $targetExpr as xs:string?, 
-                                      $linkContextItem as node(), 
+                                      $linkContextItem as item(), 
                                       $context as map(xs:string, item()*))
         as node()* {
     if (not($targetExpr)) then () else

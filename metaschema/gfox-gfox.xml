@@ -463,21 +463,29 @@ return
                               docSimilarMsg docSimilarMsgOK
                               count countMsg countMsgOK
                               
-                              countContextNodes countContextNodesMsg contContextNodesMsgOK
-                              minCountContextNodes minCountContextNodesMsg minCountContextNodesMsgOK
-                              maxCountContextNodes maxCountContextNodesMsg maxCountContextNodesMsgOK
+                              countContextNodes minCountContextNodes maxCountContextNodes
+                              countTargetResources minCountTargetResources maxCountTargetResources
+                              countTargetDocs minCountTargetDocs maxCountTargetDocs
+                              countTargetNodes minCountTargetNodes maxCountTargetNodes
+                              countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                              countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                              countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
                               
-                              countTargetResources countTargetResourcesMsg countTargetResourcesMsgOK
-                              minCountTargetResources minCountTargetResourcesMsg minCountTargetResourcesMsgOK
-                              maxCountTargetResources maxCountTargetResourcesMsg maxCountTargetResourcesMsgOK                              
+                              countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                              countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                              countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                              countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                              countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                              countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                              countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
                               
-                              countTargetDocs countTargetDocsMsg countTargetDocsMsgOK
-                              minCountTargetDocs minCountTargetDocsMsg minCountTargetDocsMsgOK
-                              maxCountTargetDocs maxCountTargetDocsMsg maxCountTargetDocsMsgOK
-                              
-                              countTargetNodes countTargetNodesMsg countTargetNodesMsgOK
-                              minCountTargetNodes minCountTargetNodesMsg minCountTargetNodesMsgOK
-                              maxCountTargetNodes maxCountTargetNodesMsg maxCountTargetNodesMsgOK"
+                              countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                              countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                              countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                              countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                              countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                              countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                              countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"
                         />    
                 <ex:allowedElems elemNames="skipItem roundItem editText"
                     msg="Unexpected elements in 'docSimilar' element; expected: $elemNames"

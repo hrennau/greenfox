@@ -61,14 +61,12 @@ declare function f:applyLinkConnector($ldo as map(*),
        ============================= :)
     else if ($ldo?foxpath) then
         let $evaluationContext := $context?_evaluationContext
+        let $evaluationContextNext := 
+            if (not($contextPoint instance of node())) then $evaluationContext else
+                map:put($context?_evaluationContext, QName('', 'linkContext'), $contextPoint)
+
         return
-            (: _TO_DO_ CLARIFY - should the Foxpath context be the contextItem or the contextURI?
-               Temptative decision: the contextURI, as the context is typically not useful
-               for a Foxpath expression; note that the contextItem is accessible via
-               variable $linkContext :)
-            i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContext, true())
-            (: i:evaluateFoxpath($ldo?foxpath, $contextPoint, $evaluationContext, true()) :)
-            
+            i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContextNext, true())
             
     else if ($ldo?uriTemplate) then
         let $items := f:resolveUriTemplate($ldo, $contextPoint, $context)

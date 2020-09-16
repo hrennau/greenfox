@@ -104,14 +104,17 @@ declare function f:validateDocSimilar_similarity(
                 result:validationResult_docSimilar_exception($constraintElem, $lro, (), (), $context)
             else
             
+        (: Context node :)
+        let $linkContextNode := ($lro?contextItem[. instance of node()], $contextNode)[1]
+        
         (: Fetch target nodes :)
-        let $targetNodes := 
+        let $linkTargetNodes := 
             if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
             else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.) 
         return
             (: Exception - no target doc :)
-            if (not($targetNodes)) then            
+            if (not($linkTargetNodes)) then            
                 let $msg :=
                     if ($lro?targetURI ! i:fox-resource-exists(.)) then 
                         'Similarity target resource cannot be parsed'
@@ -123,10 +126,10 @@ declare function f:validateDocSimilar_similarity(
             else
                     
         (: Perform comparison :)
-        for $targetNode in $targetNodes
+        for $targetNode in $linkTargetNodes
         let $targetURI := $lro?targetURI
-        let $d1 := f:normalizeDocForComparison($contextNode, $constraintElem/*, $normOptions, $targetNode)
-        let $d2 := f:normalizeDocForComparison($targetNode, $constraintElem/*, $normOptions, $contextNode)
+        let $d1 := f:normalizeDocForComparison($linkContextNode, $constraintElem/*, $normOptions, $targetNode)
+        let $d2 := f:normalizeDocForComparison($targetNode, $constraintElem/*, $normOptions, $linkContextNode)
         let $isDocSimilar := deep-equal($d1, $d2)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)

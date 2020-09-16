@@ -1718,7 +1718,7 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         as attribute()* {
     let $exprAtts := ( 
         $constraintElem/@linkName ! attribute linkName {.},
-        ($constraintElem/@foxpath, $ldo?foxpath)[1] ! normalize-space(.) ! attribute foxpathXXX {.},
+        ($constraintElem/@foxpath, $ldo?foxpath)[1] ! normalize-space(.) ! attribute foxpath {.},
         ($constraintElem/@hrefXP, $ldo?hrefXP)[1] ! normalize-space(.) ! attribute hrefXP {.},    
         ($constraintElem/@uriXP, $ldo?uriXP)[1] ! normalize-space(.) ! attribute uriXP {.},        
         ($constraintElem/@linkXP, $ldo?linkXP)[1] ! normalize-space(.) ! attribute linkXP {.},        
