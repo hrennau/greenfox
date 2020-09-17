@@ -28,7 +28,8 @@ at "validationResult.xqm";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates ValuePair constraints.
+ : Validates a resource against ValuePair constraints or FoxvaluePair constraints
+ : or ValueCompared constraints or FoxvalueCompared constraints.
  :
  : The $contextItem is either the current resource, or a focus node.
  :
@@ -83,11 +84,11 @@ declare function f:validateValuePairConstraint($contextURI as xs:string,
  :)
 
 (:~
- : Validates the correspondences defined by 'valueCord' elements.
+ : Validates a resource by comparing a resource value with resource values obtained
+ : for the target resources of link resolution objects.
  :
  : @param constraintElem constraint defining element
- : @param lros Linke Result Objects
- : @param contextInfo context information
+ : @param lros Linke Result objects
  : @param context the processing context
  :)
 declare function f:validateValuesCompared($constraintElem as element(),

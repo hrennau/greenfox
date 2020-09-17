@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of a FolderSimilar constraint. The folders with which to compare
-    ("target folders") the focus resource folder are specified by a link definition - for 
-    example, by a Foxpath expression.
+    Demonstrates the use of FolderSimilar constraints. Folder similarity means that the lists
+    of member names, modified as described below, are equal. Member contents are not inspected.
     
-    Supplementary constraints: attributes @count, @minCount and @maxCount constrain the number of 
-    target folders.
+    The target folder is compared with folder(s) selected by a Link Definition ("link target folders"). 
+    The constraint contains a local Link Definition or references a global definition by name 
+    (@linkName). Here, the Link Definition is local, consisting of a Foxpath expression (@foxpath).
     
     When comparing folders, files and sub folders found in only one of the two folders being
     compared are ignored if they match a name pattern from the name patterns specified by 
-    <skipFiles>/@names or <skipFolders>/@names, respectively. Any number of <skipFiles> and 
+    skipFiles/@names or skipFolders/@names, respectively. Any number of <skipFiles> and 
     <skipFolders> elements is allowed. They may have a @where attribute with possible values 
     'here' and 'there': if 'here', the matching files or folders are only ignored if occurring 
-    in the focus resource folder ('here') or in the target folder ('there').
+    in the target folder ('here') or in the link target folder ('there').
     
     In this example, any files *.sav.* are ignored, and any *.sav folders are ignored if occurring 
     in the target folder.
@@ -25,9 +25,14 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
-            <folderSimilar foxpath="..\airports-copy" count="1">
+            
+            <!-- Check: folder 'airports-copy' is similar -->
+            <folderSimilar foxpath="..\airports-copy" count="1"
+                folderSimilarMsg="Copy folder not similar">
                 <skipFiles names="*.sav.*"/>
                 <skipFolders names="*.sav" where="there"/>
             </folderSimilar>

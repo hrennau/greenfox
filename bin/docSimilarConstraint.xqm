@@ -97,6 +97,7 @@ declare function f:validateDocSimilar_similarity(
     let $results :=
         (: For each Link Resolution objects :)
         for $lro in $lros
+        (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
         
         (: Check for link error :)
         return

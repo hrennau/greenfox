@@ -13,33 +13,33 @@
     In this example, the Link Definition contains a link context node expression (contextXP) and a
     link target nodes expression (targetXP).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.linkContext.linkTarget"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.subtrees-iterated.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
-    <!-- Define link: fileCopy -->
-    <linkDef name="fileCopy"
+    <!-- Define link: archiveFileCopy -->
+    <linkDef name="archiveFileCopy"
              contextXP="//airport[not(@href)]"
-             foxpath="fox-parent-sibling('airports-copy')\fox-child($fileName)"
+             foxpath="..\..\..\..\airports-copy.zip\#archive#\airports-copy\fox-child($fileName)"
              targetXP="//airport[@icao eq $linkContext/@icao]">
-        <constraints countTargetDocs="1"/>
+        <constraints countTargetResources="1"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: docSimilar folder -->
-        <folder foxpath="airports" id="airportsFolderShape">            
+        <!-- Visit archive contents: airports -->
+        <folder foxpath="archives\airports.zip\#archive#\airports" id="docSimilarFolderShape">            
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
-            <!-- Visit: airports-*.xml -->
+            <!-- Visit archive contents: airports-*.xml -->
             <file foxpath="airports-*.xml[//airport[not(@href)]]" id="countryAirportsFileShape">
                 <targetSize minCountMsg="Missing files: country airports files" minCount="1"/>
                 
-                <!-- Check: node content similar? -->
-                <docSimilar linkName="fileCopy" docSimilarMsg="Local airport description different from copy"
+                <!-- Check archive contents: node content similar? -->
+                <docSimilar linkName="archiveFileCopy" docSimilarMsg="Local airport description different from copy"
                             countTargetResourcesPerContextPoint="1" 
                             countTargetResourcesPerContextPointMsg="Airport description copy missing">
                 </docSimilar>

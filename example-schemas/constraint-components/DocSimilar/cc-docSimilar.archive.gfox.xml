@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint component DocSimilar. 
-    
-    This example checks resources contained by an archive file. See example 
-    'cc-docSimilar.gfox.xml' for more information about DocSimilar constraints.
+    Demonstrates the use of DocSimilar constraints. This example checks resources contained
+    by an archive file.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc.similar.archive"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -13,11 +11,16 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <!-- Target folder within archive -->
+        
+        <!-- Visit archive contents: docSimilar folder -->
         <folder foxpath="archives\docSimilar.zip\#archive#\docSimilar" id="docSimilarFolderShape">
-            <targetSize countMsg="Missing folder: DocSimilar" count="1"/>            
+            <targetSize countMsg="Missing folder: DocSimilar" count="1"/>
+
+            <!-- Visit archive contents: executionSummary1.xml -->
             <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
+                
+                <!-- Check archive congtents: doc similar? -->
                 <docSimilar foxpath="..\executionSummary-reference.xml" redReport="localIndexedPath"
                     countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                     <skipItem kind="element" localName="articleNumber"/>

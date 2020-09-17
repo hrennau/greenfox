@@ -926,29 +926,35 @@ declare function f:validationResult_docSimilar_exception(
  :) 
 declare function f:validationResult_folderSimilar(
                                           $colour as xs:string,
-                                          $targetFolder as xs:string,
-                                          $ldo as map(*)?,                                          
                                           $constraintElem as element(gx:folderSimilar),
-                                          $values as element()*)
+                                          $ldo as map(*)?,                                          
+                                          $targetURI as xs:string,                                         
+                                          $values as element()*,
+                                          $context as map(xs:string, item()*))
         as element() {
-    let $elemName := 'gx:' || $colour
-    let $constraintComponent := 'FolderSimilarConstraint'
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id
- 
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, 'folderSimilar', ())
-        else i:getErrorMsg($constraintElem, 'folderSimilar', ())
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+    let $constraintComp := 'FolderSimilar'
+    
+    let $msg := i:getResultMsg($colour, $constraintElem, 'folderSimilar')
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     let $modifiers := $constraintElem/<gx:modifiers>{*}</gx:modifiers>[*]
         
     return
-        element {$elemName}{
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComponent},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},
-            attribute targetURI {$targetFolder},
+        element {f:resultElemName($colour)}{
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+        
+            attribute targetURI {$targetURI},
             $linkDefAtts,
             $modifiers,
             $values
