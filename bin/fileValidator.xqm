@@ -110,62 +110,44 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         $folders/i:validateFolder(., $context)
     )
     let $focusNodeResults := $focusNodes/i:validateFocusNode($contextURI, ., $contextItem, $contextDoc, $context)
-    let $coreConstraintResults :=
-        for $constraint in $coreConstraints
-        return
-            typeswitch($constraint)
-            case $targetSize as element(gx:targetSize) return () (: Already processed ... :)                
-            case $lastModified as element(gx:lastModified) return 
-                i:validateLastModified($contextURI, $lastModified, $context)
-            case $fileSize as element(gx:fileSize) return 
-                i:validateFileSize($contextURI, $fileSize, $context)
-            case $fileName as element(gx:fileName) return 
-                i:validateFileName($contextURI, $fileName, $context)
-            case $mediatype as element(gx:mediatype) return 
-                i:validateMediatype($contextURI, $mediatype, $context)     
-            case $docContent as element(gx:docContent) return 
-                dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $docContent, $context)            
-            case $values as element(gx:values) return 
-                expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $values, $context)            
-            case $foxvalues as element(gx:foxvalues) return 
-                expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $foxvalues, $context)            
-            case $valuePairs as element(gx:valuePairs) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuePairs, $context)            
-            case $foxvaluePairs as element(gx:foxvaluePairs) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $foxvaluePairs, $context)            
-            case $valuesCompared as element(gx:valuesCompared) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $valuesCompared, $context)            
-            case $foxvaluesCompared as element(gx:foxvaluesCompared) return 
-                expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $foxvaluesCompared, $context)            
-            case $links as element(gx:links) return 
-                i:validateLinks($contextURI, $contextDoc, $contextItem, $links, $context)            
-            case $docSimilar as element(gx:docSimilar) return 
-                i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $docSimilar, $context)
-            case $xsdValid as element(gx:xsdValid) return 
-                i:xsdValidate($contextURI, $xsdValid, $context)
-            case $ifMediatype as element(gx:ifMediatype) return
-                $ifMediatype
-                [i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]
-                /f:validateFileInstanceComponents($contextURI, $contextDoc, $contextNode, ., $context)
+    let $coreConstraintResults := 
+        for $constraintElem in $coreConstraints return
+        
+        typeswitch($constraintElem)
+        case element(gx:targetSize) return () (: Already processed ... :)            
+        case element(gx:lastModified) return i:validateLastModified($constraintElem, $context)                
+        case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
+        case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
+        case element(gx:mediatype) return i:validateMediatype($contextURI, $constraintElem, $context)     
+        case element(gx:docContent) return dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:values) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:foxvalues) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:valuePairs) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:foxvaluePairs) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:valuesCompared) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:foxvaluesCompared) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:links) return i:validateLinks($contextURI, $contextDoc, $contextItem, $constraintElem, $context)            
+        case element(gx:docSimilar) return i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $constraintElem, $context)
+        case element(gx:xsdValid) return i:xsdValidate($contextURI, $constraintElem, $context)
+        
+        case element(gx:ifMediatype) return $constraintElem
+                     [i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]
+                      /f:validateFileInstanceComponents($contextURI, $contextDoc, $contextNode, ., $context)                
+        case element(gx:xpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)
+        case element(gx:foxpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)            
+        case element(gx:contentCorrespondence) return concord:validateConcord($contextURI, $contextDoc, $contextItem, $constraintElem, $context)
                 
-            case $xpath as element(gx:xpath) return 
-                i:validateExpressionValue($contextURI, $xpath, $contextItem, $contextDoc, $context)
-            case $foxpath as element(gx:foxpath) return 
-                i:validateExpressionValue($contextURI, $foxpath, $contextItem, $contextDoc, $context)            
-            case $concord as element(gx:contentCorrespondence) return 
-                concord:validateConcord($contextURI, $contextDoc, $contextItem, $concord, $context)
-                
-            default return 
-                error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
-                      concat('Unexpected shape or constraint element, name: ', $constraint/name()))
-        let $extensionConstraintResults := 
-            $extensionConstraints/f:validateExtensionConstraint($contextURI, $contextDoc, $contextNode, ., $context)         
-        return (
-            $resourceShapeResults, 
-            $focusNodeResults,
-            $coreConstraintResults,
-            $extensionConstraintResults
-        )        
+        default return 
+            error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
+                  concat('Unexpected shape or constraint element, name: ', $constraintElem/name()))
+    let $extensionConstraintResults := 
+        $extensionConstraints/f:validateExtensionConstraint($contextURI, $contextDoc, $contextNode, ., $context)         
+    return (
+        $resourceShapeResults, 
+        $focusNodeResults,
+        $coreConstraintResults,
+        $extensionConstraintResults
+    )        
 };        
 
 (:~

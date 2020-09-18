@@ -784,11 +784,12 @@ return
                     matches matchesMsg matchesMsgOK
                     notMatches notMatchesMsg notMatchesMsgOK
                     like likeMsg likeMsgOK
-                    notLike notLikeMsg notLikeMsgOK"
+                    notLike notLikeMsg notLikeMsgOK
+                    flags"
                     msg="Unexpected attributes in 'lastModified' element."
                     msgOK="OK - 'lastModified' element: no unexpected attributes"/>
                 <ex:oneOrMoreAtts
-                    attNames="eq lt le gt ge"
+                    attNames="eq lt le gt ge matches notMatches like notLike"
                     msg="One of these attributes expected: $attNames"
                     msgOK="OK - 'lastModified' element: required attributes found"/>
                 

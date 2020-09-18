@@ -206,10 +206,14 @@ declare function f:normalizeDocForComparison($node as node(),
         for $normItem in $normItems
         return
             typeswitch($normItem)
+            
+            (: Ignore items :)
             case $skipItem as element(gx:skipItem) return
                 let $selected := $selectedItems($node_, $skipItem)            
                 return
                     if (empty($selected)) then () else delete node $selected
+                    
+            (: Round numeric values :)
             case $roundItem as element(gx:roundItem) return
                 let $selected := $selectedItems($node_, $roundItem)            
                 return
@@ -221,7 +225,8 @@ declare function f:normalizeDocForComparison($node as node(),
                         let $value := $node/number(.)
                         let $newValue := round($value div $scale, 0) * $scale
                         return replace value of node $node with $newValue
-                        
+              
+            (: Edit item text (string replacement) :)
             case $editText as element(gx:editText) return
                 let $selected := $selectedItems($node_, $editText)
                 return

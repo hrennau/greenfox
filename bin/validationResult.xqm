@@ -116,9 +116,9 @@ declare function f:validationResultValues($value as item()*,
 declare function f:validationResult_fileProperties($colour as xs:string,
                                                    $constraintElem as element(),
                                                    $constraintNode as attribute(),
-                                                   $context as map(xs:string, item()*),
                                                    $actualValue as item(),
-                                                   $additionalAtts as attribute()*) 
+                                                   $additionalAtts as attribute()*,
+                                                   $context as map(xs:string, item()*)) 
         as element() {
     let $resourceShapeId := $constraintElem/@resourceShapeID        
     let $resourceShapePath := $constraintElem/@resourceShapePath    
@@ -152,6 +152,8 @@ declare function f:validationResult_fileProperties($colour as xs:string,
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.), $fn_msg(), (), ())
     let $values := f:validationResultValues($actualValue, $constraintElem)
     let $resourceShapeId := $constraintElem/@resourceShapeID
+    let $flags := $constraintElem/@flags
+    let $case := $constraintElem/@case
     return
     
         element {f:resultElemName($colour)} {
@@ -953,9 +955,9 @@ declare function f:validationResult_folderSimilar(
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-        
-            attribute targetURI {$targetURI},
             $linkDefAtts,
+            
+            attribute targetURI {$targetURI},
             $modifiers,
             $values
         }        
@@ -975,36 +977,38 @@ declare function f:validationResult_folderSimilar(
  :)
 declare function f:validationResult_folderSimilar_count(
                                     $colour as xs:string,
-                                    $ldo as map(*)?,
                                     $constraintElem as element(gx:folderSimilar),
-                                    $constraintAtt as attribute(),
+                                    $constraintNode as attribute(),
+                                    $ldo as map(*)?,
                                     $targetItems as item()*,
-                                    $targetContextPath as xs:string)
+                                    $targetContextPath as xs:string,
+                                    $context as map(xs:string, item()*))
         as element() {
-    let $actCount := count($targetItems)        
-    let $elemName := if ($colour eq 'green') then 'gx:green' else 'gx:red'
-    let $constraintComp := 'FolderSimilarTarget' || $constraintAtt/i:firstCharToUpperCase(local-name(.))
-    let $msg :=
-        if ($colour eq 'green') then $constraintElem/i:getOkMsg(., $constraintAtt/local-name(.), ())
-        else $constraintElem/i:getErrorMsg(., $constraintAtt/local-name(.), ())
-        
-    (: Link description attributes :)
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+    let $constraintComp := 'FolderSimilar' || $constraintNode/i:firstCharToUpperCase(local-name(.))
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     
-    (: Values :)
-    let $values :=
-        if (not($colour = ('red', 'yellow'))) then ()
-        else f:validationResultValues($targetItems, $constraintElem)
+    let $actCount := count($targetItems)    
+    let $values := f:validationResultValues($targetItems, $constraintElem)[$colour = ('red', 'yellow')]
     return
-        element {$elemName} {
-            $msg ! attribute msg {.},
-            attribute filePath {$targetContextPath},
-            attribute constraintComp {$constraintComp},
-            $constraintElem/@id/attribute constraintID {. || '-' || $constraintAtt/local-name(.)},                    
-            $constraintElem/@resourceShapeID,
-            $constraintAtt,
+        element {f:resultElemName($colour)} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $linkDefAtts,            
+            $constraintNode,
+            
             attribute valueCount {$actCount},
-            $linkDefAtts,
             $values
         }
 };

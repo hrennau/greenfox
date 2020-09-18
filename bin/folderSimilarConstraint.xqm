@@ -61,18 +61,20 @@ declare function f:validateFolderSimilar($contextURI as xs:string,
 (:~
  : Validates the target count of a resource shape or a focus node.
  :
- : @param constraintElem element declaring the constraints
+ : @param constraintElem element declaring the FolderSimilar constraint
+ : @param ldo the Link Definition object used to provide the folders with which to compare
+ : @param targetURIs the file paths of the folders with which to compare 
  : @param targetItems the target resources obtained by resolving the target declaration
  : @param context the processing context
  : @return validation results obtained for the target count constraints
  :) 
 declare function f:validateFolderSimilar_count($constraintElem as element(), 
                                                $ldo as map(*)?,
-                                               $targetItems as item()*,
+                                               $targetURIs as item()*,
                                                $context as map(xs:string, item()*))
         as element()* {
-    let $contextPath := $context?_contextPath        
-    let $targetCount := count($targetItems)    
+    let $contextPath := $context?_targetInfo?contextURI        
+    let $targetCount := count($targetURIs)    
     let $countConstraints := $constraintElem/(@count, @minCount, @maxCount)
     return if (empty($countConstraints)) then () else
     
@@ -87,16 +89,17 @@ declare function f:validateFolderSimilar_count($constraintElem as element(),
     let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
     return        
         vr:validationResult_folderSimilar_count(
-            $colour, $ldo, $constraintElem, $cmp, $targetItems, $contextPath)
+            $colour, $constraintElem, $cmp, $ldo, $targetURIs, $contextPath, $context)
 };
 
 (:~
  : Validates the similarity between a folder and other folders.
  :
  : @param contextURI the file path of the folder to be checked
- : @param constraintElem element declaring the constraints
- : @param targetFolders the target folders with which to compare
- : @param evaluationContext the evaluation context
+ : @param constraintElem element declaring the FolderSimilar constraint
+ : @param ldo the Link Definition object used to provide the folders with which to compare
+ : @param targetURIs the file paths of the folders with which to compare
+ : @param context the processing context
  : @return validation results obtained for the target count constraints
  :) 
 declare function f:validateFolderSimilar_similarity(
@@ -161,19 +164,14 @@ declare function f:compareFolders($folder1 as xs:string,
     let $dirs1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-dir(.)]  
     let $dirs2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-dir(.)]
     
-    let $fileNames1 := $files1 ! replace(., '^.*[/\\]', '')
-    let $fileNames2 := $files2 ! replace(., '^.*[/\\]', '')
+    let $fileNames1 := $files1 ! i:resourceName(.)
+    let $fileNames2 := $files2 ! i:resourceName(.)
     let $fileNames1Only := $fileNames1[not(. = $fileNames2)]
-        [   
-            not(some $ignoredFile in $ignoredFiles satisfies 
-                matches(., $ignoredFile/@regex, 'i'))
-        ]
-    let $dirNames1 := $dirs1 ! replace(., '^.*[/\\]', '')
-    let $dirNames2 := $dirs2 ! replace(., '^.*[/\\]', '')
+        [not(some $file in $ignoredFiles satisfies matches(., $file/@regex, 'i'))]
+    let $dirNames1 := $dirs1 ! i:resourceName(.)
+    let $dirNames2 := $dirs2 ! i:resourceName(.)
     let $dirNames1Only := $dirNames1[not(. = $dirNames2)]
-       [
-            not(some $ignoredFile in $ignoredFolders satisfies 
-                matches(., $ignoredFile/@regex, 'i'))]    
+       [not(some $folder in $ignoredFolders satisfies matches(., $folder/@regex, 'i'))]    
     return
         map:merge((
             if (empty($fileNames1Only)) then () else map{'files1Only': $fileNames1Only},
@@ -186,13 +184,13 @@ declare function f:compareFolders($folder1 as xs:string,
  : The configuration contains regular expressions matched by the names of
  : files and folders to be ignored.
  :
- : @param folderSimilar an element declaring a Folder Similar constraint
+ : @param constraintElem the constraint element, declaring a Folder Similar constraint
  : @return a configuration
  :) 
-declare function f:getFolderSimilarityConfig($folderSimilar as element(gx:folderSimilar))
+declare function f:getFolderSimilarityConfig($constraintElem as element(gx:folderSimilar))
         as element() {
     let $ignoredFiles :=
-        for $elem in $folderSimilar/gx:skipFiles    
+        for $elem in $constraintElem/gx:skipFiles    
         for $name in $elem/@names/tokenize(.)
         let $regex := $name ! i:glob2regex(.)
         return 
@@ -200,7 +198,7 @@ declare function f:getFolderSimilarityConfig($folderSimilar as element(gx:folder
                 $elem/@where
             }</ignoredFile>
     let $ignoredFolders :=
-        for $elem in $folderSimilar/gx:skipFolders    
+        for $elem in $constraintElem/gx:skipFolders    
         for $name in $elem/@names/tokenize(.)
         let $regex := $name ! i:glob2regex(.)
         return 
@@ -220,7 +218,6 @@ declare function f:getFolderSimilarityConfig($folderSimilar as element(gx:folder
             <ignoredFiles>{$ignoredFilesAny}</ignoredFiles>[$ignoredFilesAny],
             <ignoredFilesHere>{$ignoredFilesHere}</ignoredFilesHere>[$ignoredFilesHere],
             <ignoredFilesThere>{$ignoredFilesThere}</ignoredFilesThere>[$ignoredFilesThere],
-
             <ignoredFolders>{$ignoredFoldersAny}</ignoredFolders>[$ignoredFoldersAny],
             <ignoredFoldersHere>{$ignoredFoldersHere}</ignoredFoldersHere>[$ignoredFoldersHere],
             <ignoredFoldersThere>{$ignoredFoldersThere}</ignoredFoldersThere>[$ignoredFoldersThere]

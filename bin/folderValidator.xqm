@@ -91,34 +91,17 @@ declare function f:validateFolderInstance($contextURI as xs:string,
         
         (: validate - constraints and value shapes :)
         let $valueShapeResults :=
-            for $constraint in $constraints[not(self::gx:targetSize)]
-            let $error :=
-                typeswitch($constraint)
-                
-                case $foxvalues as element(gx:foxvalues) return 
-                    value:validateValueConstraint($contextURI, (), (), $foxvalues, $context)
-                case $foxvaluePairs as element(gx:foxvaluePairs) return 
-                    vpair:validateValuePairConstraint($contextURI, (), (), $foxvaluePairs, $context)
-                case $foxvaluesCompared as element(gx:foxvaluesCompared) return 
-                    vpair:validateValuePairConstraint($contextURI, (), (), $foxvaluesCompared, $context)
-                    
-                case $folderContent as element(gx:folderContent) return f:validateFolderContent($contextURI, $folderContent, $context)
-                case $folderSimilar as element(gx:folderSimilar) return f:validateFolderSimilar($contextURI, $folderSimilar, $context)
-                case $lastModified as element(gx:lastModified) return i:validateLastModified($contextURI, $lastModified, $context)
-                case $folderName as element(gx:folderName) return i:validateFileName($contextURI, $folderName, $context)
-                case $foxpath as element(gx:foxpath) return i:validateExpressionValue($contextURI, $foxpath, $contextURI, (), $context)                
-                default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraint)))
-            return
-                if ($error) then $error/i:augmentErrorElement(., (attribute folderPath {$contextURI}), 'first')
-                else (
-                    error(QName((), 'SYSTEM_ERROR'), 'Unexpected event: validation without result'),
-                    <gx:green>{
-                        attribute constraintComp {$constraint/local-name()},                    
-                        $constraint/@id/attribute constraintID {.},
-                        $constraint/@label/attribute constraintLabel {.},
-                        attribute folderPath {$contextURI}
-                    }</gx:green>
-                )
+            for $constraintElem in $constraints[not(self::gx:targetSize)] return
+            typeswitch($constraintElem)
+            case element(gx:lastModified) return i:validateLastModified($constraintElem, $context)
+            case element(gx:folderName) return i:validateFileName($constraintElem, $context)
+            case element(gx:foxvalues) return value:validateValueConstraint($contextURI, (), (), $constraintElem, $context)
+            case element(gx:foxvaluePairs) return vpair:validateValuePairConstraint($contextURI, (), (), $constraintElem, $context)
+            case element(gx:foxvaluesCompared) return vpair:validateValuePairConstraint($contextURI, (), (), $constraintElem, $context)
+            case element(gx:folderContent) return f:validateFolderContent($contextURI, $constraintElem, $context)
+            case element(gx:folderSimilar) return f:validateFolderSimilar($contextURI, $constraintElem, $context)
+            case element(gx:foxpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextURI, (), $context)                
+            default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraintElem)))
         return ($resourceShapeResults, $valueShapeResults)                    
     )
     return

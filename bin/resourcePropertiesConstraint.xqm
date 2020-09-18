@@ -27,49 +27,44 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateLastModified($filePath as xs:string, 
-                                        $constraintElem as element(gx:lastModified), 
+declare function f:validateLastModified($constraintElem as element(gx:lastModified), 
                                         $context as map(*))
         as element()* {
+    let $contextURI := $context?_targetInfo?contextURI        
     let $constraintId := $constraintElem/@id
     let $constraintLabel := $constraintElem/@label
     
+    let $eq := $constraintElem/@eq
     let $lt := $constraintElem/@lt
     let $gt := $constraintElem/@gt
     let $le := $constraintElem/@le
     let $ge := $constraintElem/@ge
-    let $eq := $constraintElem/@eq
     let $like := $constraintElem/@like
     let $notLike := $constraintElem/@notLike
     let $matches := $constraintElem/@matches
-    let $notMatches := $constraintElem/@notMatches
-    
+    let $notMatches := $constraintElem/@notMatches    
     let $flags := string($constraintElem/@flags)
     
-    (: let $actValue := file:last-modified($filePath) ! string(.) :)
-    let $actValue := i:resourceLastModified($filePath) ! string(.)
+    let $actValue := i:resourceLastModified($contextURI) ! string(.)
     
     let $results := 
-        for $facet in ($lt, $gt, $le, $ge, $eq, $like, $notLike, $matches, $notMatches)
+        for $cmp in ($eq, $lt, $gt, $le, $ge, $eq, $like, $notLike, $matches, $notMatches)
         let $violation :=
-            switch($facet/local-name(.))
-            case 'lt' return $actValue >= $facet
-            case 'le' return $actValue > $facet
-            case 'gt' return $actValue <= $facet
-            case 'ge' return $actValue < $facet
-            case 'eq' return $actValue != $facet
+            switch($cmp/local-name(.))
+            case 'eq' return $actValue = $cmp
+            case 'lt' return $actValue >= $cmp
+            case 'le' return $actValue > $cmp
+            case 'gt' return $actValue <= $cmp
+            case 'ge' return $actValue < $cmp
+            case 'eq' return $actValue != $cmp
             case 'matches' return not(matches($actValue, $matches, $flags))
             case 'notMatches' return matches($actValue, $notMatches, $flags)
             case 'like' return not(matches($actValue, $like/f:glob2regex(.), $flags))
             case 'notLike' return matches($actValue, $notLike/f:glob2regex(.), $flags)            
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
-        let $additionalAtts := (
-            if (not($facet/local-name(.) = ('like', 'notLike', 'matches', 'notMatches'))) then ()
-            else attribute flags {$flags}
-        )
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $cmp, $actValue, (), $context)
     return $results                        
 };
 
@@ -81,10 +76,10 @@ declare function f:validateLastModified($filePath as xs:string,
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateFileSize($filePath as xs:string, 
-                                    $constraintElem as element(gx:fileSize), 
+declare function f:validateFileSize($constraintElem as element(gx:fileSize), 
                                     $context as map(*))
         as element()* {
+    let $contextURI := $context?_targetInfo?contextURI        
     let $constraintId := $constraintElem/@id
     let $constraintLabel := $constraintElem/@label
 
@@ -95,7 +90,7 @@ declare function f:validateFileSize($filePath as xs:string,
     let $gt := $constraintElem/@gt
     let $ge := $constraintElem/@ge
     
-    let $actValue := i:resourceFileSize($filePath)
+    let $actValue := i:resourceFileSize($contextURI)
     
     let $results := 
         for $facet in ($lt, $gt, $le, $ge, $eq)
@@ -109,9 +104,8 @@ declare function f:validateFileSize($filePath as xs:string,
             case 'ge' return $actValue < $facet
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
-        let $additionalAtts := ()
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $actValue, (), $context)
     return $results                        
 };
 
@@ -123,10 +117,10 @@ declare function f:validateFileSize($filePath as xs:string,
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateFileName($filePath as xs:string, 
-                                    $constraintElem as element(gx:fileName), 
+declare function f:validateFileName($constraintElem as element(gx:fileName), 
                                     $context as map(*))
         as element()* {
+    let $contextURI := $context?_targetInfo?contextURI        
     let $constraintId := $constraintElem/@id
     let $constraintLabel := $constraintElem/@label
     
@@ -140,7 +134,7 @@ declare function f:validateFileName($filePath as xs:string,
     let $flags := ($constraintElem/@flags, '')[1]
     let $case := ($constraintElem/@case/xs:boolean(.), false())[1]
 
-    let $actValue := i:resourceName($filePath)
+    let $actValue := i:resourceName($contextURI)
     let $actValueED := if ($case) then $actValue else lower-case($actValue)
     let $results := 
         for $facet in ($eq, $ne, $like, $notLike, $matches, $notMatches)
@@ -155,13 +149,8 @@ declare function f:validateFileName($filePath as xs:string,
             case 'notMatches' return matches($actValueED, $facetED, $flags)
             default return error()
         let $colour := if ($violation) then 'red' else 'green'
-        let $additionalAtts := (
-            attribute case {$case},
-            if (not($facet/local-name(.) = ('like', 'notLike', 'matches', 'notMatches'))) then ()
-            else attribute flags {$flags}
-        )
         return   
-            result:validationResult_fileProperties($colour, $constraintElem, $facet, $context, $actValue, $additionalAtts)
+            result:validationResult_fileProperties($colour, $constraintElem, $facet, $actValue, (), $context)
     return $results                        
 };
 

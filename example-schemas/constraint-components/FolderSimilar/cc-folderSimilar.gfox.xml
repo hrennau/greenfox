@@ -31,10 +31,14 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Check: folder 'airports-copy' is similar -->
-            <folderSimilar foxpath="..\airports-copy" count="1"
-                folderSimilarMsg="Copy folder not similar">
+            <folderSimilar foxpath="..\airports-copy"
+                folderSimilarMsg="Copy folder not similar"
+                countTargetResources="1" 
+                countTargetResourcesMsg="Missing folder, airports-copy">
                 <skipFiles names="*.sav.*"/>
-                <skipFolders names="*.sav" where="there"/>
+                <skipFiles names="airports-ireland.xml" where="here"/>
+                <skipFiles names="airports-ireland.updated.xml" where="there"/>
+                <skipFolders names="*.sav"/>
             </folderSimilar>
         </folder>                
     </domain>

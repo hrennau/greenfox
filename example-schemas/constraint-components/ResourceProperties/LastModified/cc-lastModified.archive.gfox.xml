@@ -1,46 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of constraint components LastModifiedXY.
+    Demonstrates the use of LastModified constraints. This example checks resources
+    contained by an archive file.  
     
-    This example checks resources contained by an archive file.
-    
-    Constraint components: 
-    * Name:  LastModifiedLe
-    - XML:   lastModified/@le
-    - Check: The date or date-time of last modification must be less than or equal to the specified limit
-    
-    * Name:  LastModifiedGt
-    - XML:   lastModified/@gt
-    - Check: The date or date-time of last modification must be greater than the specified limit
-    
-    * Name:  LastModifiedMatches 
-    - XML:   lastModified/@matches
-    - Check: The date or date-time of last modification must match the given regular expression
-    
-    * Name:  LastModifiedNotMatches
-    - XML:   lastModifiedNotMatches
-    - Check: The date or date-time of last modification must not match the given regular expression
-        
-    In this example, validation catches files modified ...
-    * after 2020-04-15
-    * before 2020-04-01
-    * not between 20:00 and 22:00
-    * between 21:10 and 21:30
-    
-    Note optional further parameters (@flags not used in the example):
-    : @case - if 'true', the date-time is compared case-sensitively; default: 'false'
-    * @flags - regex flags, used in @like, @notLike, @matches, @notMatches; default: ''
-    
-    The complete set of constraint components related to the date-time of last modification is:
-    * LastModifiedGt - lastModified/@gt
-    * LastModifiedGe - lastModified/@ge    
-    * LastModifiedLt - lastModified/@lt
-    * LastModifiedLe - lastModified/@le             
-    * LastModifiedEq - lastModified/@eq
-    * LastModifiedLike - lastModified/@like   
-    * LastModifiedNotLike - lastModified/@notLike
-    * LastModifiedMatches - lastModified/@matches   
-    * LastModifiedNotMatches - lastModified/@notMatches
+    Note that there is no difference compared with checking normal file system resources - 
+    dealing with archive contents is just a detail of navigation used to provide the 
+    resources involved.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified.archive"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -50,15 +15,17 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit archive contents: airports folder -->
         <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- Check archive contents: last-modified dates -->
             <file foxpath=".\\*" id="anyFileShape">
                 <targetSize minCount="140" minCountMsg="Less files than expected"/>
                 <lastModified 
                     le="2020-04-30" leMsg="Files must be older than 2020-04-30"
-                    gt="2020-04-01" gtMsg="Files must be from 2020-04-01 or later"
-                    matches="^.*T(21|22|23).*$" matchesMsg="Files must be modified between 21:00 and 00:00"
-                    notMatches="^.*T23:5*" notMatchesMsg="Files must not be modified between 23:50 and 00:00"/>                
+                    gt="2020-04-01" gtMsg="Files must be from 2020-04-01 or later"/>                
             </file>
         </folder>
     </domain>
