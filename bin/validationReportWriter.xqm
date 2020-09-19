@@ -47,6 +47,7 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
     case "redTree" return f:writeValidationReport_redTree($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum1" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum2" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "sum3" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)    
     case "std" return f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, $reportType, $format, $options)    
     default return error(QName((), 'INVALID_ARG'), concat('Unexpected validation report type: ', "'", $reportType, "'",
         '; value must be one of: raw, whiteTree, redTree.'))
@@ -313,19 +314,21 @@ declare function f:writeValidationReport_sum(
                    tt:lpad($countGreen, $countGreenWidth, ' '),
                    ' |'),
         $hsep1,
-        if ($reportType eq 'sum1') then () else (
-        
-        ' ',
-        if (empty($redResources)) then () else (
-        'Red resources: ',
-        $redResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
-        ' '),
-        if (empty($greenResources)) then () else (
-        'Green resources: ',
-        $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
-        ' ')
+        if ($reportType eq 'sum1') then () else (        
+            ' ',
+            if (empty($redResources)) then () else (
+                'Red resources: ',
+                $redResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
+                ' ',        
+                if ($reportType eq 'sum2') then () else (
+                    if (empty($greenResources)) then () else (
+                    'Green resources: ',
+                    $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
+                    ' ')
+                )
+            )
         )
-    )                   
+    )
     let $report := string-join($lines, '&#xA;')
     return $report
 };    

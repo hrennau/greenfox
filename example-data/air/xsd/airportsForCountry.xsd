@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"> 
+    <xs:element name="airportsForCountry" type="airportsForCountryType"/>
+    
+    <xs:complexType name="airportsForCountryType">
+        <xs:sequence>
+            <xs:element name="airportType"/>
+        </xs:sequence>
+        <xs:attribute name="country" type="xs:string" use="required"/>
+        <xs:attribute name="count" type="xs:integer" use="required"/>
+    </xs:complexType>
+    
+    <xs:complexType name="airportType">
+        <xs:sequence minOccurs="0">
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="city" type="xs:string"/>
+            <xs:element name="country" type="xs:string"/>
+            <xs:element name="geo" type="geoType"/>
+            <xs:element name="temporal" type="temporalType"/>
+            <xs:element name="type" type="xs:string"/>            
+            <xs:element name="source1" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:integer" use="required"/>
+        <xs:attribute name="icao" type="xs:string" use="required"/>        
+        <xs:attribute name="iata" type="xs:string"/>
+        <xs:attribute name="latitude" type="xs:decimal"/>
+        <xs:attribute name="longitude" type="xs:decimal"/>
+        <xs:attribute name="href" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="geoType">
+        <xs:sequence>
+            <xs:element name="latitude" type="xs:decimal"/>
+            <xs:element name="longitude" type="xs:decimal"/>
+            <xs:element name="altitude" type="xs:decimal"/>
+        </xs:sequence>        
+    </xs:complexType>
+    
+    <xs:complexType name="temporalType">
+        <xs:sequence>
+            <xs:element name="timezone" type="xs:integer"/>
+            <xs:element name="tzTimezone" type="xs:string"/>
+            <xs:element name="dst" type="xs:string"/>
+        </xs:sequence>        
+    </xs:complexType>
+</xs:schema>

@@ -1,0 +1,17 @@
+<airport id="433" iata="KAJ" icao="EFKI">
+  <name>Kajaani Airport</name>
+  <city>Kajaani</city>
+  <country>Finland</country>
+  <geo>
+    <latitude>64.285499572754</latitude>
+    <longitude>27.692399978638</longitude>
+    <altitude>483</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

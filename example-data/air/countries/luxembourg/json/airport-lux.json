@@ -1,0 +1,22 @@
+{
+  "airport":{
+    "id":629,
+    "iata":"LUX",
+    "icao":"ELLX",
+    "name":"Luxembourg-Findel International Airport",
+    "city":"Luxemburg",
+    "country":"Luxembourg",
+    "geo":{
+      "latitude":49.6233333,
+      "longitude":6.2044444,
+      "altitude":1234
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Luxembourg",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

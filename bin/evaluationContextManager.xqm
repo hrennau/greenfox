@@ -355,6 +355,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
         let $foxpathExpressions := (
             $relationshipDefinitions?foxpath ! .,         
             $components/(
+                self::gx:foxvaluesCompared/gx:foxvalueCompared/(@expr1FOX, @expr2FOX),
                 self::gx:foxpath/@expr,
                 self::gx:validatorFoxpath,
                 @foxpath,

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    A simple schema checking the names and IATA codes of airport files.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/air-data-domain"
+          xmlns="http://www.greenfox.org/ns/schema">
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="air data domain">
+        
+        <!-- VISIT: 'air' folder -->
+        <folder foxpath="air" id="airFolderShape">
+            <targetSize count="1" countMsg="Missing folder: air"/>   
+            
+            <!-- VISIT: index folder -->
+            <folder foxpath="index" id="indexFolderShape">
+                <targetSize count="1" countMsg="Missing folder: index"/>
+                
+                <!-- CHECK: folder contents -->
+                <folderContent closed="true">
+                    <memberFile name="airports.xml"/>
+                    <memberFile name="airports.json"/>
+                    <memberFile name="airports-*.xml" minCount="1" maxCount="1000"/>
+                    <memberFile name="airports-*.json" minCount="1" maxCount="1000"/>
+                </folderContent>
+                
+            </folder>
+            
+            <!-- VISIT: country folders -->
+            <folder foxpath="countries\*" id="countryFolderShape">
+                <targetSize minCount="1" minCountMsg="At least one country expected"/>
+                
+                <!-- CHECK: folder contents -->
+                <folderContent closed="true">
+                    <memberFolder name="csv"/>
+                    <memberFolder name="json"/>
+                    <memberFolder name="xml"/>
+                </folderContent>
+
+                <!-- VISIT: XML airport files -->
+                <file foxpath="xml\*" id="xmlAirportFileShape">
+                    <targetSize minCount="1" minCountMsg="At least one XML airport file expected"/>
+                
+                    <!-- CHECK: file name -->
+                    <fileName like="airport-*.xml" 
+                              likeMsg="Expected name pattern - airport-XXX.xml"/>
+                
+                    <!-- CHECK: well-formed XML -->
+                    <mediatype eq="xml"/>
+                
+                    <!-- CHECK values: altitude and IATA code -->    
+                    <values>
+                        <value exprXP="//latitude" datatype="decimal"/>
+                        <value exprXP="//longitude" datatype="decimal"/>
+                        <value exprXP="//altitude"
+                               count="1" countMsg="Missing altitude"
+                               useDatatype="integer"
+                               ge="-10" 
+                               geMsg="Altitude must be ge -10"/>
+                        <value exprXP="/airport/@iata" 
+                               count="1" countMsg="Missing IATA code"
+                               matches="^[A-Z]{3}$" 
+                               matchesMsg="IATA code must be three uppercase letters"/>
+                    </values>
+                    
+                    <!-- CHECK values: country must match containing folder name -->
+                    <foxvaluesCompared foxpath="..\..">
+                        <foxvalueCompared expr1XP="/airport/country" count1="1" 
+                                          expr2FOX="file-name(.)" count2="1"
+                                          useString="lc" 
+                                          cmp="eq"
+                                          eqMsg="The airport country field must match the grandparent folder name"/>
+                    </foxvaluesCompared>
+                </file>
+            </folder>                
+        </folder>
+    </domain>
+
+</greenfox>
