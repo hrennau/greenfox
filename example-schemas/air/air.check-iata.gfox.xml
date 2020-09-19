@@ -35,7 +35,19 @@
                     <links hrefXP="//@href" recursive="true"
                            minCountTargetResources="50"
                            resolvable="true"
-                           resolvableMsg="Link resolving failed"/>
+                           resolvableMsg="Recursive link resolving failed"/>
+                    
+                    <!-- VISIT: <airportsForCountry> elements -->
+                    <focusNode xpath="//airportsForCountry">
+                        
+                        <!-- CHECK: @href built on @country -->
+                        <valuePairs>
+                            <valuePair expr1XP="@country" 
+                                       expr2XP="@href/replace(., '^airports-|\.xml$', '')"
+                                       cmp="eq" eqMsg="href must be airports-$country.xml"
+                                       useString="lc"/>
+                        </valuePairs>
+                    </focusNode>
                 </file>
             </folder>
             
