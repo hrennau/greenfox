@@ -9,7 +9,7 @@
         "icao":"EICK",
         "latitude":51.84130096435547,
         "longitude":-8.491109848022461,
-        "href":"ireland\/airport-ork.json"
+        "href":"..\/countries\/ireland\/xml\/airport-ork.json"
       },
       {
         "id":597,
@@ -17,7 +17,7 @@
         "icao":"EICM",
         "latitude":53.300201416015625,
         "longitude":-8.941590309143066,
-        "href":"ireland\/airport-gwy.json"
+        "href":"..\/countries\/ireland\/xml\/airport-gwy.json"
       },
       {
         "id":599,
@@ -25,7 +25,7 @@
         "icao":"EIDW",
         "latitude":53.421299,
         "longitude":-6.27007,
-        "href":"ireland\/airport-dub.json"
+        "href":"..\/countries\/ireland\/xml\/airport-dub.json"
       },
       {
         "id":600,
@@ -33,7 +33,7 @@
         "icao":"EIKN",
         "latitude":53.910301208496094,
         "longitude":-8.818490028381348,
-        "href":"ireland\/airport-noc.json"
+        "href":"..\/countries\/ireland\/xml\/airport-noc.json"
       },
       {
         "id":601,
@@ -41,7 +41,7 @@
         "icao":"EIKY",
         "latitude":52.18090057373047,
         "longitude":-9.52377986907959,
-        "href":"ireland\/airport-kir.json"
+        "href":"..\/countries\/ireland\/xml\/airport-kir.json"
       },
       {
         "id":602,
@@ -68,7 +68,7 @@
         "icao":"EINN",
         "latitude":52.702,
         "longitude":-8.92482,
-        "href":"ireland\/airport-snn.json"
+        "href":"..\/countries\/ireland\/xml\/airport-snn.json"
       },
       {
         "id":604,
@@ -76,7 +76,7 @@
         "icao":"EISG",
         "latitude":54.280200958252,
         "longitude":-8.5992097854614,
-        "href":"ireland\/airport-sxl.json"
+        "href":"..\/countries\/ireland\/xml\/airport-sxl.json"
       },
       {
         "id":605,
@@ -84,7 +84,7 @@
         "icao":"EIWF",
         "latitude":52.187198638916016,
         "longitude":-7.0869598388671875,
-        "href":"ireland\/airport-wat.json"
+        "href":"..\/countries\/ireland\/xml\/airport-wat.json"
       },
       {
         "id":5577,
@@ -92,7 +92,7 @@
         "icao":"EIDL",
         "latitude":55.0442008972168,
         "longitude":-8.340999603271484,
-        "href":"ireland\/airport-cfn.json"
+        "href":"..\/countries\/ireland\/xml\/airport-cfn.json"
       },
       {
         "id":5578,
@@ -119,7 +119,7 @@
         "icao":"EIIM",
         "latitude":53.1067008972168,
         "longitude":-9.653610229492188,
-        "href":"ireland\/airport-ior.json"
+        "href":"..\/countries\/ireland\/xml\/airport-ior.json"
       },
       {
         "id":6422,
@@ -127,7 +127,7 @@
         "icao":"EICA",
         "latitude":53.23030090332031,
         "longitude":-9.467780113220215,
-        "href":"ireland\/airport-nnr.json"
+        "href":"..\/countries\/ireland\/xml\/airport-nnr.json"
       },
       {
         "id":7030,
@@ -135,7 +135,7 @@
         "icao":"EIIR",
         "latitude":53.064701080322266,
         "longitude":-9.510899543762207,
-        "href":"ireland\/airport-inq.json"
+        "href":"..\/countries\/ireland\/xml\/airport-inq.json"
       },
       {
         "id":7468,
@@ -143,7 +143,7 @@
         "icao":"EIMN",
         "latitude":53.09299850463867,
         "longitude":-9.568059921264648,
-        "href":"ireland\/airport-iia.json"
+        "href":"..\/countries\/ireland\/xml\/airport-iia.json"
       },
       {
         "id":8683,
@@ -170,7 +170,7 @@
         "icao":"EIBN",
         "latitude":51.66859817504883,
         "longitude":-9.484169960021973,
-        "href":"ireland\/airport-byt.json"
+        "href":"..\/countries\/ireland\/xml\/airport-byt.json"
       }
     ]
   }

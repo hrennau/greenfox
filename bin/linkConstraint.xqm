@@ -85,11 +85,11 @@ declare function f:resolveAndValidateLinks(
         
     (: Link Definition object :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
-    let $_DEBUG := trace($ldo, '___LDO: ')
+    (: let $_DEBUG := trace($ldo, '___LDO: ') :)
     
     (: Link Resolution objects :)
     let $lros := link:resolveLinkDef($ldo, 'lro', $contextInfo?filePath, $contextItem[. instance of node()], $context, ())
-    let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ')
+    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '_LROS: ') :)
     
     (: Write validation results :)
     return (

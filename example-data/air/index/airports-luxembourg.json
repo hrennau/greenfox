@@ -8,7 +8,7 @@
       "icao":"ELLX",
       "latitude":49.6233333,
       "longitude":6.2044444,
-      "href":"luxembourg\/airport-lux.json"
+      "href":"..\/countries\/luxembourg\/xml\/airport-lux.json"
     }
   }
 }

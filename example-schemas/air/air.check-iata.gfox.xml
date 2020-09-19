@@ -26,7 +26,17 @@
                     <memberFile name="airports-*.xml" minCount="1" maxCount="1000"/>
                     <memberFile name="airports-*.json" minCount="1" maxCount="1000"/>
                 </folderContent>
-                
+               
+                <!-- VISIT: airports file -->
+                <file foxpath="airports.xml">
+                    <targetSize count="1" countMsg="Missing file: airports"/>
+                    
+                    <!-- CHECK: links resolvable, recursively -->
+                    <links hrefXP="//@href" recursive="true"
+                           minCountTargetResources="50"
+                           resolvable="true"
+                           resolvableMsg="Link resolving failed"/>
+                </file>
             </folder>
             
             <!-- VISIT: country folders -->

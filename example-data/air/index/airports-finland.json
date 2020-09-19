@@ -9,7 +9,7 @@
         "icao":"EFET",
         "latitude":68.362602233887,
         "longitude":23.424299240112,
-        "href":"finland\/airport-enf.json"
+        "href":"..\/countries\/finland\/xml\/airport-enf.json"
       },
       {
         "id":418,
@@ -36,7 +36,7 @@
         "icao":"EFHA",
         "latitude":61.856039,
         "longitude":24.786686,
-        "href":"finland\/airport-kev.json"
+        "href":"..\/countries\/finland\/xml\/airport-kev.json"
       },
       {
         "id":420,
@@ -44,7 +44,7 @@
         "icao":"EFHF",
         "latitude":60.254600524902344,
         "longitude":25.042800903320312,
-        "href":"finland\/airport-hem.json"
+        "href":"..\/countries\/finland\/xml\/airport-hem.json"
       },
       {
         "id":421,
@@ -52,7 +52,7 @@
         "icao":"EFHK",
         "latitude":60.317199707031,
         "longitude":24.963300704956,
-        "href":"finland\/airport-hel.json"
+        "href":"..\/countries\/finland\/xml\/airport-hel.json"
       },
       {
         "id":422,
@@ -98,7 +98,7 @@
         "icao":"EFHV",
         "latitude":60.6543998718,
         "longitude":24.8810997009,
-        "href":"finland\/airport-hyv.json"
+        "href":"..\/countries\/finland\/xml\/airport-hyv.json"
       },
       {
         "id":425,
@@ -144,7 +144,7 @@
         "icao":"EFIT",
         "latitude":62.1661,
         "longitude":30.073601,
-        "href":"finland\/airport-ktq.json"
+        "href":"..\/countries\/finland\/xml\/airport-ktq.json"
       },
       {
         "id":428,
@@ -152,7 +152,7 @@
         "icao":"EFIV",
         "latitude":68.607299804688,
         "longitude":27.405300140381,
-        "href":"finland\/airport-ivl.json"
+        "href":"..\/countries\/finland\/xml\/airport-ivl.json"
       },
       {
         "id":429,
@@ -160,7 +160,7 @@
         "icao":"EFJO",
         "latitude":62.662899017334,
         "longitude":29.607500076294,
-        "href":"finland\/airport-joe.json"
+        "href":"..\/countries\/finland\/xml\/airport-joe.json"
       },
       {
         "id":430,
@@ -168,7 +168,7 @@
         "icao":"EFJY",
         "latitude":62.399501800537,
         "longitude":25.678300857544,
-        "href":"finland\/airport-jyv.json"
+        "href":"..\/countries\/finland\/xml\/airport-jyv.json"
       },
       {
         "id":431,
@@ -176,7 +176,7 @@
         "icao":"EFKA",
         "latitude":63.127102,
         "longitude":23.051399,
-        "href":"finland\/airport-kau.json"
+        "href":"..\/countries\/finland\/xml\/airport-kau.json"
       },
       {
         "id":432,
@@ -184,7 +184,7 @@
         "icao":"EFKE",
         "latitude":65.778701782227,
         "longitude":24.582099914551,
-        "href":"finland\/airport-kem.json"
+        "href":"..\/countries\/finland\/xml\/airport-kem.json"
       },
       {
         "id":433,
@@ -192,7 +192,7 @@
         "icao":"EFKI",
         "latitude":64.285499572754,
         "longitude":27.692399978638,
-        "href":"finland\/airport-kaj.json"
+        "href":"..\/countries\/finland\/xml\/airport-kaj.json"
       },
       {
         "id":434,
@@ -200,7 +200,7 @@
         "icao":"EFKJ",
         "latitude":62.4625015259,
         "longitude":22.3931007385,
-        "href":"finland\/airport-khj.json"
+        "href":"..\/countries\/finland\/xml\/airport-khj.json"
       },
       {
         "id":435,
@@ -208,7 +208,7 @@
         "icao":"EFKK",
         "latitude":63.721199035645,
         "longitude":23.143100738525,
-        "href":"finland\/airport-kok.json"
+        "href":"..\/countries\/finland\/xml\/airport-kok.json"
       },
       {
         "id":436,
@@ -235,7 +235,7 @@
         "icao":"EFKS",
         "latitude":65.987602233887,
         "longitude":29.239400863647,
-        "href":"finland\/airport-kao.json"
+        "href":"..\/countries\/finland\/xml\/airport-kao.json"
       },
       {
         "id":438,
@@ -243,7 +243,7 @@
         "icao":"EFKT",
         "latitude":67.700996398926,
         "longitude":24.846799850464,
-        "href":"finland\/airport-ktt.json"
+        "href":"..\/countries\/finland\/xml\/airport-ktt.json"
       },
       {
         "id":439,
@@ -251,7 +251,7 @@
         "icao":"EFKU",
         "latitude":63.007099151611,
         "longitude":27.797800064087,
-        "href":"finland\/airport-kuo.json"
+        "href":"..\/countries\/finland\/xml\/airport-kuo.json"
       },
       {
         "id":440,
@@ -259,7 +259,7 @@
         "icao":"EFLA",
         "latitude":61.144199,
         "longitude":25.693501,
-        "href":"finland\/airport-qlf.json"
+        "href":"..\/countries\/finland\/xml\/airport-qlf.json"
       },
       {
         "id":441,
@@ -267,7 +267,7 @@
         "icao":"EFLP",
         "latitude":61.044601,
         "longitude":28.144743,
-        "href":"finland\/airport-lpp.json"
+        "href":"..\/countries\/finland\/xml\/airport-lpp.json"
       },
       {
         "id":442,
@@ -275,7 +275,7 @@
         "icao":"EFMA",
         "latitude":60.122200012207,
         "longitude":19.898199081421,
-        "href":"finland\/airport-mhq.json"
+        "href":"..\/countries\/finland\/xml\/airport-mhq.json"
       },
       {
         "id":443,
@@ -302,7 +302,7 @@
         "icao":"EFMI",
         "latitude":61.6866,
         "longitude":27.201799,
-        "href":"finland\/airport-mik.json"
+        "href":"..\/countries\/finland\/xml\/airport-mik.json"
       },
       {
         "id":445,
@@ -329,7 +329,7 @@
         "icao":"EFOU",
         "latitude":64.930099487305,
         "longitude":25.354600906372,
-        "href":"finland\/airport-oul.json"
+        "href":"..\/countries\/finland\/xml\/airport-oul.json"
       },
       {
         "id":447,
@@ -356,7 +356,7 @@
         "icao":"EFPO",
         "latitude":61.461700439453,
         "longitude":21.799999237061,
-        "href":"finland\/airport-por.json"
+        "href":"..\/countries\/finland\/xml\/airport-por.json"
       },
       {
         "id":449,
@@ -440,7 +440,7 @@
         "icao":"EFRO",
         "latitude":66.564796447754,
         "longitude":25.830400466919,
-        "href":"finland\/airport-rvn.json"
+        "href":"..\/countries\/finland\/xml\/airport-rvn.json"
       },
       {
         "id":454,
@@ -467,7 +467,7 @@
         "icao":"EFSA",
         "latitude":61.943099975586,
         "longitude":28.945100784302,
-        "href":"finland\/airport-svl.json"
+        "href":"..\/countries\/finland\/xml\/airport-svl.json"
       },
       {
         "id":456,
@@ -494,7 +494,7 @@
         "icao":"EFSO",
         "latitude":67.3949966431,
         "longitude":26.6191005707,
-        "href":"finland\/airport-sot.json"
+        "href":"..\/countries\/finland\/xml\/airport-sot.json"
       },
       {
         "id":458,
@@ -502,7 +502,7 @@
         "icao":"EFTP",
         "latitude":61.414100646973,
         "longitude":23.604400634766,
-        "href":"finland\/airport-tmp.json"
+        "href":"..\/countries\/finland\/xml\/airport-tmp.json"
       },
       {
         "id":459,
@@ -529,7 +529,7 @@
         "icao":"EFTU",
         "latitude":60.514099121094,
         "longitude":22.262800216675,
-        "href":"finland\/airport-tku.json"
+        "href":"..\/countries\/finland\/xml\/airport-tku.json"
       },
       {
         "id":461,
@@ -537,7 +537,7 @@
         "icao":"EFUT",
         "latitude":60.89640045166,
         "longitude":26.938400268555,
-        "href":"finland\/airport-uti.json"
+        "href":"..\/countries\/finland\/xml\/airport-uti.json"
       },
       {
         "id":462,
@@ -545,7 +545,7 @@
         "icao":"EFVA",
         "latitude":63.050701141357,
         "longitude":21.762199401855,
-        "href":"finland\/airport-vaa.json"
+        "href":"..\/countries\/finland\/xml\/airport-vaa.json"
       },
       {
         "id":463,
@@ -553,7 +553,7 @@
         "icao":"EFVR",
         "latitude":62.171100616455,
         "longitude":27.868600845337,
-        "href":"finland\/airport-vrk.json"
+        "href":"..\/countries\/finland\/xml\/airport-vrk.json"
       },
       {
         "id":464,
@@ -561,7 +561,7 @@
         "icao":"EFYL",
         "latitude":64.0547222,
         "longitude":24.7252778,
-        "href":"finland\/airport-yli.json"
+        "href":"..\/countries\/finland\/xml\/airport-yli.json"
       },
       {
         "id":5560,
@@ -569,7 +569,7 @@
         "icao":"EFSI",
         "latitude":62.692101,
         "longitude":22.8323,
-        "href":"finland\/airport-sjy.json"
+        "href":"..\/countries\/finland\/xml\/airport-sjy.json"
       },
       {
         "id":7725,
