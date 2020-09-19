@@ -31,6 +31,9 @@
                 <file foxpath="airports.xml">
                     <targetSize count="1" countMsg="Missing file: airports"/>
                     
+                    <!-- CHECK: XSD valid -->
+                    <xsdValid xsdFoxpath="..\..\xsd\*.xsd"/>
+                    
                     <!-- CHECK: links resolvable, recursively -->
                     <links hrefXP="//@href" recursive="true"
                            minCountTargetResources="50"
