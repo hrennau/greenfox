@@ -8,11 +8,11 @@
  
 (:~@operations
    <operations>
-      <operation name="validate" type="node()" func="validateOp">     
+      <operation name="validate" type="item()" func="validateOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="domain" type="xs:string?"/>
          <param name="params" type="xs:string?"/>
-         <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
+         <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, sum1, sum2, std" default="redTree"/>
          <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>
@@ -47,7 +47,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @return a report describing ...
  :) 
 declare function f:validateOp($request as element())
-        as element() {
+        as item() {
         
     (: Preliminary checks :)        
     let $gfoxSource := tt:getParams($request, 'gfox')/*    

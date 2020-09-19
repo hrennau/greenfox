@@ -1,22 +1,23 @@
 (:
  : -------------------------------------------------------------------------
  :
- : resourceRelationships.xqm - functions for managing the processing context
+ : processingContext.xqm - functions for managing the processing context
  :
  : -------------------------------------------------------------------------
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "foxpathUtil.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "foxpathUtil.xqm",
+   "greenfoxUtil.xqm";
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
-    "linkDefinition.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at "linkDefinition.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -25,8 +26,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : New relationships are parsed from <linkDef> elements and added to the context,
  : overwriting any existing relationship with the same name.
  :
- : @param linkDefs elements defining resource relationships
  : @param context the current processing context
+ : @param linkDefs Link Definition elements
  : @return the updated processing context
  :)
 declare function f:updateContextResourceRelationships($context as map(*),
@@ -124,7 +125,11 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
     let $augmentedValue := 
         let $raw := f:substituteVars($value, $substitutionContext, ())
         return
-            if ($name eq 'domain') then i:pathToAbsolutePath($raw)
+            if ($name eq 'domain') then 
+                try {i:pathToAbsolutePath($raw)}
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, please correct and retry;&#xA;### value: ", $raw))}
             else $raw
     let $augmentedEntry := map:entry($name, $augmentedValue)    
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))

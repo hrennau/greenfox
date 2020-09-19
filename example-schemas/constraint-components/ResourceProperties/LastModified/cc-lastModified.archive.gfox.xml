@@ -4,8 +4,7 @@
     contained by an archive file.  
     
     Note that there is no difference compared with checking normal file system resources - 
-    dealing with archive contents is just a detail of navigation used to provide the 
-    resources involved.
+    dealing with archive contents is just a detail of the navigation providing the resources.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified.archive"
           xmlns="http://www.greenfox.org/ns/schema">

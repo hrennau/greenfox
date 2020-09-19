@@ -36,7 +36,7 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
                                   $reportType as xs:string, 
                                   $reportFormat as xs:string,
                                   $options as map(*))
-        as element() {
+        as item() {
     let $domains := $gfox/gx:domain
     
     (: Initial check - only one domain allowed :)
@@ -51,8 +51,8 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
     let $results := f:validateDomain($domain, $context)
     
     (: Construct validation report :)
-    let $report := i:writeValidationReport($gfox, $domain, $context, $results, 
-                                           $reportType, $reportFormat, $options)
+    let $report := i:writeValidationReport(
+        $gfox, $domain, $results, $reportType, $reportFormat, $options, $context)
     return
         $report
 };

@@ -13,6 +13,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare variable $f:URI_XSD := 'http://www.w3.org/2001/XMLSchema';
 declare variable $f:URI_GX := 'http://www.greenfox.org/ns/schema';
+declare variable $f:URI_GXERR := 'http://www.greenfox.org/ns/error';
 declare variable $f:PREFIX_GX := 'gx';
 
 declare variable $f:DEBUG_LEVEL := 1;

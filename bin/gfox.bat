@@ -12,7 +12,7 @@ set HERE=%XERE:\=/%
 :: ====================================================================================
 
 :: defaults
-set RTYPE=r
+set RTYPE=
 set ISWHITE=
 
 :NEXTPAR
@@ -30,6 +30,8 @@ if "%value%"=="" goto :ENDPAR
 
 if "%name%"=="-w" (
    set ISWHITE=Y
+) else if "%name%"=="-r" (
+   set ISWHITE=N
 ) else if "%name%"=="-t" (
    set RTYPE=!VALUE!
    shift   
@@ -39,24 +41,26 @@ if "%name%"=="-w" (
  ) else (
    echo Unknown option: %name%
    echo Supported options: 
-   echo    -f   
+   echo    -r -w   
    echo Aborted.
    exit /b
 )
 goto :NEXTPAR
 :ENDPAR 
 
-if "%ISWHITE%"=="Y" (
-    set RTYPE=whiteTree
-) else if "%RTYPE%"=="w" (
-    set RTYPE=whiteTree
-) else if "%RTYPE%"=="r" (
-    set RTYPE=redTree
-) else (
-  echo "Unknown report type: %RTYPE%
-  echo Aborted.
-  exit /b
-)    
+if "%RTYPE"=="" (
+    if "%ISWHITE%"=="Y" (
+        set RTYPE=whiteTree
+    ) else if "%RTYPE%"=="w" (
+        set RTYPE=whiteTree
+    ) else if "%RTYPE%"=="r" (
+        set RTYPE=redTree
+    ) else (
+        echo "Unknown report type: %RTYPE%
+        echo Aborted.
+        exit /b
+    )
+)
 set schema=%name%
 shift
 set domain=%1

@@ -473,6 +473,36 @@ declare function f:pathToNative($path as xs:string)
             $path ! file:path-to-native(.) ! replace(., '/', '\\') ! replace(., '\\$', '')    
 }; 
 
+declare function f:pathToNative($path as xs:string, $backslash as xs:boolean)
+        as xs:string {
+    let $sep := codepoints-to-string(30000)    
+    let $slashChar := if ($backslash) then '\\' else '/'
+    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
+    return
+        (: URI is archive URI :)
+        if ($beforeArchiveEntry) then
+            let $after := substring($path, string-length($beforeArchiveEntry) + 1)
+            return
+                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '[/\\]', $slashChar) ! replace(., $slashChar||'$', '') 
+        (: URI is a file system URI :)
+        else
+            $path ! file:path-to-native(.) ! replace(., '[/\\]', $slashChar) ! replace(., $slashChar||'$', '')    
+}; 
+
+(:~
+ : Transforms a URI or file system path into a normalized file system
+ : path. A normalized file system path looks like 
+ :   ".:/*" in Windows (e.g. C:/projects)
+ :   "/*" in Unix
+ :)
+declare function f:uriOrPathToNormPath($uriOrPath as xs:string)
+        as xs:string {
+    $uriOrPath 
+    ! replace(., '\\', '/')
+    ! replace(., '^file:/*(/.*)', '$1') (: retain one slash :)
+    ! replace(., '^/(.:/.*)', '$1')
+};        
+
 (:~
  : Transforms a file system path or URI to a Foxpath
  : representation, using backslash as step separator
