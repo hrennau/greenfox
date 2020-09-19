@@ -27,8 +27,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateLastModified($constraintElem as element(gx:lastModified), 
-                                        $context as map(*))
+declare function f:validateFileDate($constraintElem as element(gx:fileDate), 
+                                    $context as map(*))
         as element()* {
     let $contextURI := $context?_targetInfo?contextURI        
     let $constraintId := $constraintElem/@id
@@ -154,72 +154,3 @@ declare function f:validateFileName($constraintElem as element(gx:fileName),
     return $results                        
 };
 
-(:
-(:~
- : Writes a validation result, for constraint components FileName*, FileSize*,
- : LastModified*.
- :
- : @param colour the colour of the result
- : @param constraintElem the element containing the attributes declaring the constraint
- : @param constraint the main attribute declaring the constraint 
- : @param actualValue the actual value of the file property
- : @param additionalAtts additional attributes to be included in the result
- : @return an element representing a 'red' or 'green' validation result
- :)
-declare function f:constructError_fileProperties($filePath as xs:string,
-                                                 $colour as xs:string,
-                                                 $constraintElem as element(),
-                                                 $constraint as attribute(),
-                                                 $actualValue as item(),
-                                                 $additionalAtts as attribute()*) 
-        as element() {
-    let $constraintComp :=
-        $constraintElem/f:firstCharToUpperCase(local-name(.)) ||
-        $constraint/f:firstCharToUpperCase(local-name(.))
-        
-    let $resourcePropertyName :=
-        switch(local-name($constraintElem))
-        case 'fileName' return 'File name'
-        case 'fileSize' return 'File size'
-        case 'lastModified' return 'Last modified time'
-        default return error()
-        
-    let $compare :=
-        switch(local-name($constraint))
-        case 'eq' return 'be equal to'
-        case 'ne' return 'not be equal to'
-        case 'lt' return 'be less than'
-        case 'le' return 'be less than or equal to'        
-        case 'gt' return 'be greater than'
-        case 'ge' return 'be greater than or equal to'        
-        case 'like' return 'match the pattern'
-        case 'notLike' return 'not match the pattern'
-        case 'matches' return 'match the regex'
-        case 'notMatches' return 'not match the regex'
-        default return 'satisfy'
-        
-    let $elemName := 'gx:' || $colour    
-    let $msg := 
-        if ($colour eq 'green') then i:getOkMsg($constraintElem, $constraint/local-name(.), ())
-        else 
-            i:getErrorMsg($constraintElem, 
-                          $constraint/local-name(.), 
-                          concat($resourcePropertyName, ' should ', $compare,
-                          " '", $constraint, "'"))
-    let $values := result:validationResultValues($actualValue, $constraintElem)
-    let $resourceShapeId := $constraintElem/@resourceShapeID
-    let $constraintId := $constraintElem/@id || '-' || $constraint/local-name(.)
-    return
-    
-        element {$elemName} {
-            $msg ! attribute msg {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            attribute resourceShapeID {$resourceShapeId},   
-            $filePath ! attribute filePath {.},
-            $constraint,
-            $additionalAtts,
-            $values
-        }                                          
-};
-:)

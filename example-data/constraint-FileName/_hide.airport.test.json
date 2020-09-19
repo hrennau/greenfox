@@ -1,0 +1,22 @@
+{
+  "airports":{
+    "airportsForCountry":[
+      {
+        "country":"Denmark",
+        "href":"airports-denmark.json"
+      },
+      {
+        "country":"Finland",
+        "href":"airports-finland.json"
+      },
+      {
+        "country":"Ireland",
+        "href":"airports-ireland.json"
+      },
+      {
+        "country":"Luxembourg",
+        "href":"airports-luxembourg.json"
+      }
+    ]
+  }
+}

@@ -93,8 +93,8 @@ declare function f:validateFolderInstance($contextURI as xs:string,
         let $valueShapeResults :=
             for $constraintElem in $constraints[not(self::gx:targetSize)] return
             typeswitch($constraintElem)
-            case element(gx:lastModified) return i:validateLastModified($constraintElem, $context)
-            case element(gx:folderName) return i:validateFileName($constraintElem, $context)
+            case element(gx:fileDate) return i:validateFileDate($constraintElem, $context)
+            case element(gx:fileName) return i:validateFileName($constraintElem, $context)
             case element(gx:foxvalues) return value:validateValueConstraint($contextURI, (), (), $constraintElem, $context)
             case element(gx:foxvaluePairs) return vpair:validateValuePairConstraint($contextURI, (), (), $constraintElem, $context)
             case element(gx:foxvaluesCompared) return vpair:validateValuePairConstraint($contextURI, (), (), $constraintElem, $context)

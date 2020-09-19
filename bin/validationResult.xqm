@@ -104,7 +104,7 @@ declare function f:validationResultValues($value as item()*,
 
 (:~
  : Writes a validation result, for constraint components FileName*, FileSize*,
- : LastModified*.
+ : FileDate*.
  :
  : @param colour the colour of the result
  : @param constraintElem the element containing the attributes declaring the constraint
@@ -133,7 +133,7 @@ declare function f:validationResult_fileProperties($colour as xs:string,
         switch(local-name($constraintElem))
         case 'fileName' return 'File name'
         case 'fileSize' return 'File size'
-        case 'lastModified' return 'Last modified time'
+        case 'fileDate' return 'File date'
         default return error(),    
         ' must ',
         switch(local-name($constraintNode))
@@ -164,6 +164,8 @@ declare function f:validationResult_fileProperties($colour as xs:string,
             attribute resourceShapeID {$resourceShapeId},            
             $contextURI ! attribute filePath {.},
             $constraintNode,
+            $flags ! attribute flags {.},
+            $case ! attribute case {.},
             $additionalAtts,
             $values
         }                                          
@@ -1362,14 +1364,21 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
     let $resourceShapePath := $constraintElem/@resourceShapePath      
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
         
+    
     let $constraintConfig :=
+        let $ccPrefix := if ($constraintElem/self::element(gx:valuePair)) then 'ValuePair' 
+                         else if ($constraintElem/self::element(gx:foxvaluePair)) then 'FoxvaluePair'
+                         else if ($constraintElem/self::element(gx:valueCompared)) then 'ValueCompaired'
+                         else if ($constraintElem/self::element(gx:foxvalueCompared)) then 'FoxvalueCompaired'
+                         else error()
+        return
         typeswitch($constraintNode)
-        case attribute(count1)    return map{'constraintComp': 'ValuePairValue1Count',    'atts': ('count1')}
-        case attribute(minCount1) return map{'constraintComp': 'ValuePairValue1MinCount', 'atts': ('minCount1')}        
-        case attribute(maxCount1) return map{'constraintComp': 'ValuePairValue1MaxCount', 'atts': ('maxCount1')}        
-        case attribute(count2)    return map{'constraintComp': 'ValuePairValue2Count',    'atts': ('count2')}
-        case attribute(minCount2) return map{'constraintComp': 'ValuePairValue2MinCount', 'atts': ('minCount2')}        
-        case attribute(maxCount2) return map{'constraintComp': 'ValuePairValue2MaxCount', 'atts': ('maxCount2')}        
+        case attribute(count1)    return map{'constraintComp': $ccPrefix || 'Value1Count',    'atts': ('count1')}
+        case attribute(minCount1) return map{'constraintComp': $ccPrefix || 'Value1MinCount', 'atts': ('minCount1')}        
+        case attribute(maxCount1) return map{'constraintComp': $ccPrefix || 'Value1MaxCount', 'atts': ('maxCount1')}        
+        case attribute(count2)    return map{'constraintComp': $ccPrefix || 'Value2Count',    'atts': ('count2')}
+        case attribute(minCount2) return map{'constraintComp': $ccPrefix || 'Value2MinCount', 'atts': ('minCount2')}        
+        case attribute(maxCount2) return map{'constraintComp': $ccPrefix || 'Value2MaxCount', 'atts': ('maxCount2')}        
         default return error()
     
     let $standardAttNames := $constraintConfig?atts

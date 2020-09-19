@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of context variable $fileName. In this example, $fileName is
+    used in the Foxpath expression of a local Link Definition.
+    
+    The schema checks that every selected JSON document has a IATA code which is
+    equal to the IATA code in the corresponding XML document (file name obtained by
+    replacing .json with .xml).
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/evaluation-context/filename-eqFoxpath"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit: folder 'airports' -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+            
+            <!-- Visit: JSON airport files -->
+            <file foxpath=".\\airport-*.json" id="airportFileShape" mediatype="json">
+                <targetSize minCountMsg="Missing files: airport-*.json" minCount="60"/>
+                
+                <!-- Check: IATA code equal to the IATA code in corresponding XML doc -->                
+                <foxvaluesCompared foxpath="fox-sibling(replace($fileName, '\.json', '.xml'))"
+                                   countTargetResources="1"
+                                   countTargetResourcesMsg="Missing XML resource or IATA attribute">
+                    <foxvalueCompared expr1XP="//airport/iata"
+                                      expr2FOX="/airport/@iata"
+                                      count2="1" count2Msg="Missing @iata attribute"
+                                      cmp="eq" eqMsg="IATA code not equal to the code in XML resource"
+                                      />
+                </foxvaluesCompared>
+                <!--
+                <xpath expr="//airport/iata"
+                       eqFoxpath="let $xmlFileName := replace($fileName, '\.json', '.xml') return
+                                  ..\*[matches(file-name(.), $xmlFileName)]
+                                  /airport/@iata"
+                       eqFoxpathMsg="IATA code not equal to the code in XML resource"
+                       count="1" 
+                       countMsg="Missing XML resource or IATA attribute"/>
+                       -->
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

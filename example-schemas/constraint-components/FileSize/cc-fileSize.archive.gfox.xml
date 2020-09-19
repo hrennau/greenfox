@@ -18,7 +18,7 @@
         
         <!-- Visit archive contents: folder 'constraint-FileSize' -->
         <folder foxpath="archives\constraint-FileSize.zip\#archive#\constraint-FileSize" id="fileSizeFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>
+            <targetSize countMsg="Missing folder: consgtraint-FileSize" count="1"/>
 
             <!-- Visit archive contents: all files except _hide* -->
             <file foxpath="* except _hide*" id="contentFilesShape">

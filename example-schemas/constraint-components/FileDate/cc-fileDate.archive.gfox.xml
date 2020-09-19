@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FileDate constraints. This example checks resources
+    contained by an archive file.  
+    
+    Note that there is no difference compared with checking normal file system resources - 
+    dealing with archive contents is just a detail of the navigation providing the resources.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified.archive"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit archive contents: constraint-FileDate folder -->
+        <folder foxpath="archives\constraint-FileDate.zip\#archive#\constraint-FileDate" id="fileDateFolderShape">
+            <targetSize countMsg="Missing folder: constraint-fileDate" count="1"/>
+
+            <!-- Check archive contents: file dates -->
+            <file foxpath=".\\(* except _hide*)" id="anyFileShape">
+                <targetSize minCount="20" minCountMsg="Less files than expected"/>
+                <fileDate 
+                    le="2020-04-30" leMsg="Files must be older than 2020-04-30"
+                    gt="2020-04-01" gtMsg="Files must be from 2020-04-01 or later"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

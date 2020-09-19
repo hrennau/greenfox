@@ -240,7 +240,7 @@ declare function f:compileGreenfox_addResourceShapeIdsRC($n as node()) {
                     self::gx:targetSize,
                     self::gx:fileName,                    
                     self::gx:fileSize, 
-                    self::gx:lastModified, 
+                    self::gx:fileDate, 
                     self::gx:mediatype,
                     self::gx:contentCorrespondence,
                     self::gx:content,

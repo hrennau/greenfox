@@ -252,7 +252,7 @@ declare function f:writeValidationReport_sum(
                                         $options as map(*))
         as item() {
     let $options := map{}
-    let $ccstat := trace(f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'redTree', 'xml', $options) , '_CCSTAT: ')
+    let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'redTree', 'xml', $options)
     let $ccomps := $ccstat/*
     
     let $countRed := $ccstat/@countRed/xs:integer(.)
@@ -265,12 +265,14 @@ declare function f:writeValidationReport_sum(
         group by $rname := string($r)
         let $kind := if ($r[1]/self::folder) then 'D' else 'F'
         let $ccomps := $r/../../@name => distinct-values() => sort()
+        order by $kind, $rname
         return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}"/>
     let $greenResources :=
         for $r in $ccstat//greenResources/(folder, file)
         group by $rname := string($r)
         let $kind := if ($r[1]/self::folder) then 'D' else 'F'
         let $ccomps := $r/../../@name => distinct-values() => sort()
+        order by $kind, $rname
         return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}"/>
             
     let $ccompNameWidth := (('constraint comp', $ccomps/@name) !string-length(.)) => max()
@@ -295,7 +297,10 @@ declare function f:writeValidationReport_sum(
         '#green:   ' || $ccstat/@countGreen || (if (not($countGreen)) then () else concat('   (', $countGreenResources, ' resources)')),
         ' ',
         $hsep1,
-        '| Constraint Comp | #red | #green |',
+        '| ' || 
+        tt:rpad('Constraint Comp', $ccompNameWidth, ' ') || ' | ' || 
+        tt:rpad('#red', $countRedWidth, ' ') || ' | ' || 
+        tt:rpad('#green', $countGreenWidth, ' ') || ' |',
         $hsep2,
         for $ccomp in $ccstat/constraintComp
         let $name := $ccomp/@name

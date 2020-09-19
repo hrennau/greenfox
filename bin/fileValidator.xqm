@@ -115,7 +115,7 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         
         typeswitch($constraintElem)
         case element(gx:targetSize) return () (: Already processed ... :)            
-        case element(gx:lastModified) return i:validateLastModified($constraintElem, $context)                
+        case element(gx:fileDate) return i:validateFileDate($constraintElem, $context)                
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($contextURI, $constraintElem, $context)     
