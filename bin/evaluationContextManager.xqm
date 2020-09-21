@@ -66,19 +66,20 @@ declare function f:adaptContext($filePath as xs:string,
             $focusNodes,
             $context)
             
-    let $reqBindings := $reqBindingsAndDocs?requiredBindings
+    let $reqBindings := $reqBindingsAndDocs?requiredBindings    
     let $reqDocs := 
         map:merge((
             $reqBindingsAndDocs?xdoc ! map:entry('xdoc', .),
             $reqBindingsAndDocs?jdoc ! map:entry('jdoc', .),
             $reqBindingsAndDocs?csvdoc ! map:entry('csvdoc', .),
-            $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .)
+            $reqBindingsAndDocs?htmldoc ! map:entry('htmldoc', .),
+            $reqBindingsAndDocs?linesdoc ! map:entry('linesdoc', .)
         ))        
-    
+
     (: Update the evaluation context so that it contains an entry for each
        variable reference found in the in-scope components :)
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, ())        
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, ())        
     return $context   
 };
 
@@ -295,6 +296,16 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                 if (not($required)) then ()
                 else f:csvDoc($filePath, $resourceShape)
          
+
+        let $linesdoc :=
+            let $required := f:linesTreeRequired($allComponents)
+            return
+                if (not($required)) then () 
+                else
+                    let $lines := i:fox-unparsed-text-lines($filePath, ()) ! <line>{.}</line>
+                    return
+                        document {<lines count="{count($lines)}" xml:base="{$filePath}">{$lines}</lines>}
+
         let $doc := ($xdoc, $jdoc, $htmldoc, $csvdoc) 
         return
             map:merge((
@@ -302,7 +313,8 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                 $xdoc ! map:entry('xdoc', .),
                 $jdoc ! map:entry('jdoc', .),
                 $csvdoc ! map:entry('csvdoc', .),
-                $htmldoc ! map:entry('htmldoc', .)
+                $htmldoc ! map:entry('htmldoc', .),
+                $linesdoc ! map:entry('linesdoc', .)
             ))
     
     return
@@ -429,6 +441,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $jdoc as document-node()?,
                                             $csvdoc as document-node()?,
                                             $htmldoc as document-node()?,
+                                            $linesdoc as document-node()?,
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
     let $doc := ($xdoc, $jdoc, $csvdoc, $htmldoc)[1]    
@@ -436,6 +449,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
         $xdoc ! map:entry('xdoc', .),
         $jdoc ! map:entry('jdoc', .),
         $csvdoc ! map:entry('csvdoc', .),
+        $linesdoc ! map:entry('linesdoc', .),
         $doc ! map:entry('doc', .)))
     let $context := 
         let $evaluationContext :=
@@ -448,6 +462,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                 if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
                 if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
                 if (not($reqBindings = 'htmldoc')) then () else map:entry(QName('', 'htmldoc'), $htmldoc),
+                if (not($reqBindings = 'linesdoc')) then () else map:entry(QName('', 'linesdoc'), $linesdoc),
                 
                 (: Add built-in variables - this, filePath, fileName :)
                 if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
@@ -512,4 +527,25 @@ declare function f:nodeTreeRequired($components as element()*)
         self::gx:foxpath/@*[ends-with(name(.), 'XPath')],
         self::gx:contentCorrespondence      
     ))
+};        
+
+(:~
+ : Returns true if a given set of schema components contains a component which
+ : requires a lines tree, false otherwise.
+ :
+ : @param components a set of schema components, e.g. constraint elements and shapes
+ : @return true if the input contains a component which requires a node tree
+ :)
+declare function f:linesTreeRequired($components as element()*)
+        as xs:boolean? { 
+     (: let $_DEBUG := trace($components/name() => string-join(', '), '_COMPONENT_NAMES: ') return :)         
+
+    exists($components/(
+        (self::gx:value, self::gx:values)[.//(@exprLP, @filterLP, @mapLP)], 
+        (self::gx:valuePair, self::gx:valuePairs)[.//(@expr1LP, @expr2LP, @filter1LP, @filter2LP, @map1LP, @map2LP)], 
+        (self::gx:valueCompared, self::gx:valuesCompared)[.//(@expr1LP, @expr2LP, @filter1LP, @filter2LP, @map1LP, @map2LP)], 
+        (self::gx:foxvaluePair, self::gx:foxvaluePairs)[.//(@expr1LP, @expr2LP, @filter1LP, @filter2LP, @map1LP, @map2LP)],
+        (self::gx:foxvalueCompared, self::gx:foxvalueCompared)[.//(@expr1LP, @expr2LP, @filter1LP, @filter2LP, @map1LP, @map2LP)]
+    ))
+
 };        

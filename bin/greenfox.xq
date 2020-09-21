@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-09-19T10:29:18.403+02:00 
+ : @version 2020-09-21T20:19:53.973+02:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -97,7 +97,7 @@ declare variable $toolScheme :=
       <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
       <param name="domain" type="xs:string?"/>
       <param name="params" type="xs:string?"/>
-      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, sum1, sum2, std" default="redTree"/>
+      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, sum1, sum2, sum3, std" default="redTree"/>
       <param name="format" type="xs:string?" default="xml"/>
       <pgroup name="input" minOccurs="1"/>
     </operation>

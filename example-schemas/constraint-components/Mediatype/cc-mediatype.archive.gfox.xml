@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Mediatype constraints. This example checks resources
+    contained by an archive file.  
+    
+    Note that there is no difference compared with checking normal file system resources - 
+    dealing with archive contents is just a detail of the navigation providing the resources.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- Visit archive contents: folder 'constraint-Mediatype' -->
+        <folder foxpath="archives\constraint-Mediatype.zip\#archive#\constraint-Mediatype" id="mediatypeFolderShape">
+            <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
+            
+            <!-- Visit archive contents: JSON files -->
+            <file foxpath=".\\*.json" id="jsonFileShape">
+                <mediatype eq="json"/>
+            </file>
+            
+            <!-- Visit archive contents: XML files -->
+            <file foxpath=".\\*.xml" id="xmlFileShape">
+                <mediatype eq="xml"/>
+            </file>
+            
+            <!-- Visit archive contents: CSV files (separator: comma) -->
+            <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+                <mediatype eq="csv"
+                    csv.separator="comma" csv.withHeader="true"
+                    csv.minColumnCount="4" csv.maxColumnCount="4" 
+                    csv.minRowCount="2" csv.maxRowCount="30"/>                
+            </file>
+            
+            <!-- Visit archive contents: CSV files (separator: semicolon) -->            
+            <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+                <mediatype eq="csv"
+                    csv.separator="semicolon" csv.withHeader="true"
+                    csv.minColumnCount="4" csv.maxColumnCount="4" 
+                    csv.minRowCount="2" csv.maxRowCount="30"/>
+                />
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

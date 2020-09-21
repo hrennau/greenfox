@@ -1,4 +1,4 @@
-<airport id="420" iata="HEM" icao="EFHF">
+<airport id="420" iata="HEM" icao="EFHF" createdAt="2020-09-21T20:07:03.891+02:00">
   <name>Helsinki Malmi Airport</name>
   <city>Helsinki</city>
   <country>Finland</country>

@@ -824,7 +824,7 @@ return
                 <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK 
                                           csv.minColumnCount csv.maxColumnCount
                                           csv.minRowCount csv.maxRowCount
-                                          csv.separator"
+                                          csv.separator csv.withHeader"
                     msg="Unexpected attributes in 'mediatype' element; expected: $attNames"
                     msgOK="OK - 'mediatype' element: no unexpected attributes"/>
                 <ex:xoneAtts attNames="eq in"

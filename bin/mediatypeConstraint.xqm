@@ -27,11 +27,10 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context processing context
  : @return validation result elements
  :)
-declare function f:validateMediatype($contextURI as xs:string, 
-                                     $constraintElem as element(gx:mediatype), 
+declare function f:validateMediatype($constraintElem as element(gx:mediatype), 
                                      $context as map(xs:string, item()*))
         as element()* {
-        
+    let $contextURI := $context?_targetInfo?contextURI   
     let $eq := $constraintElem/@eq
     let $eqItems := $constraintElem/@eq/tokenize(.)
     return

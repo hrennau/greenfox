@@ -3,6 +3,7 @@
     "id":444,
     "iata":"MIK",
     "icao":"EFMI",
+    "createdAt":"2020-09-21T20:07:03.891+02:00",
     "name":"Mikkeli Airport",
     "city":"Mikkeli",
     "country":"Finland",

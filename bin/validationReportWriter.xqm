@@ -319,14 +319,14 @@ declare function f:writeValidationReport_sum(
             if (empty($redResources)) then () else (
                 'Red resources: ',
                 $redResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
-                ' ',        
-                if ($reportType eq 'sum2') then () else (
+                ' ')
+            ,        
+            if ($reportType eq 'sum2') then () else (
                     if (empty($greenResources)) then () else (
                     'Green resources: ',
                     $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
                     ' ')
                 )
-            )
         )
     )
     let $report := string-join($lines, '&#xA;')

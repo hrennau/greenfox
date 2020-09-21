@@ -38,6 +38,20 @@ declare function f:fox-unparsed-text-available($uri as xs:string,
 };
 
 (:~
+ : Returns the lines of a string representation of a resource.
+ :
+ : @param uri the URI or file path of the resource
+ : @param encoding the encoding of the resource content
+ : @param options options controlling the evaluation
+ : @return the text of the resource, or the empty sequence if retrieval fails
+ :)
+declare function f:fox-unparsed-text-lines($uri as xs:string, 
+                                           $encoding as xs:string?)
+        as xs:string* {
+    tt:fox-unparsed-text-lines($uri, $encoding, ())        
+};
+
+(:~
  : Returns an XML document identified by URI or file path. If the
  : URI points to an archive file, an @xml:base attribute is
  : added to the root element, along with a @fox:base-xml-added

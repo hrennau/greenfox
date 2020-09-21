@@ -167,7 +167,23 @@ declare function f:validateValuePair($constraintElem as element(),
     let $expr1XP := $constraintElem/@expr1XP
     let $expr2XP := $constraintElem/@expr2XP      
     let $expr1FOX := $constraintElem/@expr1FOX
-    let $expr2FOX := $constraintElem/@expr2FOX      
+    let $expr2FOX := $constraintElem/@expr2FOX    
+    let $expr1LP := $constraintElem/@expr1LP
+    let $expr2LP := $constraintElem/@expr2LP    
+    
+    let $filterMap1LP :=
+        if (not($constraintElem/(@filter1LP, @map1LP))) then () else
+            map:merge((
+                map:entry('exprKind', 'filterMapLP'),
+                $constraintElem/@filter1LP/map:entry('filterLP', string(.)),
+                $constraintElem/@map1LP/map:entry('mapLP', string(.))))
+    let $filterMap2LP :=
+        if (not($constraintElem/(@filter2LP, @map2LP))) then () else
+            map:merge((
+                map:entry('exprKind', 'filterMapLP'),
+                $constraintElem/@filter2LP/map:entry('filterLP', string(.)),
+                $constraintElem/@map2LP/map:entry('mapLP', string(.))))
+    
     let $constraintNode := $constraintElem/(@cmp, .)[1]
     let $quantifier := ($constraintElem/@quant, 'all')[1]
     let $flags := string($constraintElem/@flags)
@@ -176,23 +192,51 @@ declare function f:validateValuePair($constraintElem as element(),
     
     (: Context kind :)
     let $expr2Context := $constraintElem/@expr2Context
-    let $expr1 := ($expr1XP, $expr1FOX)[1]
-    let $expr2 := ($expr2XP, $expr2FOX)[1]   
-    let $expr1Lang := if ($expr1 eq $expr1FOX) then 'foxpath' else 'xpath'
-    let $expr2Lang := if ($expr2 eq $expr2FOX) then 'foxpath' else 'xpath'    
+    
+    let $expr1Spec := ($expr1XP, $expr1FOX, $expr1LP, $filterMap1LP)[1]
+    let $expr1Lang := if ($expr1XP) then 'xpath' 
+                     else if ($expr1FOX) then 'foxpath' 
+                     else if ($expr1LP) then 'linepath'
+                     else if (exists($filterMap1LP)) then 'filtermap'
+                     else error()
+    let $expr2Spec := ($expr2XP, $expr2FOX, $expr2LP, $filterMap2LP)[1]
+    let $expr2Lang := if ($expr2XP) then 'xpath' 
+                     else if ($expr2FOX) then 'foxpath' 
+                     else if ($expr2LP) then 'linepath'
+                     else if (exists($filterMap2LP)) then 'filtermap'
+                     else error()
+    
+    let $expr1 :=
+        if ($expr1XP) then $expr1XP
+        else if ($expr1FOX) then $expr1FOX
+        else if ($expr1LP) then $expr1LP
+        else if (exists($filterMap1LP)) then i:constructFilterMapExpr($filterMap1LP)
+        else error()
+    let $expr2 :=
+        if ($expr2XP) then $expr2XP
+        else if ($expr2FOX) then $expr2FOX
+        else if ($expr2LP) then $expr2LP
+        else if (exists($filterMap2LP)) then i:constructFilterMapExpr($filterMap2LP)
+        else error()
     
     (: Value 1 :)
     let $items1Raw :=
         switch($expr1Lang)
         case 'xpath' return i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())
         case 'foxpath' return i:evaluateFoxpath($expr1, $contextURI, $evaluationContext, true())        
+        case 'linepath' return 
+            let $contextLinesNode := $context?_reqDocs?linesdoc
+            return i:evaluateXPath($expr1, $contextLinesNode, $evaluationContext, true(), true())
+        case 'filtermap' return 
+            let $contextLinesNode := $context?_reqDocs?linesdoc
+            return i:evaluateXPath($expr1, $contextLinesNode, $evaluationContext, true(), true())
         default return error()
     let $items1TYRaw := i:applyUseDatatype($items1Raw, $useDatatype, $useString)
 
     (: results: value counts 1 :)
     let $results_expr1Count :=
         f:validateValuePair_counts(
-            $constraintElem, $items1TYRaw, 'expr1', $expr1, $expr1Lang, (), $context)
+            $constraintElem, $items1TYRaw, 'expr1', $expr1, $expr1Spec, $expr1Lang, (), $context)
 
     (: indexes: conversion errors 1 :)
     let $indexes_conversionError1 := 
@@ -230,6 +274,8 @@ declare function f:validateValuePair($constraintElem as element(),
             switch($expr2Lang)
                 case 'xpath' return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
                 case 'foxpath' return i:evaluateFoxpath($expr2, $contextItem, $econtext, true())        
+                case 'linepath' return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
+                case 'filtermap' return i:evaluateXPath($expr2, $contextItem, $econtext, true(), true())
                 default return error()
     }
     
@@ -304,7 +350,7 @@ declare function f:validateValuePair($constraintElem as element(),
             f:validateValuePair_context2_iterating(
                  $constraintElem, $constraintNode,
                  $expr2Context, $quantifier, $useDatatype, $useString,
-                 $expr2, $expr2Lang,
+                 $expr2, $expr2Spec, $expr2Lang,
                  $items1, $items1TY,
                  $getItems2, $cmpTrue,
                  $context)
@@ -318,7 +364,7 @@ declare function f:validateValuePair($constraintElem as element(),
                 return
             
                     f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $useContextItem,
-                        $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
+                        $quantifier, $useDatatype, $useString, $expr2, $expr2Spec, $expr2Lang,
                         $items1, $items1TY, $results_expr1Conversion,
                         $getItems2, $cmpTrue, $findViolations,
                         $context) 
@@ -329,7 +375,7 @@ declare function f:validateValuePair($constraintElem as element(),
             (: Target items can be target nodes, the target doc, or the target URI :)
             for $targetItem in $targetItems return
                 f:validateValuePair_context2_fixed($constraintElem, $constraintNode, $targetItem,
-                    $quantifier, $useDatatype, $useString, $expr2, $expr2Lang,
+                    $quantifier, $useDatatype, $useString, $expr2, $expr2Spec, $expr2Lang,
                     $items1, $items1TY, $results_expr1Conversion,
                     $getItems2, $cmpTrue, $findViolations,
                     $context) 
@@ -353,6 +399,7 @@ declare function f:validateValuePair_context2_iterating(
     $useDatatype as xs:QName?,   
     $useString as xs:string*,
     $expr2 as xs:string,
+    $expr2Spec as item(),
     $expr2Lang as xs:string,
     $items1 as item()*,
     $items1TY as item()*,
@@ -380,7 +427,7 @@ declare function f:validateValuePair_context2_iterating(
         return (
             (: Value 2: count checks :)
             f:validateValuePair_counts(
-                $constraintElem, $items2, 'expr2', $expr2, $expr2Lang, $item1, $context),
+                $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, $item1, $context),
             
             (: Value 2: conversion errors :)
             $items2ConversionError ! result:validationResult_valuePair(
@@ -415,7 +462,7 @@ declare function f:validateValuePair_context2_iterating(
                         'red', $constraintElem, $constraintNode, ., (), $context)
             let $countResults :=
                 f:validateValuePair_counts(
-                    $constraintElem, $items2, 'expr2', $expr2, $expr2Lang, $item1, $context)   
+                    $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, $item1, $context)   
                     
             return
                 (: Write for each item from value 1 a map with keys:
@@ -473,6 +520,7 @@ declare function f:validateValuePair_context2_fixed(
     $useDatatype as xs:QName?,
     $useString as xs:string*,
     $expr2 as xs:string,
+    $expr2Spec as item(),
     $expr2Lang as xs:string,
 
     $items1 as item()*,
@@ -502,7 +550,7 @@ declare function f:validateValuePair_context2_fixed(
     (: *** Check results: counts :)
     let $results_expr2Count :=
         f:validateValuePair_counts(
-            $constraintElem, $items2, 'expr2', $expr2, $expr2Lang, (), $context)
+            $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, (), $context)
     
     (: *** Check results: pair :)    
     let $results_pair :=
@@ -571,6 +619,7 @@ declare function f:validateValuePair_counts($constraintElem as element(),
                                             $items as item()*,
                                             $exprRole as xs:string, (: source | target :) 
                                             $expr as xs:string, 
+                                            $exprSpec as item(),
                                             $exprLang as xs:string,
                                             $contextItem1 as item()?,
                                             $context as map(xs:string, item()*))
@@ -596,7 +645,7 @@ declare function f:validateValuePair_counts($constraintElem as element(),
         let $colour := if ($green) then 'green' else 'red'        
         return  
             result:validationResult_valuePair_counts(
-                $colour, $constraintElem, $constraintNode, $exprRole, $expr, $exprLang, 
+                $colour, $constraintElem, $constraintNode, $exprRole, $exprSpec, $exprLang, 
                 $valueCount, $contextItem1, (), $context)
     return $results        
 };

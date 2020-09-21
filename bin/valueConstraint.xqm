@@ -91,32 +91,54 @@ declare function f:validateValue($constraintElem as element(),
     let $targetInfo := $context?_targetInfo        
     let $contextURI := $targetInfo?contextURI
     let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
+    let $contextLinesNode := $context?_reqDocs?linesdoc
     let $evaluationContext := $context?_evaluationContext
     
     (: Read expression :)
     let $exprXP := $constraintElem/@exprXP
     let $exprFOX := $constraintElem/@exprFOX
-    let $expr := ($exprXP, $exprFOX)[1]
+    let $exprLP := $constraintElem/@exprLP
+    let $filterMapLP :=
+        if (not($constraintElem/(@filterLP, @mapLP))) then () else
+            map:merge((
+                map:entry('exprKind', 'filterMapLP'),
+                $constraintElem/@filterLP/map:entry('filterLP', string(.)),
+                $constraintElem/@mapLP/map:entry('mapLP', string(.))))
+    let $exprSpec := ($exprXP, $exprFOX, $exprLP, $filterMapLP)[1]
     let $exprLang := if ($exprXP) then 'xpath' 
                      else if ($exprFOX) then 'foxpath' 
+                     else if ($exprLP) then 'linepath'
+                     else if (exists($filterMapLP)) then 'filtermap'
                      else error()
     
+    let $expr :=
+        if ($exprXP) then $exprXP
+        else if ($exprFOX) then $exprFOX
+        else if ($exprLP) then $exprLP
+        else if (exists($filterMapLP)) then i:constructFilterMapExpr($filterMapLP)
+        else error()
+        
     (: Evaluate expression :)
     let $exprValue :=    
         if ($exprXP) then 
             i:evaluateXPath($exprXP, $contextNode, $evaluationContext, true(), true())
         else if ($exprFOX) then  
             i:evaluateFoxpath($exprFOX, $contextURI, $evaluationContext, true())
+        else if ($exprLP) then
+            i:evaluateXPath($exprLP, $contextLinesNode, $evaluationContext, true(), true())    
+        else if (exists($filterMapLP)) then
+            i:evaluateXPath($expr, $contextLinesNode, $evaluationContext, true(), true())    
+                          
         else error(QName((), 'SCHEMA_ERROR'), 'Missing expression')
     
     let $results := 
     (
-        f:validateValue_counts($exprValue, $expr, $exprLang, $constraintElem, $context),
-        f:validateValue_cmp($exprValue, $expr, $exprLang, $constraintElem, $context),    
-        f:validateValue_in($exprValue, $expr, $exprLang, $constraintElem, $context),
-        f:validateValue_contains($exprValue, $expr, $exprLang, $constraintElem, $context),
-        f:validateValue_eqeq($exprValue, $expr, $exprLang, $constraintElem, $context),
-        f:validateValue_itemsUnique($exprValue, $expr, $exprLang, $constraintElem, $context),
+        f:validateValue_counts($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_cmp($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),    
+        f:validateValue_in($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_contains($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_eqeq($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_itemsUnique($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         ()
     )
     return
@@ -125,6 +147,7 @@ declare function f:validateValue($constraintElem as element(),
 
 declare function f:validateValue_cmp($exprValue as item()*,
                                      $expr as xs:string,
+                                     $exprSpec as item(),
                                      $exprLang as xs:string,
                                      $constraintElem as element(),
                                      $context as map(xs:string, item()*))
@@ -177,13 +200,13 @@ declare function f:validateValue_cmp($exprValue as item()*,
                     else ()
             let $colour := if (empty($violations)) then 'green' else 'red'
             return 
-                result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
+                result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, $violations, $exprSpec, $exprLang,
                                               $resultAdditionalAtts, (), $resultOptions, $context)
         else if ($quantifier eq 'some') then 
             let $match := exists($exprValueTY[$cmpTrue(., $useCmp)]) 
             let $colour := if ($match) then 'green' else 'red'
             return
-                result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, (), $expr, $exprLang,
+                result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, (), $exprSpec, $exprLang,
                                               $resultAdditionalAtts, (), $resultOptions, $context)
     return
         $results
@@ -194,6 +217,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
  :)
 declare function f:validateValue_in($exprValue as item()*,
                                     $expr as xs:string,
+                                    $exprSpec as item(),
                                     $exprLang as xs:string,                                                  
                                     $constraintElem as element(),
                                     $context as map(xs:string, item()*))
@@ -256,7 +280,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
+                        $colour, $constraintElem, $cmp, $exprValue, $violations, $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
                 let $conforms :=
@@ -268,7 +292,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $expr, $exprLang,
+                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else error()                        
         case element(gx:notin) return
@@ -283,7 +307,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $violations, $expr, $exprLang,
+                        $colour, $constraintElem, $cmp, $exprValue, $violations, $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
                 let $conforms := 
@@ -295,7 +319,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $expr, $exprLang,
+                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
                 
         default return error()
@@ -306,6 +330,7 @@ declare function f:validateValue_in($exprValue as item()*,
  :)
 declare function f:validateValue_contains($exprValue as item()*,
                                           $expr as xs:string,
+                                          $exprSpec as item(),
                                           $exprLang as xs:string,                                              
                                           $constraintElem as element(),
                                           $context as map(xs:string, item()*))
@@ -326,7 +351,7 @@ declare function f:validateValue_contains($exprValue as item()*,
             $notContainedTY ! string() ! <gx:missingValue>{.}</gx:missingValue>
     return
         result:validationResult_value(
-            $colour, $constraintElem, $constraintNode, $exprValue, (), $expr, $exprLang,
+            $colour, $constraintElem, $constraintNode, $exprValue, (), $exprSpec, $exprLang,
             (), $additionalElems, (), $context)
 };        
 
@@ -335,6 +360,7 @@ declare function f:validateValue_contains($exprValue as item()*,
  :)
 declare function f:validateValue_eqeq($exprValue as item()*,
                                       $expr as xs:string,
+                                      $exprSpec as item(),
                                       $exprLang as xs:string,                                              
                                       $constraintElem as element(),
                                       $context as map(xs:string, item()*))
@@ -360,7 +386,7 @@ declare function f:validateValue_eqeq($exprValue as item()*,
     let $additionalElems := $violations2 ! string(.) ! <gx:missingValue>{.}</gx:missingValue>
     return
         result:validationResult_value(
-            $colour, $constraintElem, $constraintNode, $exprValue, $violations, $expr, $exprLang,
+            $colour, $constraintElem, $constraintNode, $exprValue, $violations, $exprSpec, $exprLang,
             (), $additionalElems, (), $context)
 };        
 
@@ -369,6 +395,7 @@ declare function f:validateValue_eqeq($exprValue as item()*,
  :)
 declare function f:validateValue_itemsUnique($exprValue as item()*,
                                           $expr as xs:string,
+                                          $exprSpec as item(),
                                           $exprLang as xs:string,                                              
                                           $constraintElem as element(),
                                           $context as map(xs:string, item()*))
@@ -396,7 +423,7 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
         return $exprValue[. = $values]                
     return            
         result:validationResult_value(
-            $colour, $constraintElem, $itemsUnique, $exprValue, $violations, $expr, $exprLang,
+            $colour, $constraintElem, $itemsUnique, $exprValue, $violations, $exprSpec, $exprLang,
                 (), (), (), $context)
 };        
 
@@ -412,6 +439,7 @@ declare function f:validateValue_itemsUnique($exprValue as item()*,
  :)
 declare function f:validateValue_counts($items as item()*,
                                         $expr as xs:string,
+                                        $exprSpec as item(),
                                         $exprLang as xs:string,
                                         $constraintElem as element(),
                                         $context as map(xs:string, item()*))
@@ -435,7 +463,7 @@ declare function f:validateValue_counts($items as item()*,
         let $colour := if ($ok) then 'green' else 'red'        
         return  
             result:validationResult_value_counts(
-                $colour, $constraintElem, $constraintNode, $items, $expr, $exprLang, (), $context)
+                $colour, $constraintElem, $constraintNode, $items, $exprSpec, $exprLang, (), $context)
                 
     let $results2 :=
         if (empty($constraintNodes2)) then () else
@@ -452,7 +480,7 @@ declare function f:validateValue_counts($items as item()*,
         let $colour := if ($ok) then 'green' else 'red'
         return
             result:validationResult_value_counts(
-                $colour, $constraintElem, $constraintNode, $items, $expr, $exprLang, (), $context)
+                $colour, $constraintElem, $constraintNode, $items, $exprSpec, $exprLang, (), $context)
     return ($results1, $results2)        
 };
 

@@ -1028,7 +1028,7 @@ declare function f:validationResult_value($colour as xs:string,
                                           $constraintNode as node(),
                                           $exprValue as item()*,    
                                           $violations as item()*,
-                                          $expr as xs:string,
+                                          $exprSpec as item(),
                                           $exprLang as xs:string,                                          
                                           $additionalAtts as attribute()*,
                                           $additionalElems as element()*,
@@ -1083,6 +1083,7 @@ declare function f:validationResult_value($colour as xs:string,
         return 
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},
@@ -1095,9 +1096,8 @@ declare function f:validationResult_value($colour as xs:string,
             $focusNode,
             $standardAtts,
             $additionalAtts,
-            $valueCountAtt,            
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},
+            $valueCountAtt,   
+            $exprAtts,
             $quantifierAtt,
             $values,
             $additionalElems
@@ -1121,8 +1121,8 @@ declare function f:validationResult_value_counts($colour as xs:string,
                                                  $constraintElem as element(),
                                                  $constraintNode as attribute(),
                                                  $exprValue as item()*,  
-                                                 $expr as xs:string, 
-                                                 $exprLang as xs:string,                                                 
+                                                 $exprSpec as item(),
+                                                 $exprLang as xs:string,                                          
                                                  $additionalAtts as attribute()*,
                                                  $context as map(xs:string, item()*))
         as element() {
@@ -1158,7 +1158,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
         return 
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
-    
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)    
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
@@ -1171,8 +1171,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
             
             $standardAtts,
             $valueCountAtt,
-            attribute exprLang {$exprLang},
-            attribute expr {$expr},            
+            $exprAtts,            
             $additionalAtts,
             $values            
         }       
@@ -1350,8 +1349,8 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
                                                      $constraintElem as element(),
                                                      $constraintNode as attribute(),
                                                      $exprRole as xs:string,
-                                                     $expr as xs:string,
-                                                     $exprLang as xs:string,
+                                                     $exprSpec as item(),
+                                                     $exprLang as xs:string,                                          
                                                      $valueCount as item()*,
                                                      $contextItem1 as item()?,
                                                      $additionalAtts as attribute()*,
@@ -1394,7 +1393,7 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
             return attribute contextItem1 {$attValue}                             
 
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
@@ -1405,8 +1404,7 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
             $exprRole ! attribute exprRole {.},
-            $expr ! attribute expr {.},
-            $exprLang ! attribute exprLang {.},
+            $exprAtts,
         
             $standardAtts,
             $valueCountAtt,
@@ -1747,5 +1745,20 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
     )
     return $exprAtts
         
-};        
+};   
 
+declare function f:validateResult_exprAtts($exprSpec as item(), $exprLang as xs:string?)
+        as attribute()* {
+    attribute exprLang {$exprLang},
+    
+    typeswitch($exprSpec)
+    case xs:string return attribute expr {$exprSpec}
+    case map(*) return
+        if ($exprSpec?exprKind eq 'filterMapLP') then (
+            $exprSpec?filterLP ! attribute filterLP {.},
+            $exprSpec?mapLP ! attribute mapLP {.})
+        else
+            attribute expr {'?'}
+    default return attribute expr {'?'}                
+};
+                                                   

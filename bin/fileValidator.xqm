@@ -118,7 +118,7 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         case element(gx:fileDate) return i:validateFileDate($constraintElem, $context)                
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
-        case element(gx:mediatype) return i:validateMediatype($contextURI, $constraintElem, $context)     
+        case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
         case element(gx:docContent) return dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
         case element(gx:values) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
         case element(gx:foxvalues) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            

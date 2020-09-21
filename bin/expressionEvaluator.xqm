@@ -134,3 +134,35 @@ let $varName :=
     return concat($prolog, '&#xA;', $query)
 };
 
+(:~
+ : Constructs a filter-map expression, which optionally filters the lines of a lines
+ : document and optionally maps them to a value. 
+ :
+ : A lines document has a <lines> root and one <line> child per text line.
+ :
+ : The expression is specified by a map with the following entries:
+ : ?exprKind - must be 'filterMapLP' (mandatory)
+ : ?filterLP - an XPath expression used to filter the lines (optional)
+ : ?mapLP - an XPath expressioon used to map a line to a value (optional)
+ : Both expressions are to be evaluated in the context of a single line.
+ :
+ : If ?filterLP is not specified, the expression will map all lines.
+ : If ?mapLP is not specified, the expression will return selected lines without changes
+ : If none of the expressions is specified, the expression will return all lines without changes
+ :
+ : @param filterMapLP a map describing a filterMap expression
+ : @return an XPath expression which captures the filtering and mapping behaviour as specified
+ :)
+declare function f:constructFilterMapExpr($filterMapLP as map(xs:string, xs:string))
+        as xs:string {
+
+    let $expr :=    
+        'trace(' ||
+        '/lines/line' || ($filterMapLP?filterLP ! concat('[', ., ']')) || 
+        $filterMapLP?mapLP ! concat('/(', ., ')') ||
+        ', "_EXPR_VALUE: ")'
+
+    let $_DEBUG := trace($expr, '_FILTER_MAP_EXPR: ')
+    return $expr
+};        
+

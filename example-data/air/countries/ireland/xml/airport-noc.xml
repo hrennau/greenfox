@@ -1,4 +1,4 @@
-<airport id="600" iata="NOC" icao="EIKN">
+<airport id="600" iata="NOC" icao="EIKN" createdAt="2020-09-21T20:07:03.891+02:00">
   <name>Ireland West Knock Airport</name>
   <city>Connaught</city>
   <country>Ireland</country>

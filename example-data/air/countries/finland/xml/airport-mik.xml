@@ -1,4 +1,4 @@
-<airport id="444" iata="MIK" icao="EFMI">
+<airport id="444" iata="MIK" icao="EFMI" createdAt="2020-09-21T20:07:03.891+02:00">
   <name>Mikkeli Airport</name>
   <city>Mikkeli</city>
   <country>Finland</country>

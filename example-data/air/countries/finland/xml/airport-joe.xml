@@ -1,4 +1,4 @@
-<airport id="429" iata="JOE" icao="EFJO">
+<airport id="429" iata="JOE" icao="EFJO" createdAt="2020-09-21T20:07:03.891+02:00">
   <name>Joensuu Airport</name>
   <city>Joensuu</city>
   <country>Finland</country>

@@ -2,13 +2,13 @@
 <!-- 
     Demonstrates the use of Mediatype constraints. Supported values for mediatypes are: xml, json, csv.
     
-    In this example, validation catches 
-    * .json files which are not well-formed JSON
-    * .xml files which are not well-formed XML    
-    
-    Note optional further parameters (not used in the example):
-    * @csv.minRowCount - when checking mediatyp 'csv', the number of rows must not be less than the specified value    
-    * @csv.minColumnCount - when checking mediatype 'csv', all rows must have at least the specified number of columns
+    In case of mediatype "csv", further constraints are supported:
+    * @csv.minRowCount - the number of rows must not be less than the specified value    
+    * @csv.minColumnCount - all rows must have at least the specified number of columns
+    * @csv.maxRowCount - the number of rows must not be greater than the specified value    
+    * @csv.maxColumnCount - all rows must have at most the specified number of columns
+    When checking the row count, the option @csv.withHeader can be used and decrements the 
+    actual row count by one.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -18,13 +18,36 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+        
+        <!-- Visit: folder 'constraint-Mediatype' -->
+        <folder foxpath="constraint-Mediatype" id="mediatypeFolderShape">
+            <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
+            
+            <!-- Visit files: JSON files -->
             <file foxpath=".\\*.json" id="jsonFileShape">
-                <mediatype eq="xml"/>
+                <mediatype eq="json"/>
             </file>
+            
+            <!-- Visit files: XML files -->
             <file foxpath=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>
+            </file>
+            
+            <!-- Visit files: CSV files (separator: comma) -->
+            <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+                <mediatype eq="csv"
+                    csv.separator="comma" csv.withHeader="true"
+                    csv.minColumnCount="4" csv.maxColumnCount="4" 
+                    csv.minRowCount="2" csv.maxRowCount="30"/>                
+            </file>
+            
+            <!-- Visit files: CSV files (separator: semicolon) -->            
+            <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+                <mediatype eq="csv"
+                    csv.separator="semicolon" csv.withHeader="true"
+                    csv.minColumnCount="4" csv.maxColumnCount="4" 
+                    csv.minRowCount="2" csv.maxRowCount="30"/>
+                />
             </file>
         </folder>
     </domain>

@@ -50,7 +50,7 @@ declare function f:validateExtensionConstraint($contextFilePath as xs:string,
         return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $useParams)  
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, $useParams)  
 
     let $xpath := $constraintComponent/(@validatorXPath, gx:validatorXPath)[1]
     let $foxpath := $constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)[1]
