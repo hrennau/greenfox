@@ -7,30 +7,32 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "expressionEvaluator.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "expressionEvaluator.xqm",
+   "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:xsdValidate($filePath as xs:string, 
-                               $constraint as element(gx:xsdValid), 
+declare function f:xsdValidate($constraint as element(gx:xsdValid), 
                                $context as map(*))
         as element()* {
-    if (not(i:fox-doc-available($filePath))) then 
+    let $contextURI := $context?_targetInfo?contextURI
+    return
+    
+    if (not(i:fox-doc-available($contextURI))) then 
         let $msg := "XSD validation requires XML file, but file is not XML"
         return
-            f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
+            f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
     else
       
-    let $doc := i:fox-doc-no-base-xml($filePath)
+    let $doc := i:fox-doc-no-base-xml($contextURI)
     let $expr := $constraint/@xsdFoxpath
     let $evaluationContext := $context?_evaluationContext
     let $xsdPaths := 
-        let $value := f:evaluateFoxpath($expr, $filePath, $evaluationContext, true())
+        let $value := f:evaluateFoxpath($expr, $contextURI, $evaluationContext, true())
         return (
             for $v in $value 
             return
@@ -42,7 +44,7 @@ declare function f:xsdValidate($filePath as xs:string,
         if (empty($xsdPaths)) then
             let $msg := "No XSDs found"
             return
-                f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())            
+                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())            
         else
         
     let $xsdRoots := 
@@ -58,7 +60,7 @@ declare function f:xsdValidate($filePath as xs:string,
             
                 let $msg := "xsdFoxpath yields non-XSD node"
                 return
-                    f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
+                    f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
         else
 
     let $rootElem := $doc/*
@@ -75,12 +77,12 @@ declare function f:xsdValidate($filePath as xs:string,
             let $msg := concat('No XSD element declaration found for this document; ',
                                'namespace=', $namespace, '; local name: ', $lname)
             return
-                f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
+                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
         else if (count($elementDecl) gt 1) then
             let $msg := concat('More than 1 XSD element declarations found for this document; ',
                                'namespace=', $namespace, '; local name: ', $lname)
             return                                    
-                f:constructResult_xsdValid('red', $msg, $filePath, $constraint, ())
+                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
         else 
         
     (: let $schema := $elementDecl/base-uri(.) :)    
@@ -88,14 +90,14 @@ declare function f:xsdValidate($filePath as xs:string,
     let $report := validate:xsd-report($doc, $schema)
     return
         if ($report//status eq 'valid') then
-            f:constructResult_xsdValid('green', (), $filePath, $constraint, ())
+            f:constructResult_xsdValid('green', (), $contextURI, $constraint, ())
         else            
-            f:constructResult_xsdValid('red', (), $filePath, $constraint, $report)
+            f:constructResult_xsdValid('red', (), $contextURI, $constraint, $report)
 };
 
 declare function f:constructResult_xsdValid($colour as xs:string,
                                             $msg as xs:string?,
-                                            $filePath as xs:string,                                            
+                                            $contextURI as xs:string,                                            
                                             $constraintElem as element(),
                                             $report as element()?)
         as element() {
@@ -103,7 +105,7 @@ declare function f:constructResult_xsdValid($colour as xs:string,
     return
         element {$elemName}{
             $msg ! attribute msg {.},
-            attribute filePath {$filePath},                
+            attribute filePath {$contextURI},                
             attribute constraintComponent {"XsdValid"},
             $constraintElem/@id/attribute constraintID {.},
             $constraintElem/@label/attribute constraintLabel {.},            

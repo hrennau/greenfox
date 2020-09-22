@@ -103,7 +103,8 @@ declare function f:writeValidationReport_whiteTree(
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
-        for $result in $results        
+        for $result in $results  
+        (: let $_DEBUG := trace($result, '___RESULT: ') :)
         let $resourceIdentifier := $result/(@filePath, @folderPath)[1]
         let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
         group by $resourceIdentifier
@@ -115,6 +116,9 @@ declare function f:writeValidationReport_whiteTree(
         let $red := $result/(self::gx:red, self::gx:red)
         let $yellow := $result/self::gx:yellow
         let $green := $result/self::gx:green
+        let $whiteRed := $result/self::gx:whiteRed
+        let $whiteYellow := $result/self::gx:whiteYellow
+        let $whiteGreen := $result/self::gx:whiteGreen
         let $other := $result except ($red, $green)
         let $removeAtts :=('filePath', 'folderPath')
         return
@@ -123,18 +127,47 @@ declare function f:writeValidationReport_whiteTree(
                     $resourceIdentifierAtt, 
                     $result/self::gx:red/f:removeAtts(., $removeAtts),
                     $result/self::gx:yellow/f:removeAtts(., $removeAtts),
-                    $result/self::gx:green/f:removeAtts(., $removeAtts)
+                    $result/self::gx:green/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)
                 }</gx:redResource>
             else if ($yellow) then 
                 <gx:yellowResource>{
                     $resourceIdentifierAtt/self::gx:yellow/f:removeAtts(., $removeAtts), 
-                    $result/self::gx:green/f:removeAtts(., $removeAtts)
+                    $result/self::gx:green/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
                 }</gx:yellowResource> 
             else if ($green) then 
                 <gx:greenResource>{
                     $resourceIdentifierAtt, 
-                    $result/f:removeAtts(., $removeAtts)
+                    $result/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
                 }</gx:greenResource>
+            else if ($whiteRed) then 
+                <gx:whiteRedResource>{
+                    $resourceIdentifierAtt, 
+                    $result/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
+                }</gx:whiteRedResource>
+            else if ($whiteYellow) then 
+                <gx:whiteYellowResource>{
+                    $resourceIdentifierAtt, 
+                    $result/f:removeAtts(., $removeAtts),
+                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
+                }</gx:whiteYellowResource>
+            else if ($whiteGreen) then 
+                <gx:whiteGreenResource>{
+                    $resourceIdentifierAtt, 
+                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
+                }</gx:whiteGreenResource>
             else error()
     let $redResources := $resourceDescriptors/self::gx:redResource
     let $yellowResources := $resourceDescriptors/self::gx:yellowResource    

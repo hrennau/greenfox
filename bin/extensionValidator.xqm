@@ -7,28 +7,32 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_foxpath.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_foxpath.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "evaluationContextManager.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "evaluationContextManager.xqm",
+   "greenfoxUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateExtensionConstraint($contextFilePath as xs:string,
-                                               $contextDoc as document-node()?,
-                                               $contextItem as item()?,
-                                               $constraint as element(),
+declare function f:validateExtensionConstraint($constraint as element(),
                                                $context as map(xs:string, item()*))
                                             
         as element()* {
+        
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    return
+        
     let $constraintComponent := f:getExtensionConstraintComponents($constraint)        
     let $constraintElemName := $constraintComponent/@constraintElementName
     let $paramNames := $constraintComponent/gx:param/@name
@@ -49,14 +53,14 @@ declare function f:validateExtensionConstraint($contextFilePath as xs:string,
         let $potentialBindings := i:getPotentialBindings()
         return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
 
-    let $context := f:prepareEvaluationContext($context, $reqBindings, $contextFilePath, 
+    let $context := f:prepareEvaluationContext($context, $reqBindings, $contextURI, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, $useParams)  
 
     let $xpath := $constraintComponent/(@validatorXPath, gx:validatorXPath)[1]
     let $foxpath := $constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)[1]
     let $exprValue := 
-        if ($xpath) then f:evaluateXPath($xpath, $contextItem, $context?_evaluationContext, true(), true())
-        else if ($foxpath) then f:evaluateFoxpath($xpath, $contextItem, $context?_evaluationContext, true())
+        if ($xpath) then f:evaluateXPath($xpath, $contextNode, $context?_evaluationContext, true(), true())
+        else if ($foxpath) then f:evaluateFoxpath($xpath, $contextURI, $context?_evaluationContext, true())
         else error()
     let $isValidAndErrors := if (empty($exprValue)) then true()
                              else if ($exprValue instance of xs:boolean) then $exprValue
@@ -66,7 +70,7 @@ declare function f:validateExtensionConstraint($contextFilePath as xs:string,
     
     let $msg := $constraint/@msg/f:editMsg(., $useParams)
     let $msgOk := $constraint/@msgOK/f:editMsg(., $useParams)
-    let $nodePath := if (not($contextItem instance of node())) then () else $contextItem/i:datapath(.)
+    let $nodePath := $contextNode/i:datapath(.)
     
     let $constraintIdentAtts := (
         'ExtensionConstraint' ! attribute constraintComp {.},

@@ -1083,7 +1083,7 @@ declare function f:validationResult_value($colour as xs:string,
         return 
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
-    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang, ())
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},
@@ -1158,7 +1158,7 @@ declare function f:validationResult_value_counts($colour as xs:string,
         return 
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
-    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)    
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang, ())    
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
@@ -1242,6 +1242,10 @@ declare function f:validationResult_value_exception(
 declare function f:validationResult_valuePair($colour as xs:string,
                                               $constraintElem,
                                               $constraintNode as node(),
+                                              $expr1Spec as item(),
+                                              $expr2Spec as item(),
+                                              $expr1Lang as xs:string,
+                                              $expr2Lang as xs:string,
                                               $violations as item()*,
                                               $additionalAtts as attribute()*,
                                               $context as map(xs:string, item()*))
@@ -1262,15 +1266,13 @@ declare function f:validationResult_valuePair($colour as xs:string,
                            $constraintNode/i:firstCharToUpperCase($constraintKind)
     
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintKind)
-    let $expr1Lang := 'xpath'
-    let $expr2Lang := 'xpath'    
-    
     let $values := 
         let $items := if (exists($violations)) then $violations else ()
         return 
             if (empty($items)) then () else
                 f:validationResultValues($items, $constraintElem, $targetInfo?doc)
-    
+    let $expr1Atts := f:validateResult_exprAtts($expr1Spec, $expr1Lang, '1')
+    let $expr2Atts := f:validateResult_exprAtts($expr2Spec, $expr2Lang, '2')
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
@@ -1281,10 +1283,9 @@ declare function f:validationResult_valuePair($colour as xs:string,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
         
-            $constraintElem/@expr1XP ! attribute expr1 {.},
-            attribute expr1Lang {$expr1Lang},            
-            $constraintElem/@expr2XP ! attribute expr2 {.},
-            attribute expr2Lang {$expr2Lang},
+            $expr1Atts,
+            $expr2Atts,
+            
             $cmpAtt,
             $useDatatypeAtt,
             $flagsAtt,
@@ -1393,7 +1394,7 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
             return attribute contextItem1 {$attValue}                             
 
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang)
+    let $exprAtts := f:validateResult_exprAtts($exprSpec, $exprLang, ())
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},        
@@ -1747,18 +1748,21 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         
 };   
 
-declare function f:validateResult_exprAtts($exprSpec as item(), $exprLang as xs:string?)
+declare function f:validateResult_exprAtts($exprSpec as item(), $exprLang as xs:string?, $postfix as xs:string?)
         as attribute()* {
-    attribute exprLang {$exprLang},
+    let $exprAttName := 'expr' || $postfix return (
+    
+    attribute {'expr' || $postfix || 'Lang'} {$exprLang},
     
     typeswitch($exprSpec)
-    case xs:string return attribute expr {$exprSpec}
+    case xs:string return attribute {$exprAttName} {$exprSpec}
     case map(*) return
         if ($exprSpec?exprKind eq 'filterMapLP') then (
-            $exprSpec?filterLP ! attribute filterLP {.},
-            $exprSpec?mapLP ! attribute mapLP {.})
+            $exprSpec?filterLP ! attribute {'filter' || $postfix || 'LP'} {.},
+            $exprSpec?mapLP ! attribute {'map' || $postfix || 'LP'} {.})
         else
-            attribute expr {'?'}
-    default return attribute expr {'?'}                
+            attribute {$exprAttName} {'?'}
+    default return attribute {$exprAttName} {'?'}
+    )
 };
                                                    

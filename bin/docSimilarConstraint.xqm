@@ -30,22 +30,23 @@ declare namespace fox="http://www.foxpath.org/ns/annotations";
  : Supplementary constraints refer to the number of items representing
  : the documents with which to compare.
  :
- : @param contextURI the file path of the file containing the initial context item 
- : @param contextDoc the XML document containing the initial context item
- : @param contextItem the initial context item to be used in expressions
  : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return validation results, red and/or green
-:)
-declare function f:validateDocSimilar($contextURI as xs:string,
-                                      $contextDoc as document-node()?,                                      
-                                      $contextNode as node()?,
-                                      $constraintElem as element(gx:docSimilar),                                      
+ :)
+declare function f:validateDocSimilar($constraintElem as element(gx:docSimilar),                                      
                                       $context as map(xs:string, item()*))
         as element()* {
 
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    let $useContextNode := ($contextNode, $contextDoc)[1]
+    return
+
     (: Exception - no context document :)
-    if (not($context?_targetInfo?doc)) then
+    if (not($useContextNode)) then
         result:validationResult_docSimilar_exception($constraintElem, (),
             'Context resource could not be parsed', (), $context)
     else
@@ -53,10 +54,9 @@ declare function f:validateDocSimilar($contextURI as xs:string,
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)
     let $lros := 
-        let $contextNode := ($contextNode, $contextDoc)[1]
         let $options := map{'targetMediatype': 'xml'}
         return
-            link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $options) 
+            link:resolveLinkDef($ldo, 'lro', $contextURI, $useContextNode, $context, $options) 
             [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)
         
     (: Check link constraints :)
@@ -64,7 +64,7 @@ declare function f:validateDocSimilar($contextURI as xs:string,
     
     (: Check similarity :)
     let $results_comparison := 
-        f:validateDocSimilar_similarity($contextNode, $lros, $constraintElem, $context)
+        f:validateDocSimilar_similarity($useContextNode, $lros, $constraintElem, $context)
         
     return ($results_link, $results_comparison)
 };   

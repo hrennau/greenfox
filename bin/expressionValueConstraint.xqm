@@ -23,12 +23,17 @@ import module namespace vr="http://www.greenfox.org/ns/xquery-functions/validati
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateExpressionValue($contextFilePath as xs:string,
-                                           $constraintElem as element(), 
-                                           $contextItem as item()?,                                           
-                                           $contextDoc as document-node()?,
+declare function f:validateExpressionValue($constraintElem as element(), 
                                            $context as map(xs:string, item()*))
         as element()* {
+        
+    let $targetInfo := $context?_targetInfo
+    let $contextFilePath := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    let $contextItem := ($contextNode, $contextDoc, $contextFilePath)[1]
+    return
+        
     (:   
     let $_DEBUG := trace(typeswitch($contextItem) 
                          case document-node() return 'DNODE' 
@@ -204,7 +209,7 @@ declare function f:validateExpressionValue($contextFilePath as xs:string,
         for $xpath in $constraintElem/gx:xpath
         for $exprValueItem in $exprValue
         return
-            i:validateExpressionValue($xpath, $exprValueItem, $contextFilePath, $contextDoc, $context)
+            i:validateExpressionValue($exprValueItem, $context)
     return (
         $results,
         $furtherResults

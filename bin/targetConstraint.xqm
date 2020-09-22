@@ -70,7 +70,6 @@ declare function f:validateLinkConstraints($resourceShape as element(),
     if (empty($lros)) then () else
        
     let $constraintElem := $resourceShape/gx:targetSize
-    let $contextInfo := map:merge((map:entry('filePath', $context?_contextPath)))
     return 
         link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)
 };
@@ -89,7 +88,7 @@ declare function f:validateTargetCount($resourceShape as element(),
                                        $targetItems as item()*,
                                        $context as map(xs:string, item()*))
         as element()* {
-    let $contextPath := $context?_contextPath        
+    let $contextURI := $context?_targetInfo?contextURI        
     let $constraintElem := $resourceShape/gx:targetSize        
     let $targetCount := count($targetItems)    
     let $countConstraints := $constraintElem/(@count, @minCount, @maxCount)
@@ -105,5 +104,5 @@ declare function f:validateTargetCount($resourceShape as element(),
     let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
     return        
         vr:validationResult_targetCount($colour, $constraintElem, $cmp, 
-            $ldo, $targetItems, $contextPath, $context)
+            $ldo, $targetItems, $contextURI, $context)
 };

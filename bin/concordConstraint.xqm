@@ -35,20 +35,21 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : The $contextItem is either the current resource, or a focus node.
  :
- : @param contextURI the file path of the file containing the initial context item 
- : @param contextDoc the XML document containing the initial context item
- : @param contextItem the initial context item to be used in expressions
  : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateConcord($contextURI as xs:string,
-                                   $contextDoc as document-node()?,
-                                   $contextItem as item()?,
-                                   $constraintElem as element(),
+declare function f:validateConcord($constraintElem as element(),
                                    $context as map(xs:string, item()*))
         as element()* {
-    
+
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    let $contextItem := ($contextNode, $contextDoc, $contextURI)[1]
+    return
+
     (: context info - a container for current file path, current document and 
                       datapath of the focus node :)    
     let $contextInfo := 

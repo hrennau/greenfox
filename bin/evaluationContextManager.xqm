@@ -478,7 +478,8 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
             )  
         return map:put($context, '_evaluationContext', $evaluationContext) !
                map:put(., '_reqDocs', $reqDocs) !
-               map:put(., '_targetInfo', map{'contextURI': $context?_contextPath, 'doc': $doc})
+               (: map:put(., '_targetInfo', map{'contextURI': $context?_contextPath, 'doc': $doc}) :)
+               map:put(., '_targetInfo', map{'contextURI': $filePath, 'doc': $doc})
     return $context        
 }; 
 

@@ -65,7 +65,10 @@ declare function f:validateFile($fileShape as element(gx:file), $context as map(
 };
 
 (:~
- : Validates a file resource against a file shape.
+ : Validates a file resource against a file shape. The context is still 
+ : refering to the previous resource. The context is adapted, and validation
+ : of the file resource against the file shape (or another node containing
+ : file constraints - e.g. focus node or if node) is launched.
  :
  : @param contextURI the file path
  : @param fileShape the file shape
@@ -82,25 +85,17 @@ declare function f:validateFileInstance($contextURI as xs:string,
     let $context := map:put($context, '_contextPath', $contextURI)
     let $context := i:adaptContext($contextURI, $fileShape, $context)
     let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id || '_DOCNR_' || $position, $context)
-    let $contextDoc := $context?_reqDocs?doc
-    let $results := f:validateFileInstanceComponents($contextURI, $contextDoc, $contextDoc, $fileShape, $context)
+    let $results := f:validateFileInstanceComponents($fileShape, $context)
     return $results
 };
 
-declare function f:validateFileInstanceComponents($contextURI as xs:string,
-                                                  $contextDoc as document-node()?,
-                                                  $contextNode as node()?,                                                  
-                                                  $fileShape as element(),                                                                                                    
+declare function f:validateFileInstanceComponents($fileShape as element(),                                                                                                    
                                                   $context as map(*))
         as element()* {
-    let $contextItem := ($contextNode, $contextURI)[1]
-    
     let $childComponents := $fileShape/*[not(@deactivated eq 'true')]
-    
     let $files := $childComponents/self::gx:file
     let $folders := $childComponents/self::gx:folder
-    let $focusNodes := $childComponents/self::gx:focusNode
-    
+    let $focusNodes := $childComponents/self::gx:focusNode    
     let $constraints := $childComponents except ($files, $folders, $focusNodes)
     let $extensionConstraints := f:getExtensionConstraints($constraints)
     let $coreConstraints := $constraints except $extensionConstraints
@@ -109,7 +104,7 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         $files/i:validateFile(., $context),
         $folders/i:validateFolder(., $context)
     )
-    let $focusNodeResults := $focusNodes/i:validateFocusNode($contextURI, ., $contextItem, $contextDoc, $context)
+    let $focusNodeResults := $focusNodes/i:validateFocusNode(., $context)
     let $coreConstraintResults := 
         for $constraintElem in $coreConstraints return
         
@@ -119,32 +114,30 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
-        case element(gx:docContent) return dcont:validateDocContentConstraint($constraintElem, $context)        
-        case element(gx:values) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:foxvalues) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:valuePairs) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:foxvaluePairs) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:valuesCompared) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:foxvaluesCompared) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
-        case element(gx:links) return i:validateLinks($contextURI, $contextDoc, $contextItem, $constraintElem, $context)            
-        case element(gx:docSimilar) return i:validateDocSimilar($contextURI, $contextDoc, $contextItem, $constraintElem, $context)
-        case element(gx:xsdValid) return i:xsdValidate($contextURI, $constraintElem, $context)
+        case element(gx:docContent) return dcont:validateDocContentConstraint($constraintElem, $context)  
         
-        case element(gx:ifMediatype) return $constraintElem
-                     [i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]
-                      /f:validateFileInstanceComponents($contextURI, $contextDoc, $contextNode, ., $context)                
-        case element(gx:xpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)
-        case element(gx:foxpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)            
-        case element(gx:contentCorrespondence) return concord:validateConcord($contextURI, $contextDoc, $contextItem, $constraintElem, $context)
-        (:     
-        case element(gx:if) return := i:evaluateConditional($constraintElem, $context)
-         :)    
+        case element(gx:values) return expr:validateValueConstraint($constraintElem, $context)
+        case element(gx:foxvalues) return expr:validateValueConstraint($constraintElem, $context)
+        case element(gx:valuePairs) return expair:validateValuePairConstraint($constraintElem, $context)            
+        case element(gx:foxvaluePairs) return expair:validateValuePairConstraint($constraintElem, $context)            
+        case element(gx:valuesCompared) return expair:validateValuePairConstraint($constraintElem, $context)            
+        case element(gx:foxvaluesCompared) return expair:validateValuePairConstraint($constraintElem, $context)        
+        case element(gx:links) return i:validateLinks($constraintElem, $context)            
+        case element(gx:docSimilar) return i:validateDocSimilar($constraintElem, $context)
+        case element(gx:xsdValid) return i:xsdValidate($constraintElem, $context)        
+        case element(gx:ifMediatype) return 
+            let $contextURI := $context?_targetInfo?contextURI return
+              $constraintElem[i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]/f:validateFileInstanceComponents(., $context)                
+        case element(gx:xpath) return i:validateExpressionValue($constraintElem, $context)
+        case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)            
+        case element(gx:contentCorrespondence) return concord:validateConcord($constraintElem, $context)
+        case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, $context)
         
         default return 
             error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
                   concat('Unexpected shape or constraint element, name: ', $constraintElem/name()))
     let $extensionConstraintResults := 
-        $extensionConstraints/f:validateExtensionConstraint($contextURI, $contextDoc, $contextNode, ., $context)         
+        $extensionConstraints/f:validateExtensionConstraint(., $context)         
     return (
         $resourceShapeResults, 
         $focusNodeResults,
@@ -171,33 +164,29 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
  : @param context the processing context
  : @return a set of results
  :)
-declare function f:validateFocusNode($contextURI as xs:string,
-                                     $focusNodeShape as element(), 
-                                     $nodeContextItem as node()?,                                     
-                                     $contextDoc as document-node()?,
+declare function f:validateFocusNode($focusNodeShape as element(),
                                      $context as map(xs:string, item()*))
         as element()* {
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    let $useContextNode := ($contextNode, $contextDoc)[1]
+    return
+        
     let $xpath := $focusNodeShape/@xpath
     let $foxpath := $focusNodeShape/@foxpath        
     let $exprValue :=    
         let $evaluationContext := $context?_evaluationContext
-        let $contextItem := ($nodeContextItem, $contextURI)[1]
+        let $contextItem := ($useContextNode, $contextURI)[1]
         return
             if ($xpath) then 
                 i:evaluateXPath($xpath, $contextItem, $evaluationContext, true(), true())
-                
-            (: Foxpath based focus node shape conceptually not yet fully evaluated;
-               considered, but for the time being not yet supported               
-            else if ($foxpath) then  
-                f:evaluateFoxpath($foxpath, $contextURI, $evaluationContext, true())
-             :)
-             
             else error(QName((), 'SCHEMA_ERROR'), 'Missing expression')
     let $focusNodes := $exprValue[. instance of node()]   
     
     (: Validation results - target size :)
-    let $results_target :=
-        $focusNodeShape/i:validateTargetCount(., (), $focusNodes, $context)
+    let $results_target := $focusNodeShape/i:validateTargetCount(., (), $focusNodes, $context)
 
     (: Other validation results :)
     let $results_other :=
@@ -208,13 +197,51 @@ declare function f:validateFocusNode($contextURI as xs:string,
             if ($focusNode/ancestor::node() intersect $contextDoc) then $contextDoc
             else $focusNode/root()
         return
-            f:validateFileInstanceComponents($contextURI, 
-                                             $focusNodeDoc,
-                                             $focusNode,
-                                             $focusNodeShape,                                             
-                                             $context)
+            f:validateFileInstanceComponents($focusNodeShape, $context)
     return
         ($results_target, $results_other)
 };
+
+(:~
+ : Validates a conditional constraint.
+ :
+ : @param constraintElem an element declaring the condition of a conditional constraint
+ : @param context the processing context
+ : @return validation results
+ :)
+declare function f:validateConditionalConstraint($constraintElem as element(gx:conditional), 
+                                                 $context as map(*))
+        as element()* {
+    
+    let $if := $constraintElem/gx:if[1]
+    let $then := $constraintElem/gx:then[1]
+    let $elseif := $constraintElem/gx:elseIf
+    let $else := $constraintElem/gx:else[1]
+    
+    let $ifResults := $if/f:validateFileInstanceComponents(., $context)
+    let $ifTrue := every $result in $ifResults satisfies $result/self::gx:green
+    return (
+        trace($ifResults/f:whitenResults(.), '++++++ WHITENED_RESULTS: '),
+        if ($ifTrue) then $then/f:validateFileInstanceComponents(., $context)        
+        else $else/f:validateFileInstanceComponents(., $context)
+    )        
+};
+
+(:~
+ : Transforms results so that 'red', 'yellow' and 'green' is
+ : marked as not describing validity, as they have been produced in
+ : order to determine a condition.
+ :)
+declare function f:whitenResults($results as element()*)
+        as element()* {
+    for $result in $results
+    return
+        typeswitch($result)
+        case element(gx:red) return element gx:whiteRed {$result/(@*, node())}
+        case element(gx:green) return element gx:whiteGreen {$result/(@*, node())}
+        case element(gx:yellow) return element gx:whiteYellow {$result/(@*, node())}
+        default return $result
+};        
+
 
 

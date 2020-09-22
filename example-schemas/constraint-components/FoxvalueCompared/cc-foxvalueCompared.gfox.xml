@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FoxvalueCompared constraints: declares a VoxvalueComparedInin contraint.
+    Demonstrates the use of FoxvalueCompared constraints: declares a FoxvalueComparedInin contraint.
     
     All items of value 1 must be equal to an item from value 2, and all items of value 2 must be
     equal to an item from value 1. Note that this "mutual inclusion" is not equivalent to
@@ -14,8 +14,12 @@
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>            
+            <targetSize countMsg="Missing folder: airports" count="1"/>
+
+            <!-- CHECK: contents compared with contents of copy folder -->
             <foxvaluesCompared foxpath="fox-sibling('airports-copy')" 
                                countTargetResources="1">                
                 <foxvalueCompared expr1FOX=".\\airport-*.xml//country" 
