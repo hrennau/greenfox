@@ -34,19 +34,19 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : Bla.
  :
- : @param contextURI the file path of the file containing the initial context item 
- : @param contextDoc the XML document containing the initial context item
- : @param contextNode the initial context node to be used in expressions
  : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateDocContentConstraint($contextURI as xs:string,
-                                                $contextDoc as document-node()?,
-                                                $contextNode as node()?,
-                                                $constraintElem as element(gx:docContent),
+declare function f:validateDocContentConstraint($constraintElem as element(gx:docContent),
                                                 $context as map(xs:string, item()*))
         as element()* {
+
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    return
     
     (: Exception - no context document :)
     if (not($context?_targetInfo?doc)) then

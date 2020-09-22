@@ -105,6 +105,7 @@ declare function f:evaluateNodePathRC($steps as element()+,
             if ($head/@regex) then $contextNode/ancestor::*[matches(local-name(.), $head/@regex)]
             else if ($head/@name) then $contextNode/parent::*[local-name(.) eq $head/@name]
             else $contextNode/..
+        case element(self) return $contextNode            
         default return error()
         
     (: Evaluate prefix :)
@@ -176,6 +177,8 @@ declare function f:parseNodePath($nodePath as xs:string,
     ) else if (starts-with($nodePath, '..')) then (
         $nodePath ! f:parseNodePathRC(., $options, $context)
     (: ./foo :)
+    ) else if (matches($nodePath, '^\s*.\s*$')) then (
+        <self/>
     ) else if (starts-with($nodePath, '.')) then (
         $nodePath ! replace(., '^\.\s*', '') ! f:parseNodePathRC(., $options, $context)
     (: foo... :)        

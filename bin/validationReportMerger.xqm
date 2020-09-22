@@ -105,7 +105,7 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
     return 
         <gx:validationReport xmlns:gx="http://www.greenfox.org/ns/schema"
                              xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                             countErrors="{$countRed}" 
+                             countRed="{$countRed}" 
                              countRedResources="{$countRedResources}"
                              countYellowResources="{$countYellowResources}"
                              countGreenResources="{$countGreenResources}">{
@@ -113,7 +113,7 @@ declare function f:merge($gfox as element()+, $reportType as xs:string)
                 $gfox/<xs:greenfoxSchema documentURI="{@greenfoxDocumentURI}" 
                                          greenfoxURI="{@greenfoxURI}"
                                          greenfoxPrefix="{@greenfoxURI ! $prefixMap(.)}"
-                                         countErrors="{@countErrors}"/>
+                                         countRed="{@countRed}"/>
             }</gx:greenfoxSchemas>,
             $resources
         }</gx:validationReport>

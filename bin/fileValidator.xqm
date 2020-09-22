@@ -119,7 +119,7 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
-        case element(gx:docContent) return dcont:validateDocContentConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
+        case element(gx:docContent) return dcont:validateDocContentConstraint($constraintElem, $context)        
         case element(gx:values) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
         case element(gx:foxvalues) return expr:validateValueConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
         case element(gx:valuePairs) return expair:validateValuePairConstraint($contextURI, $contextDoc, $contextNode, $constraintElem, $context)            
@@ -136,7 +136,10 @@ declare function f:validateFileInstanceComponents($contextURI as xs:string,
         case element(gx:xpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)
         case element(gx:foxpath) return i:validateExpressionValue($contextURI, $constraintElem, $contextItem, $contextDoc, $context)            
         case element(gx:contentCorrespondence) return concord:validateConcord($contextURI, $contextDoc, $contextItem, $constraintElem, $context)
-                
+        (:     
+        case element(gx:if) return := i:evaluateConditional($constraintElem, $context)
+         :)    
+        
         default return 
             error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
                   concat('Unexpected shape or constraint element, name: ', $constraintElem/name()))

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocContent constraints.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: airports folder -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>          
+
+            <!-- VISIT: country airports files -->
+            <file foxpath="airports-ireland.xml" id="countryAirportsShape">
+                <targetSize minCount="1" minCountMsg="Expected country airports documents"/>
+                
+                <!-- Focus node: airport elements with IATA code -->
+                <focusNode xpath="//airport[@iata]">
+                    
+                    <!-- CHECK: grammar -->
+                    <docContent>
+                        <node locNP="." closed="true">
+                            <node locNP="@id"/>
+                            <node locNP="@iata"/>
+                            <node locNP="@icao"/>
+                            <node locNP="@latitude"/>
+                            <node locNP="@longitude"/>
+                            <node locNP="@href"/>
+                        </node>
+                    </docContent>
+                </focusNode>
+                <!-- Focus node: airport elements without IATA code -->                
+                <focusNode xpath="//airport[not(@iata)]">
+                    
+                    <!-- CHECK: grammar -->                    
+                    <docContent>
+                        <node locNP="." closed="true">
+                            <node locNP="@id"/>
+                            <node locNP="@icao"/>
+                            <node locNP="name"/>
+                            <node locNP="city"/>
+                            <node locNP="country"/>
+                            <node locNP="geo"/>
+                            <node locNP="temporal"/>
+                            <node locNP="type"/>
+                            <node locNP="source1"/>
+                        </node>
+                    </docContent>
+                </focusNode>
+            </file>
+
+        </folder>
+    </domain>
+
+</greenfox>
