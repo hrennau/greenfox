@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-extension-grep"
+          xmlns:ex="http://example.com"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <constraintComponents>
+        
+        <!-- Simple grep constraint -->
+        <constraintComponent constraintElementName="ex:grep">
+            <param name="pattern" type="xs:string"></param>
+            <param name="flags" type="xs:string?"></param>
+            <validatorXPath>
+            exists(unparsed-text-lines($this)[matches(., $pattern, $flags)])
+            </validatorXPath>
+        </constraintComponent>
+
+    </constraintComponents>    
+    
+    <domain path="\tt\greenfox\example-data" name="greenfox-example-data">    
+        
+        <!-- *** System root folder shape *** -->
+        <folder foxpath="textfiles" id="textfilesFolderShape">
+            <targetSize msg="No textfiles folder found" minCount="1"/>
+            <file foxpath="README.md">
+                <targetSize msg="README file not found" minCount="1"/>    
+                <ex:grep pattern="ISO 639-3" flags="i"
+                         msg="File does not contain string '$pattern'."
+                         msgOK="File contains string '$pattern'."/>                    
+            </file>
+        </folder>
+    </domain>    
+</greenfox>

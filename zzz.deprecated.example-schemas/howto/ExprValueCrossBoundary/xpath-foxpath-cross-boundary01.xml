@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/system-s"
+          xmlns="http://www.greenfox.org/ns/schema">
+    
+    <!-- *** System file tree *** -->
+    <domain path="\tt\greenfox\resources\example-system\system-s" name="system-s">
+               
+        <!-- *** Response file shape *** -->
+        <file foxpath=".\\test-*[config]\output\(*.xml, *.json)" 
+              id="responseFileShape"
+              mediatype="xml-or-json">
+                    
+            <!-- # Check - article number in codelist? -->
+            <xpath 
+                expr="//*:fooValue"
+                inFoxpath="$domain\\codelists\*.xml
+                           /codelist[@name eq 'foo-article']/entry/@code"
+                inFoxpathMsg="Unknown foo article number"/>
+                    
+            <!-- # Check - return code ok? -->
+            <foxpath 
+                expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                //record[response eq $fileName]/returnCode"
+                eqXPath="//*:returnCode"                                   
+                eqXPathMsg="Return code not the configured value"/>                                   
+                    
+        </file>
+    </domain>
+</greenfox>
+

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Goal: files 'errors.xml' and 'errorsDetails.xml' either occur both, or not at all.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/oxygen/check-catalog"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="fileExistenceDependencies" id="fileExistenceDependenciesFolderShape">
+            <targetSize countMsg="Missing folder: fileExistenceDependencies" count="1"/>
+
+            <!-- docbook files -->
+            <file foxpath=".\\*.xml[/docbook:*]">
+               ...
+               <!-- docbook with images --> 
+               <file foxpath=".[//docbook:imagedata]">
+                 ...
+                 <folder foxpath="..\img[is-dir(.)]">
+                   <targetSize countMsg="No img subfolder" 
+                               count="1"/>
+                 </folder>
+               </file>                    
+            </file>
+            
+        </folder>
+    </domain>
+
+</greenfox>
