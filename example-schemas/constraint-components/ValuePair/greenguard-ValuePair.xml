@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Greenguard of folder with example schemas for ValuePair constraints.
+    
+    call gfox /path/to/ValuePair/greenguard-ValuePair.xml
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.includes"
+    xmlns="http://www.greenfox.org/ns/schema">
+    
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\.."/>
+    </context>
+    
+    <domain path="${domain}" name="example-schemas-value-pair">
+       
+       <folder foxpath=".">
+            <!-- Demo coverage: @quant -->
+           <foxvalues>
+               <foxvalue exprFOX=".\\*.gfox.xml//@quant" minCount="1" 
+                         containsMsg="Demo coverage - missing @quant values">
+                   <contains>
+                       <term>someForEach</term>
+                       <term>some</term>
+                       <term>all</term>
+                   </contains>
+               </foxvalue>
+               <!-- Demo coverage: @expr2Context -->               
+               <foxvalue exprFOX=".\\*.gfox.xml//@expr2Context" minCount="1"
+                         containsMsg="Demo coverage - missing @expr2Context=#item">
+                   <contains>
+                       <term>#item</term>
+                   </contains>
+               </foxvalue>
+               <!-- Demo coverage: @useDatatype -->               
+               <foxvalue exprFOX=".\\*.gfox.xml//@useDatatype" minCount="1"
+                         minCountMsg="Demo coverage - missing @useDatatype"
+                         containsMsg="Demo coverage - missing @useDatatype=date">
+                   <contains>
+                       <term>date</term>
+                   </contains>
+               </foxvalue>
+               <!-- Demo coverage: @useString -->               
+               <foxvalue exprFOX=".\\*.gfox.xml//@useString" minCount="1"
+                         minCountMsg="Demo coverage - missing @useString"/>
+               <!-- Demo coverage: @flags -->               
+               <foxvalue exprFOX=".\\*.gfox.xml//@flags" minCount="1"
+                         minCountMsg="Demo coverage - missing @flags"/>
+           </foxvalues>
+       </folder>
+        
+        <file foxpath="*.gfox.xml" id="greenfoxFileShape">
+            <targetSize minCount="10" minCountMsg="Expected more example schemas"/>
+
+            <focusNode xpath="/gx:greenfox">
+                <values>
+                    <value exprXP="@greenfoxURI" count="1"
+                           like="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.*"
+                           likeMsg="Not expected greenfoxURI" />
+                </values>
+                
+                <focusNode xpath="gx:domain">
+                    <targetSize count="1" countMsg="Missing domain element"/>
+                    
+                    <values>
+                        <value exprXP="@path" count="1" like="?{domain}" likeMsg="Not expected domain path"/>
+                        <value exprXP="@name" count="1" eq="greenfox-example-data" eqMsg="Not expected domain name"/>
+                    </values>
+                    
+                    <focusNode xpath="gx:folder[1]">
+                        <targetSize count="1" countMsg="Missing folder shape"/>
+                        <values>
+                            <value exprXP="@foxpath" count="1" 
+                                   eq="constraint-ValuePair" eqMsg="Should select folder 'constraint-ValuePair"/>
+                            <value exprXP="@id" count="1" 
+                                   eq="valuePairFolderShape" eqMsg="Folder ID should be 'valuePairFolderShape'"/>
+                        </values>
+                    
+                        <focusNode xpath="gx:file">
+                            <targetSize count="1" countMsg="Missing file shape"/>
+                            <values>
+                                <value exprXP="@foxpath" inMsg="Not expected foxpath on file shape">
+                                    <in>
+                                        <eq>*projectDates*.xml except _hide*</eq>
+                                        <eq>*factbook*.xml except _hide*</eq>
+                                    </in>
+                                </value>
+                            </values>
+                            
+                            <focusNode xpath="gx:targetSize">
+                                <targetSize count="1" countMsg="Missing file target size"/>
+                                <values>
+                                    <value exprXP="@minCount" eq="1" eqMsg="Expected in file shape a target size minCount 1"/>
+                                    <value exprXP="@minCountMsg" like="Missing file:*" likeMsg="Expected minCounMsg 'Missing file: ...'"/>
+                                </values>
+                            </focusNode>
+                            
+                            <focusNode xpath="(., gx:focusNode)/gx:valuePairs/gx:valuePair">
+                                <targetSize minCount="1" minCountMsg="Missing 'valuePair' constraint"/>
+
+                                <values>
+                                    <value exprXP="@expr1XP" exists="true"/>
+                                    <value exprXP="@expr2XP" exists="true"/>                                    
+                                </values>
+                                
+                                <!-- @cmp must be accompanied by @cmpMsg -->
+                                <conditional>
+                                    <if>
+                                        <values>
+                                            <value exprXP="@cmp" exists="true"/>
+                                        </values>
+                                    </if>
+                                    <then>
+                                        <values>
+                                            <value exprXP="@cmpMsg" exists="true"/>
+                                        </values>
+                                    </then>
+                                    <elseIf>
+                                        <values>
+                                            <value exprXP="gx:in" exists="true"/>
+                                        </values>                                        
+                                    </elseIf>
+                                    <then>
+                                        <values>
+                                            <value exprXP="@inMsg" exists="true"/>
+                                        </values>                                        
+                                    </then>
+                                </conditional>
+                            </focusNode>                            
+                        </focusNode>                
+                    </focusNode>
+                </focusNode>
+            </focusNode>                
+        </file>
+    </domain>
+    
+</greenfox>
+

@@ -9,18 +9,25 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
+        <!-- Default domain -->
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="factbook" id="factbookFolderShape">
-            <targetSize countMsg="Missing folder: factbook" count="1"/>            
-            <file foxpath="factbook.xml" id="factbookFileShape">
-                <targetSize count="1" countMsg="Missing file: factbook.xml"/>
+        
+        <!-- VISIT: folder 'constraint-ValuePair' -->
+        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+            <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
+
+            <!-- VISIT: file 'factbook.xml' -->
+            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+                <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
+                
+                <!-- CHECK: all country references in city elements correspond to a country ID -->
                 <valuePairs>
                     <valuePair expr1XP="//city/@country" minCount1="3144" minCount1Msg="Expected more cities."
                                expr2XP="//country/@id" minCount2="231" minCount2Msg="Expected more countries." 
-                               cmp="in" inMsg="City contains invalid country reference - value not a country ID."/>
+                               cmp="in" cmpMsg="City contains invalid country reference - value not a country ID."/>
                 </valuePairs>
             </file>
         </folder>

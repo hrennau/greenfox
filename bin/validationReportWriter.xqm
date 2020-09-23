@@ -113,13 +113,13 @@ declare function f:writeValidationReport_whiteTree(
                 let $attName := if (i:fox-resource-is-file($resourceIdentifier)) then 'file' else 'folder'
                 return
                     attribute {$attName} {$resourceIdentifier}
-        let $red := $result/(self::gx:red, self::gx:red)
+        let $red := $result/self::gx:red
         let $yellow := $result/self::gx:yellow
         let $green := $result/self::gx:green
         let $whiteRed := $result/self::gx:whiteRed
         let $whiteYellow := $result/self::gx:whiteYellow
         let $whiteGreen := $result/self::gx:whiteGreen
-        let $other := $result except ($red, $green)
+        let $other := ($result except ($red, $yellow, $green, $whiteRed, $whiteYellow, $whiteGreen))/.
         let $removeAtts :=('filePath', 'folderPath')
         return
             if ($red) then 
@@ -134,7 +134,8 @@ declare function f:writeValidationReport_whiteTree(
                 }</gx:redResource>
             else if ($yellow) then 
                 <gx:yellowResource>{
-                    $resourceIdentifierAtt/self::gx:yellow/f:removeAtts(., $removeAtts), 
+                    $resourceIdentifierAtt,
+                    $result/self::gx:yellow/f:removeAtts(., $removeAtts), 
                     $result/self::gx:green/f:removeAtts(., $removeAtts),
                     $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
                     $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
@@ -143,7 +144,7 @@ declare function f:writeValidationReport_whiteTree(
             else if ($green) then 
                 <gx:greenResource>{
                     $resourceIdentifierAtt, 
-                    $result/f:removeAtts(., $removeAtts),
+                    $result/self::gx:green/f:removeAtts(., $removeAtts),
                     $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
                     $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
                     $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    

@@ -27,15 +27,17 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Validates a folder against FolderSimilar constraints.
  :
- : @param contextURI the file path of the context folder 
- : @param constraintElem the element declaring the constraint
+ : @param constraintElem the element declaring the constraints
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateFolderSimilar($contextURI as xs:string,
-                                         $constraintElem as element(gx:folderSimilar),
+declare function f:validateFolderSimilar($constraintElem as element(gx:folderSimilar),
                                          $context as map(xs:string, item()*))
         as element()* {
+
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    return
 
     (: Link resolution :)
     let $ldo := link:getLinkDefObject($constraintElem, $context)

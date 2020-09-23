@@ -25,14 +25,38 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateConditionalConstraint($constraintElem as element(gx:conditional), 
-                                                 $context as map(*))
+declare function f:validateConditionalConstraint(
+                    $constraintElem as element(gx:conditional), 
+                    $validator as function(element(), map(xs:string, item()*)) as element()*,
+                    $context as map(*))
         as element()* {
     
     let $if := $constraintElem/gx:if[1]
     let $then := $constraintElem/gx:then[1]
     let $elseif := $constraintElem/gx:elseIf
-    let $else := $constraintElem/gx:else
+    let $else := $constraintElem/gx:else[1]
     
-    let $ifResults := ()
+    let $ifResults := $if/$validator(., $context)
+    let $ifTrue := every $result in $ifResults satisfies $result/self::gx:green
+    return (
+        $ifResults/f:whitenResults(.),
+        if ($ifTrue) then $then/$validator(., $context)        
+        else $else/$validator(., $context)
+    )        
 };
+
+(:~
+ : Transforms results so that 'red', 'yellow' and 'green' is
+ : marked as not describing validity, as they have been produced in
+ : order to determine a condition.
+ :)
+declare function f:whitenResults($results as element()*)
+        as element()* {
+    for $result in $results
+    return
+        typeswitch($result)
+        case element(gx:red) return element gx:whiteRed {$result/(@*, node())}
+        case element(gx:green) return element gx:whiteGreen {$result/(@*, node())}
+        case element(gx:yellow) return element gx:whiteYellow {$result/(@*, node())}
+        default return $result
+};        

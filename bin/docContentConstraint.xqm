@@ -46,6 +46,7 @@ declare function f:validateDocContentConstraint($constraintElem as element(gx:do
     let $contextURI := $targetInfo?contextURI
     let $contextDoc := $targetInfo?doc
     let $contextNode := $targetInfo?focusNode
+    let $useContextNode := ($contextNode, $contextDoc)[1]
     return
     
     (: Exception - no context document :)
@@ -59,12 +60,25 @@ declare function f:validateDocContentConstraint($constraintElem as element(gx:do
     let $options := map{'withNamespaces': $withNamespaces}    
     let $compiledNodePaths := f:compileNodePaths($constraintElem, $options, $context)
     for $constraintNode in $constraintElem/gx:node 
-    let $contextNode := ($contextNode, $contextDoc)[1]
     return
-        f:validateNodeContentConstraint($constraintElem, $constraintNode, $contextNode, (), (), 
+        f:validateNodeContentConstraint($constraintElem, $constraintNode, $useContextNode, (), (), 
             $compiledNodePaths, $options, $context)
 };
 
+(:~
+ : Validates a file resource or a focus node from a file resource against
+ : a DocContent constraint group.
+ :
+ : @param constraintElem element representing the constraint group
+ : @param constraintNode a node representing a particular constraint
+ : @param contextNode ?
+ : @param contextPosition ?
+ : @param contextTrail ?
+ : @param compiledNodePaths ?
+ : @param options evaluation options
+ : @param context the processing context
+ : @return validation results
+ :)
 declare function f:validateNodeContentConstraint($constraintElem as element(gx:docContent),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,

@@ -184,7 +184,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
         case attribute(datatype) return function($op1, $op2) {i:castableAs($op1, QName($i:URI_XSD, $op2))}       
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $cmp))        
     let $useCmp :=
-        if ($cmp/self::attribute(like)) then trace( $cmp/i:glob2regex(.) , '_USECMP: ')
+        if ($cmp/self::attribute(like)) then $cmp/i:glob2regex(.)
         else if ($cmp/self::attribute(notLike)) then $cmp/i:glob2regex(.)
         else if ($cmp/self::attribute(datatype)) then $cmp        
         else if (empty($useDatatype)) then $cmp 

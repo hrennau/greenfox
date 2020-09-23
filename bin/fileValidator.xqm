@@ -8,18 +8,18 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "conditionalConstraint.xqm",
     "docSimilarConstraint.xqm",
-    "evaluationContextManager.xqm",
-    "expressionValueConstraint.xqm",
-    "extensionValidator.xqm",
-    "focusNodeValidator.xqm",
-    "greenfoxTarget.xqm",
-    "linkConstraint.xqm",    
-    "mediatypeConstraint.xqm",
-    "resourcePropertiesConstraint.xqm",    
-    "xsdValidator.xqm";
+   "evaluationContextManager.xqm",
+   "expressionValueConstraint.xqm",
+   "extensionValidator.xqm",
+   "focusNodeValidator.xqm",
+   "greenfoxTarget.xqm",
+   "linkConstraint.xqm",    
+   "mediatypeConstraint.xqm",
+   "resourcePropertiesConstraint.xqm",    
+   "xsdValidator.xqm";
 
 import module namespace dcont="http://www.greenfox.org/ns/xquery-functions/doc-content" 
 at "docContentConstraint.xqm";
@@ -36,27 +36,27 @@ at "valuePairConstraint.xqm";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates the target resources of a file shape against the file shape.
+ : Validates the target resources of a file shape against a file shape.
  : Steps: (a) determine and validate target resources, (b) validate each
  : target resource against the file shape.
  :
- : @param fileShape the file shape
+ : @param shapeElem an element representing the file shape
  : @param context processing context
  : @return validation results
  :)
-declare function f:validateFile($fileShape as element(gx:file), $context as map(*)) 
+declare function f:validateFile($shapeElem as element(gx:file), $context as map(*)) 
         as element()* {
-    let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id, $context)  
+    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id, $context)  
     
     (: Determine target and evaluate target constraints :)
-    let $targetPathsAndTargetValidationResults := f:getTargetPaths($fileShape, $context)
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($shapeElem, $context)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
     
     (: Check instances :)
     let $instanceResults := 
         for $targetPath at $pos in $targetPaths
-        return f:validateFileInstance($targetPath, $fileShape, $pos, $context)
+        return f:validateFileInstance($targetPath, $shapeElem, $pos, $context)
     
     (: Merge results :)        
     let $results := ($targetValidationResults, $instanceResults)
@@ -67,32 +67,47 @@ declare function f:validateFile($fileShape as element(gx:file), $context as map(
 (:~
  : Validates a file resource against a file shape. The context is still 
  : refering to the previous resource. The context is adapted, and validation
- : of the file resource against the file shape (or another node containing
- : file constraints - e.g. focus node or if node) is launched.
+ : of the file resource against the file shape is launched.
  :
  : @param contextURI the file path
- : @param fileShape the file shape
+ : @param shapeElem the file shape
  : @param position position of the file resource in the sequence of file resources
  : @param context the processing context
  : @return validation results
  :)
 declare function f:validateFileInstance($contextURI as xs:string, 
-                                        $fileShape as element(gx:file),
+                                        $shapeElem as element(gx:file),
                                         $position as xs:integer?,
                                         $context as map(*)) 
         as element()* {
     (: Update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $contextURI)
-    let $context := i:adaptContext($contextURI, $fileShape, $context)
-    let $_DEBUG := f:DEBUG_CONTEXT($fileShape/@id || '_DOCNR_' || $position, $context)
-    let $results := f:validateFileInstanceComponents($fileShape, $context)
+    let $context := i:adaptContext($contextURI, $shapeElem, $context)
+    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id || '_DOCNR_' || $position, $context)
+    let $results := f:validateFileConstraints($shapeElem, $context)
     return $results
 };
 
-declare function f:validateFileInstanceComponents($fileShape as element(),                                                                                                    
-                                                  $context as map(*))
+(:~
+ : Validates a file resource or a focus node from a file resource against 
+ : a schema element containing the elements against which to validate. 
+ : The contained elements may be constraint elements, and/or focus node 
+ : elements, and/or file shape elements. The containing element may be a 
+ : file shape element, or a focus node element, or a clause element from 
+ : a composite constraint (if, then, elseIf, else). 
+ :
+ : The file resource and (optionally) the current focus node is described
+ : by the _targetInfo entry of the context.
+ :
+ : @param fileConstraints the element containing the elements against which 
+ :   to validate
+ : @param context the processing context
+ : @return validation results
+ :)
+declare function f:validateFileConstraints($fileConstraints as element(),                                                                                                    
+                                           $context as map(xs:string, item()*))
         as element()* {
-    let $childComponents := $fileShape/*[not(@deactivated eq 'true')]
+    let $childComponents := $fileConstraints/*[not(@deactivated eq 'true')]
     let $files := $childComponents/self::gx:file
     let $folders := $childComponents/self::gx:folder
     let $focusNodes := $childComponents/self::gx:focusNode    
@@ -127,11 +142,11 @@ declare function f:validateFileInstanceComponents($fileShape as element(),
         case element(gx:xsdValid) return i:xsdValidate($constraintElem, $context)        
         case element(gx:ifMediatype) return 
             let $contextURI := $context?_targetInfo?contextURI return
-              $constraintElem[i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]/f:validateFileInstanceComponents(., $context)                
+              $constraintElem[i:matchesMediatype((@eq, @in/tokenize(.)), $contextURI)]/f:validateFileConstraints(., $context)                
         case element(gx:xpath) return i:validateExpressionValue($constraintElem, $context)
         case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)            
         case element(gx:contentCorrespondence) return concord:validateConcord($constraintElem, $context)
-        case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, $context)
+        case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, f:validateFileConstraints#2, $context)
         
         default return 
             error(QName((), 'UNEXPECTED_COMPONENT_IN_FILE_SHAPE'), 
@@ -147,24 +162,22 @@ declare function f:validateFileInstanceComponents($fileShape as element(),
 };        
 
 (:~
- : Validates a resource node against a focus node shape.
+ : Validates a file resource or a focus node from a file resource against
+ : a focus node element.
  :
- : The focus node shape maps the resource node to a set of focus nodes,
- : which must be validated against the constraints and shapes defined
- : by child elements of the focus node shape.
+ : The focus node element maps the file resource to a set of focus nodes,
+ : which must be validated against the constraints, shapes and focus node
+ : elements contained by the focus node element.
  :
- : The mapping of the resource node to focus nodes is defined by an
- : XPath expression (@xpath). Note that in the future, also other types
- : of mapping may be supported.
+ : The mapping of the file resource or (current) focus node to focus nodes 
+ : is defined by an XPath expression (@xpath). Note that in the future 
+ : also other types of mapping may be supported.
  :
- : @param contextURI the file path of the file resource containing the focus node
- : @param focusNodeShape a set of constraints which apply to the focus node
- : @param nodeContextItem the node to be validated
- : @param contextDoc the document containing the node to be validated
+ : @param focusNodeElem element representing a focus node
  : @param context the processing context
- : @return a set of results
+ : @return validation results
  :)
-declare function f:validateFocusNode($focusNodeShape as element(),
+declare function f:validateFocusNode($focusNodeElem as element(),
                                      $context as map(xs:string, item()*))
         as element()* {
     let $targetInfo := $context?_targetInfo
@@ -174,34 +187,31 @@ declare function f:validateFocusNode($focusNodeShape as element(),
     let $useContextNode := ($contextNode, $contextDoc)[1]
     return
         
-    let $xpath := $focusNodeShape/@xpath
-    let $foxpath := $focusNodeShape/@foxpath        
+    let $xpath := $focusNodeElem/@xpath
     let $exprValue :=    
         let $evaluationContext := $context?_evaluationContext
         let $contextItem := ($useContextNode, $contextURI)[1]
         return
-            if ($xpath) then 
-                i:evaluateXPath($xpath, $contextItem, $evaluationContext, true(), true())
+            if ($xpath) then i:evaluateXPath($xpath, $contextItem, $evaluationContext, true(), true())
             else error(QName((), 'SCHEMA_ERROR'), 'Missing expression')
     let $focusNodes := $exprValue[. instance of node()]   
     
     (: Validation results - target size :)
-    let $results_target := $focusNodeShape/i:validateTargetCount(., (), $focusNodes, $context)
+    let $results_target := $focusNodeElem/i:validateTargetCount(., (), $focusNodes, $context)
 
     (: Other validation results :)
     let $results_other :=
         for $focusNode in $focusNodes
         let $context := i:updateEvaluationContext_focusNode($focusNode, $context)
-        (: let $_DEBUG := f:DEBUG_CONTEXT($focusNodeShape/@id || '-AFTER_UPD_FOCUSNODE', $context) :)
         let $focusNodeDoc :=
             if ($focusNode/ancestor::node() intersect $contextDoc) then $contextDoc
             else $focusNode/root()
-        return
-            f:validateFileInstanceComponents($focusNodeShape, $context)
+        return f:validateFileConstraints($focusNodeElem, $context)
     return
         ($results_target, $results_other)
 };
 
+(: 
 (:~
  : Validates a conditional constraint.
  :
@@ -218,12 +228,12 @@ declare function f:validateConditionalConstraint($constraintElem as element(gx:c
     let $elseif := $constraintElem/gx:elseIf
     let $else := $constraintElem/gx:else[1]
     
-    let $ifResults := $if/f:validateFileInstanceComponents(., $context)
+    let $ifResults := $if/f:validateFileConstraints(., $context)
     let $ifTrue := every $result in $ifResults satisfies $result/self::gx:green
     return (
         trace($ifResults/f:whitenResults(.), '++++++ WHITENED_RESULTS: '),
-        if ($ifTrue) then $then/f:validateFileInstanceComponents(., $context)        
-        else $else/f:validateFileInstanceComponents(., $context)
+        if ($ifTrue) then $then/f:validateFileConstraints(., $context)        
+        else $else/f:validateFileConstraints(., $context)
     )        
 };
 
@@ -242,6 +252,6 @@ declare function f:whitenResults($results as element()*)
         case element(gx:yellow) return element gx:whiteYellow {$result/(@*, node())}
         default return $result
 };        
-
+ :)
 
 

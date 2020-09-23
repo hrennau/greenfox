@@ -31,20 +31,20 @@ at
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates a FolderContent constraint.
+ : Validates a folder against FolderContent constraints.
  :
- : @param contextURI the file path of the file containing the initial context item 
- : @param contextDoc the XML document containing the initial context item
- : @param contextItem the initial context item to be used in expressions
  : @param constraintElem the element declaring the constraint
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateFolderContent($contextURI as xs:string, 
-                                         $constraintElem as element(gx:folderContent), 
+declare function f:validateFolderContent($constraintElem as element(gx:folderContent), 
                                          $context as map(*)) 
         as element()* {
-        
+
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    return
+
     (: write map mapping names patterns to regex values :)    
     let $nameRegexMap := f:getRegexMap(
         $constraintElem//@name,

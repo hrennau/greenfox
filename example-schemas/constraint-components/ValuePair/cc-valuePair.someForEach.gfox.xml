@@ -10,14 +10,21 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
+        <!-- Default domain -->
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
-            <targetSize countMsg="Missing folder: projectDates" count="1"/>            
-            <file foxpath="projectDates.xml" id="projectDatesShape">
-                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+        
+        <!-- VISIT: folder 'constraint-ValuePair' -->
+        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+            <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
+            
+            <!-- VISIT: file 'projectDates.xml'" -->
+            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesShape">
+                <targetSize minCount="1" minCountMsg="Missing file: projectDates.xml"/>
+                
+                <!-- CHECK: for each end date a milestone with that date -->
                 <valuePairs>
                     <!-- For each endDate there must be at least milestone with the same date -->
                     <valuePair expr1XP="//project/@endDate" minCount1="0" 
@@ -25,7 +32,7 @@
                                expr2Context="#item"
                                quant="someForEach"
                                useDatatype="date"
-                               cmp="eq" eqMsg="For each Project end date there must be at least milestone with the same date."
+                               cmp="eq" cmpMsg="For each Project end date there must be at least milestone with the same date."
                                />
                 </valuePairs>
             </file>

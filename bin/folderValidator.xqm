@@ -41,17 +41,43 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the validation context
  : @return errors found
  :)
-declare function f:validateFolder($gxFolder as element(), $context as map(xs:string, item()*)) 
+declare function f:validateFolder($shapeElem as element(), 
+                                  $context as map(xs:string, item()*)) 
         as element()* {
-    let $targetPathsAndTargetValidationResults := f:getTargetPaths($gxFolder, $context)
+    let $targetPathsAndTargetValidationResults := f:getTargetPaths($shapeElem, $context)
     let $targetPaths := $targetPathsAndTargetValidationResults[. instance of xs:anyAtomicType]
     let $targetValidationResults := $targetPathsAndTargetValidationResults[. instance of element()]
     
-    (: Check instances :)                            
-    let $instanceResults := $targetPaths ! f:validateFolderInstance(., $gxFolder, $context)
+    (: Check instances :)     
+    let $instanceResults := 
+        for $targetPath at $pos in $targetPaths
+        return f:validateFolderInstance($targetPath, $shapeElem, $pos, $context)
     let $results := ($targetValidationResults, $instanceResults)
     return
         $results 
+};
+
+(:~
+ : Validates a folder resource against a folder shape. The context is still 
+ : refering to the previous resource. The context is adapted, and validation
+ : of the folder resource against the folder shape is launched.
+ :
+ : @param contextURI the file path
+ : @param shapeElem the file shape
+ : @param position position of the file resource in the sequence of file resources
+ : @param context the processing context
+ : @return validation results
+ :)
+declare function f:validateFolderInstance($contextURI as xs:string, 
+                                          $shapeElem as element(gx:folder),
+                                          $position as xs:integer?,
+                                          $context as map(*)) 
+        as element()* {
+    (: Update context - new value of _contextPath :)
+    let $context := map:put($context, '_contextPath', $contextURI)
+    let $context := i:adaptContext($contextURI, $shapeElem, $context)
+    let $results := f:validateFolderConstraints($shapeElem, $context)
+    return $results
 };
 
 (:~
@@ -62,15 +88,11 @@ declare function f:validateFolder($gxFolder as element(), $context as map(xs:str
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateFolderInstance($contextURI as xs:string, 
-                                          $folderShape as element(), 
-                                          $context as map(*)) 
+declare function f:validateFolderConstraints($folderConstraints as element(), 
+                                             $context as map(*)) 
         as element()* {
     (: update context :)
-    let $context := map:put($context, '_contextPath', $contextURI)
-    let $context := i:adaptContext($contextURI, $folderShape, $context)
-        
-    let $childComponents := $folderShape/*[not(@deactivated eq 'true')]
+    let $childComponents := $folderConstraints/*[not(@deactivated eq 'true')]
     
     let $files := $childComponents/self::gx:file
     let $folders := $childComponents/self::gx:folder
@@ -98,9 +120,10 @@ declare function f:validateFolderInstance($contextURI as xs:string,
             case element(gx:foxvalues) return value:validateValueConstraint($constraintElem, $context)
             case element(gx:foxvaluePairs) return vpair:validateValuePairConstraint($constraintElem, $context)
             case element(gx:foxvaluesCompared) return vpair:validateValuePairConstraint($constraintElem, $context)
-            case element(gx:folderContent) return f:validateFolderContent($contextURI, $constraintElem, $context)
-            case element(gx:folderSimilar) return f:validateFolderSimilar($contextURI, $constraintElem, $context)
-            case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)                
+            case element(gx:folderContent) return f:validateFolderContent($constraintElem, $context)
+            case element(gx:folderSimilar) return f:validateFolderSimilar($constraintElem, $context)
+            case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)     
+            case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, f:validateFolderConstraints#2, $context)
             default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraintElem)))
         return ($resourceShapeResults, $valueShapeResults)                    
     )

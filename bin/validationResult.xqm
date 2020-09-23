@@ -1265,7 +1265,7 @@ declare function f:validationResult_valuePair($colour as xs:string,
     let $constraintComp := $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
                            $constraintNode/i:firstCharToUpperCase($constraintKind)
     
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraintKind)
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     let $values := 
         let $items := if (exists($violations)) then $violations else ()
         return 
@@ -1756,6 +1756,7 @@ declare function f:validateResult_exprAtts($exprSpec as item(), $exprLang as xs:
     
     typeswitch($exprSpec)
     case xs:string return attribute {$exprAttName} {$exprSpec}
+    case attribute() return attribute {$exprAttName} {$exprSpec}
     case map(*) return
         if ($exprSpec?exprKind eq 'filterMapLP') then (
             $exprSpec?filterLP ! attribute {'filter' || $postfix || 'LP'} {.},
