@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:t="http://www.greenfox.org/ns/schema"
+           targetNamespace="http://www.greenfox.org/ns/schema" elementFormDefault="qualified"> 
+
+    <xs:element name="greenfox" type="t:GreenfoxType"/>
+    
+    
+    <xs:complexType name="GreenfoxType">
+        <xs:sequence>
+            <xs:element name="context" minOccurs="0" type="t:ContextType"/>
+            <xs:element name="linkDef" minOccurs="0" maxOccurs="unbounded" type="t:LinkDefType"/>
+            <xs:element name="domain" type="t:DomainType"/>
+        </xs:sequence>
+        <xs:attribute name="greenfoxURI" type="xs:anyURI"/>
+    </xs:complexType>
+    
+    <xs:complexType name="ContextType">
+        <xs:sequence>
+            <xs:element name="field" minOccurs="0" maxOccurs="unbounded" type="t:ContextFieldType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ContextFieldType">
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+        <xs:attribute name="value" type="xs:string"/>
+    </xs:complexType>
+    
+    <xs:complexType name="LinkDefType">
+        <xs:sequence>
+            <xs:element name="templateVar" minOccurs="0" maxOccurs="unbounded" type="t:TemplateVarType"/>
+            <xs:element name="constraints" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefinitionAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="DomainType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="folder" type="t:FolderType"/>
+                <xs:element name="file"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="path" type="xs:string" use="required"/>
+        <xs:attribute name="name" type="xs:string"/>
+    </xs:complexType>
+    
+    <xs:complexType name="TemplateVarType">
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+        <xs:attribute name="exprXP" type="xs:string" use="required"/>
+    </xs:complexType>
+    
+    <xs:complexType name="FolderType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceGroup"/>
+                <xs:group ref="t:FolderConstraintGroup"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:TargetDeclaration"/>
+        <xs:attribute name="id" type="xs:NCName"/>        
+        
+        <xs:attribute name="linkName" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefinitionAttGroup"/>        
+    </xs:complexType>
+
+    <xs:complexType name="FileType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceGroup"/>
+                <xs:group ref="t:FileConstraintGroup"/>
+                <xs:element name="focusNode"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:TargetDeclaration"/>
+        <xs:attribute name="id" type="xs:NCName"/>
+        
+        <xs:attribute name="mediatype" type="xs:string"/>
+        
+        <xs:attribute name="linkName" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefinitionAttGroup"/>        
+    </xs:complexType>
+    
+    <xs:complexType name="TargetSizeType">
+        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countMsg" type="xs:string"/>
+        <xs:attribute name="minCountMsg" type="xs:string"/>
+        <xs:attribute name="maxCountMsg" type="xs:string"/>
+        <xs:attributeGroup ref="t:LinkValidationAttGroup"/>
+    </xs:complexType>
+    
+    <xs:group name="FolderConstraintGroup">
+        <xs:choice>
+            <xs:element name="fileName"/>
+            <xs:element name="fileDate"/>
+            <xs:element name="fileSize"/>
+            <xs:element name="folderContent"/>
+            <xs:element name="folderSimilar"/>
+            <xs:element name="foxvalue"/>
+            <xs:element name="foxvalues"/>
+            <xs:element name="foxvaluePair"/>            
+            <xs:element name="foxvaluePairs"/>
+            <xs:element name="foxvaluesCompared"/>
+            <xs:element name="link"/>
+            <xs:element name="conditional"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="FileConstraintGroup">
+        <xs:choice>
+            <xs:element name="fileName"/>
+            <xs:element name="fileDate"/>
+            <xs:element name="fileSize"/>
+            <xs:element name="mediatype"/>
+            <xs:element name="docContent"/>
+            <xs:element name="docSimilar"/>
+            <xs:element name="value"/>
+            <xs:element name="values"/>
+            <xs:element name="foxvalue"/>
+            <xs:element name="foxvalues"/>
+            <xs:element name="foxvaluePair"/>            
+            <xs:element name="foxvaluePairs"/>
+            <xs:element name="foxvaluesCompared"/>
+            <xs:element name="links"/>
+            <xs:element name="xsdValid"/>            
+            <xs:element name="conditional"/>
+        </xs:choice>
+    </xs:group>
+    
+    <xs:group name="ResourceGroup">
+        <xs:choice>
+            <xs:element name="file" type="t:FileType"/>
+            <xs:element name="folder" type="t:FolderType"/>
+        </xs:choice>
+    </xs:group>
+    
+    <xs:attributeGroup name="LinkRefOrDefAttGroup">
+        <xs:attribute name="linkName" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefinitionAttGroup"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="LinkDefinitionAttGroup">
+        <xs:attribute name="contextXP" type="xs:string"/>
+        <xs:attribute name="targetXP" type="xs:string"/>        
+        <xs:attribute name="hrefXP" type="xs:string"/>
+        <xs:attribute name="uriXP" type="xs:string"/>
+        <xs:attribute name="uriTemplate" type="xs:string"/>
+        <xs:attribute name="recursive" type="xs:boolean"/>        
+        <xs:attribute name="targetMediatype" type="xs:string"/>        
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="LinkValidationAttGroup">
+        <xs:attribute name="resolvable" type="xs:boolean"/>    
+        <xs:attribute name="resolvableMsg" type="xs:string"/>
+        <xs:attribute name="resolvableMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="TargetDeclaration">
+        <xs:attribute name="foxpath" type="xs:string"/>
+        <xs:attribute name="path" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    
+</xs:schema>

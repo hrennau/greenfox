@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of ValuePair constraints: declares a ValuePairGe contraint. As the
-    quantifier 'someForEach' is used, for each item from value 1 at least one item from value 2 must match
+    Demonstrates the use of ValuePair constraints: declares a ValuePairEq contraint. 
     
-    In this example, date consistencies are checked: for each end date, there must be at least one
-    milestone with the same date.
+    As the @quant option 'someForEach' is used, for each item from value 1 at least 
+    one item from value 2 must match.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.some-for-each"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.quant-someForEach"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

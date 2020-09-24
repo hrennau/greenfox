@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    
+    This example uses the @quant option 'all', which means that all value items must 
+    satisfy the condition, not only some. Use of @quant equal 'all' is not necessary, 
+    as 'all' is the default value of @quant.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.quant-all"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'constraint-ValuePair' -->
+        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+            <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
+
+            <!-- VISIT: file 'factbook.xml' -->
+            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+                <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
+
+                <!-- CHECK: all province references are province IDs -->
+                <valuePairs>
+                    <valuePair expr1XP="//city/@province/tokenize(.)" minCount1="100" minCount1Msg="Expected at least 100 province references."
+                               expr2XP="//province/@id" minCount2="100" minCount2Msg="Expected at least 100 provinces."                                                                   
+                               quant="all"
+                               cmp="in" cmpMsg="All province references must be province IDs."/>
+                </valuePairs>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

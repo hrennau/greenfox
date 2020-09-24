@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairEq contraint.
+    
+    As the @quant option 'some' is used, conformance requires only one value item to 
+    satisfy the condition, rather than all value items as in the case of @quant value 
+    'all', which is also the default value.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.quant-some"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'constraint-ValuePair' -->
+        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+            <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
+
+            <!-- VISIT: file 'factbook.xml' -->
+            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+                <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
+
+                <!-- CHECK: the values of the <name> child elements include the @name attribute value;
+                            note that absence of a @name attribute or of <name> child elements is not 
+                            an error -->
+                <valuePairs>
+                    <valuePair expr1XP="@name" minCount1="0" minCount1Msg="Missing attribute - @name."
+                               expr2XP="name" minCount2="0" minCount2Msg="Missing child - name."                                                                   
+                               quant="some"
+                               cmp="eq" cmpMsg="Country names must include the name in the name attribute."/>
+                </valuePairs>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

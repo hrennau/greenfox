@@ -7,7 +7,7 @@
     All items of value 1 must be >= the items of value 2. Here, all project start 
     dates (value 1) must be >= a minimum date (value 2).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.ge.useDatatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useDatatype-date"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

@@ -31,11 +31,16 @@ declare function f:validateConditionalConstraint(
                     $context as map(*))
         as element()* {
     
+    let $clauses := $constraintElem/*
+    (:
     let $if := $constraintElem/gx:if[1]
     let $then := $constraintElem/gx:then[1]
     let $elseif := $constraintElem/gx:elseIf
     let $else := $constraintElem/gx:else[1]
-    
+    :)
+    return
+        f:validateConditionalConstraintRC($constraintElem, $clauses, $validator, $context)
+(:        
     let $ifResults := $if/$validator(., $context)
     let $ifTrue := every $result in $ifResults satisfies $result/self::gx:green
     return (
@@ -43,6 +48,48 @@ declare function f:validateConditionalConstraint(
         if ($ifTrue) then $then/$validator(., $context)        
         else $else/$validator(., $context)
     )        
+:)    
+};
+
+declare function f:validateConditionalConstraintRC(
+                    $constraintElem as element(gx:conditional),
+                    $clauses as element()+,
+                    $validator as function(element(), map(xs:string, item()*)) as element()*,
+                    $context as map(*))
+        as element()* {
+    let $head := head($clauses) return
+    
+    typeswitch($head)
+    case element(gx:else) return $head/$validator(., $context)
+    case element(gx:if) | element(gx:elseIf) return
+        let $ifResults := $head/$validator(., $context)
+        let $ifTrue := every $result in $ifResults satisfies 
+                        $result/(self::gx:green, self::gx:whiteGreen, self::gx:whiteYellow, self::gx:whiteRed)
+        return (
+            (: Deliver results of condition testing :)
+            $ifResults/f:whitenResults(.), 
+            
+            (: evaluate 'then' :)
+            if ($ifTrue) then
+                let $then := $head/following-sibling::gx:then[1]
+                return
+                    if (not($then)) then error(QName((), 'INVALID_SCHEMA'), 
+                        concat('Invalid schema - <', $head/local-name(.), '> not followed by <then>'))
+                    else $then/$validator(., $context)
+            (: continuej with 'elseIf' or evaluate 'else' :)
+            else
+                let $elseIf := $head/following-sibling::gx:elseIf[1]
+                return
+                    if ($elseIf) then
+                        let $nextClauses := ($elseIf, $elseIf/following-sibling::*)
+                        return
+                            f:validateConditionalConstraintRC($constraintElem, $nextClauses, $validator, $context)
+                    else $head/following-sibling::gx:else[1]/$validator(., $context)
+        )
+        default return
+            error(QName((), 'INVALID_SCHEMA'), 
+                concat('Invalid schema - unexpected child element in gx:conditional, ',
+                       'element name: ', $head/name()))
 };
 
 (:~

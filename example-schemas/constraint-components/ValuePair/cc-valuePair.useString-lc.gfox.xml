@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    
+    As the @useString option 'lc' is used, the comparison is applied to lower-case copies
+    of the values.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-lc"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'constraint-ValuePair' -->
+        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+            <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
+
+            <!-- VISIT: file 'countryNames.xml' -->
+            <file foxpath="*country-names*.xml except _hide*" id="countryNamesShape">
+                <targetSize minCount="1" minCountMsg="Missing file: countryNames.xml"/>
+
+                <!-- CHECK: the @defaultCountry is found in the country list (case-normalized) -->
+                <valuePairs>
+                    <valuePair expr1XP="/countries/@defaultCountry" count1="1" count1Msg="Missing attribute - @defaultCountry."
+                               expr2XP="//country" minCount2="100" minCount2Msg="Less countries than expected."
+                               useString="lc"
+                               cmp="in" cmpMsg="Default country must be found in the country list."/>
+                </valuePairs>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

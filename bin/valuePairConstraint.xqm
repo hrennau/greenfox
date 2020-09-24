@@ -261,7 +261,6 @@ declare function f:validateValuePair($constraintElem as element(),
     let $items1TY :=
         if (empty($useDatatype)) then $items1TYRaw
         else $items1TYRaw[not(position() = $indexes_conversionError1)]   
-        
 
     (: Function items
        ============== :)       

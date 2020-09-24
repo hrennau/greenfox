@@ -46,7 +46,7 @@ declare function f:validateValueConstraint($constraintElem as element(),
     return
     
     (: Exception - no context document :)
-    if ($constraintElem/gx:value/@exprXP and not($context?_targetInfo?doc)) then
+    if ($constraintElem/(self::gx:value, gx:value)/@exprXP and not($context?_targetInfo?doc)) then
         result:validationResult_value_exception($constraintElem,
             'Context resource could not be parsed', (), $context)
     else
@@ -70,7 +70,8 @@ declare function f:validateValues($constraintElem as element(),
                                   $context as map(xs:string, item()*))
         as element()* {
         
-    $constraintElem/(gx:value, gx:foxvalue)/f:validateValue(., $contextNode, $context)
+    $constraintElem/(self::gx:value, self::gx:foxvalue, gx:value, gx:foxvalue)
+        /f:validateValue(., $contextNode, $context)
 };
 
 (:~
