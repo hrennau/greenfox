@@ -165,10 +165,10 @@ declare function f:normalizeDocForComparison($node as node(),
     
     let $selectedItems := 
         function($tree, $modifier) as node()* {
-            let $targetXPath := $modifier/@targetXPath
+            let $itemXP := $modifier/@itemXP
             return
-                if ($targetXPath) then
-                    xquery:eval($targetXPath, map{'': $tree})
+                if ($itemXP) then
+                    xquery:eval($itemXP, map{'': $tree})
                 else
             let $kind := $modifier/@kind
             let $localName := $modifier/@localName
@@ -230,14 +230,14 @@ declare function f:normalizeDocForComparison($node as node(),
                         return replace value of node $node with $newValue
               
             (: Edit item text (string replacement) :)
-            case $editText as element(gx:editText) return
-                let $selected := $selectedItems($node_, $editText)
+            case $editItem as element(gx:editItem) return
+                let $selected := $selectedItems($node_, $editItem)
                 return
                     if (empty($selected)) then ()
                     else
-                        let $from  := $editText/@replaceSubstring
-                        let $to := $editText/@replaceWith
-                        let $useString := $editText/@useString/tokenize(.)
+                        let $from  := $editItem/@replaceSubstring
+                        let $to := $editItem/@replaceWith
+                        let $useString := $editItem/@useString/tokenize(.)
                         
                         for $sel in $selected
                         let $newValue := 

@@ -24,13 +24,13 @@
                                 minCountContextNodes="1" minCountContextNodesMsg="Expected article elements">
                     <valueCompared expr1XP="articleName" 
                                    expr2XP="//article/@name" 
-                                   cmp="in" inMsg="Article name not expected."
+                                   cmp="in" cmpMsg="Article name not expected."
                                    count1="1" count1Msg="Article context without articleName."
                                    minCount2="3" minCount2Msg="Less than 3 expected article names."/>
                     <valueCompared expr1XP="articlePrice" 
                                    expr2XP="//article/@price" 
-                                   useDatatype="xs:decimal" 
-                                   cmp="in" inMsg="Price not expected"
+                                   useDatatype="decimal" 
+                                   cmp="in" cmpMsg="Price not expected"
                                    count1="1" count1Msg="Article context without articlePrice."
                                    minCount2="3" minCount2Msg="Less than 3 expected article prices."/>                    
                 </valuesCompared>

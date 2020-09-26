@@ -1064,7 +1064,7 @@ declare function f:validationResult_value($colour as xs:string,
         case attribute(length) return map{'constraintComp': $ccPrefix || 'Length', 'atts': ('length', 'quant')}
         case attribute(minLength) return map{'constraintComp': $ccPrefix || 'MinLength', 'atts': ('minLength', 'quant')}        
         case attribute(maxLength) return map{'constraintComp': $ccPrefix || 'MaxLength', 'atts': ('maxLength', 'quant')}        
-        case attribute(itemsUnique) return map{'constraintComp': $ccPrefix || 'ItemsUnique', 'atts': ('itemsUnique')}
+        case attribute(distinct) return map{'constraintComp': $ccPrefix || 'ItemsDistinct', 'atts': ('distinct')}
         default return error()
     let $constraintIdBase := $constraintElem/@id
     let $constraintId := concat($constraintIdBase, '-', $constraintNode/local-name(.))

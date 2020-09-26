@@ -139,7 +139,7 @@ declare function f:validateValue($constraintElem as element(),
         f:validateValue_in($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         f:validateValue_contains($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         f:validateValue_eqeq($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
-        f:validateValue_itemsUnique($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_itemsDistinct($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         ()
     )
     return
@@ -392,16 +392,17 @@ declare function f:validateValue_eqeq($exprValue as item()*,
 };        
 
 (:~
- : Validates ValueItemsUnique constraints.
+ : Validates ValueItemsDistinct constraints.
  :)
-declare function f:validateValue_itemsUnique($exprValue as item()*,
+declare function f:validateValue_itemsDistinct(
+                                          $exprValue as item()*,
                                           $expr as xs:string,
                                           $exprSpec as item(),
                                           $exprLang as xs:string,                                              
                                           $constraintElem as element(),
                                           $context as map(xs:string, item()*))
         as element()* {
-    let $itemsUnique := $constraintElem/@itemsUnique
+    let $itemsUnique := $constraintElem/@distinct
     return if (empty($itemsUnique)) then () else
     
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)

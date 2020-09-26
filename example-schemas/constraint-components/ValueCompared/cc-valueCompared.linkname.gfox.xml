@@ -31,11 +31,11 @@
                 <valuesCompared linkName="expectations">
                     <valueCompared expr1XP="//articleName" 
                                    expr2XP="//article/@name" 
-                                   cmp="in" inMsg="Article name not expected."/>
+                                   cmp="in" cmpMsg="Article name not expected."/>
                     <valueCompared expr1XP="//articlePrice" 
                                    expr2XP="//article/@price" 
-                                   useDatatype="xs:decimal" 
-                                   cmp="in" inMsg="Price not expected"/>
+                                   useDatatype="decimal" 
+                                   cmp="in" cmpMsg="Price not expected"/>
                 </valuesCompared>
             </file>
         </folder>

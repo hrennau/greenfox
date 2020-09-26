@@ -348,7 +348,7 @@ declare function f:validateValuePair($constraintElem as element(),
     let $results_pair :=
         (: expression 2 context = item from expression 1        
            --------------------------------------------- :)
-        if ($expr2Context eq '#item') then
+        if ($expr2Context eq 'item') then
             f:validateValuePair_context2_iterating(
                  $constraintElem, $constraintNode,
                  $expr2Context, $quantifier, $useDatatype, $useString,

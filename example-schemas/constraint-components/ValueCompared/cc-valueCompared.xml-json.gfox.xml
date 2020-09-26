@@ -29,10 +29,10 @@
                                 countTargetResources="1">                
                     <valueCompared expr1XP="//@iata" count1="1"
                                    expr2XP="//iata" count2="1"
-                                   cmp="eq" ininMsg="XML and JSON version must have the same IATA code."/>
+                                   cmp="eq" cmpMsg="XML and JSON version must have the same IATA code."/>
                     <valueCompared expr1XP="//@id" count1="1"
                                    expr2XP="//id" count2="1"
-                                   cmp="eq" ininMsg="XML and JSON version must have the same ID value."/>
+                                   cmp="eq" cmpMsg="XML and JSON version must have the same ID value."/>
                 </valuesCompared>
             </file>
         </folder>

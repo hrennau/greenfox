@@ -21,7 +21,7 @@
                     <foxvaluePair expr1XP="/airports/airport/@iata"
                                   expr2FOX="..\*\airport-*.xml\replace(file-name(.), '^airport-(.*)\.xml', '$1')"                                  
                                   useString="lc"
-                                  cmp="in" inMsg="For each IATA code one file expected."
+                                  cmp="in" cmpMsg="For each IATA code one file expected."
                                   minCount1="1" minCount1Msg="Expected more airports."
                                   minCount2="10" minCount2Msg="Expected more countries."/>
                 </foxvaluePairs>

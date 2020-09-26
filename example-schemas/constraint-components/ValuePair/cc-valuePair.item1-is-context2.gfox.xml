@@ -31,17 +31,17 @@
                 <valuePairs>
                     <valuePair expr1XP="//project/@endDate" minCount1="0" 
                                expr2XP="../@startDate" count2="1"                                    
-                               expr2Context="#item"
+                               expr2Context="item"
                                cmp="ge" cmpMsg="Project end date must be greater or equal project start date"
                                />
                     <valuePair expr1XP="//milestone/@date" minCount1="0" 
                                expr2XP="../../@startDate" count2="1" 
-                               expr2Context="#item"
+                               expr2Context="item"
                                cmp="ge" cmpMsg="Milestone date must be greater or equal project start date"
                                />
                     <valuePair expr1XP="//milestone/@date" minCount1="0" 
                                expr2XP="../../@endDate" minCount2="0" 
-                               expr2Context="#item"
+                               expr2Context="item"
                                cmp="le" cmpMsg="Milestone date must be less or equal project end date"
                                />
                 </valuePairs>

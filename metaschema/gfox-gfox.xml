@@ -487,7 +487,7 @@ return
                               countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
                               countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"
                         />    
-                <ex:allowedElems elemNames="skipItem roundItem editText"
+                <ex:allowedElems elemNames="skipItem roundItem editItem"
                     msg="Unexpected elements in 'docSimilar' element; expected: $elemNames"
                     msgOK="OK - 'docSimilar' element: no unexpected child elements"/>
                 

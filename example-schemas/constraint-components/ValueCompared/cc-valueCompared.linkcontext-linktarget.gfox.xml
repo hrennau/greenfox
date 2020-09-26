@@ -35,13 +35,13 @@
                                    expr2XP="@name" 
                                    count1="1" 
                                    count2="1" 
-                                   cmp="eq" eqMsg="Unexpected article name"/>
+                                   cmp="eq" cmpMsg="Unexpected article name"/>
                     <valueCompared expr1XP="articlePrice" 
                                    expr2XP="@price" 
-                                   useDatatype="xs:decimal" 
+                                   useDatatype="decimal" 
                                    count1="1" 
                                    count2="1" 
-                                   cmp="eq" eqMsg="Unexpected price"/>
+                                   cmp="eq" cmpMsg="Unexpected price"/>
                 </valuesCompared>
             </file>
         </folder>

@@ -44,7 +44,7 @@
                     <!-- Check: node content similar? -->
                     <docSimilar linkName="input2" docSimilarMsg="'input' elements not similar"
                                 countTargetResources="1" countTargetResourcesMsg="Summary 2 document missing">
-                        <editText localName="articleNumber" replaceSubstring="^678.*$" replaceWith="678XXX"/>
+                        <editItem localName="articleNumber" replaceSubstring="^678.*$" replaceWith="678XXX"/>
                         <skipItem kind="attribute" localName="fileName"/>
                         <skipItem kind="attribute" localName="fileSize"/>
                     </docSimilar>

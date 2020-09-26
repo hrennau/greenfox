@@ -25,7 +25,7 @@
                          the target file should contain exactly one file with a matching name -->
                     <foxvaluePair expr1XP="/airports/airport/@iata"
                                   expr2FOX="..\*\fox-child('airport-'||$item||'*.xml')"     
-                                  expr2Context="#item"
+                                  expr2Context="item"
                                   minCount1="14" minCount1Msg="Expected more airports."
                                   count2="1" count2Msg="Airport file not found."/>
                 </foxvaluePairs>

@@ -28,7 +28,7 @@
                     <!-- For each endDate there must be at least milestone with the same date -->
                     <valuePair expr1XP="//project/@endDate" minCount1="0" 
                                expr2XP="../milestone/@date" minCount2="1"
-                               expr2Context="#item"
+                               expr2Context="item"
                                quant="someForEach"
                                useDatatype="date"
                                cmp="eq" cmpMsg="For each Project end date there must be at least milestone with the same date."
