@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints.
+    Demonstrates the use of DocTree constraints.
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree.try"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -15,14 +15,14 @@
 
             <file foxpath="airports-ireland.xml" id="airportFileShape">
                 <targetSize minCountMsg="More airport files expected" minCount="0"/>
-                <docContent>
+                <docTree>
                     
                     <!-- Document structure -->
                     <node locNP="/airports" atts="country count">
                         <node locNP="airport/geo/latitude" maxCount="1000" minCount="1"/>
                     </node>
                     
-                </docContent>
+                </docTree>
             </file>
 
         </folder>

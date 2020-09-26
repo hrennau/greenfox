@@ -1,12 +1,12 @@
 (:
  : -------------------------------------------------------------------------
  :
- : docContentConstraint.xqm - validates a file resource against DocContent constraints
+ : docTreeConstraint.xqm - validates a file resource against DocTree constraints
  :
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions/doc-content";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/doc-tree";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
 at "tt/_foxpath.xqm";    
 
@@ -21,8 +21,8 @@ at "linkDefinition.xqm",
    "linkResolution.xqm",
    "linkValidation.xqm";
 
-import module namespace dcont="http://www.greenfox.org/ns/xquery-functions/doc-content" 
-at "docContentUtil.xqm";
+import module namespace dcont="http://www.greenfox.org/ns/xquery-functions/doc-tree" 
+at "docTreeUtil.xqm";
 
 import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
 at "validationResult.xqm";
@@ -30,7 +30,7 @@ at "validationResult.xqm";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
- : Validates a DocContent constraint.
+ : Validates a DocTree constraint.
  :
  : Bla.
  :
@@ -38,8 +38,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateDocContentConstraint($constraintElem as element(gx:docContent),
-                                                $context as map(xs:string, item()*))
+declare function f:validateDocTreeConstraint($constraintElem as element(gx:docTree),
+                                             $context as map(xs:string, item()*))
         as element()* {
 
     let $targetInfo := $context?_targetInfo
@@ -51,7 +51,7 @@ declare function f:validateDocContentConstraint($constraintElem as element(gx:do
     
     (: Exception - no context document :)
     if (not($context?_targetInfo?doc)) then
-        result:validationResult_docContent_exception($constraintElem,
+        result:validationResult_docTree_exception($constraintElem,
             'Context resource could not be parsed', (), $context)
     else
     
@@ -67,7 +67,7 @@ declare function f:validateDocContentConstraint($constraintElem as element(gx:do
 
 (:~
  : Validates a file resource or a focus node from a file resource against
- : a DocContent constraint group.
+ : a DocTree constraint group.
  :
  : @param constraintElem element representing the constraint group
  : @param constraintNode a node representing a particular constraint
@@ -79,7 +79,7 @@ declare function f:validateDocContentConstraint($constraintElem as element(gx:do
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateNodeContentConstraint($constraintElem as element(gx:docContent),
+declare function f:validateNodeContentConstraint($constraintElem as element(gx:docTree),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $contextPosition as xs:integer?,
@@ -131,7 +131,7 @@ declare function f:validateNodeContentConstraint($constraintElem as element(gx:d
  : constraints of the model node. If the model node has no cardinality constraints,
  : it has an implicit constraint 'count=1'.
  :
- : @param constraintElem the constraint element declaring the DocContent constraints
+ : @param constraintElem the constraint element declaring the DocTree constraints
  : @param constraintNode a model node
  : @param contextNode the current context node used as a context when determing the instance nodes
  : @param valueNodes the instance nodes corresponding to the model node
@@ -140,7 +140,7 @@ declare function f:validateNodeContentConstraint($constraintElem as element(gx:d
  : @param context the processing context
  : @return validation results :)
 declare function f:validateNodeContentConstraint_counts(
-                                                 $constraintElem as element(gx:docContent),
+                                                 $constraintElem as element(gx:docTree),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $valueNodes as node()*,
@@ -162,14 +162,14 @@ declare function f:validateNodeContentConstraint_counts(
                 default return error()
             let $colour := if ($ok) then 'green' else 'red'
             return
-                result:validationResult_docContent_counts(
+                result:validationResult_docTree_counts(
                     $colour, $constraintElem, $countAtt, (), $contextNode, $valueCount, $trail, (), $context)
                 
         (: implicit constraints :)                        
         else
             let $colour := if ($valueCount eq 1) then 'green' else 'red'
             return
-                result:validationResult_docContent_counts(
+                result:validationResult_docTree_counts(
                     $colour, $constraintElem, $constraintNode, (), $contextNode, $valueCount, $trail, (), $context) 
 }; 
 
@@ -177,7 +177,7 @@ declare function f:validateNodeContentConstraint_counts(
  : Checks the instance nodes corresponding to a model node against the presence of
  : mandatory attributes represented by shortcut notation (@atts).
  :
- : @param constraintElem the constraint element declaring the DocContent constraints
+ : @param constraintElem the constraint element declaring the DocTree constraints
  : @param constraintNode a model node
  : @param valueNodes the instance nodes corresponding to the model node
  : @param trail a textual representation of the model path leading to this model node
@@ -220,7 +220,7 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
         let $newContextNode := $valueNode
         let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attName
         return
-            result:validationResult_docContent_counts(
+            result:validationResult_docTree_counts(
                 $colour, $constraintElem, $attsConstraintNode, string($attName), $newContextNode, count($att), $newTrail, (), $context)
 
 (:            
@@ -235,7 +235,7 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
             let $newContextNode := $node
             let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attLname
             return
-                result:validationResult_docContent_counts(
+                result:validationResult_docTree_counts(
                     $colour, $constraintElem, $attsConstraintNode, string($attQName), $newContextNode, count($att), $newTrail, (), $context)
         else
             for $shortcutAttName in $shortcutAttNames       
@@ -247,16 +247,16 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
             let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attLname
             return
                 (: Note that $node is passed on as context node :)
-                result:validationResult_docContent_counts(
+                result:validationResult_docTree_counts(
                     $colour, $constraintElem, $attsConstraintNode, $attLname, $newContextNode, count($att), $newTrail, (), $context)
 :)                    
 };
 
 (:~
- : Checks the instance nodes corresponding to a model node against a DocContentClosed
+ : Checks the instance nodes corresponding to a model node against a DocTreeClosed
  : constraint. 
  :
- : @param constraintElem the constraint element declaring the DocContent constraints
+ : @param constraintElem the constraint element declaring the DocTree constraints
  : @param constraintNode a model node
  : @param contextNode the current context node used as a context when determing the instance nodes
  : @param valueNodes the instance nodes corresponding to the model node
@@ -265,7 +265,7 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
  : @param context the processing context
  : @return validation results :)
 declare function f:validateNodeContentConstraint_closed(
-                                                 $constraintElem as element(gx:docContent),
+                                                 $constraintElem as element(gx:docTree),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $valueNodes as node()*,
@@ -325,14 +325,14 @@ declare function f:validateNodeContentConstraint_closed(
     
     return 
         if ($unexpectedNodes) then
-            $unexpectedNodes/result:validationResult_docContent_closed('red', $constraintElem, $constraintNode, 
+            $unexpectedNodes/result:validationResult_docTree_closed('red', $constraintElem, $constraintNode, 
                 $currentContextNode, ., $trail, (), $context)
         else                    
-            result:validationResult_docContent_closed('green', $constraintElem, $constraintNode, 
+            result:validationResult_docTree_closed('green', $constraintElem, $constraintNode, 
                 $currentContextNode, (), $trail, (), $context)
 }; 
 
-declare function f:compileNodePaths($constraintElem as element(gx:docContent),
+declare function f:compileNodePaths($constraintElem as element(gx:docTree),
                                     $options as map(xs:string, item()*),
                                     $context as map(xs:string, item()*))
         as map(xs:string, item()*) {

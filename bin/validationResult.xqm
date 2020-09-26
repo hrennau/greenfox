@@ -226,15 +226,15 @@ declare function f:validationResult_mediatype($colour as xs:string,
  : ===============================================================================
  :)
 
-declare function f:validationResult_docContent_counts($colour as xs:string,
-                                                      $constraintElem as element(),
-                                                      $constraintNode as node(),
-                                                      $shortcutAttNodeName as xs:string?,
-                                                      $contextNode as node(),
-                                                      $valueCount as xs:integer,   
-                                                      $nodeTrail as xs:string,
-                                                      $additionalAtts as attribute()*,
-                                                      $context as map(xs:string, item()*))
+declare function f:validationResult_docTree_counts($colour as xs:string,
+                                                   $constraintElem as element(),
+                                                   $constraintNode as node(),
+                                                   $shortcutAttNodeName as xs:string?,
+                                                   $contextNode as node(),
+                                                   $valueCount as xs:integer,   
+                                                   $nodeTrail as xs:string,
+                                                   $additionalAtts as attribute()*,
+                                                   $context as map(xs:string, item()*))
         as element() {
     let $contextURI := $context?_targetInfo?contextURI
     let $resourceShapeID := $constraintElem/@resourceShapeID
@@ -264,20 +264,20 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
         }       
 };
 
-declare function f:validationResult_docContent_closed($colour as xs:string,
-                                                      $constraintElem as element(),
-                                                      $constraintNode as node(),
-                                                      $contextNode as node(),
-                                                      $unexpectedNode as node()?,   
-                                                      $nodeTrail as xs:string,
-                                                      $additionalAtts as attribute()*,
-                                                      $context as map(xs:string, item()*))
+declare function f:validationResult_docTree_closed($colour as xs:string,
+                                                   $constraintElem as element(),
+                                                   $constraintNode as node(),
+                                                   $contextNode as node(),
+                                                   $unexpectedNode as node()?,   
+                                                   $nodeTrail as xs:string,
+                                                   $additionalAtts as attribute()*,
+                                                   $context as map(xs:string, item()*))
         as element() {
     let $contextURI := $context?_targetInfo?contextURI
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
-    let $constraintComponent := 'DocContentClosed'
+    let $constraintComponent := 'DocTreeClosed'
     let $nodePath := $contextNode/i:datapath(.)
     let $unexpectedNodeLocalName := $unexpectedNode/local-name(.)
     let $unexpectedNodeNamespace := $unexpectedNode/namespace-uri(.)[string()]
@@ -304,17 +304,17 @@ declare function f:validationResult_docContent_closed($colour as xs:string,
 
 (:~
  : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of a DocContent constraint.
+ : which prevents normal evaluation of a DocTree constraint.
  : Such an exceptional condition is, for example, a failure to parse 
  . the context resource into a node tree.
  :
- : @param constraintElem an element declaring a DocContentconstraint
+ : @param constraintElem an element declaring DocTree constraints
  : @param exception an optional message string
  : @param addAtts additional attributes 
  : @param context processing context
  : @return a red validation result
  :)
-declare function f:validationResult_docContent_exception(
+declare function f:validationResult_docTree_exception(
                                             $constraintElem as element(),
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
@@ -325,7 +325,7 @@ declare function f:validationResult_docContent_exception(
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
         
     let $targetInfo := $context?_targetInfo        
-    let $constraintComp := 'DocContent'        
+    let $constraintComp := 'DocTree'        
     let $constraintId := $constraintElem/@id
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}

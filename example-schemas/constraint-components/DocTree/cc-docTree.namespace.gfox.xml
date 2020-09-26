@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints. This example shows the use of namespaces.
+    Demonstrates the use of DocTree constraints. This example shows the use of namespaces.
     
     Rules:
     (1) Names without prefix:
-    (a) Unless the <docContent> element has @withNamespaces='true', the node namespace is
+    (a) Unless the <docTree> element has @withNamespaces='true', the node namespace is
         ignored, that is, 'foo' is treated like '*:foo' and '@foo' is treated like '@*:foo'
     (2) If prefixes are used, they are resolved according to the namespace bindings of the
         <node> element
@@ -13,7 +13,7 @@
     Note that you can describe the document without caring about namespaces - just do not 
     use @withNamespaces=true.
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/namespace.gfox"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -26,10 +26,10 @@
 
             <file foxpath="airport-*.xml[1]" id="airportFileShape">
                 <targetSize minCountMsg="Missing airport file" minCount="1"/>
-                <docContent withNamespaces="true"
-                            xmlns:g="http://example.org/geo"
-                            xmlns:t="http://example.org/time"
-                            xmlns:xml="http://www.w3.org/XML/1998/namespace">
+                <docTree withNamespaces="true"
+                         xmlns:g="http://example.org/geo"
+                         xmlns:t="http://example.org/time"
+                         xmlns:xml="http://www.w3.org/XML/1998/namespace">
 
                     <node locNP="/airport">
                         <node locNP="name"/>
@@ -50,7 +50,7 @@
                        <node locNP="../t:dst"/>
                     </node>
 
-                </docContent>
+                </docTree>
             </file>
 
         </folder>

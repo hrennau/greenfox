@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints. This example shows the use of indexes.
+    Demonstrates the use of DocTree constraints. This example shows the use of indexes.
     ...[i] returns the i-th item.
     ...[-i] returns the i-th item, counted from the end (-1 = last item, -2 = second last, ...)
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree.index"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -17,7 +17,7 @@
 
             <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
                 <targetSize minCountMsg="Missing airport file" minCount="1"/>
-                <docContent>
+                <docTree>
                     <node locNP="/airport/*[-3]">
                         <node locNP="dst"/>
                     </node>
@@ -27,7 +27,7 @@
                         </node>
                     </node>
 
-                </docContent>
+                </docTree>
             </file>
 
         </folder>

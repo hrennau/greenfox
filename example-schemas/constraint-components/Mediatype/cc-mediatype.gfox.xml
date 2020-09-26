@@ -7,7 +7,7 @@
     * @csv.minColumnCount - all rows must have at least the specified number of columns
     * @csv.maxRowCount - the number of rows must not be greater than the specified value    
     * @csv.maxColumnCount - all rows must have at most the specified number of columns
-    When checking the row count, the option @csv.withHeader can be used and decrements the 
+    When checking the row count, the option @csv.header can be used and decrements the 
     actual row count by one.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
@@ -36,23 +36,21 @@
             <!-- Visit files: CSV files (separator: comma) -->
             <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
                 <mediatype eq="csv"
-                    csv.separator="comma" csv.withHeader="true"
+                    csv.separator="comma" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
                     csv.minRowCount="2" csv.maxRowCount="30"
                     csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
-                    csv.minRowCountMsg="Expected at least 2 rows"
-                />                
+                    csv.minRowCountMsg="Expected at least 2 rows"/>                
             </file>
             
             <!-- Visit files: CSV files (separator: semicolon) -->            
             <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
                 <mediatype eq="csv"
-                    csv.separator="semicolon" csv.withHeader="true"
+                    csv.separator="semicolon" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
                     csv.minRowCount="2" csv.maxRowCount="30"
                     csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
-                    csv.minRowCountMsg="Expected at least 2 rows"                    
-                />
+                    csv.minRowCountMsg="Expected at least 2 rows"/>
             </file>
         </folder>
     </domain>

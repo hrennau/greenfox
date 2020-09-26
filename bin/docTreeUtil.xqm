@@ -1,12 +1,12 @@
 (:
  : -------------------------------------------------------------------------
  :
- : docContentUtil.xqm - utility functions for the validation of DocContent constraints
+ : docTreeUtil.xqm - utility functions for the validation of DocTree constraints
  :
  : -------------------------------------------------------------------------
  :)
  
-module namespace f="http://www.greenfox.org/ns/xquery-functions/doc-content";
+module namespace f="http://www.greenfox.org/ns/xquery-functions/doc-tree";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
 at "tt/_foxpath.xqm";    
 
@@ -163,26 +163,24 @@ declare function f:parseNodePath($nodePath as xs:string,
                                  $context as map(xs:string, item()*))
         as element()+ {
     (: //foo... :)
-    if (starts-with($nodePath, '//')) then (
-        <root/>,
-        $nodePath ! f:parseNodePathRC(., $options, $context)
+    if (starts-with($nodePath, '//')) then
+        (<root/>, $nodePath ! f:parseNodePathRC(., $options, $context))
     (: /foo... :)
-    ) else if (starts-with($nodePath, '/')) then (
-        <root/>,
-        $nodePath ! f:parseNodePathRC(., $options, $context)
+    else if (starts-with($nodePath, '/')) then
+        (<root/>, $nodePath ! f:parseNodePathRC(., $options, $context))
     (: .../foo :)
-    ) else if (starts-with($nodePath, '...')) then (
+    else if (starts-with($nodePath, '...')) then
         $nodePath ! f:parseNodePathRC(., $options, $context)
     (: ../foo :)
-    ) else if (starts-with($nodePath, '..')) then (
+    else if (starts-with($nodePath, '..')) then
         $nodePath ! f:parseNodePathRC(., $options, $context)
     (: ./foo :)
-    ) else if (matches($nodePath, '^\s*.\s*$')) then (
+    else if (matches($nodePath, '^\s*.\s*$')) then
         <self/>
-    ) else if (starts-with($nodePath, '.')) then (
+    else if (starts-with($nodePath, '.')) then
         $nodePath ! replace(., '^\.\s*', '') ! f:parseNodePathRC(., $options, $context)
     (: foo... :)        
-    ) else ('/' || $nodePath) ! f:parseNodePathRC(., $options, $context)
+    else ('/' || $nodePath) ! f:parseNodePathRC(., $options, $context)
 };
 
 (:~
@@ -200,7 +198,7 @@ declare function f:parseNodePathRC($nodePath as xs:string,
     let $sep := codepoints-to-string(30000) return
     
     let $fn_parseStep := 
-        (: $char1 is / or \. :)
+        (: Argument $char1 is / or \. :)
         function($text, $char1) {
             let $cont := replace($text, '^'||$char1||'+\s*', '')
             let $nameEtc := replace($cont, '^(.*?)?(/.*)', '$1'||$sep||'$2')
@@ -234,6 +232,7 @@ declare function f:parseNodePathRC($nodePath as xs:string,
         }
     return
     
+    (: Descentant step :)
     if (starts-with($nodePath, '//')) then
         let $parts := $fn_parseStep($nodePath, '/')
         return (

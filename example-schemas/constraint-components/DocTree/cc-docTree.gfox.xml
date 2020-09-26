@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints.
+    Demonstrates the use of DocTree constraints.
+    
+    Each <node> child of the constraint element describes a subtree of the document
+    tree. Each <node> child of a <node> element describes a set of nodes reached
+    by the node path in @locNP on its parent node. Explicit cardinality constraints
+    are specified by @count, @minCount, @maxCount. The implicit cardinality constraint -
+    when there are no explicit constraints - is "exactly one node". 
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -14,16 +20,16 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>          
 
             <file foxpath="airports.xml" id="airportsFileShape">
-                <docContent xmlns:geo="http://example.org/geo">
+                <docTree xmlns:geo="http://example.org/geo">
                     <node locNP="/airports" closed="true">
                         <node locNP="airportsForCountry" count="4"/>                        
                     </node>                    
-                </docContent>
+                </docTree>
             </file>
 
             <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
                 <targetSize minCountMsg="More airport files expected" minCount="0"/>
-                <docContent>
+                <docTree>
                     
                     <!-- Document structure -->
                     <node locNP="/airport" closed="true">
@@ -56,7 +62,7 @@
                         <node locNP="../dst"/>
                     </node>
 
-                </docContent>
+                </docTree>
             </file>
 
         </folder>

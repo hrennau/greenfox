@@ -166,7 +166,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
          element(gx:foxpath) | 
          element(gx:folderContent) |
          element(gx:docSimilar) | 
-         element(gx:docContent) |
+         element(gx:docTree) |
          element(gx:value) |
          element(gx:values) |    
          element(gx:valuePair) |
@@ -511,7 +511,7 @@ declare function f:nodeTreeRequired($components as element()*)
     exists($components/(
         self::gx:focusNode,
         self::gx:docSimilar,
-        self::gx:docContent,
+        self::gx:docTree,
         self::gx:value, self::gx:values,    
         self::gx:valuePair, self::gx:valuePairs,
         self::gx:valueCompared, self::gx:valuesCompared,

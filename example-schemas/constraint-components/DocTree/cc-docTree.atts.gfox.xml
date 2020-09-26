@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints.
+    Demonstrates the use of DocTree constraints.
+    
+    This example uses the @atts attribute, a shortcut representation of
+    attributes found in a node.
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree.atts"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -14,16 +17,16 @@
             <targetSize countMsg="Missing folder: airports" count="1"/>          
 
             <file foxpath="airports.xml" id="airportsFileShape">
-                <docContent xmlns:geo="http://example.org/geo">
+                <docTree xmlns:geo="http://example.org/geo">
                     <node locNP="/airports" closed="true">
                         <node locNP="airportsForCountry" count="4"/>                        
                     </node>                    
-                </docContent>
+                </docTree>
             </file>
 
             <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
                 <targetSize minCountMsg="More airport files expected" minCount="0"/>
-                <docContent>
+                <docTree>
                     
                     <!-- Document structure -->
                     <node locNP="/airport" atts="id iata icao externalID?" closed="true" >
@@ -43,7 +46,7 @@
                         <node locNP="type"/>
                         <node locNP="source1"/>
                     </node>
-                </docContent>
+                </docTree>
             </file>
 
         </folder>

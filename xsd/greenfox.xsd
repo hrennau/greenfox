@@ -187,20 +187,20 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="csv.maxRowCountMsgOK" type="xs:string"/>
     </xs:complexType>
     
-    <!-- D o c C o n e n t    C o n s t r a i n t s -->
-    <xs:complexType name="DocContentType">
+    <!-- D o c T r e e    C o n s t r a i n t s -->
+    <xs:complexType name="DocTreeType">
         <xs:sequence>
-            <xs:element name="node" type="t:DocContentNodeType" maxOccurs="unbounded"/>
+            <xs:element name="node" type="t:DocTreeNodeType" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="withNamespaces" type="xs:boolean"/>
     </xs:complexType>
     
-    <xs:complexType name="DocContentNodeType">
+    <xs:complexType name="DocTreeNodeType">
         <xs:sequence>
-            <xs:element name="node" type="t:DocContentNodeType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="node" type="t:DocTreeNodeType" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="locNP" type="xs:string"/>
-        <xs:attribute name="atts" type="xs:string"/>
+        <xs:attribute name="atts" type="t:AttributeUsageListType"/>
         <xs:attribute name="closed" type="xs:boolean"/>
         <xs:attribute name="closedMsg" type="xs:string"/>
         <xs:attribute name="closedMsgOK" type="xs:string"/>
@@ -272,6 +272,14 @@ Simple types
         </xs:restriction>
     </xs:simpleType>
     
+    <xs:simpleType name="AttributeUsageListType">
+        <xs:list itemType="t:AttributeUsageType"/>
+    </xs:simpleType>
+    <xs:simpleType name="AttributeUsageType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\i\c*:)?\i\c*\??"/>
+        </xs:restriction>
+    </xs:simpleType>
     <!-- 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Groups 
@@ -301,7 +309,7 @@ Groups
             <xs:element name="fileDate" type="t:FileDateType"/>
             <xs:element name="fileSize" type="t:FileSizeType"/>
             <xs:element name="mediatype" type="t:MediatypeType"/>
-            <xs:element name="docContent" type="t:DocContentType"/>
+            <xs:element name="docTree" type="t:DocTreeType"/>
             <xs:element name="docSimilar"/>
             <xs:element name="value"/>
             <xs:element name="values"/>
@@ -452,7 +460,7 @@ Attribute groups
     
     <xs:attributeGroup name="CsvOptionsAttGroup">
         <xs:attribute name="csv.separator" type="t:CsvSeparatorType"/>
-        <xs:attribute name="csv.withHeader" type="xs:boolean"/>        
+        <xs:attribute name="csv.header" type="t:YesNoType"/>        
         <xs:attribute name="csv.format" type="t:CsvFormatType"/>
         <xs:attribute name="csv.lax" type="t:YesNoType"/>
         <xs:attribute name="csv.quotes" type="t:YesNoType"/>

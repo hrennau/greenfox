@@ -96,10 +96,10 @@ declare function f:fox-doc-available($uri as xs:string)
  :
  : @param uri the URI or file path of the resource
  : @param separator the separator character (or token `comma` or token `semicolon`)
- : @param withHeader if 'yes', the first row contains column headers
+ : @param header if 'yes', the first row contains column headers
  : @param names if 'direct', column names are used as element names;
  :              if 'attributes', column names are provided by @name
- : @param withQuotes if 'yes', quotes at start and end of field are treated as control characters
+ : @param quotes if 'yes', quotes at start and end of field are treated as control characters
  : @param backslashes if 'yes', \n, \t and \r are replaced by the corresponding control characters
  : @param options options controlling the evaluation
  : @return an XML document representing JSON data, or the empty sequence if 
@@ -107,13 +107,13 @@ declare function f:fox-doc-available($uri as xs:string)
  :)
 declare function f:fox-csv-doc($uri as xs:string,
                                $separator as xs:string,
-                               $withHeader as xs:string,
+                               $header as xs:string,
                                $names as xs:string,
-                               $withQuotes as xs:string,
+                               $quotes as xs:string,
                                $backslashes as xs:string,
                                $options as map(*)?)
         as document-node()? {
-    tt:fox-csv-doc($uri, $separator, $withHeader, $names, $withQuotes, $backslashes, $options)
+    tt:fox-csv-doc($uri, $separator, $header, $names, $quotes, $backslashes, $options)
 };
 
 (:~
@@ -126,12 +126,12 @@ declare function f:fox-csv-doc($uri as xs:string,
 declare function f:csvDoc($filePath as xs:string, $params as element()+)
         as document-node()? {
     let $separator := ($params/@csv.separator,  'comma')[1]
-    let $withHeader := ($params/@csv.withHeader, 'no')[1]
+    let $header := ($params/@csv.header, 'no')[1]
     let $names := ($params/@csv.names, 'direct')[1]
-    let $withQuotes := ($params/@csv.withQuotes, 'yes')[1]
+    let $quotes := ($params/@csv.quotes, 'yes')[1]
     let $backslashes := ($params/@csv.backslashes, 'no')[1]
     return
-        f:fox-csv-doc($filePath, $separator, $withHeader, $names, $withQuotes, $backslashes, ())
+        f:fox-csv-doc($filePath, $separator, $header, $names, $quotes, $backslashes, ())
 };   
 
 (:~

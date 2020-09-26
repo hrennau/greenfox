@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of DocContent constraints.
+    Demonstrates the use of DocTree constraints.
+    
+    The example highlights the use in combination with focus nodes - the check
+    applies to the document subtree rooted in the current focus node.
 -->    
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree.focusNode"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -23,7 +26,7 @@
                 <focusNode xpath="//airport[@iata]">
                     
                     <!-- CHECK: grammar -->
-                    <docContent>
+                    <docTree>
                         <node locNP="." closed="true">
                             <node locNP="@id"/>
                             <node locNP="@iata"/>
@@ -32,13 +35,13 @@
                             <node locNP="@longitude"/>
                             <node locNP="@href"/>
                         </node>
-                    </docContent>
+                    </docTree>
                 </focusNode>
                 <!-- Focus node: airport elements without IATA code -->                
                 <focusNode xpath="//airport[not(@iata)]">
                     
                     <!-- CHECK: grammar -->                    
-                    <docContent>
+                    <docTree>
                         <node locNP="." closed="true">
                             <node locNP="@id"/>
                             <node locNP="@icao"/>
@@ -50,7 +53,7 @@
                             <node locNP="type"/>
                             <node locNP="source1"/>
                         </node>
-                    </docContent>
+                    </docTree>
                 </focusNode>
             </file>
 

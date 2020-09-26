@@ -433,7 +433,7 @@ return
                  ======================================== -->
 
             <focusNode xpath="//*:file">
-                <ex:allowedAtts attNames="id description deactivated linkName path foxpath hrefXP uriXP recursive mediatype csv.separator csv.withHeader"
+                <ex:allowedAtts attNames="id description deactivated linkName path foxpath hrefXP uriXP recursive mediatype csv.separator csv.header"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->
@@ -443,7 +443,7 @@ return
 
                 <!-- element names -->
                 <ex:allowedElems
-                    elemNames="targetSize folder file links fileDate fileSize fileName docSimilar values foxvalues valuePairs valuesCompared foxvaluePairs foxvaluesCompared contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docContent xpath foxpath conditional"
+                    elemNames="targetSize folder file links fileDate fileSize fileName docSimilar values foxvalues valuePairs valuesCompared foxvaluePairs foxvaluesCompared contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docTree xpath foxpath conditional"
                     msg="Unexpected elements in 'file' element; expected: $elemNames"
                     msgOK="OK - 'file' element: no unexpected elements"/>
 
@@ -824,7 +824,7 @@ return
                 <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK 
                                           csv.minColumnCount csv.maxColumnCount
                                           csv.minRowCount csv.maxRowCount
-                                          csv.separator csv.withHeader
+                                          csv.separator csv.header
                                           csv.minColumnCountMsg csv.minColumnCountMsgOK  
                                           csv.maxColumnCountMsg csv.maxColumnCountMsgOK
                                           csv.minRowCountMsg csv.minRowCountMsgOK                                          
