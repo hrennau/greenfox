@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FileName constraints - declares FileNameMatches constraints. 
+    
+    This example uses regular expressions checking the presence of uncommon characters (whitespace, parentheses).
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileName.uncommon-chars"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'constraint-FileName' -->
+        <folder foxpath="constraint-FileName" id="fileNameFolderShape">
+            <targetSize countMsg="Missing folder: constraint-FileName" count="1"/>   
+            
+            <!-- VISIT: whitespace files -->
+            <file foxpath="*whitespace*" id="xyzFileShape">
+                <targetSize minCountMsg="Expected a file with name *whitespace*" minCount="1"/>
+                
+                <!-- CHECK: file names -->
+                <fileName matches="\s" matchesMsg="Expected file name with whitespace"/>
+    
+            </file>
+            <!-- VISIT: parentheses files -->
+            <file foxpath="*parentheses*" id="xyzFileShape">
+                <targetSize minCountMsg="Expected a file with name *parentheses*" minCount="1"/>
+                
+                <!-- CHECK: file names -->
+                <fileName matches="\(\d{4}\.\d{2}\.\d{2}\)" matchesMsg="Expected file name with (yyyy.mm.dd)"/>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

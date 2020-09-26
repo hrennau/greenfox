@@ -662,14 +662,31 @@ declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?
         as item()* {
     if (empty($useDatatype)) then 
         if (empty($useString)) then $value
-        else
+        else f:applyUseString($value, $useString)
+(:        
             let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
             let $interm := if ($useString = 'uc') then $interm ! upper-case(.) else $interm
             let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm
             return $interm
-    
+:)    
     else $value ! i:castAs(., $useDatatype)        
 };        
+
+(:~
+ : Edits a string, applying a simple operation like "lower-case".
+ :
+ : @param value the value to be edited
+ : @return the edited value
+ :)
+declare function f:applyUseString($value as item()*, $useString as xs:string*)
+        as item()* {
+    if (empty($useString)) then $value else
+    let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
+    let $interm := if ($useString = 'uc') then $interm ! upper-case(.) else $interm
+    let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm
+    return $interm
+};        
+
 
 
 

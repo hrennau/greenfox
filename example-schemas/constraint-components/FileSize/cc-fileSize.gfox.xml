@@ -17,15 +17,15 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: folder 'constraint-FileSize' -->
+        <!-- VISIT: folder 'constraint-FileSize' -->
         <folder foxpath="constraint-FileSize" id="fileSizeFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileSize" count="1"/>
 
-            <!-- Visit: all files except _hide* -->
+            <!-- VISIT: all files except _hide* -->
             <file foxpath="* except _hide*" id="contentFilesShape">
                 <targetSize minCountMsg="Less files than expected" minCount="3"/>
                 
-                <!-- Check: file size -->
+                <!-- CHECK: file size -->
                 <fileSize gt="0" gtMsg="Empty files not allowed"
                           le="1000000" leMsg="Files larger 1MB not allowed"/>
             </file>

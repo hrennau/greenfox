@@ -142,6 +142,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $linkConstraints := $ldo?constraints    
     let $constraintAtts := ($linkConstraints, $constraintElem)/@*
     let $constraintMap :=
+    
+        (: *** exists :)
         map:merge((
             let $constraints := $constraintAtts[name() eq 'exists'][. eq 'true']
             return
@@ -149,9 +151,12 @@ declare function f:validateLinkCounts($lros as map(*)*,
                 let $valueCount := ($lros[?targetExists][not(?errorCode)]?targetURI => distinct-values() => count(), 0)[1]
                 return 
                     map{'exists': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+            (: *** countContextNodes :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)ContextNodes$')]
             return
                 if (empty($constraints)) then () else
+                (: count all distinct context items, node or atom :) 
                 let $valueCount :=
                     let $contextItems := $lros?contextItem
                     let $nodes := $contextItems[. instance of node()]/.
@@ -159,27 +164,39 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     return count($nodes) + count($atoms)
                 return 
                     map{'contextNodes': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+            (: *** countTargetResources :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResources$')]
             return
                 if (empty($constraints)) then () else
+                (: count all distinct target URIs :)
                 let $valueCount := $lros[?targetExists]?targetURI => distinct-values() => count()
                 return 
                     map{'targetResources': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+            (: *** countTargetDocs :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocs$')]
             return
                 if (empty($constraints)) then () else
+                (: count all distinct target docs :)
                 let $valueCount := $lros?targetDoc/. => count()
                 return 
                     map{'targetDocs': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+            (: *** countTargetNodes :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodes$')]
             return
                 if (empty($constraints)) then () else
+                (: count all distinct target nodes :)
                 let $valueCount := $lros?targetNodes/. => count()
                 return 
                     map{'targetNodes': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+            (: *** countTargetResourcesPerContextPoint :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetResourcesPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
+                (: count for each context point the number of distinct target URIs :)
                 let $valueCounts :=
                     for $lro allowing empty in $lros        
                     let $contextItem := $lro?contextItem
@@ -189,9 +206,12 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     return count($targetResources)
                 return
                     map{'targetResourcesPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}},
+                    
+            (: *** countTargetDocsPerContextPoint :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetDocsPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
+                (: count for each context point the number of distinct target docs :)                
                 let $valueCounts :=
                     for $lro allowing empty in $lros        
                     let $contextItem := $lro?contextItem
@@ -201,9 +221,12 @@ declare function f:validateLinkCounts($lros as map(*)*,
                     return count($targetDocs)
                 return
                     map{'targetDocsPerContextPoint': map{'actCount': $valueCounts, 'constraints': $constraints}},
-            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)_$')]
+                    
+            (: *** countTargetNodesPerContextPoint :)
+            let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)TargetNodesPerContextPoint$')]
             return
                 if (empty($constraints)) then () else
+                (: count for each context point the number of distinct target nodes :)                
                 let $valueCounts :=
                     for $lro allowing empty in $lros        
                     let $contextItem := $lro?contextItem

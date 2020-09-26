@@ -229,6 +229,7 @@ declare function f:validationResult_mediatype($colour as xs:string,
 declare function f:validationResult_docContent_counts($colour as xs:string,
                                                       $constraintElem as element(),
                                                       $constraintNode as node(),
+                                                      $shortcutAttNodeName as xs:string?,
                                                       $contextNode as node(),
                                                       $valueCount as xs:integer,   
                                                       $nodeTrail as xs:string,
@@ -244,7 +245,7 @@ declare function f:validationResult_docContent_counts($colour as xs:string,
         if ($constraintNode/self::attribute()) then $constraintNode/i:firstCharToUpperCase(local-name(.))
         else 'Count')
     let $nodePath := $contextNode/i:datapath(.)
-    let $implicitCount := 1[not($constraintNode/self::attribute())]
+    let $implicitCount := 1[not($constraintNode/self::attribute()) or $constraintNode/self::attribute(atts)]
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     return
         element {f:resultElemName($colour)} {

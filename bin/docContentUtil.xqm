@@ -203,7 +203,8 @@ declare function f:parseNodePathRC($nodePath as xs:string,
         (: $char1 is / or \. :)
         function($text, $char1) {
             let $cont := replace($text, '^'||$char1||'+\s*', '')
-            let $nameEtc := replace($cont, '^(.*)?([./].*)', '$1'||$sep||'$2')
+            let $nameEtc := replace($cont, '^(.*?)?(/.*)', '$1'||$sep||'$2')
+(:          let $nameEtc := replace($cont, '^(.*)?([./].*)', '$1'||$sep||'$2') :)  (: 20200926 :)
             let $nameIndex := (if (contains($nameEtc, $sep)) then substring-before($nameEtc, $sep) else $nameEtc)
                          [string()]
             let $name := (
@@ -215,12 +216,11 @@ declare function f:parseNodePathRC($nodePath as xs:string,
             let $localNameAndPrefix := 
                 if (not(contains($name, ':'))) then $name
                 else (substring-after($name, ':'), substring-before($name, ':'))
-            let $localNameRaw := $localNameAndPrefix[1]
-            let $isAttribute := starts-with($localNameRaw, '@')[.]            
-            let $localName := 
-                if ($isAttribute) then substring($localNameRaw, 2) else $localNameRaw
-                
-            let $prefix := $localNameAndPrefix[2]
+            (: let $localNameRaw := $localNameAndPrefix[1] :)
+            let $isAttribute := starts-with($name, '@')[.]            
+            (: let $localName := $localNameRaw ! replace(., '^@', '') :)
+            let $localName := $localNameAndPrefix[1] ! replace(., '^@', '')
+            let $prefix := $localNameAndPrefix[2] ! replace(., '^@', '')
             let $regex := $localName ! i:glob2regex(.)
             let $remains := substring-after($nameEtc, $sep)[string()]
             return
@@ -279,7 +279,7 @@ declare function f:parseNodePathRC($nodePath as xs:string,
 
 (:~
  : Returns true if the name of a given node matches the name constraints
- : of at least one compiled node path steps. This function is used
+ : of at least one compiled node path step. This function is used
  : when checking closed constraints, comparing the names of attributes
  : and elements against the child and attribute paths used by the
  : <node> child elements of the <node> element to be checked, representing
@@ -293,21 +293,28 @@ declare function f:parseNodePathRC($nodePath as xs:string,
  :)
 declare function f:nodeNameMatchesNodePathStep($node as node(), 
                                                $steps as element()*, 
+                                               $furtherLocalNames as xs:string*,
+                                               $furtherQNames as xs:QName*,
                                                $withNamespaces as xs:boolean?, 
                                                $namespaceContext as element())
         as xs:boolean {
-not(
+    let $lname := $node/local-name(.)
+    return
+    (
     some $step in $steps satisfies
     (
-        $step/@regex/matches($node/local-name(.), .) or
-        $step/@name eq $node/local-name(.)
+        $step/@regex/matches($lname, .) or
+        $step/@name eq $lname
     ) and 
     (
         not($step/@prefix) and (not($withNamespaces) or not($step/namespace-uri(.)))
         or
         $step/@prefix/namespace-uri-for-prefix(., $namespaceContext) eq $node/namespace-uri(.)
     )
-)
+    )
+    or not($withNamespaces) and $lname = $furtherLocalNames    
+    or ($withNamespaces) and $node/node-name(.) = $furtherQNames
+
        
 };        
 

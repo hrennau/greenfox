@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocContent constraints.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>          
+
+            <file foxpath="airports-ireland.xml" id="airportFileShape">
+                <targetSize minCountMsg="More airport files expected" minCount="0"/>
+                <docContent>
+                    
+                    <!-- Document structure -->
+                    <node locNP="/airports" atts="country count">
+                        <node locNP="airport/geo/latitude" maxCount="1000" minCount="1"/>
+                    </node>
+                    
+                </docContent>
+            </file>
+
+        </folder>
+    </domain>
+
+</greenfox>

@@ -38,7 +38,10 @@
                 <mediatype eq="csv"
                     csv.separator="comma" csv.withHeader="true"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"/>                
+                    csv.minRowCount="2" csv.maxRowCount="30"
+                    csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
+                    csv.minRowCountMsg="Expected at least 2 rows"
+                />                
             </file>
             
             <!-- Visit files: CSV files (separator: semicolon) -->            
@@ -46,7 +49,9 @@
                 <mediatype eq="csv"
                     csv.separator="semicolon" csv.withHeader="true"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"/>
+                    csv.minRowCount="2" csv.maxRowCount="30"
+                    csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
+                    csv.minRowCountMsg="Expected at least 2 rows"                    
                 />
             </file>
         </folder>

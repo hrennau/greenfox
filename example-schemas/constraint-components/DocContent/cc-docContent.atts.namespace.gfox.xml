@@ -35,9 +35,7 @@
                         <node locNP="name"/>
                         <node locNP="city"/>
                         <node locNP="country"/>
-                        <node locNP="g:geo" closed="true">
-                            <node locNP="@reviewed"/>
-                            <node locNP="@xml:id"/>
+                        <node locNP="g:geo" atts="reviewed xml:id" closed="true">
                             <node locNP="g:latitude"/>
                             <node locNP="g:longitude"/>
                             <node locNP="g:altitude"/>

@@ -6,7 +6,7 @@
     Note that there is no difference compared with checking normal file system resources - 
     dealing with archive contents is just a detail of the navigation providing the resources.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/last-modified.archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileDate.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -16,11 +16,11 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit archive contents: constraint-FileDate folder -->
+        <!-- VISIT archive contents: constraint-FileDate folder -->
         <folder foxpath="archives\constraint-FileDate.zip\#archive#\constraint-FileDate" id="fileDateFolderShape">
             <targetSize countMsg="Missing folder: constraint-fileDate" count="1"/>
 
-            <!-- Check archive contents: file dates -->
+            <!-- CHECK archive contents: file dates -->
             <file foxpath=".\\(* except _hide*)" id="anyFileShape">
                 <targetSize minCount="20" minCountMsg="Less files than expected"/>
                 <fileDate 

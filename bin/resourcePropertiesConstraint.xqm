@@ -35,6 +35,7 @@ declare function f:validateFileDate($constraintElem as element(gx:fileDate),
     let $constraintLabel := $constraintElem/@label
     
     let $eq := $constraintElem/@eq
+    let $ne := $constraintElem/@ne
     let $lt := $constraintElem/@lt
     let $gt := $constraintElem/@gt
     let $le := $constraintElem/@le
@@ -51,12 +52,12 @@ declare function f:validateFileDate($constraintElem as element(gx:fileDate),
         for $cmp in ($eq, $lt, $gt, $le, $ge, $eq, $like, $notLike, $matches, $notMatches)
         let $violation :=
             switch($cmp/local-name(.))
-            case 'eq' return $actValue = $cmp
+            case 'eq' return $actValue != $cmp
+            case 'ne' return $actValue = $cmp            
             case 'lt' return $actValue >= $cmp
             case 'le' return $actValue > $cmp
             case 'gt' return $actValue <= $cmp
             case 'ge' return $actValue < $cmp
-            case 'eq' return $actValue != $cmp
             case 'matches' return not(matches($actValue, $matches, $flags))
             case 'notMatches' return matches($actValue, $notMatches, $flags)
             case 'like' return not(matches($actValue, $like/f:glob2regex(.), $flags))

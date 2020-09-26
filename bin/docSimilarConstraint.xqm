@@ -175,13 +175,16 @@ declare function f:normalizeDocForComparison($node as node(),
             let $namespace := $modifier/@namespace
             let $parentLocalName := $modifier/@parentLocalName
             let $parentNamespace := $modifier/@parentNamespace
+            let $testXP := $modifier/@testXP
                 
             let $candidates := if ($kind eq 'attribute') then $tree//@* else $tree//*
             let $selected :=
-               $candidates[not($localName) or local-name() eq $localName]
+               $candidates
+               [not($localName) or local-name() eq $localName]
                [not(@namespace) or namespace-uri(.) eq $namespace]
                [not($parentLocalName) or ../local-name(.) eq $parentLocalName]
                [not(@parentNamespace) or ../namespace-uri(.) eq $parentNamespace]
+               [not($testXP) or boolean(f:evaluateSimpleXPath($testXP, .))]
             return $selected
         }
     return
@@ -234,14 +237,16 @@ declare function f:normalizeDocForComparison($node as node(),
                     else
                         let $from  := $editText/@replaceSubstring
                         let $to := $editText/@replaceWith
+                        let $useString := $editText/@useString/tokenize(.)
                         
                         for $sel in $selected
+                        let $newValue := 
+                            if ($from and $to) then replace($sel, $from, $to) else $sel
                         let $newValue :=
-                            if ($from and $to) then replace($sel, $from, $to)
-                            else ()
+                            if (empty($useString)) then $newValue else i:applyUseString($newValue, $useString)                            
                         return
-                            if (empty($newValue)) then () else
-                                replace value of node $sel with $newValue
+                            if ($sel eq $newValue) then () else
+                                replace value of node $sel with trace( $newValue , '_REPLACE_WITH_NEW_VALUE: ')
             default return ()
     )
     return $node_

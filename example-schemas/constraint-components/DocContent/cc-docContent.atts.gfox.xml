@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocContent constraints.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports" count="1"/>          
+
+            <file foxpath="airports.xml" id="airportsFileShape">
+                <docContent xmlns:geo="http://example.org/geo">
+                    <node locNP="/airports" closed="true">
+                        <node locNP="airportsForCountry" count="4"/>                        
+                    </node>                    
+                </docContent>
+            </file>
+
+            <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
+                <targetSize minCountMsg="More airport files expected" minCount="0"/>
+                <docContent>
+                    
+                    <!-- Document structure -->
+                    <node locNP="/airport" atts="id iata icao externalID?" closed="true" >
+                        <node locNP="name"/>
+                        <node locNP="city"/>
+                        <node locNP="country"/>
+                        <node locNP="geo" closed="true">
+                            <node locNP="latitude"/>
+                            <node locNP="longitude"/>
+                            <node locNP="altitude"/>
+                        </node>
+                        <node locNP="temporal" closed="true">
+                            <node locNP="timezone"/>
+                            <node locNP="tzTimezone"/>
+                            <node locNP="dst"/>                                
+                        </node>
+                        <node locNP="type"/>
+                        <node locNP="source1"/>
+                    </node>
+                </docContent>
+            </file>
+
+        </folder>
+    </domain>
+
+</greenfox>

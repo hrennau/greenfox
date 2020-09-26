@@ -10,7 +10,7 @@
     Note the option @case - if its value is "false", the comparison is case insensitive. This not
     only applies to glob pattern and regex tests, but also to eq and ne comparison.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-name"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileName"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -20,19 +20,19 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: folder 'constraint-FileName' -->
+        <!-- VISIT: folder 'constraint-FileName' -->
         <folder foxpath="constraint-FileName" id="fileNameFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileName" count="1"/>   
             
-            <!-- Visit: JSON files -->
+            <!-- VISIT: JSON files -->
             <file foxpath=".\\*.json[not(self~::_hide*)]" id="jsonFileShape">
                 <targetSize minCountMsg="Expected more JSON files" minCount="6"/>
                 
-                <!-- Check: file names -->
+                <!-- CHECK: file names -->
                 <fileName like="airport*.json" likeMsg="JSON files must match pattern 'airport*.json"
                           notLike="*test*" notLikeMsg="JSON files must not match pattern '*test*'"/>
     
-                <!-- Check: file names (special regex, case sensitive) -->
+                <!-- CHECK: file names (special regex, case sensitive) -->
                 <!--    A second 'fileName' element is required because of @case -->
                 <fileName notMatches="\s+-\s+Kopie" notMatchesMsg="JSON files must not match regex '\s+-\s+Kopie'" 
                           case="true"/>

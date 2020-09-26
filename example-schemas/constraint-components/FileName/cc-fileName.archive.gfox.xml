@@ -6,7 +6,7 @@
     Note that there is no difference compared with checking normal file system resources - 
     dealing with archive contents is just a detail of the navigation providing the resources.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/file-name.archive"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileName.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -16,19 +16,19 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit archive contents: folder 'constraint-FileName' -->
+        <!-- VISIT archive contents: folder 'constraint-FileName' -->
         <folder foxpath="archives\constraint-FileName.zip\#archive#\constraint-FileName" id="fileNameFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileName.zip" count="1"/>            
             
-            <!-- Visit archive contents: JSON files -->
+            <!-- VISIT archive contents: JSON files -->
             <file foxpath=".\\*.json[not(self~::_hide*)]" id="jsonFileShape">
                 <targetSize minCountMsg="Expected more JSON files" minCount="6"/>
                 
-                <!-- Check archive contents: file names -->                
+                <!-- CHECK archive contents: file names -->                
                 <fileName like="airport*.json" likeMsg="JSON files must match pattern 'airport*.json"
                     notLike="*test*" notLikeMsg="JSON files must not match pattern '*test*'"/>
                 
-                <!-- Check: file names (special regex, case sensitive) -->
+                <!-- CHECK: file names (special regex, case sensitive) -->
                 <!--    A second 'fileName' element is required because of @case -->
                 <fileName notMatches="\s+-\s+Kopie" notMatchesMsg="JSON files must not match regex '\s+-\s+Kopie'" 
                           case="true"/>

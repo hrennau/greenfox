@@ -20,22 +20,22 @@
 :)  
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "compile.xqm",
-    "greenfoxSchemaValidator.xqm",    
-    "log.xqm",
-    "greenfoxEditUtil.xqm",
-    "systemValidator.xqm",
-    "validationReportWriter.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "compile.xqm",
+   "greenfoxSchemaValidator.xqm",    
+   "log.xqm",
+   "greenfoxEditUtil.xqm",
+   "systemValidator.xqm",
+   "validationReportWriter.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -51,7 +51,9 @@ declare function f:validateOp($request as element())
         
     (: Preliminary checks :)        
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
-    let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)    
+    let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)
+    let $xsdInvalidSchemaReport := f:xsdValidateSchema($gfoxSource)
+    return if ($xsdInvalidSchemaReport) then $xsdInvalidSchemaReport else
     
     (: Collect parameters :)
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
@@ -103,4 +105,39 @@ declare function f:check_greenfoxSchemaRoot($gfox as element())
     let $errorCode := 'INVALID_ARG'
     let $msg := string-join(('Not a greenfox schema;', $msgParts, 'aborted.'), ' ')                    
     return error(QName('', $errorCode), $msg)        
+};
+
+(:~
+ : Checks if the greenfox schema is XSD valid.
+ :
+ : @param gfox the schema
+ : @return an error report, or the empty sequence if no errors were found
+ :)
+declare function f:xsdValidateSchema($gfox as element())
+        as element(gx:invalidSchema)? {
+
+    let $greenfoxXsd := resolve-uri('') || '/../../xsd/greenfox.xsd'
+    let $gfoxSourceURI := $gfox/root()/document-uri(.)
+    let $report := validate:xsd-report($gfoxSourceURI, $greenfoxXsd)
+    return 
+        if ($report/status eq 'valid') then () else 
+            f:xsdReportToXsdGreenfoxReport($report, $gfoxSourceURI)
+};
+
+declare function f:xsdReportToXsdGreenfoxReport($report as element(), $schemaURI as xs:string)
+        as element(gx:invalidSchema)? {
+    let $msgs :=
+        for $msg in $report/(* except status)
+        return
+            <gx:message>{
+                $msg/@line,
+                $msg/@column,
+                $msg/@level[. ne 'Error'],
+                $msg/string()
+            }</gx:message>
+    return            
+        <gx:invalidSchema validation="xsd" name="{$schemaURI}">{
+            $msgs
+        }</gx:invalidSchema>        
+            
 };        

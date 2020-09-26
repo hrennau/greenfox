@@ -2,12 +2,12 @@
   <name>Aalborg Airport</name>
   <city>Aalborg</city>
   <country>Denmark</country>
-  <geo xmlns="http://example.org/geo">
+  <geo xmlns="http://example.org/geo" xml:id="g1" reviewed="true">
     <latitude>57.0927589138</latitude>
     <longitude>9.84924316406</longitude>
     <altitude>10</altitude>
   </geo>
-  <temporal xmlns="http://example.org/time">
+  <temporal xmlns="http://example.org/time" xml:id="t1" reviewed="true">
     <timezone>1</timezone>
     <tzTimezone>Europe/Copenhagen</tzTimezone>
     <dst>E</dst>

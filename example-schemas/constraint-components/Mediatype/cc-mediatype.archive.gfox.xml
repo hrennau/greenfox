@@ -43,7 +43,6 @@
                     csv.separator="semicolon" csv.withHeader="true"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
                     csv.minRowCount="2" csv.maxRowCount="30"/>
-                />
             </file>
         </folder>
     </domain>
