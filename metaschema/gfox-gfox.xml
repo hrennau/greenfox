@@ -808,13 +808,13 @@ return
             <focusNode xpath="//*:xsdValid">
 
                 <!-- allowed attributes -->
-                <ex:allowedAtts attNames="xsdFoxpath xsdValidMsg xsdValidMsgOK msg msgOK"
+                <ex:allowedAtts attNames="xsdFOX xsdValidMsg xsdValidMsgOK"
                     msg="Unexpected attributes in 'xsdValid' element; expected: $attNames"
                     msgOK="OK - 'xsdValid' element: no unexpected attributes"/>
                 <!-- mandatory attributes -->                
-                <ex:mandatoryAtts attNames="xsdFoxpath"
-                    msg="An 'xsdValid' constraint must have an 'xsdFoxpath' attribute"
-                    msgOK="OK - 'xsdValid' element: has 'xsdFoxpath' attribute"/>
+                <ex:mandatoryAtts attNames="xsdFOX"
+                    msg="An 'xsdValid' constraint must have an 'xsdFOX' attribute"
+                    msgOK="OK - 'xsdValid' element: has 'xsdFOX' attribute"/>
             </focusNode>
             
             <!-- ========================================

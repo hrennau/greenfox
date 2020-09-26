@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of XSDValid constraints. The XSD must not be specified invidually for
+    the instance document, it suffices to specify a set of XSDs from which the appropriate
+    XSD is automatically selected.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xsdvalid"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder output -->
+        <folder foxpath="input-output-config\output" id="outputFolderShape">
+            <targetSize countMsg="Missing folder: output" count="1"/>
+
+            <!-- VISIT: XML files -->
+            <file foxpath="*.xml" id="responseFileShape">
+                <targetSize minCountMsg="At least two responses expected" minCount="2"/>
+                
+                <!-- CHECK: XSD valid? --> 
+                <xsdValid xsdFOX="$domain\xsd\schema-foo-article.xsd"
+                          xsdValidMsg="Response msg not XSD valid"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of XSDValid constraints. This example checks resources contained by an 
+    archive file, and it uses an XSD itself contained by an archive file.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/xsdvalid"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT archive contents: output folder -->
+        <folder foxpath="archives\input-output-config.zip\#archive#\input-output-config\output" id="outputFolderShape">
+            <targetSize countMsg="Missing folder: output" count="1"/>
+
+            <!-- VISIT archive contents: XML files -->
+            <file foxpath="*.xml" id="responseFileShape">
+                <targetSize minCountMsg="At least two responses expected" minCount="2"/>
+                
+                <!-- CHECK: XSD valid? -->
+                <xsdValid xsdFOX="$domain\archives\xsd.zip\#archive#\xsd\schema-foo-article.xsd"
+                          xsdValidMsg="Response msg not XSD valid"/>                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

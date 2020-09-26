@@ -14,9 +14,12 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at "expressionEvaluator.xqm",
    "greenfoxUtil.xqm";
     
+import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 
+at "validationResult.xqm";
+    
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:xsdValidate($constraint as element(gx:xsdValid), 
+declare function f:xsdValidate($constraintElem as element(gx:xsdValid), 
                                $context as map(*))
         as element()* {
     let $contextURI := $context?_targetInfo?contextURI
@@ -25,11 +28,11 @@ declare function f:xsdValidate($constraint as element(gx:xsdValid),
     if (not(i:fox-doc-available($contextURI))) then 
         let $msg := "XSD validation requires XML file, but file is not XML"
         return
-            f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
+            result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
     else
       
     let $doc := i:fox-doc-no-base-xml($contextURI)
-    let $expr := $constraint/@xsdFoxpath
+    let $expr := $constraintElem/@xsdFOX
     let $evaluationContext := $context?_evaluationContext
     let $xsdPaths := 
         let $value := f:evaluateFoxpath($expr, $contextURI, $evaluationContext, true())
@@ -44,7 +47,7 @@ declare function f:xsdValidate($constraint as element(gx:xsdValid),
         if (empty($xsdPaths)) then
             let $msg := "No XSDs found"
             return
-                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())            
+                result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
         else
         
     let $xsdRoots := 
@@ -60,7 +63,7 @@ declare function f:xsdValidate($constraint as element(gx:xsdValid),
             
                 let $msg := "xsdFoxpath yields non-XSD node"
                 return
-                    f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
+                    result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
         else
 
     let $rootElem := $doc/*
@@ -77,24 +80,23 @@ declare function f:xsdValidate($constraint as element(gx:xsdValid),
             let $msg := concat('No XSD element declaration found for this document; ',
                                'namespace=', $namespace, '; local name: ', $lname)
             return
-                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
+                result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
         else if (count($elementDecl) gt 1) then
             let $msg := concat('More than 1 XSD element declarations found for this document; ',
                                'namespace=', $namespace, '; local name: ', $lname)
             return                                    
-                f:constructResult_xsdValid('red', $msg, $contextURI, $constraint, ())
+                result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
         else 
         
     (: let $schema := $elementDecl/base-uri(.) :)    
     let $schema := $elementDecl/ancestor::xs:schema    
     let $report := validate:xsd-report($doc, $schema)
+    let $colour := if ($report//status eq 'valid') then 'green' else 'red'
     return
-        if ($report//status eq 'valid') then
-            f:constructResult_xsdValid('green', (), $contextURI, $constraint, ())
-        else            
-            f:constructResult_xsdValid('red', (), $contextURI, $constraint, $report)
+        result:validationResult_xsdValid($colour, $constraintElem, $report, $context)
 };
 
+(:
 declare function f:constructResult_xsdValid($colour as xs:string,
                                             $msg as xs:string?,
                                             $contextURI as xs:string,                                            
@@ -116,5 +118,5 @@ declare function f:constructResult_xsdValid($colour as xs:string,
          }
         
 };        
-
+:)
 

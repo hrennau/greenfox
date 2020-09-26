@@ -45,7 +45,7 @@ LinkDefinition
     <!-- Link definition element -->
     <xs:complexType name="LinkDefType">
         <xs:sequence>
-            <xs:element name="templateVar" minOccurs="0" maxOccurs="unbounded" type="t:TemplateVarType"/>
+            <xs:group ref="t:LinkDefGroup" minOccurs="0"/>
             <xs:element name="constraints" minOccurs="0" type="t:ConstraintsType"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:NCName"/>
@@ -60,7 +60,7 @@ LinkDefinition
     
     <!-- Constraints element -->
     <xs:complexType name="ConstraintsType">
-        <xs:attributeGroup ref="t:LinkConstraintFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
     <!-- 
@@ -71,61 +71,12 @@ Domain
     <xs:complexType name="DomainType">
         <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="folder" type="t:FolderType"/>
+                <xs:element name="folder" type="t:FolderShapeType"/>
                 <xs:element name="file"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="path" type="xs:string" use="required"/>
         <xs:attribute name="name" type="xs:string"/>
-    </xs:complexType>
-
-    <!-- 
-**********************************************************
-Folder 
-**********************************************************    
--->
-    <xs:complexType name="FolderType">        
-        <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:group ref="t:ResourceGroup"/>
-                <xs:group ref="t:FolderConstraintGroup"/>                
-            </xs:choice>
-        </xs:sequence>
-        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
-        <xs:attribute name="id" type="xs:NCName"/>
-    </xs:complexType>
-
-    <!-- 
-**********************************************************
-File 
-**********************************************************    
--->
-    <xs:complexType name="FileType">        
-        <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:group ref="t:ResourceGroup"/>
-                <xs:group ref="t:FileConstraintGroup"/>
-                <xs:element name="focusNode" type="t:FocusNodeType"/>                
-            </xs:choice>
-        </xs:sequence>
-        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
-        <xs:attribute name="id" type="xs:NCName"/>
-        <xs:attribute name="mediatype" type="xs:string"/>
-        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
-    </xs:complexType>
-    
-    <xs:complexType name="FocusNodeType">        
-        <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:group ref="t:ResourceGroup"/>
-                <xs:group ref="t:FileConstraintGroup"/>
-                <xs:element name="focusNode" type="t:FocusNodeType"/>                
-            </xs:choice>
-        </xs:sequence>
-        <xs:attribute name="xpath" type="xs:string"/>
     </xs:complexType>
 
     <!-- 
@@ -140,31 +91,82 @@ TargetSize
         <xs:attribute name="countMsg" type="xs:string"/>
         <xs:attribute name="minCountMsg" type="xs:string"/>
         <xs:attribute name="maxCountMsg" type="xs:string"/>
-        <xs:attributeGroup ref="t:LinkConstraintFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
 
     <!-- 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+S h a p e s 
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+    
+    <!-- F i l e    S h a p e -->
+    
+    <xs:complexType name="FileShapeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FileConstraintGroup"/>
+                <xs:element name="focusNode" type="t:FocusNodeType"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attribute name="id" type="xs:NCName"/>
+        <xs:attribute name="mediatype" type="xs:string"/>
+        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
+    </xs:complexType>
+    
+    <!-- F o l d e r    S h a p e -->
+    
+    <xs:complexType name="FolderShapeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FolderConstraintGroup"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attribute name="id" type="xs:NCName"/>
+    </xs:complexType>
+
+    <!-- F o c u s    N o d e -->    
+    
+    <xs:complexType name="FocusNodeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FileConstraintGroup"/>
+                <xs:element name="focusNode" type="t:FocusNodeType"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="xpath" type="xs:string"/>
+    </xs:complexType>    
+    
+    <!-- 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 C o n s t r a i n t    e l e m e n t s 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
 -->    
     
-<!-- F i l e    N a m e    C o n s t r a i n t s -->    
-    <xs:complexType name="FileNameType">
+    <!-- F i l e    N a m e    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="FileNameConstraintType">
         <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
         <xs:attributeGroup ref="t:MatchesLikeFacetAttGroup"/>
         <xs:attribute name="flags" type="t:FlagsType"/>
         <xs:attribute name="case" type="xs:boolean"/>
     </xs:complexType>
 
-    <!-- F i l e    D a t e    C o n s t r a i n t s -->    
-    <xs:complexType name="FileDateType">
+    <!-- F i l e    D a t e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FileDateConstraintType">
         <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
         <xs:attributeGroup ref="t:GtLtStringFacetAttGroup"/>
         <xs:attributeGroup ref="t:MatchesLikeFacetAttGroup"/>
@@ -172,13 +174,15 @@ C o n s t r a i n t    e l e m e n t s
     </xs:complexType>
     
     <!-- F i l e    S i z e    C o n s t r a i n t s -->    
-    <xs:complexType name="FileSizeType">
+    
+    <xs:complexType name="FileSizeConstraintType">
         <xs:attributeGroup ref="t:EqNeIntegerFacetAttGroup"/>
         <xs:attributeGroup ref="t:GtLtIntegerFacetAttGroup"/>
     </xs:complexType>
     
     <!-- M e d i a t y p e    C o n s t r a i n t s -->
-    <xs:complexType name="MediatypeType">
+    
+    <xs:complexType name="MediatypeConstraintType">
         <xs:attribute name="eq" type="t:MediatypeListType"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
         
@@ -201,7 +205,7 @@ C o n s t r a i n t    e l e m e n t s
     
     <!-- D o c T r e e    C o n s t r a i n t s -->
     
-    <xs:complexType name="DocTreeType">
+    <xs:complexType name="DocTreeConstraintType">
         <xs:sequence>
             <xs:element name="node" type="t:DocTreeNodeType" maxOccurs="unbounded"/>
         </xs:sequence>
@@ -227,6 +231,16 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="maxCountMsg" type="xs:string"/>
         <xs:attribute name="maxCountMsgOK" type="xs:string"/>
     </xs:complexType>
+    
+    <!-- L i n k    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="LinkConstraintType">
+        <xs:sequence>
+            <xs:group ref="t:LinkDefGroup" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
 
     <!-- D o c S i m i l a r    C o n s t r a i n t s -->
     
@@ -241,7 +255,7 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="docSimilarMsgOK" type="xs:string"/>
         <xs:attribute name="redReport" type="t:RedReportEnumType"/>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
-        <xs:attributeGroup ref="t:LinkConstraintFacetAttGroup"/>        
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>        
     </xs:complexType>
     
     <xs:complexType name="SkipItemType">
@@ -267,19 +281,19 @@ C o n s t r a i n t    e l e m e n t s
     
     <!-- V a l u e    C o n s t r a i n t s -->
     
-    <xs:complexType name="ValuesType">
+    <xs:complexType name="ValuesConstraintType">
         <xs:sequence>
-            <xs:element name="value" type="t:ValueType" maxOccurs="unbounded"/>
+            <xs:element name="value" type="t:ValueConstraintType" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="FoxvaluesType">
+    <xs:complexType name="FoxvaluesConstraintType">
         <xs:sequence>
-            <xs:element name="foxvalue" type="t:FoxvalueType" maxOccurs="unbounded"/>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
     
-    <xs:complexType name="ValueType">
+    <xs:complexType name="ValueConstraintType">
         <xs:complexContent>
             <xs:extension base="t:ValueBaseType">
                 <xs:attribute name="exprXP" type="xs:string"/>
@@ -287,7 +301,7 @@ C o n s t r a i n t    e l e m e n t s
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="FoxvalueType">
+    <xs:complexType name="FoxvalueConstraintType">
         <xs:complexContent>
             <xs:extension base="t:ValueBaseType">
                 <xs:attribute name="exprFOX" type="xs:string"/>
@@ -354,7 +368,7 @@ C o n s t r a i n t    e l e m e n t s
             <xs:element name="valueCompared" type="t:ValueComparedType" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
-        <xs:attributeGroup ref="t:LinkConstraintFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
     <xs:complexType name="ValueComparedType">
@@ -373,7 +387,7 @@ C o n s t r a i n t    e l e m e n t s
             <xs:element name="foxvalueCompared" type="t:FoxvalueComparedType" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
-        <xs:attributeGroup ref="t:LinkConstraintFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
     <xs:complexType name="FoxvalueComparedType">
@@ -431,6 +445,15 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attributeGroup ref="t:Count1FacetAttGroup"/>
         <xs:attributeGroup ref="t:Count2FacetAttGroup"/>
     </xs:complexType>
+
+    <!-- X s d V a l i d    C o n s t r a i n t s -->
+    
+    <xs:complexType name="XsdValidConstraintType">
+        <xs:attribute name="xsdFOX" type="xs:string"/>
+        <xs:attribute name="xsdValidMsg" type="xs:string"/>
+        <xs:attribute name="xsdValidMsgOK" type="xs:string"/>
+    </xs:complexType>
+    
     
     <!-- 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -619,51 +642,55 @@ Enumerations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Groups 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
--->    
-    
-    <!-- *** Groups *** -->    
+-->
+    <xs:group name="LinkDefGroup">
+        <xs:choice>
+            <xs:element name="templateVar" type="t:TemplateVarType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:group>
+
     <xs:group name="FolderConstraintGroup">
         <xs:choice>
-            <xs:element name="fileName" type="t:FileNameType"/>
-            <xs:element name="fileDate" type="t:FileDateType"/>
-            <xs:element name="fileSize" type="t:FileSizeType"/>
+            <xs:element name="fileName" type="t:FileNameConstraintType"/>
+            <xs:element name="fileDate" type="t:FileDateConstraintType"/>
+            <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
             <xs:element name="folderContent"/>
             <xs:element name="folderSimilar"/>
-            <xs:element name="foxvalue"/>
-            <xs:element name="foxvalues"/>
-            <xs:element name="foxvaluePairs"/>
-            <xs:element name="foxvaluesCompared"/>
-            <xs:element name="link"/>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
+            <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
+            <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
+            <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
+            <xs:element name="links" type="t:LinkConstraintType"/>
             <xs:element name="conditional"/>
         </xs:choice>
     </xs:group>
 
     <xs:group name="FileConstraintGroup">
         <xs:choice>
-            <xs:element name="fileName" type="t:FileNameType"/>
-            <xs:element name="fileDate" type="t:FileDateType"/>
-            <xs:element name="fileSize" type="t:FileSizeType"/>
-            <xs:element name="mediatype" type="t:MediatypeType"/>
-            <xs:element name="docTree" type="t:DocTreeType"/>
+            <xs:element name="fileName" type="t:FileNameConstraintType"/>
+            <xs:element name="fileDate" type="t:FileDateConstraintType"/>
+            <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
+            <xs:element name="mediatype" type="t:MediatypeConstraintType"/>
+            <xs:element name="docTree" type="t:DocTreeConstraintType"/>
             <xs:element name="docSimilar" type="t:DocSimilarType"/>
-            <xs:element name="value" type="t:ValueType"/>
-            <xs:element name="values" type="t:ValuesType"/>
+            <xs:element name="value" type="t:ValueConstraintType"/>
+            <xs:element name="values" type="t:ValuesConstraintType"/>
             <xs:element name="valuePairs" type="t:ValuePairsType"/>
             <xs:element name="valuesCompared" type="t:ValuesComparedType"/>
-            <xs:element name="foxvalue" type="t:FoxvalueType"/>
-            <xs:element name="foxvalues" type="t:FoxvaluesType"/>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
+            <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
-            <xs:element name="links"/>
-            <xs:element name="xsdValid"/>            
+            <xs:element name="links" type="t:LinkConstraintType"/>
+            <xs:element name="xsdValid" type="t:XsdValidConstraintType"/>            
             <xs:element name="conditional"/>
         </xs:choice>
     </xs:group>
     
-    <xs:group name="ResourceGroup">
+    <xs:group name="ResourceShapeGroup">
         <xs:choice>
-            <xs:element name="file" type="t:FileType"/>
-            <xs:element name="folder" type="t:FolderType"/>
+            <xs:element name="file" type="t:FileShapeType"/>
+            <xs:element name="folder" type="t:FolderShapeType"/>
         </xs:choice>
     </xs:group>
     
@@ -675,6 +702,7 @@ Attribute groups
     
     <xs:attributeGroup name="LinkDefAttGroup">
         <xs:attribute name="foxpath" type="xs:string"/>        
+        <xs:attribute name="path" type="xs:string"/>
         <xs:attribute name="contextXP" type="xs:string"/>
         <xs:attribute name="targetXP" type="xs:string"/>        
         <xs:attribute name="hrefXP" type="xs:string"/>
@@ -691,7 +719,6 @@ Attribute groups
     
     <xs:attributeGroup name="TargetDeclarationAttGroup">
         <xs:attributeGroup ref="t:LinkDefAttGroup"/>
-        <xs:attribute name="path" type="xs:string"/>
     </xs:attributeGroup>
     
     <xs:attributeGroup name="CountFacetAttGroup">
@@ -748,11 +775,17 @@ Attribute groups
         <xs:attribute name="empty2MsgOK" type="xs:string"/>        
     </xs:attributeGroup>
     
-    <xs:attributeGroup name="LinkConstraintFacetAttGroup">
+    <xs:attributeGroup name="LinkFacetAttGroup">
+        
         <!-- resolvable -->
         <xs:attribute name="resolvable" type="xs:boolean"/>    
         <xs:attribute name="resolvableMsg" type="xs:string"/>
         <xs:attribute name="resolvableMsgOK" type="xs:string"/>
+        
+        <!-- exists -->
+        <xs:attribute name="exists" type="xs:boolean"/>    
+        <xs:attribute name="existsMsg" type="xs:string"/>
+        <xs:attribute name="existsMsgOK" type="xs:string"/>
         
         <!-- countContextNodes, etc. -->
         <xs:attribute name="countContextNodes" type="xs:nonNegativeInteger"/>

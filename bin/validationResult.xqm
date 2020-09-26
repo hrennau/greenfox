@@ -337,10 +337,9 @@ declare function f:validationResult_docTree_exception(
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
-            $addAtts,
             $filePathAtt,
-            $focusNodeAtt
+            $focusNodeAtt,            
+            $addAtts
         }
 };
 
@@ -865,6 +864,8 @@ declare function f:validationResult_docSimilar_exception(
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)        
     let $constraintComp := 'DocSimilar'
     let $constraintId := $constraintElem/@id
+    let $filePathAtt := $contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $focusNodePath ! attribute focusNodePath {.}
     
     let $contextItemInfo :=
         if (empty($lro)) then ()
@@ -897,14 +898,13 @@ declare function f:validationResult_docSimilar_exception(
         
     return
         element {'gx:red'} {
-            $exception ! attribute msg {.},        
-            $contextURI ! attribute filePath {.},
-            $focusNodePath ! attribute focusNodePath {.},
-            $constraintComp ! attribute constraintComp {.},            
+            $exception ! attribute exception {.},
+            $constraintComp ! attribute constraintComp {.},
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
+            $filePathAtt,
+            $focusNodeAtt,
             $contextItemInfo,
             $targetInfo,
             $addAtts
@@ -1091,10 +1091,10 @@ declare function f:validationResult_value($colour as xs:string,
             attribute constraintComp {$constraintConfig?constraintComp},
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
-            $resourceShapeID ! attribute resourceShapeID {.},
-            
+            $resourceShapeID ! attribute resourceShapeID {.},            
             $filePath,
             $focusNode,
+            
             $standardAtts,
             $additionalAtts,
             $valueCountAtt,   
@@ -1209,16 +1209,13 @@ declare function f:validationResult_value_exception(
         element {'gx:red'} {
             attribute exception {$msg},            
             attribute constraintComp {$constraintComp},            
-            (: attribute constraintID {$constraintId}, :)
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
-            $addAtts,
             $filePathAtt,
-            $focusNodeAtt
+            $focusNodeAtt,            
+            $addAtts
         }
-       
 };
 
 
@@ -1296,43 +1293,6 @@ declare function f:validationResult_valuePair($colour as xs:string,
         }
        
 };
-
-(:~
- : Creates a validation result expressing an exceptional condition 
- : which prevents normal evaluation of a ValuePair constraint.
- : Such an exceptional condition is, for example, a failure to parse 
- . the context resource into a node.
- :
- : @param constraintElem an element declaring an ExpressionPair constraint
- : @param exception an optional message string
- : @param addAtts additional attributes 
- : @param contextInfo informs about the focus document and focus node
- : @return a red validation result
- :)
- (:
-declare function f:validationResult_valuePair_exception(
-                                            $constraintElem as element(),
-                                            $exception as xs:string?,                                                  
-                                            $addAtts as attribute()*,
-                                            $contextInfo as map(xs:string, item()*))
-        as element() {
-    let $constraintComp := 'ExpressionPair'        
-    let $constraintId := $constraintElem/@id
-    let $filePathAtt := $contextInfo?filePath ! attribute filePath {.}
-    let $focusNodeAtt := $contextInfo?nodePath ! attribute nodePath {.}
-    let $msg := $exception
-    return
-        element {'gx:red'} {
-            attribute exception {$msg},
-            attribute constraintComp {$constraintComp},
-            attribute constraintID {$constraintId},
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
-        }
-       
-};
-:)
 
 (:~
  : Creates a validation result for a ValuePair*Count constraint (ValuePairCount1,
@@ -1445,15 +1405,14 @@ declare function f:validationResult_valuePair_exception(
     
     let $msg := $exception
     return
-        element {'gx:red'} {
-            $exception ! attribute msg {.},        
-            $contextURI ! attribute filePath {.},
-            $focusNodePath ! attribute focusNodePath {.},
+        element gx:red {
+            $exception ! attribute exception {.},        
             $constraintComp ! attribute constraintComp {.},            
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
+            $filePathAtt,
+            $focusNodeAtt,            
             $addAtts
         }
 };
@@ -1523,17 +1482,15 @@ declare function f:validationResult_valueCompared_exception(
         
     return
         element {'gx:red'} {
-            $exception ! attribute msg {.},        
-            $contextURI ! attribute filePath {.},
-            $focusNodePath ! attribute focusNodePath {.},
+            $exception ! attribute exception {.},
             $constraintComp ! attribute constraintComp {.},            
             $constraintPath ! attribute constraintPath {.},            
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
+            $filePathAtt,
+            $focusNodeAtt,            
             $contextItemInfo,
-            $targetInfo,
-            
+            $targetInfo,            
             $addAtts
         }
 };
@@ -1713,13 +1670,93 @@ declare function f:validationResult_concord_exception(
             attribute exception {$msg},
             attribute constraintComp {$constraintComp},
             attribute constraintID {$constraintId},
+            $filePathAtt,
+            $focusNodeAtt,
             $contextItemInfo,
             $targetInfo,
-            $addAtts,
-            $filePathAtt,
-            $focusNodeAtt
+            $addAtts
         }
        
+};
+
+declare function f:validationResult_xsdValid($colour as xs:string,
+                                             $constraintElem as element(),
+                                             $report as element()?,
+                                             $context as map(xs:string, item()*))
+        as element() {
+    let $contextURI := $context?_targetInfo?contextURI
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem) 
+    let $constraintComponent := 'XsdValid'
+    let $xsdFOX := $constraintElem/@xsdFOX
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintElem/local-name(.))
+    return
+        element {f:resultElemName($colour)} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            attribute constraintComp {$constraintComponent},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $xsdFOX ! attribute xsdFOX {.},
+            $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
+        }       
+
+(:
+    let $elemName := 'gx:' || $colour
+    return
+        element {$elemName}{
+            $msg ! attribute msg {.},
+            attribute filePath {$contextURI},                
+            attribute constraintComponent {"XsdValid"},
+            $constraintElem/@id/attribute constraintID {.},
+            $constraintElem/@label/attribute constraintLabel {.},            
+            $constraintElem/@resourceShapeID/attribute resourceShapeID {.},                
+            $constraintElem/@xsdFoxpath,
+            if ($colour eq 'green') then ()
+            else $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
+         }
+:)
+};
+
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a DocTree constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node tree.
+ :
+ : @param constraintElem an element declaring DocTree constraints
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param context processing context
+ : @return a red validation result
+ :)
+declare function f:validationResult_xsdValid_exception(
+                                            $constraintElem as element(),
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $context as map(xs:string, item()*))
+        as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)        
+    let $targetInfo := $context?_targetInfo        
+    let $constraintComp := 'XsdValid'        
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element gx:red {
+            attribute exception {$msg},            
+            attribute constraintComp {$constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $filePathAtt,
+            $focusNodeAtt,            
+            $addAtts
+        }
 };
 
 (:~

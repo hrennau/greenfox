@@ -14,7 +14,7 @@
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>
+            <targetSize count="1" countMsg="Missing folder: airports"/>
 
             <!-- Visit: all XML airport files -->
             <file foxpath=".\\airport-*.xml" id="airportFileShape">
