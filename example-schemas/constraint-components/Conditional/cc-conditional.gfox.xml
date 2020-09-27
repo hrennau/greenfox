@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints: declares a ValuePairIn contraint.
+    
+    As the @useString option 'lc ns' is used, the comparison is applied to lower-case 
+    and whitespace-normalized copies of the values.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-lc-ns"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'constraint-Conditional' -->
+        <folder foxpath="constraint-Conditional" id="conditionalFolderShape">
+            <targetSize countMsg="Missing folder: constraint-Conditional" count="1"/>
+
+            <!-- VISIT: file 'projectDates.xml' -->
+            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesFileShape">
+                <targetSize minCount="2" minCountMsg="Missing file: projectDates.xml"/>
+
+                <conditional>
+                    <!-- Contains project YY* ? -->
+                    <if>
+                        <value exprXP="//project/@name"
+                               quant="some"
+                               like="YY*" flags="i"/>
+                    </if>
+                    <!-- Yes: department is *JU -->
+                    <then>
+                        <value exprXP="/projects/@department"
+                               like="*-JU" flags="i"
+                               likeMsg="Projects collection with YY* should have department *-JU"/>
+                    </then>
+                    <!-- No: department is not *JU -->
+                    <else>
+                        <value exprXP="/projects/@department"
+                            notLike="*-JU" flags="i"
+                            notLikeMsg="Projects collection without YY* must not have department *-JU"/>                        
+                    </else>
+                    
+                </conditional>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

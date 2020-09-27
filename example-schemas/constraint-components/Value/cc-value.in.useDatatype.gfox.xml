@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. Declares a ValueIn and a ValueMinCount constraint.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.in.useDatatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'projectDates' -->
+        <folder foxpath="projectDates" id="projectDatesFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>
+
+            <!-- VISIT: file 'projectDates.xml' -->
+            <file foxpath="projectDates.xml" id="projectDatesShape">
+                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+                
+                <!-- CHECK: project names found in whitelist -->
+                <values>
+                    <value exprXP="/projects/project/@startDate" 
+                           minCount="1" minCountMsg="At least one project expected."
+                           useDatatype="date"
+                           inMsg="Project name not whitelisted.">
+                        <in>
+                            <eq>2020-01-01</eq>
+                            <eq>2020-05-01</eq>
+                            <eq>2020-08-18</eq>                            
+                            <like>2018-*</like>
+                        </in>
+                    </value>
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

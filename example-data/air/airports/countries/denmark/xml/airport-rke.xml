@@ -1,0 +1,17 @@
+<airport id="617" iata="RKE" icao="EKRK" createdAt="2020-09-27T10:06:56.011+02:00">
+  <name>Copenhagen Roskilde Airport</name>
+  <city>Copenhagen</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>55.585601806640625</latitude>
+    <longitude>12.131400108337402</longitude>
+    <altitude>146</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

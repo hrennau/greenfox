@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":442,
+    "iata":"MHQ",
+    "icao":"EFMA",
+    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "name":"Mariehamn Airport",
+    "city":"Mariehamn",
+    "country":"Finland",
+    "geo":{
+      "latitude":60.122200012207,
+      "longitude":19.898199081421,
+      "altitude":17
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Mariehamn",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

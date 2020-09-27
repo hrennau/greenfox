@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. Declares a ValueContains constraint. 
+    
+    The expression value must contain each term from the term list in contains/term.
+    Note that the expression value may also contain other terms.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.contains.useDatatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'airports' -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>
+
+            <!-- VISIT: file 'airports-ireland.xml' -->
+            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+                <targetSize count="1" countMsg="Missing file: airports-ireland.xml.xml"/>
+                
+                <!-- CHECK: expected latitudes found -->
+                <values>
+                    <value exprXP="//@latitude"
+                           useDatatype="decimal"
+                           containsMsg="Expected latitudes missing.">
+                        <contains>
+                            <term>51.84130096435547</term>
+                            <term>53.300201416015625</term>
+                            <term>53.421299</term>
+                        </contains>
+                    </value>
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

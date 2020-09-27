@@ -47,8 +47,8 @@ declare function f:validateValueConstraint($constraintElem as element(),
     
     (: Exception - no context document :)
     if ($constraintElem/(self::gx:value, gx:value)/@exprXP and not($context?_targetInfo?doc)) then
-        result:validationResult_value_exception($constraintElem,
-            'Context resource could not be parsed', (), $context)
+        result:validationResult_value_exception($constraintElem, (),
+            'Context resource could not be parsed', (), (), $context)
     else
         
     (: Check values :)    
@@ -138,7 +138,8 @@ declare function f:validateValue($constraintElem as element(),
         f:validateValue_cmp($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),    
         f:validateValue_in($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         f:validateValue_contains($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
-        f:validateValue_eqeq($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_sameTerms($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
+        f:validateValue_deepEqual($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         f:validateValue_itemsDistinct($exprValue, $expr, $exprSpec, $exprLang, $constraintElem, $context),
         ()
     )
@@ -224,14 +225,27 @@ declare function f:validateValue_in($exprValue as item()*,
                                     $context as map(xs:string, item()*))
         as element()* {
     let $targetInfo := $context?_targetInfo        
-    let $constraints := $constraintElem/(gx:in, gx:notin)
-    return if (not($constraints)) then () else
+    let $constraintNodes := $constraintElem/(gx:in, gx:notin)
+    return if (not($constraintNodes)) then () else
     
     let $resultAdditionalAtts := ()
-    let $resultOptions := ()   
+    let $resultOptions := ()  
+    
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $useString := $constraintElem/@useString/tokenize(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
+    let $useString := $constraintElem/@useString/tokenize(.)    
+    let $exprValueConverted := i:applyUseDatatypeAndFilterErrors($exprValue, $useDatatype, $useString)
+    let $exprValueTY := $exprValueConverted?values
+    let $conversionErrors1 := $exprValueConverted?errors?item
+    let $results_conversionError1 := (
+        if (empty($conversionErrors1)) then () else
+            let $msg :=
+                concat("DATA CONVERSION ERROR - ",
+                       "some value items could not be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}
+            let $addElems := $conversionErrors1 ! <gx:value>{string(.)}</gx:value>                           
+            return result:validationResult_value_exception($constraintElem, $constraintNodes[1], $msg, $addAtts, $addElems, $context),
+            ()
+    )
     
     let $fn_matches := function($item, $itemTY, $alternatives) {
         some $alternative in $alternatives satisfies
@@ -252,23 +266,48 @@ declare function f:validateValue_in($exprValue as item()*,
     }
     let $flags := string($constraintElem/@flags)    
     let $quantifier := ($constraintElem/@quant, 'all')[1]
-    for $cmp in $constraints
+    return (
+
+    (: Results #1: conversion errors 
+       ============================= :)
+    $results_conversionError1,
+    
+    (: Results #2: constraint results, also reference value conversion errors 
+       ====================================================================== :)
+    (: Loop over constraints :)
+    for $constraintNode in $constraintNodes
     
     (: Alternatives are enhanced by typed values (if appropriate) :)
-    let $alternatives :=
-        if (empty($useDatatype)) then $cmp/*
+    let $alternativesRaw :=
+        if (empty($useDatatype)) then $constraintNode/*
         else
-            for $alternative in $cmp/*
+            for $alternative in $constraintNode/*
             return
                 typeswitch($alternative)
                 case element(gx:eq) | element(gx:ne) return
-                    element {node-name($alternative)} {
-                        $alternative/@*, attribute valueTY {$alternative/i:applyUseDatatype(., $useDatatype, $useString)},
-                        $alternative/node()
-                    }
+                    let $converted := $alternative/i:applyUseDatatype(., $useDatatype, $useString)
+                    return
+                        if ($converted instance of map(*)) then $converted else
+                        element {node-name($alternative)} {
+                            $alternative/@*, attribute valueTY {$converted},
+                            $alternative/node()
+                        }
                 default return $alternative
-    return
-        typeswitch($cmp)
+    let $alternatives := $alternativesRaw[. instance of element()]                
+    let $conversionErrors2 := $alternativesRaw[. instance of map(*)]
+    
+    let $results_conversionError2 := (
+        if (empty($conversionErrors2)) then () else
+            let $msg :=
+                concat("DATA CONVERSION ERROR - ",
+                       "some value items could not be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}
+            let $addElems := $conversionErrors2 ! <gx:value>{string(.)}</gx:value>                           
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context),
+            ()
+    )    
+    let $results_constraint :=
+        typeswitch($constraintNode)
         case element(gx:in) return
             if ($quantifier eq 'all') then            
                 let $violations := 
@@ -281,7 +320,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $violations, $exprSpec, $exprLang,
+                        $colour, $constraintElem, $constraintNode, $exprValue, $violations, $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
                 let $conforms :=
@@ -293,7 +332,7 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
+                        $colour, $constraintElem, $constraintNode, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else error()                        
         case element(gx:notin) return
@@ -308,22 +347,27 @@ declare function f:validateValue_in($exprValue as item()*,
                 let $colour := if (exists($violations)) then 'red' else 'green'
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $violations, $exprSpec, $exprLang,
+                        $colour, $constraintElem, $constraintNode, $exprValue, $violations, $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
             else if ($quantifier eq 'some') then
                 let $conforms := 
                     if (empty($useDatatype)) then
-                        some $item in $exprValue satisfies not($fn_matches($item, $cmp))
+                        some $item in $exprValue satisfies not($fn_matches($item, $constraintNode))
                     else                        
                         some $pos in 1 to count($exprValue)
                         satisfies not($fn_matches($exprValue[$pos], $exprValueTY[$pos], $alternatives))
                 let $colour := if ($conforms) then 'green' else 'red'                
                 return
                     result:validationResult_value(
-                        $colour, $constraintElem, $cmp, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
+                        $colour, $constraintElem, $constraintNode, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
                 
         default return error()
+    return (
+        $results_conversionError2,
+        $results_constraint
+    )
+    )
 };        
 
 (:~
@@ -340,41 +384,84 @@ declare function f:validateValue_contains($exprValue as item()*,
     let $constraintNode := $constraintElem/gx:contains
     let $expectedItems := $constraintElem/gx:contains/gx:term
     return if (not($expectedItems)) then () else
-
+    
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $useString := $constraintElem/@useString/tokenize(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
-    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype, $useString)
-    let $notContainedTY := $expectedItemsTY[not(. = $exprValueTY)]
-    let $colour := if (exists($notContainedTY)) then 'red' else 'green'
-    let $additionalElems :=
-        if ($colour eq 'green') then () else
-            $notContainedTY ! string() ! <gx:missingValue>{.}</gx:missingValue>
-    return
-        result:validationResult_value(
-            $colour, $constraintElem, $constraintNode, $exprValue, (), $exprSpec, $exprLang,
-            (), $additionalElems, (), $context)
+    let $useString := $constraintElem/@useString/tokenize(.)    
+    let $exprValueConverted := i:applyUseDatatypeAndFilterErrors($exprValue, $useDatatype, $useString)
+    let $expectedItemsConverted := i:applyUseDatatypeAndFilterErrors($expectedItems, $useDatatype, $useString)
+    let $exprValueTY := $exprValueConverted?values
+    let $expectedItemsTY := $expectedItemsConverted?values
+    let $conversionErrors1 := $exprValueConverted?errors?item
+    let $conversionErrors2 := $expectedItemsConverted?errors?item
+    let $results_conversionError := (
+        if (empty($conversionErrors1)) then () else
+            let $msg :=
+                concat("DATA CONVERSION ERROR - ",
+                       "some value items could not be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}
+            let $addElems := $conversionErrors1 ! <gx:value>{string(.)}</gx:value>                           
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context),
+        if (empty($conversionErrors2)) then () else
+            let $msg :=
+                concat("INVALID SCHEMA - some 'term' values from element '", $constraintNode/local-name(.), "' ",
+                       "cannot be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}                           
+            let $addElems := $conversionErrors2 ! <gx:value>{string(.)}</gx:value>
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context)
+    )
+    let $results_constraint :=    
+        let $notContainedTY := $expectedItemsTY[not(. = $exprValueTY)]
+        let $colour := if (exists($notContainedTY)) then 'red' else 'green'
+        let $additionalElems :=
+            if ($colour eq 'green') then () else
+                $notContainedTY ! string() ! <gx:missingValue>{.}</gx:missingValue>
+        return
+            result:validationResult_value(
+                $colour, $constraintElem, $constraintNode, $exprValue, (), $exprSpec, $exprLang,
+                (), $additionalElems, (), $context)
+    return ($results_conversionError, $results_constraint)                
 };        
 
 (:~
- : Validates ValueEqEq constraints.
+ : Validates ValueSameTerms constraints.
  :)
-declare function f:validateValue_eqeq($exprValue as item()*,
-                                      $expr as xs:string,
-                                      $exprSpec as item(),
-                                      $exprLang as xs:string,                                              
-                                      $constraintElem as element(),
-                                      $context as map(xs:string, item()*))
+declare function f:validateValue_sameTerms($exprValue as item()*,
+                                           $expr as xs:string,
+                                           $exprSpec as item(),
+                                           $exprLang as xs:string,                                              
+                                           $constraintElem as element(),
+                                           $context as map(xs:string, item()*))
         as element()* {
     let $targetInfo := $context?_targetInfo  
-    let $constraintNode := $constraintElem/gx:eqeq
-    let $expectedItems := $constraintElem/gx:eqeq/gx:term
+    let $constraintNode := $constraintElem/gx:sameTerms
+    let $expectedItems := $constraintElem/gx:sameTerms/gx:term
     return if (not($expectedItems)) then () else
     
     let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
-    let $useString := $constraintElem/@useString/tokenize(.)
-    let $exprValueTY := i:applyUseDatatype($exprValue, $useDatatype, $useString)
-    let $expectedItemsTY := i:applyUseDatatype($expectedItems, $useDatatype, $useString)
+    let $useString := $constraintElem/@useString/tokenize(.)    
+    let $exprValueConverted := i:applyUseDatatypeAndFilterErrors($exprValue, $useDatatype, $useString)
+    let $expectedItemsConverted := i:applyUseDatatypeAndFilterErrors($expectedItems, $useDatatype, $useString)
+    let $exprValueTY := $exprValueConverted?values
+    let $expectedItemsTY := $expectedItemsConverted?values
+    let $conversionErrors1 := $exprValueConverted?errors?item
+    let $conversionErrors2 := $expectedItemsConverted?errors?item
+    let $results_conversionError := (
+        if (empty($conversionErrors1)) then () else
+            let $msg :=
+                concat("DATA CONVERSION ERROR - ",
+                       "some value items could not be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}
+            let $addElems := $conversionErrors1 ! <gx:value>{string(.)}</gx:value>                           
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context),
+        if (empty($conversionErrors2)) then () else
+            let $msg :=
+                concat("INVALID SCHEMA - some 'term' values from element 'sameTerms' ",
+                       "cannot be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}                           
+            let $addElems := $conversionErrors2 ! <gx:value>{string(.)}</gx:value>
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context)
+    )
+    
     let $violations1 := 
         if (empty($useDatatype)) then $exprValue[not(. = $expectedItems)]
         else 
@@ -385,10 +472,107 @@ declare function f:validateValue_eqeq($exprValue as item()*,
     let $colour := if (exists(($violations1, $violations2))) then 'red' else 'green' 
     let $violations := $violations1
     let $additionalElems := $violations2 ! string(.) ! <gx:missingValue>{.}</gx:missingValue>
-    return
+    let $results_constraint :=
         result:validationResult_value(
             $colour, $constraintElem, $constraintNode, $exprValue, $violations, $exprSpec, $exprLang,
             (), $additionalElems, (), $context)
+    return (
+        $results_constraint,
+        $results_conversionError
+    )
+};        
+
+(:~
+ : Validates ValueDeepEqual constraints.
+ :)
+declare function f:validateValue_deepEqual($exprValue as item()*,
+                                           $expr as xs:string,
+                                           $exprSpec as item(),
+                                           $exprLang as xs:string,                                              
+                                           $constraintElem as element(),
+                                           $context as map(xs:string, item()*))
+        as element()* {
+    let $targetInfo := $context?_targetInfo  
+    let $constraintNode := $constraintElem/gx:deepEqual
+    let $expectedItems := $constraintElem/gx:deepEqual/gx:term/string()
+    return if (not($constraintNode)) then () else
+    
+    let $useDatatype := $constraintElem/@useDatatype/i:resolveUseDatatype(.)
+    let $useString :=
+        (: If neither useDatatype nor useString is used, the items must be converted to string :)
+        if (exists($useDatatype)) then () 
+        else
+            let $explicit := $constraintElem/@useString
+            return if (not($explicit)) then 'sv' else $explicit/tokenize(.)
+    
+    let $exprValueConverted := i:applyUseDatatypeAndFilterErrors($exprValue, $useDatatype, $useString)
+    let $expectedItemsConverted := i:applyUseDatatypeAndFilterErrors($expectedItems, $useDatatype, $useString)
+    let $exprValueTY := $exprValueConverted?values
+    let $expectedItemsTY := $expectedItemsConverted?values
+    let $conversionErrors1 := $exprValueConverted?errors?item
+    let $conversionErrors2 := $expectedItemsConverted?errors?item
+    let $results_conversionError := (
+        if (empty($conversionErrors1)) then () else
+            let $msg :=
+                concat("DATA CONVERSION ERROR - ",
+                       "some value items could not be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}
+            let $addElems := $conversionErrors1 ! <gx:value>{string(.)}</gx:value>                           
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context),
+        if (empty($conversionErrors2)) then () else
+            let $msg :=
+                concat("INVALID SCHEMA - some 'term' values from element '", $constraintNode/local-name(.), "' ",
+                       "cannot be converted to '", $useDatatype, "'.")
+            let $addAtts := attribute useDatatype {$useDatatype}                           
+            let $addElems := $conversionErrors2 ! <gx:value>{string(.)}</gx:value>
+            return result:validationResult_value_exception($constraintElem, $constraintNode, $msg, $addAtts, $addElems, $context)
+    )
+    let $results_constraint :=
+        if ($results_conversionError) then
+            let $msg := "CHECK NOT POSSIBLE - deepEqual check not possible because of datatype conversion errors"
+            return                
+                result:validationResult_value_exception($constraintElem, $constraintNode, $msg, (), (), $context)        
+        else
+        
+        (: Number of items not equal :)
+        if (count($exprValueTY) ne count($expectedItemsTY)) then
+            let $addAtts := (
+                    attribute countItems {count($exprValueTY)},
+                    attribute countDeepEqualTerms {count($expectedItemsTY)}
+            )
+            return
+                let $addAtts := attribute addInfo {'Numbers of value items and control terms different'}
+                return
+                    result:validationResult_value(
+                        'red', $constraintElem, $constraintNode, $exprValue, (), $exprSpec, $exprLang,
+                        $addAtts, $addAtts, (), $context)
+        
+        (: Deep-equal ok :)
+        else if (deep-equal($exprValueTY, $expectedItemsTY)) then 
+                result:validationResult_value(
+                    'green', $constraintElem, $constraintNode, $exprValue, (), $exprSpec, $exprLang,
+                    (), (), (), $context)
+        
+        (: Deep-equal not ok :)
+        else                
+            (: Index of first deviation :)
+            let $minIndexDeviation :=
+                min(
+                    for $pos in 1 to count($exprValueTY)
+                    where not($exprValueTY[$pos] eq $expectedItemsTY[$pos])
+                    return $pos)
+            let $violations := $exprValue[$minIndexDeviation]
+            let $addAtts := 
+                attribute valueNotEqualTo {$expectedItems[$minIndexDeviation]}
+            let $addElems := ()             
+            return
+                result:validationResult_value(
+                    'red', $constraintElem, $constraintNode, $exprValue, $violations, $exprSpec, $exprLang,
+                    $addAtts, $addElems, (), $context)
+    return (
+        $results_conversionError,
+        $results_constraint
+    )
 };        
 
 (:~

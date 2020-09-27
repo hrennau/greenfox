@@ -408,7 +408,8 @@ C o n s t r a i n t    e l e m e n t s
             <xs:element name="in" type="t:ValueComparisonsType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="notin" type="t:ValueComparisonsType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="contains" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="eqeq" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="sameTerms" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="deepEqual" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="quant" type="t:QuantEnumType"/>        
         <xs:attribute name="flags" type="t:FlagsType"/>
@@ -417,12 +418,14 @@ C o n s t r a i n t    e l e m e n t s
         
         <xs:attribute name="inMsg" type="xs:string"/>
         <xs:attribute name="inMsgOK" type="xs:string"/>
-        <xs:attribute name="eqeqMsg" type="xs:string"/>
-        <xs:attribute name="eqeqMsgOK" type="xs:string"/>        
         <xs:attribute name="notinMsg" type="xs:string"/>
         <xs:attribute name="notinMsgOK" type="xs:string"/>
         <xs:attribute name="containsMsg" type="xs:string"/>
         <xs:attribute name="containsMsgOK" type="xs:string"/>
+        <xs:attribute name="sameTermsMsg" type="xs:string"/>
+        <xs:attribute name="sameTermsMsgOK" type="xs:string"/>
+        <xs:attribute name="deepEqualMsg" type="xs:string"/>
+        <xs:attribute name="deepEqualMsgOK" type="xs:string"/>        
         
         <xs:attributeGroup ref="t:CountFacetAttGroup"/>
         <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
@@ -452,6 +455,42 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="xsdFOX" type="xs:string"/>
         <xs:attribute name="xsdValidMsg" type="xs:string"/>
         <xs:attribute name="xsdValidMsgOK" type="xs:string"/>
+    </xs:complexType>
+    
+    <!-- C o n d i t i o n a l    F i l e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ConditionalFileConstraintType">
+        <xs:sequence>
+            <xs:element name="if" type="t:ConditionalFileConstraintClauseType"/>
+            <xs:element name="then" type="t:ConditionalFileConstraintClauseType"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="elseif" type="t:ConditionalFileConstraintClauseType"/>
+                <xs:element name="then" type="t:ConditionalFileConstraintClauseType"/>                
+            </xs:sequence>
+            <xs:element name="else" type="t:ConditionalFileConstraintClauseType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ConditionalFileConstraintClauseType">
+        <xs:group ref="t:FileConstraintGroup"/>    
+    </xs:complexType>
+
+    <!-- C o n d i t i o n a l    F o l d e r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ConditionalFolderConstraintType">
+        <xs:sequence>
+            <xs:element name="if" type="t:ConditionalFolderConstraintClauseType"/>
+            <xs:element name="then" type="t:ConditionalFolderConstraintClauseType"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="elseif" type="t:ConditionalFolderConstraintClauseType"/>
+                <xs:element name="then" type="t:ConditionalFolderConstraintClauseType"/>                
+            </xs:sequence>
+            <xs:element name="else" type="t:ConditionalFolderConstraintClauseType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ConditionalFolderConstraintClauseType">
+        <xs:group ref="t:FileConstraintGroup"/>    
     </xs:complexType>
     
     
@@ -520,6 +559,7 @@ Enumerations
             <xs:enumeration value="lc"/>    
             <xs:enumeration value="uc"/>
             <xs:enumeration value="ns"/>
+            <xs:enumeration value="sv"/>
         </xs:restriction>
     </xs:simpleType>
     
@@ -579,8 +619,8 @@ Enumerations
             <xs:enumeration value="in"/>
             <xs:enumeration value="notin"/>
             <xs:enumeration value="includes"/>
-            <xs:enumeration value="inin"/>
-            <xs:enumeration value="eqeq"/>
+            <xs:enumeration value="sameTerms"/>
+            <xs:enumeration value="deepEqual"/>
         </xs:restriction>
     </xs:simpleType>
     
@@ -661,7 +701,7 @@ Groups
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
             <xs:element name="links" type="t:LinkConstraintType"/>
-            <xs:element name="conditional"/>
+            <xs:element name="conditional" type="t:ConditionalFolderConstraintType"/>
         </xs:choice>
     </xs:group>
 
@@ -683,7 +723,7 @@ Groups
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
             <xs:element name="links" type="t:LinkConstraintType"/>
             <xs:element name="xsdValid" type="t:XsdValidConstraintType"/>            
-            <xs:element name="conditional"/>
+            <xs:element name="conditional" type="t:ConditionalFileConstraintType"/>
         </xs:choice>
     </xs:group>
     

@@ -285,7 +285,7 @@ declare function f:validateValuePair($constraintElem as element(),
     (: (2.1) Function processing a single item second operand :)
     let $cmpTrue :=
         if ($constraintNode/self::element()) then ()
-        else if ($constraintNode = ('in', 'notin', 'includes', 'inin', 'eqeq')) then () else
+        else if ($constraintNode = ('in', 'notin', 'includes', 'sameTerms', 'deepEqual')) then () else
         switch($constraintNode)
         case 'eq' return function($op1, $op2) {$op1 = $op2}        
         case 'ne' return function($op1, $op2) {$op1 != $op2}        
@@ -297,7 +297,7 @@ declare function f:validateValuePair($constraintElem as element(),
 
     (: (2.2) Function processing multiple items second operand :)
     let $findViolations :=
-        if (not($constraintNode = ('in', 'notin', 'includes', 'inin', 'eqeq'))) then () else
+        if (not($constraintNode = ('in', 'notin', 'includes', 'sameTerms', 'deepEqual'))) then () else
         switch($constraintNode)
  
         case 'in' return function($items1, $items1TY, $items2, $items2TY) {
@@ -315,7 +315,7 @@ declare function f:validateValuePair($constraintElem as element(),
             where not($item2TY = $items1TY)
             return $items2[$pos]}
 
-        case 'inin' return function($items1, $items1TY, $items2, $items2TY) {
+        case 'sameTerms' return function($items1, $items1TY, $items2, $items2TY) {
             for $item1TY at $pos in $items1TY
             where not($item1TY = $items2TY)
             return $items1[$pos],
@@ -324,7 +324,7 @@ declare function f:validateValuePair($constraintElem as element(),
             return $items2[$pos]
             }
             
-        case 'eqeq' return function($items1, $items1TY, $items2, $items2TY) {
+        case 'deepEqual' return function($items1, $items1TY, $items2, $items2TY) {
             (: In case of conversion errors - do not check :)
             if (count($items1) ne count($items1TY) or 
                 count($items2) ne count($items2TY)) then ()
@@ -581,7 +581,7 @@ declare function f:validateValuePair_context2_fixed(
         (:
          : Identify items for which the correspondence check fails;
            in case of includes, these are value 2 items;
-           in case of inin and eqeq, these are value 1 and/or value 2 items
+           in case of sameTerms and deepEqual, these are value 1 and/or value 2 items
            otherwise these are value 1 items
          :) 
         let $violations :=

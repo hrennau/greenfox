@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":453,
+    "iata":"RVN",
+    "icao":"EFRO",
+    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "name":"Rovaniemi Airport",
+    "city":"Rovaniemi",
+    "country":"Finland",
+    "geo":{
+      "latitude":66.564796447754,
+      "longitude":25.830400466919,
+      "altitude":642
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":432,
+    "iata":"KEM",
+    "icao":"EFKE",
+    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "name":"Kemi-Tornio Airport",
+    "city":"Kemi",
+    "country":"Finland",
+    "geo":{
+      "latitude":65.778701782227,
+      "longitude":24.582099914551,
+      "altitude":61
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

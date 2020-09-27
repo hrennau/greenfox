@@ -650,25 +650,28 @@ declare function f:resolveUseDatatype($useDatatype as attribute(useDatatype)?)
     if (not(contains(., ':'))) then QName($i:URI_XSD, .) else resolve-QName(., ..))
 };
 
+declare function f:applyUseDatatypeAndFilterErrors($value as item()*, $useDatatype as xs:QName?, $useString as xs:string*)
+        as map(*) {
+    let $converted := f:applyUseDatatype($value, $useDatatype, $useString)
+    let $errors := if (empty($useDatatype)) then () else $converted[. instance of map(*)]
+    let $convertedValues := if (empty($useDatatype)) then $converted else $converted[not(. instance of map(*))]
+    return
+        map{'ok': empty($errors), 'values': $convertedValues, 'errors': $errors}
+};
+
 (:~
  : Casts the items of a value to a datatype. In case of an error, the item is 
- : represented by an error element.
+ : represented by a map with keys 'item', 'type' and 'errorCode'.
  :
  : @param value the value to be c
  : @param useDatatype attribute with a datatype to be used
  : @return the qualified type name
  :)
 declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?, $useString as xs:string*)
-        as item()* {
+        as item()* {            
     if (empty($useDatatype)) then 
         if (empty($useString)) then $value
         else f:applyUseString($value, $useString)
-(:        
-            let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
-            let $interm := if ($useString = 'uc') then $interm ! upper-case(.) else $interm
-            let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm
-            return $interm
-:)    
     else $value ! i:castAs(., $useDatatype)        
 };        
 
@@ -681,9 +684,10 @@ declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?
 declare function f:applyUseString($value as item()*, $useString as xs:string*)
         as item()* {
     if (empty($useString)) then $value else
-    let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
+    let $interm := if ($useString = 'sv') then $value ! string(.) else $value
+    let $interm := if ($useString = 'lc') then $interm ! lower-case(.) else $interm
     let $interm := if ($useString = 'uc') then $interm ! upper-case(.) else $interm
-    let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm
+    let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm    
     return $interm
 };        
 

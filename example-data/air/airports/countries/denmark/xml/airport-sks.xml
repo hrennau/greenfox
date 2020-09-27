@@ -1,0 +1,17 @@
+<airport id="621" iata="SKS" icao="EKSP" createdAt="2020-09-27T10:06:56.011+02:00">
+  <name>Skrydstrup Air Base</name>
+  <city>Skrydstrup</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>55.221048</latitude>
+    <longitude>9.26702</longitude>
+    <altitude>141</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

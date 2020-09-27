@@ -1,0 +1,17 @@
+<airport id="444" iata="MIK" icao="EFMI" createdAt="2020-09-27T10:06:56.011+02:00">
+  <name>Mikkeli Airport</name>
+  <city>Mikkeli</city>
+  <country>Finland</country>
+  <geo>
+    <latitude>61.6866</latitude>
+    <longitude>27.201799</longitude>
+    <altitude>329</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

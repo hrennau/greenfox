@@ -393,7 +393,14 @@ declare function f:whiteTreeToRedTreeRC($n as node(), $options as map(*))
     case document-node() return
         document {$n ! f:whiteTreeToRedTreeRC(., $options)}
     case element(gx:green) return ()        
+    case element(gx:whiteGreen) return ()
+    case element(gx:whiteYellow) return ()
+    case element(gx:whiteRed) return ()
+    
     case element(gx:greenResources) return ()
+    case element(gx:whiteGreenResources) return ()
+    case element(gx:whiteYellowResources) return ()
+    case element(gx:whiteRedResources) return ()
 
     case element(gx:yellowResources) | element(gx:redResources) return 
         if (not($n//(gx:yellow, gx:red))) then ()

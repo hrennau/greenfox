@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. Declares a ValueDeepEqual constraint.
+    
+    The expression value must be deep-equal to the terms contained by the <deepEqual> list.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.deepEqual.useDatatype"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'projectDates' -->
+        <folder foxpath="projectDates" id="projectDatesFolderShape">
+            <targetSize countMsg="Missing folder: projectDates" count="1"/>
+
+            <!-- VISIT: file 'projectDates.xml' -->
+            <file foxpath="projectDates.xml" id="projectDatesShape">
+                <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
+                
+                <!-- CHECK: project start dates deep-equal expected dates -->
+                <values>
+                    <value exprXP="/projects/project/@startDate => sort()" 
+                           minCount="1" minCountMsg="At least one project expected."  
+                           useDatatype="date"
+                           deepEqualMsg="Not the expected list of start dates">
+                        <deepEqual>
+                            <term>2018-01-01</term>
+                            <term>2020-01-01</term>                            
+                            <term>2020-05-01</term>
+                            <term>2020-08-18</term>                            
+                        </deepEqual>
+                    </value>
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

@@ -1054,7 +1054,8 @@ declare function f:validationResult_value($colour as xs:string,
         case element(gx:in) return map{'constraintComp': $ccPrefix || 'In', 'atts': ('useDatatype')}
         case element(gx:notin) return map{'constraintComp': $ccPrefix || 'Notin', 'atts': ('useDatatype')}
         case element(gx:contains) return map{'constraintComp': $ccPrefix || 'Contains', 'atts': ('useDatatype', 'quant')}
-        case element(gx:eqeq) return map{'constraintComp': $ccPrefix || 'Eqeq', 'atts': ('useDatatype', 'quant')}
+        case element(gx:sameTerms) return map{'constraintComp': $ccPrefix || 'SameTerms', 'atts': ('useDatatype', 'quant')}
+        case element(gx:deepEqual) return map{'constraintComp': $ccPrefix || 'DeepEqual', 'atts': ('useDatatype', 'quant')}        
         
         case attribute(datatype) return map{'constraintComp': $ccPrefix || 'Datatype', 'atts': ('datatype', 'useDatatype', 'quant')}
         case attribute(matches) return map{'constraintComp': $ccPrefix || 'Matches', 'atts': ('matches', 'useDatatype', 'quant')}
@@ -1192,16 +1193,21 @@ declare function f:validationResult_value_counts($colour as xs:string,
  :)
 declare function f:validationResult_value_exception(
                                             $constraintElem as element(),
+                                            $constraintNode as node()?,
                                             $exception as xs:string?,                                                  
                                             $addAtts as attribute()*,
+                                            $addElems as element()*,
                                             $context as map(xs:string, item()*))
         as element() {
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
-    let $constraintPath := i:getSchemaConstraintPath($constraintElem)        
+    let $constraintPath := i:getSchemaConstraintPath(($constraintNode, $constraintElem)[1])        
     let $targetInfo := $context?_targetInfo  
-    let $constraintComp := if ($constraintElem/self::element(gx:foxvalue)) then 'Foxvalue' else 'Value'
-    let $constraintId := $constraintElem/@id
+    let $constraintComp := 
+        if ($constraintElem/self::gx:foxvalues) then 'Foxvalue'
+        else if ($constraintElem/self::gx:values) then 'Value'
+        else $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
+             $constraintNode/i:firstCharToUpperCase(local-name(.))
     let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
     let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
     let $msg := $exception
@@ -1214,7 +1220,8 @@ declare function f:validationResult_value_exception(
             $resourceShapeID ! attribute resourceShapeID {.},
             $filePathAtt,
             $focusNodeAtt,            
-            $addAtts
+            $addAtts,
+            $addElems
         }
 };
 

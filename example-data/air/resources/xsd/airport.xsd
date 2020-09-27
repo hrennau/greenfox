@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"> 
+    <xs:element name="airport" type="airportType"/>
+    
+    <xs:complexType name="airportType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="city" type="xs:string"/>
+            <xs:element name="country" type="xs:string"/>
+            <xs:element name="geo" type="geoType"/>
+            <xs:element name="temporal" type="temporalType"/>
+            <xs:element name="type" type="xs:string"/>            
+            <xs:element name="source1" type="xs:string"/>
+        </xs:sequence>        
+        <xs:attribute name="id" type="xs:integer" use="required"/>
+        <xs:attribute name="iata" type="iataType" use="required"/>
+        <xs:attribute name="icao" type="icaoType" use="required"/>
+        <xs:attribute name="createdAt" type="xs:dateTime" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="geoType">
+        <xs:sequence>
+            <xs:element name="latitude" type="xs:decimal"/>
+            <xs:element name="longitude" type="xs:decimal"/>
+            <xs:element name="altitude" type="xs:decimal"/>
+        </xs:sequence>        
+    </xs:complexType>
+    
+    <xs:complexType name="temporalType">
+        <xs:sequence>
+            <xs:element name="timezone" type="xs:integer"/>
+            <xs:element name="tzTimezone" type="xs:string"/>
+            <xs:element name="dst" type="xs:string"/>
+        </xs:sequence>        
+    </xs:complexType>
+    
+    <xs:simpleType name="iataType">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[A-Z]{3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="icaoType">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[A-Z]{4}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+</xs:schema>
+

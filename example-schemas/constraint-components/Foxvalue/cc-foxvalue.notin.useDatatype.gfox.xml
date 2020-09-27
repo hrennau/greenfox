@@ -16,13 +16,17 @@
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        
+        <!-- VISIT: folder 'ireland' -->        
+        <folder foxpath="airports\ireland" id="airportsFolderShape">            
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            
+            <!-- CHECK: folder does not contain data using particular latitudes -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
                           useDatatype="decimal"
                           minCount="1" minCountMsg="At least one latitude expected."
-                          notInMsg="Latitude blacklisted.">
+                          notinMsg="Latitude blacklisted.">
                     <notin>
                         <eq>53.421299999</eq>
                         <eq>53.300201416015625999</eq>

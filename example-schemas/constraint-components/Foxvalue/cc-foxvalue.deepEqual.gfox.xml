@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints: declares a FoxvalueDeepEqual contraint. 
+    The expression value must be deep-equal to the sequence of string values from the
+    term list in <deepEqual>.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.deepEqual"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <!-- Default domain -->
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="greenfox-example-data">
+        
+        <!-- VISIT: folder 'airports' -->
+        <folder foxpath="airports" id="airportsFolderShape">
+            <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
+            
+            <!-- CHECK: expected combinations of folder name and airport count -->
+            <foxvalues>
+                <foxvalue exprFOX="*[is-dir()]\concat(file-name(.), ': ', count(airport-*.xml)) => sort()"
+                          deepEqualMsg="Not expected country name / count combinations">
+                    <deepEqual>
+                        <term>denmark: 17</term>
+                        <term>finland: 33</term>
+                        <term>ireland: 14</term>
+                        <term>luxembourg: 1</term>
+                    </deepEqual>
+                </foxvalue>
+            </foxvalues>            
+        </folder>
+    </domain>
+
+</greenfox>
