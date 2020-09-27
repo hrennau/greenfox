@@ -401,7 +401,7 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
 };
 
 (:~
- : Writes a validation result for constraint components FolderContentMinCount and FolderContentMaxCount.
+ : Writes a validation result for constraint components FolderContentCount/MinCountMaxCount.
  :
  : @param colour the colour of the result
  : @param constraintElem the element containing the attributes and child elements declaring the constraint
@@ -429,9 +429,7 @@ declare function f:constructError_folderContentCount($colour as xs:string,
     let $constraintComp :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
         $constraintNode/i:firstCharToUpperCase(local-name(.))    
-    let $msg := 
-        if ($colour eq 'red') then i:getErrorMsg($constraintElem, 'minCount', ())
-        else i:getOkMsg($constraintElem, 'minCount', ())
+    let $msg := i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $constraintNode/local-name(.))
     let $constraintId := $constraintElem/@id
     let $resourceShapeId := $constraintElem/@resourceShapeID
     

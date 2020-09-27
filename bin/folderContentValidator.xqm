@@ -137,7 +137,8 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
         gx:excludedMemberFolder, gx:excludedMemberFolders)
     let $resourceNames := $d/(@name, @names/tokenize(.))
     
-    (: Which members must be counted? :)
+    (: Which members must be counted?
+         Dependent on the element name it is files, folders, or both :)
     let $relevantMembers :=
         typeswitch($d)
         case element(gx:memberFile) | element(gx:memberFiles) |
@@ -148,7 +149,9 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
              return $memberFolders
         default return ($memberFiles, $memberFolders)
     
-    (: Loop over resource names :)
+    (: Loop over resource names used by member nodes:
+         count matching members and compare with constraints
+     :)
     for $resourceName in $resourceNames    
     let $regex := $nameRegexMap($resourceName)
     let $found := $relevantMembers[matches(., $regex, 'i')]
@@ -160,7 +163,7 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
              element(gx:excludedMemberFolder) | element(gx:excludedMemberFolders) |
              element(gx:excludedMember) | element(gx:excludedMembers) return
 
-            let $colour := trace( if ($count gt 0) then 'red' else 'green' , '_COLOUR')
+            let $colour := if ($count gt 0) then 'red' else 'green'
             return
                 result:constructError_folderContentCount(
                     $colour, $constraintElem, $d, $context, $resourceName, $found, (), ())

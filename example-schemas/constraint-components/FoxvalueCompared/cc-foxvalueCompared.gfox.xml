@@ -24,7 +24,7 @@
                                countTargetResources="1">                
                 <foxvalueCompared expr1FOX=".\\airport-*.xml//country" 
                                   expr2FOX=".\\airport-*.xml//country" 
-                                  cmp="inin" ininMsg="Folders should contain same airport countries."/>
+                                  cmp="sameTerms" cmpMsg="Folders should contain same airport countries."/>
             </foxvaluesCompared>
         </folder>
     </domain>

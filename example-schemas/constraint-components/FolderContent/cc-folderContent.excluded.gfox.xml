@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates use of FolderContent constraints.
+    
+    This example demonstrates the use of ExcludedMemberFile, which excludes a file or
+    files in a very explicit way (more than saying @maxCount=0).
+    
+    Similar elements are: 
+      excludedMember, excludedMembers,
+      excludedMemberFile, excludedMemberFiles,
+      excludedMemberFolder, excludedMemberFolders.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.excluded"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+    
+    <domain path="${domain}" name="greenfox-example-data">        
+        
+        <!-- VISIT: folder 'constraint-FolderContent' -->
+        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+            <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
+
+            <!-- CHECK: folder does NOT contain particular files -->
+            <folderContent>
+                <memberFile name="ONLINE.FLAG"/>                
+                <excludedMemberFile name="OFFLINE.FLAG" excludedMemberFileMsg="OFFLINE flag not allowed"/>
+                <excludedMemberFiles names="*test* *sav*" excludedMemberFilesMsg="*test* and *sav* not allowed"/>
+            </folderContent>  
+        </folder>
+    </domain>
+
+</greenfox>

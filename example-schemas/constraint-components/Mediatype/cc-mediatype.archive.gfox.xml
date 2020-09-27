@@ -6,41 +6,46 @@
     Note that there is no difference compared with checking normal file system resources - 
     dealing with archive contents is just a detail of the navigation providing the resources.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype.archive"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
+        <!-- Default domain -->
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit archive contents: folder 'constraint-Mediatype' -->
+        <!-- VISIT archive contents: folder 'constraint-Mediatype' -->
         <folder foxpath="archives\constraint-Mediatype.zip\#archive#\constraint-Mediatype" id="mediatypeFolderShape">
             <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
             
-            <!-- Visit archive contents: JSON files -->
+            <!-- VISIT archive contents: JSON files -->
             <file foxpath=".\\*.json" id="jsonFileShape">
                 <mediatype eq="json"/>
             </file>
             
-            <!-- Visit archive contents: XML files -->
+            <!-- VISIT archive contents: XML files -->
             <file foxpath=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>
             </file>
             
-            <!-- Visit archive contents: CSV files (separator: comma) -->
+            <!-- VISIT archive contents: CSV files (separator: comma) -->
             <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+                
+                <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
-                    csv.separator="comma" csv.withHeader="true"
+                    csv.separator="comma" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
                     csv.minRowCount="2" csv.maxRowCount="30"/>                
             </file>
             
-            <!-- Visit archive contents: CSV files (separator: semicolon) -->            
+            <!-- VISIT archive contents: CSV files (separator: semicolon) -->            
             <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+                
+                <!-- CHECK - file is CSV -->                
                 <mediatype eq="csv"
-                    csv.separator="semicolon" csv.withHeader="true"
+                    csv.separator="semicolon" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
                     csv.minRowCount="2" csv.maxRowCount="30"/>
             </file>

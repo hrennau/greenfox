@@ -11,30 +11,41 @@
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        
+        <!-- VISIT archive contents: folder 'constraint-FOlderContent' -->
+        <folder foxpath="archives\constraint-FolderContent.zip\#archive#\constraint-FolderContent" id="folderContentFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
-            <folderContent closed="true">
-                <memberFolder name="denmark"/>
+            <!-- Check folder contents -->
+            <!-- CHECK: folder contents -->
+            <folderContent closed="true" ignoredMembers="*.FLAG log.*">
                 <memberFolder name="ireland"/>
-                <memberFolder name="finland"/>
                 <memberFolder name="luxembourg"/>                
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
-                <memberFile name="airports-*.xml" count="4"/>
-                <memberFile name="airports-*.json" maxCount="4" minCount="1"/>
+                <memberFile name="airports-*.xml" minCount="4"/>
+                <memberFile name="airports-*.json" count="4"/>
                 <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
                 <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
             </folderContent>  
             
-            <folder foxpath="denmark">
-                <targetSize countMsg="Missing folder: denmark" count="1"/>
+            <!-- VISIT: folder 'ireland' -->
+            <folder foxpath="ireland">
+                <targetSize countMsg="Missing folder: ireland" count="1"/>
                 <folderContent closed="true">
-                    <memberFile name="airport-???.xml" minCount="17"/>
-                    <memberFile name="airport-???.json" minCount="17"/>
+                    <memberFile name="airport-???.xml" minCount="14" minCountMsg="Not the expected number of Lux XML airport files"/>
+                    <memberFile name="airport-???.json" minCount="14" minCountMsg="Not the expected number of Lux JSON airport files"/>
                 </folderContent>
             </folder>
             
+            <!-- VISIT: folder 'luxembourg' -->
+            <folder foxpath="luxembourg">
+                <targetSize countMsg="Missing folder: luxembourg" count="1"/>
+                <folderContent closed="true">
+                    <memberFile name="airport-???.xml" minCount="1" maxCount="2"/>
+                    <memberFile name="airport-???.json" minCount="1" maxCount="2"/>
+                </folderContent>
+            </folder>
         </folder>
     </domain>
 </greenfox>

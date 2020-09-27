@@ -19,22 +19,24 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: folder 'constraint-Mediatype' -->
+        <!-- VISIT: folder 'constraint-Mediatype' -->
         <folder foxpath="constraint-Mediatype" id="mediatypeFolderShape">
             <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
             
-            <!-- Visit files: JSON files -->
+            <!-- VISIT files: JSON files -->
             <file foxpath=".\\*.json" id="jsonFileShape">
                 <mediatype eq="json"/>
             </file>
             
-            <!-- Visit files: XML files -->
+            <!-- VISIT files: XML files -->
             <file foxpath=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>
             </file>
             
-            <!-- Visit files: CSV files (separator: comma) -->
+            <!-- VISIT files: CSV files (separator: comma) -->
             <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+                
+                <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
                     csv.separator="comma" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 
@@ -43,8 +45,10 @@
                     csv.minRowCountMsg="Expected at least 2 rows"/>                
             </file>
             
-            <!-- Visit files: CSV files (separator: semicolon) -->            
+            <!-- VISIT files: CSV files (separator: semicolon) -->            
             <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+                
+                <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
                     csv.separator="semicolon" csv.header="yes"
                     csv.minColumnCount="4" csv.maxColumnCount="4" 

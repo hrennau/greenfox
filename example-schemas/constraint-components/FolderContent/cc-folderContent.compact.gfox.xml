@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Same checks as in cc-folderContent.gfox.xml, but written more compactly - using plural forms
-    (memberFolders and memberFiles).
+    Demonstrates use of FolderContent constraints.
+    
+    This example shows the use of a compact notation, using plural forms (memberFolders, memberFiles, ...).
+    The plural forms have a @names attribute instead of @name; their values are whitespace separated lists of
+    names. Cardinality constraints apply to each name independently (not additively!). For example,
+    <memberFiles names="foo*.xml bar*.xml" count="4"/> means that exactly four matches of foo* and four matches
+    of bar* are expected.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.compact"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
+        <!-- Default domain -->
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
-            <targetSize countMsg="Missing folder: airports" count="1"/>
+        
+        <!-- VISIT: folder 'constraint-FolderContent' -->
+        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+            <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
 
-            <folderContent closed="true">
-                <memberFolders names="denmark ireland finland luxembourg"/>                
+            <!-- CHECK: folder contents -->
+            <folderContent closed="true" ignoredMembers="*.FLAG">
+                <memberFolders names="ireland luxembourg"/>                
                 <memberFiles names="airports.xml airports.json"/>
                 <memberFile name="airports-*.xml" count="4"/>
                 <memberFile name="airports-*.json" maxCount="4" minCount="1"/>
@@ -23,10 +32,13 @@
                 <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
             </folderContent>  
 
-            <folder foxpath="denmark">
-                <targetSize countMsg="Missing folder: denmark" count="1"/>
+            <!-- VISIT: folder 'ireland' -->
+            <folder foxpath="ireland">
+                <targetSize countMsg="Missing folder: ireland" count="1"/>
+                
+                <!-- CHECK: folder contents -->
                 <folderContent closed="true">
-                    <memberFiles names="airport-???.xml airport-???.json" minCount="17"/>
+                    <memberFiles names="airport-???.xml airport-???.json" minCount="14"/>
                 </folderContent>
             </folder>
         </folder>

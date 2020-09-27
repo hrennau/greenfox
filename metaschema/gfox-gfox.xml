@@ -297,6 +297,7 @@ return
                     elemNames="member members
                                memberFile memberFiles 
                                memberFolder memberFolders 
+                               excludedMember excludedMembers
                                excludedMemberFile excludedMemberFiles 
                                excludedMemberFolder excludedMemberFolders"
                     msg="Unexpected elements in 'folderContent' element; expected: $elemNames"
@@ -365,7 +366,7 @@ return
                 <focusNode xpath="*:excludedMemberFile, *:excludedMemberFolder">
 
                     <!-- attribute names -->
-                    <ex:allowedAtts attNames="name"
+                    <ex:allowedAtts attNames="name excludedMemberFileMsg excludedMemberFileMsgOK excludedMemberFolderMsg excludedMemberFolderMsgOK"
                         msg="Unexpected attributes in 'excludedMemberFile' or 'excludedMemberFolder' element; expected: $attNames"
                         msgOK="OK - 'excludedMemberFile' or 'excludedMemberFolder' element: no unexpected attributes"/>
 
@@ -383,7 +384,7 @@ return
                 <focusNode xpath="*:excludedMemberFiles, *:excludedMemberFolders">
 
                     <!-- attribute names -->
-                    <ex:allowedAtts attNames="names"
+                    <ex:allowedAtts attNames="names excludedMemberFilesMsg excludedMemberFilesMsgOK excludedMemberFoldersMsg excludedMemberFoldersMsgOK"
                         msg="Unexpected attributes in 'excludedMemberFiles' or 'excludedMemberFolders' element; expected: $attNames"
                         msgOK="OK - 'excludedMemberFiles' or 'excludedMemberFolders' element: no unexpected attributes"/>
 

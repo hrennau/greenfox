@@ -203,6 +203,93 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="csv.maxRowCountMsgOK" type="xs:string"/>
     </xs:complexType>
     
+    <!-- F o l d e r C o n t e n t    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FolderContentConstraintType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="memberFile" type="t:MemberFileType"/>
+                <xs:element name="memberFiles" type="t:MemberFilesType"/>
+                <xs:element name="memberFolder" type="t:MemberType"/>
+                <xs:element name="memberFolders" type="t:MembersType"/>
+                <xs:element name="member" type="t:MemberType"/>
+                <xs:element name="members" type="t:MemberType"/>
+
+                <xs:element name="excludedMemberFile" type="t:ExcludedMemberFileType"/>
+                <xs:element name="excludedMemberFiles" type="t:ExcludedMemberFilesType"/>
+                <xs:element name="excludedMemberFolder" type="t:ExcludedMemberFolderType"/>
+                <xs:element name="excludedMemberFolders" type="t:ExcludedMemberFoldersType"/>
+                <xs:element name="excludedMember" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMembers" type="t:ExcludedMembersType"/>
+                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="closed" type="xs:boolean"/>
+        <xs:attribute name="ignoredMembers" type="xs:string"/>
+    </xs:complexType>
+    
+    <xs:complexType name="MemberType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attributeGroup ref="t:CountMinMaxFacetAttGroup"/>
+    </xs:complexType>
+
+    <xs:complexType name="MembersType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attributeGroup ref="t:CountMinMaxFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="MemberFileType">
+        <xs:complexContent>
+            <xs:extension base="t:MemberType">
+                <xs:attributeGroup ref="t:HashKeyFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>        
+    </xs:complexType>
+    
+    <xs:complexType name="MemberFilesType">
+        <xs:complexContent>
+            <xs:extension base="t:MembersType">
+                <xs:attributeGroup ref="t:HashKeyFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>        
+    </xs:complexType>
+    
+    <xs:complexType name="ExcludedMemberType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="excludedMemberMsg"/>
+        <xs:attribute name="excludedMemberMsgOK"/>
+    </xs:complexType>
+
+    <xs:complexType name="ExcludedMembersType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attribute name="excludedMembersMsg"/>
+        <xs:attribute name="excludedMembersMsgOK"/>
+    </xs:complexType>
+
+    <xs:complexType name="ExcludedMemberFileType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="excludedMemberFileMsg"/>
+        <xs:attribute name="excludedMemberFileMsgOK"/>
+    </xs:complexType>
+    
+    <xs:complexType name="ExcludedMemberFilesType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attribute name="excludedMemberFilesMsg"/>
+        <xs:attribute name="excludedMemberFilesMsgOK"/>
+    </xs:complexType>
+
+    <xs:complexType name="ExcludedMemberFolderType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="excludedMemberFolderMsg"/>
+        <xs:attribute name="excludedMemberFolderMsgOK"/>
+    </xs:complexType>
+    
+    <xs:complexType name="ExcludedMemberFoldersType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attribute name="excludedMemberFoldersMsg"/>
+        <xs:attribute name="excludedMemberFoldersMsgOK"/>
+    </xs:complexType>
+    
     <!-- D o c T r e e    C o n s t r a i n t s -->
     
     <xs:complexType name="DocTreeConstraintType">
@@ -526,11 +613,43 @@ Simple types
     <xs:simpleType name="AttributeUsageListType">
         <xs:list itemType="t:AttributeUsageType"/>
     </xs:simpleType>
+    
     <xs:simpleType name="AttributeUsageType">
         <xs:restriction base="xs:string">
             <xs:pattern value="(\i\c*:)?\i\c*\??"/>
         </xs:restriction>
     </xs:simpleType>
+    
+    <xs:simpleType name="Md5ListType">
+        <xs:list itemType="t:Md5Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Md5Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]{32}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Sha1ListType">
+        <xs:list itemType="t:Sha1Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha1Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Sha256ListType">
+        <xs:list itemType="t:Sha256Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha256Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
     
     <!-- 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -694,7 +813,7 @@ Groups
             <xs:element name="fileName" type="t:FileNameConstraintType"/>
             <xs:element name="fileDate" type="t:FileDateConstraintType"/>
             <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
-            <xs:element name="folderContent"/>
+            <xs:element name="folderContent" type="t:FolderContentConstraintType"/>
             <xs:element name="folderSimilar"/>
             <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
             <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
@@ -759,6 +878,30 @@ Attribute groups
     
     <xs:attributeGroup name="TargetDeclarationAttGroup">
         <xs:attributeGroup ref="t:LinkDefAttGroup"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="HashKeyFacetAttGroup">
+        <xs:attribute name="md5" type="t:Md5ListType"/>
+        <xs:attribute name="md5Msg" type="xs:string"/>
+        <xs:attribute name="md5MsgOK" type="xs:string"/>        
+        <xs:attribute name="sha1" type="t:Sha1ListType"/>
+        <xs:attribute name="sha1Msg" type="xs:string"/>        
+        <xs:attribute name="sha1MsgOK" type="xs:string"/>        
+        <xs:attribute name="sha256" type="t:Sha256ListType"/>
+        <xs:attribute name="sha256Msg" type="xs:string"/>        
+        <xs:attribute name="sha256MsgOK" type="xs:string"/>        
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="CountMinMaxFacetAttGroup">
+        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countMsg" type="xs:string"/>
+        <xs:attribute name="countMsgOK" type="xs:string"/>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountMsg" type="xs:string"/>
+        <xs:attribute name="minCountMsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountMsg" type="xs:string"/>
+        <xs:attribute name="maxCountMsgOK" type="xs:string"/>
     </xs:attributeGroup>
     
     <xs:attributeGroup name="CountFacetAttGroup">
