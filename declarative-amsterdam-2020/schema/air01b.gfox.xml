@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Same validation as in air01.gfox.xml, but more compact notation, using plural
+    forms; the @names attribute is a whitespace-separated list of file names or
+    name patterns. 
+    
+    Note that the cardinality constraints apply to each item in the names list 
+    independently. In order to watch this logic, you might experiment and change 
+    the @maxCount value to '3'.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="Some root folder">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder"/>
+
+            <!-- CHECK: folder content -->
+            <folderContent closed="true">
+                <memberFiles names="airports.xml airports.json"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+            </folderContent>
+        </folder>
+    </domain>
+
+</greenfox>
+

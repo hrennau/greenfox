@@ -1,0 +1,17 @@
+<airport id="460" iata="TKU" icao="EFTU" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Turku Airport</name>
+  <city>Turku</city>
+  <country>Finland</country>
+  <geo>
+    <latitude>60.514099121094</latitude>
+    <longitude>22.262800216675</longitude>
+    <altitude>161</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

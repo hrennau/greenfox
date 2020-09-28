@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    We added checking of country airports files (airports-*.xml). Checks are always
+    expressed by CONSTRAINTS. Here we use VALUE CONSTRAINTS, represented by <value> 
+    elements: an XPath (@exprXP) is evaluted and the result is checked against 
+    constraints expressed by attributes (or child elemens) of the <value> element. 
+    
+    Examples for such constraints: the value items are equal (@eq) or less than (@lt) 
+    a given literal, or they match a regex (@matches). They may be required to be
+    distinct (@distinct), and there are many more constraints possible. Check out the
+    document of the Value constraint. 
+    
+    Every constraint can be associated with an "error message" (@eqMsg, @ltMsg etc.),
+    and also with a "success message" (@eqMsgOK, @ltMsgOK), not used in this example.
+    
+    Quite important are cardinality constraints (@count, @minCount, @maxCount), as 
+    without them a typo may lead to an empty result which "passes" all kinds of
+    constraints!
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="Some root folder">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder"/>
+
+            <!-- CHECK: folder content -->
+            <folderContent closed="true">
+                <memberFiles names="airports.xml airports.json"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
+                <memberFile name="*.FLAG" minCount="1"/>
+            </folderContent>
+            
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
+                
+                <!-- CHECK: file empty -->
+                <fileSize eq="0" eqMsg="FLAG file not empty"/>
+            </file>
+
+            <!-- VISIT country airports files -->
+            <file foxpath="airports-*.xml except *luxembourg*">
+                <targetSize minCount="2" minCountMsg="Too few country airport files"/>
+                
+                <values>
+                    <value exprXP="//type" 
+                           eq="airport" eqMsg="Type not 'airport'"
+                           minCount="1" minCountMsg="Missing data: type"/>
+                    <value exprXP="//altitude" 
+                           minCount="1" minCountMsg="Missing data: altitude"
+                           lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
+                    <value exprXP="//@icao" 
+                           minCount="1" minCountMsg="Missing data: ICAO code"
+                           matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                    <value exprXP="//(latitude, longitude)" 
+                           minCount="1" minCountMsg="Missing data: latitude, longitude"
+                           datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
+                    <value exprXP="//airport/@id" 
+                           minCount="1" minCountMsg="Missing data: ID"
+                           distinct="true"/>                        
+                </values>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

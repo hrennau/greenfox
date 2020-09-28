@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":604,
+    "iata":"SXL",
+    "icao":"EISG",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Sligo Airport",
+    "city":"Sligo",
+    "country":"Ireland",
+    "geo":{
+      "latitude":54.280200958252,
+      "longitude":-8.5992097854614,
+      "altitude":11
+    },
+    "temporal":{
+      "timezone":0,
+      "tzTimezone":"Europe\/Dublin",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

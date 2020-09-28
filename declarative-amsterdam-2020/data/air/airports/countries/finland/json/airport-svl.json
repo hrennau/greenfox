@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":455,
+    "iata":"SVL",
+    "icao":"EFSA",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Savonlinna Airport",
+    "city":"Savonlinna",
+    "country":"Finland",
+    "geo":{
+      "latitude":61.943099975586,
+      "longitude":28.945100784302,
+      "altitude":311
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

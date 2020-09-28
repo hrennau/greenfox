@@ -1,0 +1,17 @@
+<airport id="462" iata="VAA" icao="EFVA" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Vaasa Airport</name>
+  <city>Vaasa</city>
+  <country>Finland</country>
+  <geo>
+    <latitude>63.050701141357</latitude>
+    <longitude>21.762199401855</longitude>
+    <altitude>19</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

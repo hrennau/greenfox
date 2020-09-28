@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":628,
+    "iata":"AAL",
+    "icao":"EKYT",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Aalborg Airport",
+    "city":"Aalborg",
+    "country":"Denmark",
+    "geo":{
+      "latitude":57.0927589138,
+      "longitude":9.84924316406,
+      "altitude":10
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":5579,
+    "iata":"CNL",
+    "icao":"EKSN",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Sindal Airport",
+    "city":"Sindal",
+    "country":"Denmark",
+    "geo":{
+      "latitude":57.503502,
+      "longitude":10.2294,
+      "altitude":92
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"N"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Our first Greenfox schema. It visits a single resource - the airports index
+    folder, and it checks its contents, using a FolderContent constraint.
+    
+    Launch validation with a command like this:
+       gfox /path/to/air01.xml
+    You may want to experiment with it, slightly change the details -
+    e.g. changing file names or adding more file names - and observe the effect.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="Some root folder">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder"/>
+
+            <!-- CHECK: folder content -->
+            <folderContent closed="true">
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="100"/>
+                <memberFile name="airports-*.json" maxCount="100"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+            </folderContent>
+        </folder>
+    </domain>
+
+</greenfox>
+

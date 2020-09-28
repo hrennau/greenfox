@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":463,
+    "iata":"VRK",
+    "icao":"EFVR",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Varkaus Airport",
+    "city":"Varkaus",
+    "country":"Finland",
+    "geo":{
+      "latitude":62.171100616455,
+      "longitude":27.868600845337,
+      "altitude":286
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

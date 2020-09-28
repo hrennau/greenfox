@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":618,
+    "iata":"RNN",
+    "icao":"EKRN",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Bornholm Airport",
+    "city":"Ronne",
+    "country":"Denmark",
+    "geo":{
+      "latitude":55.06330108642578,
+      "longitude":14.759599685668945,
+      "altitude":52
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}
