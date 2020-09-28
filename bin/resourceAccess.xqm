@@ -225,8 +225,8 @@ declare function f:pathToUriCompatible($path as xs:string)
 declare function f:pathToAbsolutePath($path as xs:string)
         as xs:string {
     let $path :=
-        if (matches($path, '^file:/+')) then replace($path, '^file:/+', '')
-        else $path
+        if (matches($path, '^file:/+[a-zA-Z]:')) then replace($path, '^file:/+', '')
+        else replace($path, '^file:/*(/([^/].*)?)$', '$1')
         
     let $prelim :=    
         let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
