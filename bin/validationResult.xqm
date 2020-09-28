@@ -320,15 +320,13 @@ declare function f:validationResult_docTree_exception(
                                             $addAtts as attribute()*,
                                             $context as map(xs:string, item()*))
         as element() {
+    let $targetInfo := $context?_targetInfo
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
     let $constraintPath := i:getSchemaConstraintPath($constraintElem)
-        
-    let $targetInfo := $context?_targetInfo        
     let $constraintComp := 'DocTree'        
-    let $constraintId := $constraintElem/@id
-    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
-    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
     let $msg := $exception
     return
         element gx:red {
@@ -371,15 +369,14 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
                                                       $additionalElems as element()*                                                    
                                                      ) 
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath    
     let $resourceShapeId := $constraintElem/@resourceShapeID        
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-
     let $constraintComp := 'FolderContentClosed'
-    let $elemName := 'gx:' || $colour
-    let $msg := 
-        if ($colour eq 'red') then i:getErrorMsg($constraintElem, 'closed', 'Unexpected folder contents.')
-        else i:getOkMsg($constraintElem, 'closed', ())
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     
     let $valueElems :=
         for $path in $paths
@@ -388,12 +385,14 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
             <gx:value resoureKind="{$kind}">{$path}</gx:value>
     
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComp},
             $constraintPath ! attribute constraintPath {.},
             $resourceShapePath ! attribute resourceShapePath {.},
-            attribute resourceShapeID {$resourceShapeId},            
+            attribute resourceShapeID {$resourceShapeId},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
             $additionalAtts,
             $additionalElems,
             $valueElems
@@ -405,7 +404,9 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
  :
  : @param colour the colour of the result
  : @param constraintElem the element containing the attributes and child elements declaring the constraint
- : @param constraint attribute representing the maximum or minimum count allowed
+ : @param constraintNode attribute representing the maximum or minimum count allowed
+ : @param constraintCompName an explicit name of the constraint component, userd when the
+ :   name cannot be derived from the local names of $constraintElem and $constraintNode 
  : @param resourceName the resource name or name pattern used by the constraint declaration
  : @param paths the file paths of resources matching the name or name pattern 
  : @param additionalAtts additional attributes to be included in the result
@@ -415,23 +416,28 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
 declare function f:constructError_folderContentCount($colour as xs:string,
                                                      $constraintElem as element(),
                                                      $constraintNode as node(),
-                                                     $context as map(xs:string, item()*),                                                     
+                                                     $constraintCompName as xs:string?,                                                     
                                                      $resourceName as xs:string,
                                                      $paths as xs:string*,
                                                      $additionalAtts as attribute()*,
-                                                     $additionalElems as element()*                                                    
+                                                     $additionalElems as element()*,
+                                                     $context as map(xs:string, item()*)
                                                      ) 
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath    
+    let $resourceShapeId := $constraintElem/@resourceShapeID        
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-    
-    let $elemName := 'gx:' || $colour        
-    let $constraintComp :=
-        $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
-        $constraintNode/i:firstCharToUpperCase(local-name(.))    
+    let $constraintComp := 'FolderContentClosed'
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    let $constraintComp := (
+          $constraintCompName,
+            $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+            $constraintNode/i:firstCharToUpperCase(local-name(.))
+          )[1]    
     let $msg := i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $constraintNode/local-name(.))
-    let $constraintId := $constraintElem/@id
-    let $resourceShapeId := $constraintElem/@resourceShapeID
     
     let $valueElems :=
         for $path in $paths
@@ -441,13 +447,15 @@ declare function f:constructError_folderContentCount($colour as xs:string,
     let $actCount := count($paths)            
     
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {$msg},
             attribute constraintComp {$constraintComp},
             (: attribute constraintID {$constraintId}, :)
             $constraintPath ! attribute constraintPath {.},
             $resourceShapePath ! attribute resourceShapePath {.},
-            attribute resourceShapeID {$resourceShapeId},    
+            attribute resourceShapeID {$resourceShapeId},
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
             attribute resourceName {$resourceName},
             $constraintNode[self::attribute()],
             attribute actCount {$actCount},
@@ -483,26 +491,34 @@ declare function f:constructError_folderContentHash($colour as xs:string,
                                                     $additionalElems as element()*                                                    
                                                     ) 
         as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath    
     let $resourceShapeId := $constraintElem/@resourceShapeID        
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-
-    let $elemName := 'gx:' || $colour
+    let $constraintComp := 'FolderContentClosed'
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    let $constraintComp :=
+          $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+          $constraintNode/i:firstCharToUpperCase(local-name(.))    
+    let $msg := i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $constraintNode/local-name(.))
     let $constraintComp :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
         $constraintNode/i:firstCharToUpperCase(local-name(.))
-    let $constraintId := $constraintElem/@id
-    let $resourceShapeId := $constraintElem/@resourceShapeID
     let $hashKind := $constraintNode/local-name(.)
     let $actValueAtt := attribute {concat($hashKind, 'Found')} {$foundHashKeys} [$colour eq 'red']
-    let $msg := 
+    let $msg := i:getResultMsg($colour, ($constraintNode/.., $constraintNode/../..), $hashKind,
+                    concat('Expected ', $hashKind, ' value found.'), (),
+                    concat('Not expected  ', $hashKind, ' value.'))
+                    (:
         if ($colour eq 'green') then 
             i:getOkMsg(($constraintNode/.., $constraintNode/../..), $hashKind, concat('Expected ', $hashKind, ' value found.'))
         else
             i:getErrorMsg(($constraintNode/.., $constraintNode/../..), $hashKind, concat('Not expected  ', $hashKind, ' value.'))
-            
+            :)
     return
-        element {$elemName} {
+        element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintComp},
             $constraintPath ! attribute constraintPath {.},

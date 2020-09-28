@@ -165,8 +165,8 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
 
             let $colour := if ($count gt 0) then 'red' else 'green'
             return
-                result:constructError_folderContentCount(
-                    $colour, $constraintElem, $d, $context, $resourceName, $found, (), ())
+                result:constructError_folderContentCount($colour, $constraintElem, $d, 
+                    'FolderContentExcluded', $resourceName, $found, (), (), $context)
                     
         (: cardinality constraints :)            
         default return    
@@ -185,15 +185,16 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                 let $colour := if ($fn_check($att, $count)) then 'green' else 'red'
                 return
                     result:constructError_folderContentCount(
-                        $colour, $constraintElem, $att, $context, $resourceName, $found, (), ())
+                        $colour, $constraintElem, $att, (), $resourceName, $found, (), (), $context)
                         
             (: implicit constraints :)                        
             else
                 let $colour := if ($count eq 1) then 'green' else 'red'
-                return
-                    result:constructError_folderContentCount(
-                        $colour, $constraintElem, $d, $context, $resourceName, $found, 
-                            attribute implicitCount {1}, ())
+                return trace(
+                    result:constructError_folderContentCount($colour, $constraintElem, $d, 
+                        'FolderContentCount', $resourceName, $found, 
+                        attribute implicitCount {1}, (), $context) 
+                        , '___IMPLICIT_COUNT_RESULT: ')
 };
 
 (:~

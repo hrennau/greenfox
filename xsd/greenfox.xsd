@@ -812,7 +812,6 @@ Groups
         <xs:choice>
             <xs:element name="fileName" type="t:FileNameConstraintType"/>
             <xs:element name="fileDate" type="t:FileDateConstraintType"/>
-            <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
             <xs:element name="folderContent" type="t:FolderContentConstraintType"/>
             <xs:element name="folderSimilar"/>
             <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
