@@ -7,6 +7,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
+        <!-- Default domain -->
         <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
     </context>
 
@@ -15,15 +16,15 @@
 
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: docSimilar folder -->
+        <!-- VISIT: docSimilar folder -->
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
-            <!-- Check: folder 'airports-copy' is similar -->
+            <!-- CHECK: folder 'airports-copy' is similar -->
             <folderSimilar linkName="copyFolder"
                            folderSimilarMsg="Copy folder not similar"
                            countTargetResources="1" 
-                           countTargetResourcesMsg="Missing folder, airports-copy">>
+                           countTargetResourcesMsg="Missing folder, airports-copy">
                 <skipFiles names="*.sav.*"/>
                 <skipFiles names="airports-ireland.xml" where="here"/>
                 <skipFiles names="airports-ireland.updated.xml" where="there"/>

@@ -26,11 +26,11 @@
     
     <domain path="${domain}" name="greenfox-example-data">
         
-        <!-- Visit: airports folder -->
+        <!-- VISIT: airports folder -->
         <folder foxpath="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
-            <!-- Check: folder 'airports-copy' is similar -->
+            <!-- CHECK: folder 'airports-copy' is similar -->
             <folderSimilar foxpath="..\airports-copy"
                 folderSimilarMsg="Copy folder not similar"
                 countTargetResources="1" 

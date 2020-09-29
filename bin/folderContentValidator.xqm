@@ -190,11 +190,10 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
             (: implicit constraints :)                        
             else
                 let $colour := if ($count eq 1) then 'green' else 'red'
-                return trace(
+                return
                     result:constructError_folderContentCount($colour, $constraintElem, $d, 
                         'FolderContentCount', $resourceName, $found, 
                         attribute implicitCount {1}, (), $context) 
-                        , '___IMPLICIT_COUNT_RESULT: ')
 };
 
 (:~
