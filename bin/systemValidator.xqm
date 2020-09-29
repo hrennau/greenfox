@@ -72,7 +72,13 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
 declare function f:validateDomain($gxDomain as element(gx:domain), 
                                   $context as map(xs:string, item()*))
         as element()* {
-    let $domainPath := $gxDomain/@path ! i:pathToAbsolutePath(.)
+    let $dpath := $gxDomain/@path
+    let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
+    return
+        if (not($domainPath)) then
+            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $dpath))
+        else
+                
     let $domainURI := $domainPath ! i:pathToUriCompatible(.)
     let $domainName := $gxDomain/@name/string()
     

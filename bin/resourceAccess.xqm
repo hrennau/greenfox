@@ -205,7 +205,8 @@ declare function f:fox-resource-is-dir($uri as xs:string)
 };
 
 (:~
- : URI compatible means that only forward slahes are used.
+ : Replaces backward slash with forward slash and removes trailing
+ : slash or backward slah.
  :
  : @param path the path to be edited
  : @return URI compatible copy of the path

@@ -185,8 +185,15 @@ declare function f:externalContext($params as xs:string?,
         if (map:contains($prelim, 'schemaPath')) then $prelim
         else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim
         else 
-            let $schemaLocation := $gfox/base-uri(.) ! i:pathToAbsolutePath(.)
-            return map:put($prelim, 'schemaPath', $schemaLocation)
+            let $schemaLocation := $gfox/base-uri(.)            
+            let $schemaLocationAbs := 
+                try {$schemaLocation ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
+                catch * {()} 
+            return 
+                if ($schemaLocationAbs) then
+                    map:put($prelim, 'schemaPath', $schemaLocationAbs)                
+                else
+                    error(QName((), 'INVALID_ARG'), concat('Invalid schema path: ', $schemaLocation))                    
 
     (: Add or edit 'domain' entry;
        normalization: absolute path, using back slashes :)
@@ -200,7 +207,8 @@ declare function f:externalContext($params as xs:string?,
             else
                 (: Add 'domain' entry, value from call parameter 'domain' :)
                 let $domainAbs := 
-                    try {$domain ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
+                    try {$domain ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
+                    catch * {()} 
                 return
                     if ($domainAbs) then 
                         map:put($prelim2, 'domain', $domainAbs)
@@ -214,7 +222,8 @@ declare function f:externalContext($params as xs:string?,
             return           
                 if ($domainFromNvpair) then
                     let $domainFromNvPairAbs := 
-                        try {$domainFromNvpair ! i:pathToAbsoluteFoxpath(.)} catch * {()}
+                        try {$domainFromNvpair ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
+                        catch * {()}
                     return
                         if ($domainFromNvPairAbs) then 
                             map:put($prelim2, 'domain', $domainFromNvPairAbs)
