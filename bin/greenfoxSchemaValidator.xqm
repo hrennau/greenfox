@@ -155,7 +155,7 @@ declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
     let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, 'gfox=' || $paramGfox, ())
     let $metaGfox := $metaGfoxAndContext[. instance of element()]
     let $metaContext := $metaGfoxAndContext[. instance of map(*)]
-    let $metaReportType := 'redTree'
+    let $metaReportType := 'red'
     let $metaReportFormat := 'xml'
     let $metaReportOptions := map{}
     let $metaReport := i:validateSystem($metaGfox, $metaContext, $metaReportType, $metaReportFormat, $metaReportOptions)   

@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-09-22T22:43:45.404+02:00 
+ : @version 2020-09-29T20:02:52.094+02:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -97,13 +97,13 @@ declare variable $toolScheme :=
       <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
       <param name="domain" type="xs:string?"/>
       <param name="params" type="xs:string?"/>
-      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, sum1, sum2, sum3, std" default="redTree"/>
+      <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, red, white, wresults, rresults, std" default="sum2"/>
       <param name="format" type="xs:string?" default="xml"/>
       <pgroup name="input" minOccurs="1"/>
     </operation>
     <operation name="merge" type="element()" func="mergeOp" mod="validationReportMerger.xqm" namespace="http://www.greenfox.org/ns/xquery-functions">
       <param name="gfox" type="docFOX" fct_minDocCount="1" sep="WS"/>
-      <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
+      <param name="reportType" type="xs:string?" fct_values="white, red, wresults, rresults, std" default="red"/>
     </operation>
     <operation name="_help" func="_help" mod="tt/_help.xqm">
       <param name="default" type="xs:boolean" default="false"/>

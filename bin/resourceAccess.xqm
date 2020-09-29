@@ -204,7 +204,12 @@ declare function f:fox-resource-is-dir($uri as xs:string)
     return tt:fox-is-dir($uri, $foxpathOptions)
 };
 
-
+(:~
+ : URI compatible means that only forward slahes are used.
+ :
+ : @param path the path to be edited
+ : @return URI compatible copy of the path
+ :)
 declare function f:pathToUriCompatible($path as xs:string)
         as xs:string {
     $path ! replace(., '\\', '/') ! replace(., '/$', '')        

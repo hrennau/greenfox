@@ -127,9 +127,10 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
         return
             if ($name eq 'domain') then 
                 try {
-                    let $apath := i:pathToAbsolutePath($raw)
+                    let $apath := i:pathToAbsoluteFoxpath($raw)
                     let $path := $apath ! i:normalizeAbsolutePath(.)
-                    return trace( $path , '___DOMAIN_PATH: ')
+                    (: let $_DEBUG := trace($path, '___DOMAIN_PATH: ') :)
+                    return $path
                 }
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
@@ -198,14 +199,27 @@ declare function f:externalContext($params as xs:string?,
                            "parameter 'params' with a 'domain' entry; aborted.'"))
             else
                 (: Add 'domain' entry, value from call parameter 'domain' :)
-                $domain ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
+                let $domainAbs := 
+                    try {$domain ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
+                return
+                    if ($domainAbs) then 
+                        map:put($prelim2, 'domain', $domainAbs)
+                    else 
+                        error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $domain))
+                        
         (: Without domain parameter :)                
         else  
             (: If domain name-value pair: edit value (making path absolute) :)        
             let $domainFromNvpair := map:get($prelim2, 'domain')
             return           
                 if ($domainFromNvpair) then
-                    $domainFromNvpair ! i:pathToAbsolutePath(.) ! map:put($prelim2, 'domain', .)
+                    let $domainFromNvPairAbs := 
+                        try {$domainFromNvpair ! i:pathToAbsoluteFoxpath(.)} catch * {()}
+                    return
+                        if ($domainFromNvPairAbs) then 
+                            map:put($prelim2, 'domain', $domainFromNvPairAbs)
+                        else 
+                            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $domain))
                 else $prelim2
     return
         $prelim3
