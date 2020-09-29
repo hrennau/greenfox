@@ -126,7 +126,11 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
         let $raw := f:substituteVars($value, $substitutionContext, ())
         return
             if ($name eq 'domain') then 
-                try {i:pathToAbsolutePath($raw)}
+                try {
+                    let $apath := i:pathToAbsolutePath($raw)
+                    let $path := $apath ! i:normalizeAbsolutePath(.)
+                    return trace( $path , '___DOMAIN_PATH: ')
+                }
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
                         concat("### INVALID SCHEMA - context variable 'domain' not a valid path, please correct and retry;&#xA;### value: ", $raw))}

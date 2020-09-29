@@ -210,6 +210,11 @@ declare function f:pathToUriCompatible($path as xs:string)
     $path ! replace(., '\\', '/') ! replace(., '/$', '')        
 }; 
 
+declare function f:pathToAbsoluteFoxpath($path as xs:string)
+        as xs:string {
+    f:pathToAbsolutePath($path) ! replace(., '/', '\\')
+};
+
 (:~
  : Resolves a path to an absolute path, assuming that the context
  : is the file system.
@@ -224,34 +229,43 @@ declare function f:pathToUriCompatible($path as xs:string)
  :)
 declare function f:pathToAbsolutePath($path as xs:string)
         as xs:string {
+    (: Remove leading 'file:/+' :)
     let $path :=
         if (matches($path, '^file:/+[a-zA-Z]:')) then replace($path, '^file:/+', '')
         else replace($path, '^file:/*(/([^/].*)?)$', '$1')
         
-    let $prelim :=    
+    let $pathRaw :=  
+        (: Path leading to the archive which will be entered :)
         let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
         return
-            (: URI is an archive URI :)
+            (: Case 1: URI is an archive URI
+                       => deliver a Foxpath, which means: use only backslash :)
             if ($archiveFilePath) then
                 let $archiveContentPath := 
                     substring($path, string-length($archiveFilePath) + 1)
-                    ! replace(., '/', '\\')
+                    ! replace(., '/', '\\') 
                 return
                     f:pathToAbsolutePath($archiveFilePath) || $archiveContentPath 
+                    ! replace(., '/', '\\')
+                    
             else
                 let $uriSchema := replace($path, '^(\i\c+:/+).*', '$1')[. ne $path]
                 return
+                    (: Case 2: Non-file URI schema 
+                               => deliver a Foxpath, which means: use only backslash :)
                     if ($uriSchema) then 
-                        let $uriPath := substring($path, 1 + string-length($uriSchema)) 
-                                        ! replace(., '/', '\\')
+                        let $uriPath := 
+                            substring($path, 1 + string-length($uriSchema)) 
+                            ! replace(., '/', '\\') (: Not file URI: deliver Foxpath, therefore: backslash :)
                         return
                             $uriSchema || $uriPath
+                    (: Case 3: URI is a file URI or path
+                               => use native separator :)
                     else
-                        $path 
-                        ! file:path-to-native(.) 
-                        ! replace(., '/', '\\')
+                        $path ! file:path-to-native(.) 
+                        (: ! replace(., '/', '\\') :)
     return 
-        $prelim ! replace(., '\\$', '')    
+        $pathRaw ! replace(., '[/\\]$', '')    
 }; 
 
 

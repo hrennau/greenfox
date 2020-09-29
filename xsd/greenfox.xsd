@@ -290,6 +290,26 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="excludedMemberFoldersMsgOK"/>
     </xs:complexType>
     
+    <!-- F o l d e r S i m i l a r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FolderSimilarConstraintType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="skipFiles" type="t:SkipMembersType"/>
+                <xs:element name="skipFolders" type="t:SkipMembersType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="folderSimilarMsg" type="xs:string"/>
+        <xs:attribute name="folderSimilarMsgOK" type="xs:string"/>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="SkipMembersType">
+        <xs:attribute name="names" type="xs:string" use="required"/>
+        <xs:attribute name="where" type="t:HereThereEnumType"/>
+    </xs:complexType>
+    
     <!-- D o c T r e e    C o n s t r a i n t s -->
     
     <xs:complexType name="DocTreeConstraintType">
@@ -689,6 +709,12 @@ Enumerations
         </xs:restriction>
     </xs:simpleType>
     
+    <xs:simpleType name="HereThereEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="here"/>
+            <xs:enumeration value="there"/>
+        </xs:restriction>
+    </xs:simpleType>
     
     <xs:simpleType name="ItemKindEnumType">
         <xs:restriction base="xs:token">
@@ -813,7 +839,7 @@ Groups
             <xs:element name="fileName" type="t:FileNameConstraintType"/>
             <xs:element name="fileDate" type="t:FileDateConstraintType"/>
             <xs:element name="folderContent" type="t:FolderContentConstraintType"/>
-            <xs:element name="folderSimilar"/>
+            <xs:element name="folderSimilar" type="t:FolderSimilarConstraintType"/>
             <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
             <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
