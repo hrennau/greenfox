@@ -12,7 +12,7 @@
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="domain" type="xs:string?"/>
          <param name="params" type="xs:string?"/>
-         <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, sum1, sum2, sum3, std" default="redTree"/>
+         <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, red, white, wresults, rresults, std" default="sum2"/>
          <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>
@@ -119,7 +119,7 @@ declare function f:xsdValidateSchema($gfox as element())
     let $greenfoxXsd := (resolve-uri('') || '/../../xsd/greenfox.xsd')
                         ! file:path-to-native(.)
                         ! f:normalizeAbsolutePath(.)
-    let $_DEBUG := trace($greenfoxXsd, '___GREENFOX_XSD: ')
+    (: let $_DEBUG := trace($greenfoxXsd, '___GREENFOX_XSD: '):)
     let $gfoxSourceURI := $gfox/root()/document-uri(.)
     let $report := validate:xsd-report($gfoxSourceURI, $greenfoxXsd)
     return 

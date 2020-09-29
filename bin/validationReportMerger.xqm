@@ -10,7 +10,7 @@
    <operations>
       <operation name="merge" type="element()" func="mergeOp">     
          <param name="gfox" type="docFOX" fct_minDocCount="1" sep="WS"/>
-         <param name="reportType" type="xs:string?" fct_values="white, red, whiteTree, redTree, std" default="redTree"/>
+         <param name="reportType" type="xs:string?" fct_values="white, red, wresults, rresults, std" default="red"/>
       </operation>
     </operations>  
 :)  

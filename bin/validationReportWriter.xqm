@@ -41,19 +41,19 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
                                          $context as map(xs:string, item()*))
         as item()* {
     switch($reportType)
-    case "white" return f:writeValidationReport_raw($reportType, $gfox, $domain, $context, $results, $format, $options)
-    case "red" return f:writeValidationReport_raw($reportType, $gfox, $domain, $context, $results, $format, $options)
-    case "whiteTree" return f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, $reportType, $format, $options)
-    case "redTree" return f:writeValidationReport_redTree($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "wresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
+    case "rresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
+    case "white" return f:writeValidationReport_white($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "red" return f:writeValidationReport_red($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum1" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum2" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum3" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)    
-    case "std" return f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, $reportType, $format, $options)    
+    case "std" return f:writeValidationReport_wresults($gfox, $domain, $context, $results, $reportType, $format, $options)    
     default return error(QName((), 'INVALID_ARG'), concat('Unexpected validation report type: ', "'", $reportType, "'",
-        '; value must be one of: raw, whiteTree, redTree.'))
+        '; value must be one of: sum1, sum2, sum3, red, white, rresults, wresults.'))
 };
 
-declare function f:writeValidationReport_raw(
+declare function f:writeValidationReport_wresults(
                                         $reportType as xs:string,
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
@@ -91,7 +91,7 @@ declare function f:writeValidationReport_raw(
         $report/f:finalizeReport(.)
 };
 
-declare function f:writeValidationReport_whiteTree(
+declare function f:writeValidationReport_white(
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
                                         $context as map(xs:string, item()*),                                        
@@ -188,15 +188,15 @@ declare function f:writeValidationReport_whiteTree(
                              reportMediatype="application/xml">{
             <gx:redResources>{
                 attribute count {count($redResources)},
-                $redResources
+                f:displayResultResults($redResources)
             }</gx:redResources>,
             <gx:yellowResources>{
-                attribute count {count($redResources)},
-                $yellowResources
+                attribute count {count($yellowResources)},
+                f:displayResultResults($yellowResources)
             }</gx:yellowResources>,
             <gx:greenResources>{
                 attribute count {count($greenResources)},
-                $greenResources
+                f:displayResultResults($greenResources)
             }</gx:greenResources>
         }</gx:validationReport>
     return
@@ -204,10 +204,10 @@ declare function f:writeValidationReport_whiteTree(
 };
 
 (:~
- : Writes a 'redTree' report.
+ : Writes a 'red' report.
  :
  :)
-declare function f:writeValidationReport_redTree(
+declare function f:writeValidationReport_red(
                                         $gfox as element(gx:greenfox)+,
                                         $domain as element(gx:domain),                                        
                                         $context as map(xs:string, item()*),                                        
@@ -217,9 +217,9 @@ declare function f:writeValidationReport_redTree(
                                         $options as map(*))
         as element() {
     let $options := map{}
-    let $whiteTree := f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, 'redTree', 'xml', $options)        
-    let $redTree := f:whiteTreeToRedTree($whiteTree, $options)
-    return $redTree
+    let $white := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)        
+    let $red := f:whiteToRed($white, $options)
+    return $red
 };
 
 (:~
@@ -236,7 +236,7 @@ declare function f:writeValidationReport_constraintCompStat(
                                         $options as map(*))
         as element() {
     let $options := map{}
-    let $whiteTree := f:writeValidationReport_whiteTree($gfox, $domain, $context, $results, 'redTree', 'xml', $options)
+    let $whiteTree := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)
 
     let $fn_listResources := function($resources) {
         for $r in $resources
@@ -287,7 +287,7 @@ declare function f:writeValidationReport_sum(
                                         $options as map(*))
         as item() {
     let $options := map{}
-    let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'redTree', 'xml', $options)
+    let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'red', 'xml', $options)
     let $ccomps := $ccstat/*
     
     let $countRed := $ccstat/@countRed/xs:integer(.)
@@ -368,30 +368,30 @@ declare function f:writeValidationReport_sum(
 };    
 
 (:~
- : Transforms a 'whiteTree' tree report into a 'redTree' report.
+ : Transforms a 'white' report into a 'red' report.
  :
- : @param whiteTree a 'whiteTree' report
+ : @param whiteTree a 'white' report
  : @param options options controlling the report
- : @return the 'redTree' report
+ : @return the 'red' report
  :) 
-declare function f:whiteTreeToRedTree($whiteTree as element(gx:validationReport), 
-                                      $options as map(*))
+declare function f:whiteToRed($white as element(gx:validationReport), 
+                              $options as map(*))
         as element(gx:validationReport) {
-    f:whiteTreeToRedTreeRC($whiteTree, $options)        
+    f:whiteToRedRC($white, $options)        
 };
 
 (:~
- : Recursive helper function of 'f:whiteTreeToRedTree'.
+ : Recursive helper function of 'f:whiteToRed'.
  :
  : @param n as node from the 'whiteTree' report
  : @param options options controlling the report
- : @return the representation of the node in the 'redTree' report
+ : @return the representation of the node in the 'red' report
  :)
-declare function f:whiteTreeToRedTreeRC($n as node(), $options as map(*))
+declare function f:whiteToRedRC($n as node(), $options as map(*))
         as node()* {
     typeswitch($n)
     case document-node() return
-        document {$n ! f:whiteTreeToRedTreeRC(., $options)}
+        document {$n ! f:whiteToRedRC(., $options)}
     case element(gx:green) return ()        
     case element(gx:whiteGreen) return ()
     case element(gx:whiteYellow) return ()
@@ -406,16 +406,16 @@ declare function f:whiteTreeToRedTreeRC($n as node(), $options as map(*))
         if (not($n//(gx:yellow, gx:red))) then ()
         else
             element {node-name($n)} {
-                $n/@* ! f:whiteTreeToRedTreeRC(., $options),
-                $n/node() ! f:whiteTreeToRedTreeRC(., $options)            
+                $n/@* ! f:whiteToRedRC(., $options),
+                $n/node() ! f:whiteToRedRC(., $options)            
             }
 
     case element() return
         element {node-name($n)} {
-            $n/@* ! f:whiteTreeToRedTreeRC(., $options),
-            $n/node() ! f:whiteTreeToRedTreeRC(., $options)            
+            $n/@* ! f:whiteToRedRC(., $options),
+            $n/node() ! f:whiteToRedRC(., $options)            
         }
-    case attribute(reportType) return attribute reportType {'redTree'}        
+    case attribute(reportType) return attribute reportType {'red'}        
     default return $n        
 };
 
@@ -457,3 +457,13 @@ declare function f:getDomainDescriptor($domain as element(gx:domain))
     $domain/@path/replace(., '\\', '/')        
 };
 
+declare function f:displayResultResults($resources as element()*)
+        as node()* {
+    for $r in $resources
+    let $file := $r/(@file, @folder)[1]
+    return (
+        comment {concat('&#xA;&#xA;*** ', $file, '&#xA;&#xA;    ')},
+        $r
+    )
+        
+};        
