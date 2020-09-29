@@ -1,0 +1,24 @@
+Our first Greenfox schema. It VISITs a single resource - the airports index
+folder, and it CHECKs its contents, using a FolderContent constraint. 
+    
+Launch validation with a command like this:
+   gfox /path/to/air01.xml
+   
+Use different options for changing the report type, e.g.:
+   gfox -r /path/to/air01.xml
+   
+Report type options:   
+-a   summary report, only constraint statistics
+-b   as before, but red resources are listed (default)
+-c   as before, but also green resources are listed
+-r   list for all red resources all results
+-w   list for all resources all results
+
+You may want to experiment with the schema, slightly change the details -
+e.g. changing file names or adding more <memberFile> elements.
+
+Note ...
+- the use of backslashes in file system navigation (also on Unix)
+- the use of wildcards
+- the use of explicit cardinality constraints (default: @count=1)
+- the use of a @closed attribute - only the described members are allowed

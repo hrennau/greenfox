@@ -175,7 +175,7 @@ declare function f:parseNodePath($nodePath as xs:string,
     else if (starts-with($nodePath, '..')) then
         $nodePath ! f:parseNodePathRC(., $options, $context)
     (: ./foo :)
-    else if (matches($nodePath, '^\s*.\s*$')) then
+    else if (matches($nodePath, '^\s*\.\s*$')) then
         <self/>
     else if (starts-with($nodePath, '.')) then
         $nodePath ! replace(., '^\.\s*', '') ! f:parseNodePathRC(., $options, $context)

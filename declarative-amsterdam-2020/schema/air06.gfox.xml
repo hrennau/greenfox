@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Now we start to connect the resources: we add a constraint which looks not only
-    at the resource to be validated, but also a second resource and requires the
-    two to be somehow related. Most often, "looking at resources" means evaluating 
-    expressions in their context - one expression in the context of the first 
-    resource, another expression in the context of the other resource. And the 
-    relationship between the resources is observed by comparing the two values.
-    
-    A ValueCompared constraint is thus composed of 
-    (a) a specification which resource(s) to use as the second resource, 
-    (b) an expression to be evaluated in the context of the resource to be evaluated, 
-    (c) an expression to be evaluated in the context of the second resource, and 
-    (d) further attributes or child elements specifying what to expect from the pair 
-        of expression values.
-        
-    Here, we check that the @country value in the XML file is equal to the 
-    corresponding "country" in the accompanying JSON document. So the "partner"
-    of the comparison is a JSON document, which is selected by the @foxpath
-    expression on <valueCompared>. Note that this is only one of several ways
-    how the partner resource can be selected.
-    
-    Also note that the JSON document is parsed into an XML node tree and thus
-    made accessible to XPath navigation. XPath everywhere!
+    We visit the JSOB document and check that all href links can be resolved.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
           xmlns="http://www.greenfox.org/ns/schema"
@@ -52,6 +31,7 @@
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
             
+            <!-- VISIT: country airports files (XML) -->
             <file foxpath="airports-*.xml">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
@@ -70,7 +50,7 @@
                            distinct="true"/>                        
                 </values>
                 
-                <!-- CHECK: resource value pairs -->
+                <!-- CHECK: @country value matches file name -->
                 <valuePairs>
                     <valuePair expr1XP="/*/@country" minCount1="1"
                                expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
@@ -78,16 +58,18 @@
                                useString="lc"/>
                 </valuePairs>
                 
-                <!-- CHECK: resource values compared "across resource boundaries" -->
+                <!-- CHECK: @country value matches "country" field in corresponding JSON file -->
                 <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"
                                    cmp="eq" cmpMsg="Country name in XML and JSON different"/>
                 </valuesCompared>
                 
+                <!-- VISIT: corresponding JSON document -->
                 <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
                     
+                    <!-- CHECK: href links resolvable -->
                     <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>
                 </file>
             </file>

@@ -94,6 +94,10 @@ declare function f:validateNodeContentConstraint($constraintElem as element(gx:d
     
     (: Find nodes :)
     let $compiledNodePath := i:datapath($locNP, $constraintElem) ! $compiledNodePaths(.)
+    (:
+    let $_DEBUG := trace($locNP,'+++ LOC_NP: ')
+    let $_DEBUG := trace($compiledNodePath, '+++ COMPILED_NODE_PATH: ')
+     :)
     let $nodes := dcont:evaluateCompiledNodePath($compiledNodePath, $contextNode, $constraintNode, $options, $context)
     (: let $_DEBUG := trace($compiledNodePaths, '+++ COMPILED_NODE_PATHS: '):)
     

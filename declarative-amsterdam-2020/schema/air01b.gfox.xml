@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Same validation as in air01.gfox.xml, but more compact notation, using plural
-    forms; the @names attribute is a whitespace-separated list of file names or
-    name patterns. 
-    
-    Note that the cardinality constraints apply to each item in the names list 
-    independently. In order to watch this logic, you might experiment and change 
-    the @maxCount value to '3'.
+    Same validation as in air01.gfox.xml, but more compact notation
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
-          xmlns="http://www.greenfox.org/ns/schema">
-
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    

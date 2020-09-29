@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Our first Greenfox schema. It visits a single resource - the airports index
-    folder, and it checks its contents, using a FolderContent constraint.
-    
-    Launch validation with a command like this:
-       gfox /path/to/air01.xml
-    You may want to experiment with it, slightly change the details -
-    e.g. changing file names or adding more file names - and observe the effect.
+    Our first Greenfox schema. It visits the airports index folder and
+    checks folder contents.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
-          xmlns="http://www.greenfox.org/ns/schema">
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
