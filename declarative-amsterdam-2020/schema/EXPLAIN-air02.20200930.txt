@@ -1,0 +1,42 @@
+We added the check of a file resource: we visit all FLAG files and check
+their size, which must be 0.
+
+In the <fileSize> element, you see a pair of attributes which is quite
+typical: a constraint attribute (@eq), which declares a constraint; and
+a message attribute with a name derived from the constraint attribute by
+appending 'Msg'. As you might expect, the <fileSize> element can also
+be used with other constraints expressing a comparison - @lt, @le, @gt, 
+@le, @ne - and each one of them can be accompanied by a corresponding 
+message attribute.
+
+Such messages are added to the validation result in case of constraint
+violation. You have not yet seen the results themselves. Please try out
+the same call with option -w inserted before the schema name:
+
+  gfox -w /path/to/greenfox/declarative-amsterdam-2020/schema/air02.gfox.xml 
+
+For each validation, a result element is produced. The element name is
+'green' or 'red'. Each element describes the checking of a single resource
+against a single constraint. Such checking is the atom of the validation
+process, and result elements are the atoms of a Greenfox validation report.
+
+You may also define messages commenting on conformance: use attributes 
+with names like @eqMsgOK, @ltMsgOK, @geMsgOK, etc. Let's try it out - 
+add to the <fileSize> element an attribute similar to
+ 
+  @eqMsgOK="OK - FLAG file empty." 
+
+Repeat the call with -w, and, hopefully, you'll see your message.
+
+Now let's provoke an error. We tweak the schema - replace eq="0"
+with eq="1000". Repeat the call, now without -w:
+    
+  gfox /path/to/greenfox/declarative-amsterdam-2020/schema/air02.gfox.xml
+      
+The summary report now tells us about a violation - see the table
+line with "FileSizeEq"; the name of the offending resource is displayed
+below. If you call the validation with option -r, you see just the red
+results:
+
+  gfox -r /path/to/greenfox/declarative-amsterdam-2020/schema/air02.gfox.xml
+

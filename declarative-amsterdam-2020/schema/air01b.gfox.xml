@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Same validation as in air01.gfox.xml, but more compact notation
+    Same validation as in air01.gfox.xml, but more compact notation.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
           xmlns="http://www.greenfox.org/ns/schema"

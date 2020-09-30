@@ -18,8 +18,9 @@
     constraints!
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
-          xmlns="http://www.greenfox.org/ns/schema">
-
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    

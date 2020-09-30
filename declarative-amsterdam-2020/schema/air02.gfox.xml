@@ -4,8 +4,9 @@
     their size, which must be 0.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
-          xmlns="http://www.greenfox.org/ns/schema">
-
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    
@@ -13,7 +14,7 @@
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <targetSize count="1" countMsg="Missing folder"/>
+            <targetSize count="10" countMsg="Missing folder"/>
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
@@ -27,7 +28,7 @@
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="0" eqMsg="FLAG file not empty"/>
+                <fileSize eq="1000" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>

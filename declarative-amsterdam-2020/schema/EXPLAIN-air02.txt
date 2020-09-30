@@ -1,0 +1,36 @@
+We added the check of a file resource: we visit all FLAG files and check
+their size, which must be 0.
+
+Now take a step back and look at the structure: we VISIT resources, and
+we CHECK them against constraints. What we visit are files and folders,
+represented by <file> and <folder> elements. These elements are called 
+SHAPES. A shape is a set of constraints plus a target declaration. The 
+target declaration selects the resources to be validated against those 
+constraints.
+
+CONSTRAINTS are declared by child (and sometimes descendant) elements of 
+the shapes. The <folderContent> element constrains the target folders 
+of the containing folder shape. The <fileSize> element constrains the 
+target files of the containing file shape. 
+
+The TARGET DECLARATION is represented by attributes on the shape element. 
+Here, the target declarations are FOXPATH expressions. Foxpath is an 
+extended version of XPath 3.0, which supports file system navigation, 
+as well as conventional node tree navigation. Foxpath uses the backslash 
+to separate steps of file system navigation, and slashes to separate 
+steps of node tree navigation.
+
+A target declaration is evaluated in the context of a member from the
+target set of the parent shape, or of the domain, if there is no parent 
+shape. The "*.FLAG" expression thus selects all FLAG files in a folder 
+from the target set of the folder containing the file shape. The
+target set of the file shape is the union of the files obtained in the
+context of each folder from the parent folder shape.
+
+The <targetSize> elements are also constraints. In contrast to all other
+constraints, they do not constrain the target resources of the containing
+shape. They constrain the number of target resources, and thus they constrain
+the target resources of the grandparent shape. Note that it is in *their* 
+context that the target declaration did not yield the expected result. So 
+every folder from the folder shape which does not contain FLAG files will
+be reported as violating the target size constraint.

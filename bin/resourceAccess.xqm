@@ -271,6 +271,13 @@ declare function f:pathToAbsolutePath($path as xs:string)
         $pathRaw ! replace(., '[/\\]$', '')    
 }; 
 
+declare function f:resolveModuleBasedPath($path as xs:string)
+        as xs:string {
+    (resolve-uri('') || '/' || $path)
+    ! file:path-to-native(.)   (: URI turned into path :)
+    ! f:normalizeAbsolutePath(.)
+};        
+
 
 
 
