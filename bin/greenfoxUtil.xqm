@@ -428,86 +428,55 @@ declare function f:normalizeAbsolutePath($path as xs:string)
         else $norm ! f:normalizeAbsolutePath(.)
 };
 
-(:
-(:~
- : Normalizes a given file path.
- :
- : Normalization means (a) resolving a relative path to an
- : absolute path, (b) replacing slashes with backward slashes.
- :
- : @path a file path
- : @return normalized file path
- :)
-declare function f:normalizeFilepath($path as xs:string)
-        as xs:string? {
-(:        
-    (
-    try {$path ! file:path-to-native(.)} catch * {$path}
-    ) ! replace(., '[/\\]$', '') ! replace(., '/', '\\')
-:)
-    $path 
-    ! replace(., '\\', '/') 
-    ! resolve-uri(., file:parent('.') ! replace(., '\\', '/')) 
-    ! replace(., '\\$', '') 
-    ! f:pathToFoxpath(.) 
-}; 
-:)
-
-(:~
- : Normalizes a given file path.
- :
- : Normalization means (a) resolving a relative path to an
- : absolute path, (b) replacing slashes with backward slashes.
- :
- : @path a file path
- : @return normalized file path
- :)
-declare function f:normalizeFilepath($path as xs:string)
-        as xs:string { trace(
-    file:path-to-uri($path)      (: absolute URI, with any % encoding :)
-    ! file:path-to-native(.)     (: pure file system path :)
-    ! replace(., '/', '\\')      (: for non-Windows systems :)
-    ! replace(., '[/\\]$', '')   (: discard a trailing \ :)
-    , concat('_PATH=', $path, ' - NORMALIZE_FILEPATH: '))
-};
-
 (:~ 
- : Like file:path-to-native, but making sure that backslaehs
- : are used irrespective of the operation system.
+ : Like file:path-to-native, but making sure that the right separator
+ : is used in the argument, as on Unix the wrong separator provokes an error:
+ :
+ :    basex 'file:path-to-native("\Users\hauke\Projects\ParsQube\XML\greenfox\declarative-amsterdam-2020\data\air")'
+ :    Stopped at /Users/hauke/Projects/ParsQube/XML/greenfox/, 1/20:
+ :
+ :    basex 'file:path-to-native("/Users/hauke/Projects/ParsQube/XML/greenfox/declarative-amsterdam-2020/data/air")'
+ :    /Users/hauke/Projects/ParsQube/XML/greenfox/declarative-amsterdam-2020/data/air/
+ :
+ : If the path is a file URI, it is returned unchanged.
+ :
+ : If the path contains an archive, the subpath preceding the archive is passed to
+ : file:path-to-native, and the remainder is appended. In this case, dir separators
+ : are replace with \\.
  :
  : @param path the path to be edited
  : @return the edited path
  :)
 declare function f:pathToNative($path as xs:string)
         as xs:string {
-    let $sep := codepoints-to-string(30000)    
-    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
+    let $pathToArchive := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
     return
         (: URI is archive URI :)
-        if ($beforeArchiveEntry) then
-            let $after := substring($path, string-length($beforeArchiveEntry) + 1)
+        if ($pathToArchive) then
+            let $withinArchivePath := substring($path, string-length($pathToArchive) + 1)
+            let $pathToArchiveAbs := $pathToArchive ! f:pathToNative(.)
             return
-                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '/', '\\') ! replace(., '\\$', '') 
+                ($pathToArchiveAbs || $withinArchivePath) 
+                ! replace(., '/', '\\') 
+                ! replace(., '\\$', '') 
         (: URI is a file system URI :)
+        else if (matches($path, '^file:/')) then $path
         else
-            $path ! file:path-to-native(.) ! replace(., '/', '\\') ! replace(., '\\$', '')    
+            $path ! f:dirSepToNative(.) ! file:path-to-native(.) ! replace(., '[/\\]$', '')    
 }; 
 
-declare function f:pathToNative($path as xs:string, $backslash as xs:boolean)
+(:~
+ : Replaces all occurrences of / or \\ with the directory
+ : separator of the current platform.
+ :
+ : @param path the string to edit
+ : @return the edited string
+ :)
+declare function f:dirSepToNative($path as xs:string)
         as xs:string {
-    let $sep := codepoints-to-string(30000)    
-    let $slashChar := if ($backslash) then '\\' else '/'
-    let $beforeArchiveEntry := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
-    return
-        (: URI is archive URI :)
-        if ($beforeArchiveEntry) then
-            let $after := substring($path, string-length($beforeArchiveEntry) + 1)
-            return
-                (file:path-to-native($beforeArchiveEntry) || $after) ! replace(., '[/\\]', $slashChar) ! replace(., $slashChar||'$', '') 
-        (: URI is a file system URI :)
-        else
-            $path ! file:path-to-native(.) ! replace(., '[/\\]', $slashChar) ! replace(., $slashChar||'$', '')    
-}; 
+    let $dirSep := file:dir-separator() ! replace(., '\\', '\\\\')
+    return replace($path, '[/\\]', $dirSep)
+};
 
 (:~
  : Transforms a URI or file system path into a normalized file system

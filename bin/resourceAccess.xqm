@@ -239,7 +239,6 @@ declare function f:pathToAbsolutePath($path as xs:string)
     let $path :=
         if (matches($path, '^file:/+[a-zA-Z]:')) then replace($path, '^file:/+', '')
         else replace($path, '^file:/*(/([^/].*)?)$', '$1')
-        
     let $pathRaw :=  
         (: Path leading to the archive which will be entered :)
         let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
@@ -251,8 +250,8 @@ declare function f:pathToAbsolutePath($path as xs:string)
                     substring($path, string-length($archiveFilePath) + 1)
                     ! replace(., '/', '\\') 
                 return
-                    f:pathToAbsolutePath($archiveFilePath) || $archiveContentPath 
-                    ! replace(., '/', '\\')
+                    (: Unclear if the replace with \\ applies to the complete URI or only the within-archive path :)
+                    f:pathToAbsolutePath($archiveFilePath) || ($archiveContentPath ! replace(., '/', '\\'))
                     
             else
                 let $uriSchema := replace($path, '^(\i\c+:/+).*', '$1')[. ne $path]
@@ -265,11 +264,9 @@ declare function f:pathToAbsolutePath($path as xs:string)
                             ! replace(., '/', '\\') (: Not file URI: deliver Foxpath, therefore: backslash :)
                         return
                             $uriSchema || $uriPath
-                    (: Case 3: URI is a file URI or path
-                               => use native separator :)
+                    (: Case 3: URI is a file path => make absolute :)
                     else
-                        $path ! file:path-to-native(.) 
-                        (: ! replace(., '/', '\\') :)
+                        $path ! f:dirSepToNative(.) ! file:path-to-native(.) 
     return 
         $pathRaw ! replace(., '[/\\]$', '')    
 }; 

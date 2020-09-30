@@ -134,7 +134,8 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
                 }
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, please correct and retry;&#xA;### value: ", $raw))}
+                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
             else $raw
     let $augmentedEntry := map:entry($name, $augmentedValue)    
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
