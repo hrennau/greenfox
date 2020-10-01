@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+function usage {
+    echo
+    echo 'Usage: greenfox [-a -b -c -r -w] [-t type] schema [domain]'
+    echo
+    echo 'schema: Greenfox schema file; relative or absolute path'
+    echo 'domain: Validation root resource; relative or absolute path'
+    echo
+    echo '-a      : report type = sum1'
+    echo '-b      : report type = sum2'
+    echo '-c      : report type = sum3'
+    echo '-r      : report type = red'
+    echo '-w      : report type = white'
+    echo '-t      : the report type; one of: sum1 sum2 sum3 red white wresults rresults'
+    echo
+}
+
+function fail {
+    echo 1>&2 "$1"
+    usage 1>&2
+    exit 1
+}
+
+# ====================================================================================
+#
+#     find script directory
+#
+# ====================================================================================
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+HERE="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# ====================================================================================
+#
+#     defaults
+#
+# ====================================================================================
+
+RTYPE=sum2
+
+# ====================================================================================
+#
+#     parse options and arguments
+#
+# ====================================================================================
+
+while [ $# -gt 0 ] && [ ${1::1} == '-' ]; do
+    OPT="$1"
+    case "$OPT" in
+        -a) RTYPE=sum1  ;;
+        -b) RTYPE=sum2  ;;
+        -c) RTYPE=sum3  ;;
+        -r) RTYPE=red   ;;
+        -w) RTYPE=white ;;
+        -t)
+            RTYPE="$2"
+            shift
+        ;;
+        *)
+            fail "Unknown option: $OPT"
+        ;;
+    esac
+    shift
+done
+
+case "$RTYPE" in
+    white|red|sum1|sum2|sum3|wresults|rresults) ;;
+    *) fail "Unknown report type: $RTYPE" ;;
+esac
+
+schema="$1"
+domain="$2"
+
+if [ "$schema" == "?" ]; then
+    usage
+    exit
+fi
+
+if [ -z "$schema" ]; then
+    fail "Missing schema."
+fi
+
+# ====================================================================================
+#
+#     execute greenfox
+#
+# ====================================================================================
+
+[ -n "$RTYPE"  ] && RTYPE_PARAM=",reportType=$RTYPE"
+[ -n "$domain" ] && DOMAIN_PARAM=",domain=$domain"
+
+basex -b "request=val?gfox=${schema}${RTYPE_PARAM}${DOMAIN_PARAM}" "$HERE"/greenfox.xq
