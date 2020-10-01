@@ -58,7 +58,7 @@
                     <node locNP="//@*" count="3"/>
                     
                     <!-- Any *zone must have a dst sibling -->
-                    <node locNP="//*zone" minCount="2">
+                    <node locNP="//*zone" minCount="2" maxCount="unbounded">
                         <node locNP="../dst"/>
                     </node>
 

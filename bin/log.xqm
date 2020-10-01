@@ -40,8 +40,11 @@ declare function f:DEBUG_FILE($item as item(),
     file:write($i:DEBUG_FOLDER || '/' || $fileName, $item)
 };
 
-declare function f:DEBUG_CONTEXT($label as xs:string, $context as map(xs:string, item()*))
+declare function f:DEBUG_CONTEXT($label as xs:string,
+                                 $debugLevel as xs:integer,
+                                 $context as map(xs:string, item()*))
         as empty-sequence() {
+    if ($debugLevel ge $i:DEBUG_LEVEL) then () else        
     let $dir := $i:DEBUG_FOLDER
     let $fname := $dir || '/DEBUG.CONTEXT_' || $label || '.xml'
     let $contextDoc :=

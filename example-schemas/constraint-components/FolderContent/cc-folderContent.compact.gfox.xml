@@ -38,7 +38,7 @@
                 
                 <!-- CHECK: folder contents -->
                 <folderContent closed="true">
-                    <memberFiles names="airport-???.xml airport-???.json" minCount="14"/>
+                    <memberFiles names="airport-???.xml airport-???.json" minCount="14" maxCount="unbounded"/>
                 </folderContent>
             </folder>
         </folder>

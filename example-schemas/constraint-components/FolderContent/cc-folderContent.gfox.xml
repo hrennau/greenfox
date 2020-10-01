@@ -30,7 +30,7 @@
                 <memberFolder name="luxembourg"/>                
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
-                <memberFile name="airports-*.xml" minCount="4"/>
+                <memberFile name="airports-*.xml" count="4"/>
                 <memberFile name="airports-*.json" count="4"/>
                 <memberFile name="airports.xml" md5="84DC2E974364915663E1712800B28385"/>
                 <memberFile name="airports.json" md5="6127FF438FBC51507DA8077ED706F9B8"/>
@@ -40,8 +40,8 @@
             <folder foxpath="ireland">
                 <targetSize countMsg="Missing folder: ireland" count="1"/>
                 <folderContent closed="true">
-                    <memberFile name="airport-???.xml" minCount="14" minCountMsg="Not the expected number of Lux XML airport files"/>
-                    <memberFile name="airport-???.json" minCount="14" minCountMsg="Not the expected number of Lux JSON airport files"/>
+                    <memberFile name="airport-???.xml" maxCount="unbounded" minCount="14" minCountMsg="Not the expected number of Lux XML airport files"/>
+                    <memberFile name="airport-???.json" maxCount="unbounded" minCount="14" minCountMsg="Not the expected number of Lux JSON airport files"/>
                 </folderContent>
             </folder>
             

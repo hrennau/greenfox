@@ -47,7 +47,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:validateFile($shapeElem as element(gx:file), $context as map(*)) 
         as element()* {
-    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id, $context)  
+    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id, $i:DEBUG_LEVEL, $context)  
     
     (: Determine target and evaluate target constraints :)
     let $targetPathsAndTargetValidationResults := f:getTargetPaths($shapeElem, $context)
@@ -84,7 +84,7 @@ declare function f:validateFileInstance($contextURI as xs:string,
     (: Update context - new value of _contextPath :)
     let $context := map:put($context, '_contextPath', $contextURI)
     let $context := i:adaptContext($contextURI, $shapeElem, $context)
-    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id || '_DOCNR_' || $position, $context)
+    let $_DEBUG := f:DEBUG_CONTEXT($shapeElem/@id || '_DOCNR_' || $position, $i:DEBUG_LEVEL, $context)
     let $results := f:validateFileConstraints($shapeElem, $context)
     return $results
 };

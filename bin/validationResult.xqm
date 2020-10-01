@@ -229,6 +229,7 @@ declare function f:validationResult_mediatype($colour as xs:string,
 declare function f:validationResult_docTree_counts($colour as xs:string,
                                                    $constraintElem as element(),
                                                    $constraintNode as node(),
+                                                   $constraintComponentName as xs:string?,
                                                    $shortcutAttNodeName as xs:string?,
                                                    $contextNode as node(),
                                                    $valueCount as xs:integer,   
@@ -241,6 +242,7 @@ declare function f:validationResult_docTree_counts($colour as xs:string,
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
     let $constraintComponent :=
+        if ($constraintComponentName) then $constraintComponentName else
         $constraintElem/i:firstCharToUpperCase(local-name(.)) || (
         if ($constraintNode/self::attribute()) then $constraintNode/i:firstCharToUpperCase(local-name(.))
         else 'Count')

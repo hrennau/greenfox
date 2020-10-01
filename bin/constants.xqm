@@ -16,7 +16,7 @@ declare variable $f:URI_GX := 'http://www.greenfox.org/ns/schema';
 declare variable $f:URI_GXERR := 'http://www.greenfox.org/ns/error';
 declare variable $f:PREFIX_GX := 'gx';
 
-declare variable $f:DEBUG_LEVEL := 1;
+declare variable $f:DEBUG_LEVEL := 0;
 declare variable $f:DEBUG_FOLDER := '.';
 declare variable $f:DEBUG_TAGS := 
     'linksxxx'

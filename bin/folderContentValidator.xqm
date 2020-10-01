@@ -170,30 +170,33 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                     
         (: cardinality constraints :)            
         default return    
-            let $countAtts := $d/(@count, @minCount, @maxCount) return
-            
-            (: explicit constraints :)
-            if ($countAtts) then
-                let $fn_check := function($att, $count) {
-                    typeswitch($att)
-                    case attribute(count) return $count = $att
-                    case attribute(minCount) return $count >= $att
-                    case attribute(maxCount) return $count <= $att
-                    default return error()
-                }
-                for $att in $countAtts
-                let $colour := if ($fn_check($att, $count)) then 'green' else 'red'
-                return
-                    result:constructError_folderContentCount(
-                        $colour, $constraintElem, $att, (), $resourceName, $found, (), (), $context)
-                        
-            (: implicit constraints :)                        
-            else
-                let $colour := if ($count eq 1) then 'green' else 'red'
-                return
-                    result:constructError_folderContentCount($colour, $constraintElem, $d, 
-                        'FolderContentCount', $resourceName, $found, 
-                        attribute implicitCount {1}, (), $context) 
+            let $att := $d/@count return
+                if ($att) then
+                    let $ok := $count eq $att/xs:integer(.) 
+                    let $colour := if ($ok) then 'green' else 'red'
+                    return
+                        result:constructError_folderContentCount($colour, $constraintElem, 
+                            $att, (), $resourceName, $found, (), (), $context)
+                else (                
+                    let $att := $d/@minCount return
+                        (: if (not($att)) then () else :)
+                        let $minCount := ($att/xs:integer(.), 1)[1]
+                        let $ok := $count ge $minCount 
+                        let $colour := if ($ok) then 'green' else 'red'
+                        return
+                            result:constructError_folderContentCount($colour, $constraintElem, 
+                                ($att, $d)[1], (), $resourceName, $found, (), (), $context)
+                    ,
+                    let $att := $d/@maxCount return
+                        (: if (not($att)) then () else :)
+                        if ($att eq 'unbounded') then () else
+                        let $maxCount := ($att/xs:integer(.), 1)[1]
+                        let $ok := $count le $maxCount 
+                        let $colour := if ($ok) then 'green' else 'red'
+                        return
+                            result:constructError_folderContentCount($colour, $constraintElem, 
+                                ($att, $d)[1], (), $resourceName, $found, (), (), $context)
+                    )                        
 };
 
 (:~

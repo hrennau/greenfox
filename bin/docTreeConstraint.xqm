@@ -152,7 +152,40 @@ declare function f:validateNodeContentConstraint_counts(
                                                  $options as map(xs:string, item()*),
                                                  $context as map(xs:string, item()*))
         as element()* {
-    let $valueCount := count($valueNodes)
+    let $count := count($valueNodes)    
+    let $att := $constraintNode/@count return    
+        if ($att) then
+            let $ok := $count eq $att/xs:integer(.) 
+            let $colour := if ($ok) then 'green' else 'red'
+            return
+                result:validationResult_docTree_counts(
+                    $colour, $constraintElem, $att, 'DocTreeCount', (), 
+                    $contextNode, $count, $trail, (), $context)
+        else (                
+            let $att := $constraintNode/@minCount return
+            (: if (not($att)) then () else :)
+            let $minCount := ($att/xs:integer(.), 1)[1]
+            let $ok := $count ge $minCount 
+            let $colour := if ($ok) then 'green' else 'red'
+            let $useConstraintNode := ($att, $constraintNode)[1]
+            return
+                result:validationResult_docTree_counts(
+                    $colour, $constraintElem, $useConstraintNode, 'DocTreeMinCount', (), 
+                    $contextNode, $count, $trail, (), $context)
+            ,
+            let $att := $constraintNode/@maxCount return
+            (: if (not($att)) then () else :)
+            if ($att eq 'unbounded') then () else
+            let $maxCount := ($att/xs:integer(.), 1)[1]
+            let $ok := $count le $maxCount 
+            let $colour := if ($ok) then 'green' else 'red'
+            let $useConstraintNode := ($att, $constraintNode)[1]
+            return
+                result:validationResult_docTree_counts(
+                    $colour, $constraintElem, $useConstraintNode, 'DocTreeMaxCount', (), 
+                    $contextNode, $count, $trail, (), $context)
+        )                        
+(:   
     let $countAtts := $constraintNode/(@count, @minCount, @maxCount)
     return    
         (: explicit constraints :)
@@ -174,7 +207,8 @@ declare function f:validateNodeContentConstraint_counts(
             let $colour := if ($valueCount eq 1) then 'green' else 'red'
             return
                 result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $constraintNode, (), $contextNode, $valueCount, $trail, (), $context) 
+                    $colour, $constraintElem, $constraintNode, (), $contextNode, $valueCount, $trail, (), $context)
+:)                    
 }; 
 
 (:~
@@ -225,7 +259,7 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
         let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attName
         return
             result:validationResult_docTree_counts(
-                $colour, $constraintElem, $attsConstraintNode, string($attName), $newContextNode, count($att), $newTrail, (), $context)
+                $colour, $constraintElem, $attsConstraintNode, (), string($attName), $newContextNode, count($att), $newTrail, (), $context)
 
 (:            
         if ($withNamespaces) then
