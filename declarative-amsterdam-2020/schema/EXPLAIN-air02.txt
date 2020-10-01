@@ -27,10 +27,10 @@ from the target set of the folder containing the file shape. The
 target set of the file shape is the union of the files obtained in the
 context of each folder from the parent folder shape.
 
-The <targetSize> elements are also constraints. In contrast to all other
-constraints, they do not constrain the target resources of the containing
-shape. They constrain the number of target resources, and thus they constrain
-the target resources of the grandparent shape. Note that it is in *their* 
-context that the target declaration did not yield the expected result. So 
-every folder from the folder shape which does not contain FLAG files will
-be reported as violating the target size constraint.
+The <targetSize> elements are also constraints. They constrain the result 
+of the target declaration, for example the number of selected files. The 
+TargetSize constraints thus apply to the target resources of the grandparent 
+shape, as it is in *their* context that the target declaration did not 
+yield the expected result. So every folder from the folder shape which 
+does not contain FLAG files will be reported as violating the target size 
+constraint of the file shape.
