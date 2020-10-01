@@ -65,8 +65,8 @@ declare function f:writeValidationReport_wresults(
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $useResults := 
-        if ($reportType eq 'white') then $results 
-        else if ($reportType eq 'red') then $results[self::gx:red, self::gx:yellow]
+        if ($reportType eq 'wresults') then $results 
+        else if ($reportType eq 'rresults') then $results[self::gx:red, self::gx:yellow]
         else error()
     let $report :=    
         <gx:validationReport domain="{f:getDomainDescriptor($domain)}"

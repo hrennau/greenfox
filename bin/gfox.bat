@@ -49,6 +49,8 @@ if "%RTYPE%"=="white" (rem
 ) else if "%RTYPE%"=="sum1" (rem
 ) else if "%RTYPE%"=="sum2" (rem 
 ) else if "%RTYPE%"=="sum3" (rem        
+) else if "%RTYPE%"=="wresults" (rem
+) else if "%RTYPE%"=="rresults" (rem
 ) else (
      echo "Unknown report type: %RTYPE%
      echo Aborted.
