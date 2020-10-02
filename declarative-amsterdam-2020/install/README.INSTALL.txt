@@ -1,3 +1,10 @@
+SYSTEM REQUIREMENTS
+===================
+Java 8 INSTALLED
+
+Please check, e.g. entering on the command-line:
+    java -version
+
 (1) Install BaseX
 =================
 (a) Download from here: https://basex.org/download/
@@ -11,12 +18,20 @@
 PS C:\path\to\current\dir> basex -version
 BaseX 9.4.3 [Standalone]
 
+(e) Optionally, you may may increase the Heap Space allocated in the start script:
+    Edit the line containing "BASEX_JVM", changing the value of -Xmx. Examples:
+       Windows:    set BASEX_JVM=-Xmx4g %BASEX_JVM%
+       Other:      BASEX_JVM="-Xmx4g $BASEX_JVM"
+       
+    This change will become necessary if program execution terminates with
+    "Out of Memory" or "Java heap space" error
+       
 (2) Install greenfox
 ====================
 (a) Clone or download from here: https://github.com/hrennau/greenfox
 (b) Check command-line interface:
-(c1) Start shell
-(c2) Enter:
+(b1) Start shell
+(b2) Enter:
      Windows:
        /path/to/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
      Other:
@@ -24,7 +39,7 @@ BaseX 9.4.3 [Standalone]
             
      # Make sure to replace "/path/to" with the path of the root folder of unpacked Greenfox
      
-(c3) You should see something similar to this:
+(b3) You should see something similar to this:
 
 =============================================================================
 =                                                                           =
@@ -54,6 +69,10 @@ domain:   C:/tt/greenfox/declarative-amsterdam-2020/data/air
 | TargetCount ........... |    0 |      1 |
 -------------------------------------------
 
+(c) Recommended: add the "bin" folder of the Greenfox installation to the PATH variable.
+    Afterward, you can call Greenfox without path. Example:
+       gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+
 (3) Install Foxpath (optional)
 ==============================
 # Installation of Standalone Foxpath is optional - as Foxpath is integrated into Greenfox
@@ -62,13 +81,17 @@ domain:   C:/tt/greenfox/declarative-amsterdam-2020/data/air
 # during the tutorial), you need to install Foxpath     
 (a) Clone or download from here: https://github.com/hrennau/foxpath
 (b) Check command-line interface:
-(c1) Start shell
-(c2) Enter:
+(b1) Start shell
+(b2) Enter:
      Windows:
        /path/to/foxpath/bin/fox.bat *
      Others:
        /path/to/foxpath/bin/fox *
             
      # Make sure to replace "/path/to" with the path of the root folder of unpacked Foxpath
-(c3) You should see a list of file paths    
+(b3) You should see a list of file paths    
+
+(c) Recommended: add the "bin" folder of the Foxpath installation to the PATH variable.
+    Afterward, you can call Foxpath without path. Example:
+       fox *
 
