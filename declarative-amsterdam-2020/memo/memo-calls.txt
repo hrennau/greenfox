@@ -1,9 +1,42 @@
-# emptyFiles
-greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles.gfox.xml
+# Edit - replace "/tt/" with the actual path of the greenfox installation
 
-# emptyFiles-ignFlagFiles
-greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles-ignFlagFiles.gfox.xml
-greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles-ignFlagFiles2.gfox.xml
+# Recommended: extend PATH variable to include the directory "/path/to/greenfox/bin"
+#              and remove the initial "/path/to/greenfox/bin"
 
-# specify domain explicitly
-greenfox val?gfox=/tt/greenfox/declarative-amsterdam-2020/schema/emptyFiles.gfox.xml,domain=/projects/sap
+# WINDOWS
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air02.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air03.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air04.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air05.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air06.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air07.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air08.gfox.xml
+
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air02.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air03.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air04.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air05.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air06.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air07.minimal.gfox.xml
+/tt/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air08.minimal.gfox.xml
+
+# OTHERS
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air02.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air03.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air04.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air05.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air06.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air07.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air08.gfox.xml
+
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air01.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air02.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air03.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air04.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air05.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air06.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air07.minimal.gfox.xml
+/tt/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air08.minimal.gfox.xml
