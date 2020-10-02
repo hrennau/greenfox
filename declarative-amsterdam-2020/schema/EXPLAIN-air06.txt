@@ -1,0 +1,5 @@
+We visit the JSON document and check that all href links can be resolved.
+We also check that latitude and longitude are greater country minimums
+read from a CSV file.
+
+(to be continued)

@@ -1,0 +1,37 @@
+EXCERCISE AIR03
+===============
+Modify the schema, changing value and/or adding further value constraint.
+
+In order to see the error result elements, use option -r:
+   gfox -r /path/to/air03.gfox.xml 
+If you want to see *all* result elements (red or green), use option -w:
+   gfox -r /path/to/air03.gfox.xml
+
+Available value constraints
+---------------------------
++ ATTRIBUTES
+- @count, @minCount, @maxCount, @exists, @empty
+- @eq, @ne, @lt, @le, @gt, @ge
+- @like, @notLine (e.g. like="abc*")
+- @matches, @notMatches (e.g. matches="^abc.*")
+- @length, @minLength, @maxLength
+- @min, @max
+- @datatype (e.g. datatype="date")
+
++ CHILD ELEMENTS
+- The items match at least one comparison from in/*:
+  <in><eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+</in>
+
+- The items match none of the comparisons from in/*:  
+  <notin>
+      <eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+
+  </notin>
+  
+- The value contains all terms from contains/term  
+  <contains><term>+</contains>
+
+- All items are in sameTerms/term, and the other way around
+  <sameTerms><term>+</deepEqual>
+
+- The value and deepEqual/term are deep-equal
+  <deepEqual><term>+</deepEqual>

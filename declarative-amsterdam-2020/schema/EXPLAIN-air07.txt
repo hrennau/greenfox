@@ -1,0 +1,4 @@
+We extend our checking of the JSON document: the tree structure is
+validated against an expected tree structure.
+
+(to be continued)

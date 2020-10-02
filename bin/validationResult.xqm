@@ -243,9 +243,8 @@ declare function f:validationResult_docTree_counts($colour as xs:string,
     let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
     let $constraintComponent :=
         if ($constraintComponentName) then $constraintComponentName else
-        $constraintElem/i:firstCharToUpperCase(local-name(.)) || (
-        if ($constraintNode/self::attribute()) then $constraintNode/i:firstCharToUpperCase(local-name(.))
-        else 'Count')
+            $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
+            $constraintNode/i:firstCharToUpperCase(local-name(.))
     let $nodePath := $contextNode/i:datapath(.)
     let $implicitCount := 1[not($constraintNode/self::attribute()) or $constraintNode/self::attribute(atts)]
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
@@ -432,13 +431,10 @@ declare function f:constructError_folderContentCount($colour as xs:string,
     let $resourceShapeId := $constraintElem/@resourceShapeID        
     let $resourceShapePath := $constraintElem/@resourceShapePath    
     let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-    let $constraintComp := 'FolderContentClosed'
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $constraintComp := (
-          $constraintCompName,
-            $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
+    let $constraintComp :=
+        if ($constraintCompName) then $constraintCompName else
+            $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
             $constraintNode/i:firstCharToUpperCase(local-name(.))
-          )[1]    
     let $msg := i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $constraintNode/local-name(.))
     
     let $valueElems :=

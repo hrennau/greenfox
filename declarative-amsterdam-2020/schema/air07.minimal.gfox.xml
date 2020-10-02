@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    We extend our checking of the JSON document: the tree structure is
+    validated against an expected tree structure.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="Some root folder">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <!-- checks omitted ... -->            
+            
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <!-- checks omitted ... -->                
+            </file>
+            
+            <!-- VISIT: country airports files (XML) -->
+            <file foxpath="airports-*.xml">
+                <!-- checks omitted ... -->                
+                
+                <!-- VISIT: matching JSON file --> 
+                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
+                    <!-- checks omitted ... -->                    
+
+                    <!-- CHECK: tree structure -->
+                    <docTree>
+                        <node locNP="/json/airportsForCountry">
+                            <node locNP="@type"/>
+                            <node locNP="country"/>
+                            <node locNP="countAirports"/>
+                            <node locNP="airport">
+                                <node locNP="@type"/>
+                                <node locNP="_" maxCount="unbounded" closed="true">
+                                    <node locNP="@type"/>
+                                    <node locNP="id"/>
+                                    <node locNP="iata" minCount="0"/>
+                                    <node locNP="icao"/>
+                                    <node locNP="createdAt"/>
+                                    <node locNP="latitude" minCount="0"/>
+                                    <node locNP="longitude" minCount="0"/>
+                                    <node locNP="href" minCount="0"/>
+                                    <node locNP="name" minCount="0"/>
+                                    <node locNP="city" minCount="0"/>
+                                    <node locNP="country" minCount="0"/>                                    
+                                    <node locNP="geo" minCount="0" closed="true">
+                                        <node locNP="@type"/>
+                                        <node locNP="latitude" minCount="0"/>
+                                        <node locNP="longitude" minCount="0"/>
+                                        <node locNP="altitude" minCount="0"/>                                        
+                                    </node>
+                                    <node locNP="temporal" minCount="0"/>
+                                    <node locNP="type" minCount="0"/>
+                                    <node locNP="source1" minCount="0"/>
+                                </node>
+                            </node>
+                        </node>
+                    </docTree>
+                    
+                </file>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+
+

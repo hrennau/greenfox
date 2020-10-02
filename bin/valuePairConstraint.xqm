@@ -62,6 +62,7 @@ declare function f:validateValuePairConstraint($constraintElem as element(),
              self::gx:foxvaluesCompared, self::gx:foxvalueCompared))
         then 
             let $ldo := link:getLinkDefObject($constraintElem, $context)
+            (: let $_DEBUG := trace($ldo, '_LDO: ') :)
             let $lros := 
                 let $requiresXml := exists($constraintElem/*/@expr2XP)
                 let $options := if (not($requiresXml)) then () else map{'targetMediatype': 'xml'}

@@ -25,7 +25,7 @@
             <!-- CHECK: folder content -->
             <folderContent closed="true">
                 <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
                 <memberFile name="*.FLAG" minCount="1"/>
             </folderContent>
             
@@ -58,14 +58,16 @@
                 
                 <!-- CHECK: resource value pairs -->
                 <valuePairs>
+                    <!-- @countAirports = number of airports -->
                     <valuePair expr1XP="/*/@countAirports" count1="1"
-                               expr2XP="count(//airport)" minCount2="1"
-                               cmp="eq" cmpMsg="Wrong number of airports"
-                               useDatatype="integer"/>
+                        expr2XP="count(//airport)" minCount2="1"
+                        cmp="eq" cmpMsg="Wrong number of airports"
+                        useDatatype="integer"/>
+                    <!-- @country = country from file name -->
                     <valuePair expr1XP="/*/@country" count1="1"
-                               expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
-                               cmp="eq" cmpMsg="Country name in attribute and file name different"
-                               useString="lc"/>
+                        expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
+                        cmp="eq" cmpMsg="Country name in attribute and file name different"
+                        useString="lc"/>
                 </valuePairs>
             </file>
         </folder>

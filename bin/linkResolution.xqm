@@ -212,7 +212,65 @@ declare function f:resolveLinkDefRC(
                                     'targetDoc': $targetDoc},
                                     $ldo?targetXP ! map{
                                     'targetNodes': $targetNodes}))
+
+            (: Mediatype: csv :)
+            else if ($targetMediatype = 'csv') then   
+                if (not(i:fox-unparsed-text-available($targetURI, ()))) then
+                
+                    (: Result: resource not found
+                       ========================== :)                
+                    if (not(i:fox-resource-exists($targetURI))) then
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextItem': $linkContextItem,                     
+                            'href': string($href), 
+                            'targetURI': $targetURI, 
+                            'targetExists': false(),
+                            'errorCode': 'no_resource'}
+                            
+                    (: Result: not a text resource
+                       =========================== :)               
+                    else
+                        map{'type': 'linkResolutionObject',
+                            'contextURI': $contextURI,
+                            'contextItem': $linkContextItem,                     
+                            'href': string($href), 
+                            'targetURI': $targetURI, 
+                            'targetExists': true(),
+                            'errorCode': 'no_text'}
+                else
+                    let $text := i:fox-unparsed-text($targetURI, ())
+                    (: _TO_DO_ We need a function csvDoc consuming the document text, rather than the URI :)
+                    let $targetDoc := try {i:csvDoc($targetURI, (), $ldo)} 
+                                      catch * {trace((), concat('+++ CSV PARSE EXCEPTION; ERR_CODE: ', $err:code, ' ; ERR_DESCRIPTION: ', $err:description))}
+                    let $targetNodes := $targetDoc ! f:getLinkTargetNodes(., $ldo?targetXP, $linkContextItem, $context)
+                    return 
+                        if (not($targetDoc)) then
+                        
+                            (: Result: not a JSON document
+                               =========================== :)                        
+                            map{'type': 'linkResolutionObject',
+                                'contextURI': $contextURI,
+                                'contextItem': $linkContextItem,                            
+                                'href': string($href), 
+                                'targetURI': $targetURI,
+                                'targetExists': true(),
+                                'errorCode': 'not_json'}
+                        else 
+                            (: Result: JSON document, optionally also selected target nodes
+                               ============================================================ :)                        
+                            map:merge((
+                                map{'type': 'linkResolutionObject',
+                                    'contextURI': $contextURI,
+                                    'contextItem': $linkContextItem,                            
+                                    'href': string($href), 
+                                    'targetURI': $targetURI,
+                                    'targetExists': true(),
+                                    'targetDoc': $targetDoc},
+                                    $ldo?targetXP ! map{
+                                    'targetNodes': $targetNodes}))
             
+
             (: Mediatype: xml :)            
             else if ($targetMediatype = 'xml') then
                 if (not(i:fox-doc-available($targetURI))) then 

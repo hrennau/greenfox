@@ -19,28 +19,18 @@
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <targetSize count="1" countMsg="Missing folder"/>
-
-            <!-- CHECK: folder content -->
-            <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
-                <memberFile name="*.FLAG" minCount="1"/>
-            </folderContent>
+            <!-- checks omitted ... -->            
             
             <!-- VISIT: FLAG files -->
             <file foxpath="*.FLAG">
-                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
-                
-                <!-- CHECK: file empty -->
-                <fileSize eq="0" eqMsg="FLAG file not empty"/>
+                <!-- checks omitted ... -->
             </file>
 
             <!-- VISIT country airports files -->
             <file foxpath="airports-*.xml except *luxembourg*">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
-                <!-- CHECK various resource values -->      
+                <!-- CHECK various resource values -->
                 <values>
                     <value exprXP="//type" 
                         minCount="1" minCountMsg="Missing data: type"
@@ -54,7 +44,7 @@
                     <value exprXP="//(latitude, longitude)" 
                         minCount="1" minCountMsg="Missing data: latitude, longitude"
                         datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
-                    <value exprXP="//airport/@id"  
+                    <value exprXP="//airport/@id" 
                         minCount="1" minCountMsg="Missing data: ID"
                         distinct="true"/>                        
                 </values>

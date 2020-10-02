@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Same validation as in air01.gfox.xml, but more compact notation.
+    We added the check of a file resource: we visit all FLAG files and check
+    their size, which must be 0.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
           xmlns="http://www.greenfox.org/ns/schema"
@@ -13,14 +14,15 @@
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <targetSize count="1" countMsg="Missing folder"/>
-
-            <!-- CHECK: folder content -->
-            <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
-                <memberFile name="*.FLAG" minCount="0"/>
-            </folderContent>
+            <!-- checks omitted ... -->
+            
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
+                
+                <!-- CHECK: file empty -->
+                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+            </file>
         </folder>
     </domain>
 

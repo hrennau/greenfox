@@ -1,0 +1,22 @@
+Now we start to CONNECT THE RESOURCES: we add a constraint which looks not only
+at the resource to be validated, but also a second resource and requires the
+two to be somehow related. Most often, "looking at resources" means evaluating 
+expressions in their context - one expression in the context of the first 
+resource, another expression in the context of the other resource. And the 
+relationship between the resources is observed by comparing the two values.
+    
+A VALUE COMPARED constraint is thus composed of 
+    (a) a specification which resource(s) to use as the second resource
+    (b) an expression to be evaluated in the context of the first resource 
+    (c) an expression to be evaluated in the context of the second resource 
+    (d) further attributes or child elements specifying what to expect from 
+        the pair of expression values.
+        
+Here, we check that the @country value in the XML file is equal to the 
+"country" in the accompanying JSON document. So the XML document is compared
+with a JSON document, which is selected by the @foxpath expression on 
+<valueCompared>. A Foxpath expression is only one of several ways how the 
+partner resource can be selected.
+    
+Also note that the JSON document is parsed into an XML node tree and thus made 
+accessible to XPath navigation. XPath everywhere!

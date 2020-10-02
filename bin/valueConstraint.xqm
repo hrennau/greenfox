@@ -166,6 +166,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
     for $cmp in $constraintElem/(
         @eq, @ne, @lt, @le, @gt, @ge, 
         @matches, @notMatches, @like, @notLike, 
+        @min, @max,
         @length, @minLength, @maxLength, 
         @datatype)    
     let $cmpTrue :=

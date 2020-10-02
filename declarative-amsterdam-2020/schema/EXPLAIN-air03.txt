@@ -1,0 +1,27 @@
+We added checking of country airports files (airports-*.xml). We declare 
+several VALUE CONSTRAINTS, represented by <value> elements. A <value> element 
+specifies an expression (typically: XPath expression, @exprXP) and declares 
+constraints which apply to the expression value (@eq, @lt, @matches, @distinct, 
+@datatype, ...).
+
+The expression is evaluated in the context of the target resource. More 
+precisely, it is evaluated in the context of the root node of the resource, 
+unless the constraint has a <focusNode> ancestor.
+
+Every constraint can be associated with an "error message" (@eqMsg, @ltMsg 
+etc.). The messages are represented by attributes with a name obtained by 
+appending the suffix "Msg" to the name of the constraint node (e.q. @eqMsg).  
+Success messages are also possible, they have the name suffix "MsgOK". (Not
+used in this example.)
+    
+Quite important are cardinality constraints (@count, @minCount, @maxCount), 
+as without them a typo may lead to an empty result which "passes" all kinds 
+of constraints!
+
+Before comparison, items may be CAST to a datatype specified by @useDatatype,
+or EDITED as specified by @useString - e.g. set to lower-case ('lc'),
+whitespace-normalised ('ns') or trimmed ('tr').  
+
+By default, conformance requires ALL ITEMS to meet the condition. When using
+@quant equal "some", the constraint is relaxed so that only AT LEAST ONE
+item must conform.

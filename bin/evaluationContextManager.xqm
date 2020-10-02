@@ -294,7 +294,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                 $mediatype eq 'csv'
             return
                 if (not($required)) then ()
-                else f:csvDoc($filePath, $resourceShape)
+                else f:csvDoc($filePath, $resourceShape, ())
          
 
         let $linesdoc :=
@@ -361,7 +361,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                 self::gx:validatorXPath,
                 @xpath,
                 @*[ends-with(name(), 'XPath')],
-                (., gx:value, gx:valuePair)/@*[ends-with(name(), 'XP')]
+                (., gx:value, gx:valuePair, gx:valueCompared)/@*[ends-with(name(), 'XP')]
             )
         ) => distinct-values()            
         let $foxpathExpressions := (
@@ -371,7 +371,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                 self::gx:foxpath/@expr,
                 self::gx:validatorFoxpath,
                 @foxpath,
-                (., gx:foxvalue, gx:foxvaluePair)/@*[ends-with(name(), 'FOX')]
+                (., gx:foxvalue, gx:foxvaluePair, gx:foxvalueCompared)/@*[ends-with(name(), 'FOX')]
             )
         ) => distinct-values()
         return (
@@ -444,6 +444,7 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $linesdoc as document-node()?,
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
+    (: let $_DEBUG := trace($reqBindings, concat('___FILEPATH: ', $filePath, ' ; ___REQ_BINDINGS: ')) :)
     let $doc := ($xdoc, $jdoc, $csvdoc, $htmldoc)[1]    
     let $reqDocs := map:merge((
         $xdoc ! map:entry('xdoc', .),

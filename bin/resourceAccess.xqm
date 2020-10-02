@@ -123,13 +123,13 @@ declare function f:fox-csv-doc($uri as xs:string,
  : @param params one or several elements which may have attributes controllig the parsing
  : @return the csv document, or the empty sequence of parsing is not successful
  :)
-declare function f:csvDoc($filePath as xs:string, $params as element()+)
+declare function f:csvDoc($filePath as xs:string, $params as element()*, $paramsMap as map(xs:string, item()*)?)
         as document-node()? {
-    let $separator := ($params/@csv.separator,  'comma')[1]
-    let $header := ($params/@csv.header, 'no')[1]
-    let $names := ($params/@csv.names, 'direct')[1]
-    let $quotes := ($params/@csv.quotes, 'yes')[1]
-    let $backslashes := ($params/@csv.backslashes, 'no')[1]
+    let $separator := ($params/@csv.separator, $paramsMap?csv.separator,  'comma')[1]
+    let $header := ($params/@csv.header, $paramsMap?csv.header, 'no')[1]
+    let $names := ($params/@csv.names, $paramsMap?csv.namese, 'direct')[1]
+    let $quotes := ($params/@csv.quotes, $paramsMap?quotes, 'yes')[1]
+    let $backslashes := ($params/@csv.backslashes, $paramsMap?backslashes, 'no')[1]
     return
         f:fox-csv-doc($filePath, $separator, $header, $names, $quotes, $backslashes, ())
 };   

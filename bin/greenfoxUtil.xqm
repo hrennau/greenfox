@@ -673,10 +673,13 @@ declare function f:applyUseDatatype($value as item()*, $useDatatype as xs:QName?
 declare function f:applyUseString($value as item()*, $useString as xs:string*)
         as item()* {
     if (empty($useString)) then $value else
-    let $interm := if ($useString = 'sv') then $value ! string(.) else $value
-    let $interm := if ($useString = 'lc') then $interm ! lower-case(.) else $interm
+    let $interm := if ($useString = 'lc') then $value ! lower-case(.) else $value
     let $interm := if ($useString = 'uc') then $interm ! upper-case(.) else $interm
-    let $interm := if ($useString = 'ns') then $interm ! normalize-space(.) else $interm    
+    let $interm := 
+        if ($useString = 'ns') then $interm ! normalize-space(.) 
+        else if ($useString = 'tr') then $interm ! replace(., '^\s+|\s+$', '')
+        else if ($useString = 'sv') then $interm ! string(.)
+        else $interm
     return $interm
 };        
 

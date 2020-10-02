@@ -115,7 +115,7 @@ S h a p e s
         </xs:sequence>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
         <xs:attribute name="id" type="xs:NCName"/>
-        <xs:attribute name="mediatype" type="xs:string"/>
+        <xs:attribute name="mediatype" type="t:MediatypeEnumType"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
     </xs:complexType>
     
@@ -702,6 +702,7 @@ Enumerations
             <xs:enumeration value="lc"/>    
             <xs:enumeration value="uc"/>
             <xs:enumeration value="ns"/>
+            <xs:enumeration value="tr"/>
             <xs:enumeration value="sv"/>
         </xs:restriction>
     </xs:simpleType>
@@ -904,6 +905,7 @@ Attribute groups
         <xs:attribute name="uriTemplate" type="xs:string"/>
         <xs:attribute name="recursive" type="xs:boolean"/>        
         <xs:attribute name="targetMediatype" type="xs:string"/>        
+        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
     </xs:attributeGroup>
     
     <xs:attributeGroup name="LinkRefOrDefAttGroup">

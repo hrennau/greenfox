@@ -140,6 +140,8 @@ declare function f:parseLinkDef($linkDef as element())
                     else if ($targetXP) then 'xml' 
                     else if ($recursive and $requiresContextNode) then 'xml'
                     else () 
+            let $csvAtts :=
+                $linkDef/(@csv.separator, @csv.header, @csv.format, @csv.lax, @csv.quotes, @csv.backslashes)
             return
                 map:merge((
                     $connector ! map:entry('connector', .),
@@ -149,9 +151,10 @@ declare function f:parseLinkDef($linkDef as element())
                     $uriXP ! map:entry('uriXP', .),
                     $uriTemplate ! map:entry('uriTemplate', .),                    
                     $targetMediatype ! map:entry('targetMediatype', .),
-                    $recursive ! map:entry('recursive', .),
-                    $contextXP ! map:entry('contextXP', .),
-                    $targetXP ! map:entry('targetXP', .),   
+                    $recursive ! map:entry('recursive', string(.)),
+                    $contextXP ! map:entry('contextXP', string(.)),
+                    $targetXP ! map:entry('targetXP', string(.)),   
+                    $csvAtts ! map:entry(local-name(.), string(.)),
                     
                     if (not($templateVars)) then () else
                         map:entry('templateVars', map:merge($templateVars ! map:entry(@name, .))),

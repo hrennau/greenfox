@@ -14,13 +14,13 @@
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <targetSize count="10" countMsg="Missing folder"/>
+            <targetSize count="1" countMsg="Missing folder"/>
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
                 <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" maxCount="3"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -28,7 +28,7 @@
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="1000" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>

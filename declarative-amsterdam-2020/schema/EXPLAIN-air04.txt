@@ -1,0 +1,32 @@
+We added a couple of ValuePair constraint. Such constraints are represented by 
+<valuePair> elements with attributes specifying two expressions (usually XPath 
+expressions - @expr1XQ, @expr2XQ) and attributes and/or child elements 
+declaring constraints. Notably, the @cmp attribute specifies a certain kind of 
+comparison. 
+
+To give you an idea, the possible attribute values are: 
+- eq, ne, lt, le, gt, ge - pairwise value comparison 
+- in - all items from value 1 are also items from 2
+- notin - value 1 and value 2 are disjoint, they have no common items+
+- includes - value 1 includes all items from value2
+- sameTerms - all items from 1 are also items from 2, and vice versa
+- deepEqual - the values are deep-equal 
+
+Before comparison, items may be CAST to a datatype specified by @useDatatype,
+or EDITED as specified by @useString - e.g. set to lower-case ('lc'),
+whitespace-normalised ('ns') or trimmed ('tr').  
+
+By default, conformance requires ALL ITEMS to meet the condition. When using
+@quant equal "some", the constraint is relaxed so that only AT LEAST ONE
+item must conform.
+
+By default, both expressions are evaluated in the same CONTEXT - root or 
+inner node of the target resource. Using @expr2Context="item", the second
+expression is re-evaluated for each item from value 1, using that item
+as a context item. In this case a further value of @quant is available,
+"someForEach" which means that for each item from value 1 there must be
+at least one conformant item from value 2.  
+
+Note that the second constraint uses an expression which references a VARIABLE 
+$fileName - there is a small number of preset variable bindings accessible in 
+constraint expressions.
