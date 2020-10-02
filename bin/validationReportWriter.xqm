@@ -322,6 +322,7 @@ declare function f:writeValidationReport_sum(
                tt:repeatChar($hsepChar2, $countRedWidth), $hsepChar2, $hsepChar2, '|',
                tt:repeatChar($hsepChar2, $countGreenWidth), $hsepChar2, $hsepChar2)
     let $lines := (
+        f:displayMsg($gfox),
         '',
         'G r e e n f o x    r e p o r t    s u m m a r y',
         '',
@@ -361,7 +362,9 @@ declare function f:writeValidationReport_sum(
                     $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
                     ' ')
                 )
-        )
+        ),
+        '',
+        ''
     )
     let $report := string-join($lines, '&#xA;')
     return $report
@@ -466,4 +469,21 @@ declare function f:displayResultResults($resources as element()*)
         $r
     )
         
+};      
+
+declare function f:displayMsg($gfox as element(gx:greenfox))
+        as xs:string? {
+    if (not(contains($gfox/base-uri(.), 'declarative-amsterdam-2020/schema/air01.gfox.xml'))) then () else
+    (
+    '=============================================================================',
+    '=                                                                           =',
+    '=                   W  E  L  C  O  M  E        A  T                         =',
+    '=                                                                           =',
+    '=     D  E  C  L  A  R  A  T  I  V  E        A  M  S  T  E  R  D  A  M      =',
+    '=                                                                           =',  
+    '=                                 2  0  2  0                                =',
+    '=                                                                           =',
+    '=============================================================================',
+    ''
+    ) => string-join('&#xA;')
 };        

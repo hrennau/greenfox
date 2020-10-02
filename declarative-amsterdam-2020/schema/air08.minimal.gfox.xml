@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    We submit the index document to XSD validation, and we check that all href
+    links can be recursively resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="Some root folder">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <!-- checks omitted ... -->            
+
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <!-- checks omitted ... -->                
+            </file>
+            
+            <!-- VISIT: index file (XML) -->
+            <file foxpath="airports.xml">
+                <targetSize count="1" countMsg="Missing index file"/>
+                
+                <!-- CHECK: XSD valid -->
+                <xsdValid xsdFOX="${domain}\resources\xsd\*.xsd"/>
+                
+                <!-- CHECK: href links can be resolved, recursively -->
+                <links hrefXP="//@href" recursive="true" resolvable="true" minCountTargetResources="60"/>
+            </file>            
+            
+            <!-- VISIT: country airports files (XML) -->
+            <file foxpath="airports-*.xml">
+                <!-- checks omitted ... -->                
+                
+                <!-- VISIT: matching JSON file --> 
+                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
+                    <!-- checks omitted ... -->                    
+
+                    <!-- VISIT: href reference targets -->
+                    <file hrefXP="//href">
+                        <!-- checks omitted ... -->                        
+                    </file>
+                </file>
+            </file>            
+        </folder>
+    </domain>
+
+</greenfox>
+
+

@@ -29,20 +29,6 @@
                 <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" mediatype="json">
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
 
-                    <!-- Latitude and Longitude >= country minimum values (from cow.csv) -->
-                    <valuesCompared foxpath="${domain}\resources\geo\cow.csv" targetMediatype="csv" csv.separator="semicolon" csv.header="yes">
-                        <valueCompared expr1XP="//latitude[. > 10]" minCount1="0"
-                            expr2XP="//record[ISOen_name/normalize-space(lower-case(.)) eq 
-                            replace($fileName, '.+-(.*).json', '$1')]
-                            /minlatitude" count2="1"
-                            cmp="ge" useDatatype="decimal"/>    
-                        <valueCompared expr1XP="//longitude[. > -60]" minCount1="0"
-                            expr2XP="//record[ISOen_name/normalize-space(lower-case(.)) eq 
-                            replace($fileName, '.+-(.*).json', '$1')]
-                            /minlongitude" count2="1"
-                            cmp="ge" useDatatype="decimal"/>    
-                    </valuesCompared>
-                    
                     <!-- CHECK: href links resolvable -->
                     <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>
                 </file>

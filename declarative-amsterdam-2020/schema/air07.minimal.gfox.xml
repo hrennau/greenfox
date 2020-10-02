@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    We extend our checking of the JSON document: the tree structure is
-    validated against an expected tree structure.
+    We follow the href links, visit the link targets and validate their tree structure.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
           xmlns="http://www.greenfox.org/ns/schema"
@@ -30,40 +29,33 @@
                 <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
                     <!-- checks omitted ... -->                    
 
-                    <!-- CHECK: tree structure -->
-                    <docTree>
-                        <node locNP="/json/airportsForCountry">
-                            <node locNP="@type"/>
-                            <node locNP="country"/>
-                            <node locNP="countAirports"/>
-                            <node locNP="airport">
+                    <!-- VISIT: href reference targets -->
+                    <file hrefXP="//href">
+                        <targetSize resolvable="true"/>
+                        
+                        <!-- CHECK: tree structure -->
+                        <docTree>
+                            <node locNP="/json/airport" closed="true">
                                 <node locNP="@type"/>
-                                <node locNP="_" maxCount="unbounded" closed="true">
+                                <node locNP="id"/>
+                                <node locNP="iata"/>
+                                <node locNP="icao"/>
+                                <node locNP="createdAt"/>
+                                <node locNP="name"/>
+                                <node locNP="city"/>
+                                <node locNP="country"/>                            
+                                <node locNP="geo" closed="true">
                                     <node locNP="@type"/>
-                                    <node locNP="id"/>
-                                    <node locNP="iata" minCount="0"/>
-                                    <node locNP="icao"/>
-                                    <node locNP="createdAt"/>
-                                    <node locNP="latitude" minCount="0"/>
-                                    <node locNP="longitude" minCount="0"/>
-                                    <node locNP="href" minCount="0"/>
-                                    <node locNP="name" minCount="0"/>
-                                    <node locNP="city" minCount="0"/>
-                                    <node locNP="country" minCount="0"/>                                    
-                                    <node locNP="geo" minCount="0" closed="true">
-                                        <node locNP="@type"/>
-                                        <node locNP="latitude" minCount="0"/>
-                                        <node locNP="longitude" minCount="0"/>
-                                        <node locNP="altitude" minCount="0"/>                                        
-                                    </node>
-                                    <node locNP="temporal" minCount="0"/>
-                                    <node locNP="type" minCount="0"/>
-                                    <node locNP="source1" minCount="0"/>
+                                    <node locNP="latitude"/>
+                                    <node locNP="longitude"/>
+                                    <node locNP="altitude"/>                                        
                                 </node>
+                                <node locNP="temporal"/>
+                                <node locNP="type"/>
+                                <node locNP="source1" minCount="0"/>                            
                             </node>
-                        </node>
-                    </docTree>
-                    
+                        </docTree>
+                    </file>
                 </file>
             </file>
         </folder>

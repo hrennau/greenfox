@@ -1,4 +1,3 @@
-We extend our checking of the JSON document: the tree structure is
-validated against an expected tree structure.
+We follow the href links, visit the link targets and validate their tree structure.
 
 (to be continued)
