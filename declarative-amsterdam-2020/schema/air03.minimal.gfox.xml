@@ -15,17 +15,12 @@
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    
-    <domain path="${domain}" name="Some root folder">
+    <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <!-- checks omitted ... -->            
+            <!-- checks & shapes omitted ... -->            
             
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
-                <!-- checks omitted ... -->
-            </file>
-
             <!-- VISIT country airports files -->
             <file foxpath="airports-*.xml except *luxembourg*">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>

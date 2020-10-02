@@ -13,17 +13,11 @@
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    
-    <domain path="${domain}" name="Some root folder">
+    <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <targetSize count="1" countMsg="Missing folder"/>
-            <!-- checks omitted ... -->
-            
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
-                <!-- checks omitted ... -->                
-            </file>
+            <!-- checks & shapes omitted ... -->         
             
             <file foxpath="airports-*.xml">
                 <!-- checks omitted ... -->
