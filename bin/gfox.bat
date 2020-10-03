@@ -91,7 +91,7 @@ if not "%PARAMS%"=="" (
     set PARAMS_PARAM=,params=%PARAMS%
     set PARAMS2=!PARAMS:,=;!
     set PARAMS_PARAM=,params=!PARAMS2!
-    #echo "!PARAMS_PARAM!"
+    rem echo "!PARAMS_PARAM!"
     
 )
 rem exit
