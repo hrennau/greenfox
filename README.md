@@ -1,7 +1,8 @@
 # greenfox
 A command-line tool for validating filesystem trees against a greenfox schema.
 
-Not for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 -
+Note for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 -
+
    The contents of this project will still change until Thursday -
    please make sure to checkout again on Wednesday, Oct 07, evening
     
@@ -17,14 +18,18 @@ Use options in order to select a report type:
 - a - report type "Statistics short (no resources listed)
 - b - report type "Statistics standard (red resources listed)
 - c - report type "Statistics long (red and green resources listed)
-- r - all results for red resources, grouped by resource 
-- w - all results, grouped by resource
+- r - report type "Red" (all results for red resources, grouped by resource) 
+- w - report type "White" (all results, grouped by resource)
 
 Example calls:
 
+
+```
 gfox ../schema/air01.gfox.xml
 gfox -c ../schema/air01.gfox.xml
 gfox -r ../schema/air01.gfox.xml
+
+```
 
 For an introduction see in the **documentation folder**:
 
