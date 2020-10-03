@@ -35,7 +35,8 @@ if "%name%"=="-a" (set RTYPE=sum1
 ) else if "%name%"=="-w" (set RTYPE=white
 ) else if "%name%"=="-t" (set RTYPE=!VALUE!
    shift   
-) else if "%name%"=="-p" (set PARAMS=!VALUE!
+) else if "%name%"=="-p" (
+   if "%PARAMS%"=="" (set PARAMS=!VALUE!) else (set PARAMS=!PARAMS!;!VALUE!)
    shift   
  ) else (
    echo Unknown option: %name%
@@ -46,6 +47,8 @@ if "%name%"=="-a" (set RTYPE=sum1
 )
 goto :NEXTPAR
 :ENDPAR 
+
+echo PARAMS: %PARAMS%
 
 if "%RTYPE%"=="white" (rem        
 ) else if "%RTYPE%"=="red" (rem
@@ -86,14 +89,15 @@ if "%schema%"=="?" (
 
 set RTYPE_PARAM=
 if not "%RTYPE%"=="" (set RTYPE_PARAM=,reportType=%RTYPE%)
-set PARAMS_PARAM=
-if not "%PARAMS%"=="" (
-    set PARAMS_PARAM=,params=%PARAMS%
-    set PARAMS2=!PARAMS:,=;!
-    set PARAMS_PARAM=,params=!PARAMS2!
-    rem echo "!PARAMS_PARAM!"
-    
-)
+if not "%PARAMS%"=="" (set PARAMS_PARAM=,params=%PARAMS%)
+rem #set PARAMS_PARAM=
+rem #if not "%PARAMS%"=="" (
+rem #    set PARAMS_PARAM=,params=%PARAMS%
+rem #    set PARAMS2=!PARAMS:,=;!
+rem #    set PARAMS_PARAM=,params=!PARAMS2!
+rem #    rem echo "!PARAMS_PARAM!"
+rem #    
+rem #)
 rem exit
 
 
