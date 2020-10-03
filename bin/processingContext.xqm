@@ -246,9 +246,20 @@ declare function f:externalContext($params as xs:string?,
 declare function f:checkExternalContext($externalContext as map(*), 
                                         $contextElem as element(gx:context))
         as empty-sequence() {
-    let $missingValues := 
-        $contextElem/gx:field[not(@value)]/@name
-        [not(map:contains($externalContext, .))]
+    let $internalKeys := $contextElem/gx:field/@name/string()        
+    let $externalKeys := map:keys($externalContext)
+    let $externalKeysUnknown := $externalKeys[not(. = $internalKeys)][not(. eq 'schemaPath')] => sort()
+    return
+        if (exists($externalKeysUnknown)) then
+            let $plural := 's'[count($externalKeysUnknown) gt 1]
+            return
+                error(QName((), 'INVALID_ARG'), 
+                    concat('Unknown parameter', $plural, ': ', 
+                        string-join($externalKeysUnknown, ', '))) 
+        else
+        
+    let $missingValues :=
+        $contextElem/gx:field[not(@value)]/@name[not(map:contains($externalContext, .))]
     return
         if (empty($missingValues)) then ()
         else
