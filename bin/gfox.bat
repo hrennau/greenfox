@@ -87,7 +87,16 @@ if "%schema%"=="?" (
 set RTYPE_PARAM=
 if not "%RTYPE%"=="" (set RTYPE_PARAM=,reportType=%RTYPE%)
 set PARAMS_PARAM=
-if not "%PARAMS%"=="" (set PARAMS_PARAM=,params=%PARAMS%)
+if not "%PARAMS%"=="" (
+    set PARAMS_PARAM=,params=%PARAMS%
+    set PARAMS2=!PARAMS:,=;!
+    set PARAMS_PARAM=,params=!PARAMS2!
+    #echo "!PARAMS_PARAM!"
+    
+)
+rem exit
+
+
 set DOMAIN_PARAM=
 if not "%DOMAIN%"=="" (set DOMAIN_PARAM=,domain=%DOMAIN%)
 basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%" %HERE%/greenfox.xq
