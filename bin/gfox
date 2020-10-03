@@ -2,7 +2,7 @@
 
 function usage {
     echo
-    echo 'Usage: greenfox [-a -b -c -r -w] [-t type] schema [domain]'
+    echo 'Usage: greenfox [-a -b -c -r -w] [-t type] [-p parameters] schema [domain]'
     echo
     echo 'schema: Greenfox schema file; relative or absolute path'
     echo 'domain: Validation root resource; relative or absolute path'
@@ -13,6 +13,7 @@ function usage {
     echo '-r      : report type = red'
     echo '-w      : report type = white'
     echo '-t      : the report type; one of: sum1 sum2 sum3 red white wresults rresults'
+    echo '-p      : parameters as name=value pairs, comma-separated'
     echo
 }
 
@@ -58,10 +59,8 @@ while [ $# -gt 0 ] && [ ${1::1} == '-' ]; do
         -c) RTYPE=sum3  ;;
         -r) RTYPE=red   ;;
         -w) RTYPE=white ;;
-        -t)
-            RTYPE="$2"
-            shift
-        ;;
+        -t) RTYPE="$2"  ; shift ;;
+        -p) PARAMS="$2" ; shift ;;
         *)
             fail "Unknown option: $OPT"
         ;;
@@ -94,5 +93,6 @@ fi
 
 [ -n "$RTYPE"  ] && RTYPE_PARAM=",reportType=$RTYPE"
 [ -n "$domain" ] && DOMAIN_PARAM=",domain=$domain"
+[ -n "$PARAMS" ] && PARAMS_PARAM=",params=${PARAMS/,/;}"
 
-basex -b "request=val?gfox=${schema}${RTYPE_PARAM}${DOMAIN_PARAM}" "$HERE"/greenfox.xq
+basex -b "request=val?gfox=${schema}${RTYPE_PARAM}${DOMAIN_PARAM}${PARAMS_PARAM}" "$HERE"/greenfox.xq
