@@ -1,40 +1,54 @@
 # Greenfox
 A command-line tool for validating filesystem trees against a Greenfox schema.
 
-### Note for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 ### 
 
-*   The contents of this project will still change until Thursday -
-   please make sure to checkout again on Wednesday, Oct 07, evening.
-*    
+----------
+
+
+Notes for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 
+
+- Tutorial material found here: $greenfox/declarative-amsterdam-2020
+- Installation hints foud here: $greenfox/declarative-amsterdam-2020/install/README.INSTALL.txt
+- The material is preliminary and will change until Thursday.
+- Please make sure to UPDATE your project on Wednesday, Oct 07, evening.
+----------
+
+
+
 A **Greenfox schema** is a set of conditions constraining a **file system tree**. 
-The file system tree can be **validated** against the schema, using gfox, the greenfox processor. 
+The file system tree can be **validated** against the schema, using **gfox**, the greenfox processor. 
 The result of validation is a **validation report**. A validation report indicates **conformance** - 
-whether the file system tree conforms to the schema - and it supplies **validation results**. 
-Each validation result describes the outcome of validating a single resource against a single 
-constraint. 
+whether the file system tree conforms to the schema - and it supplies **validation results** or **result statistics**. 
 
-Use options in order to select a report type:
+Use options -[abcrw] in order to select a report type:
 
-- a - report type "Statistics short (no resources listed)
-- b - report type "Statistics standard (red resources listed)
-- c - report type "Statistics long (red and green resources listed)
-- r - report type "Red" (all validation results for red resources, grouped by resource) 
-- w - report type "White" (all validation results, grouped by resource)
+- -a = report type "Statistics short" (no resources listed)
+- -b = report type "Statistics standard" (red resources listed)
+- -c = report type "Statistics long" (red and green resources listed)
+- -r = report type "Red" (all validation results for red resources, grouped by resource) 
+- -w = report type "White" (all validation results, grouped by resource)
+
+Usage:
+
+- The first call parameter is the **schema path**
+- The optional second parameter is the **domain path** (root folder of the file system subtree to be validated)
 
 Example calls:
-
-
 ```
 gfox ../schema/air01.gfox.xml
 gfox -c ../schema/air01.gfox.xml
 gfox -r ../schema/air01.gfox.xml
+gfox /path/to/my.gfox.xml /path/to/domain
+gfox  -w /path/to/my.gfox.xml /path/to/domain
+gfox  -a /path/to/my.gfox.xml /path/to/domain
 ```
 
 For an introduction see in the **documentation folder**:
 
 - greenfox-xmlprague-2020.pdf
 - greenfox-xmlprague-2020.pptx
-- greenfox-manual.docx
+
+More material to appear before Thursday, October 8, 2020.
 
 For schema examples, see folder example-schemas.
 
