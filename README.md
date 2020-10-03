@@ -30,8 +30,12 @@ Use options -[abcrw] in order to select a report type:
 
 Usage:
 
-- The first call parameter is the **schema path**
-- The optional second parameter is the **domain path** (root folder of the file system subtree to be validated)
+```
+   gfox [-abcrw] path-to-schema [path-to-domain]
+```
+
+- path-to-schema - relative or absolute path of the Greenfox schema file
+- path-to-domain - relative or absolute path of the root folder of the file system tree to be validated
 
 Example calls:
 ```
