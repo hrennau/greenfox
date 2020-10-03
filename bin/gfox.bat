@@ -13,6 +13,7 @@ set HERE=%XERE:\=/%
 
 :: defaults
 set RTYPE=sum2
+set PARAMS=
 
 :NEXTPAR
 set name=%~1
@@ -33,6 +34,8 @@ if "%name%"=="-a" (set RTYPE=sum1
 ) else if "%name%"=="-r" (set RTYPE=red
 ) else if "%name%"=="-w" (set RTYPE=white
 ) else if "%name%"=="-t" (set RTYPE=!VALUE!
+   shift   
+) else if "%name%"=="-p" (set PARAMS=!VALUE!
    shift   
  ) else (
    echo Unknown option: %name%
@@ -63,7 +66,7 @@ set domain=%1
 
 if "%schema%"=="?" (
     echo.
-    echo Usage: greenfox [-a -b -c -r -w] [-t type] schema [domain]
+    echo Usage: greenfox [-a -b -c -r -w] [-t type] [-p params] schema [domain]
     echo.
     echo schema: Greenfox schema file; relative or absolute path
     echo domain: Validation root resource; relative or absolute path
@@ -73,12 +76,18 @@ if "%schema%"=="?" (
     echo -c      : report type = sum3        
     echo -r      : report type = red
     echo -w      : report type = white        
-    echo -t      : the report type; one of: sum1 sum2 sum3 red white wresults rresults 
+    echo -t      : the report type; one of: sum1 sum2 sum3 red white wresults rresults
+    echo -P      : parameters as name=value pairs, semicolon-separated; due to shell 
+    echo             syntax quirks, it is recommended to use a blank before the first =
+    echo             e.g. -p "ignValue =eq;ignSchema=abc.xml"
     echo.
     exit /b
 )
+
 set RTYPE_PARAM=
 if not "%RTYPE%"=="" (set RTYPE_PARAM=,reportType=%RTYPE%)
+set PARAMS_PARAM=
+if not "%PARAMS%"=="" (set PARAMS_PARAM=,params=%PARAMS%)
 set DOMAIN_PARAM=
 if not "%DOMAIN%"=="" (set DOMAIN_PARAM=,domain=%DOMAIN%)
-basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%" %HERE%/greenfox.xq
+basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%" %HERE%/greenfox.xq
