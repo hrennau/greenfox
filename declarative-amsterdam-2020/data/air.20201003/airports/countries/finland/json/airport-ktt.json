@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":438,
+    "iata":"KTT",
+    "icao":"EFKT",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Kittilä Airport",
+    "city":"Kittila",
+    "country":"Finland",
+    "geo":{
+      "latitude":67.700996398926,
+      "longitude":24.846799850464,
+      "altitude":644
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

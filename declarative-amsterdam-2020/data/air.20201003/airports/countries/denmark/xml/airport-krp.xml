@@ -1,0 +1,17 @@
+<airport id="612" iata="KRP" icao="EKKA" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Karup Airport</name>
+  <city>Karup</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>56.29750061035156</latitude>
+    <longitude>9.124629974365234</longitude>
+    <altitude>170</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

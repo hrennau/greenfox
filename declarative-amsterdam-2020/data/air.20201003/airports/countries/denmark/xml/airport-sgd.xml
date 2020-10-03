@@ -1,0 +1,17 @@
+<airport id="619" iata="SGD" icao="EKSB" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Sønderborg Airport</name>
+  <city>Soenderborg</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>54.96440124511719</latitude>
+    <longitude>9.791729927062988</longitude>
+    <altitude>24</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

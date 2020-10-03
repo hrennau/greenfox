@@ -926,6 +926,8 @@ Attribute groups
         <xs:attribute name="hrefXP" type="xs:string"/>
         <xs:attribute name="uriXP" type="xs:string"/>
         <xs:attribute name="uriTemplate" type="xs:string"/>
+        <xs:attribute name="reflector1" type="xs:string"/>
+        <xs:attribute name="reflector2" type="xs:string"/>
         <xs:attribute name="recursive" type="xs:boolean"/>        
         <xs:attribute name="targetMediatype" type="xs:string"/>        
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>

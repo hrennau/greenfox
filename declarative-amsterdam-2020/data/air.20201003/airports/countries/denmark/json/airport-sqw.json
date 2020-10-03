@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":622,
+    "iata":"SQW",
+    "icao":"EKSV",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Skive Airport",
+    "city":"Skive",
+    "country":"Denmark",
+    "geo":{
+      "latitude":56.550201416015625,
+      "longitude":9.172980308532715,
+      "altitude":74
+    },
+    "temporal":{
+      "timezone":1,
+      "tzTimezone":"Europe\/Copenhagen",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

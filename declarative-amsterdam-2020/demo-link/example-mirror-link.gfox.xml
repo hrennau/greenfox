@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Checks that all schemas in $greenfox/schema have the same content as the corresponding schema
+    in $greenfox/schema-initial.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-constraint/DocSimilar/schemas-unchanged"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\declarative-amsterdam-2020\data"/>
+        <field name="ignSchemas" value="foo.gfox.xml bar.gfox.xml"/>
+    </context>
+    
+    <linkDef name="refAirports"
+             reflector1="${domain}\air"
+             reflector2="${domain}\air.20201003"
+             />
+    
+    <domain path="${domain}" name="dc2020">
+        
+        <!-- VISIT: index folder -->
+        <folder foxpath="air\airports\countries" id="indexFolderShape">
+            <targetSize countMsg="Missing folder: countries" count="1"/>
+
+            <!-- VISIT: country airports document -->
+            <file foxpath=".\\airport-*.xml" id="countryAirportsFileShape">
+                <targetSize minCount="3" minCountMsg="Less country airports documents than expected"/>
+                
+                <!-- CHECK: documents equal to reference documents -->
+                <docSimilar linkName="refAirports" countTargetResources="1">
+                    <ignoreValue kind="attribute" localName="createdAt"/>
+                </docSimilar>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

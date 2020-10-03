@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Checks that the schemas within folder 'demo-constraint' contall all types of constraints -
-    Conditional, DocSimilar, DocTree, FileDate, FileName, FileSize, ...
+    Checks that all files with file extension .xml and .json are well-formed XML and JSON
+    documents, respectively.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Mediatype/valid-xml-and-json"
           xmlns="http://www.greenfox.org/ns/schema">

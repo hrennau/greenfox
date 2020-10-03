@@ -1,0 +1,23 @@
+{
+  "airport":{
+    "id":458,
+    "iata":"TMP",
+    "icao":"EFTP",
+    "createdAt":"2020-09-28T21:18:24.131+02:00",
+    "name":"Tampere-Pirkkala Airport",
+    "city":"Tampere",
+    "country":"Finland",
+    "geo":{
+      "latitude":61.414100646973,
+      "longitude":23.604400634766,
+      "altitude":390
+    },
+    "temporal":{
+      "timezone":2,
+      "tzTimezone":"Europe\/Helsinki",
+      "dst":"E"
+    },
+    "type":"airport",
+    "source1":"OurAirports"
+  }
+}

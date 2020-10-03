@@ -1,0 +1,17 @@
+<airport id="608" iata="BLL" icao="EKBI" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Billund Airport</name>
+  <city>Billund</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>55.7402992249</latitude>
+    <longitude>9.15178012848</longitude>
+    <altitude>247</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

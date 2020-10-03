@@ -1,0 +1,17 @@
+<airport id="613" iata="BYR" icao="EKLS" createdAt="2020-09-28T21:18:24.131+02:00">
+  <name>Læsø Airport</name>
+  <city>Laeso</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>57.277198791503906</latitude>
+    <longitude>11.000100135803223</longitude>
+    <altitude>25</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

@@ -7,7 +7,7 @@
         "id":417,
         "iata":"ENF",
         "icao":"EFET",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":68.362602233887,
         "longitude":23.424299240112,
         "href":"..\/countries\/finland\/json\/airport-enf.json"
@@ -15,7 +15,7 @@
       {
         "id":418,
         "icao":"EFEU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Eura Airport",
         "city":"Eura",
         "country":"Finland",
@@ -36,7 +36,7 @@
         "id":419,
         "iata":"KEV",
         "icao":"EFHA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.856039,
         "longitude":24.786686,
         "href":"..\/countries\/finland\/json\/airport-kev.json"
@@ -45,7 +45,7 @@
         "id":420,
         "iata":"HEM",
         "icao":"EFHF",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.254600524902344,
         "longitude":25.042800903320312,
         "href":"..\/countries\/finland\/json\/airport-hem.json"
@@ -54,7 +54,7 @@
         "id":421,
         "iata":"HEL",
         "icao":"EFHK",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.317199707031,
         "longitude":24.963300704956,
         "href":"..\/countries\/finland\/json\/airport-hel.json"
@@ -62,7 +62,7 @@
       {
         "id":422,
         "icao":"EFHM",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Hameenkyro Airport",
         "city":"Hameenkyro",
         "country":"Finland",
@@ -82,7 +82,7 @@
       {
         "id":423,
         "icao":"EFHN",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Hanko Airport",
         "city":"Hanko",
         "country":"Finland",
@@ -103,7 +103,7 @@
         "id":424,
         "iata":"HYV",
         "icao":"EFHV",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.6543998718,
         "longitude":24.8810997009,
         "href":"..\/countries\/finland\/json\/airport-hyv.json"
@@ -111,7 +111,7 @@
       {
         "id":425,
         "icao":"EFIK",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Kiikala Airport",
         "city":"Kikala",
         "country":"Finland",
@@ -131,7 +131,7 @@
       {
         "id":426,
         "icao":"EFIM",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Immola Airport",
         "city":"Immola",
         "country":"Finland",
@@ -152,7 +152,7 @@
         "id":427,
         "iata":"KTQ",
         "icao":"EFIT",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.1661,
         "longitude":30.073601,
         "href":"..\/countries\/finland\/json\/airport-ktq.json"
@@ -161,7 +161,7 @@
         "id":428,
         "iata":"IVL",
         "icao":"EFIV",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":68.607299804688,
         "longitude":27.405300140381,
         "href":"..\/countries\/finland\/json\/airport-ivl.json"
@@ -170,7 +170,7 @@
         "id":429,
         "iata":"JOE",
         "icao":"EFJO",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.662899017334,
         "longitude":29.607500076294,
         "href":"..\/countries\/finland\/json\/airport-joe.json"
@@ -179,7 +179,7 @@
         "id":430,
         "iata":"JYV",
         "icao":"EFJY",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.399501800537,
         "longitude":25.678300857544,
         "href":"..\/countries\/finland\/json\/airport-jyv.json"
@@ -188,7 +188,7 @@
         "id":431,
         "iata":"KAU",
         "icao":"EFKA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":63.127102,
         "longitude":23.051399,
         "href":"..\/countries\/finland\/json\/airport-kau.json"
@@ -197,7 +197,7 @@
         "id":432,
         "iata":"KEM",
         "icao":"EFKE",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":65.778701782227,
         "longitude":24.582099914551,
         "href":"..\/countries\/finland\/json\/airport-kem.json"
@@ -206,7 +206,7 @@
         "id":433,
         "iata":"KAJ",
         "icao":"EFKI",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":64.285499572754,
         "longitude":27.692399978638,
         "href":"..\/countries\/finland\/json\/airport-kaj.json"
@@ -215,7 +215,7 @@
         "id":434,
         "iata":"KHJ",
         "icao":"EFKJ",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.4625015259,
         "longitude":22.3931007385,
         "href":"..\/countries\/finland\/json\/airport-khj.json"
@@ -224,7 +224,7 @@
         "id":435,
         "iata":"KOK",
         "icao":"EFKK",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":63.721199035645,
         "longitude":23.143100738525,
         "href":"..\/countries\/finland\/json\/airport-kok.json"
@@ -232,7 +232,7 @@
       {
         "id":436,
         "icao":"EFKM",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Kemijarvi Airport",
         "city":"Kemijarvi",
         "country":"Finland",
@@ -253,7 +253,7 @@
         "id":437,
         "iata":"KAO",
         "icao":"EFKS",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":65.987602233887,
         "longitude":29.239400863647,
         "href":"..\/countries\/finland\/json\/airport-kao.json"
@@ -262,7 +262,7 @@
         "id":438,
         "iata":"KTT",
         "icao":"EFKT",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":67.700996398926,
         "longitude":24.846799850464,
         "href":"..\/countries\/finland\/json\/airport-ktt.json"
@@ -271,7 +271,7 @@
         "id":439,
         "iata":"KUO",
         "icao":"EFKU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":63.007099151611,
         "longitude":27.797800064087,
         "href":"..\/countries\/finland\/json\/airport-kuo.json"
@@ -280,7 +280,7 @@
         "id":440,
         "iata":"QLF",
         "icao":"EFLA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.144199,
         "longitude":25.693501,
         "href":"..\/countries\/finland\/json\/airport-qlf.json"
@@ -289,7 +289,7 @@
         "id":441,
         "iata":"LPP",
         "icao":"EFLP",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.044601,
         "longitude":28.144743,
         "href":"..\/countries\/finland\/json\/airport-lpp.json"
@@ -298,7 +298,7 @@
         "id":442,
         "iata":"MHQ",
         "icao":"EFMA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.122200012207,
         "longitude":19.898199081421,
         "href":"..\/countries\/finland\/json\/airport-mhq.json"
@@ -306,7 +306,7 @@
       {
         "id":443,
         "icao":"EFME",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Menkijarvi Airport",
         "city":"Menkijarvi",
         "country":"Finland",
@@ -327,7 +327,7 @@
         "id":444,
         "iata":"MIK",
         "icao":"EFMI",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.6866,
         "longitude":27.201799,
         "href":"..\/countries\/finland\/json\/airport-mik.json"
@@ -335,7 +335,7 @@
       {
         "id":445,
         "icao":"EFNU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Nummela Airport",
         "city":"Nummela",
         "country":"Finland",
@@ -356,7 +356,7 @@
         "id":446,
         "iata":"OUL",
         "icao":"EFOU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":64.930099487305,
         "longitude":25.354600906372,
         "href":"..\/countries\/finland\/json\/airport-oul.json"
@@ -364,7 +364,7 @@
       {
         "id":447,
         "icao":"EFPI",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Piikajarvi Airport",
         "city":"Piikajarvi",
         "country":"Finland",
@@ -385,7 +385,7 @@
         "id":448,
         "iata":"POR",
         "icao":"EFPO",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.461700439453,
         "longitude":21.799999237061,
         "href":"..\/countries\/finland\/json\/airport-por.json"
@@ -393,7 +393,7 @@
       {
         "id":449,
         "icao":"EFPU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Pudasjärvi Airport",
         "city":"Pudasjarvi",
         "country":"Finland",
@@ -413,7 +413,7 @@
       {
         "id":450,
         "icao":"EFPY",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Pyhäsalmi Airport",
         "city":"Pyhasalmi",
         "country":"Finland",
@@ -433,7 +433,7 @@
       {
         "id":451,
         "icao":"EFRH",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Raahe Pattijoki Airport",
         "city":"Pattijoki",
         "country":"Finland",
@@ -453,7 +453,7 @@
       {
         "id":452,
         "icao":"EFRN",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Rantasalmi Airport",
         "city":"Rantasalmi",
         "country":"Finland",
@@ -474,7 +474,7 @@
         "id":453,
         "iata":"RVN",
         "icao":"EFRO",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":66.564796447754,
         "longitude":25.830400466919,
         "href":"..\/countries\/finland\/json\/airport-rvn.json"
@@ -482,7 +482,7 @@
       {
         "id":454,
         "icao":"EFRY",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Rayskala Airport",
         "city":"Rayskala",
         "country":"Finland",
@@ -503,7 +503,7 @@
         "id":455,
         "iata":"SVL",
         "icao":"EFSA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.943099975586,
         "longitude":28.945100784302,
         "href":"..\/countries\/finland\/json\/airport-svl.json"
@@ -511,7 +511,7 @@
       {
         "id":456,
         "icao":"EFSE",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Selanpaa Airport",
         "city":"Selanpaa",
         "country":"Finland",
@@ -532,7 +532,7 @@
         "id":457,
         "iata":"SOT",
         "icao":"EFSO",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":67.3949966431,
         "longitude":26.6191005707,
         "href":"..\/countries\/finland\/json\/airport-sot.json"
@@ -541,7 +541,7 @@
         "id":458,
         "iata":"TMP",
         "icao":"EFTP",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":61.414100646973,
         "longitude":23.604400634766,
         "href":"..\/countries\/finland\/json\/airport-tmp.json"
@@ -549,7 +549,7 @@
       {
         "id":459,
         "icao":"EFTS",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Teisko Airport",
         "city":"Teisko",
         "country":"Finland",
@@ -570,7 +570,7 @@
         "id":460,
         "iata":"TKU",
         "icao":"EFTU",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.514099121094,
         "longitude":22.262800216675,
         "href":"..\/countries\/finland\/json\/airport-tku.json"
@@ -579,7 +579,7 @@
         "id":461,
         "iata":"UTI",
         "icao":"EFUT",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":60.89640045166,
         "longitude":26.938400268555,
         "href":"..\/countries\/finland\/json\/airport-uti.json"
@@ -588,7 +588,7 @@
         "id":462,
         "iata":"VAA",
         "icao":"EFVA",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":63.050701141357,
         "longitude":21.762199401855,
         "href":"..\/countries\/finland\/json\/airport-vaa.json"
@@ -597,7 +597,7 @@
         "id":463,
         "iata":"VRK",
         "icao":"EFVR",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.171100616455,
         "longitude":27.868600845337,
         "href":"..\/countries\/finland\/json\/airport-vrk.json"
@@ -606,7 +606,7 @@
         "id":464,
         "iata":"YLI",
         "icao":"EFYL",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":64.0547222,
         "longitude":24.7252778,
         "href":"..\/countries\/finland\/json\/airport-yli.json"
@@ -615,7 +615,7 @@
         "id":5560,
         "iata":"SJY",
         "icao":"EFSI",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "latitude":62.692101,
         "longitude":22.8323,
         "href":"..\/countries\/finland\/json\/airport-sjy.json"
@@ -623,7 +623,7 @@
       {
         "id":7725,
         "icao":"EFHE",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Hernesaari Heliport",
         "city":"Helsinki",
         "country":"Finland",
@@ -643,7 +643,7 @@
       {
         "id":10295,
         "icao":"EFKY",
-        "createdAt":"2020-09-28T21:18:24.131+02:00",
+        "createdAt":"2020-10-03T20:32:31.665+02:00",
         "name":"Kymi Airport",
         "city":"Kotka",
         "country":"Finland",
