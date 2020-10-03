@@ -408,26 +408,6 @@ declare function f:copyNamespaceNodes($elem as element())
     in-scope-prefixes($elem)[string()] ! namespace {.} {namespace-uri-for-prefix(., $elem)}        
 };        
 
-(: Normlizes an absolute path by removing step/.., step/step/../.. etc.
- :
- : Examples:
- : /a/b/c/.. => /a/b
- : /a/b/c/../.. => /a 
- : /a/b/c/../../.. => / 
- : /a/b/c/../d => /a/b/d
- : /a/b/c/../../d => /a/b/d 
- : /a/.. => /
- : / .. => INVALID, NOT ABSOLUTE
- :)
-declare function f:normalizeAbsolutePath($path as xs:string)
-        as xs:string {
-    let $norm := replace($path, '^(.*?)   [/\\] [^/\\]*?[/\\]   \.\.   (.*)', '$1$2', 'x')                 
-    return
-        if ($norm eq $path) then $norm 
-        else if (not($norm)) then substring($path, 1, 1)
-        else $norm ! f:normalizeAbsolutePath(.)
-};
-
 (:~ 
  : Like file:path-to-native, but making sure that the right separator
  : is used in the argument, as on Unix the wrong separator provokes an error:

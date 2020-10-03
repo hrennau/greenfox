@@ -1794,6 +1794,8 @@ declare function f:resultElemName($colour as xs:string) {'gx:' || $colour};
 declare function f:validateResult_linkDefAtts($ldo as map(*)?,
                                               $constraintElem as element()?)
         as attribute()* {
+    let $constraintElem :=
+        if ($constraintElem/self::gx:targetSize) then $constraintElem/.. else $constraintElem
     let $exprAtts := ( 
         $constraintElem/@linkName ! attribute linkName {.},
         ($constraintElem/@foxpath, $ldo?foxpath)[1] ! normalize-space(.) ! attribute foxpath {.},
@@ -1802,6 +1804,8 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         ($constraintElem/@linkXP, $ldo?linkXP)[1] ! normalize-space(.) ! attribute linkXP {.},        
         ($constraintElem/@linkContextXP, $ldo?linkContextXP)[1] ! normalize-space(.) ! attribute linkContextXP {.},
         ($constraintElem/@linkTargetXP, $ldo?linkTargetXP)[1] ! normalize-space(.) ! attribute linkTargetXP {.},
+        ($constraintElem/@reflector1, $ldo?mirror?reflector1)[1] ! normalize-space(.) ! attribute reflector1 {.},
+        ($constraintElem/@reflector2, $ldo?mirror?reflector2)[1] ! normalize-space(.) ! attribute reflector2 {.},
         ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
     )
     return $exprAtts

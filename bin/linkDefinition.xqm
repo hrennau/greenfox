@@ -109,15 +109,16 @@ declare function f:parseLinkDef($linkDef as element())
     let $hrefXP := $linkDef/@hrefXP/string()
     let $uriXP := $linkDef/@uriXP/string()
     let $uriTemplate := $linkDef/@uriTemplate
-    let $uriReflectionBase := $linkDef/@uriReflectionBase/string()    
+    let $reflector1 := $linkDef/@reflector1/string()    
     return
         if (empty((
-            $foxpath, $hrefXP, $uriXP, $uriTemplate, $uriReflectionBase))) then () else
+            $foxpath, $hrefXP, $uriXP, $uriTemplate, $reflector1))) then () else
             
     let $recursive := $linkDef/@recursive/string()
     let $contextXP := $linkDef/@contextXP/string()
     let $targetXP := $linkDef/@targetXP/string()            
-    let $uriReflectionShift := $linkDef/@uriReflectionShift/string()
+    let $reflector2 := $linkDef/@reflector2/string()
+    let $reflector1Shift := $linkDef/@reflector1Shift/string()
     let $constraints := $linkDef/gx:constraints    
     let $templateVars := $linkDef/gx:templateVar            
     let $ldo :=        
@@ -127,7 +128,7 @@ declare function f:parseLinkDef($linkDef as element())
                 else if ($hrefXP) then 'hrefExpr'
                 else if ($uriXP) then 'uriExpr'
                 else if ($uriTemplate) then 'uriTemplate'
-                else if ($uriReflectionBase) then 'uriReflection'                    
+                else if ($reflector1) then 'mirror'                    
                 else error()
         
             let $requiresContextNode :=
@@ -159,9 +160,10 @@ declare function f:parseLinkDef($linkDef as element())
                     if (not($templateVars)) then () else
                         map:entry('templateVars', map:merge($templateVars ! map:entry(@name, .))),
                         
-                    $uriReflectionBase ! map:entry('uriReflection', 
-                        map{'base': $uriReflectionBase, 
-                            'shift': $uriReflectionShift}),
+                    $reflector1 ! map:entry('mirror', 
+                        map{'reflector1': $reflector1,
+                            'reflector2': $reflector2,
+                            'reflector1Shift': $reflector1Shift}),
                             
                     $constraints ! map:entry('constraints', $constraints)                            
                 ))

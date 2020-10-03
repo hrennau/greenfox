@@ -21,12 +21,7 @@
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
-at "tt/_request.xqm",
-   "tt/_reportAssistent.xqm",
-   "tt/_errorAssistent.xqm",
-   "tt/_log.xqm",
-   "tt/_nameFilter.xqm",
-   "tt/_pcollection.xqm";    
+at "tt/_constants.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "constants.xqm",
@@ -35,6 +30,7 @@ at "constants.xqm",
    "log.xqm",
    "greenfoxEditUtil.xqm",
    "systemValidator.xqm",
+   "uriUtil.xqm",
    "validationReportWriter.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
@@ -133,7 +129,7 @@ declare function f:xsdValidateSchema($gfox as element(),
         let $useXsd :=
             if ($gfox//(@* except @domain)[matches(., '\{\i\c*\}')]) then
                 let $gfoxVarsSubstitutedText := serialize($gfoxVarsSubstituted, map{'method': 'xml'})
-                let $_WRITE := file:write('GFOX_VAR_SUBST.xml', $gfoxVarsSubstitutedText ! parse-xml(.), map{'method': 'xml'})
+                (: let $_WRITE := file:write('GFOX_VAR_SUBST.xml', $gfoxVarsSubstitutedText ! parse-xml(.), map{'method': 'xml'}):)
                 return $gfoxVarsSubstitutedText
             else
                 $gfox

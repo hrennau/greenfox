@@ -7,11 +7,12 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath-uri-operations.xqm";
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath-uri-operations.xqm";
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "resourceAccess.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "resourceAccess.xqm",
+   "uriUtil.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -236,9 +237,11 @@ declare function f:pathToAbsoluteFoxpath($path as xs:string)
 declare function f:pathToAbsolutePath($path as xs:string)
         as xs:string {
     (: Remove leading 'file:/+' :)
-    let $path :=
+    let $path := i:removeFileUriSchema($path)
+    (:
         if (matches($path, '^file:/+[a-zA-Z]:')) then replace($path, '^file:/+', '')
         else replace($path, '^file:/*(/([^/].*)?)$', '$1')
+     :)        
     let $pathRaw :=  
         (: Path leading to the archive which will be entered :)
         let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]

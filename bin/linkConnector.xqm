@@ -8,17 +8,18 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
-    "linkUtil.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at "linkUtil.xqm";
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "expressionEvaluator.xqm",
-    "greenfoxUtil.xqm",
-    "log.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "expressionEvaluator.xqm",
+   "greenfoxUtil.xqm",
+   "log.xqm",
+   "uriUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -71,6 +72,11 @@ declare function f:applyLinkConnector($ldo as map(*),
     else if ($ldo?uriTemplate) then
         let $items := f:resolveUriTemplate($ldo, $contextPoint, $context)
         return $items
+        
+    else if (exists($ldo?mirror)) then
+        let $items := f:resolveMirror($ldo, $context)
+        return $items
+    
     else ()
 };
 
@@ -135,3 +141,20 @@ declare function f:resolveUriTemplateRC($uriTemplate as xs:string,
             for $item1 in $left, $item2 in $right
             return concat($item1, $item2)
 };
+
+(:~
+ : Applies a Mirror link to a context URI. 
+ :  
+ : @param ldo Link Definition object
+ : @param context the processing context
+ : @return a sequence of URIss
+ :)
+declare function f:resolveMirror($ldo as map(*),
+                                 $context as map(xs:string, item()*))
+        as xs:string* {
+    let $uri := $context?_targetInfo?contextURI        
+    let $reflector1 := $ldo?mirror?reflector1        
+    let $reflector2 := $ldo?mirror?reflector2
+    return
+        i:getImage($uri, $reflector1, $reflector2)
+};        

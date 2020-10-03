@@ -14,7 +14,8 @@ at "tt/_foxpath.xqm";
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "constants.xqm",
    "foxpathUtil.xqm",
-   "greenfoxUtil.xqm";
+   "greenfoxUtil.xqm",
+   "uriUtil.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
 at "linkDefinition.xqm";
