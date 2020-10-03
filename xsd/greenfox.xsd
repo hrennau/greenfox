@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
            xmlns:t="http://www.greenfox.org/ns/schema"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
            targetNamespace="http://www.greenfox.org/ns/schema" elementFormDefault="qualified"> 
 
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+    
     <xs:element name="greenfox" type="t:GreenfoxType"/>
     
     <!-- 
@@ -17,6 +20,7 @@ Root element
             <xs:element name="domain" type="t:DomainType"/>
         </xs:sequence>
         <xs:attribute name="greenfoxURI" type="xs:anyURI"/>
+        <xs:attribute ref="xml:base"/>
     </xs:complexType>
     
     <!-- 
@@ -184,6 +188,8 @@ C o n s t r a i n t    e l e m e n t s
     
     <xs:complexType name="MediatypeConstraintType">
         <xs:attribute name="eq" type="t:MediatypeListType"/>
+        <xs:attribute name="eqMsg" type="xs:string"/>
+        <xs:attribute name="eqMsgOK" type="xs:string"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
         
         <xs:attribute name="csv.minColumnCount" type="xs:nonNegativeInteger"/>
@@ -354,7 +360,8 @@ C o n s t r a i n t    e l e m e n t s
     <xs:complexType name="DocSimilarType">
         <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="skipItem" type="t:SkipItemType" maxOccurs="unbounded"/>
+                <xs:element name="skipItem" type="t:SelectItemType" maxOccurs="unbounded"/>
+                <xs:element name="ignoreValue" type="t:SelectItemType" maxOccurs="unbounded"/>
                 <xs:element name="editItem" type="t:EditItemType" maxOccurs="unbounded"/>
             </xs:choice>
         </xs:sequence>
@@ -365,7 +372,7 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attributeGroup ref="t:LinkFacetAttGroup"/>        
     </xs:complexType>
     
-    <xs:complexType name="SkipItemType">
+    <xs:complexType name="SelectItemType">
         <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
     </xs:complexType>
 
@@ -378,10 +385,10 @@ C o n s t r a i n t    e l e m e n t s
     
     <xs:attributeGroup name="ItemSelectorAttGroup">
         <xs:attribute name="kind" type="t:ItemKindEnumType"/>
-        <xs:attribute name="localName" type="xs:NCName"/>
-        <xs:attribute name="parentLocalName" type="xs:NCName"/>
-        <xs:attribute name="namespace" type="xs:anyURI"/>
-        <xs:attribute name="parentNamespace" type="xs:anyURI"/>
+        <xs:attribute name="localName" type="t:NCNameList"/>
+        <xs:attribute name="parentLocalName" type="t:NCNameList"/>
+        <xs:attribute name="namespace" type="t:AnyURIList"/>
+        <xs:attribute name="parentNamespace" type="t:AnyURIList"/>
         <xs:attribute name="testXP" type="xs:string"/>
         <xs:attribute name="itemXP" type="xs:string"/>
     </xs:attributeGroup>
@@ -606,32 +613,8 @@ C o n s t r a i n t    e l e m e n t s
 Simple types 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
 -->    
-    <xs:simpleType name="FlagsType">
-        <xs:restriction base="xs:string">
-            <xs:pattern value="[ix]+"/>    
-        </xs:restriction>
-    </xs:simpleType>
-
-    <xs:simpleType name="UseStringListType">
-        <xs:list itemType="t:UseStringEnumType"/>
-    </xs:simpleType>
-    
-    <xs:simpleType name="MaxCountType">
-        <xs:union memberTypes="xs:nonNegativeInteger t:UnboundedEnumType"/>
-    </xs:simpleType>
-    
-    <xs:simpleType name="MediatypeListType">
-        <xs:list itemType="t:MediatypeEnumType"/>
-    </xs:simpleType>
-    
-    <xs:simpleType name="CsvSeparatorType">
-        <xs:union memberTypes="t:CsvSeparatorIdentifierEnumType t:SingleCharType"/>
-    </xs:simpleType>
-    
-    <xs:simpleType name="SingleCharType">
-        <xs:restriction base="xs:string">
-            <xs:length value="1"/>
-        </xs:restriction>
+    <xs:simpleType name="AnyURIList">
+        <xs:list itemType="xs:anyURI"/>
     </xs:simpleType>
     
     <xs:simpleType name="AttributeUsageListType">
@@ -644,6 +627,20 @@ Simple types
         </xs:restriction>
     </xs:simpleType>
     
+    <xs:simpleType name="CsvSeparatorType">
+        <xs:union memberTypes="t:CsvSeparatorIdentifierEnumType t:SingleCharType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="FlagsType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[ix]+"/>    
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="MaxCountType">
+        <xs:union memberTypes="xs:nonNegativeInteger t:UnboundedEnumType"/>
+    </xs:simpleType>
+    
     <xs:simpleType name="Md5ListType">
         <xs:list itemType="t:Md5Type"/>
     </xs:simpleType>
@@ -653,7 +650,15 @@ Simple types
             <xs:pattern value="[0-9A-Fa-f]{32}"/>
         </xs:restriction>
     </xs:simpleType>
-
+    
+    <xs:simpleType name="MediatypeListType">
+        <xs:list itemType="t:MediatypeEnumType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="NCNameList">
+        <xs:list itemType="xs:NCName"/>
+    </xs:simpleType>
+    
     <xs:simpleType name="Sha1ListType">
         <xs:list itemType="t:Sha1Type"/>
     </xs:simpleType>
@@ -663,7 +668,7 @@ Simple types
             <xs:pattern value="[0-9A-Fa-f]"/>
         </xs:restriction>
     </xs:simpleType>
-
+    
     <xs:simpleType name="Sha256ListType">
         <xs:list itemType="t:Sha256Type"/>
     </xs:simpleType>
@@ -672,6 +677,16 @@ Simple types
         <xs:restriction base="xs:token">
             <xs:pattern value="[0-9A-Fa-f]"/>
         </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="SingleCharType">
+        <xs:restriction base="xs:string">
+            <xs:length value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="UseStringListType">
+        <xs:list itemType="t:UseStringEnumType"/>
     </xs:simpleType>
     
     
