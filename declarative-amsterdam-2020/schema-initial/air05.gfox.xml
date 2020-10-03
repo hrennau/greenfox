@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Now we start to connect the resources: we add a ValueCompared constraint, which
+    evaluates one expression in the first resource, another expression in the second
+    resource and compares the values.
+    
+    In this example, an attribute from the XML document is compared with a field from
+    a related JSON document.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="air">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder"/>
+
+            <!-- CHECK: folder content -->
+            <folderContent closed="true">
+                <memberFiles names="airports.xml airports.json"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
+                <memberFile name="*.FLAG" minCount="1"/>
+            </folderContent>
+            
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
+                
+                <!-- CHECK: file empty -->
+                <fileSize eq="0" eqMsg="FLAG file not empty"/>
+            </file>
+            
+            <file foxpath="airports-*.xml">
+                <targetSize minCount="2" minCountMsg="Too few country airport files"/>
+                
+                <!-- CHECK: resource values -->
+                <values>
+                    <value exprXP="//type" 
+                           eq="airport" eqMsg="Type not 'airport'"/>
+                    <value exprXP="//altitude" 
+                           lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
+                    <value exprXP="//@icao" 
+                           matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                    <value exprXP="//(latitude, longitude)" 
+                           datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
+                    <value exprXP="//airport/@id" 
+                           minCount="1"
+                           distinct="true"/>                        
+                </values>
+                
+                <!-- CHECK: resource value pairs -->
+                <valuePairs>
+                    <valuePair expr1XP="/*/@country" minCount1="1"
+                               expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
+                               cmp="eq" cmpMsg="Country name in attribute and file name different"
+                               useString="lc"/>
+                </valuePairs>
+                
+                <!-- CHECK: @country value matches "country" field in corresponding JSON file -->
+                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                    <valueCompared expr1XP="/*/@country" minCount1="1"
+                                   expr2XP="/json/airportsForCountry/country"
+                                   cmp="eq" cmpMsg="Country name in XML and JSON different"/>
+                </valuesCompared>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

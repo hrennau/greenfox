@@ -1,0 +1,4 @@
+We submit the index document to XSD validation, and we check that all href
+links can be recursively resolved.
+
+(to be continued)

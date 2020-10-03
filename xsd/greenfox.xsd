@@ -192,6 +192,14 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="eqMsgOK" type="xs:string"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
         
+        <xs:attribute name="csv.columnCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.columnCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.columnCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.rowCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.rowCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.rowCountMsgOK" type="xs:string"/>
+        
         <xs:attribute name="csv.minColumnCount" type="xs:nonNegativeInteger"/>
         <xs:attribute name="csv.minColumnCountMsg" type="xs:string"/>
         <xs:attribute name="csv.minColumnCountMsgOK" type="xs:string"/>

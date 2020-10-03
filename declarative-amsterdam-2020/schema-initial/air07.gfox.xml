@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    We follow the href links, visit the link targets and validate their tree structure.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="air">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder"/>
+
+            <!-- CHECK: folder content -->
+            <folderContent closed="true">
+                <memberFiles names="airports.xml airports.json"/>
+                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
+                <memberFile name="*.FLAG" minCount="1"/>
+            </folderContent>
+            
+            <!-- VISIT: FLAG files -->
+            <file foxpath="*.FLAG">
+                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
+                
+                <!-- CHECK: file empty -->
+                <fileSize eq="0" eqMsg="FLAG file not empty"/>
+            </file>
+            
+            <!-- VISIT: country airports files (XML) -->
+            <file foxpath="airports-*.xml">
+                <targetSize minCount="2" minCountMsg="Too few country airport files"/>
+                
+                <!-- CHECK: resource values -->
+                <values>
+                    <value exprXP="//type" 
+                           eq="airport" eqMsg="Type not 'airport'"/>
+                    <value exprXP="//altitude" 
+                           lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
+                    <value exprXP="//@icao" 
+                           matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                    <value exprXP="//(latitude, longitude)" 
+                           datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
+                    <value exprXP="//airport/@id" 
+                           minCount="1"
+                           distinct="true"/>                        
+                </values>
+                
+                <!-- CHECK: @country value matches file name -->
+                <valuePairs>
+                    <valuePair expr1XP="/*/@country" minCount1="1"
+                               expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
+                               cmp="eq" cmpMsg="Country name in attribute and file name different"
+                               useString="lc"/>
+                </valuePairs>
+                
+                <!-- CHECK: @country value matches "country" field in corresponding JSON file -->
+                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                    <valueCompared expr1XP="/*/@country" minCount1="1"
+                                   expr2XP="/json/airportsForCountry/country"
+                                   cmp="eq" cmpMsg="Country name in XML and JSON different"/>
+                </valuesCompared>
+                
+                <!-- VISIT: matching JSON file --> 
+                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
+                    <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
+                
+                    <!-- CHECK: href links resolvable -->
+                    <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>     
+
+                    <!-- VISIT: href reference targets -->
+                    <file hrefXP="//href">
+                        <targetSize resolvable="true"/>
+                        
+                        <!-- CHECK: tree structure -->
+                        <docTree>
+                            <node locNP="/json/airport" closed="true">
+                                <node locNP="@type"/>
+                                <node locNP="id"/>
+                                <node locNP="iata"/>
+                                <node locNP="icao"/>
+                                <node locNP="createdAt"/>
+                                <node locNP="name"/>
+                                <node locNP="city"/>
+                                <node locNP="country"/>                            
+                                <node locNP="geo" closed="true">
+                                    <node locNP="@type"/>
+                                    <node locNP="latitude"/>
+                                    <node locNP="longitude"/>
+                                    <node locNP="altitude"/>                                        
+                                </node>
+                                <node locNP="temporal"/>
+                                <node locNP="type"/>
+                                <node locNP="source1" minCount="0"/>                            
+                            </node>
+                        </docTree>
+                    </file>
+                </file>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+
+

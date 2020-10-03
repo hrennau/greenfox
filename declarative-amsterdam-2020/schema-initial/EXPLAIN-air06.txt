@@ -1,0 +1,3 @@
+We visit the JSON document and check that all href links can be resolved.
+
+(to be continued)

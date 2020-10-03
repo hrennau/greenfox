@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Checks that all schemas in $greenfox/schemas have the same content as the corresponding schema
+    in $greenfox/schema-initial.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo/DocSimilar/schemas-unchanged"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <!-- Replace value with schemas to be ignored - e.g. "air02b.gfox.xml air03.gfox.xml" -->
+        <field name="ignSchema" value="foo.gfox.xml bar.gfox.xml"/>
+        <!-- Replace value with attribute names, attribute values shall be ignored -->
+        <field name="ignValue" value="foo bar"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        
+        <!-- VISIT: schema folder -->
+        <folder foxpath="schema" id="schemaFolderShape">
+            <targetSize countMsg="Missing folder: schema-initial" count="1"/>
+
+            <!-- VISIT: all schemas -->
+            <file foxpath="*.gfox.xml" id="schemaFileShape">
+                <targetSize minCount="16" minCountMsg="Less schemas than expected"/>
+                
+                <!-- CHECK: schemas have same content as initial schemas? 
+                            But ignore all schemas listed in context field 'ignSchemas' -->
+                <docSimilar foxpath="fox-parent-sibling('schema-initial')\fox-child($fileName)
+                                     [not(file-name(.) = tokenize('${ignSchema}'))]">
+                    <ignoreValue kind="attribute" localName="${ignValue}"/>
+                </docSimilar>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

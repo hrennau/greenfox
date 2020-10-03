@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Checks that the schemas within folder 'demo-constraint' contall all types of constraints -
+    Conditional, DocSimilar, DocTree, FileDate, FileName, FileSize, ...
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/greenguard"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        
+        <!-- VISIT: folder data -->
+        <folder foxpath="data" id="demoConstraintFolderShape">
+            <targetSize countMsg="Missing folder: data" count="1"/>
+
+            <!-- VISIT: all XML files -->
+            <file foxpath=".\\*.xml">
+                <!-- CHECK: XML well-formed -->
+                <mediatype eq="xml" eqMsg=".xml file not XML"/>
+            </file>
+            <!-- VISIT: all JSON files -->
+            <file foxpath=".\\*.json">
+                <!-- CHECK: JSON well-formed -->
+                <mediatype eq="json" eqMsg=".json file not JSON"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>

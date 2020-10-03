@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    We visit the JSON document and check that all href links can be resolved.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>    
+    <domain path="${domain}" name="air">
+        
+        <!-- VISIT index folder -->
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <!-- checks & shapes omitted ... -->            
+            
+            <!-- VISIT: country airports files (XML) -->
+            <file foxpath="airports-*.xml">
+                <!-- checks omitted ... -->                
+                
+                <!-- VISIT: corresponding JSON document -->
+                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" mediatype="json">
+                    <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
+
+                    <!-- CHECK: href links resolvable -->
+                    <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>
+                </file>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+

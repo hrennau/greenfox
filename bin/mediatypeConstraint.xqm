@@ -57,7 +57,9 @@ declare function f:validateMediatype($constraintElem as element(gx:mediatype),
                         let $doc := f:csvDoc($contextURI, $constraintElem/(., ancestor::gx:file[1]), ())
                         let $facetResults := if (not($doc)) then () else
                             let $checkAtts := $constraintElem/(
-                                @csv.minColumnCount, @csv.maxColumnCount, @csv.minRowCount, @csv.maxRowCount)
+                                @csv.columnCount, @csv.rowCount,
+                                @csv.minColumnCount, @csv.maxColumnCount, 
+                                @csv.minRowCount, @csv.maxRowCount)
                             
                             let $actMinColCount := min($doc/*/*/count(*))                            
                             let $actMaxColCount := max($doc/*/*/count(*))
@@ -66,14 +68,20 @@ declare function f:validateMediatype($constraintElem as element(gx:mediatype),
                             for $checkAtt in $checkAtts
                             let $violatingValue :=
                                 typeswitch($checkAtt)
+                                case attribute(csv.columnCount) return $doc/*/*/count(*)[. != $checkAtt] => distinct-values() => sort()
+                                case attribute(csv.rowCount) return $actRowCount[. !=$checkAtt]
                                 case attribute(csv.minColumnCount) return $actMinColCount[. < $checkAtt]
                                 case attribute(csv.maxColumnCount) return $actMaxColCount[. > $checkAtt]
                                 case attribute(csv.minRowCount) return $actRowCount[. < $checkAtt]
                                 case attribute(csv.maxRowCount) return $actRowCount[. > $checkAtt]
                                 default return error()
-                            let $colour := if ($violatingValue) then 'red' else 'green'
-                            let $violationInfoAtt := if (not($violatingValue)) then () else
-                                let $attName := $checkAtt/local-name(.) ! replace(., '^csv.(min|max)', 'csv.Act')
+                            let $colour := if (exists($violatingValue)) then 'red' else 'green'
+                            let $violationInfoAtt := if (empty($violatingValue)) then () else
+                                let $attName := $checkAtt/local-name(.) ! (
+                                    switch(.)
+                                    case('csv.columnCount') return 'actColumnCount'
+                                    case('csv.rowCount') return 'actRowCount'
+                                    default return replace(., '^csv.(min|max)', 'csv.Act'))
                                 return attribute {$attName} {$violatingValue}
                             return
                                 result:validationResult_mediatype(

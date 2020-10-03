@@ -202,7 +202,10 @@ declare function f:validationResult_mediatype($colour as xs:string,
     let $constraintComponent :=
         $constraintElem/i:firstCharToUpperCase(local-name(.)) ||
         $constraintNode/i:firstCharToUpperCase(local-name(.))
-        ! replace(., '\.', '') ! replace(., 'm(in|ax)', 'M$1')
+        ! replace(., 'Csv.m', 'CsvM')
+        ! replace(., 'Csv.c', 'CsvC')
+        ! replace(., 'Csv.r', 'CsvR')
+        ! replace(., 'Csv.m(in|ax)', 'Csv.M$1')
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
     return
         element {f:resultElemName($colour)}{
