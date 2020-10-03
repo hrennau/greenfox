@@ -3,7 +3,7 @@
     Checks that file cow.csv is a semicolon-separated CSV with expected numbers of
     columns and expected number of lines.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/greenguard"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Mediatype/valid-csv"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

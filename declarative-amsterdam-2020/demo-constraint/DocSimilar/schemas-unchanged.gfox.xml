@@ -3,7 +3,7 @@
     Checks that all schemas in $greenfox/schemas have the same content as the corresponding schema
     in $greenfox/schema-initial.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo/DocSimilar/schemas-unchanged"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-constraint/DocSimilar/schemas-unchanged"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

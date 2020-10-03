@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Checks that the schemas within folder 'demo-constraint' contain all types of constraints -
+    Checks that the set of schemas under folder 'demo-constraint' contains all types of constraints -
     Conditional, DocSimilar, DocTree, FileDate, FileName, FileSize, ...
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/greenguard"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-constraint/all-constraint-types-used"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
