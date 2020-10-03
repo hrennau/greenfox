@@ -171,20 +171,20 @@ declare function f:normalizeDocForComparison($node as node(),
                     xquery:eval($itemXP, map{'': $tree})
                 else
             let $kind := $modifier/@kind
-            let $localName := $modifier/@localName
-            let $namespace := $modifier/@namespace
-            let $parentLocalName := $modifier/@parentLocalName
-            let $parentNamespace := $modifier/@parentNamespace
+            let $localName := $modifier/@localName/tokenize(.)
+            let $namespace := $modifier/@namespace/tokenize(.)
+            let $parentLocalName := $modifier/@parentLocalName/tokenize(.)
+            let $parentNamespace := $modifier/@parentNamespace/tokenize(.)
             let $testXP := $modifier/@testXP
                 
             let $candidates := if ($kind eq 'attribute') then $tree//@* else $tree//*
             let $selected :=
                $candidates
-               [not($localName) or local-name() eq $localName]
-               [not(@namespace) or namespace-uri(.) eq $namespace]
-               [not($parentLocalName) or ../local-name(.) eq $parentLocalName]
-               [not(@parentNamespace) or ../namespace-uri(.) eq $parentNamespace]
-               [not($testXP) or boolean(f:evaluateSimpleXPath($testXP, .))]
+               [empty($localName) or local-name() = $localName]
+               [empty(@namespace) or namespace-uri(.) = $namespace]
+               [empty($parentLocalName) or ../local-name(.) = $parentLocalName]
+               [empty(@parentNamespace) or ../namespace-uri(.) = $parentNamespace]
+               [empty($testXP) or boolean(f:evaluateSimpleXPath($testXP, .))]
             return $selected
         }
     return
@@ -216,6 +216,14 @@ declare function f:normalizeDocForComparison($node as node(),
                 return
                     if (empty($selected)) then () else delete node $selected
                     
+            (: Ignore item string value :)
+            case $skipItem as element(gx:ignoreValue) return
+                let $selected := $selectedItems($node_, $skipItem)            
+                return
+                    if (empty($selected)) then () else 
+                        for $sel in $selected[self::attribute() or not(*)] return
+                            replace value of node $sel with ''
+                    
             (: Round numeric values :)
             case $roundItem as element(gx:roundItem) return
                 let $selected := $selectedItems($node_, $roundItem)            
@@ -246,7 +254,7 @@ declare function f:normalizeDocForComparison($node as node(),
                             if (empty($useString)) then $newValue else i:applyUseString($newValue, $useString)                            
                         return
                             if ($sel eq $newValue) then () else
-                                replace value of node $sel with trace( $newValue , '_REPLACE_WITH_NEW_VALUE: ')
+                                replace value of node $sel with $newValue
             default return ()
     )
     return $node_

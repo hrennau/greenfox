@@ -52,8 +52,6 @@ declare function f:validateOp($request as element())
     (: Preliminary checks :)        
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
     let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)
-    let $xsdInvalidSchemaReport := f:xsdValidateSchema($gfoxSource)
-    return if ($xsdInvalidSchemaReport) then $xsdInvalidSchemaReport else
     
     (: Collect parameters :)
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
@@ -65,21 +63,28 @@ declare function f:validateOp($request as element())
 
     (: Compile greenfox schema :)
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, $params, $domain)
+    let $context := $gfoxAndContext?context
+    let $gfoxVarsSubstituted := $gfoxAndContext?schemaPrelim
+    let $gfoxCompiled := $gfoxAndContext?schemaCompiled
+    (:
     let $gfox := $gfoxAndContext[. instance of element()]
     let $context := $gfoxAndContext[. instance of map(*)]
-    
-    let $_LOG := i:DEBUG_FILE($gfox, 1, 'GFOX.xml')
+     :)
+    let $xsdInvalidSchemaReport := f:xsdValidateSchema($gfoxSource, $gfoxVarsSubstituted)
+    return if ($xsdInvalidSchemaReport) then $xsdInvalidSchemaReport else
+
+    (: let $_LOG := i:DEBUG_FILE($gfoxCompiled, 0, 'GFOX.xml'):)
     
     (: Validate greenfox schema :)
-    let $gfoxErrors := f:validateGreenfox($gfox)
+    let $gfoxErrors := f:validateGreenfox($gfoxCompiled)
     return if ($gfoxErrors) then $gfoxErrors else
 
     (: Validate greenfox schema against meta schema :)
-    let $invalidSchemaReport := i:metaValidateSchema($gfoxSource)
+    let $invalidSchemaReport := () (: i:metaValidateSchema($gfoxSource) :)
     return if ($invalidSchemaReport) then $invalidSchemaReport else
     
     (: Validate system :)
-    let $report := i:validateSystem($gfox, $context, $reportType, $reportFormat, $reportOptions)
+    let $report := i:validateSystem($gfoxCompiled, $context, $reportType, $reportFormat, $reportOptions)
     return $report
 };        
 
@@ -111,18 +116,29 @@ declare function f:check_greenfoxSchemaRoot($gfox as element())
  : Checks if the greenfox schema is XSD valid.
  :
  : @param gfox the schema
+ : @param gfoxVarsSubstituted copy of the schema with variables substituted
  : @return an error report, or the empty sequence if no errors were found
  :)
-declare function f:xsdValidateSchema($gfox as element())
+declare function f:xsdValidateSchema($gfox as element(), 
+                                     $gfoxVarsSubstituted)
         as element(gx:invalidSchema)? {
 
+    
     let $greenfoxXsd := (resolve-uri('') || '/../../xsd/greenfox.xsd')
                         ! file:path-to-native(.)   (: URI turned into path :)
                         ! f:normalizeAbsolutePath(.)
-    (: let $_DEBUG := trace($greenfoxXsd, '___GREENFOX_XSD: '):)
     
     let $gfoxSourceURI := $gfox/root()/document-uri(.)
-    let $report := validate:xsd-report($gfoxSourceURI, $greenfoxXsd)
+    let $report := 
+        let $useXsd :=
+            if ($gfox//(@* except @domain)[matches(., '\{\i\c*\}')]) then
+                let $gfoxVarsSubstitutedText := serialize($gfoxVarsSubstituted, map{'method': 'xml'})
+                let $_WRITE := file:write('GFOX_VAR_SUBST.xml', $gfoxVarsSubstitutedText ! parse-xml(.), map{'method': 'xml'})
+                return $gfoxVarsSubstitutedText
+            else
+                $gfox
+        return
+            validate:xsd-report($useXsd, $greenfoxXsd)
     return 
         if ($report/status eq 'valid') then () else 
             f:xsdReportToXsdGreenfoxReport($report, $gfoxSourceURI)
