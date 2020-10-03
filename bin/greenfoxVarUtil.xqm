@@ -57,7 +57,8 @@ declare function f:substituteVarsAux($s as xs:string?,
                                      $prefixChar as xs:string) as xs:string? {
     let $sep := codepoints-to-string(30000)
     let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), 
-                              concat('$1', $sep, '$2', $sep, '$3'))
+                              concat('$1', $sep, '$2', $sep, '$3'),
+                              's')
     return
         if ($parts eq $s) then $s   (: no matches :)
         else
