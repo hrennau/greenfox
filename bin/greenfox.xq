@@ -1,7 +1,7 @@
 (:
  : greenfox - 
  :
- : @version 2020-09-29T20:02:52.094+02:00 
+ : @version 2020-10-04T05:44:04.283+02:00 
  :)
 
 import module namespace tt="http://www.ttools.org/xquery-functions" at
@@ -98,6 +98,7 @@ declare variable $toolScheme :=
       <param name="domain" type="xs:string?"/>
       <param name="params" type="xs:string?"/>
       <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, red, white, wresults, rresults, std" default="sum2"/>
+      <param name="ccfilter" type="nameFilter?"/>
       <param name="format" type="xs:string?" default="xml"/>
       <pgroup name="input" minOccurs="1"/>
     </operation>

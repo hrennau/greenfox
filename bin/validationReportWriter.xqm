@@ -9,12 +9,7 @@
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
-at "tt/_request.xqm",
-   "tt/_reportAssistent.xqm",
-   "tt/_errorAssistent.xqm",
-   "tt/_log.xqm",
-   "tt/_nameFilter.xqm",
-   "tt/_pcollection.xqm";    
+at "tt/_nameFilter.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "compile.xqm",
@@ -40,6 +35,10 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
                                          $options as map(*),
                                          $context as map(xs:string, item()*))
         as item()* {
+    let $ccfilter := $options?ccfilter
+    let $results := $results[tt:matchesNameFilter(@constraintComp, $ccfilter)]
+    return
+    
     switch($reportType)
     case "wresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
     case "rresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
@@ -62,6 +61,7 @@ declare function f:writeValidationReport_wresults(
                                         $format as xs:string,
                                         $options as map(*))
         as item()* {
+    let $ccfilter := $options?ccfilter        
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $useResults := 
@@ -76,6 +76,7 @@ declare function f:writeValidationReport_wresults(
                              greenfoxURI="{$greenfoxURI}"
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
+            $ccfilter/@text/attribute constraintCompFilter {.},                             
             for $result in $useResults
             order by 
                 switch ($result/local-name(.)) 
@@ -100,6 +101,7 @@ declare function f:writeValidationReport_white(
                                         $format as xs:string,
                                         $options as map(*))
         as element() {
+    let $ccfilter := $options?ccfilter        
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
@@ -186,6 +188,7 @@ declare function f:writeValidationReport_white(
                              greenfoxURI="{$greenfoxURI}"
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
+            $ccfilter/@text/attribute constraintCompFilter {.},                             
             <gx:redResources>{
                 attribute count {count($redResources)},
                 f:displayResultResults($redResources)
@@ -216,7 +219,6 @@ declare function f:writeValidationReport_red(
                                         $format as xs:string,
                                         $options as map(*))
         as element() {
-    let $options := map{}
     let $white := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)        
     let $red := f:whiteToRed($white, $options)
     return $red
@@ -286,7 +288,7 @@ declare function f:writeValidationReport_sum(
                                         $format as xs:string,
                                         $options as map(*))
         as item() {
-    let $options := map{}
+    let $ccfilter := $options?ccfilter
     let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'red', 'xml', $options)
     let $ccomps := $ccstat/*
     
@@ -329,6 +331,7 @@ declare function f:writeValidationReport_sum(
         'greenfox: ' || $ccstat/@greenfoxDocumentURI/i:uriOrPathToNormPath(.),
         'domain:   ' || $ccstat/@domain,
         ' ',
+        $ccfilter/@text/concat('>>>>>>&#xA;', 'Constraint comp filter: ', ., '&#xA;>>>>>>&#xA;'),
         '#red:     ' || $countRed || (if (not($countRed)) then () else concat('   (', $countRedResources, ' resources)')),
         '#green:   ' || $ccstat/@countGreen || (if (not($countGreen)) then () else concat('   (', $countGreenResources, ' resources)')),
         ' ',

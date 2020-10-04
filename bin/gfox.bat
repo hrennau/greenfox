@@ -14,6 +14,7 @@ set HERE=%XERE:\=/%
 :: defaults
 set RTYPE=sum2
 set PARAMS=
+set CCFILTER=
 
 :NEXTPAR
 set name=%~1
@@ -38,17 +39,20 @@ if "%name%"=="-a" (set RTYPE=sum1
 ) else if "%name%"=="-p" (
    if "%PARAMS%"=="" (set PARAMS=!VALUE!) else (set PARAMS=!PARAMS!;!VALUE!)
    shift   
+) else if "%name%"=="-F" (
+   set CCFILTER=!VALUE!
+   shift   
  ) else (
    echo Unknown option: %name%
    echo Supported options: 
-   echo    -r -w   
+   echo    -a -b -c -r -w                 # Select report type
+   echo    -p "name=value"                # Set schema parameter - multiple use allowed
+   echo    -F "foo* *bar ~foo*bar ~*peng" # Filter constraint components - all "foo* or *bar, except foo*bar or *peng"   
    echo Aborted.
    exit /b
 )
 goto :NEXTPAR
 :ENDPAR 
-
-echo PARAMS: %PARAMS%
 
 if "%RTYPE%"=="white" (rem        
 ) else if "%RTYPE%"=="red" (rem
@@ -90,6 +94,7 @@ if "%schema%"=="?" (
 set RTYPE_PARAM=
 if not "%RTYPE%"=="" (set RTYPE_PARAM=,reportType=%RTYPE%)
 if not "%PARAMS%"=="" (set PARAMS_PARAM=,params=%PARAMS%)
+if not "%CCFILTER%"=="" (set CCFILTER_PARAM=,ccfilter=%CCFILTER%)
 rem #set PARAMS_PARAM=
 rem #if not "%PARAMS%"=="" (
 rem #    set PARAMS_PARAM=,params=%PARAMS%
@@ -103,4 +108,4 @@ rem exit
 
 set DOMAIN_PARAM=
 if not "%DOMAIN%"=="" (set DOMAIN_PARAM=,domain=%DOMAIN%)
-basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%" %HERE%/greenfox.xq
+basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%%CCFILTER_PARAM%" %HERE%/greenfox.xq
