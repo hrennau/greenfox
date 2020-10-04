@@ -31,6 +31,9 @@ at "valueConstraint.xqm";
 import module namespace vpair="http://www.greenfox.org/ns/xquery-functions/value-pair" 
 at "valuePairConstraint.xqm";    
     
+import module namespace dtree="http://www.greenfox.org/ns/xquery-functions/doc-tree" 
+at "docTreeConstraint.xqm";
+    
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
@@ -123,6 +126,7 @@ declare function f:validateFolderConstraints($folderConstraints as element(),
             case element(gx:foxvaluesCompared) return vpair:validateValuePairConstraint($constraintElem, $context)
             case element(gx:folderContent) return f:validateFolderContent($constraintElem, $context)
             case element(gx:folderSimilar) return f:validateFolderSimilar($constraintElem, $context)
+            case element(gx:hyperdocTree) return dtree:validateDocTreeConstraint($constraintElem, $context)
             case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, f:validateFolderConstraints#2, $context)
             case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)            
             default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraintElem)))

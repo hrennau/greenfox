@@ -48,6 +48,11 @@ declare function f:validateLinkConstraints($lros as map(*)*,
         as element()* {
     f:validateLinkResolvable($lros, $ldo, $constraintElem, $context),
     f:validateLinkCounts($lros, $ldo, $constraintElem, $context)
+
+(: Errors reported by validationResult_linkResolution 
+    (: Link errors with errorCode :)
+    $lros[?errorCode] ! vr:validationResult_linkError($ldo, ., $constraintElem, (), $context)
+ :)    
 };
 
 (:~
@@ -70,7 +75,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     
     let $linkConstraints := $ldo?constraints
     let $constraintNode := ($constraintElem, $linkConstraints)/@resolvable[1][. eq 'true']
-    return if (not($constraintNode)) then () else   
+    return if (not($constraintNode) and empty($lros?errorCode)) then () else   
     
     (: Link Resolution Objects are grouped by link context item;
        it may be a resource URI or a link context node :)

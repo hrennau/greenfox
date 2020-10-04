@@ -18,6 +18,7 @@ at "constants.xqm",
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
 at "linkDefinition.xqm",
+   "linkHyperdoc.xqm",
    "linkResolution.xqm",
    "linkValidation.xqm";
 
@@ -38,7 +39,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param context the processing context
  : @return a set of validation results
  :)
-declare function f:validateDocTreeConstraint($constraintElem as element(gx:docTree),
+declare function f:validateDocTreeConstraint($constraintElem as element(),
                                              $context as map(xs:string, item()*))
         as element()* {
 
@@ -46,11 +47,10 @@ declare function f:validateDocTreeConstraint($constraintElem as element(gx:docTr
     let $contextURI := $targetInfo?contextURI
     let $contextDoc := $targetInfo?doc
     let $contextNode := $targetInfo?focusNode
-    let $useContextNode := ($contextNode, $contextDoc)[1]
     return
     
     (: Exception - no context document :)
-    if (not($context?_targetInfo?doc)) then
+    if ($constraintElem/self::gx:docTree and not($context?_targetInfo?doc)) then
         result:validationResult_docTree_exception($constraintElem,
             'Context resource could not be parsed', (), $context)
     else
@@ -59,10 +59,32 @@ declare function f:validateDocTreeConstraint($constraintElem as element(gx:docTr
     let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)    
     let $options := map{'withNamespaces': $withNamespaces}    
     let $compiledNodePaths := f:compileNodePaths($constraintElem, $options, $context)
-    for $constraintNode in $constraintElem/gx:node 
     return
-        f:validateNodeContentConstraint($constraintElem, $constraintNode, $useContextNode, (), (), 
-            $compiledNodePaths, $options, $context)
+    
+    (: Hyperdoc validation :)
+    if ($constraintElem/self::gx:hyperdocTree) then
+        let $hyperdocAndLinkResults := link:getLinkHyperdoc($constraintElem, $context)
+        let $hyperdoc := $hyperdocAndLinkResults?hyperdoc
+        let $linkResults := $hyperdocAndLinkResults?linkValidationResults
+        return (
+            $linkResults,
+            
+            if (not($hyperdoc)) then
+                result:validationResult_docTree_exception($constraintElem,
+                    'Hyperdoc could not be created', (), $context)            
+            else
+                for $constraintNode in $constraintElem/gx:node
+                return
+                    f:validateNodeContentConstraint($constraintElem, $constraintNode, $hyperdoc, (), (), 
+                        $compiledNodePaths, $options, $context)
+    )
+    (: Target resource doc validation :)    
+    else
+        let $useContextNode := ($contextNode, $contextDoc)[1]    
+        for $constraintNode in $constraintElem/gx:node 
+        return
+            f:validateNodeContentConstraint($constraintElem, $constraintNode, $useContextNode, (), (), 
+                $compiledNodePaths, $options, $context)
 };
 
 (:~
@@ -79,7 +101,7 @@ declare function f:validateDocTreeConstraint($constraintElem as element(gx:docTr
  : @param context the processing context
  : @return validation results
  :)
-declare function f:validateNodeContentConstraint($constraintElem as element(gx:docTree),
+declare function f:validateNodeContentConstraint($constraintElem as element(),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $contextPosition as xs:integer?,
@@ -144,7 +166,7 @@ declare function f:validateNodeContentConstraint($constraintElem as element(gx:d
  : @param context the processing context
  : @return validation results :)
 declare function f:validateNodeContentConstraint_counts(
-                                                 $constraintElem as element(gx:docTree),
+                                                 $constraintElem as element(),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $valueNodes as node()*,
@@ -152,6 +174,7 @@ declare function f:validateNodeContentConstraint_counts(
                                                  $options as map(xs:string, item()*),
                                                  $context as map(xs:string, item()*))
         as element()* {
+    let $constraintCompPrefix := $constraintElem/local-name(.) ! i:firstCharToUpperCase(.)       
     let $count := count($valueNodes)    
     let $att := $constraintNode/@count return    
         if ($att) then
@@ -170,7 +193,7 @@ declare function f:validateNodeContentConstraint_counts(
             let $useConstraintNode := ($att, $constraintNode)[1]
             return
                 result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $useConstraintNode, 'DocTreeMinCount', (), 
+                    $colour, $constraintElem, $useConstraintNode, $constraintCompPrefix || 'MinCount', (), 
                     $contextNode, $count, $trail, (), $context)
             ,
             let $att := $constraintNode/@maxCount return
@@ -182,33 +205,9 @@ declare function f:validateNodeContentConstraint_counts(
             let $useConstraintNode := ($att, $constraintNode)[1]
             return
                 result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $useConstraintNode, 'DocTreeMaxCount', (), 
+                    $colour, $constraintElem, $useConstraintNode, $constraintCompPrefix || 'MaxCount', (), 
                     $contextNode, $count, $trail, (), $context)
         )                        
-(:   
-    let $countAtts := $constraintNode/(@count, @minCount, @maxCount)
-    return    
-        (: explicit constraints :)
-        if ($countAtts) then
-            for $countAtt in $countAtts
-            let $ok :=
-                switch ($countAtt/local-name(.))
-                case 'count' return $valueCount = $countAtt
-                case 'minCount' return $valueCount >= $countAtt
-                case 'maxCount' return $valueCount <= $countAtt
-                default return error()
-            let $colour := if ($ok) then 'green' else 'red'
-            return
-                result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $countAtt, (), $contextNode, $valueCount, $trail, (), $context)
-                
-        (: implicit constraints :)                        
-        else
-            let $colour := if ($valueCount eq 1) then 'green' else 'red'
-            return
-                result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $constraintNode, (), $contextNode, $valueCount, $trail, (), $context)
-:)                    
 }; 
 
 (:~
@@ -303,7 +302,7 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
  : @param context the processing context
  : @return validation results :)
 declare function f:validateNodeContentConstraint_closed(
-                                                 $constraintElem as element(gx:docTree),
+                                                 $constraintElem as element(),
                                                  $constraintNode as element(gx:node),                                                 
                                                  $contextNode as node()?,
                                                  $valueNodes as node()*,
@@ -370,7 +369,7 @@ declare function f:validateNodeContentConstraint_closed(
                 $currentContextNode, (), $trail, (), $context)
 }; 
 
-declare function f:compileNodePaths($constraintElem as element(gx:docTree),
+declare function f:compileNodePaths($constraintElem as element(),
                                     $options as map(xs:string, item()*),
                                     $context as map(xs:string, item()*))
         as map(xs:string, item()*) {

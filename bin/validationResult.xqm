@@ -280,8 +280,10 @@ declare function f:validationResult_docTree_closed($colour as xs:string,
     let $contextURI := $context?_targetInfo?contextURI
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath    
-    let $constraintPath := i:getSchemaConstraintPath($constraintNode) 
-    let $constraintComponent := 'DocTreeClosed'
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
+    let $constraintComponent := 
+        let $constraintCompPrefix := $constraintElem/i:firstCharToUpperCase(local-name(.))    
+        return $constraintCompPrefix || 'Closed'
     let $nodePath := $contextNode/i:datapath(.)
     let $unexpectedNodeLocalName := $unexpectedNode/local-name(.)
     let $unexpectedNodeNamespace := $unexpectedNode/namespace-uri(.)[string()]
@@ -557,7 +559,7 @@ declare function f:constructError_folderContentHash($colour as xs:string,
 declare function f:validationResult_linkResolvable($ldo as map(*)?,
                                                    $lros as map(*)*,
                                                    $constraintElem as element(),
-                                                   $constraintNode as node(),
+                                                   $constraintNode as node()?,
                                                    $linkContextItem as item(),
                                                    $options as map(*)?,
                                                    $context as map(xs:string, item()*))
@@ -568,9 +570,12 @@ declare function f:validationResult_linkResolvable($ldo as map(*)?,
     let $focusNodePath := $targetInfo?focusNodePath
     let $resourceShapeID := $constraintElem/@resourceShapeID
     let $resourceShapePath := $constraintElem/@resourceShapePath      
-    let $constraintPath := i:getSchemaConstraintPath($constraintNode)
-    let $constraintComp := 'LinkResolvable'
-    
+    let $constraintPath := ($constraintNode, $constraintElem)[1]/i:getSchemaConstraintPath(.)
+    let $constraintComp := 
+        if (not($constraintNode)) then 
+            $constraintElem/i:firstCharToUpperCase(local-name(.)) || 'LinkResolution'
+        else 'LinkResolvable'
+
     (: Successful and failing link resolutions :)
     let $failures := $lros[?errorCode]
     let $successes := $lros[not(?errorCode)]    
@@ -699,8 +704,11 @@ declare function f:validationResult_linkCount($colour as xs:string,
     let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
     
     (: Error codes :)
+    (: obsolete - now reported in validationResult_linkError :)
+    (:
     let $errorCodes := ($lros?errorCode => distinct-values() => string-join('; '))[string()]
-    
+     :)
+     
     let $msg := i:getResultMsg($colour, $constraintNode/.., $constraintNode/local-name(.))
     
     (: If the constraint is part of the link definition, the path of the referencing
@@ -719,13 +727,65 @@ declare function f:validationResult_linkCount($colour as xs:string,
             $constraintElemPath,
             $resourceShapePath ! attribute resourceShapePath {.}, 
             $resourceShapeID ! attribute resourceShapeID {.},
-            
+            (:
             $errorCodes ! attribute errorCode {.},
+            :)
             $linkDefAtts,
             $standardAtts,
             $valueCountAtt            
         }       
 };
+
+(:~
+ : Creates a validation result for a LinkCount related constraint (LinkMinCount,
+ : LinkMaxCount, LinkCount.
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param valueShape the shape declaring the constraint
+ : @param exprValue expression value producing the links
+ : @param additionalAtts additional attributes to be included in the validation result
+ : @param additionalElems additional elements to be included in the validation result 
+ : @param contextInfo information about the resource context
+ : @param options options controling details of the validation result
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_linkError($ldo as map(*)?,
+                                              $lro as map(*),
+                                              $constraintElem as element(),
+                                              $options as map(*)?,
+                                              $context as map(xs:string, item()*))
+        as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintElem)
+    let $constraintComp := $constraintElem/i:firstCharToUpperCase(local-name(.)) || 'LinkResolution'
+        
+    (: Link description attributes :)
+    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    
+    (: link error code :)
+    let $errorCode := $lro?errorCode
+    
+    (: message :)
+    let $msg := 'Link error - link could not be resolved or not be fully resolved'
+    
+    return
+        element {f:resultElemName('red')} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            $constraintComp ! attribute constraintComp {.},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $errorCode ! attribute linkErrorCode {.},
+            $linkDefAtts            
+        }       
+};
+
 
 (:~
  : ===============================================================================
