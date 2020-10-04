@@ -34,7 +34,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:updateContextResourceRelationships($context as map(*),
                                                       $linkDefs as element(gx:linkDef)*)
         as map(*) {
-    let $newRelationships := link:parseLinkDefs($linkDefs)
+    let $newRelationships := link:parseLinkDefs($linkDefs, $context)
     return if (empty($newRelationships)) then $context else
         
     let $newNames := $newRelationships ! map:keys(.)    
@@ -80,13 +80,18 @@ declare function f:initialContext($gfox as element(gx:greenfox),
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
         
     (: Collect entries, overwriting schema values with external values :)
-    let $contextElem := $gfox/gx:context    
+    let $contextElem := $gfox/gx:context
+    let $domainEC := $externalContext?domain
+    let $domainFI := $contextElem/gx:field[@name eq 'domain']/@value/string()
     let $entries := (        
         if ($contextElem/gx:field[@name eq 'schemaPath']) then ()
         else $externalContext?schemaPath ! map:entry('schemaPath', .)
         ,
         if ($contextElem/gx:field[@name eq 'domain']) then ()
         else $externalContext?domain ! map:entry('domain', .)
+        ,
+        if ($contextElem/gx:field[@name eq 'domainURI']) then ()
+        else ($domainEC, $domainFI)[1] ! map:entry('domainURI', .)
         ,
         for $field in $contextElem/gx:field
         let $name := $field/@name/string()
@@ -99,7 +104,7 @@ declare function f:initialContext($gfox as element(gx:greenfox),
         (: Perform variable substitution :)    
         map:merge(
             $entries2
-        )        
+        )   
 };
 
 (:~
@@ -137,8 +142,21 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
                     error(QName((), 'INVALID_SCHEMA'), 
                         concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
                         "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
+            else if ($name eq 'domainURI') then  
+                try {
+                    let $apath := i:pathToAbsoluteFoxpath($raw)
+                    let $path := $apath ! i:normalizeAbsolutePath(.)
+                    (: let $_DEBUG := trace($path, '___DOMAIN_PATH: ') :)
+                    let $uri := $path ! i:pathToUriCompatible(.)
+                    return $uri
+                }
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
             else $raw
     let $augmentedEntry := map:entry($name, $augmentedValue)    
+    
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
     return (
         $augmentedEntry,

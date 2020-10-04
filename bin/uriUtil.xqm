@@ -114,6 +114,19 @@ declare function f:normalizeURISet($uris as xs:string+)
 };
 
 (:~
+ : Transforms a path into a representation which can be used where a URI
+ : is expected. Replaces backward slash with forward slash and removes trailing
+ : slash or backward slah.
+ :
+ : @param path the path to be edited
+ : @return URI compatible copy of the path
+ :)
+declare function f:pathToUriCompatible($path as xs:string)
+        as xs:string {
+    $path ! replace(., '\\', '/') ! replace(., '/$', '')        
+}; 
+
+(:~
  : Removes from a URI or path the file URI scheme, if present.
  :
  : @param uri the uri or path to be edited

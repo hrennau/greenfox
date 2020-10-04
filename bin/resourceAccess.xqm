@@ -205,18 +205,6 @@ declare function f:fox-resource-is-dir($uri as xs:string)
     return tt:fox-is-dir($uri, $foxpathOptions)
 };
 
-(:~
- : Replaces backward slash with forward slash and removes trailing
- : slash or backward slah.
- :
- : @param path the path to be edited
- : @return URI compatible copy of the path
- :)
-declare function f:pathToUriCompatible($path as xs:string)
-        as xs:string {
-    $path ! replace(., '\\', '/') ! replace(., '/$', '')        
-}; 
-
 declare function f:pathToAbsoluteFoxpath($path as xs:string)
         as xs:string {
     f:pathToAbsolutePath($path) ! replace(., '/', '\\')

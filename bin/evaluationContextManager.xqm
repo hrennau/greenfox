@@ -260,7 +260,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             let $required :=            
                 $mediatype = ('xml', 'xml-or-json')
                 or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
-                or not($mediatype) and (f:nodeTreeRequired($allComponents) or exists($ldos[?requiresContextNode]))
+                or not($mediatype) and (f:nodeTreeRequired($allComponents, $context) or exists($ldos[?requiresContextNode]))
             return
                 if (not($required)) then () 
                 else if (not(i:fox-doc-available($filePath))) then ()
@@ -271,7 +271,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
             let $required :=
                 $requiredBindings = 'json' or
                 $mediatype = ('json', 'xml-or-json') or 
-                not($mediatype) and (f:nodeTreeRequired($allComponents) or exists($ldos[?requiresContextNode]))                    
+                not($mediatype) and (f:nodeTreeRequired($allComponents, $context) or exists($ldos[?requiresContextNode]))                    
             return
                 if (not($required)) then ()
                 else try {i:fox-json-doc($filePath, ())} catch * {()}
@@ -505,7 +505,7 @@ declare function f:updateEvaluationContext_focusNode($focusNode as node(), $cont
  : @param components a set of schema components, e.g. constraint elements and shapes
  : @return true if the input contains a component which requires a node tree
  :)
-declare function f:nodeTreeRequired($components as element()*)
+declare function f:nodeTreeRequired($components as element()*, $context as map(xs:string, item()*))
         as xs:boolean? { 
     (: let $_DEBUG := trace($components/name() => string-join(', '), '_COMPONENT_NAMES: ') return :)        
         
@@ -520,8 +520,8 @@ declare function f:nodeTreeRequired($components as element()*)
         self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
         self::gx:foxvalueCompared[.//(@expr1XP, @expr2XP)],
         self::gx:foxvaluesCompared[.//(@expr1XP, @expr2XP)],
-        self::gx:links[not(@linkName)][link:parseLinkDef(.)?requiresContextNode], 
-        self::gx:file[not(@linkName)][link:parseLinkDef(.)?requiresContextNode],
+        self::gx:links[not(@linkName)][link:parseLinkDef(., $context)?requiresContextNode], 
+        self::gx:file[not(@linkName)][link:parseLinkDef(., $context)?requiresContextNode],
         gx:validatorXPath, 
         @validatorXPath,
                       

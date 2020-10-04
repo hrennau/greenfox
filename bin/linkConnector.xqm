@@ -92,7 +92,7 @@ declare function f:resolveUriTemplate($ldo as map(*),
                                       $contextPoint as item(),
                                       $context as map(xs:string, item()*))
         as xs:string* {
-    (: let $_DEBUG := trace($contextPoint, '_CONTEXT_POINT: ') :)
+    (: let $_DEBUG := trace($contextPoint, '_CONTEXT_POINT: '):)
     
     let $uriTemplate := $ldo?uriTemplate        
     let $templateVarMap :=
@@ -119,7 +119,7 @@ declare function f:resolveUriTemplateRC($uriTemplate as xs:string,
                                         $templateVarMap as map(*))
         as xs:string* {
     let $sep := codepoints-to-string(30000)        
-    let $partsConcat := replace($uriTemplate, '^(.*)?\{(.*?)\}(.*)', '$1'||$sep||'$2'||$sep||'$3')
+    let $partsConcat := replace($uriTemplate, '^(.*?)?\{(.*?)\}(.*)', '$1'||$sep||'$2'||$sep||'$3')
     return
         if ($partsConcat eq $uriTemplate) then $uriTemplate else
         

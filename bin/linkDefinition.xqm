@@ -8,15 +8,15 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
     
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
-    "linkResolution.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at "linkResolution.xqm";
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "foxpathUtil.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "foxpathUtil.xqm",
+   "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -53,7 +53,14 @@ declare function f:getLinkDefObject($linkDef as item(),
         case $linkDefObject as map(*) return $linkDefObject
         (: Element referencing or providing a local link definition :)
         case $linkDefElem as element() return
-            let $linkName := $linkDefElem/(@linkName, @link)[1]
+            let $ldo := $linkDefElem/f:parseLinkDef(., $context)
+            return
+                if (empty($ldo)) then
+                    error(QName((), 'INVALID_SCHEMA'), concat('Element does not reference or ',
+                        'define a valid link definition; element name: ', name($linkDefElem)))    
+                else $ldo                        
+(:            
+            let $linkName := trace($linkDefElem/(@linkName, @link)[1] , '+++ LINK_NAME: ')
             return
                 if ($linkName) then
                     let $try := link:linkDefObject($linkName, $context)
@@ -63,7 +70,8 @@ declare function f:getLinkDefObject($linkDef as item(),
                 else
                     (: Try to parse the element into a Link Definition; if not possible,
                        the empty sequence is returned :)
-                    link:parseLinkDef($linkDefElem)
+                    link:parseLinkDef($linkDefElem, $context)
+:)                    
         default return error((), 'Parameter $linkDef must be a string, an object or an element')
     return $ldo        
 };
@@ -77,12 +85,12 @@ declare function f:getLinkDefObject($linkDef as item(),
  : @param linkDefs schema elements from which to parse the relationships
  : @return a map representing the relationships parsed from the <linkDef> elements
  :)
-declare function f:parseLinkDefs($linkDefs as element()*)
+declare function f:parseLinkDefs($linkDefs as element()*, $context as map(xs:string, item()*))
         as map(*) {
     map:merge(        
         for $linkDef in $linkDefs
         let $name := $linkDef/@name/string()
-        let $ldo := f:parseLinkDef($linkDef)
+        let $ldo := f:parseLinkDef($linkDef, $context)
         return map:entry($name, $ldo)
     )
 };    
@@ -103,24 +111,49 @@ declare function f:parseLinkDefs($linkDefs as element()*)
  : @return a Link Definition Object, or the empty sequence if the element does not
  :   represent a Link Definition
  :)
-declare function f:parseLinkDef($linkDef as element())
+declare function f:parseLinkDef($linkDef as element(),
+                                $context as map(xs:string, item()*))
         as map(*)? {
-    let $foxpath := $linkDef/@foxpath/string()
-    let $hrefXP := $linkDef/@hrefXP/string()
-    let $uriXP := $linkDef/@uriXP/string()
-    let $uriTemplate := $linkDef/@uriTemplate
-    let $reflector1 := $linkDef/@reflector1/string()    
+    let $referenced := $linkDef/@linkName/f:linkDefObject(., $context)    
+    let $foxpath := ($linkDef/@foxpath/string(), $referenced?foxpath)[1]
+    let $hrefXP := ($linkDef/@hrefXP/string(), $referenced?hrefXP)[1]
+    let $uriXP := ($linkDef/@uriXP/string(), $referenced?uriXP)[1]
+    let $uriTemplate := ($linkDef/@uriTemplate, $referenced?uriTemplate)[1]
+    let $reflector1 := ($linkDef/@reflector1/string(), $referenced?reflector1)[1]
+    let $reflector2 := ($linkDef/@reflector2/string(), $referenced?reflector2)[1]
+    let $reflector1Shift := ($linkDef/@reflector1Shift/string(), $referenced?reflector1Shift)[1]    
+    let $recursive := ($linkDef/@recursive/string(), $referenced?recursive)[1]
+    let $contextXP := ($linkDef/@contextXP/string(), $referenced?contextXP)[1]
+    let $targetXP := ($linkDef/@targetXP/string(), $referenced?targetXP)[1]            
+    let $targetMediatype := ($linkDef/@targetMediatype/string(), $referenced?targetMediatype)[1]
+    let $csvSeparator := ($linkDef/@csv.separator/string(), $referenced?csv.separator)[1]
+    let $csvHeader := ($linkDef/@csv.header/string(), $referenced?csv.header)[1]
+    let $csvFormat := ($linkDef/@csv.format/string(), $referenced?csv.format)[1]
+    let $csvLax := ($linkDef/@csv.lax/string(), $referenced?csv.lax)[1]
+    let $csvQuotes := ($linkDef/@csv.quotes/string(), $referenced?csv.quotes)[1]
+    let $csvBackslashes := ($linkDef/@csv.backslashes/string(), $referenced?csv.backslashes)[1]
+    let $templateVarsDef := $linkDef/gx:templateVar
+    let $templateVarsRef := $referenced?templateVars
+    let $constraintsRef := $referenced?constraints
+    
+    (: Build the map of templates vars; key=name, value=XML element with @value :)
+    let $templateVarsMap :=
+        if (empty($templateVarsDef)) then $templateVarsRef
+        else if (empty($templateVarsRef)) then 
+            if (empty($templateVarsDef)) then () 
+            else map:merge($templateVarsDef/map:entry(@name, .))
+        else
+            map:merge((
+                let $names := ($templateVarsDef/@name, map:keys($templateVarsRef)) => distinct-values()
+                for $name in $names return
+                    map:entry($name, ($templateVarsDef[@name eq $name], $templateVarsRef($name))[1])
+            ))                    
     return
         if (empty((
-            $foxpath, $hrefXP, $uriXP, $uriTemplate, $reflector1))) then () else
-            
-    let $recursive := $linkDef/@recursive/string()
-    let $contextXP := $linkDef/@contextXP/string()
-    let $targetXP := $linkDef/@targetXP/string()            
-    let $reflector2 := $linkDef/@reflector2/string()
-    let $reflector1Shift := $linkDef/@reflector1Shift/string()
-    let $constraints := $linkDef/gx:constraints    
-    let $templateVars := $linkDef/gx:templateVar            
+            $foxpath, $hrefXP, $uriXP, $uriTemplate, $reflector1, $reflector2,
+                $recursive, $contextXP, $targetXP, $constraintsRef, $templateVarsMap))) then () 
+        else
+    
     let $ldo :=        
         map:merge(        
             let $connector :=
@@ -128,21 +161,25 @@ declare function f:parseLinkDef($linkDef as element())
                 else if ($hrefXP) then 'hrefExpr'
                 else if ($uriXP) then 'uriExpr'
                 else if ($uriTemplate) then 'uriTemplate'
-                else if ($reflector1) then 'mirror'                    
+                else if ($reflector1) then 'mirror'
                 else error()
         
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
                     or $contextXP
             let $targetMediatype :=
-                let $explicit := $linkDef/@targetMediatype/string()
-                return
-                    if ($explicit) then $explicit 
-                    else if ($targetXP) then 'xml' 
-                    else if ($recursive and $requiresContextNode) then 'xml'
-                    else () 
-            let $csvAtts :=
-                $linkDef/(@csv.separator, @csv.header, @csv.format, @csv.lax, @csv.quotes, @csv.backslashes)
+                if ($targetMediatype) then $targetMediatype 
+                else if ($targetXP) then 'xml' 
+                else if ($recursive and $requiresContextNode) then 'xml'
+                else () 
+            let $csvProperties := (
+                $csvSeparator ! map:entry('csv.separator', .),
+                $csvHeader ! map:entry('csv.header', .),
+                $csvFormat ! map:entry('csv.format', .),
+                $csvLax ! map:entry('csv.lax', .),
+                $csvQuotes ! map:entry('csv.quotes', .),
+                $csvBackslashes ! map:entry('csv.backslashes', .)
+            )
             return
                 map:merge((
                     $connector ! map:entry('connector', .),
@@ -155,19 +192,17 @@ declare function f:parseLinkDef($linkDef as element())
                     $recursive ! map:entry('recursive', string(.)),
                     $contextXP ! map:entry('contextXP', string(.)),
                     $targetXP ! map:entry('targetXP', string(.)),   
-                    $csvAtts ! map:entry(local-name(.), string(.)),
+                    $csvProperties,
                     
-                    if (not($templateVars)) then () else
-                        map:entry('templateVars', map:merge($templateVars ! map:entry(@name, .))),
+                    map:entry('templateVars', $templateVarsMap)[exists($templateVarsMap)],
                         
                     $reflector1 ! map:entry('mirror', 
                         map{'reflector1': $reflector1,
                             'reflector2': $reflector2,
                             'reflector1Shift': $reflector1Shift}),
                             
-                    $constraints ! map:entry('constraints', $constraints)                            
-                ))
-    )
+                    $constraintsRef ! map:entry('constraints', .)                            
+                )))
     return $ldo
 };    
 

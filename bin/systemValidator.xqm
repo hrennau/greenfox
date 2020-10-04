@@ -12,7 +12,8 @@ at "tt/_nameFilter.xqm";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "constants.xqm",
-   "folderValidator.xqm";
+   "folderValidator.xqm",
+   "uriUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 

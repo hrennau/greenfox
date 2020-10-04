@@ -7,18 +7,18 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_foxpath.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_foxpath.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "fileValidator.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions"  
+at "fileValidator.xqm",
+   "greenfoxUtil.xqm",
+   "uriUtil.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
