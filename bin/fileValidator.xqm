@@ -21,7 +21,7 @@ at "conditionalConstraint.xqm",
    "resourcePropertiesConstraint.xqm",    
    "xsdValidator.xqm";
 
-import module namespace dcont="http://www.greenfox.org/ns/xquery-functions/doc-tree" 
+import module namespace dtree="http://www.greenfox.org/ns/xquery-functions/doc-tree" 
 at "docTreeConstraint.xqm";
 
 import module namespace expr="http://www.greenfox.org/ns/xquery-functions/value" 
@@ -130,7 +130,8 @@ declare function f:validateFileConstraints($fileConstraints as element(),
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
-        case element(gx:docTree) return dcont:validateDocTreeConstraint($constraintElem, $context)  
+        case element(gx:docTree) return dtree:validateDocTreeConstraint($constraintElem, $context)  
+        case element(gx:hyperdocTree) return dtree:validateDocTreeConstraint($constraintElem, $context)        
         
         case element(gx:value) return expr:validateValueConstraint($constraintElem, $context)
         case element(gx:values) return expr:validateValueConstraint($constraintElem, $context)

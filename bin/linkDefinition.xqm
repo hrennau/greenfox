@@ -119,9 +119,10 @@ declare function f:parseLinkDef($linkDef as element(),
     let $hrefXP := ($linkDef/@hrefXP/string(), $referenced?hrefXP)[1]
     let $uriXP := ($linkDef/@uriXP/string(), $referenced?uriXP)[1]
     let $uriTemplate := ($linkDef/@uriTemplate, $referenced?uriTemplate)[1]
-    let $reflector1 := ($linkDef/@reflector1/string(), $referenced?reflector1)[1]
-    let $reflector2 := ($linkDef/@reflector2/string(), $referenced?reflector2)[1]
-    let $reflector1Shift := ($linkDef/@reflector1Shift/string(), $referenced?reflector1Shift)[1]    
+    let $mirrorRef := $referenced?mirror
+    let $reflector1 := $linkDef/@reflector1/string()
+    let $reflector2 := $linkDef/@reflector2/string()
+    let $reflector1Shift := $linkDef/@reflector1Shift/string()    
     let $recursive := ($linkDef/@recursive/string(), $referenced?recursive)[1]
     let $contextXP := ($linkDef/@contextXP/string(), $referenced?contextXP)[1]
     let $targetXP := ($linkDef/@targetXP/string(), $referenced?targetXP)[1]            
@@ -147,21 +148,36 @@ declare function f:parseLinkDef($linkDef as element(),
                 let $names := ($templateVarsDef/@name, map:keys($templateVarsRef)) => distinct-values()
                 for $name in $names return
                     map:entry($name, ($templateVarsDef[@name eq $name], $templateVarsRef($name))[1])
-            ))                    
+            ))
+    (: Built the map of mirror parameters :)            
+    let $mirrorMap :=
+        if (empty(($reflector1, $reflector2, $reflector1Shift))) then $mirrorRef        
+        else if (empty($mirrorRef)) then
+            map{
+                'reflector1': $reflector1,
+                'reflector2': $reflector2,
+                'reflector1Shift': $reflector1Shift
+            }
+        else            
+            map{
+                'reflector1': ($reflector1, $mirrorRef?reflector1)[1],
+                'reflector2': ($reflector1, $mirrorRef?reflector2)[1],
+                'reflector1Shift': ($reflector1Shift, $mirrorRef?reflector1Shift)[1]
+            }
     return
         if (empty((
-            $foxpath, $hrefXP, $uriXP, $uriTemplate, $reflector1, $reflector2,
+            $foxpath, $hrefXP, $uriXP, $uriTemplate, $mirrorMap,
                 $recursive, $contextXP, $targetXP, $constraintsRef, $templateVarsMap))) then () 
         else
     
-    let $ldo :=        
+    let $ldo :=       
         map:merge(        
             let $connector :=
                 if ($foxpath) then 'foxpath'
                 else if ($hrefXP) then 'hrefExpr'
                 else if ($uriXP) then 'uriExpr'
                 else if ($uriTemplate) then 'uriTemplate'
-                else if ($reflector1) then 'mirror'
+                else if (exists($mirrorMap)) then 'mirror'
                 else error()
         
             let $requiresContextNode :=
@@ -192,15 +208,9 @@ declare function f:parseLinkDef($linkDef as element(),
                     $recursive ! map:entry('recursive', string(.)),
                     $contextXP ! map:entry('contextXP', string(.)),
                     $targetXP ! map:entry('targetXP', string(.)),   
-                    $csvProperties,
-                    
-                    map:entry('templateVars', $templateVarsMap)[exists($templateVarsMap)],
-                        
-                    $reflector1 ! map:entry('mirror', 
-                        map{'reflector1': $reflector1,
-                            'reflector2': $reflector2,
-                            'reflector1Shift': $reflector1Shift}),
-                            
+                    $csvProperties,                    
+                    $templateVarsMap ! map:entry('templateVars', .),
+                    $mirrorMap ! map:entry('mirror', .),
                     $constraintsRef ! map:entry('constraints', .)                            
                 )))
     return $ldo
