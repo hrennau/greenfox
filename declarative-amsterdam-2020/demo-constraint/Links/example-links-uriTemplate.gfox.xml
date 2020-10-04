@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links - uses a link definition containing a URI template.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Links/example-links-uri-template"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+    </context>
+  
+    <!-- Define link: 
+           assumed link context is a CSV document with columns 4 and 5 giving country and IATA code; 
+           the target link is constructed using a URI template referencing country and IATA code -->
+    <linkDef name="jsonAirports"
+             contextXP="/csv/record[*[5] ne '\N']"
+             uriTemplate="${domainURI}/data/air/airports/countries/{country}/json/airport-{iata}.json"
+             targetMediatype="json">
+        <templateVar name="country" exprXP="*[4]"/>
+        <templateVar name="iata" exprXP="*[5]/lower-case(.)"/>
+    </linkDef>                
+    
+    <domain path="${domain}" name="dc2020">
+        <!-- VISIT: airports folder -->
+        <folder foxpath="data\air\resources\airports" id="airportsFolderShape">
+            <targetSize count="1" countMsg="Missing folder: airports"/>
+
+            <!-- VISIT: CSV dictionary of airports -->
+            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv">
+                <targetSize minCount="1" minCountMsg="Missing airports CSV file"/>
+                
+                <!-- CHECK: URI template based links can be resolved -->
+                <links linkName="jsonAirports" 
+                       resolvable="true" resolvableMsg="Link cannot be resolved"
+                       minCountTargetResources="20" minCountTargetResourcesMsg="Missing link targets"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
