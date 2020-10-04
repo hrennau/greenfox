@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocTree constraints.
+    
+    Each <node> child of the constraint element describes a subtree of the document
+    tree. Each <node> child of a <node> element describes a set of nodes reached
+    by the node path in @locNP on its parent node. Explicit cardinality constraints
+    are specified by @count, @minCount, @maxCount. The implicit cardinality constraint -
+    when there are no explicit constraints - is "exactly one node". 
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        <folder foxpath=".\data\resources" id="resourcesFolderShape">
+            <targetSize count="1" countMsg="Missing folder: resources"/>          
+
+            <file foxpath="factbook\factbook.xml" id="factbookFileShape">
+                <targetSize count="1" countMsg="Missing file: factbook.xml"/>
+                <docTree>
+                    <node locNP="//river" maxCount="unbounded" closed="true">
+                        <node locNP="@id"/>                        
+                        <node locNP="@length" minCount="0"/>
+                        <node locNP="@name"/>
+                        <node locNP="to" minCount="0"/>
+                        <node locNP="located" minCount="0" maxCount="unbounded"/>                        
+                    </node>                    
+                </docTree>
+            </file>
+
+        </folder>
+    </domain>
+
+</greenfox>

@@ -352,6 +352,17 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="maxCountMsg" type="xs:string"/>
         <xs:attribute name="maxCountMsgOK" type="xs:string"/>
     </xs:complexType>
+
+    <!-- H y p e r d o c T r e e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="HyperdocTreeConstraintType">
+        <xs:complexContent>
+            <xs:extension base="t:DocTreeConstraintType">
+                <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+                <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
     
     <!-- L i n k    C o n s t r a i n t s -->    
     
@@ -878,6 +889,7 @@ Groups
             <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
+            <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
             <xs:element name="links" type="t:LinkConstraintType"/>
             <xs:element name="conditional" type="t:ConditionalFolderConstraintType"/>
         </xs:choice>
@@ -890,6 +902,7 @@ Groups
             <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
             <xs:element name="mediatype" type="t:MediatypeConstraintType"/>
             <xs:element name="docTree" type="t:DocTreeConstraintType"/>
+            <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
             <xs:element name="docSimilar" type="t:DocSimilarType"/>
             <xs:element name="value" type="t:ValueConstraintType"/>
             <xs:element name="values" type="t:ValuesConstraintType"/>
