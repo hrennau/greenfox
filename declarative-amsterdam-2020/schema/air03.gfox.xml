@@ -56,7 +56,7 @@
                         datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
                     <value exprXP="//airport/@id"  
                         minCount="1" minCountMsg="Missing data: ID"
-                        distinct="true"/>                        
+                        distinct="true" distinctMsg="IDs not distinct"/>                        
                 </values>
             </file>
         </folder>

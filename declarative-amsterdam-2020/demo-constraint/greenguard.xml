@@ -17,11 +17,12 @@
             <targetSize countMsg="Missing folder: demo-constraint" count="1"/>
 
             <!-- CHECK: The schemas contain every constraint type -->
-            <foxvalue exprFOX=".\\*.xml[/*:greenfox//*/local-name()]">
+            <foxvalue exprFOX=".\\*.xml/*:greenfox//*/local-name() => distinct-values() => sort()">
                 <contains>
                     <term>conditional</term>
                     <term>docSimilar</term>
-                    <term>docTree</term>                    
+                    <term>docTree</term>
+                    <term>hyperdocTree</term>                    
                     <term>fileDate</term>                    
                     <term>fileName</term>
                     <term>fileSize</term>
