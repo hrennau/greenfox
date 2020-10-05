@@ -3,7 +3,7 @@
     We added the check of a file resource: we visit all FLAG files and check
     their size, which must be 0.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air02"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
@@ -28,7 +28,7 @@
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="100" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>

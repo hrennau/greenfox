@@ -22,7 +22,7 @@
                 
                 <!-- CHECK: file empty -->
                 <!--<fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>-->
-                <fileSize gt="0" gtMsg="Empty files not allowed"/>
+                <fileSize eq="1" gtMsg="Empty files not allowed"/>
             </file>
         </folder>
     </domain>

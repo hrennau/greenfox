@@ -2,7 +2,7 @@
 <!-- 
     We follow the href links, visit the link targets and validate their tree structure.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air07"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
@@ -93,7 +93,8 @@
                                     <node locNP="longitude"/>
                                     <node locNP="altitude"/>                                        
                                 </node>
-                                <node locNP="temporal"/>
+                                <node locNP="temporal/timezone"/>
+                                <node locNP="temporal/tzTimezone"/>
                                 <node locNP="type"/>
                                 <node locNP="source1" minCount="0"/>                            
                             </node>

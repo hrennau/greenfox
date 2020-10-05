@@ -6,11 +6,10 @@ resource, another expression in the context of the other resource. And the
 relationship between the resources is observed by comparing the two values.
     
 A VALUE COMPARED constraint is thus composed of 
-    (a) a specification which resource(s) to use as the second resource
+    (a) Link Definition: identifies the resources used as the second resource
     (b) an expression to be evaluated in the context of the first resource 
     (c) an expression to be evaluated in the context of the second resource 
-    (d) further attributes or child elements specifying what to expect from 
-        the pair of expression values.
+    (d) comparator: specifies how to check this pair of expression values
         
 Here, we check that the @country value in the XML file is equal to the 
 "country" in the accompanying JSON document. So the XML document is compared

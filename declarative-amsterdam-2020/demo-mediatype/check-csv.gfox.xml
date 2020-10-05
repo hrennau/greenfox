@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the checking of a CSV document. Note the @mediatype attribute on <file>.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-csv"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airports.with-headr.csv -->
+        <file foxpath="air\resources\airports\airports.with-header.csv" mediatype="csv" csv.header="yes">
+            <targetSize count="1" countMsg="Missing file: airports.csv"/>
+                
+            <!-- @href must start with https:// -->
+            <value exprXP="//TimezoneTz[. ne '\N']" 
+                   minCount="100" countMsg="Too few timezones"
+                   like="*/*" matchesMsg="TimezoneTZ not as */*"/>
+        </file>
+    </domain>
+
+</greenfox>
+

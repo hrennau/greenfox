@@ -1,3 +1,36 @@
-We visit the JSON document and check that all href links can be resolved.
+We visit the JSON document and check that all href links can be resolved. But
+what exactly is a "link"? Is there some hardcoded assumption that items named
+"href" contain link URIs?
 
-(to be continued)
+Certainly not. A link is a mapping of a resource to other resources, defined 
+by a LINK DEFINITION. Greenfox includes an elaborate model of link definitions, 
+which can use different forms. The most important difference between Greenfox
+as of xmlprague and Greenfox of Amsterdam is the introduction of a Link model.
+
+In this case the complete link definition is specified by the @hrefXP expression, 
+interpreted as an XPath yielding the items containing link URIs. The @resolvable 
+attribute is a constraint, meaning that any URI produced by the href expression 
+must be successfully resolved to a target resource. And the 
+@minCountTargetResources is another constraint - the number of link target 
+resources must be > 0.
+
+So a <links> constraint always has two parts: (1) a Link Definition and (2) 
+constraints. The Link Definition maps the resource to other resources. The
+constraints check the outcome against expectations. 
+
+The Link Definition can take quite different forms.
+
+The second <links> element uses a URI expression yielding the target URIs.
+
+The third <links> element uses a Foxpath expression yielding the target
+resources. It navigates the file system, rather than construct a URI.
+
+The fourth <links> element also uses a Foxpath expression selecting a 
+target resource, but then drills into the document and yields a node
+found inside - note the @targetXP attribute. The link model of Greenfox
+includes an optional target node selector, narrowing down the link
+result to content nodes, rather than URI or root node.
+
+The last <links> element uses a mirror - it selects a resource found
+at the same position under reflector 2 as the current resource is found
+at under reflector 1.

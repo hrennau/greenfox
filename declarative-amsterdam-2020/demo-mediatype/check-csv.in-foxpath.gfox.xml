@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the evaluation of a CSV document within a Foxpath expression.
+    Although a file is checked, the check is performed by a foxvalue constraint 
+    of the folder, which can be understood like this: 
+      "The folder should contain a resource satisfying the condition ...". 
+    
+    The document is parsed using csv-doc(uri, separator, header).
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-csv.in-foxpath"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airports.with-headr.csv -->
+        <folder foxpath="air\resources\airports">
+            <targetSize count="1" countMsg="Missing folder: airports"/>
+                
+            <!-- @href must start with https:// -->
+            <foxvalue exprFOX="airports.with-header.csv\csv-doc(., 'comma', 'yes')//TimezoneTz[. ne '\N']" 
+                   minCount="100" countMsg="Too few timezones"
+                   like="*/*" matchesMsg="TimezoneTZ not as */*"/>
+        </folder>
+    </domain>
+
+</greenfox>
+

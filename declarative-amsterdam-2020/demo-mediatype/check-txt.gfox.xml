@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the checking of a text document. The document is internally represented
+    by a <lines> element with one <line> child element per text line.
+    
+    The expression value is obtained by (optionally) filtering the text lines and
+    (optionally) mapping the selected lines to result items. 
+    
+    The XPath expression @filterLP is used as a predicate for filtering lines. The XPath 
+    expression @mapLP is used to map the selected line(s) to a value.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-text"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airports.xml -->
+        <file foxpath="air\airports\index\meta.txt">
+            <targetSize count="1" countMsg="Missing file: meta.txt"/>
+                
+            <!-- 'version' must be >= 1.001 -->
+            <value filterLP="matches(., '^version:')" mapLP="replace(., '.*:\s*', '')" 
+                   count="1" countMsg="Missing version"
+                   ge="1.001" geMsg="Version lt 1.001"
+                   useDatatype="decimal"/>
+        </file>
+    </domain>
+
+</greenfox>
+

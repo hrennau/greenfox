@@ -769,6 +769,7 @@ Enumerations
             <xs:enumeration value="xml"/>
             <xs:enumeration value="json"/>
             <xs:enumeration value="csv"/>
+            <xs:enumeration value="html"/>
         </xs:restriction>    
     </xs:simpleType>
     

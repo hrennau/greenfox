@@ -3,7 +3,7 @@
     We submit the index document to XSD validation, and we check that all href
     links can be recursively resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air08"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">

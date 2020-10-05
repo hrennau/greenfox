@@ -2,7 +2,7 @@
 <!-- 
     We visit the JSON document and check that all href links can be resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air06"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
@@ -24,8 +24,25 @@
                 <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" mediatype="json">
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
 
-                    <!-- CHECK: href links resolvable -->
-                    <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>
+                    <!-- CHECK: href contains resolvable URIs -->
+                    <links hrefXP="//href" 
+                           resolvable="true" minCountTargetResources="1"/>
+                    
+                    <!-- CHECK: uriXP values are resolvable URIs -->
+                    <links uriXP="//href/replace(., 'json', 'xml')" 
+                           resolvable="true" minCountTargetResources="1"/>
+                    
+                    <!-- CHECK: corresponding XML document exists -->
+                    <links foxpath="fox-sibling($fileName, '\.json', '.xml')" 
+                           countTargetResources="1"/>
+                    
+                    <!-- CHECK: this resource is referenced by another resource -->
+                    <links foxpath="fox-sibling('airports.json')" targetXP="//href[ends-with(., $fileName)]" targetMediatype="json" 
+                           countTargetResources="1"/>
+                    
+                    <!-- CHECK: this resource is "mirrored" by another resource --> 
+                    <links reflector1="${domain}" reflector2="${domain}\..\air.20201003"
+                           countTargetResources="1"/>
                 </file>
             </file>
         </folder>

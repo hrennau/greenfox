@@ -1,11 +1,11 @@
 EXCERCISE AIR03
 ===============
-Modify the schema, changing value and/or adding further value constraint.
+Modify the schema, changing value and/or adding further value constraints.
+Data are found here: $greenfox/declarative-amsterdam-2020/data/air/airports/index
 
 In order to see the error result elements, use option -r:
    gfox -r /path/to/air03.gfox.xml 
-If you want to see *all* result elements (red or green), use option -w:
-   gfox -r /path/to/air03.gfox.xml
+If you want to see *all* result elements (red or green), use option -w
 
 Available value constraints
 ---------------------------
@@ -22,7 +22,7 @@ Available value constraints
 - The items match at least one comparison from in/*:
   <in><eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+</in>
 
-- The items match none of the comparisons from in/*:  
+- The items match none of the comparisons from notin/*:  
   <notin>
       <eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+
   </notin>
@@ -31,7 +31,7 @@ Available value constraints
   <contains><term>+</contains>
 
 - All items are in sameTerms/term, and the other way around
-  <sameTerms><term>+</deepEqual>
+  <sameTerms><term>+</sameTerms>
 
-- The value and deepEqual/term are deep-equal
+- The value and the sequence deepEqual/term are deep-equal
   <deepEqual><term>+</deepEqual>

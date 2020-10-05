@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the checking of an HTML document. Note the @mediatype attribute on <file>.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-html"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airport FRA (HTML) -->
+        <file foxpath="resources\airport-html\fra.html" mediatype="html">
+            <targetSize count="1" countMsg="Missing file: fra.html"/>
+                
+            <!-- @href must start with https:// -->
+            <value exprXP="//@href" 
+                   minCount="100" countMsg="Too few hrefs"
+                   matches="^(#|/etc.clientlibs/.*|https:/).*$" matchesMsg="href must be https"/>
+        </file>
+    </domain>
+
+</greenfox>
+

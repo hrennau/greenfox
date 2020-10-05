@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the checking of an XML document. XML is the default mediatype, 
+    @mediatype not necessary.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-xml"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airports.xml -->
+        <file foxpath="air\airports\index\airports.xml">
+            <targetSize count="1" countMsg="Missing file: airports.xml"/>
+                
+            <!-- @href must start with https:// -->
+            <value exprXP="//@href/replace(., '.*-(.*)\.xml', '$1')" 
+                   minCount="3" countMsg="Too few hrefs"
+                   containsMsg="Does not contain all of denmark, finland and ireland"
+                   useString="lc">
+                <contains>
+                    <term>Denmark</term>
+                    <term>Finland</term>
+                    <term>Ireland</term>
+                </contains>
+            </value>
+        </file>
+    </domain>
+
+</greenfox>
+

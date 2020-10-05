@@ -18,7 +18,7 @@
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+        <folder foxpath="airports\index">
             <targetSize count="1" countMsg="Missing folder"/>
 
             <!-- CHECK: folder content -->

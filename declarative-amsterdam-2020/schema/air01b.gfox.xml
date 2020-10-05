@@ -2,7 +2,7 @@
 <!-- 
     Same validation as in air01.gfox.xml, but more compact notation.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01b"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">

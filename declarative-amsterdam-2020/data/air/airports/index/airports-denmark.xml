@@ -1,6 +1,6 @@
 <airportsForCountry country="Denmark" countAirports="31">
   <airport id="607" iata="AAR" icao="EKAH" createdAt="2020-10-03T20:32:31.665+02:00" latitude="56.2999992371" longitude="10.619000434899998" href="../countries/denmark/xml/airport-aar.xml"/>
-  <airport id="607" iata="BLL" icao="EKBI" createdAt="2020-10-03T20:32:31.665+02:00" latitude="55.7402992249" longitude="9.15178012848" href="../countries/denmark/xml/airport-bll.xml"/>
+  <airport id="608" iata="BLL" icao="EKBI" createdAt="2020-10-03T20:32:31.665+02:00" latitude="55.7402992249" longitude="9.15178012848" href="../countries/denmark/xml/airport-bll.xml"/>
   <airport id="609" iata="CPH" icao="EKCH" createdAt="2020-10-03T20:32:31.665+02:00" latitude="55.617900848389" longitude="12.656000137329" href="../countries/denmark/xml/airport-cph.xml"/>
   <airport id="610" iata="EBJ" icao="EKEB" createdAt="2020-10-03T20:32:31.665+02:00" latitude="55.525902" longitude="8.5534" href="../countries/denmark/xml/airport-ebj.xml"/>
   <airport id="611" icao="EKGH" createdAt="2020-10-03T20:32:31.665+02:00">

@@ -7,7 +7,7 @@
     In this example, an attribute from the XML document is compared with a field from
     a related JSON document.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

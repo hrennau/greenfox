@@ -11,7 +11,7 @@
     <geo>
       <latitude>53.301700592</latitude>
       <longitude>-6.451330184940001</longitude>
-      <altitude>1319</altitude>
+      <altitude>319</altitude>
     </geo>
     <temporal>
       <timezone>0</timezone>
@@ -53,7 +53,7 @@
     <geo>
       <latitude>53.07109832763672</latitude>
       <longitude>-6.0452799797058105</longitude>
-      <altitude>1001</altitude>
+      <altitude>1</altitude>
     </geo>
     <temporal>
       <timezone>0</timezone>

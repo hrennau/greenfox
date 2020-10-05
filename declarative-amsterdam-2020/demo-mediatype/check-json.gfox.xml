@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the checking of a JSON document. Note the @mediatype attribute on <file>.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/demo-mediatype/check-json"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data"/>
+    </context>    
+    <domain path="${domain}" name="data">
+        
+        <!-- VISIT airport files (JSON) -->
+        <file foxpath="air\airports\countries*\json\airport-*.json" mediatype="json">
+            <targetSize minCount="30" minCountMsg="Too few airport files"/>
+                
+            <!-- 'dst' must be E|U|N -->
+            <value exprXP="//dst" 
+                count="1" countMsg="Missing data: dst"
+                eqMsg="dst not 'E|U|N'">
+                <in>
+                    <eq>E</eq>
+                    <eq>U</eq>
+                    <eq>N</eq>
+                </in>
+            </value>
+        </file>
+    </domain>
+
+</greenfox>
+

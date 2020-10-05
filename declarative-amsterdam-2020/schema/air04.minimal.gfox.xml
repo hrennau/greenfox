@@ -10,7 +10,7 @@
     small number of preset variable bindings accessible in constraint
     expressions.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air04"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>

@@ -7,7 +7,7 @@
     In this example, an attribute from the XML document is compared with a field from
     a related JSON document.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -65,6 +65,9 @@
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"
                                    cmp="eq" cmpMsg="Country name in XML and JSON different"/>
+                    <valueCompared expr1XP="//airport/string-join((@id, @iata, @icao), '~') => sort()" minCount1="1"
+                                   expr2XP="//airport/_/string-join((id, iata, icao), '~') => sort()"
+                                   cmp="deepEqual" cmpMsg="id/iata/icao tuples not deep equal"/>
                 </valuesCompared>
                 
             </file>
