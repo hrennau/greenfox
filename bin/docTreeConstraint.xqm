@@ -333,8 +333,8 @@ declare function f:validateNodeContentConstraint_closed(
     let $cnpsAttributeOrChild := 
         for $locNP in $constraintNode/gx:node/@locNP
         let $cnp := $locNP ! i:datapath(., $constraintElem) ! $compiledNodePaths(.)
-        where count($cnp) eq 1 and ($cnp/self::child or $cnp/self::attribute)
-        return $cnp            
+        where count($cnp) ge 1 and ($cnp[1]/self::child or $cnp[1]/self::attribute)
+        return $cnp[1]            
     let $cnpsAttribute := $cnpsAttributeOrChild[self::attribute]            
     let $cnpsElement := $cnpsAttributeOrChild[self::child]
         
