@@ -36,7 +36,9 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
                                          $context as map(xs:string, item()*))
         as item()* {
     let $ccfilter := $options?ccfilter
-    let $results := $results[tt:matchesNameFilter(@constraintComp, $ccfilter)]
+    let $fnfilter := $options?fnfilter
+    let $results := $results[not($ccfilter) or tt:matchesNameFilter(@constraintComp, $ccfilter)]
+                            [not($fnfilter) or tt:matchesNameFilter((@filePath, @folderPath)[1] ! replace(., '.*/', ''), $fnfilter)]
     return
     
     switch($reportType)
@@ -62,6 +64,7 @@ declare function f:writeValidationReport_wresults(
                                         $options as map(*))
         as item()* {
     let $ccfilter := $options?ccfilter        
+    let $fnfilter := $options?fnfilter
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $useResults := 
@@ -77,6 +80,7 @@ declare function f:writeValidationReport_wresults(
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
             $ccfilter/@text/attribute constraintCompFilter {.},                             
+            $fnfilter/@text/attribute fileNameFilter {.},
             for $result in $useResults
             order by 
                 switch ($result/local-name(.)) 
@@ -101,7 +105,8 @@ declare function f:writeValidationReport_white(
                                         $format as xs:string,
                                         $options as map(*))
         as element() {
-    let $ccfilter := $options?ccfilter        
+    let $ccfilter := $options?ccfilter 
+    let $fnfilter := $options?fnfilter
     let $gfoxSourceURI := $gfox[1]/@xml:base
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
@@ -188,7 +193,8 @@ declare function f:writeValidationReport_white(
                              greenfoxURI="{$greenfoxURI}"
                              reportType="{$reportType}"
                              reportMediatype="application/xml">{
-            $ccfilter/@text/attribute constraintCompFilter {.},                             
+            $ccfilter/@text/attribute constraintCompFilter {.},    
+            $fnfilter/@text/attribute fileNameFilter {.},
             <gx:redResources>{
                 attribute count {count($redResources)},
                 f:displayResultResults($redResources)
@@ -289,6 +295,7 @@ declare function f:writeValidationReport_sum(
                                         $options as map(*))
         as item() {
     let $ccfilter := $options?ccfilter
+    let $fnfilter := $options?fnfilter
     let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'red', 'xml', $options)
     let $ccomps := $ccstat/*
     
@@ -332,6 +339,7 @@ declare function f:writeValidationReport_sum(
         'domain:   ' || $ccstat/@domain,
         ' ',
         $ccfilter/@text/concat('>>>>>>&#xA;', 'Constraint comp filter: ', ., '&#xA;>>>>>>&#xA;'),
+        $fnfilter/@text/concat('>>>>>>&#xA;', 'Resource name filter:   ', ., '&#xA;>>>>>>&#xA;'),        
         '#red:     ' || $countRed || (if (not($countRed)) then () else concat('   (', $countRedResources, ' resources)')),
         '#green:   ' || $ccstat/@countGreen || (if (not($countGreen)) then () else concat('   (', $countGreenResources, ' resources)')),
         ' ',

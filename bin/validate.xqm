@@ -14,6 +14,7 @@
          <param name="params" type="xs:string?"/>
          <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, red, white, wresults, rresults, std" default="sum2"/>
          <param name="ccfilter" type="nameFilter?"/>         
+         <param name="fnfilter" type="nameFilter?"/>
          <param name="format" type="xs:string?" default="xml"/>
          <pgroup name="input" minOccurs="1"/>         
       </operation>
@@ -56,8 +57,9 @@ declare function f:validateOp($request as element())
     let $params := tt:getParams($request, 'params')
     let $reportType := tt:getParams($request, 'reportType')
     let $ccfilter := tt:getParams($request, 'ccfilter')
+    let $fnfilter := tt:getParams($request, 'fnfilter')    
     let $reportFormat := tt:getParams($request, 'format')
-    let $reportOptions := map{'ccfilter': $ccfilter}
+    let $reportOptions := map{'ccfilter': $ccfilter, 'fnfilter': $fnfilter}
 
     (: Compile greenfox schema :)
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, $params, $domain)
