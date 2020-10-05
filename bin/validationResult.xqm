@@ -49,7 +49,8 @@ declare function f:validationResultValues($value as item()*,
                 typeswitch($item)
                 case xs:anyAtomicType | attribute() return string($item) ! <gx:value>{.}</gx:value>
                 case element() return
-                    if ($item/not((@*, *))) then string ($item) ! <gx:value>{.}</gx:value>
+                    (: if ($item/not((@*, *))) then string ($item) ! <gx:value>{.}</gx:value> :)
+                    if ($item/not(*)) then string ($item) ! <gx:value>{.}</gx:value>
                     else <gx:valueNodePath>{i:datapath($item)}</gx:valueNodePath>
                 default return ()                
 };     
@@ -81,7 +82,7 @@ declare function f:validationResultValues($value as item()*,
         typeswitch($item)
         case xs:anyAtomicType return string($item) ! <gx:value>{.}</gx:value>
         case element() return
-            if ($item/not((@*, *))) then
+            if ($item/not(*)) then            
                 string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, string($item)}</gx:value>
             else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
         case attribute() return
@@ -413,7 +414,7 @@ declare function f:constructError_folderContentClosed($colour as xs:string,
  : @param constraintNode attribute representing the maximum or minimum count allowed
  : @param constraintCompName an explicit name of the constraint component, userd when the
  :   name cannot be derived from the local names of $constraintElem and $constraintNode 
- : @param resourceName the resource name or name pattern used by the constraint declaration
+ : @param memberName the resource name or name pattern used by the constraint declaration
  : @param paths the file paths of resources matching the name or name pattern 
  : @param additionalAtts additional attributes to be included in the result
  : @param additionalElems additional elements to be included in the result 
@@ -423,7 +424,7 @@ declare function f:constructError_folderContentCount($colour as xs:string,
                                                      $constraintElem as element(),
                                                      $constraintNode as node(),
                                                      $constraintCompName as xs:string?,                                                     
-                                                     $resourceName as xs:string,
+                                                     $memberName as xs:string,
                                                      $paths as xs:string*,
                                                      $additionalAtts as attribute()*,
                                                      $additionalElems as element()*,
@@ -459,7 +460,7 @@ declare function f:constructError_folderContentCount($colour as xs:string,
             attribute resourceShapeID {$resourceShapeId},
             $contextURI ! attribute filePath {.},
             $focusNodePath ! attribute focusNodePath {.},
-            attribute resourceName {$resourceName},
+            attribute memberName {$memberName},
             $constraintNode[self::attribute()],
             attribute actCount {$actCount},
             $additionalAtts,
