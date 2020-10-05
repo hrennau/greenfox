@@ -119,7 +119,7 @@ S h a p e s
         </xs:sequence>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
         <xs:attribute name="id" type="xs:NCName"/>
-        <xs:attribute name="mediatype" type="t:MediatypeEnumType"/>
+        <xs:attribute name="mediatype" type="t:MediatypeListType"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
     </xs:complexType>
     
@@ -239,6 +239,8 @@ C o n s t r a i n t    e l e m e n t s
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="closed" type="xs:boolean"/>
+        <xs:attribute name="closedMsg" type="xs:string"/>
+        <xs:attribute name="closedMsgOK" type="xs:string"/>
         <xs:attribute name="ignoredMembers" type="xs:string"/>
     </xs:complexType>
     

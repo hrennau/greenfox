@@ -29,12 +29,12 @@
                             countMsg="No codelist folder found"/>
 
                 <!-- # Check - folder contains codelists? -->
-                <foxpath 
-                    expr="*.xml//codelist[entry]/@name"
+                <foxvalue 
+                    exprFOX="*.xml//codelist[entry]/@name"
                     minCount="1"
                     minCountMsg="Codelist folder without codelists"
-                    itemsUnique="true"
-                    itemsUniqueMsg="Codelist names must be unique"/>
+                    distinct="true"
+                    distinctMsg="Codelist names must be unique"/>
                 <file foxpath="*[is-xml(.)]" id="codelistFileShape">
                     <targetSize minCount="1" 
                                 minCountMsg="No codelist files found"/>
@@ -50,17 +50,17 @@
                 <folderContent
                     closed="true"
                     closedMsg="Testcase contains member other than input, output, config, log-*.">
-                    <memberFolders names="input, output, config"/>
-                    <memberFile name="log-*" count="*"/>
+                    <memberFolders names="input output config"/>
+                    <memberFile name="log-*" minCount="0" maxCount="unbounded"/>
                 </folderContent>
 
                 <!-- *** msg config shape *** -->
                 <file foxpath="config\msg-config.csv" id="msgConfigFileShape"
-                      mediatype="csv" csv.separator="," csv.withHeader="yes">
+                      mediatype="csv" csv.separator="," csv.header="yes">
                     <targetSize count="1" countMsg="Config file missing"/>
 
                     <!-- # Check - configured return codes expected? -->
-                    <xpath expr="//returnCode"
+                    <value exprXP="//returnCode"
                            minCount="1"
                            minCountMsg="The message config file must contain at least one return code"
                            inMsg="Config file contains unknown return code">
@@ -69,12 +69,12 @@
                             <eq>NOFIND</eq>
                             <like>ERROR_*</like>
                         </in>
-                    </xpath>
+                    </value>
                     
                     <focusNode xpath="/*/*">
                         <targetSize minCount="1"
                                     minCountMsg="Message config file must contain at least one row"/>
-                        <xpath expr="*"
+                        <value exprXP="*"
                                count="3"
                                countMsg="Every row must have three columns"/>                        
                     </focusNode>
@@ -85,42 +85,49 @@
                     <targetSize minCountMsg="Input folder without request msgs" minCount="1"/>
 
                         <!-- # Check - request with response? -->
-                    <foxpath 
-                        expr="..\..\output\*\file-name(.)"
-                        containsXPath="$fileName ! replace(., '(.*)RQ(.*)$', '$1RS$2')"
-                        containsXPathMsg="Request without response"/>
+                    <links foxpath="..\..\output\fox-child($fileName, 'RQ(.*)$', 'RS$1')" 
+                           countTargetResources="1" 
+                           countTargetResourcesMsg="Request withou response"/>
                 </file>
 
                 <!-- *** Response file shape *** -->
                 <file foxpath="output\(*.xml, *.json)" id="responseFileShape"
-                      mediatype="xml-or-json">
+                      mediatype="xml json">
                     <targetSize minCountMsg="Output folder without request msgs" minCount="1"/>
 
                     <!-- # Check - response fresh? -->
-                    <lastModified geMsg="Stale output file" ge="${lastModified}"/>
+                    <fileDate geMsg="Stale output file" ge="${lastModified}"/>
 
                     <!-- # Check - response non-empty? -->
                     <fileSize gtMsg="Empty output file" gt="0"/>
 
                     <!-- # Check - schema valid? (only if XML) -->
-                    <ifMediatype eq="xml">
-                        <xsdValid xsdFoxpath="$domain\resources\xsd\\*.xsd"
-                                  msg="Response msg not XSD valid"/>                                  
-                    </ifMediatype>
+                    <conditional>
+                        <if>
+                            <mediatype eq="xml"/>
+                        </if>
+                        <then>
+                            <xsdValid xsdFOX="$domain\resources\xsd\\*.xsd"
+                                xsdValidMsg="Response msg not XSD valid"/>                            
+                        </then>
+                    </conditional>
 
                     <!-- # Check - known article number? -->
-                    <xpath 
-                        expr="//*:fooValue"
-                        inFoxpath="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"
-                        inFoxpathMsg="Unknown foo article number" id="articleNumberValueShape"/>
+                    <foxvaluePairs>
+                        <foxvaluePair 
+                        expr1XP="//*:fooValue"
+                        expr2FOX="$domain\\codelists\*.xml/codelist[@name eq 'foo-article']/entry/@code"
+                        cmp="in"
+                        cmpMsg="Unknown foo article number"/>
 
                     <!-- # Check - return code ok? -->
-                    <foxpath 
-                        expr="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
-                              //record[response eq $fileName]/returnCode"
-                        eqXPath="//*:returnCode"                                   
-                        eqXPathMsg="Return code not the configured value"/>                                   
-
+                        <foxvaluePair 
+                        expr1FOX="..\..\config\msg-config.csv\csv-doc(., ',', 'yes')
+                                 //record[response eq $fileName]/returnCode"
+                        expr2XP="//*:returnCode"
+                        cmp="eq"
+                        cmpMsg="Return code not the configured value"/>                                   
+                    </foxvaluePairs>
                 </file>
 
             </folder>

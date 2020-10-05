@@ -255,11 +255,11 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
     (: Required documents :)   
     let $requiredDocs :=
         if (not($resourceShape/self::gx:file)) then () else
-        
+        let $mediatypes := tokenize($mediatype)
         let $xdoc :=
             let $required :=            
-                $mediatype = ('xml', 'xml-or-json')
-                or not($mediatype = ('json', 'csv')) and $requiredBindings = 'doc'
+                $mediatypes = ('xml', 'json')
+                or not($mediatypes = ('json', 'csv')) and $requiredBindings = 'doc'
                 or not($mediatype) and (f:nodeTreeRequired($allComponents, $context) or exists($ldos[?requiresContextNode]))
             return
                 if (not($required)) then () 
@@ -270,7 +270,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         
             let $required :=
                 $requiredBindings = 'json' or
-                $mediatype = ('json', 'xml-or-json') or 
+                $mediatypes = ('json', 'xml') or 
                 not($mediatype) and (f:nodeTreeRequired($allComponents, $context) or exists($ldos[?requiresContextNode]))                    
             return
                 if (not($required)) then ()
@@ -281,7 +281,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
         
             let $required :=
                 $requiredBindings = 'html' or
-                $mediatype = ('html', 'xml-or-html')
+                $mediatypes = ('html', 'xml')
             return
                 if (not($required)) then ()
                 else
