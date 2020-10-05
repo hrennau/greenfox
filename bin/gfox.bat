@@ -103,7 +103,7 @@ if "%schema%"=="?" (
     echo - all items are evaluated case-insensitively
     echo.    
     echo Example:
-    echo   -F "*closed *count* ~value* ~target*"
+    echo   -C "*closed *count* ~value* ~target*"
     echo   MEANS: All constraints *closed* or *count*, but excluding value* and excluding target*
     echo.
     echo Example:
