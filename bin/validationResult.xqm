@@ -477,7 +477,7 @@ declare function f:constructError_folderContentCount($colour as xs:string,
  : @param colour the colour of the result
  : @param constraintElem the element containing the attributes and child elements declaring the constraint
  : @param constraint attribute representing the maximum or minimum count allowed
- : @param resourceName the resource name or name pattern used by the constraint declaration
+ : @param memberName the resource name or name pattern used by the constraint declaration
  : @param paths the file paths of resources matching the name or name pattern 
  : @param additionalAtts additional attributes to be included in the result
  : @param additionalElems additional elements to be included in the result 
@@ -488,7 +488,7 @@ declare function f:constructError_folderContentHash($colour as xs:string,
                                                     $constraintNode as attribute(),
                                                     $constraintValue as xs:string,
                                                     $context as map(xs:string, item()*),                                                    
-                                                    $resourceName as xs:string,
+                                                    $memberName as xs:string,
                                                     $foundHashKeys as xs:string*,                                                   
                                                     $fileNames as xs:string*,
                                                     $additionalAtts as attribute()*,
@@ -515,20 +515,16 @@ declare function f:constructError_folderContentHash($colour as xs:string,
     let $msg := i:getResultMsg($colour, ($constraintNode/.., $constraintNode/../..), $hashKind,
                     concat('Expected ', $hashKind, ' value found.'), (),
                     concat('Not expected  ', $hashKind, ' value.'))
-                    (:
-        if ($colour eq 'green') then 
-            i:getOkMsg(($constraintNode/.., $constraintNode/../..), $hashKind, concat('Expected ', $hashKind, ' value found.'))
-        else
-            i:getErrorMsg(($constraintNode/.., $constraintNode/../..), $hashKind, concat('Not expected  ', $hashKind, ' value.'))
-            :)
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},
             attribute constraintComp {$constraintComp},
             $constraintPath ! attribute constraintPath {.},
             $resourceShapePath ! attribute resourceShapePath {.},
-            attribute resourceShapeID {$resourceShapeId},            
-            attribute resourceName {$resourceName},
+            attribute resourceShapeID {$resourceShapeId}, 
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},            
+            attribute memberName {$memberName},
             $actValueAtt,
             attribute {$constraintNode/name()} {$constraintValue}
         }
