@@ -23,7 +23,7 @@ set domain=
 set name=%~1
 set char1=%name:~0,1%
 rem if "%char1%" neq "-" goto :ENDPAR
-echo NAME=%name%
+rem echo NAME=%name%
 
 rem if this is a parameter name, remove quote (by re-assigning to %~1)
 rem the quote was needed for argument expressions containing <
@@ -64,13 +64,11 @@ if "%name%"=="-1" (set RTYPE=sum1
    exit /b
 ) else (
     if "!schema!"=="" (
-        echo SCHEMA_STILL_EMPTY
         set schema=!name!
     ) else if "!domain!"=="" (
-        echo DOMAIN_STILL_EMPTY
         set domain=!name!
     ) else (
-        echo Usage: greenfox [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames] schema [domain]
+        echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames]
         echo.
         echo Third parameter not allowed.
         exit /b    
@@ -105,7 +103,9 @@ rem set domain=%1
 
 if "%schema%"=="?" (
     echo.
-    echo Usage: greenfox [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames] schema [domain]
+    echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames] 
+    echo.
+    echo Options and parameters may be mixed.
     echo.
     echo schema: Greenfox schema file; relative or absolute path
     echo domain: Validation root resource; relative or absolute path
