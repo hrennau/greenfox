@@ -20,6 +20,10 @@
                 <memberFiles names="airports.xml airports.json"/>
                 <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
                 <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>    
+                <memberFolder name="log"/>                
             </folderContent>
         </folder>
     </domain>

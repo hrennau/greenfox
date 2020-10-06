@@ -5,7 +5,7 @@
     
     Folder members are described by <memberFile> and <memberFolder> elements.
     Default cardinality is 1..1. Use @minCount, @maxCount or @count to specify
-    other constraints.
+    other constraints. The MD5 can be checked with @md5."
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
           xmlns="http://www.greenfox.org/ns/schema"
@@ -14,7 +14,8 @@
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>   
+    
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
@@ -28,6 +29,10 @@
                 <memberFile name="airports-*.xml" maxCount="unbounded"/>
                 <memberFile name="airports-*.json" maxCount="unbounded"/>
                 <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                            md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                            md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
         </folder>
     </domain>
