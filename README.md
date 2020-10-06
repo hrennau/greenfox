@@ -7,8 +7,8 @@ A command-line tool for validating filesystem trees against a Greenfox schema.
 
 Notes for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 
 
-- Tutorial material found here: $greenfox/declarative-amsterdam-2020
-- Installation hints foud here: $greenfox/declarative-amsterdam-2020/install/README.INSTALL.txt
+- Tutorial material found here: [$greenfox/declarative-amsterdam-2020](declarative-amsterdam-2020)
+- Installation hints found here: [$greenfox/declarative-amsterdam-2020/install/README.INSTALL.txt](https://raw.githubusercontent.com/hrennau/greenfox/master/declarative-amsterdam-2020/install/README.INSTALL.txt)
 - The material is preliminary and will change until Thursday.
 - Please make sure to UPDATE your project on Wednesday, Oct 07, evening.
 ----------
@@ -20,13 +20,13 @@ The file system tree can be **validated** against the schema, using **gfox**, th
 The result of validation is a **validation report**. A validation report indicates **conformance** - 
 whether the file system tree conforms to the schema - and it supplies **validation results** or **result statistics**. 
 
-Use options -[abcrw] in order to select a report type:
+Use options `-[123rw]` in order to select a report type:
 
-- -a = report type "Statistics short" (no resources listed)
-- -b = report type "Statistics standard" (red resources listed)
-- -c = report type "Statistics long" (red and green resources listed)
-- -r = report type "Red" (all validation results for red resources, grouped by resource) 
-- -w = report type "White" (all validation results, grouped by resource)
+- `-1` = report type "Statistics short" (no resources listed)
+- `-2` = report type "Statistics standard" (red resources listed)
+- `-3` = report type "Statistics long" (red and green resources listed)
+- `-r` = report type "Red" (all validation results for red resources, grouped by resource) 
+- `-w` = report type "White" (all validation results, grouped by resource)
 
 Usage:
 
@@ -34,8 +34,8 @@ Usage:
    gfox [-abcrw] path-to-schema [path-to-domain]
 ```
 
-- path-to-schema - relative or absolute path of the Greenfox schema file
-- path-to-domain - relative or absolute path of the root folder of the file system tree to be validated
+- `path-to-schema` - relative or absolute path of the Greenfox schema file
+- `path-to-domain` - relative or absolute path of the root folder of the file system tree to be validated
 
 Example calls:
 ```
