@@ -16,19 +16,22 @@ set RTYPE=sum2
 set PARAMS=
 set CCFILTER=
 set FNFILTER=
+set schema=
+set domain=
 
 :NEXTPAR
 set name=%~1
 set char1=%name:~0,1%
-if "%char1%" neq "-" goto :ENDPAR
+rem if "%char1%" neq "-" goto :ENDPAR
+echo NAME=%name%
 
 rem if this is a parameter name, remove quote (by re-assigning to %~1)
 rem the quote was needed for argument expressions containing <
 set name=%~1
+if "%name%"=="" goto :ENDPAR
+
 shift
 set value=%~1
-
-if "%value%"=="" goto :ENDPAR
 
 if "%name%"=="-1" (set RTYPE=sum1
 ) else if "%name%"=="-2" (set RTYPE=sum2
@@ -50,17 +53,38 @@ if "%name%"=="-1" (set RTYPE=sum1
 ) else if "%name%"=="-R" (
    set FNFILTER=!VALUE!
    shift   
- ) else (
+ ) else if "%char1%"=="-" (
    echo Unknown option: %name%
    echo Supported options: 
-   echo    -a -b -c -r -w                 # Select report type
+   echo    -1 -2 -3 -r -w                 # Select report type
    echo    -p "name=value"                # Set schema parameter - multiple use allowed
-   echo    -F "foo* *bar ~foo*bar ~*peng" # Filter constraint components - all "foo* or *bar, except foo*bar or *peng"   
+   echo    -C "foo* *bar ~foo*bar ~*peng" # Filter constraint components - all "foo* or *bar, except foo*bar or *peng"   
+   echo    -R "airport-* ~*.fra.*"        # Filter resources - all "airport-*, except *.fra.*"   
    echo Aborted.
    exit /b
+) else (
+    if "!schema!"=="" (
+        echo SCHEMA_STILL_EMPTY
+        set schema=!name!
+    ) else if "!domain!"=="" (
+        echo DOMAIN_STILL_EMPTY
+        set domain=!name!
+    ) else (
+        echo Usage: greenfox [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames] schema [domain]
+        echo.
+        echo Third parameter not allowed.
+        exit /b    
+    )
 )
+
+if "%value%"=="" goto :ENDPAR
+
 goto :NEXTPAR
 :ENDPAR 
+
+rem echo schema=!schema!
+rem echo domain=!domain!
+rem echo rtype=!rtype!
 
 if "%RTYPE%"=="white" (rem        
 ) else if "%RTYPE%"=="red" (rem
@@ -75,9 +99,9 @@ if "%RTYPE%"=="white" (rem
      exit /b
 )
 
-set schema=%name%
-shift
-set domain=%1
+rem set schema=%name%
+rem shift
+rem set domain=%1
 
 if "%schema%"=="?" (
     echo.
