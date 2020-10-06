@@ -30,8 +30,8 @@
                 <memberFile name="airports-*.json" maxCount="unbounded"/>
                 <memberFile name="*.FLAG" minCount="0"/>
                 <memberFile name="meta.txt"/>
-                <memberFile name="BaseX.ico" 
-                            md5="1FF7905AFE3F5616B0628B6FE11F63A9"
+                <memberFile name="phantastic.png" 
+                            md5="8C9B1211E43883A14783731AEDFFA839"
                             md5Msg="Meta file with wrong MD5"/>
                 <memberFolder name="log"/>
             </folderContent>

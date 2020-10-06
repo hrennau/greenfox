@@ -9,8 +9,8 @@ Modify the schema, changing values of constraint attributes.
 
 EXCERCISE B
 Add a further value constraint - suggestions:
-+ <timezone> must be "zero"
-+ <tzTimezone> must match the pattern "*/*"   (use @like and @likeMsg)
++ <timezone> must be "0"
++ <timezoneTz> must match the pattern "*/*"   (use @like and @likeMsg)
 
 Available value constraints
 ---------------------------

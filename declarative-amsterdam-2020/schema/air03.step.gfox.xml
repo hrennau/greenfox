@@ -31,7 +31,7 @@
                         eq="airport" eqMsg="Type not 'airport'"/>
                     <value exprXP="//@icao" 
                         minCount="1" minCountMsg="Missing data: ICAO code"
-                        matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                        matches="^[A-Z]{4}$" matchesMsg="ICAO not four capital latin letters"/>
                     <value exprXP="//altitude" 
                         minCount="1" minCountMsg="Missing data: altitude"
                         lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
