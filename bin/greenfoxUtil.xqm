@@ -19,7 +19,8 @@ import module namespace tt="http://www.ttools.org/xquery-functions" at
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
     "constants.xqm",
     "expressionEvaluator.xqm",
-    "log.xqm" ;
+    "log.xqm",
+    "uriUtil.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -442,7 +443,7 @@ declare function f:pathToNative($path as xs:string)
         (: URI is a file system URI :)
         else if (matches($path, '^file:/')) then $path
         else
-            $path ! f:dirSepToNative(.) ! file:path-to-native(.) ! replace(., '[/\\]$', '')    
+            $path ! f:dirSepToNative(.) ! i:normalizeAbsolutePath(.) ! file:path-to-native(.) ! replace(., '[/\\]$', '')    
 }; 
 
 (:~
@@ -454,6 +455,7 @@ declare function f:pathToNative($path as xs:string)
  :)
 declare function f:dirSepToNative($path as xs:string)
         as xs:string {
+    (: A backslash must be doubled, as it will be used as third arg of replace() :)
     let $dirSep := file:dir-separator() ! replace(., '\\', '\\\\')
     return replace($path, '[/\\]', $dirSep)
 };

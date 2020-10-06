@@ -257,7 +257,7 @@ declare function f:pathToAbsolutePath($path as xs:string)
                             $uriSchema || $uriPath
                     (: Case 3: URI is a file path => make absolute :)
                     else
-                        $path ! f:dirSepToNative(.) ! file:path-to-native(.) 
+                        $path ! f:dirSepToNative(.) ! i:normalizeAbsolutePath(.) ! file:path-to-native(.) 
     return 
         $pathRaw ! replace(., '[/\\]$', '')    
 }; 

@@ -123,11 +123,15 @@ declare function f:xsdValidateSchema($gfox as element(),
                                      $gfoxVarsSubstituted)
         as element(gx:invalidSchema)? {
 
-    
+    (:
     let $greenfoxXsd := (resolve-uri('') || '/../../xsd/greenfox.xsd')
                         ! file:path-to-native(.)   (: URI turned into path :)
                         ! f:normalizeAbsolutePath(.)
-    
+     :)
+    let $greenfoxXsd := (resolve-uri('') || '/../../xsd/greenfox.xsd')
+                        ! f:normalizeAbsolutePath(.)
+                        ! file:path-to-native(.)   (: URI turned into path :)
+                        
     let $gfoxSourceURI := $gfox/root()/document-uri(.)
     let $report := 
         let $useXsd :=
