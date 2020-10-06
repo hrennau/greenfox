@@ -513,8 +513,8 @@ declare function f:constructError_folderContentHash($colour as xs:string,
     let $hashKind := $constraintNode/local-name(.)
     let $actValueAtt := attribute {concat($hashKind, 'Found')} {$foundHashKeys} [$colour eq 'red']
     let $msg := i:getResultMsg($colour, ($constraintNode/.., $constraintNode/../..), $hashKind,
-                    concat('Expected ', $hashKind, ' value found.'), (),
-                    concat('Not expected  ', $hashKind, ' value.'))
+                    concat('Not expected  ', $hashKind, ' value.'), (),
+                    concat('Expected ', $hashKind, ' value found.'))
     return
         element {f:resultElemName($colour)} {
             $msg ! attribute msg {.},

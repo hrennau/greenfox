@@ -8,7 +8,8 @@
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>  
+    
     <domain path="${domain}" name="Some root folder">
         
         <!-- VISIT index folder -->
@@ -23,7 +24,7 @@
                 <memberFile name="meta.txt" 
                     md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
                     md5Msg="Meta file with wrong MD5"/>    
-                <memberFolder name="log"/>                
+                <memberFolder name="logx"/>                
             </folderContent>
         </folder>
     </domain>

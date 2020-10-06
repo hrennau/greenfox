@@ -18,19 +18,22 @@ So a <links> constraint always has two parts: (1) a Link Definition and (2)
 constraints. The Link Definition maps the resource to other resources. The
 constraints check the outcome against expectations. 
 
-The Link Definition can take quite different forms.
+The Link Definition may be referenced (@linkName) or locally declared. In the
+latter case, the attributes and child possible of the link definition are
+used by the link using element itself (here: by the <links> element.
+This can be compared to @type versus anonymous type definitions in XSD.
 
-The second <links> element uses a URI expression yielding the target URIs.
+The Link Definition can take quite different forms:
++ "hrefElems" resolves the URIs found in <href> elements
++ "href2JSON" uses a URI expression yielding the target URIs.
++ "myXML" uses a Foxpath expression yielding the target resources. It 
+      navigates the file system, rather than find or construct a URI.
++ "linkMeFromAirportsJSON" also uses a Foxpath expression selecting a 
+      target resource, but then drills into the document (@targetXP) and 
+      yields a node found inside. Any link definition may contain an optional 
+      target node selector, narrowing down the link result to selected
+      content nodes 
++ "mirror20201006" uses a mirror - it connects resources found at 
+      corresponding possitions relative to two different points of reference
+      (folders <air> and <air.20201006>).
 
-The third <links> element uses a Foxpath expression yielding the target
-resources. It navigates the file system, rather than construct a URI.
-
-The fourth <links> element also uses a Foxpath expression selecting a 
-target resource, but then drills into the document and yields a node
-found inside - note the @targetXP attribute. The link model of Greenfox
-includes an optional target node selector, narrowing down the link
-result to content nodes, rather than URI or root node.
-
-The last <links> element uses a mirror - it selects a resource found
-at the same position under reflector 2 as the current resource is found
-at under reflector 1.

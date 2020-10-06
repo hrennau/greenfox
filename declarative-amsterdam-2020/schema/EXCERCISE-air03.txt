@@ -1,21 +1,25 @@
 EXCERCISE AIR03
 ===============
-Modify the schema, changing value and/or adding further value constraints.
-Data are found here: $greenfox/declarative-amsterdam-2020/data/air/airports/index
+$dc:    $greenfox/declarative-amsterdam-2020
+Schema: $dc/schema/air03.gfox.xml 
+Data:   $dc/data/air/airports/index/airports-*.xml
 
-In order to see the error result elements, use option -r:
-   gfox -r /path/to/air03.gfox.xml 
-If you want to see *all* result elements (red or green), use option -w
+EXCERCISE A
+Modify the schema, changing values of constraint attributes.
+
+EXCERCISE B
+Add a further value constraint - suggestions:
++ <timezone> must be "zero"
++ <tzTimezone> must match the pattern "*/*"   (use @like and @likeMsg)
 
 Available value constraints
 ---------------------------
 + ATTRIBUTES
 - @count, @minCount, @maxCount, @exists, @empty
 - @eq, @ne, @lt, @le, @gt, @ge
-- @like, @notLine (e.g. like="abc*")
+- @like, @notLike (e.g. like="abc*")
 - @matches, @notMatches (e.g. matches="^abc.*")
 - @length, @minLength, @maxLength
-- @min, @max
 - @datatype (e.g. datatype="date")
 
 + CHILD ELEMENTS
@@ -23,9 +27,7 @@ Available value constraints
   <in><eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+</in>
 
 - The items match none of the comparisons from notin/*:  
-  <notin>
-      <eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+
-  </notin>
+  <notin><eq>|<ne>|<matches>|<notMatches>|<like>|<notLike>)+</notin>
   
 - The value contains all terms from contains/term  
   <contains><term>+</contains>

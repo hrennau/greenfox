@@ -3,7 +3,7 @@
     We added checking of country airports files (airports-*.xml). We declare several
     VALUE CONSTRAINTS, represented by <value> elements. 
     
-    Simple principle: the constraint specified an expression (typically an XPath expression, @exprXP),
+    Simple principle: the constraint specifies an expression (typically an XPath expression, @exprXP)
     and various constraints which apply to the value of the expression. The expression
     is evaluated in the context of the target resource, or a node from its content
     (if the constraint has a <focusNode> ancestor, not used here).
@@ -23,9 +23,15 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -40,23 +46,23 @@
             <file foxpath="airports-*.xml except *luxembourg*">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
-                <!-- CHECK various resource values -->      
+                <!-- CHECK resource values: id, type, icao, altitude, latitude, longitude -->
                 <values>
+                    <value exprXP="//airport/@id" 
+                        minCount="1" minCountMsg="Missing data: ID"
+                        distinct="true"/>                        
                     <value exprXP="//type" 
                         minCount="1" minCountMsg="Missing data: type"
                         eq="airport" eqMsg="Type not 'airport'"/>
-                    <value exprXP="//altitude" 
-                        minCount="1" minCountMsg="Missing data: altitude"
-                        lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
                     <value exprXP="//@icao" 
                         minCount="1" minCountMsg="Missing data: ICAO code"
                         matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                    <value exprXP="//altitude" 
+                        minCount="1" minCountMsg="Missing data: altitude"
+                        lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
                     <value exprXP="//(latitude, longitude)" 
                         minCount="1" minCountMsg="Missing data: latitude, longitude"
                         datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
-                    <value exprXP="//airport/@id"  
-                        minCount="1" minCountMsg="Missing data: ID"
-                        distinct="true" distinctMsg="IDs not distinct"/>                        
                 </values>
             </file>
         </folder>

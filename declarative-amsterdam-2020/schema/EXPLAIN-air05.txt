@@ -13,9 +13,12 @@ A VALUE COMPARED constraint is thus composed of
         
 Here, we check that the @country value in the XML file is equal to the 
 "country" in the accompanying JSON document. So the XML document is compared
-with a JSON document, which is selected by the @foxpath expression on 
-<valueCompared>. A Foxpath expression is only one of several ways how the 
-partner resource can be selected.
+with a JSON document, which is selected by the referenced link definition.
+This link defintion uses a @foxpath expression in order to navigate to
+the .json sibling of the given resource. A Foxpath expression is only one 
+of several ways how the partner resource can be selected.
+
+Variable $fileName is bound to the target resource currently evaluated.
     
 Also note that the JSON document is parsed into an XML node tree and thus made 
 accessible to XPath navigation. XPath everywhere!
