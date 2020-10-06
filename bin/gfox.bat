@@ -22,8 +22,6 @@ set domain=
 :NEXTPAR
 set name=%~1
 set char1=%name:~0,1%
-rem if "%char1%" neq "-" goto :ENDPAR
-rem echo NAME=%name%
 
 rem if this is a parameter name, remove quote (by re-assigning to %~1)
 rem the quote was needed for argument expressions containing <
@@ -69,7 +67,7 @@ if        "%name%"=="-1" (set RTYPE=sum1
     ) else if "!domain!"=="" (
         set domain=!name!
     ) else (
-        echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames]
+        echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]
         echo.
         echo Third argument not allowed.
         exit /b    
@@ -80,10 +78,6 @@ if "%value%"=="" goto :ENDPAR
 
 goto :NEXTPAR
 :ENDPAR
-
-rem echo schema=!schema!
-rem echo domain=!domain!
-rem echo rtype=!rtype!
 
 if        "%RTYPE%"=="white"    (rem
 ) else if "%RTYPE%"=="red"      (rem
@@ -97,10 +91,6 @@ if        "%RTYPE%"=="white"    (rem
      echo Aborted.
      exit /b
 )
-
-rem set schema=%name%
-rem shift
-rem set domain=%1
 
 if "%schema%"=="?" (
     echo.
@@ -148,16 +138,6 @@ if not "%RTYPE%"=="" (set RTYPE_PARAM=,reportType=%RTYPE%)
 if not "%PARAMS%"=="" (set PARAMS_PARAM=,params=%PARAMS%)
 if not "%CCFILTER%"=="" (set CCFILTER_PARAM=,ccfilter=%CCFILTER%)
 if not "%FNFILTER%"=="" (set FNFILTER_PARAM=,fnfilter=%FNFILTER%)
-rem #set PARAMS_PARAM=
-rem #if not "%PARAMS%"=="" (
-rem #    set PARAMS_PARAM=,params=%PARAMS%
-rem #    set PARAMS2=!PARAMS:,=;!
-rem #    set PARAMS_PARAM=,params=!PARAMS2!
-rem #    rem echo "!PARAMS_PARAM!"
-rem #
-rem #)
-rem exit
-
 
 set DOMAIN_PARAM=
 if not "%DOMAIN%"=="" (set DOMAIN_PARAM=,domain=%DOMAIN%)
