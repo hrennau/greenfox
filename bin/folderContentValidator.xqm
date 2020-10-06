@@ -176,7 +176,7 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                     let $colour := if ($ok) then 'green' else 'red'
                     return
                         result:constructError_folderContentCount($colour, $constraintElem, 
-                            $att, (), $resourceName, $found, (), (), $context)
+                            $att, 'FolderContentCount', $resourceName, $found, (), (), $context)
                 else (                
                     let $att := $d/@minCount return
                         (: if (not($att)) then () else :)
@@ -185,7 +185,7 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                         let $colour := if ($ok) then 'green' else 'red'
                         return
                             result:constructError_folderContentCount($colour, $constraintElem, 
-                                ($att, $d)[1], (), $resourceName, $found, (), (), $context)
+                                ($att, $d)[1], 'FolderContentMinCount', $resourceName, $found, (), (), $context)
                     ,
                     let $att := $d/@maxCount return
                         (: if (not($att)) then () else :)
@@ -195,7 +195,7 @@ declare function f:validateFolderContentCounts($contextURI as xs:string,
                         let $colour := if ($ok) then 'green' else 'red'
                         return
                             result:constructError_folderContentCount($colour, $constraintElem, 
-                                ($att, $d)[1], (), $resourceName, $found, (), (), $context)
+                                ($att, $d)[1], 'FolderContentMaxCount', $resourceName, $found, (), (), $context)
                     )                        
 };
 
