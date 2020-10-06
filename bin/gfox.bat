@@ -131,11 +131,11 @@ if "%schema%"=="?" (
     echo   MEANS: All constraints *closed* or *count*, but excluding value* and excluding target*
     echo.
     echo Example:
-    echo   -R "~.dtd 
+    echo   -R "~.dtd"
     echo   MEANS: All resources except *.dtd
     echo.
     echo Example:
-    echo   -R "airport-* airpots-* ~*.xml ~*txt 
+    echo   -R "airport-* airpots-* ~*.xml ~*txt" 
     echo   MEANS: All resources airport-* or airports-*, yet excluding *.xml and *.txt
     echo.
     echo.
