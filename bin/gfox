@@ -1,25 +1,71 @@
 #!/usr/bin/env bash
 
+# how to call basex cli
+: ${BASEX:=basex}
+
+function usage_options {
+    echo '-1                  : report type = sum1'
+    echo '-2                  : report type = sum2'
+    echo '-3                  : report type = sum3'
+    echo '-r                  : report type = red'
+    echo '-w                  : report type = white'
+    echo '-t reportType       : the report type; one of: sum1 sum2 sum3 red white wresults rresults'
+    echo '-p foo:bar          : parameter with name foo and value bar'
+    echo '-C constraintTypes  : filter by constraint type'
+    echo '-R resourceNames    : filter by resource name'
+}
+
 function usage {
+    echo 'Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]'
     echo
-    echo 'Usage: greenfox [-a -b -c -r -w] [-t type] [-p parameters] schema [domain]'
+    echo 'Options and arguments may be mixed.'
     echo
     echo 'schema: Greenfox schema file; relative or absolute path'
     echo 'domain: Validation root resource; relative or absolute path'
     echo
-    echo '-a      : report type = sum1'
-    echo '-b      : report type = sum2'
-    echo '-c      : report type = sum3'
-    echo '-r      : report type = red'
-    echo '-w      : report type = white'
-    echo '-t      : the report type; one of: sum1 sum2 sum3 red white wresults rresults'
-    echo '-p      : parameters as name=value pairs, comma-separated'
+    usage_options
     echo
+    echo 'The values of -C and -R are interpreted as "name filter"; rules:'
+    echo '- value = whitespace-separated list of items'
+    echo '- items without leading ~ are positive filters, selecting what is included; they are ORed'
+    echo '- items with leading ~ are negative filters, selecting what is excluded; they are ANDed'
+    echo '- all items are evaluated case-insensitively'
+    echo
+    echo 'Example:'
+    echo '  -C "*closed *count* ~value* ~target*"'
+    echo '  MEANS: All constraints *closed* or *count*, but excluding value* and excluding target*'
+    echo
+    echo 'Example:'
+    echo '  -R "~.dtd"'
+    echo '  MEANS: All resources except *.dtd'
+    echo
+    echo 'Example:'
+    echo '  -R "airport-* airpots-* ~*.xml ~*txt"'
+    echo '  MEANS: All resources airport-* or airports-*, yet excluding *.xml and *.txt'
 }
 
 function fail {
     echo 1>&2 "$1"
+    echo 1>&2
+    echo 1>&2 'Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p params] [-C constraintTypes] [-R resourceNames]'
+    exit 1
+}
+
+function fail_opt {
+    echo 1>&2 "$1"
+    echo 1>&2
+    echo 1>&2 "Allowed options:"
+    echo 1>&2
+    usage_options 1>&2
+    echo 1>&2
+    exit 1
+}
+
+function fail_usage {
+    echo 1>&2 "$1"
+    echo 1>&2
     usage 1>&2
+    echo 1>&2
     exit 1
 }
 
@@ -51,20 +97,35 @@ RTYPE=sum2
 #
 # ====================================================================================
 
-while [ $# -gt 0 ] && [ ${1::1} == '-' ]; do
-    OPT="$1"
-    case "$OPT" in
-        -a) RTYPE=sum1  ;;
-        -b) RTYPE=sum2  ;;
-        -c) RTYPE=sum3  ;;
-        -r) RTYPE=red   ;;
-        -w) RTYPE=white ;;
-        -t) RTYPE="$2"  ; shift ;;
-        -p) PARAMS="$2" ; shift ;;
-        *)
-            fail "Unknown option: $OPT"
-        ;;
-    esac
+NO_OPTS=
+
+while [ $# -gt 0 ]; do
+    if [[ "${1::1}" == "-" && -z "$NO_OPTS" ]]; then
+        OPT="$1"
+        case "$OPT" in
+            -1) RTYPE=sum1  ;;
+            -2) RTYPE=sum2  ;;
+            -3) RTYPE=sum3  ;;
+            -r) RTYPE=red   ;;
+            -w) RTYPE=white ;;
+            --) NO_OPTS=1   ;;
+            -t) RTYPE="$2"  ; shift ;;
+            -p) PARAMS="$PARAMS;${2/:/=}"; shift ;;
+            -C) CCFILTER="$2" ; shift ;;
+            -R) FNFILTER="$2" ; shift ;;
+            *)
+                fail_opt "Unknown option: $OPT"
+            ;;
+        esac
+    else
+        # parse argument
+        ARGN=$(( $ARGN + 1 ))
+        case "$ARGN" in
+            1) schema="$1" ;;
+            2) domain="$1" ;;
+            *) fail "At most two arguments may be given, schema and domain. Additional argument: $1" ;;
+        esac
+    fi
     shift
 done
 
@@ -73,16 +134,13 @@ case "$RTYPE" in
     *) fail "Unknown report type: $RTYPE" ;;
 esac
 
-schema="$1"
-domain="$2"
-
 if [ "$schema" == "?" ]; then
     usage
     exit
 fi
 
 if [ -z "$schema" ]; then
-    fail "Missing schema."
+    fail_usage "Missing schema."
 fi
 
 # ====================================================================================
@@ -91,8 +149,12 @@ fi
 #
 # ====================================================================================
 
-[ -n "$RTYPE"  ] && RTYPE_PARAM=",reportType=$RTYPE"
-[ -n "$domain" ] && DOMAIN_PARAM=",domain=$domain"
-[ -n "$PARAMS" ] && PARAMS_PARAM=",params=${PARAMS/,/;}"
+REQUEST="val?gfox=${schema}"
 
-basex -b "request=val?gfox=${schema}${RTYPE_PARAM}${DOMAIN_PARAM}${PARAMS_PARAM}" "$HERE"/greenfox.xq
+[ -n "$RTYPE"    ] && REQUEST="$REQUEST,reportType=$RTYPE"
+[ -n "$domain"   ] && REQUEST="$REQUEST,domain=$domain"
+[ -n "$PARAMS"   ] && REQUEST="$REQUEST,params=${PARAMS:1}"
+[ -n "$CCFILTER" ] && REQUEST="$REQUEST,ccfilter=$CCFILTER"
+[ -n "$FNFILTER" ] && REQUEST="$REQUEST,fnfilter=$FNFILTER"
+
+"$BASEX" -b "request=$REQUEST" "$HERE"/greenfox.xq
