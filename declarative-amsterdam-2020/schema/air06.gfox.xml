@@ -52,7 +52,7 @@
                 <memberFile name="meta.txt"/>
                 <memberFile name="phantastic.png" 
                     md5="8C9B1211E43883A14783731AEDFFA839"
-                    md5Msg="Meta file with wrong MD5"/>
+                    md5Msg="Phantastic file with wrong MD5"/>
                 <memberFolder name="log"/>
             </folderContent>
             

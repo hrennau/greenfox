@@ -26,9 +26,9 @@
                 <memberFile name="*.FLAG" minCount="0"/>
                 <memberFile name="meta.txt"/>
                 <memberFile name="phantastic.png" 
-                    md5="8C9B1211E43883A14783731AEDFFA839"
-                    md5Msg="Meta file with wrong MD5"/>
-                <memberFolder name="log"/>
+                            md5="8C9B1211E43883A14783731AEDFFA839"
+                            md5Msg="Phantastic file with wrong MD5"/>
+                <memberFolder name="logg"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -36,7 +36,7 @@
                 <targetSize minCount="0" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="10" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>
