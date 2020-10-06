@@ -3,13 +3,14 @@
     We added the check of a file resource: we visit all FLAG files and check
     their size, which must be 0.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air02"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>   
+    
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
@@ -18,17 +19,23 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
-                <memberFile name="*.FLAG" maxCount="3"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
             <file foxpath="*.FLAG">
-                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
+                <targetSize minCount="0" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="100" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>

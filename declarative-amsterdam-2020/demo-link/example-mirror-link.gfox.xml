@@ -13,7 +13,7 @@
     
     <linkDef name="refAirports"
              reflector1="${domain}\air"
-             reflector2="${domain}\air.20201003"
+             reflector2="${domain}\air.20201006"
              />
     
     <domain path="${domain}" name="dc2020">

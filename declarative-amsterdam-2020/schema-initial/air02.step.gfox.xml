@@ -3,26 +3,21 @@
     We added the check of a file resource: we visit all FLAG files and check
     their size, which must be 0.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air02-step"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>
+    
     <domain path="${domain}" name="air">
         
-        <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <!-- checks omitted ... -->
-            
-            <!-- VISIT: FLAG files -->
             <file foxpath="*.FLAG">
-                <!-- checks omitted ... -->                
-                
+                <targetSize minCount="1" minCountMsg="Missing FLAG file"/>                
                 <!-- CHECK: file empty -->
-                <!--<fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>-->
-                <fileSize gt="0" gtMsg="Empty files not allowed"/>
+                <fileSize eq="0" eqMsg="Flag file not empty"/>
             </file>
         </folder>
     </domain>

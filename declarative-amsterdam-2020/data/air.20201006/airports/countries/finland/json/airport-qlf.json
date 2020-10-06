@@ -3,7 +3,7 @@
     "id":440,
     "iata":"QLF",
     "icao":"EFLA",
-    "createdAt":"2020-10-06T09:33:43.957+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Lahti Vesivehmaa Airport",
     "city":"Vesivehmaa",
     "country":"Finland",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":2,
-      "tzTimezone":"Europe\/Helsinki",
+      "timezoneTz":"Europe\/Helsinki",
       "dst":"E"
     },
     "type":"airport",
-    "sourceAirportID":"OurAirports"
+    "source":"OurAirports"
   }
 }

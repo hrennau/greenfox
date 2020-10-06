@@ -16,16 +16,16 @@
     <linkDef name="jsonAirports"
              contextXP="/csv/record[*[5] ne '\N']"
              uriXP="'${domainURI}/data/air/airports/countries/' || 
-                     *[4] || '/json/airport-' || *[5]/lower-case(.) || '.json'"
+                     Country/lower-case(.) || '/json/airport-' || IATA/lower-case(.) || '.json'"
              targetMediatype="json"/>
     
     <domain path="${domain}" name="dc2020">
         <!-- VISIT: airports folder -->
-        <folder foxpath="data\air\resources\airports" id="airportsFolderShape">
+        <folder foxpath="data\air\resources\openflights" id="openflightsFolderShape">
             <targetSize count="1" countMsg="Missing folder: airports"/>
 
             <!-- VISIT: CSV dictionary of airports -->
-            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv">
+            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv" csv.header="yes">
                 <targetSize minCount="1" minCountMsg="Missing airports CSV file"/>
                 
                 <!-- CHECK: URI expression based links can be resolved -->

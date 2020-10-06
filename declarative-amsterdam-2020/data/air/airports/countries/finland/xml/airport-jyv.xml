@@ -1,4 +1,4 @@
-<airport id="430" iata="JYV" icao="EFJY" createdAt="2020-10-06T12:30:03.436+02:00">
+<airport id="430" iata="JYV" icao="EFJY" createdAt="2020-10-06T14:59:03.149+02:00">
   <name>Jyvaskyla Airport</name>
   <city>Jyvaskyla</city>
   <country>Finland</country>
@@ -9,9 +9,9 @@
   </geo>
   <temporal>
     <timezone>2</timezone>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <timezoneTz>Europe/Helsinki</timezoneTz>
     <dst>E</dst>
   </temporal>
   <type>airport</type>
-  <sourceAirportID>OurAirports</sourceAirportID>
+  <source>OurAirports</source>
 </airport>

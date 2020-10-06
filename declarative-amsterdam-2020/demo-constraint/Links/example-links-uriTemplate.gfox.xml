@@ -16,17 +16,17 @@
              contextXP="/csv/record[*[5] ne '\N']"
              uriTemplate="${domainURI}/data/air/airports/countries/{country}/json/airport-{iata}.json"
              targetMediatype="json">
-        <templateVar name="country" exprXP="*[4]"/>
-        <templateVar name="iata" exprXP="*[5]/lower-case(.)"/>
+        <templateVar name="country" exprXP="Country/lower-case(.)"/>
+        <templateVar name="iata" exprXP="IATA/lower-case(.)"/>
     </linkDef>                
     
     <domain path="${domain}" name="dc2020">
         <!-- VISIT: airports folder -->
-        <folder foxpath="data\air\resources\airports" id="airportsFolderShape">
+        <folder foxpath="data\air\resources\openflights" id="openflightsFolderShape">
             <targetSize count="1" countMsg="Missing folder: airports"/>
 
             <!-- VISIT: CSV dictionary of airports -->
-            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv">
+            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv" csv.header="yes">
                 <targetSize minCount="1" minCountMsg="Missing airports CSV file"/>
                 
                 <!-- CHECK: URI template based links can be resolved -->

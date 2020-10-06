@@ -4,13 +4,13 @@
     with attributes specifying two expressions (usually XPath expressions - @expr1XQ, @expr2XQ)
     and attributes and/or child elements declaring constraints. Notably, the @cmp
     attribute specifies a certain kind of comparison. To give you an idea, the possible
-    attribute values are: eq, ne, lt, le, gt, ge, in, notin, includes, sameTerms, deepEqual. 
+    attribute values are: eq, ne, lt, le, gt, ge, in, notin, contains, sameTerms, deepEqual. 
     
     In the second case the expression references a variable $fileName - there is a
     small number of preset variable bindings accessible in constraint
     expressions.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air04"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -24,9 +24,15 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->

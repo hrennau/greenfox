@@ -3,7 +3,7 @@
     "id":599,
     "iata":"DUB",
     "icao":"EIDW",
-    "createdAt":"2020-10-06T12:30:03.436+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Dublin Airport",
     "city":"Dublin",
     "country":"Ireland",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":0,
-      "tzTimezone":"Europe\/Dublin",
+      "timezoneTz":"Europe\/Dublin",
       "dst":"E"
     },
     "type":"airport",
-    "sourceAirportID":"OurAirports"
+    "source":"OurAirports"
   }
 }

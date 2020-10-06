@@ -3,21 +3,23 @@
     We submit the index document to XSD validation, and we check that all href
     links can be recursively resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air08"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air08-step"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>  
+    
+    <!-- LINK definitions -->
+    
+    <linkDef name="hrefAtts" hrefXP="//@href"/>
+    
+    <!-- DOMAIN validation -->
+     
     <domain path="${domain}" name="air">
-        
-        <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <!-- checks & shapes omitted ... -->            
-
-            <!-- VISIT: index file (XML) -->
             <file foxpath="airports.xml">
                 <targetSize count="1" countMsg="Missing index file"/>
                 
@@ -25,7 +27,7 @@
                 <xsdValid xsdFOX="${domain}\resources\xsd\*.xsd"/>
                 
                 <!-- CHECK: href links can be resolved, recursively -->
-                <links hrefXP="//@href" recursive="true" resolvable="true" minCountTargetResources="60"/>
+                <links linkName="hrefAtts" recursive="true" resolvable="true" minCountTargetResources="60"/>
             </file>            
         </folder>
     </domain>

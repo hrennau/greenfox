@@ -1,4 +1,4 @@
-We added a couple of ValuePair constraint. Such constraints are represented by 
+We added a couple of ValuePair constraints. Such constraints are represented by 
 <valuePair> elements with attributes specifying two expressions (usually XPath 
 expressions - @expr1XQ, @expr2XQ) and attributes and/or child elements 
 declaring constraints. Notably, the @cmp attribute specifies a certain kind of 
@@ -7,8 +7,8 @@ comparison.
 To give you an idea, the possible attribute values are: 
 - eq, ne, lt, le, gt, ge - pairwise value comparison 
 - in - all items from value 1 are also items from 2
-- notin - value 1 and value 2 are disjoint, they have no common items+
-- includes - value 1 includes all items from value2
+- notin - value 1 and value 2 are disjoint, they have no common items
+- contains - value 1 contains all items from value2
 - sameTerms - all items from 1 are also items from 2, and vice versa
 - deepEqual - the values are deep-equal 
 

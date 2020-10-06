@@ -4,7 +4,7 @@
     We also check a few further links, referencing link definitions with
     different connector types.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air06"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
@@ -44,9 +44,15 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -93,7 +99,7 @@
                 </valuesCompared>
                 
                 <!-- VISIT: corresponding JSON document -->
-                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" mediatype="json">
+                <file linkName="myJSON" mediatype="json">
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
                     
                     <!-- CHECK: href contains resolvable URIs -->

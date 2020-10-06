@@ -2,13 +2,14 @@
 <!-- 
     Same validation as in air01.gfox.xml, but more compact notation.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01b"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>  
+    
     <domain path="${domain}" name="Some root folder">
         
         <!-- VISIT index folder -->
@@ -20,6 +21,10 @@
                 <memberFiles names="airports.xml airports.json"/>
                 <memberFiles names="airports-*.xml airports-*.json" maxCount="unbounded"/>
                 <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>    
+                <memberFolder name="log"/>                
             </folderContent>
         </folder>
     </domain>

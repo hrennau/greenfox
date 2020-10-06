@@ -1,9 +1,9 @@
 <airportsForCountry country="Denmark" countAirports="31">
-  <airport id="607" iata="AAR" icao="EKAH" createdAt="2020-10-06T09:33:43.957+02:00" latitude="56.2999992371" longitude="10.619000434899998" href="../countries/denmark/xml/airport-aar.xml"/>
-  <airport id="608" iata="BLL" icao="EKBI" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.7402992249" longitude="9.15178012848" href="../countries/denmark/xml/airport-bll.xml"/>
-  <airport id="609" iata="CPH" icao="EKCH" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.617900848389" longitude="12.656000137329" href="../countries/denmark/xml/airport-cph.xml"/>
-  <airport id="610" iata="EBJ" icao="EKEB" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.525902" longitude="8.5534" href="../countries/denmark/xml/airport-ebj.xml"/>
-  <airport id="611" icao="EKGH" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="607" iata="AAR" icao="EKAH" createdAt="2020-10-06T14:59:03.149+02:00" latitude="56.2999992371" longitude="10.619000434899998" href="../countries/denmark/xml/airport-aar.xml"/>
+  <airport id="608" iata="BLL" icao="EKBI" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.7402992249" longitude="9.15178012848" href="../countries/denmark/xml/airport-bll.xml"/>
+  <airport id="609" iata="CPH" icao="EKCH" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.617900848389" longitude="12.656000137329" href="../countries/denmark/xml/airport-cph.xml"/>
+  <airport id="610" iata="EBJ" icao="EKEB" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.525902" longitude="8.5534" href="../countries/denmark/xml/airport-ebj.xml"/>
+  <airport id="611" icao="EKGH" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Grønholt Hillerød Airport</name>
     <city>Gronholt</city>
     <country>Denmark</country>
@@ -14,17 +14,17 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="612" iata="KRP" icao="EKKA" createdAt="2020-10-06T09:33:43.957+02:00" latitude="56.29750061035156" longitude="9.124629974365234" href="../countries/denmark/xml/airport-krp.xml"/>
-  <airport id="613" iata="BYR" icao="EKLS" createdAt="2020-10-06T09:33:43.957+02:00" latitude="57.277198791503906" longitude="11.000100135803223" href="../countries/denmark/xml/airport-byr.xml"/>
-  <airport id="614" iata="MRW" icao="EKMB" createdAt="2020-10-06T09:33:43.957+02:00" latitude="54.699299" longitude="11.4401" href="../countries/denmark/xml/airport-mrw.xml"/>
-  <airport id="615" iata="ODE" icao="EKOD" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.47669982910156" longitude="10.330900192260742" href="../countries/denmark/xml/airport-ode.xml"/>
-  <airport id="616" icao="EKPB" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="612" iata="KRP" icao="EKKA" createdAt="2020-10-06T14:59:03.149+02:00" latitude="56.29750061035156" longitude="9.124629974365234" href="../countries/denmark/xml/airport-krp.xml"/>
+  <airport id="613" iata="BYR" icao="EKLS" createdAt="2020-10-06T14:59:03.149+02:00" latitude="57.277198791503906" longitude="11.000100135803223" href="../countries/denmark/xml/airport-byr.xml"/>
+  <airport id="614" iata="MRW" icao="EKMB" createdAt="2020-10-06T14:59:03.149+02:00" latitude="54.699299" longitude="11.4401" href="../countries/denmark/xml/airport-mrw.xml"/>
+  <airport id="615" iata="ODE" icao="EKOD" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.47669982910156" longitude="10.330900192260742" href="../countries/denmark/xml/airport-ode.xml"/>
+  <airport id="616" icao="EKPB" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Kruså-Padborg Airport</name>
     <city>Krusa-padborg</city>
     <country>Denmark</country>
@@ -35,19 +35,19 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="617" iata="RKE" icao="EKRK" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.585601806640625" longitude="12.131400108337402" href="../countries/denmark/xml/airport-rke.xml"/>
-  <airport id="618" iata="RNN" icao="EKRN" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.06330108642578" longitude="14.759599685668945" href="../countries/denmark/xml/airport-rnn.xml"/>
-  <airport id="619" iata="SGD" icao="EKSB" createdAt="2020-10-06T09:33:43.957+02:00" latitude="54.96440124511719" longitude="9.791729927062988" href="../countries/denmark/xml/airport-sgd.xml"/>
-  <airport id="621" iata="SKS" icao="EKSP" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.221048" longitude="9.26702" href="../countries/denmark/xml/airport-sks.xml"/>
-  <airport id="622" iata="SQW" icao="EKSV" createdAt="2020-10-06T09:33:43.957+02:00" latitude="56.550201416015625" longitude="9.172980308532715" href="../countries/denmark/xml/airport-sqw.xml"/>
-  <airport id="623" iata="TED" icao="EKTS" createdAt="2020-10-06T09:33:43.957+02:00" latitude="57.06880187988281" longitude="8.705220222473145" href="../countries/denmark/xml/airport-ted.xml"/>
-  <airport id="624" icao="EKVD" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="617" iata="RKE" icao="EKRK" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.585601806640625" longitude="12.131400108337402" href="../countries/denmark/xml/airport-rke.xml"/>
+  <airport id="618" iata="RNN" icao="EKRN" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.06330108642578" longitude="14.759599685668945" href="../countries/denmark/xml/airport-rnn.xml"/>
+  <airport id="619" iata="SGD" icao="EKSB" createdAt="2020-10-06T14:59:03.149+02:00" latitude="54.96440124511719" longitude="9.791729927062988" href="../countries/denmark/xml/airport-sgd.xml"/>
+  <airport id="621" iata="SKS" icao="EKSP" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.221048" longitude="9.26702" href="../countries/denmark/xml/airport-sks.xml"/>
+  <airport id="622" iata="SQW" icao="EKSV" createdAt="2020-10-06T14:59:03.149+02:00" latitude="56.550201416015625" longitude="9.172980308532715" href="../countries/denmark/xml/airport-sqw.xml"/>
+  <airport id="623" iata="TED" icao="EKTS" createdAt="2020-10-06T14:59:03.149+02:00" latitude="57.06880187988281" longitude="8.705220222473145" href="../countries/denmark/xml/airport-ted.xml"/>
+  <airport id="624" icao="EKVD" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Kolding Vamdrup Airfield</name>
     <city>Kolding</city>
     <country>Denmark</country>
@@ -58,13 +58,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="626" icao="EKVH" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="626" icao="EKVH" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Vesthimmerlands Flyveplads</name>
     <city>Vesthimmerland</city>
     <country>Denmark</country>
@@ -75,15 +75,15 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="627" iata="STA" icao="EKVJ" createdAt="2020-10-06T09:33:43.957+02:00" latitude="55.9901008605957" longitude="8.353910446166992" href="../countries/denmark/xml/airport-sta.xml"/>
-  <airport id="628" iata="AAL" icao="EKYT" createdAt="2020-10-06T09:33:43.957+02:00" latitude="57.0927589138" longitude="9.84924316406" href="../countries/denmark/xml/airport-aal.xml"/>
-  <airport id="4080" icao="EKSS" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="627" iata="STA" icao="EKVJ" createdAt="2020-10-06T14:59:03.149+02:00" latitude="55.9901008605957" longitude="8.353910446166992" href="../countries/denmark/xml/airport-sta.xml"/>
+  <airport id="628" iata="AAL" icao="EKYT" createdAt="2020-10-06T14:59:03.149+02:00" latitude="57.0927589138" longitude="9.84924316406" href="../countries/denmark/xml/airport-aal.xml"/>
+  <airport id="4080" icao="EKSS" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Samsø Airport</name>
     <city>Samsoe</city>
     <country>Denmark</country>
@@ -94,14 +94,14 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="5579" iata="CNL" icao="EKSN" createdAt="2020-10-06T09:33:43.957+02:00" latitude="57.503502" longitude="10.2294" href="../countries/denmark/xml/airport-cnl.xml"/>
-  <airport id="6855" icao="EKKL" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="5579" iata="CNL" icao="EKSN" createdAt="2020-10-06T14:59:03.149+02:00" latitude="57.503502" longitude="10.2294" href="../countries/denmark/xml/airport-cnl.xml"/>
+  <airport id="6855" icao="EKKL" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Kalundborg Airport</name>
     <city>Kalundborg</city>
     <country>Denmark</country>
@@ -112,13 +112,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="8097" icao="EKTD" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="8097" icao="EKTD" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Tønder Airport</name>
     <city>Toender</city>
     <country>Denmark</country>
@@ -129,13 +129,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="9075" icao="EKEL" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="9075" icao="EKEL" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Endelave Flyveplads</name>
     <city>Endelage</city>
     <country>Denmark</country>
@@ -146,13 +146,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="9136" icao="EKHG" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="9136" icao="EKHG" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Herning Airport</name>
     <city>Herning</city>
     <country>Denmark</country>
@@ -163,13 +163,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>Europe/Copenhagen</tzTimezone>
+      <timezoneTz>Europe/Copenhagen</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="11129" icao="EKNB" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="11129" icao="EKNB" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Nordborg Flyveplads</name>
     <city>Nordborg</city>
     <country>Denmark</country>
@@ -180,13 +180,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>\N</tzTimezone>
+      <timezoneTz>\N</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="11719" icao="EKAE" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="11719" icao="EKAE" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Ærø Airport</name>
     <city>Aero</city>
     <country>Denmark</country>
@@ -197,13 +197,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>\N</tzTimezone>
+      <timezoneTz>\N</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="12931" icao="SVFT" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="12931" icao="SVFT" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>El Fuentero Airport</name>
     <city>Svenborg</city>
     <country>Denmark</country>
@@ -214,13 +214,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>\N</tzTimezone>
+      <timezoneTz>\N</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="13405" icao="EKAT" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="13405" icao="EKAT" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Anholt Airport</name>
     <city>Anholt</city>
     <country>Denmark</country>
@@ -231,13 +231,13 @@
     </geo>
     <temporal>
       <timezone>1</timezone>
-      <tzTimezone>\N</tzTimezone>
+      <timezoneTz>\N</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
-  <airport id="13435" icao="EKAC" createdAt="2020-10-06T09:33:43.957+02:00">
+  <airport id="13435" icao="EKAC" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Aarhus Seaplne Terminal</name>
     <city>Aarhus</city>
     <country>Denmark</country>
@@ -248,10 +248,10 @@
     </geo>
     <temporal>
       <timezone>2</timezone>
-      <tzTimezone>\N</tzTimezone>
+      <timezoneTz>\N</timezoneTz>
       <dst>E</dst>
     </temporal>
     <type>airport</type>
-    <sourceAirportID>OurAirports</sourceAirportID>
+    <source>OurAirports</source>
   </airport>
 </airportsForCountry>

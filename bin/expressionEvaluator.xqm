@@ -157,12 +157,10 @@ declare function f:constructFilterMapExpr($filterMapLP as map(xs:string, xs:stri
         as xs:string {
 
     let $expr :=    
-        'trace(' ||
         '/lines/line' || ($filterMapLP?filterLP ! concat('[', ., ']')) || 
-        $filterMapLP?mapLP ! concat('/(', ., ')') ||
-        ', "_EXPR_VALUE: ")'
+        $filterMapLP?mapLP ! concat('/(', ., ')')
 
-    let $_DEBUG := trace($expr, '_FILTER_MAP_EXPR: ')
+    (: let $_DEBUG := trace($expr, '_FILTER_MAP_EXPR: ') :)
     return $expr
 };        
 

@@ -7,12 +7,18 @@
     In this example, an attribute from the XML document is compared with a field from
     a related JSON document.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    
+    
+    <!-- LINK definitions -->
+    <linkDef name="myJSON"
+        foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
+        targetMediatype="json"/>
+    
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
@@ -21,9 +27,15 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -60,8 +72,9 @@
                                useString="lc"/>
                 </valuePairs>
                 
-                <!-- CHECK: @country value matches "country" field in corresponding JSON file -->
-                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                <!-- CHECK document pairs -->
+                <valuesCompared linkName="myJSON" countTargetResources="1">
+                    <!-- XML @count matches JSON "country" -->
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"
                                    cmp="eq" cmpMsg="Country name in XML and JSON different"/>

@@ -2,7 +2,7 @@
 <!-- 
     We follow the href links, visit the link targets and validate their tree structure.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air07"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
@@ -10,6 +10,32 @@
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
     </context>    
+    
+    <!-- LINK definitions -->
+    
+    <linkDef name="myJSON"
+        foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
+        targetMediatype="json"/>
+    
+    <linkDef name="myXML"
+        foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
+        targetMediatype="xml"/>
+    
+    <linkDef name="hrefElems" hrefXP="//href"/>
+    
+    <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>
+    
+    <linkDef name="linkMeFromAirportsJSON"
+        foxpath="fox-sibling('airports.json')" 
+        targetXP="//href[ends-with(., $fileName)]"
+        targetMediatype="json"/>
+    
+    <linkDef name="mirror20201006"
+        reflector1="${domain}" 
+        reflector2="${domain}\..\air.20201006"/>
+    
+    <!-- DOMAIN validation -->
+    
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
@@ -18,9 +44,15 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFiles names="airports.xml airports.json"/>
-                <memberFiles names="airports-*.xml airports-*.json" maxCount="100"/>
-                <memberFile name="*.FLAG" minCount="1"/>
+                <memberFile name="airports.xml"/>
+                <memberFile name="airports.json"/>
+                <memberFile name="airports-*.xml" maxCount="unbounded"/>
+                <memberFile name="airports-*.json" maxCount="unbounded"/>
+                <memberFile name="*.FLAG" minCount="0"/>
+                <memberFile name="meta.txt" 
+                    md5="1AED5D0B9FF55CC5614117A99C0D2DEE"
+                    md5Msg="Meta file with wrong MD5"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
@@ -66,14 +98,26 @@
                 </valuesCompared>
                 
                 <!-- VISIT: matching JSON file --> 
-                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
+                <file linkName="myJSON" mediatype="json">                
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
                 
-                    <!-- CHECK: href links resolvable -->
-                    <links hrefXP="//href" resolvable="true" minCountTargetResources="1"/>     
+                    <!-- CHECK: href contains resolvable URIs -->
+                    <links linkName="hrefElems" resolvable="true" minCountTargetResources="1"/>
+                    
+                    <!-- CHECK: uriXP values are resolvable URIs -->
+                    <links linkName="href2JSON" resolvable="true" minCountTargetResources="1"/>
+                    
+                    <!-- CHECK: corresponding XML document exists -->
+                    <links linkName="myXML" countTargetResources="1"/>
+                    
+                    <!-- CHECK: this resource is referenced by another resource -->
+                    <links linkName="linkMeFromAirportsJSON" countTargetResources="1"/>
+                    
+                    <!-- CHECK: this resource is "mirrored" by another resource --> 
+                    <links linkName="mirror20201006" countTargetResources="1"/>
 
                     <!-- VISIT: href reference targets -->
-                    <file hrefXP="//href">
+                    <file linkName="hrefElems">
                         <targetSize resolvable="true"/>
                         
                         <!-- CHECK: tree structure -->
@@ -93,9 +137,10 @@
                                     <node locNP="longitude"/>
                                     <node locNP="altitude"/>                                        
                                 </node>
-                                <node locNP="temporal"/>
+                                <node locNP="temporal/timezone"/>
+                                <node locNP="temporal/timezoneTz"/>
                                 <node locNP="type"/>
-                                <node locNP="source1" minCount="0"/>                            
+                                <node locNP="source" minCount="0"/>                            
                             </node>
                         </docTree>
                     </file>

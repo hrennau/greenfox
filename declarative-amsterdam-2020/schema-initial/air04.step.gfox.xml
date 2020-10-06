@@ -4,29 +4,23 @@
     with attributes specifying two expressions (usually XPath expressions - @expr1XQ, @expr2XQ)
     and attributes and/or child elements declaring constraints. Notably, the @cmp
     attribute specifies a certain kind of comparison. To give you an idea, the possible
-    attribute values are: eq, ne, lt, le, gt, ge, in, notin, includes, sameTerms, deepEqual. 
+    attribute values are: eq, ne, lt, le, gt, ge, in, notin, contains, sameTerms, deepEqual. 
     
     In the second case the expression references a variable $fileName - there is a
     small number of preset variable bindings accessible in constraint
     expressions.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air04-step"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>
+    
     <domain path="${domain}" name="air">
         
-        <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <!-- checks & shapes omitted ... -->            
-            
-            <!-- VISIT: country airports files -->
             <file foxpath="airports-*.xml">
-                <!-- checks omitted ... -->                
-                
-                <!-- CHECK: resource value pairs -->
                 <valuePairs>
                     <!-- @countAirports = number of airports -->
                     <valuePair expr1XP="/*/@countAirports" count1="1"

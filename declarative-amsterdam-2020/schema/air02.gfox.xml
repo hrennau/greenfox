@@ -35,7 +35,7 @@
                 <targetSize minCount="0" minCountMsg="Missing FLAG file"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="1" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>

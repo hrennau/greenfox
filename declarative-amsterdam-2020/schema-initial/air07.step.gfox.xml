@@ -2,30 +2,28 @@
 <!-- 
     We follow the href links, visit the link targets and validate their tree structure.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air01"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air07-step"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
 
     <context>
         <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>    
+    </context>  
+    
+    <!-- LINK definitions -->
+    
+    <linkDef name="myJSON"
+        foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
+        targetMediatype="json"/>
+    
+    <linkDef name="hrefElems" hrefXP="//href"/>    
+    
     <domain path="${domain}" name="air">
-        
-        <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
-            <!-- checks & shapes omitted ... -->            
-            
-            <!-- VISIT: country airports files (XML) -->
             <file foxpath="airports-*.xml">
-                <!-- checks omitted ... -->                
-                
-                <!-- VISIT: matching JSON file --> 
-                <file foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json">
-                    <!-- checks omitted ... -->                    
-
-                    <!-- VISIT: href reference targets -->
-                    <file hrefXP="//href">
+                <file linkName="myJSON" mediatype="json">
+                    <file linkName="hrefElems">
                         <targetSize resolvable="true"/>
                         
                         <!-- CHECK: tree structure -->
@@ -45,9 +43,10 @@
                                     <node locNP="longitude"/>
                                     <node locNP="altitude"/>                                        
                                 </node>
-                                <node locNP="temporal"/>
+                                <node locNP="temporal/timezone"/>
+                                <node locNP="temporal/timezoneTz"/>
                                 <node locNP="type"/>
-                                <node locNP="source1" minCount="0"/>                            
+                                <node locNP="source" minCount="0"/>                            
                             </node>
                         </docTree>
                     </file>

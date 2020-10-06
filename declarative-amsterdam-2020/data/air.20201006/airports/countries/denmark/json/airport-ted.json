@@ -3,7 +3,7 @@
     "id":623,
     "iata":"TED",
     "icao":"EKTS",
-    "createdAt":"2020-10-06T09:33:43.957+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Thisted Airport",
     "city":"Thisted",
     "country":"Denmark",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":1,
-      "tzTimezone":"Europe\/Copenhagen",
+      "timezoneTz":"Europe\/Copenhagen",
       "dst":"E"
     },
     "type":"airport",
-    "sourceAirportID":"OurAirports"
+    "source":"OurAirports"
   }
 }

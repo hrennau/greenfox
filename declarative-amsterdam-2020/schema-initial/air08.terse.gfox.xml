@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    We visit the JSON document and check that all href links can be resolved.
-    We also check a few further links, referencing link definitions with
-    different connector types.
+    We submit the index document to XSD validation, and we check that all href
+    links can be recursively resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air06"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air08"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
@@ -17,32 +16,28 @@
     
     <linkDef name="myJSON"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        targetMediatype="json"/>
-    
+        targetMediatype="json"/>    
     <linkDef name="myXML"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
-        targetMediatype="xml"/>
-    
-    <linkDef name="hrefElems" hrefXP="//href"/>
-    
-    <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>
-    
+        targetMediatype="xml"/>    
+    <linkDef name="hrefElems" hrefXP="//href"/>    
+    <linkDef name="hrefAtts" hrefXP="//@href"/>    
+    <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>    
     <linkDef name="linkMeFromAirportsJSON"
         foxpath="fox-sibling('airports.json')" 
         targetXP="//href[ends-with(., $fileName)]"
-        targetMediatype="json"/>
-    
+        targetMediatype="json"/>    
     <linkDef name="mirror20201006"
         reflector1="${domain}" 
         reflector2="${domain}\..\air.20201006"/>
+    
+    <!-- DOMAIN validation -->
     
     <domain path="${domain}" name="air">
         
         <!-- VISIT index folder -->
         <folder foxpath="airports\index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
-
-            <!-- CHECK: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -58,16 +53,19 @@
             <!-- VISIT: FLAG files -->
             <file foxpath="*.FLAG">
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
-                
-                <!-- CHECK: file empty -->
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
+            
+            <!-- VISIT: index file (XML) -->
+            <file foxpath="airports.xml">
+                <targetSize count="1" countMsg="Missing index file"/>
+                <xsdValid xsdFOX="${domain}\resources\xsd\*.xsd"/>
+                <links linkName="hrefAtts" recursive="true" resolvable="true" minCountTargetResources="60"/>
+            </file>            
             
             <!-- VISIT: country airports files (XML) -->
             <file foxpath="airports-*.xml">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
-                
-                <!-- CHECK: resource values -->
                 <values>
                     <value exprXP="//type" 
                            eq="airport" eqMsg="Type not 'airport'"/>
@@ -80,46 +78,59 @@
                     <value exprXP="//airport/@id" 
                            minCount="1"
                            distinct="true"/>                        
-                </values>
-                
-                <!-- CHECK: @country value matches file name -->
+                </values>                
                 <valuePairs>
+                    <!-- @country value matches file name -->
                     <valuePair expr1XP="/*/@country" minCount1="1"
                                expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
                                cmp="eq" cmpMsg="Country name in attribute and file name different"
                                useString="lc"/>
-                </valuePairs>
-                
-                <!-- CHECK document pairs -->
-                <valuesCompared linkName="myJSON" countTargetResources="1">
-                    <!-- XML @count matches JSON "country" -->
+                </valuePairs>                
+                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                    <!-- @country value matches "country" field in corresponding JSON file -->
                     <valueCompared expr1XP="/*/@country" minCount1="1"
-                        expr2XP="/json/airportsForCountry/country"
-                        cmp="eq" cmpMsg="Country name in XML and JSON different"/>
+                                   expr2XP="/json/airportsForCountry/country"
+                                   cmp="eq" cmpMsg="Country name in XML and JSON different"/>
                 </valuesCompared>
                 
-                <!-- VISIT: corresponding JSON document -->
+                <!-- VISIT: matching JSON file --> 
                 <file linkName="myJSON" mediatype="json">
                     <targetSize count="1" countMsg="Missing file: corresponding JSON document"/>
-                    
-                    <!-- CHECK: href contains resolvable URIs -->
                     <links linkName="hrefElems" resolvable="true" minCountTargetResources="1"/>
-                    
-                    <!-- CHECK: uriXP values are resolvable URIs -->
                     <links linkName="href2JSON" resolvable="true" minCountTargetResources="1"/>
-                    
-                    <!-- CHECK: corresponding XML document exists -->
                     <links linkName="myXML" countTargetResources="1"/>
-                    
-                    <!-- CHECK: this resource is referenced by another resource -->
                     <links linkName="linkMeFromAirportsJSON" countTargetResources="1"/>
-                    
-                    <!-- CHECK: this resource is "mirrored" by another resource --> 
                     <links linkName="mirror20201006" countTargetResources="1"/>
+                    <file linkName="hrefElems">
+                        <targetSize resolvable="true"/>                        
+                        <docTree>
+                            <node locNP="/json/airport" closed="true">
+                                <node locNP="@type"/>
+                                <node locNP="id"/>
+                                <node locNP="iata"/>
+                                <node locNP="icao"/>
+                                <node locNP="createdAt"/>
+                                <node locNP="name"/>
+                                <node locNP="city"/>
+                                <node locNP="country"/>                            
+                                <node locNP="geo" closed="true">
+                                    <node locNP="@type"/>
+                                    <node locNP="latitude"/>
+                                    <node locNP="longitude"/>
+                                    <node locNP="altitude"/>                                        
+                                </node>
+                                <node locNP="temporal/timezone"/>
+                                <node locNP="temporal/timezoneTz"/>
+                                <node locNP="type"/>
+                                <node locNP="source" minCount="0"/>                            
+                            </node>
+                        </docTree>
+                    </file>
                 </file>
-            </file>
+            </file>            
         </folder>
     </domain>
 
 </greenfox>
+
 

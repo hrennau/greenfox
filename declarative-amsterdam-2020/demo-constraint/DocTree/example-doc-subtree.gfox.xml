@@ -26,7 +26,7 @@
                         <node locNP="@id"/>                        
                         <node locNP="@length" minCount="0"/>
                         <node locNP="@name"/>
-                        <node locNP="to" minCount="0"/>
+                        <node locNP="to" minCount="0" maxCount="2"/>
                         <node locNP="located" minCount="0" maxCount="unbounded"/>                        
                     </node>                    
                 </docTree>

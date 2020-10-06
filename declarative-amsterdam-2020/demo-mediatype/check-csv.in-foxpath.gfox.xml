@@ -17,11 +17,11 @@
     <domain path="${domain}" name="data">
         
         <!-- VISIT airports.with-headr.csv -->
-        <folder foxpath="air\resources\airports">
+        <folder foxpath="air\resources\openflights">
             <targetSize count="1" countMsg="Missing folder: airports"/>
                 
             <!-- @href must start with https:// -->
-            <foxvalue exprFOX="airports.with-header.csv\csv-doc(., 'comma', 'yes')//TimezoneTz[. ne '\N']" 
+            <foxvalue exprFOX="airports.csv\csv-doc(., 'comma', 'yes')//TimezoneTz[. ne '\N']" 
                    minCount="100" countMsg="Too few timezones"
                    like="*/*" matchesMsg="TimezoneTZ not as */*"/>
         </folder>

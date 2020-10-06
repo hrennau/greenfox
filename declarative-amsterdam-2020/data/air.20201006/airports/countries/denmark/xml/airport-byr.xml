@@ -1,4 +1,4 @@
-<airport id="613" iata="BYR" icao="EKLS" createdAt="2020-10-06T09:33:43.957+02:00">
+<airport id="613" iata="BYR" icao="EKLS" createdAt="2020-10-06T14:59:03.149+02:00">
   <name>Læsø Airport</name>
   <city>Laeso</city>
   <country>Denmark</country>
@@ -9,9 +9,9 @@
   </geo>
   <temporal>
     <timezone>1</timezone>
-    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <timezoneTz>Europe/Copenhagen</timezoneTz>
     <dst>E</dst>
   </temporal>
   <type>airport</type>
-  <sourceAirportID>OurAirports</sourceAirportID>
+  <source>OurAirports</source>
 </airport>

@@ -12,7 +12,7 @@
     <domain path="${domain}" name="data">
         
         <!-- VISIT airports.with-headr.csv -->
-        <file foxpath="air\resources\airports\airports.with-header.csv" mediatype="csv" csv.header="yes">
+        <file foxpath="air\resources\openflights\airports.csv" mediatype="csv" csv.header="yes">
             <targetSize count="1" countMsg="Missing file: airports.csv"/>
                 
             <!-- @href must start with https:// -->

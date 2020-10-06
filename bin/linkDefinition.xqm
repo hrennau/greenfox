@@ -178,7 +178,7 @@ declare function f:parseLinkDef($linkDef as element(),
                 else if ($uriXP) then 'uriExpr'
                 else if ($uriTemplate) then 'uriTemplate'
                 else if (exists($mirrorMap)) then 'mirror'
-                else error()
+                else error(QName((), 'INVALID_SCHEMA'), 'Cannot determine link connector')
         
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')

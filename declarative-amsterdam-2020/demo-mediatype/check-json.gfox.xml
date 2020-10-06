@@ -12,7 +12,7 @@
     <domain path="${domain}" name="data">
         
         <!-- VISIT airport files (JSON) -->
-        <file foxpath="air\airports\countries*\json\airport-*.json" mediatype="json">
+        <file foxpath="air\airports\countries\*\json\airport-*.json" mediatype="json">
             <targetSize minCount="30" minCountMsg="Too few airport files"/>
                 
             <!-- 'dst' must be E|U|N -->
