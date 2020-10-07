@@ -3,7 +3,7 @@
   <airport id="597" iata="GWY" icao="EICM" createdAt="2020-10-06T14:59:03.149+02:00" latitude="53.300201416015625" longitude="-8.941590309143066" href="../countries/ireland/xml/airport-gwy.xml"/>
   <airport id="599" iata="DUB" icao="EIDW" createdAt="2020-10-06T14:59:03.149+02:00" latitude="53.421299" longitude="-6.27007" href="../countries/ireland/xml/airport-dub.xml"/>
   <airport id="600" iata="NOC" icao="EIKN" createdAt="2020-10-06T14:59:03.149+02:00" latitude="53.910301208496094" longitude="-8.818490028381348" href="../countries/ireland/xml/airport-noc.xml"/>
-  <airport id="600" iata="KIR" icao="EIKY" createdAt="2020-10-06T14:59:03.149+02:00" latitude="52.18090057373047" longitude="-9.52377986907959" href="../countries/ireland/xml/airport-kir.xml"/>
+  <airport id="601" iata="KIR" icao="EIKY" createdAt="2020-10-06T14:59:03.149+02:00" latitude="52.18090057373047" longitude="-9.52377986907959" href="../countries/ireland/xml/airport-kir.xml"/>
   <airport id="602" icao="EIME" createdAt="2020-10-06T14:59:03.149+02:00">
     <name>Casement Air Base</name>
     <city>Casement</city>
