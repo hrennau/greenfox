@@ -353,11 +353,13 @@ declare function f:writeValidationReport_sum(
         let $name := $ccomp/@name
         let $countRed := $ccomp/@countRed
         let $countGreen := $ccomp/@countGreen
+        let $countRedRep := if ($countRed > 0) then $countRed else '-'
+        let $countGreenRep := if ($countGreen > 0) then $countGreen else '-'
         return
             concat('| ',
                    tt:rpad($name, $ccompNameWidth, '.'), ' | ', 
-                   tt:lpad($countRed, $countRedWidth, ' '), ' | ',
-                   tt:lpad($countGreen, $countGreenWidth, ' '),
+                   tt:lpad($countRedRep, $countRedWidth, ' '), ' | ',
+                   tt:lpad($countGreenRep, $countGreenWidth, ' '),
                    ' |'),
         $hsep1,
         if ($reportType eq 'sum1') then () else (        
