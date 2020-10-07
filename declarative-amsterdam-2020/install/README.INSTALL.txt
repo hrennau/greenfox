@@ -7,6 +7,9 @@ Please check, e.g. entering on the command-line:
 
 (1) Install BaseX
 =================
+----------------------------------------------------------------------------
+R E Q U I R E D :    B A S E X    V E R S I O N    9.4.3    O R    N E W E R 
+----------------------------------------------------------------------------
 (a) Download from here: https://basex.org/download/
 (b) Recommended: for Windows, use .exe, for other platforms: use .zip
 (c) Execute installer (.exe) or unzip the zip file
