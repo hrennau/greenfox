@@ -211,6 +211,7 @@ declare function f:validateValue_cmp($exprValue as item()*,
             return
                 result:validationResult_value($colour, $constraintElem, $cmp, $exprValue, (), $exprSpec, $exprLang,
                                               $resultAdditionalAtts, (), $resultOptions, $context)
+        else error()                                              
     return
         $results
 };      
@@ -362,7 +363,7 @@ declare function f:validateValue_in($exprValue as item()*,
                     result:validationResult_value(
                         $colour, $constraintElem, $constraintNode, $exprValue, $exprValue[not($conforms)], $exprSpec, $exprLang,
                         $resultAdditionalAtts, (), $resultOptions, $context)
-                
+            else ()    
         default return error()
     return (
         $results_conversionError2,

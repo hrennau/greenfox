@@ -967,7 +967,7 @@ declare function f:validationResult_docSimilar_exception(
                     'Correspondence target resource cannot be parsed'
                 else 
                     'Correspondence target resource not found'
-        else error()
+        else error()        
     return
         element {'gx:red'} {
             $exception ! attribute exception {.},
@@ -1558,6 +1558,7 @@ declare function f:validationResult_valueCompared_exception(
                     'Comparison target resource cannot be parsed'
                 else 
                     'Comparison target target resource not found'
+        else error()                    
         
     return
         element {'gx:red'} {
@@ -1743,7 +1744,7 @@ declare function f:validationResult_concord_exception(
                     'Correspondence target resource cannot be parsed'
                 else 
                     'Correspondence target resource not found'
-        
+        else error()            
     return
         element {'gx:red'} {
             attribute exception {$msg},

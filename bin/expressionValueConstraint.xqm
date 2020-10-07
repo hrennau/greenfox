@@ -358,6 +358,7 @@ declare function f:validateExpressionValue_cmp($exprValue as item()*,
             else f:validationResult_expression('red', $valueShape, $cmp, $exprValue,
                                                 $resultAdditionalAtts, vr:validationResultValues($exprValue, $valueShape), 
                                                 $contextInfo, $resultOptions)
+        else error()                                                
     return
         if ($errors) then $errors
         else f:validationResult_expression('green', $valueShape, $cmp, $exprValue,
@@ -592,6 +593,7 @@ declare function f:validateExpressionValue_in($exprValue as item()*,
                                                    $resultAdditionalAtts, 
                                                    ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, 
                                                    $contextInfo, $resultOptions)
+        else error()                                                    
     return
         if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $in, $exprValue, 
                                                                      $resultAdditionalAtts, (), 
@@ -644,6 +646,7 @@ declare function f:validateExpressionValue_notin($exprValue as item()*,
                                                    $resultAdditionalAtts, 
                                                    ($exprValue => distinct-values()) ! <gx:value>{.}</gx:value>, 
                                                    $contextInfo, $resultOptions)
+        else error()                                                   
     return
         if ($errors) then $errors else f:validationResult_expression('green', $valueShape, $notin, $exprValue, 
                                                                      $resultAdditionalAtts, (), 

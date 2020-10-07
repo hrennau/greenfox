@@ -67,6 +67,7 @@ declare function f:docSimilarConstraintReports(
                             $dataDiffs
                         }</dataDiffs>
                     }</gx:paths>
+            else ()                    
     return $report                
 };
 
