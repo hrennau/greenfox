@@ -28,10 +28,15 @@ Use options `-[123rw]` in order to select a report type:
 - `-r` = report type "Red" (all validation results for red resources, grouped by resource) 
 - `-w` = report type "White" (all validation results, grouped by resource)
 
+Use options `-[CR]` in order to filter validation results:
+
+- `-C constraintFilter` = report only results matching the specified constraint name filters
+- `-R resourceFilter`   = report only results matching the specified resource name filters
+
 Usage:
 
 ```
-   gfox [-abcrw] path-to-schema [path-to-domain]
+   gfox path-to-schema [path-to-domain] [-123rw] [-C constraintFilter] [-R resourceFilter]
 ```
 
 - `path-to-schema` - relative or absolute path of the Greenfox schema file
@@ -40,11 +45,13 @@ Usage:
 Example calls:
 ```
 gfox ../schema/air01.gfox.xml
-gfox -c ../schema/air01.gfox.xml
-gfox -r ../schema/air01.gfox.xml
-gfox /path/to/my.gfox.xml /path/to/domain
-gfox  -w /path/to/my.gfox.xml /path/to/domain
-gfox  -a /path/to/my.gfox.xml /path/to/domain
+gfox ../schema/air01.gfox.xml -1
+gfox ../schema/air01.gfox.xml -3
+gfox ../schema/air01.gfox.xml -r
+gfox ../schema/air01.gfox.xml -r -C "*count closed ~target*"
+gfox ../schema/air01.gfox.xml -r -R "*.json *.csv ~*log*"
+gfox ../schema/air01.gfox.xml /path/to/domain
+gfox ../schema/air01.gfox.xml /path/to/domain -r
 ```
 
 For an introduction see in the **documentation folder**:
