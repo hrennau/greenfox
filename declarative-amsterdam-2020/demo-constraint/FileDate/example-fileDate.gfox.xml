@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FileDate constraints.
+    
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        <folder foxpath="data" id="dataFolderShape">
+            <targetSize count="1" countMsg="Missing data folder"/>          
+
+            <file foxpath=".\\phantastic.png">
+                <targetSize minCount="2" minCountMsg="Not even two phantastic files."/>
+                <fileDate le="2020-10-07"/>
+            </file>
+        </folder>
+    </domain>
+</greenfox>

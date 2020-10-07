@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FileName constraints.
+    
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        <folder foxpath="data\air\airports\index" id="airportsIndexFolderShape">
+            <targetSize minCount="1" countMsg="Missing index folder"/>          
+
+            <file foxpath="*[file-size(.) eq 0]">
+                <targetSize minCount="1" minCountMsg="Not even one empty file."/>
+                <fileName like="*.FLAG"/>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
