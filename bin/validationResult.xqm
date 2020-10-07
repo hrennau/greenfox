@@ -967,7 +967,7 @@ declare function f:validationResult_docSimilar_exception(
                     'Correspondence target resource cannot be parsed'
                 else 
                     'Correspondence target resource not found'
-        
+        else error()
     return
         element {'gx:red'} {
             $exception ! attribute exception {.},
