@@ -10,7 +10,7 @@
             <xs:element name="geo" type="geoType"/>
             <xs:element name="temporal" type="temporalType"/>
             <xs:element name="type" type="xs:string"/>            
-            <xs:element name="source1" type="xs:string"/>
+            <xs:element name="source" type="xs:string"/>
         </xs:sequence>        
         <xs:attribute name="id" type="xs:integer" use="required"/>
         <xs:attribute name="iata" type="iataType" use="required"/>
@@ -29,7 +29,7 @@
     <xs:complexType name="temporalType">
         <xs:sequence>
             <xs:element name="timezone" type="xs:integer"/>
-            <xs:element name="tzTimezone" type="xs:string"/>
+            <xs:element name="timezoneTz" type="xs:string"/>
             <xs:element name="dst" type="xs:string"/>
         </xs:sequence>        
     </xs:complexType>
