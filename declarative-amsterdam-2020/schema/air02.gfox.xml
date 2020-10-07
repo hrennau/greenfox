@@ -28,15 +28,15 @@
                 <memberFile name="phantastic.png" 
                             md5="8C9B1211E43883A14783731AEDFFA839"
                             md5Msg="Phantastic file with wrong MD5"/>
-                <memberFolder name="logg"/>
+                <memberFolder name="log"/>
             </folderContent>
             
             <!-- VISIT: FLAG files -->
             <file foxpath="*.FLAG">
-                <targetSize minCount="0" minCountMsg="Missing FLAG file"/>
+                <targetSize minCount="0"/>
                 
                 <!-- CHECK: file empty -->
-                <fileSize eq="10" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
+                <fileSize eq="1" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>
