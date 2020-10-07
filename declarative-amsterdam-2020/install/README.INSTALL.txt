@@ -36,9 +36,9 @@ BaseX 9.4.3 [Standalone]
 (b1) Start shell
 (b2) Enter:
      Windows:
-       /path/to/greenfox/bin/gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+       /path/to/greenfox/bin/gfox.bat /path/to/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
      Other:
-       /path/to/greenfox/bin/gfox /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+       /path/to/greenfox/bin/gfox /path/to/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
             
      # Make sure to replace "/path/to" with the path of the root folder of unpacked Greenfox
      
@@ -57,8 +57,8 @@ BaseX 9.4.3 [Standalone]
 
 G r e e n f o x    r e p o r t    s u m m a r y
 
-greenfox: C:/tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
-domain:   C:/tt/greenfox/declarative-amsterdam-2020/data/air
+greenfox: C:/path/to/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+domain:   C:/path/to/greenfox/declarative-amsterdam-2020/data/air
 
 #red:     0
 #green:   10   (2 resources)
@@ -74,7 +74,10 @@ domain:   C:/tt/greenfox/declarative-amsterdam-2020/data/air
 
 (c) Recommended: add the "bin" folder of the Greenfox installation to the PATH variable.
     Afterward, you can call Greenfox without path. Example:
-       gfox.bat /tt/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+       gfox.bat /path/to/greenfox/declarative-amsterdam-2020/schema/air01.gfox.xml
+       
+    If you navigate into the schema folder, you may also use a relative path, like this:
+       ../../bin/gfox.bat air01.gfox.xml
 
 (3) Install Foxpath (optional)
 ==============================
