@@ -3,7 +3,7 @@ A command-line tool for validating filesystem trees against a Greenfox schema.
 
 
 ----------
-IMPORTANT: Using Greenfox requires **BaseX version 9.4.3** or newer - please download from [BaseX](https://basex.org/download/)
+IMPORTANT: Greenfox requires **BaseX version 9.4.3** or newer - please download from [BaseX](https://basex.org/download/)
 
 Notes for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 
 
