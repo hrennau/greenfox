@@ -26,10 +26,10 @@ To filter by constraint component, use -C
 To filter by resource name, use -R
 
 Example for -C:
-   gfox $schema/air02.gfox.xml -r -C *closed*
-   gfox $schema/air02.gfox.xml -r -C "file* folder* ~*count"
+   gfox $dc/schema/air02.gfox.xml -r -C *closed*
+   gfox $dc/schema/air02.gfox.xml -r -C "file* folder* ~*count"
 Example for -R:
-   gfox $schema/air02.gfox.xml -r -R *FLAG*
+   gfox $dc/schema/air02.gfox.xml -r -R *FLAG*
 
 For -C and -R you can specify several values, whitespace-separated.
 Patterns with a leading ~ exclude the matching constraints/resources.

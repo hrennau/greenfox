@@ -25,19 +25,29 @@
                 <values>
                     <value exprXP="//airport/@id" 
                         minCount="1" minCountMsg="Missing data: ID"
-                        distinct="true"/>                        
+                        distinct="true"/>
+                    
+                    <value exprXP="//timezoneTz[not(. eq '\N')]" 
+                        minCount="1" minCountMsg="Missing data: timezoneTz"
+                        like="*/*"/>        
+                    
+                    <!--
                     <value exprXP="//type" 
                         minCount="1" minCountMsg="Missing data: type"
                         eq="airport" eqMsg="Type not 'airport'"/>
+                        
                     <value exprXP="//@icao" 
                         minCount="1" minCountMsg="Missing data: ICAO code"
-                        matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                        matches="^[A-Z]{4}$" matchesMsg="ICAO not four capital latin letters"/>
+                        
                     <value exprXP="//altitude" 
                         minCount="1" minCountMsg="Missing data: altitude"
                         lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
+                        
                     <value exprXP="//(latitude, longitude)" 
                         minCount="1" minCountMsg="Missing data: latitude, longitude"
                         datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
+                        -->
                 </values>
             </file>
         </folder>
