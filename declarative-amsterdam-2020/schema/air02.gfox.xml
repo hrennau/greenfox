@@ -19,7 +19,7 @@
 
             <!-- CHECK: folder content -->
             <folderContent closed="true">
-                <memberFile name="airports.xmlX"/>
+                <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
                 <memberFile name="airports-*.xml" maxCount="unbounded"/>
                 <memberFile name="airports-*.json" maxCount="unbounded"/>
