@@ -1,0 +1,29 @@
+To get a taste of Foxpath, you might try out the following fox commands.
+Prerequisite: checkout 
+
+   https://github.com/hrennau/foxpath
+   
+and add the folder $foxpath/bin to your PATH variable.
+
+= = = = = 
+
+Call examples (to be executed in folder $greenfox/declarative-amsterdam-2020/schema
+                                     or $greenfox/declarative-amsterdam-2020/the-amazing-fox):
+
+(1) fox "ancestor~::greenfox//*/file-ext() => frequencies()"
+(2) fox "ancestor~::decl*//*.gfox.xml => count()"
+(3) fox "ancestor~::decl*//*.gfox.xml[\\*:docSimilar]"
+(4) fox "ancestor~::decl*//*.gfox.xml\\*[@mediatype eq 'csv']\(@linkName, @foxpath)"
+(5) fox "ancestor~::decl*//air*.zip/#archive#//airport-*.xml\airport\country => frequencies()"
+(6) fox "ancestor~::decl*//*airport-*.json/jdoc(.)\\airport\\geo => xwrap('geos', 'b')"
+(7) fox "ancestor~::decl*//*airports.csv/csv-doc(., 'comma', 'yes')\\Longitude => min()"
+
+Explanation:
+
+(1) Get all file extensions found in the "greenfox" project, along with frequencies()
+(2) Count all Greenfox schemas in section "declarative-amsterdam-2020"
+(3) List the file paths of all Greenfox schemas containing "docSimilar" constraints
+(4) List all @foxpath attributes occurring together with a @mediatype eq 'csv'
+(5) Analyze the node content of archive air*.zip - visit all airport-*.xml files and get the values and frequencies of <country>
+(6) Visit JSON documents and construct an XML document with the collected "geo" data
+(7) Analyze a CSV file, extracting the maximum longitude
