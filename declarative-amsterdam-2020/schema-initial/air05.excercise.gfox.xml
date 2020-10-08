@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Excercise: we assure the consistency of data in airports.xml and airports-*.xml.
+    
+    For each link context element 
+        <airportsForCountry country="COUNTRY" href="airports-denmark.xml"/>
+        
+    the referenced document must ...
+        (1) exist (use @countTargetResources)
+        (2) contain in /*/@country the same value as in the @country of the link context element
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+    </context>
+
+    <domain path="${domain}" name="air">
+        
+        <folder foxpath="airports\index" id="indexFolderShape">
+            <targetSize count="1"/>
+            
+            <file foxpath="airports.xml">
+                <targetSize count="1"/>
+                
+                    <!-- In the shape target resource, we visit each <airportsForCountry> element -->
+                    <focusNode xpath="trace(/airports, '_LINK_CONTEXT_ELEM: ')">   <!-- #TODO - correct @xpath -->
+                        <!-- Check that there are at least three such elements -->
+                        <targetSize minCount="3" minCountMsg="Not even three link targets!"/>
+                        
+                        <!-- We use <valuesCompared> in order to relate contents at the link starting and ending resource -->                        
+                        <!-- We use an href-connector, specifying the XPath leading to the URI containing node -->                        
+                        
+                        <!-- #TODO - correct @hrefXP -->                        
+                        <!--         HINT: due to the ancestor <focusNode>, the context is the <airportsForCountry> element -->
+                        <valuesCompared hrefXP="trace(href, '_LINK_URIS: ')" countTargetResources="1">     
+
+                            <!-- #TODO - correct @expr1XP (context: focus node) -->
+                            <!-- #TODO - correct @expr2XP (context: root of the link target) -->
+                            <valueCompared expr1XP="trace(country, '_VALUE_FROM_LINK_CONTEXT: ')" count1="1"
+                                           expr2XP="trace(@country, '_VALUE_FROM_LINK_TARGET: ')" count2="1"
+                                           cmp="eq" 
+                                           cmpMsg="Country name in link context and link target different"/>                    
+                        </valuesCompared>
+                    </focusNode>
+                
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
+
