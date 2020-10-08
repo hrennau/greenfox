@@ -22,16 +22,19 @@
         <folder foxpath="airports\index" id="indexFolderShape">
             <file foxpath="airports-*.xml">
                 <valuePairs>
+                    
                     <!-- @countAirports = number of airports -->
                     <valuePair expr1XP="/*/@countAirports" count1="1"
                                expr2XP="count(//airport)" minCount2="1"
                                cmp="eq" cmpMsg="Wrong number of airports"
                                useDatatype="integer"/>
+                    
                     <!-- @country = country from file name -->
                     <valuePair expr1XP="/*/@country" count1="1"
                                expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
                                cmp="eq" cmpMsg="Country name in attribute and file name different"
                                useString="lc"/>
+                    
                 </valuePairs>
             </file>
         </folder>

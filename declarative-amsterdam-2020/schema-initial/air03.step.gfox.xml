@@ -27,10 +27,6 @@
                         minCount="1" minCountMsg="Missing data: ID"
                         distinct="true"/>
                     
-                    <value exprXP="//timezoneTz[not(. eq '\N')]" 
-                        minCount="1" minCountMsg="Missing data: timezoneTz"
-                        like="*/*"/>        
-                    
                     <!--
                     <value exprXP="//type" 
                         minCount="1" minCountMsg="Missing data: type"
