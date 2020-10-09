@@ -65,7 +65,7 @@ gfox ../schema/air01.gfox.xml /path/to/domain
 gfox ../schema/air01.gfox.xml /path/to/domain -r
 ```
 
-For further introductory material see in the [xmlprague2020 folder](document/xmlprague-2020):
+For further introductory material see in the [xmlprague2020 folder](documentation/xmlprague-2020):
 
 - greenfox-xmlprague-2020.pdf
 - greenfox-xmlprague-2020.pptx
