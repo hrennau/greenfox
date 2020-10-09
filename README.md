@@ -1,16 +1,17 @@
 # Greenfox
 A command-line tool for validating filesystem trees against a Greenfox schema.
 
-
-----------
 IMPORTANT: Greenfox requires **BaseX version 9.4.3** or newer - please download from [BaseX](https://basex.org/download/)
 
-Notes for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**, Oct 08, 14:00 - 15:30 
+----------
+Notes for participants of the **Greenfox Tutorial at Declarative Amsterdam 2020**:
 
-- Tutorial material found here: [$greenfox/declarative-amsterdam-2020](declarative-amsterdam-2020)
-- Installation hints found here: [$greenfox/declarative-amsterdam-2020/install/README.INSTALL.txt](https://raw.githubusercontent.com/hrennau/greenfox/master/declarative-amsterdam-2020/install/README.INSTALL.txt)
-- The material is preliminary and will change until Thursday.
-- Please make sure to UPDATE your project on Wednesday, Oct 07, evening.
+The tutorial material **will be completed in the following days**. Frequent updates to be expected. Another note follows when completion is done.
+
+Where to find what:
+
+- Tutorial material here: [$greenfox/declarative-amsterdam-2020](declarative-amsterdam-2020)
+- Installation hints here: [$greenfox/declarative-amsterdam-2020/install/README.INSTALL.txt](https://raw.githubusercontent.com/hrennau/greenfox/master/declarative-amsterdam-2020/install/README.INSTALL.txt)
 ----------
 
 
