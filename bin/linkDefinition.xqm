@@ -122,7 +122,8 @@ declare function f:parseLinkDef($linkDef as element(),
     let $mirrorRef := $referenced?mirror
     let $reflector1 := $linkDef/@reflector1/string()
     let $reflector2 := $linkDef/@reflector2/string()
-    let $reflector1Shift := $linkDef/@reflector1Shift/string()    
+    let $reflectedReplaceSubstring := $linkDef/@reflectedReplaceSubstring/string()
+    let $reflectedReplaceWith := $linkDef/@reflectedReplaceWith/string()
     let $recursive := ($linkDef/@recursive/string(), $referenced?recursive)[1]
     let $contextXP := ($linkDef/@contextXP/string(), $referenced?contextXP)[1]
     let $targetXP := ($linkDef/@targetXP/string(), $referenced?targetXP)[1]            
@@ -149,20 +150,22 @@ declare function f:parseLinkDef($linkDef as element(),
                 for $name in $names return
                     map:entry($name, ($templateVarsDef[@name eq $name], $templateVarsRef($name))[1])
             ))
-    (: Built the map of mirror parameters :)            
+    (: Build the map of mirror parameters :)            
     let $mirrorMap :=
-        if (empty(($reflector1, $reflector2, $reflector1Shift))) then $mirrorRef        
+        if (empty(($reflector1, $reflector2, $reflectedReplaceSubstring, $reflectedReplaceWith))) then $mirrorRef        
         else if (empty($mirrorRef)) then
             map{
                 'reflector1': $reflector1,
                 'reflector2': $reflector2,
-                'reflector1Shift': $reflector1Shift
+                'reflectedReplaceSubstring': $reflectedReplaceSubstring,
+                'reflectedReplaceWith': $reflectedReplaceWith
             }
         else            
             map{
                 'reflector1': ($reflector1, $mirrorRef?reflector1)[1],
                 'reflector2': ($reflector1, $mirrorRef?reflector2)[1],
-                'reflector1Shift': ($reflector1Shift, $mirrorRef?reflector1Shift)[1]
+                'reflectedReplaceSubstring': ($reflectedReplaceSubstring, $mirrorRef?reflectedReplaceSubstring)[1],
+                'reflectedReplaceWith': ($reflectedReplaceWith, $mirrorRef?reflectedReplaceWith)[1]
             }
     return
         if (empty((

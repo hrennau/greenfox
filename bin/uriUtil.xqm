@@ -34,8 +34,65 @@ declare function f:driveFromPath($path as xs:string)
  : @param uri a URI
  : @param reflector1 reflector reflecting the input URI
  : @param reflector2 reflector reflecting the output URI
+ : @param reflectedReplaceSubstring resource name editing - replacement from substring 
+ : @param reflectedReplaceWith resource name editing - replacement to substring 
  : @return the image URI, if the resource exists, an empty sequence otherwise
  :) 
+declare function f:getImage($uri as xs:string, 
+                            $reflector1 as xs:string, 
+                            $reflector2 as xs:string,
+                            $reflectedReplaceSubstring as xs:string?,
+                            $reflectedReplaceWith as xs:string?)
+        as xs:string? {
+        
+    (: Normalize URIs to make them comparable :)
+    let $uris:= f:normalizeURISet(($uri, $reflector1, $reflector2))
+    let $uri := $uris[1]
+    let $reflector1 := $uris[2]
+    let $reflector2 := $uris[3]
+    
+    let $pathReflector1ToUri :=
+        if (matches($uri, concat($reflector1, '(/.*)?$'))) then
+            substring-after($uri, concat($reflector1, '/'))
+            
+        else if (matches ($reflector1, concat($uri, '(/.*)?$'))) then
+            let $countSteps :=
+                (substring-after($reflector1, concat($uri, '/'))
+                ! tokenize(., '\s*/\s*')) => count()
+            return
+                (for $i in 1 to $countSteps return '..') => string-join('/')
+        else ()
+    return
+        (: Lefthook which is not ancestor or descendant of $uri not supported :)
+        if (empty($pathReflector1ToUri)) then () else
+        
+    let $pathReflector1ToUriEdited :=
+        if (empty($reflectedReplaceSubstring)) then $pathReflector1ToUri
+        else
+            let $parts := replace($pathReflector1ToUri, '^(.*?)?([^/]+)$', '$1~~~$2')
+            let $path := substring-before($parts, '~~~')
+            let $name := substring-after($parts, '~~~')
+            let $newName := replace($name, $reflectedReplaceSubstring, $reflectedReplaceWith)
+            return
+                concat($path, $newName)
+        
+    let $imagePath := concat($reflector2, '/', $pathReflector1ToUriEdited)
+    (:
+    let $exists := file:exists($imagePath)    
+    return $imagePath[$exists] ! f:normalizeAbsolutePath(.)
+    :)
+    return $imagePath ! f:normalizeAbsolutePath(.)
+};
+
+(:~
+ : Maps a URI to the image reflected by a mirror.
+ :
+ : @param uri a URI
+ : @param reflector1 reflector reflecting the input URI
+ : @param reflector2 reflector reflecting the output URI
+ : @return the image URI, if the resource exists, an empty sequence otherwise
+ :)
+(: 
 declare function f:getImage($uri as xs:string, $reflector1 as xs:string, $reflector2 as xs:string)
         as xs:string? {
         
@@ -67,7 +124,7 @@ declare function f:getImage($uri as xs:string, $reflector1 as xs:string, $reflec
     :)
     return $imagePath ! f:normalizeAbsolutePath(.)
 };
-
+:)
 (: Normlizes an absolute path by removing step/.., step/step/../.. etc.
  :
  : Examples:

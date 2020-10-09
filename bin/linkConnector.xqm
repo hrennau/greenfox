@@ -62,6 +62,8 @@ declare function f:applyLinkConnector($ldo as map(*),
        ============================= :)
     else if ($ldo?foxpath) then
         let $evaluationContext := $context?_evaluationContext
+        
+        (: Extend evaluation context: $linkContext :)
         let $evaluationContextNext := 
             if (not($contextPoint instance of node())) then $evaluationContext else
                 map:put($context?_evaluationContext, QName('', 'linkContext'), $contextPoint)
@@ -74,7 +76,7 @@ declare function f:applyLinkConnector($ldo as map(*),
         return $items
         
     else if (exists($ldo?mirror)) then
-        let $items := f:resolveMirror($ldo, $context)
+        let $items := f:resolveMirror($ldo, $contextPoint, $context)
         return $items
     
     else ()
@@ -150,11 +152,14 @@ declare function f:resolveUriTemplateRC($uriTemplate as xs:string,
  : @return a sequence of URIss
  :)
 declare function f:resolveMirror($ldo as map(*),
+                                 $contextPoint as item(),
                                  $context as map(xs:string, item()*))
         as xs:string* {
     let $uri := $context?_targetInfo?contextURI        
     let $reflector1 := $ldo?mirror?reflector1        
     let $reflector2 := $ldo?mirror?reflector2
-    return
-        i:getImage($uri, $reflector1, $reflector2)
+    let $reflectedReplaceSubstring := $ldo?mirror?reflectedReplaceSubstring
+    let $reflectedReplaceWith := $ldo?mirror?reflectedReplaceWith
+    let $reflected := i:getImage($uri, $reflector1, $reflector2, $reflectedReplaceSubstring, $reflectedReplaceWith)
+    return $reflected
 };        
