@@ -128,11 +128,11 @@ declare function f:csvDoc($filePath as xs:string, $params as element()*, $params
         as document-node()? {
     let $separator := ($params/@csv.separator, $paramsMap?csv.separator,  'comma')[1]
     let $header := ($params/@csv.header, $paramsMap?csv.header, 'no')[1]
-    let $names := ($params/@csv.names, $paramsMap?csv.namese, 'direct')[1]
+    let $format := ($params/@csv.format, $paramsMap?csv.format, 'direct')[1]
     let $quotes := ($params/@csv.quotes, $paramsMap?quotes, 'yes')[1]
     let $backslashes := ($params/@csv.backslashes, $paramsMap?backslashes, 'no')[1]
     return
-        f:fox-csv-doc($filePath, $separator, $header, $names, $quotes, $backslashes, ())
+        f:fox-csv-doc($filePath, $separator, $header, $format, $quotes, $backslashes, ())
 };   
 
 (:~
