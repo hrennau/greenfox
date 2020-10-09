@@ -1,7 +1,7 @@
 # Greenfox
 A command-line tool for validating filesystem trees against a Greenfox schema.
 
-Introduction: [An introduction to Greenfox](declarative-amsterdam-2020/an-troduction-to-greenfox)
+Introduction: [An introduction to Greenfox](declarative-amsterdam-2020/an-introduction-to-greenfox)
 
 Schema examples:
 
