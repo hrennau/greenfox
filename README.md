@@ -1,6 +1,16 @@
 # Greenfox
 A command-line tool for validating filesystem trees against a Greenfox schema.
 
+Introduction: [An introduction to Greenfox](declarative-amsterdam-2020/an-troduction-to-greenfox)
+
+Schema examples:
+
+- [amsterdam-tutorial](declarative-amsterdam-2020/schema)
+- [amsterdam-demo1](declarative-amsterdam-2020/demo-constraint)
+- [amsterdam-demo2](declarative-amsterdam-2020/demo-link)
+- [amsterdam-demo3](declarative-amsterdam-2020/demo-mediatype)
+- [example-schemas](example-schemas)
+
 IMPORTANT: Greenfox requires **BaseX version 9.4.3** or newer - please download from [BaseX](https://basex.org/download/)
 
 ----------
@@ -55,14 +65,12 @@ gfox ../schema/air01.gfox.xml /path/to/domain
 gfox ../schema/air01.gfox.xml /path/to/domain -r
 ```
 
-For an introduction see in the **documentation folder**:
+For further introductory material see in the [xmlprague2020 folder](document/xmlprague-2020):
 
 - greenfox-xmlprague-2020.pdf
 - greenfox-xmlprague-2020.pptx
 
-More material to appear before Thursday, October 8, 2020.
 
-For schema examples, see folder example-schemas.
 
 
 
