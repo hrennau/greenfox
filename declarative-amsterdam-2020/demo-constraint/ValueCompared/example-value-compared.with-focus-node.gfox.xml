@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints.
+    
+    Checks that the <airportsForCountry> elements in XML airports have the
+    same value in @country as the @href-referenced country airports document.
+    
+    Note that the ValueCompared constraint is a child element of a focus node. 
+    The expression context of @expr1XP is the current focus node.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\data\air"/>
+    </context>
+
+    <!-- LINK definitions -->
+    
+    <!-- Maps a resource to the resources referenced by @href on descendants or self. -->
+    <linkDef name="hrefAtts"
+             hrefXP=".//@href"/>
+
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="airports\index\airports.xml">            
+                <focusNode xpath="//airportsForCountry">
+                    
+                    <!-- Country names in airports.xml and referenced country airports document equal -->
+                    <valuesCompared linkName="hrefAtts" countTargetResources="1" resolvable="true">                    
+                        <valueCompared expr1XP="@country" minCount1="1"
+                                       expr2XP="/*/@country"
+                                       cmp="eq" cmpMsg="Country names different in airports.xml element and country airports document"/>                    
+                    </valuesCompared>
+                    
+                </focusNode>
+        </file>        
+    </domain>
+
+</greenfox>
+

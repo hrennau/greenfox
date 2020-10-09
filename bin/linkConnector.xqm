@@ -65,6 +65,7 @@ declare function f:applyLinkConnector($ldo as map(*),
         
         (: Extend evaluation context: $linkContext :)
         let $evaluationContextNext := 
+        
             if (not($contextPoint instance of node())) then $evaluationContext else
                 map:put($context?_evaluationContext, QName('', 'linkContext'), $contextPoint)
 
@@ -94,7 +95,7 @@ declare function f:resolveUriTemplate($ldo as map(*),
                                       $contextPoint as item(),
                                       $context as map(xs:string, item()*))
         as xs:string* {
-    (: let $_DEBUG := trace($contextPoint, '_CONTEXT_POINT: '):)
+    (: let $_DEBUG :=  ($contextPoint, '_CONTEXT_POINT: '):)
     
     let $uriTemplate := $ldo?uriTemplate        
     let $templateVarMap :=

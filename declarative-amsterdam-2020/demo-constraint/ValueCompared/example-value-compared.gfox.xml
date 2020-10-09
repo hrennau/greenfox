@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Now we start to connect the resources: we add a ValueCompared constraint, which
-    evaluates one expression in the first resource, another expression in the second
-    resource and compares the values.
+    Demonstrates the use of ValueCompared constraints.
     
-    In this example, an attribute from the XML document is compared with a field from
-    a related JSON document.
+    Checks that the XML airport document contains the same IATA code as
+    the corresponding JSON airport document and the corresponding row
+    in the CSV airports document.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -15,6 +14,7 @@
     </context>
 
     <!-- LINK definitions -->
+    
     <!-- Maps an XML airport description to the corresponding JSON description -->
     <linkDef name="myJSON"
              reflector1="${domain}\airports\countries\ireland\xml" 
