@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Now we start to connect the resources: we add a ValueCompared constraint, which
+    evaluates one expression in the first resource, another expression in the second
+    resource and compares the values.
+    
+    In this example, an attribute from the XML document is compared with a field from
+    a related JSON document.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\data\air"/>
+    </context>
+
+    <!-- LINK definitions -->
+    <!-- Maps an XML airport description to the corresponding JSON description -->
+    <linkDef name="myJSON"
+             reflector1="${domain}\airports\countries\ireland\xml" 
+             reflector2="${domain}\airports\countries\ireland\json"
+             reflectedReplaceSubstring="-(.*)\.xml"
+             reflectedReplaceWith="-$1.json"
+             targetMediatype="json"/>
+
+    <!-- Maps an XML or JSON airport document to the corresponding CSV document -->
+    <linkDef name="myCSV"
+             foxpath="..\..\csv\*.csv"
+             targetMediatype="csv"
+             csv.header="yes"/>
+    
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="airports\countries\ireland\xml\airport-*.xml">
+            
+                <!-- IATA code equal in XML and JSON document -->
+                <valuesCompared linkName="myJSON" countTargetResources="1">                    
+                    <valueCompared expr1XP="/*/@icao" minCount1="1"
+                                   expr2XP="//icao"
+                                   cmp="eq" cmpMsg="ICAO codes different in XML and JSON airport descriptions"/>                    
+                </valuesCompared>
+            
+            <!-- IATA code equal in XML document and corresponding row in CSV document -->            
+                <valuesCompared linkName="myCSV" countTargetResources="1">                    
+                    <valueCompared expr1XP="/*/@icao" minCount1="1"
+                                   expr2XP="//record[iata = $doc//@iata]/icao"
+                                   cmp="eq" cmpMsg="ICAO codes different in XML and CSV airport descriptions"/>                    
+                </valuesCompared>
+            
+        </file>
+        
+    </domain>
+
+</greenfox>
+
