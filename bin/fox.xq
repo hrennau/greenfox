@@ -3,7 +3,7 @@ at "foxpath.xqm",
    "tt/_foxpath-parser.xqm", 
    "tt/_foxpath-util.xqm",
    "tt/_foxpath-processorDependent.xqm";
-   
+    
 declare namespace soap="http://schemas.xmlsoap.org/soap/envelope/";
 
 declare variable $foxpath external;
