@@ -1,0 +1,236 @@
+tutorial-foxpath - A terse tutorial introducing to the use of Foxpath
+
+Foxpath is a command-line tool for evaluating Foxpath expressions. Foxpath is 
+an extended version of XPath 3.0 supporting file-system navigation. 
+
+REQUIRED: the tutorial presupposes a sound knowledge of XPath.
+
+Basic usage:
+------------
+fox  [-b] [-f] [-p] foxpath
+-b : swap step separators: use \ in file system navigation, / in node tree navigation
+-f : the foxpath parameter is the name or path of a file containing a foxpath expression
+-p: display expression tree, rather than evaluation the expression
+For more options enter: fox ?
+
+Separators
+----------
+Seperators for conventional node tree navigation and file system navigation:
+Without option -b   (example call: fox /a/b/c)
+   /   step separator for file system navigation; example: fox ../data/air
+   \   step separator for node tree navigation; example: fox somedoc.xml\*\name()
+
+With option -b it is the other way around   (example call: fox -b \a\b\c)
+   \   step separator for file system navigation; example: fox ..\data\air
+   /   step separator for node tree navigation; example: fox somedoc.xml/*/name()
+   
+Requirements
+------------
+- Clone or download the Github project https://github.com/hrennau/greenfox
+- Add the bin folder of Greenfox to your path variable: $HOME_GREENFOX/bin
+- If you do not add the folder to the path variable, call fox with absolute or relative path
+- Example: when executing the tutorial in folder
+     $HOME_GREENFOX/declarative-amsterdam-2020/tutorial-fox
+  use: ../../bin/fox.bat          # without .bat, if not on Windows
+    
+Start
+-----
+- Open a shell (e.g. Powershell)
+- Navigate to the folder $greenfox/declarative-amsterdam-2020/foxpath-tutorial
+
+==============================================================
+*** Part 1: File system navigation without entering node trees
+==============================================================
+
+** Evaluation context
+** ------------------
+The initial evaluation context is the current work folder.
+
+### EXAMPLES 
+fox *
+fox ..
+fox ../*
+ 
+** Navigation axis and name test
+** -----------------------------
+File system navigation is a sequence of navigation steps separated by / (or
+separated by \ when using -b). Each navigation step consists of 
+* a navigation axis 
+* a name test
+* optional predicates
+
+Axis and nametest are separated by ~::
+Predicates are Foxpath expressions in square brackets.
+
+Predicates are dealt with in the subsequent section. This
+section is focused on axes and name test.
+
+Axes:
+-----
+- child~::   (default)
+- descendant~::
+- descendant-or-self~::
+- parent~::
+- ancestor~::
+- ancestor-or-self~::
+- self~::
+
+Shortcuts:
+.. = parent~::*
+... = ancestor~::
+// = descendant-or-self~::
+
+Nametest
+--------
+Literal characters, escaped characters, wildcards
+Escaping: preceding ~
+Characters to escape: leading digit, blank, () [] {}
+Wildcards: * (zero or more characters), ? (exactly one character)
+
+>>> EXAMPLES: Nametest/Wildcards
+fox quick
+fox q*
+fox *ck
+fox qu?ck
+
+### EXAMPLES: Nametest/Escaping
+fox files/~20*
+fox "files/a~ b~ c"
+fox "files/a~(b~)c"
+fox "files/a~[b~]c"
+fox "files/a~{b~}c"
+
+### EXAMPLES: Axes
+fox ..
+fox ancestor~::*
+fox ancestor~::green*
+fox .../self~::green*
+fox ../data/*s
+fox ../data//*.png
+fox ../data//descendant~::*.png
+fox ../data/resources/descendant-or-self~::resources
+fox ../data/resources/ancestor-or-self~::resources
+fox ../data/resources/ancestor-or-self~::*/*.png
+
+** Predicates
+** ----------
+Being an extension of XPath 3.0, any expression can be turned into
+a Filter Expression by appending one or more predicates. A predicate
+is a Foxpath expression in square brackets. 
+
+A Foxpath expression can be any XPath 3.0 expression, as well as a file 
+system navigation expression and the call of a Foxpath function.
+In Foxpath, the expression ... except ... accepts also atomic arguments, 
+interpreted as URIs. 
+
+The predicate expression is evaluated in the context of the
+items to be filtered.
+
+### EXAMPLES: simple predicates
+fox "../data//*[is-dir()]"                             # folder paths only
+fox "../data//*[is-dir()][not(*)]"                     # empty folders
+fox "../data//*[is-file()][file-size() eq 0]"          # empty files
+fox "../data//*[is-file()][file-size() gt 1000000]"    # large files
+fox "../data//*[*.csv]"                                # folders containing CSV files
+fox "../data//*[count(*) gt 100]"                      # folders containing >100 files and/or folders
+fox "../data//*[count(*[is-file(.)]) gt 100]"          # folders containing >100 files
+fox "../data/air//index/(* except *.xml)"              # all resources except XML files
+
+** Non-navigation expressions
+** --------------------------
+The top-level expression need not be a navigation expression - it can
+be any XPath 3.0 expression, e.g. a fubction call. 
+
+A few extension functions to note:
+- file-path()    # file path
+- file-name()    # file name
+- file-ext()     # file extension
+- file-date()    # file date (date of last modification)
+- file-size()    # file size
+- file-info()    # file path + file size + file date
+- frequencies()  # distinct items, followed by their frequency in ()
+
+### EXAMPLES: non-navigation expressions
+fox "ancestor~::greenfox//*.json/concat(file-name(.), ' (', file-size(.), ')')"
+fox "ancestor~::greenfox//*/file-ext() => frequencies()"
+fox "ancestor~::greenfox//*/file-size() => max()"
+fox "ancestor~::greenfox//*/file-date() => min()"
+
+==============================================================
+*** Part 2: Adding node tree navigation
+==============================================================
+
+** Drilling down into documents
+** ----------------------------
+You can start with file system navigation and then "drill down" into
+the selected documents, by just appending to your file system path
+furhter steps which are node tree navigation steps.
+
+### Examples
+fox "../data/air//index/airports.xml\*\name()"                         # Root element name    
+fox "../data/air//index/*.xml\\*\name() => frequencies()"              # Aggregated element names and frequencies
+fox "../data/air//countries//*.xml\\altitude => min()"                 # Minimum of altitudes
+fox "../data/air//countries//*.xml\\@iata\string() => sort()"          # Sorted list of codes
+fox "../data/air//countries//*.xml\\country\string() => frequencies()" # Frequencies of country names
+
+** Node tree navigation in predicates
+-------------------------------------
+Node tree navigation can be used in predicates in order to filter files
+by their structured content.
+
+### Examples
+
+** Navigation of non-XML mediatypes
+-----------------------------------
+Several mediatypes can be parsed into node trees and navigated like XML
+documents. Functions:
+- json-doc(path) or jdoc(path) - parses JSON document with path 'path'
+- html-doc(path) or hdoc(path) - parses HTML document with path 'path'
+- csv-doc(path)  or cdoc(path) - parses CSV document with path 'path'
+- csv-doc(path, sep)           - parses CSV document, using caracter sep as separator
+- csv-doc(path, sep, header)   - parses CSV document, interpreting first line as header line (if header=yes) 
+
+### EXAMPLES
+
+** Navigating archives
+----------------------
+File system navigation can enter archive files and continue within the
+archive, as if archive contents were ordinary file system contents. Use 
+the pseudo-step #archive# in order to enter an archive.
+
+### EXAMPLES
+
+** Navigating BaseX database content
+------------------------------------
+BaseX database contents can be navigated like an ordinary file system. The
+navigation path must start with "basex:/".
+
+** Writing XML
+------------------------------------
+Foxpath function xwrap() is available for transferring extracted data into report documents.
+
+### EXAMPLES
+fox "../data/air//countries//*.xml\\geo => xwrap('geos')"              
+                # Extract all <geo> elements and wrap them in a <geos> element
+fox "../data/air//countries//*.xml\\geo => xwrap('geos', 'b')"         
+                # As before, adding to each extracted element @xml:base
+fox "../data/air//countries//*.xml\\country => distinct-values() => xwrap('countries', 'c', 'country')"
+                # Extract distinct terms, put each one into a 'country' 
+                # element and wrap them in a <countries> element
+
+** Writing CSV
+--------------
+Foxpath function wcsv() is available for creating CSV files.
+
+** Tip: Simplistic data quality checks
+--------------------------------------
+Foxpath can be used for performing simplistic data checks without writing any code.
+
+** Tip: Serious data quality checks
+-----------------------------------
+For serious data quality checking, consider using Greenfox, a schema language
+for validating file system contents.
+
+
+
+
