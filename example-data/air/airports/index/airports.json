@@ -12,10 +12,6 @@
       {
         "country":"Ireland",
         "href":"airports-ireland.json"
-      },
-      {
-        "country":"Luxembourg",
-        "href":"airports-luxembourg.json"
       }
     ]
   }

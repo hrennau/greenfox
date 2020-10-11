@@ -3,7 +3,7 @@
     "id":7030,
     "iata":"INQ",
     "icao":"EIIR",
-    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Inisheer Aerodrome",
     "city":"Inisheer",
     "country":"Ireland",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":0,
-      "tzTimezone":"Europe\/Dublin",
+      "timezoneTz":"Europe\/Dublin",
       "dst":"E"
     },
     "type":"airport",
-    "source1":"OurAirports"
+    "source":"OurAirports"
   }
 }

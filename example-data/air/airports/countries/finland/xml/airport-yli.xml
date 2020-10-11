@@ -1,4 +1,4 @@
-<airport id="464" iata="YLI" icao="EFYL" createdAt="2020-09-27T10:06:56.011+02:00">
+<airport id="464" iata="YLI" icao="EFYL" createdAt="2020-10-06T14:59:03.149+02:00">
   <name>Ylivieska Airfield</name>
   <city>Ylivieska-raudaskyla</city>
   <country>Finland</country>
@@ -9,9 +9,9 @@
   </geo>
   <temporal>
     <timezone>2</timezone>
-    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <timezoneTz>Europe/Helsinki</timezoneTz>
     <dst>E</dst>
   </temporal>
   <type>airport</type>
-  <source1>OurAirports</source1>
+  <source>OurAirports</source>
 </airport>

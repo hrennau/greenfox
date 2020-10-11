@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of evaluation context - $focusNode in foxvalue/@exprFOX.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="textfiles\countries.txt">
+            <targetSize count="1"/>
+            
+                <!-- Foxpath expression uses data extracted from $lines -->
+            <foxvalue exprFOX="${domain}\air\\countries\fox-child($lines//line/lower-case(.))"
+                      count="3"/>
+               
+        </file>
+    </domain>
+
+</greenfox>
+

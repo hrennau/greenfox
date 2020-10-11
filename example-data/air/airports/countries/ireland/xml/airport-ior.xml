@@ -1,4 +1,4 @@
-<airport id="6421" iata="IOR" icao="EIIM" createdAt="2020-09-27T10:06:56.011+02:00">
+<airport id="6421" iata="IOR" icao="EIIM" createdAt="2020-10-06T14:59:03.149+02:00">
   <name>Inishmore Aerodrome</name>
   <city>Inis Mor</city>
   <country>Ireland</country>
@@ -9,9 +9,9 @@
   </geo>
   <temporal>
     <timezone>0</timezone>
-    <tzTimezone>Europe/Dublin</tzTimezone>
+    <timezoneTz>Europe/Dublin</timezoneTz>
     <dst>U</dst>
   </temporal>
   <type>airport</type>
-  <source1>OurAirports</source1>
+  <source>OurAirports</source>
 </airport>

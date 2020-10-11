@@ -3,7 +3,7 @@
     "id":437,
     "iata":"KAO",
     "icao":"EFKS",
-    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Kuusamo Airport",
     "city":"Kuusamo",
     "country":"Finland",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":2,
-      "tzTimezone":"Europe\/Helsinki",
+      "timezoneTz":"Europe\/Helsinki",
       "dst":"E"
     },
     "type":"airport",
-    "source1":"OurAirports"
+    "source":"OurAirports"
   }
 }

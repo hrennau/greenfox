@@ -905,6 +905,7 @@ Groups
             <xs:element name="folderSimilar" type="t:FolderSimilarConstraintType"/>
             <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
             <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
+            <xs:element name="foxvaluePair" type="t:FoxvaluePairType"/>
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
             <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
@@ -924,10 +925,12 @@ Groups
             <xs:element name="docSimilar" type="t:DocSimilarType"/>
             <xs:element name="value" type="t:ValueConstraintType"/>
             <xs:element name="values" type="t:ValuesConstraintType"/>
+            <xs:element name="valuePair" type="t:ValuePairType"/>
             <xs:element name="valuePairs" type="t:ValuePairsType"/>
             <xs:element name="valuesCompared" type="t:ValuesComparedType"/>
             <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
             <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
+            <xs:element name="foxvaluePair" type="t:FoxvaluePairType"/>
             <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
             <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
             <xs:element name="links" type="t:LinkConstraintType"/>

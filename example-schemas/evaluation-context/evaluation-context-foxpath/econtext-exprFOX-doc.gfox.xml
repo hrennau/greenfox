@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of evaluation context - $doc in foxvalue/@exprFOX.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+    </context>
+
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="airports\index\airports.xml">
+            <targetSize count="1"/>
+            
+            <!-- Foxpath expression uses data extracted from $doc -->
+            <foxvalue exprFOX="..\..\countries\fox-child($doc//@country)"
+                      count="3"/>
+        </file>
+    </domain>
+
+</greenfox>
+

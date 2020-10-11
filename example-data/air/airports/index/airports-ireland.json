@@ -7,51 +7,51 @@
         "id":596,
         "iata":"ORK",
         "icao":"EICK",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":51.84130096435547,
         "longitude":-8.491109848022461,
-        "href":"..\/countries\/ireland\/xml\/airport-ork.json"
+        "href":"..\/countries\/ireland\/json\/airport-ork.json"
       },
       {
         "id":597,
         "iata":"GWY",
         "icao":"EICM",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.300201416015625,
         "longitude":-8.941590309143066,
-        "href":"..\/countries\/ireland\/xml\/airport-gwy.json"
+        "href":"..\/countries\/ireland\/json\/airport-gwy.json"
       },
       {
         "id":599,
         "iata":"DUB",
         "icao":"EIDW",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.421299,
         "longitude":-6.27007,
-        "href":"..\/countries\/ireland\/xml\/airport-dub.json"
+        "href":"..\/countries\/ireland\/json\/airport-dub.json"
       },
       {
         "id":600,
         "iata":"NOC",
         "icao":"EIKN",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.910301208496094,
         "longitude":-8.818490028381348,
-        "href":"..\/countries\/ireland\/xml\/airport-noc.json"
+        "href":"..\/countries\/ireland\/json\/airport-noc.json"
       },
       {
         "id":601,
         "iata":"KIR",
         "icao":"EIKY",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":52.18090057373047,
         "longitude":-9.52377986907959,
-        "href":"..\/countries\/ireland\/xml\/airport-kir.json"
+        "href":"..\/countries\/ireland\/json\/airport-kir.json"
       },
       {
         "id":602,
         "icao":"EIME",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "name":"Casement Air Base",
         "city":"Casement",
         "country":"Ireland",
@@ -62,52 +62,52 @@
         },
         "temporal":{
           "timezone":0,
-          "tzTimezone":"Europe\/Dublin",
+          "timezoneTz":"Europe\/Dublin",
           "dst":"E"
         },
         "type":"airport",
-        "source1":"OurAirports"
+        "source":"OurAirports"
       },
       {
         "id":603,
         "iata":"SNN",
         "icao":"EINN",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":52.702,
         "longitude":-8.92482,
-        "href":"..\/countries\/ireland\/xml\/airport-snn.json"
+        "href":"..\/countries\/ireland\/json\/airport-snn.json"
       },
       {
         "id":604,
         "iata":"SXL",
         "icao":"EISG",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":54.280200958252,
         "longitude":-8.5992097854614,
-        "href":"..\/countries\/ireland\/xml\/airport-sxl.json"
+        "href":"..\/countries\/ireland\/json\/airport-sxl.json"
       },
       {
         "id":605,
         "iata":"WAT",
         "icao":"EIWF",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":52.187198638916016,
         "longitude":-7.0869598388671875,
-        "href":"..\/countries\/ireland\/xml\/airport-wat.json"
+        "href":"..\/countries\/ireland\/json\/airport-wat.json"
       },
       {
         "id":5577,
         "iata":"CFN",
         "icao":"EIDL",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":55.0442008972168,
         "longitude":-8.340999603271484,
-        "href":"..\/countries\/ireland\/xml\/airport-cfn.json"
+        "href":"..\/countries\/ireland\/json\/airport-cfn.json"
       },
       {
         "id":5578,
         "icao":"EIWT",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "name":"Weston Airport",
         "city":"Leixlip",
         "country":"Ireland",
@@ -118,52 +118,52 @@
         },
         "temporal":{
           "timezone":0,
-          "tzTimezone":"Europe\/Dublin",
+          "timezoneTz":"Europe\/Dublin",
           "dst":"E"
         },
         "type":"airport",
-        "source1":"OurAirports"
+        "source":"OurAirports"
       },
       {
         "id":6421,
         "iata":"IOR",
         "icao":"EIIM",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.1067008972168,
         "longitude":-9.653610229492188,
-        "href":"..\/countries\/ireland\/xml\/airport-ior.json"
+        "href":"..\/countries\/ireland\/json\/airport-ior.json"
       },
       {
         "id":6422,
         "iata":"NNR",
         "icao":"EICA",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.23030090332031,
         "longitude":-9.467780113220215,
-        "href":"..\/countries\/ireland\/xml\/airport-nnr.json"
+        "href":"..\/countries\/ireland\/json\/airport-nnr.json"
       },
       {
         "id":7030,
         "iata":"INQ",
         "icao":"EIIR",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.064701080322266,
         "longitude":-9.510899543762207,
-        "href":"..\/countries\/ireland\/xml\/airport-inq.json"
+        "href":"..\/countries\/ireland\/json\/airport-inq.json"
       },
       {
         "id":7468,
         "iata":"IIA",
         "icao":"EIMN",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":53.09299850463867,
         "longitude":-9.568059921264648,
-        "href":"..\/countries\/ireland\/xml\/airport-iia.json"
+        "href":"..\/countries\/ireland\/json\/airport-iia.json"
       },
       {
         "id":8683,
         "icao":"EINC",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "name":"Newcastle Aerodrome",
         "city":"Newcastle",
         "country":"Ireland",
@@ -174,20 +174,20 @@
         },
         "temporal":{
           "timezone":0,
-          "tzTimezone":"Europe\/Dublin",
+          "timezoneTz":"Europe\/Dublin",
           "dst":"E"
         },
         "type":"airport",
-        "source1":"OurAirports"
+        "source":"OurAirports"
       },
       {
         "id":8698,
         "iata":"BYT",
         "icao":"EIBN",
-        "createdAt":"2020-09-27T10:06:56.011+02:00",
+        "createdAt":"2020-10-06T14:59:03.149+02:00",
         "latitude":51.66859817504883,
         "longitude":-9.484169960021973,
-        "href":"..\/countries\/ireland\/xml\/airport-byt.json"
+        "href":"..\/countries\/ireland\/json\/airport-byt.json"
       }
     ]
   }

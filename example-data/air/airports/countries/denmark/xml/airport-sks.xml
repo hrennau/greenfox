@@ -1,4 +1,4 @@
-<airport id="621" iata="SKS" icao="EKSP" createdAt="2020-09-27T10:06:56.011+02:00">
+<airport id="621" iata="SKS" icao="EKSP" createdAt="2020-10-06T14:59:03.149+02:00">
   <name>Skrydstrup Air Base</name>
   <city>Skrydstrup</city>
   <country>Denmark</country>
@@ -9,9 +9,9 @@
   </geo>
   <temporal>
     <timezone>1</timezone>
-    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <timezoneTz>Europe/Copenhagen</timezoneTz>
     <dst>E</dst>
   </temporal>
   <type>airport</type>
-  <source1>OurAirports</source1>
+  <source>OurAirports</source>
 </airport>

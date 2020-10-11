@@ -3,7 +3,7 @@
     "id":627,
     "iata":"STA",
     "icao":"EKVJ",
-    "createdAt":"2020-09-27T10:06:56.011+02:00",
+    "createdAt":"2020-10-06T14:59:03.149+02:00",
     "name":"Stauning Airport",
     "city":"Stauning",
     "country":"Denmark",
@@ -14,10 +14,10 @@
     },
     "temporal":{
       "timezone":1,
-      "tzTimezone":"Europe\/Copenhagen",
+      "timezoneTz":"Europe\/Copenhagen",
       "dst":"E"
     },
     "type":"airport",
-    "source1":"OurAirports"
+    "source":"OurAirports"
   }
 }
