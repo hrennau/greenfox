@@ -17,7 +17,8 @@
             <!-- Foxpath expression uses the value obtained from expression #1 ($value) -->
             <foxvaluePair 
                 expr1LP="//line" minCount1="3" 
-                expr2FOX="${domain}\air\\countries\fox-child($value/lower-case(.))" minCount2="3"/>               
+                expr2FOX="${domain}\air\\countries\fox-child($value/lower-case(.))"
+                cmpCount="eq" cmpCountMsg="Not one country folder per country term"/>               
         </file>
     </domain>
 

@@ -148,7 +148,7 @@ declare function f:validateValuePairs($constraintElem as element(),
         as element()* {
     let $targetInfo := $context?_targetInfo
     let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
-    for $pair in trace( $constraintElem/(., *)/(self::gx:valuePair, self::gx:foxvaluePair) , '______PAIRS: ') 
+    for $pair in $constraintElem/(., *)/(self::gx:valuePair, self::gx:foxvaluePair) 
     return
         $pair/f:validateValuePair(., $contextNode, (), (), $context)
 };
@@ -450,6 +450,10 @@ declare function f:validateValuePair_context2_iterating(
             f:validateValuePair_counts(
                 $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, $item1, $context),
             
+            (: Value 2: count comparison check :)
+            f:validateValuePair_cmpCount($constraintElem, $expr1Spec, $expr2Spec, $expr1Lang, $expr2Lang, 
+                $items1, $items2, $item1, $context),
+            
             (: Value 2: conversion errors :)
             $items2ConversionError ! result:validationResult_valuePair(
                     'red', $constraintElem, $constraintNode,
@@ -494,7 +498,11 @@ declare function f:validateValuePair_context2_iterating(
             let $countResults :=
                 f:validateValuePair_counts(
                     $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, $item1, $context)   
-                    
+               
+            let $countCmpResults :=
+                f:validateValuePair_cmpCount($constraintElem, $expr1Spec, $expr2Spec, $expr1Lang, $expr2Lang, 
+                    $items1, $items2, $items1, $context)            
+            
             return
                 (: Write for each item from value 1 a map with keys:
                        item1, conversionErrors2, countResults, match 
@@ -504,6 +512,8 @@ declare function f:validateValuePair_context2_iterating(
                     map:entry('item1', $item1),                    
                     (: countResults :)
                     map:entry('countResults', $countResults),                
+                    (: countCmpResults :)
+                    map:entry('countCmpResults', $countCmpResults),                
                     (: conversion errors value 2 :)
                     map:entry('conversionErrors2', $items2ConversionErrorResults),                    
                     (: match :)
@@ -512,6 +522,7 @@ declare function f:validateValuePair_context2_iterating(
         return (
             (: Count and conversion results :)
             $itemReports?countResults,
+            $itemReports?countCmpResults,
             $itemReports?conversionErrors2,
 
             (: Quantifier: some :)
@@ -537,8 +548,7 @@ declare function f:validateValuePair_context2_iterating(
                         $violations, (), $context)
                 )
             else error(QName((), 'SCHEMA_ERROR'), concat('Unknown quantifier @quant: ', $quantifier))                        
-        )
-        
+        )        
 };
 
 (:~
@@ -604,6 +614,11 @@ declare function f:validateValuePair_context2_fixed(
         f:validateValuePair_counts(
             $constraintElem, $items2, 'expr2', $expr2, $expr2Spec, $expr2Lang, (), $context)
     
+    (: *** Check count comparison :)
+    let $results_cmpCount :=    
+        f:validateValuePair_cmpCount($constraintElem, $expr1Spec, $expr2Spec, $expr1Lang, $expr2Lang, 
+            $items1, $items2, (), $context)
+
     (: *** Check results: pair :)    
     let $results_pair :=
         if ($constraintNode/self::element()) then () else
@@ -656,6 +671,7 @@ declare function f:validateValuePair_context2_fixed(
     return (
         $results_expr2Conversion,    
         $results_expr2Count,
+        $results_cmpCount,
         $results_pair)
 };
 
@@ -703,4 +719,48 @@ declare function f:validateValuePair_counts($constraintElem as element(),
                 $valueCount, $contextItem1, (), $context)
     return $results        
 };
+
+(:~
+ : Validates ValuePairCmpCount (or FoxvaluePairCmpCount) constraints. 
+ :
+ : @param constraintElem the constraint element
+ : @param items1 value of expression 1
+ : @param items2 value of expression 2
+ : @param context the evaluation context
+ : @return validation results
+ :)
+declare function f:validateValuePair_cmpCount($constraintElem as element(),
+                                              $expr1Spec as item(),
+                                              $expr2Spec as item(), 
+                                              $expr1Lang as xs:string,
+                                              $expr2Lang as xs:string,
+                                              $items1 as item()*,
+                                              $items2 as item()*,
+                                              $contextItem1 as item()?,                                              
+                                              $context as map(xs:string, item()*))
+        as element()* {
+        
+    let $constraintNode := $constraintElem/@cmpCount
+    return if (not($constraintNode)) then () else
+        
+    let $valueCount1 := count($items1)
+    let $valueCount2 := count($items2)
+    let $green :=
+        switch($constraintNode)
+            case 'eq' return $valueCount1 eq $valueCount2
+            case 'ne' return $valueCount1 ne $valueCount2
+            case 'lt' return $valueCount1 lt $valueCount2
+            case 'le' return $valueCount1 le $valueCount2
+            case 'gt' return $valueCount1 gt $valueCount2
+            case 'ge' return $valueCount1 ge $valueCount2
+            default return error()
+
+    let $colour := if ($green) then 'green' else 'red'        
+    return  
+        result:validationResult_valuePair_cmpCount(
+            $colour, $constraintElem, $constraintNode, 
+            $expr1Spec, $expr2Spec, $expr1Lang, $expr2Lang,
+            $valueCount1, $valueCount2, $contextItem1, $context)       
+};
+
 

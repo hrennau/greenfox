@@ -1455,6 +1455,70 @@ declare function f:validationResult_valuePair_counts($colour as xs:string,
 };
 
 (:~
+ : Creates a validation result for a ValuePair*Count constraint (ValuePairCount1,
+ : ValuePairMinCount1, ValuePairMaxCount1, ValuePairCount2, ValuePairMinCount2,
+ : ValuePairMaxCount2).
+ :
+ : @param colour 'green' or 'red', indicating violation or conformance
+ : @param valuePair an element declaring a Correspondence Constraint on a 
+ :   pair of content values
+ : @param constraint a constraint expressing attribute (e.g. @sourceMinCount)
+ : @param valueCount the actual number of values 
+ : @param contextInfo informs about the focus document and focus node
+ : @return a validation result, red or green
+ :)
+declare function f:validationResult_valuePair_cmpCount($colour as xs:string,
+                                                       $constraintElem as element(),
+                                                       $constraintNode as attribute(),
+                                                       $expr1Spec as item(),
+                                                       $expr2Spec as item(),
+                                                       $expr1Lang as xs:string,
+                                                       $expr2Lang as xs:string,
+                                                       $valueCount1 as xs:integer,
+                                                       $valueCount2 as xs:integer,
+                                                       $contextItem1 as item()?,                                                       
+                                                       $context as map(xs:string, item()*))
+        as element() {
+    let $targetInfo := $context?_targetInfo        
+    let $contextURI := $targetInfo?contextURI
+    let $focusNodePath := $targetInfo?focusNodePath
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
+    let $constraintComp := ($constraintElem/local-name(.) ! i:firstCharToUpperCase(.)) ||
+                           'Count' || ($constraintNode/i:firstCharToUpperCase(.))
+    
+    let $contextItem1Att :=
+        if (empty($contextItem1)) then ()
+        else 
+            let $attValue := if (not($contextItem1 instance of node())) then $contextItem1
+                             else if (not($contextItem1/*)) then $contextItem1
+                             else $contextItem1/i:datapath(.)
+            return attribute contextItem1 {$attValue}                             
+
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))    
+    let $expr1Atts := f:validateResult_exprAtts($expr1Spec, $expr1Lang, '1')
+    let $expr2Atts := f:validateResult_exprAtts($expr2Spec, $expr2Lang, '2')
+    return
+        element {f:resultElemName($colour)} {
+            $msg ! attribute msg {.},        
+            $contextURI ! attribute filePath {.},
+            $focusNodePath ! attribute focusNodePath {.},
+            attribute constraintComp {$constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $expr1Atts,
+            $expr2Atts,
+        
+            $constraintNode,
+            $valueCount1 ! attribute valueCount1 {.},
+            $valueCount2 ! attribute valueCount2 {.},
+            $contextItem1Att           
+        }       
+};
+
+(:~
  : Creates a validation result expressing an exceptional condition 
  : which prevents normal evaluation of a ValueCompared constraint.
  : Such an exceptional condition is, for example, a failure to parse 

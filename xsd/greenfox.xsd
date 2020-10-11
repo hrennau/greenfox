@@ -815,6 +815,17 @@ Enumerations
             <xs:enumeration value="unbounded"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:simpleType name="ValueCountPairCmpEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="eq"/>
+            <xs:enumeration value="ne"/>
+            <xs:enumeration value="lt"/>
+            <xs:enumeration value="le"/>
+            <xs:enumeration value="gt"/>
+            <xs:enumeration value="ge"/>
+        </xs:restriction>
+    </xs:simpleType>    
     
     <xs:simpleType name="ValuePairCmpEnumType">
         <xs:restriction base="xs:token">
@@ -1053,7 +1064,12 @@ Attribute groups
         <xs:attribute name="exists2MsgOK" type="xs:string"/>
         <xs:attribute name="empty2" type="xs:boolean"/>
         <xs:attribute name="empty2Msg" type="xs:string"/>
-        <xs:attribute name="empty2MsgOK" type="xs:string"/>        
+        <xs:attribute name="empty2MsgOK" type="xs:string"/>
+
+        <xs:attribute name="cmpCount" type="t:ValueCountPairCmpEnumType"/>
+        <xs:attribute name="cmpCountMsg" type="xs:string"/>
+        <xs:attribute name="cmpCountMsgOK" type="xs:string"/>
+        
     </xs:attributeGroup>
     
     <xs:attributeGroup name="LinkFacetAttGroup">
