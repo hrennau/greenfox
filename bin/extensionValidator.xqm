@@ -22,7 +22,14 @@ at "evaluationContextManager.xqm",
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
-declare function f:validateExtensionConstraint($constraint as element(),
+(:~
+ : Validates an extension constraint.
+ :
+ : @param constraintElem the constraint element
+ : @param context the processing context
+ : @return validation results
+ :)
+declare function f:validateExtensionConstraint($constraintElem as element(),
                                                $context as map(xs:string, item()*))
                                             
         as element()* {
@@ -33,29 +40,31 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $contextNode := $targetInfo?focusNode
     return
         
-    let $constraintComponent := f:getExtensionConstraintComponents($constraint)        
+    let $constraintComponent := f:getExtensionConstraintComponents($constraintElem)        
     let $constraintElemName := $constraintComponent/@constraintElementName
     let $paramNames := $constraintComponent/gx:param/@name
     let $evaluationContext := $context?_evaluationContext
     let $reqDocs := $context?_reqDocs
     
     let $useParams :=
-        let $paramNamesElemStyle := $constraint/gx:param/@name
-        let $atts := $constraint/@*
+        let $paramNamesElemStyle := $constraintElem/gx:param/@name
+        let $atts := $constraintElem/@*
         return (
-            $constraint/gx:param,
+            $constraintElem/gx:param,
             for $paramName in $paramNames[not(. = $paramNamesElemStyle)]
             let $attValue := $atts[local-name(.) eq $paramName]
             return $attValue ! <gx:param name="{$paramName}">{string(.)}</gx:param>
     )
-    
+    (:
     let $reqBindings :=
         let $potentialBindings := i:getPotentialBindings()
         return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextURI, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, $useParams)  
-
+    :)
+    
+    let $context := f:updateEvaluationContext_params($useParams, $context)    
     let $xpath := $constraintComponent/(@validatorXPath, gx:validatorXPath)[1]
     let $foxpath := $constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)[1]
     let $exprValue := 
@@ -68,20 +77,20 @@ declare function f:validateExtensionConstraint($constraint as element(),
     let $isValid := $isValidAndErrors[1]
     let $errorValues := tail($isValidAndErrors)
     
-    let $msg := $constraint/@msg/f:editMsg(., $useParams)
-    let $msgOk := $constraint/@msgOK/f:editMsg(., $useParams)
+    let $msg := $constraintElem/@msg/f:editMsg(., $useParams)
+    let $msgOk := $constraintElem/@msgOK/f:editMsg(., $useParams)
     let $nodePath := $contextNode/i:datapath(.)
     
     let $constraintIdentAtts := (
         'ExtensionConstraint' ! attribute constraintComp {.},
-        $constraint/local-name(.) ! attribute extensionConstraintName {.},
-        $constraint/node-name(.) ! i:qnameToURI(.) ! attribute extensionConstraintIRI {.},
-        $constraint/@id/attribute constraintComponentID {.},
-        $constraint/@label/attribute constraintLabel {.}
+        $constraintElem/local-name(.) ! attribute extensionConstraintName {.},
+        $constraintElem/node-name(.) ! i:qnameToURI(.) ! attribute extensionConstraintIRI {.},
+        $constraintElem/@id/attribute constraintComponentID {.},
+        $constraintElem/@label/attribute constraintLabel {.}
     )        
     let $paramAttsAndElems := (
-        $constraint/@*[local-name(.) = $paramNames],
-        $constraint/gx:param
+        $constraintElem/@*[local-name(.) = $paramNames],
+        $constraintElem/gx:param
     )
     let $paramAtts := $paramAttsAndElems[. instance of attribute()]
     let $paramElems := $paramAttsAndElems[. instance of element()]
@@ -120,19 +129,19 @@ declare function f:getExtensionConstraints($constraints as element()*) as elemen
  : Returns the extension constraint components referenced by a given set of constraint 
  : definitions.
  :
- : @param constraints constraint definitions
- : @return the extension constraint components referenced by the constraint definitions
+ : @param constraintElems constraint elements, among which there may be extension constraint elements
+ : @return the extension constraint components referenced by the extension constraint elements
  :)
-declare function f:getExtensionConstraintComponents($constraints as element()*) as element()* {
-    let $extensionConstraints := f:getExtensionConstraints($constraints)
-    return if (not($extensionConstraints)) then () else
+declare function f:getExtensionConstraintComponents($constraintElems as element()*) 
+        as element()* {
+    let $extensionConstraintElems := f:getExtensionConstraints($constraintElems)
+    return if (not($extensionConstraintElems)) then () else
     (
     let $extensionConstraintComponents := 
-        $extensionConstraints[1]/ancestor::gx:greenfox/gx:constraintComponents/gx:constraintComponent
-    for $extensionConstraint in $extensionConstraints
-    let $extensionConstraintName := $extensionConstraint/node-name(.)
-    let $refExtensionConstraintComponent := 
-        $extensionConstraintComponents
+        $extensionConstraintElems[1]/ancestor::gx:greenfox/gx:constraintComponents/gx:constraintComponent
+    for $extensionConstraintElem in $extensionConstraintElems
+    let $extensionConstraintName := $extensionConstraintElem/node-name(.)
+    let $refExtensionConstraintComponent := $extensionConstraintComponents
         [@constraintElementName/resolve-QName(., ..) = $extensionConstraintName]
     return 
         if (empty($refExtensionConstraintComponent)) then 

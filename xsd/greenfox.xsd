@@ -76,7 +76,7 @@ Domain
         <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="folder" type="t:FolderShapeType"/>
-                <xs:element name="file"/>
+                <xs:element name="file" type="t:FileShapeType"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="path" type="xs:string" use="required"/>
@@ -432,6 +432,9 @@ C o n s t r a i n t    e l e m e n t s
         <xs:complexContent>
             <xs:extension base="t:ValueBaseType">
                 <xs:attribute name="exprXP" type="xs:string"/>
+                <xs:attribute name="exprLP" type="xs:string"/>
+                <xs:attribute name="filterLP" type="xs:string"/>
+                <xs:attribute name="mapLP" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -474,7 +477,13 @@ C o n s t r a i n t    e l e m e n t s
         <xs:complexContent>
             <xs:extension base="t:ValuePairBaseType">
                 <xs:attribute name="expr1XP" type="xs:string"/>
+                <xs:attribute name="expr1LP" type="xs:string"/>
+                <xs:attribute name="filter1LP" type="xs:string"/>
+                <xs:attribute name="map1LP" type="xs:string"/>
                 <xs:attribute name="expr2XP" type="xs:string"/>
+                <xs:attribute name="expr2LP" type="xs:string"/>
+                <xs:attribute name="filter2LP" type="xs:string"/>
+                <xs:attribute name="map2LP" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -492,6 +501,12 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:attribute name="expr2XP" type="xs:string"/>
                 <xs:attribute name="expr1FOX" type="xs:string"/>
                 <xs:attribute name="expr2FOX" type="xs:string"/>
+                <xs:attribute name="expr1LP" type="xs:string"/>
+                <xs:attribute name="filter1LP" type="xs:string"/>
+                <xs:attribute name="map1LP" type="xs:string"/>
+                <xs:attribute name="expr2LP" type="xs:string"/>
+                <xs:attribute name="filter2LP" type="xs:string"/>
+                <xs:attribute name="map2LP" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
