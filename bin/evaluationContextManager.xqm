@@ -28,7 +28,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :)
 declare function f:getPotentialBindings() as xs:string+ {
     'doc', 
-    'linesdoc',
+    'focusNode',
+    'lines',
     'fileName',
     'filePath',    
     'domain'    
@@ -65,7 +66,7 @@ declare function f:adaptContext($filePath as xs:string,
        this excludes, however, variables which cannot be determined before
        specific expressions have been evaluted: @item, @linkContext, @targetDoc, @targetNode.
      :)
-    let $context := f:prepareEvaluationContext($reqDocs?doc, $reqDocs?linesdoc, $reqBindings, $filePath, $context)        
+    let $context := f:prepareEvaluationContext($reqDocs?doc, $reqDocs?lines, $reqBindings, $filePath, $context)        
     return $context   
 };
 
@@ -376,8 +377,8 @@ declare function f:getRequiredDocs($filePath as xs:string,
                 f:csvDoc($filePath, $resourceShape, ())
          
     (: lines document :)
-    let $linesdoc :=
-        let $required := exists($expressionsMap?linepath) or $requiredBindings = 'linesdoc'
+    let $lines :=
+        let $required := exists($expressionsMap?linepath) or $requiredBindings = 'lines'
         return
             if (not($required)) then () else 
                 let $lines := i:fox-unparsed-text-lines($filePath, ()) ! <line>{.}</line>
@@ -391,7 +392,7 @@ declare function f:getRequiredDocs($filePath as xs:string,
     return
         map:merge((
             $doc ! map:entry('doc', .),
-            $linesdoc ! map:entry('linesdoc', .)
+            $lines ! map:entry('lines', .)
         ))
 };
 
@@ -418,7 +419,7 @@ declare function f:getRequiredDocs($filePath as xs:string,
         $expressionsMap?foxpath2 ! f:determineRequiredBindingsFoxpath(., $potentialBindings),
         $expressionsMap?linepath ! f:determineRequiredBindingsXPath(., $potentialBindings),
         $expressionsMap?linepath2 ! f:determineRequiredBindingsXPath(., $potentialBindings)
-    ) => distinct-values() => sort() 
+    ) => distinct-values() => sort()
 };        
 
 (:~
@@ -526,22 +527,23 @@ declare function f:nodeTreeRequired($components as element()*, $context as map(x
  :   by the required bindings and the values to be bound to them 
  :)
 declare function f:prepareEvaluationContext($doc as document-node()?,
-                                            $linesdoc as document-node()?,
+                                            $lines as document-node()?,
                                             $reqBindings as xs:string*,
                                             $filePath as xs:string,
                                             $context as map(xs:string, item()*))
         as map(xs:string, item()*) {
         
-    let $targetInfo := map{'contextURI': $filePath, 'doc': $doc, 'linesdoc': $linesdoc}    
+    let $targetInfo := map{'contextURI': $filePath, 'doc': $doc, 'lines': $lines}    
     let $reqDocs := map:merge((
         $doc ! map:entry('doc', .),
-        $linesdoc ! map:entry('linesdoc', .)
+        $lines ! map:entry('lines', .)
     ))
     let $evaluationContext :=
         map:merge((
             $context?_evaluationContext,                
             if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
-            if (not($reqBindings = 'linesdoc')) then () else map:entry(QName('', 'linesdoc'), $linesdoc),
+            if (not($reqBindings = 'focusNode')) then () else map:entry(QName('', 'focusNode'), $doc),
+            if (not($reqBindings = 'lines')) then () else map:entry(QName('', 'lines'), $lines),
             if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
             if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
             if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain)
@@ -568,7 +570,13 @@ declare function f:updateEvaluationContext_focusNode($focusNode as node(),
     let $targetInfo := $context?_targetInfo
     let $newTargetInfo := map:put($targetInfo, 'focusNode', $focusNode) 
                           ! map:put(., 'focusNodePath', $focusNode/i:datapath(.))
-    return map:put($context, '_targetInfo', $newTargetInfo)
+    let $newEvaluationContext := 
+        $context?_evaluationContext 
+        ! map:put(., QName((), 'focusNode'), $focusNode)                          
+    let $newContext := 
+        map:put($context, '_targetInfo', $newTargetInfo) 
+        ! map:put(., '_evaluationContext', $newEvaluationContext)
+    return $newContext
 };        
 
 (:~
@@ -608,18 +616,19 @@ declare function f:newEvaluationContext_linkContextItem($linkContextItem as item
 };
 
 (:~
- : Returns a copy of the current evaluation context augmented ready for used by $expr2*.
+ : Returns a copy of the current evaluation context augmented ready for use by $expr2*.
  :
  : @param linkContextItem the current link context item
  : @param context the processing context
  : @return the updated processing context
  :) 
 declare function f:newEvaluationContext_expr2($item as item()?,
+                                              $value1 as item()*,
                                               $targetDoc as document-node()?,
                                               $targetNode as node()?,
                                               $context as map(xs:string, item()*))
         as map(*) {
-    let $newEc := $context?_evaluationContext
+    let $newEc := $context?_evaluationContext ! map:put(., QName((), 'value1'), $value1)
     return
         if (empty(($item, $targetDoc, $targetNode))) then $newEc else
         

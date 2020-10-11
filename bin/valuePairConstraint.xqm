@@ -55,7 +55,7 @@ declare function f:validateValuePairConstraint($constraintElem as element(),
     if ($constraintElem/@expr1XP and not($targetInfo?doc)) then
         result:validationResult_valuePair_exception($constraintElem,
             'Context resource could not be parsed', (), $context)
-    else if ($constraintElem/(@expr1LP, @filter1LP, @map1LP) and not($targetInfo?linesDoc)) then
+    else if ($constraintElem/(@expr1LP, @filter1LP, @map1LP) and not($targetInfo?lines)) then
         result:validationResult_valuePair_exception($constraintElem,
             'Context resource without lines document', (), $context)
     else
@@ -148,7 +148,7 @@ declare function f:validateValuePairs($constraintElem as element(),
         as element()* {
     let $targetInfo := $context?_targetInfo
     let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
-    for $pair in $constraintElem/(gx:valuePair, gx:foxvaluePair) 
+    for $pair in trace( $constraintElem/(., *)/(self::gx:valuePair, self::gx:foxvaluePair) , '______PAIRS: ') 
     return
         $pair/f:validateValuePair(., $contextNode, (), (), $context)
 };
@@ -241,10 +241,10 @@ declare function f:validateValuePair($constraintElem as element(),
         case 'xpath' return i:evaluateXPath($expr1, $contextNode, $evaluationContext, true(), true())
         case 'foxpath' return i:evaluateFoxpath($expr1, $contextURI, $evaluationContext, true())        
         case 'linepath' return 
-            let $contextLinesNode := $context?_reqDocs?linesdoc
+            let $contextLinesNode := $context?_reqDocs?lines
             return i:evaluateXPath($expr1, $contextLinesNode, $evaluationContext, true(), true())
         case 'filtermap' return 
-            let $contextLinesNode := $context?_reqDocs?linesdoc
+            let $contextLinesNode := $context?_reqDocs?lines
             return i:evaluateXPath($expr1, $contextLinesNode, $evaluationContext, true(), true())
         default return error()
     let $items1TYRaw := i:applyUseDatatype($items1Raw, $useDatatype, $useString)
@@ -284,7 +284,7 @@ declare function f:validateValuePair($constraintElem as element(),
            If $varName is set, $varValue is bound to variable $varName.
            If $varName and $varName2 is set, $varValue2 is bound to variable $varName2 :)
     let $getItems2 := function($contextItem, $item, $targetDoc, $targetNode) {
-        let $newEvaluationContext := i:newEvaluationContext_expr2($item, $targetDoc, $targetNode, $context)
+        let $newEvaluationContext := i:newEvaluationContext_expr2($item, $items1TY, $targetDoc, $targetNode, $context)
         return
             switch($expr2Lang)
             case 'xpath' return i:evaluateXPath($expr2, $contextItem, 

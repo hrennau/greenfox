@@ -135,9 +135,11 @@ declare function f:validateFileConstraints($fileConstraints as element(),
         
         case element(gx:value) return expr:validateValueConstraint($constraintElem, $context)
         case element(gx:values) return expr:validateValueConstraint($constraintElem, $context)
-        case element(gx:foxvalus) return expr:validateValueConstraint($constraintElem, $context)        
+        case element(gx:foxvalue) return expr:validateValueConstraint($constraintElem, $context)        
         case element(gx:foxvalues) return expr:validateValueConstraint($constraintElem, $context)
-        case element(gx:valuePairs) return expair:validateValuePairConstraint($constraintElem, $context)            
+        case element(gx:valuePair) return expair:validateValuePairConstraint($constraintElem, $context)
+        case element(gx:valuePairs) return expair:validateValuePairConstraint($constraintElem, $context)   
+        case element(gx:foxvaluePair) return expair:validateValuePairConstraint($constraintElem, $context)
         case element(gx:foxvaluePairs) return expair:validateValuePairConstraint($constraintElem, $context)            
         case element(gx:valuesCompared) return expair:validateValuePairConstraint($constraintElem, $context)            
         case element(gx:foxvaluesCompared) return expair:validateValuePairConstraint($constraintElem, $context)        

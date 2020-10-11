@@ -127,7 +127,8 @@ declare function f:finalizeQuery($query as xs:string,
 'declare namespace gx="http://www.greenfox.org/ns/schema";',
 for $contextName in $contextNames 
 let $varName := 
-    if ($contextName instance of xs:QName) then string-join((prefix-from-QName($contextName), local-name-from-QName($contextName)), ':')     
+    if ($contextName instance of xs:QName) then 
+        string-join((prefix-from-QName($contextName), local-name-from-QName($contextName)), ':')     
     else $contextName
     return concat('declare variable $', $varName, ' external;')
     ) => string-join('&#xA;')

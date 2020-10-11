@@ -122,6 +122,7 @@ declare function f:validateFolderConstraints($folderConstraints as element(),
             case element(gx:fileName) return i:validateFileName($constraintElem, $context)
             case element(gx:foxvalue) return value:validateValueConstraint($constraintElem, $context)
             case element(gx:foxvalues) return value:validateValueConstraint($constraintElem, $context)
+            case element(gx:foxvaluePair) return vpair:validateValuePairConstraint($constraintElem, $context)
             case element(gx:foxvaluePairs) return vpair:validateValuePairConstraint($constraintElem, $context)
             case element(gx:foxvaluesCompared) return vpair:validateValuePairConstraint($constraintElem, $context)
             case element(gx:folderContent) return f:validateFolderContent($constraintElem, $context)

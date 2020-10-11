@@ -61,7 +61,7 @@ declare function f:validateExtensionConstraint($constraintElem as element(),
         return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
 
     let $context := f:prepareEvaluationContext($context, $reqBindings, $contextURI, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, $useParams)  
+        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?lines, $useParams)  
     :)
     
     let $context := f:updateEvaluationContext_params($useParams, $context)    

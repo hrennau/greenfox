@@ -92,7 +92,7 @@ declare function f:validateValue($constraintElem as element(),
     let $targetInfo := $context?_targetInfo        
     let $contextURI := $targetInfo?contextURI
     let $contextNode := ($targetInfo?focusNode, $targetInfo?doc)[1]
-    let $contextLinesNode := $context?_reqDocs?linesdoc
+    let $contextLinesNode := $context?_reqDocs?lines
     let $evaluationContext := $context?_evaluationContext
     
     (: Read expression :)
