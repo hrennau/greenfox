@@ -628,7 +628,7 @@ declare function f:newEvaluationContext_expr2($item as item()?,
                                               $targetNode as node()?,
                                               $context as map(xs:string, item()*))
         as map(*) {
-    let $newEc := $context?_evaluationContext ! map:put(., QName((), 'value1'), $value1)
+    let $newEc := $context?_evaluationContext ! map:put(., QName((), 'value'), $value1)
     return
         if (empty(($item, $targetDoc, $targetNode))) then $newEc else
         
