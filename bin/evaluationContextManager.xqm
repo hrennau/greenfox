@@ -38,6 +38,16 @@ declare function f:getPotentialBindings() as xs:string+ {
     'linkContext'
 };
 
+(:~
+ : Returns a nex processing context, containing an evaluation context
+ : adapted to a new focus resource.
+ :
+ : @param @filePath the file path of the focus resource
+ : @param @resourceShape the resource shape element
+ : @param context the current processing context, containing the evaluation
+ :   context of the current focus resource of the *parent shape*
+ : @return the updated processing context
+ :)
 declare function f:adaptContext($filePath as xs:string, 
                                 $resourceShape as element(), 
                                 $context as map(*))
@@ -77,7 +87,10 @@ declare function f:adaptContext($filePath as xs:string,
         ))        
 
     (: Update the evaluation context so that it contains an entry for each
-       variable reference found in the in-scope components :)
+       variable references found in the in-scope components;
+       this excludes, however, variables which cannot be determined before
+       specific expressions have been evaluted: @item, @linkContext, @targetDoc, @targetNode.
+     :)
     let $context := f:prepareEvaluationContext($context, $reqBindings, $filePath, 
         $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?linesdoc, ())        
     return $context   
@@ -240,8 +253,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
     let $mediatype := $resourceShape/@mediatype        
     
     (: Required bindings :)
-    let $requiredBindings :=
-    
+    let $requiredBindings :=    
         (: A subset of potential bindings, implied by variable references in expressions :)
         let $potentialBindings := f:getPotentialBindings()
         return f:getRequiredBindings($potentialBindings, 
@@ -253,7 +265,10 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                                      $focusNodes,
                                      $context) 
     (: Required documents :)   
-    let $requiredDocs :=
+    let $requiredDocs := 
+        f:getRequiredDocs($filePath, $resourceShape, $ldos, $requiredBindings, $allComponents, $context)
+        
+(:    
         if (not($resourceShape/self::gx:file)) then () else
         let $mediatypes := tokenize($mediatype)
         let $xdoc :=
@@ -316,7 +331,7 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
                 $htmldoc ! map:entry('htmldoc', .),
                 $linesdoc ! map:entry('linesdoc', .)
             ))
-    
+:)    
     return
         map:merge((
             map:entry('requiredBindings', $requiredBindings),
@@ -325,9 +340,94 @@ declare function f:getRequiredBindingsAndDocs($filePath as xs:string,
 };        
 
 (:~
- : Determines the required variable bindings, given a set of in-scope components specifying XPath and
- : foxpath expressions. These bindings are the superset from which the actual bindings for all
- : individual expressions are selected.
+ : Determines the required variable documents, given a set of in-scope components 
+ : specifying XPath, Foxpath and Linepath expressions.
+ :
+ : @param filePath file path of this file
+ : @param resourceShape the element representing the resource shape
+ : @param allComponents the components in scope when dealing with this file
+ : @param context processing context
+ : @return a map containing the required documents
+ :)
+declare function f:getRequiredDocs($filePath as xs:string,
+                                   $resourceShape as element(),
+                                   $ldos as map(xs:string, item()*)*,
+                                   $requiredBindings as xs:string*,
+                                   $allComponents as element()*,
+                                   $context as map(xs:string, item()*))
+        as map(*)? {
+    if (not($resourceShape/self::gx:file)) then () else
+    
+    let $mediatypes := $resourceShape/@mediatype/tokenize(.)
+    
+    (: XML document :)
+    let $xdoc :=
+        let $required :=            
+            $mediatypes = 'xml'
+            or $requiredBindings = 'doc' and not($mediatypes = ('json', 'csv')) 
+            or empty($mediatypes) and 
+                (f:nodeTreeRequired($allComponents, $context) 
+                 or exists($ldos[?requiresContextNode]))
+    return
+        if (not($required)) then () 
+        else if (not(i:fox-doc-available($filePath))) then ()
+        else i:fox-doc($filePath)
+        
+    (: JSON document :)
+    let $jdoc := if ($xdoc) then () else
+        
+        let $required := $mediatypes = 'json' or $requiredBindings = 'json'
+            or empty($mediatypes)  
+               and (f:nodeTreeRequired($allComponents, $context) 
+                    or exists($ldos[?requiresContextNode]))                    
+        return
+            if (not($required)) then () else
+                try {i:fox-json-doc($filePath, ())} catch * {()}
+           
+    (: HTML document :)
+    let $htmldoc := if ($xdoc or $jdoc) then () else
+        
+        let $required := $mediatypes = 'html' or $requiredBindings = 'html'
+        return
+            if (not($required)) then () else
+                let $text := i:fox-unparsed-text($filePath, ())
+                return try {html:parse($text)} catch * {()}
+     
+    (: CSV document :)
+    let $csvdoc :=
+        let $required := $mediatypes = 'csv' or $requiredBindings = 'csvdoc'
+        return
+            if (not($required)) then () else
+                f:csvDoc($filePath, $resourceShape, ())
+         
+    (: lines document :)
+    let $linesdoc :=
+        let $required := f:linesTreeRequired($allComponents)
+        return
+            if (not($required)) then () else 
+                let $lines := i:fox-unparsed-text-lines($filePath, ()) ! <line>{.}</line>
+                return
+                    document {
+                        <lines count="{count($lines)}" xml:base="{$filePath}">{
+                            $lines
+                        }</lines>}
+
+    let $doc := ($xdoc, $jdoc, $htmldoc, $csvdoc) 
+    return
+        map:merge((
+            $doc ! map:entry('doc', .),
+            $xdoc ! map:entry('xdoc', .),
+            $jdoc ! map:entry('jdoc', .),
+            $csvdoc ! map:entry('csvdoc', .),
+            $htmldoc ! map:entry('htmldoc', .),
+            $linesdoc ! map:entry('linesdoc', .)
+        ))
+};
+
+(:~
+ : Determines the required variable bindings, given a set of in-scope components 
+ : specifying XPath and foxpath expressions. These bindings are the superset from 
+ : which the actual bindings for all individual expressions are selected.
  :
  : @param potentialBindings the variable names for which a binding may be required
  : @param coreComponents core components defining XPath and foxpath expressions
@@ -340,7 +440,7 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                                        $coreComponents as element()*,
                                        $extensionConstraints as element()*,
                                        $extensionConstraintComponents as element()*,
-                                       $relationshipDefinitions as map(*)*,
+                                       $ldos as map(*)*,
                                        $resourceShapes as element()*,
                                        $focusNodes as element()*,
                                        $context as map(xs:string, item()*))
@@ -352,27 +452,16 @@ declare function f:getRequiredBindings($potentialBindings as xs:string*,
                         $resourceShapes, $focusNodes)
     let $reqBindings :=
         let $xpathExpressions := (
-            $relationshipDefinitions?xpath ! .,
-            $relationshipDefinitions?linkXP ! .,
-            $relationshipDefinitions?linkContextXP ! .,
-            $relationshipDefinitions?linkTargetXP ! .,
-            $components/(
-                self::gx:xpath/@expr,
-                self::gx:validatorXPath,
-                @xpath,
-                @*[ends-with(name(), 'XPath')],
-                (., gx:value, gx:valuePair, gx:valueCompared)/@*[ends-with(name(), 'XP')]
-            )
+            $ldos?hrefXP ! .,
+            $ldos?uriXP ! .,
+            $ldos?contextXP ! .,
+            $ldos?targetXP ! .,
+            $ldos?templateVars?* ! @exprXP,
+            $components/(@xpath, @*[name() ! (ends-with(., 'XP') or ends-with(., 'LP'))])
         ) => distinct-values()            
         let $foxpathExpressions := (
-            $relationshipDefinitions?foxpath ! .,         
-            $components/(
-                self::gx:foxvaluesCompared/gx:foxvalueCompared/(@expr1FOX, @expr2FOX),
-                self::gx:foxpath/@expr,
-                self::gx:validatorFoxpath,
-                @foxpath,
-                (., gx:foxvalue, gx:foxvaluePair, gx:foxvalueCompared)/@*[ends-with(name(), 'FOX')]
-            )
+            $ldos?foxpath ! .,         
+            $components/(@foxpath, @*[ends-with(name(), 'FOX')])
         ) => distinct-values()
         return (
             $xpathExpressions ! f:determineRequiredBindingsXPath(., $potentialBindings),
@@ -422,8 +511,8 @@ declare function f:determineRequiredBindingsFoxpath($expr as xs:string,
 };
 
 (:~
- : Updates the context so that it contains an evaluation context as required for
- : an expression with known required bindings.
+ : Updates the context so that it contains an evaluation context as required 
+ : for an expression with known required bindings.
  :
  : @param reqBindings the names of variables referenced by the expression
  : @param context the context
@@ -445,33 +534,23 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
                                             $params as element(gx:param)*)
         as map(xs:string, item()*) {
     (: let $_DEBUG := trace($reqBindings, concat('___FILEPATH: ', $filePath, ' ; ___REQ_BINDINGS: ')) :)
-    let $doc := ($xdoc, $jdoc, $csvdoc, $htmldoc)[1]    
+    let $doc := ($xdoc, $jdoc, $csvdoc, $htmldoc)[1]
+    
     let $reqDocs := map:merge((
-        $xdoc ! map:entry('xdoc', .),
-        $jdoc ! map:entry('jdoc', .),
-        $csvdoc ! map:entry('csvdoc', .),
-        $linesdoc ! map:entry('linesdoc', .),
-        $doc ! map:entry('doc', .)))
+        $doc ! map:entry('doc', .),
+        $linesdoc ! map:entry('linesdoc', .)
+    ))
+
     let $context := 
         let $evaluationContext :=
             map:merge((
-                $context?_evaluationContext, 
-                
-                (: Add in-scope document :)
+                $context?_evaluationContext,                
                 if (not($reqBindings = 'doc')) then () else map:entry(QName('', 'doc'), $doc),
-                if (not($reqBindings = 'xdoc')) then () else map:entry(QName('', 'xdoc'), $xdoc),
-                if (not($reqBindings = 'jdoc')) then () else map:entry(QName('', 'jdoc'), $jdoc),
-                if (not($reqBindings = 'csvdoc')) then () else map:entry(QName('', 'csvdoc'), $csvdoc),
-                if (not($reqBindings = 'htmldoc')) then () else map:entry(QName('', 'htmldoc'), $htmldoc),
                 if (not($reqBindings = 'linesdoc')) then () else map:entry(QName('', 'linesdoc'), $linesdoc),
-                
-                (: Add built-in variables - this, filePath, fileName :)
                 if (not($reqBindings = 'this')) then () else map:entry(QName('', 'this'), $filePath),
                 if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
                 if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
                 if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain),
-                (: _TO_DO_ Support datatypes (xs:integer, ...) :)
-                
                 (: Add parameter element values :)
                 $params ! map:entry(QName('', @name), string(.))                
             ),
@@ -479,24 +558,9 @@ declare function f:prepareEvaluationContext($context as map(xs:string, item()*),
             )  
         return map:put($context, '_evaluationContext', $evaluationContext) !
                map:put(., '_reqDocs', $reqDocs) !
-               (: map:put(., '_targetInfo', map{'contextURI': $context?_contextPath, 'doc': $doc}) :)
                map:put(., '_targetInfo', map{'contextURI': $filePath, 'doc': $doc})
     return $context        
 }; 
-
-(:~
- : Extends the evaluation context, adding the current focus node.
- :
- : @param focusNode current focus node
- : @param context the evaluation context
- : @return updated evaluation context
- :)
-declare function f:updateEvaluationContext_focusNode($focusNode as node(), $context as map(xs:string, item()*))
-        as map(xs:string, item()*) {
-    let $targetInfo := $context?_targetInfo
-    let $newTargetInfo := map:put($targetInfo, 'focusNode', $focusNode) ! map:put(., 'focusNodePath', $focusNode/i:datapath(.))
-    return map:put($context, '_targetInfo', $newTargetInfo)
-};        
 
 (:~
  : Returns true if a given set of schema components contains a component which
@@ -551,3 +615,63 @@ declare function f:linesTreeRequired($components as element()*)
     ))
 
 };        
+
+(:
+ : -------------------------------------------------------------------------
+ :
+ : U p d a t e s
+ :
+ : -------------------------------------------------------------------------
+ :)
+
+(:~
+ : Extends the evaluation context, adding the current focus node.
+ :
+ : @param focusNode current focus node
+ : @param context the evaluation context
+ : @return updated evaluation context
+ :)
+declare function f:updateEvaluationContext_focusNode($focusNode as node(), $context as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    let $targetInfo := $context?_targetInfo
+    let $newTargetInfo := map:put($targetInfo, 'focusNode', $focusNode) ! map:put(., 'focusNodePath', $focusNode/i:datapath(.))
+    return map:put($context, '_targetInfo', $newTargetInfo)
+};        
+
+(:~
+ : Returns a copy of the current evaluation context augmented with an entry 'linkContext'
+ : which is the current link context.
+ :
+ : @param linkContextItem the current link context item
+ : @param context the processing context
+ : @return the updated processing context
+ :) 
+declare function f:newEvaluationContext_linkContextItem($linkContextItem as item(), $context as map(xs:string, item()*))
+        as map(*) {
+    let $newEvaluationContext := 
+        $context?_evaluationContext 
+        ! map:put(., QName('', 'linkContext'), $linkContextItem)
+    return $newEvaluationContext
+};
+
+(:~
+ : Returns a copy of the current evaluation context augmented ready for used by $expr2*.
+ :
+ : @param linkContextItem the current link context item
+ : @param context the processing context
+ : @return the updated processing context
+ :) 
+declare function f:newEvaluationContext_expr2($item as item()?,
+                                              $targetDoc as document-node()?,
+                                              $targetNode as node()?,
+                                              $context as map(xs:string, item()*))
+        as map(*) {
+    let $newEc := $context?_evaluationContext
+    return
+        if (empty(($item, $targetDoc, $targetNode))) then $newEc else
+        
+        let $newEc := if (empty($item)) then $newEc else map:put($newEc, QName((), 'item'), $item)
+        let $newEc := if (empty($targetDoc)) then $newEc else map:put($newEc, QName((), 'targetDoc'), $targetDoc)                
+        let $newEc := if (empty($targetNode)) then $newEc else map:put($newEc, QName((), 'targetNode'), $targetNode)
+        return $newEc
+};

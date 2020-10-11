@@ -166,19 +166,38 @@ You can start with file system navigation and then "drill down" into
 the selected documents, by just appending to your file system path
 furhter steps which are node tree navigation steps.
 
-### Examples
+### EXAMPLES - evaluating XML contents
 fox "../data/air//index/airports.xml\*\name()"                         # Root element name    
 fox "../data/air//index/*.xml\\*\name() => frequencies()"              # Aggregated element names and frequencies
 fox "../data/air//countries//*.xml\\altitude => min()"                 # Minimum of altitudes
 fox "../data/air//countries//*.xml\\@iata\string() => sort()"          # Sorted list of codes
 fox "../data/air//countries//*.xml\\country\string() => frequencies()" # Frequencies of country names
 
+A few more sophisticated examples below. They demonstrate how you can use
+Foxpath for exploring structured contents, without interest in file system 
+navigation.
+
+### EXAMPLES - exploring XML contents
+fox "../data//factbook.xml/count(\\country)"                           # count countries
+fox "../data//factbook.xml\\river[@length > 4000]\@name\string()"      # rivers with length > 4000
+fox "../data//factbook.xml\\river[count(to) gt 1]\@name\string()"      # rivers with >1 destinations
+fox "../data//factbook.xml\\located_at\@type => frequencies()"         # frequencies of //located_at/@type
+fox "../data//factbook.xml\*\concat('Latitude: ', min(\\@latitude), ' - ', max(\\@latitude))"
+                                                                       # range of latitudes
+fox "../data//factbook.xml\\country[not(@name = name[1])]\concat(@name, ' - ', name[1])"
+                                                                       # factbook: country name combinations 
+
 ** Node tree navigation in predicates
 -------------------------------------
 Node tree navigation can be used in predicates in order to filter files
 by their structured content.
 
-### Examples
+### EXAMPLES - filtering files by XML contents
+fox "../data/air//*.xml[\*\local-name(.) ne 'airport']"                # all XML files with a root ne 'airport'
+fox "../data/air//airport-*.xml[\\altitude > 700]"                     # all XML files with //altitude > 700
+fox "../data/air//airports-*.xml[count(\\airport) > 50]"               # all airports-*.xml containing >50 <airport>s
+fox "../data/air/airports//airport-*.xml[\\@iata eq 'WAT']/file-content()"
+                                                                       # content of airport document describing airport 'WAT'
 
 ** Navigation of non-XML mediatypes
 -----------------------------------
@@ -189,8 +208,6 @@ documents. Functions:
 - csv-doc(path)  or cdoc(path) - parses CSV document with path 'path'
 - csv-doc(path, sep)           - parses CSV document, using caracter sep as separator
 - csv-doc(path, sep, header)   - parses CSV document, interpreting first line as header line (if header=yes) 
-
-### EXAMPLES
 
 ** Navigating archives
 ----------------------
