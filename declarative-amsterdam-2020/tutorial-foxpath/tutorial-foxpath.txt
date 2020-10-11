@@ -209,6 +209,25 @@ documents. Functions:
 - csv-doc(path, sep)           - parses CSV document, using caracter sep as separator
 - csv-doc(path, sep, header)   - parses CSV document, interpreting first line as header line (if header=yes) 
 
+### EXAMPLES - parsing JSON
+fox "../data/air/airports//index/airports.json/jdoc()"
+                                                    # Display XML version of JSON file
+fox "../data/air/airports//index/airports.json/jdoc()\\href\string() => sort()"
+                                                    # Sorted list of all href values
+fox "../data/air/airports//index/*.json/jdoc()\\*\name() => frequencies()"
+                                                    # Aggregated element names and frequencies                                                    
+fox "../data/air/airports//airport-*.json/jdoc()\\iata\concat(., ' / ', ..\icao) => sort()"
+                                                    # For each JSON airport output IATA / ICAO code 
+### EXAMPLES - parsing CSV - _TODO_
+
+### EXAMPLES - parsing HTML
+fox "../data/resources/airport-html/fra.html/hdoc()\\*\name() => frequencies()"
+                                                    # Element names and frequencies
+fox "../data/resources/airport-html/fra.html/hdoc()\\*:meta[@name eq 'description']\@content\string()"
+                                                    # Read specific metadata
+fox "../data/resources/airport-html/fra.html/hdoc()\\@href =>count()"
+                                                    # Count links
+                                                                                                                                                            
 ** Navigating archives
 ----------------------
 File system navigation can enter archive files and continue within the

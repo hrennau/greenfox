@@ -324,8 +324,6 @@ declare function f:resolveStaticFunctionCall($call as element(),
             let $doc-text := f:fox-unparsed-text($uri, (), $options)
             let $doc := $doc-text ! html:parse(.)
             return (
-                if ($doc) then trace((), concat('HTML:   ', $uri, ': '))
-                    else trace((), concat('NO_HTML: ', $uri, ': ')),
                 $doc
             )
                             
