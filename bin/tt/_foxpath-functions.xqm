@@ -317,7 +317,7 @@ declare function f:resolveStaticFunctionCall($call as element(),
 
         (: function `html-doc` 
            =================== :)
-        else if ($fname eq 'html-doc') then
+        else if ($fname = ('html-doc', 'hdoc')) then
             let $uri :=
                 let $explicit := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
                 return ($explicit, $context)[1]
