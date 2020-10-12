@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of evaluation context - variable $item in the context
+    of foxvaluePair/@expr2FOX.
+    
+    The variable value is an item from the value returned by the corresponding 
+    @expr1* expression.    
+    
+    The variable is added to the evaluation context of a "pair constraint" -
+    a FoxvaluePair, a FoxvalueCompared, a ValuePair or a ValueCompared 
+    constraint. The variable is *only* used if the constraint has a property
+    @expr2Context = 'item', which means that @expr2* is evaluated once for each
+    item in the value of @expr1*.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+    </context>
+
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="airports\index\airports.xml">
+            <targetSize count="1"/>
+           
+            <!-- Foxpath expression references $item, the current item from the value of expression 1. -->
+            <foxvaluePair expr1XP="//airportsForCountry/@country" minCount1="3"
+                          expr2FOX="..\..\countries\fox-child($item)" count2="1"
+                          expr2Context="item"/>
+               
+        </file>
+    </domain>
+
+</greenfox>
+

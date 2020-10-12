@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of evaluation context - variable $value in the context 
+    of foxvaluePair/@expr2FOX.
+    
+    The variable value is the value returned by the corresponding @expr1* 
+    expression.
+    
+    The variable is added to the evaluation context of a "pair constraint" -
+    a FoxvaluePair, a FoxvalueCompared, a ValuePair or a ValueCompared 
+    constraint. The variable value is the value returned by @expr1*.
+    
+    COOKBOOK HINT. This schema gives an example how the visiting of resources
+    can be controlled by the content of a plain text file. Here, each line of
+    the text file describes a resource to be visited. Constraint @cmpCountMsg
+    can be used in order to check that all resources exist.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+    xmlns="http://www.greenfox.org/ns/schema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+    </context>
+
+    <domain path="${domain}" name="air">
+        
+        <file foxpath="textfiles\countries.txt">
+            <targetSize count="1"/>
+
+            <!-- Foxpath expression references $value, the value returned by expression 1 -->
+            <foxvaluePair 
+                expr1LP="//line" minCount1="3" 
+                expr2FOX="$domain\air\\countries\fox-child($value/lower-case(.))"
+                cmpCount="eq" cmpCountMsg="Not one country folder per country term"/>               
+        </file>
+    </domain>
+
+</greenfox>
+

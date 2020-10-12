@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of evaluation context - $focusNode in foxvalue/@exprFOX.
+    Demonstrates the use of evaluation context - variable $lines.
+    
+    The variable value is the root node of the shape target resource, parsed 
+    into a <lines> document. Such a document consists of a <lines> root
+    element and <line> child elements representing the lines of content text.
+    
+    Here, the variable is part of the context of foxvalue/@exprFOX.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -14,8 +20,8 @@
         <file foxpath="textfiles\countries.txt">
             <targetSize count="1"/>
             
-                <!-- Foxpath expression uses data extracted from $lines -->
-            <foxvalue exprFOX="${domain}\air\\countries\fox-child($lines//line/lower-case(.))"
+            <!-- Foxpath expression references $lines -->
+            <foxvalue exprFOX="$domain\air\\countries\fox-child($lines//line/lower-case(.))"
                       count="3"/>
                
         </file>
