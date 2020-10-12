@@ -8,6 +8,7 @@ REQUIRED: the tutorial presupposes a sound knowledge of XPath.
 Basic usage:
 ------------
 fox  [-b] [-f] [-p] foxpath
+
 -b : swap step separators: use \ in file system navigation, / in node tree navigation
 -f : the foxpath parameter is the name or path of a file containing a foxpath expression
 -p: display expression tree, rather than evaluation the expression
@@ -15,7 +16,10 @@ For more options enter: fox ?
 
 Separators
 ----------
-Seperators for conventional node tree navigation and file system navigation:
+Two different seperators are used for 
+* node tree navigation
+* file system navigation
+
 Without option -b   (example call: fox /a/b/c)
    /   step separator for file system navigation; example: fox ../data/air
    \   step separator for node tree navigation; example: fox somedoc.xml\*\name()
@@ -30,7 +34,7 @@ Requirements
 - Add the bin folder of Greenfox to your path variable: $HOME_GREENFOX/bin
 - If you do not add the folder to the path variable, call fox with absolute or relative path
 - Example: when executing the tutorial in folder
-     $HOME_GREENFOX/declarative-amsterdam-2020/tutorial-fox
+      
   use: ../../bin/fox.bat          # without .bat, if not on Windows
     
 Start
@@ -47,9 +51,9 @@ Start
 The initial evaluation context is the current work folder.
 
 ### EXAMPLES 
-fox *
-fox ..
-fox ../*
+fox *                        # List files and folders in current work folder
+fox ..                       # Output the parent folder
+fox ../*                     # List files and folders in parent folder
  
 ** Navigation axis and name test
 ** -----------------------------
@@ -219,6 +223,20 @@ fox "../data/air/airports//index/*.json/jdoc()\\*\name() => frequencies()"
 fox "../data/air/airports//airport-*.json/jdoc()\\iata\concat(., ' / ', ..\icao) => sort()"
                                                     # For each JSON airport output IATA / ICAO code 
 ### EXAMPLES - parsing CSV - _TODO_
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')
+                                                    # Retrieve the XML representation of a CSV
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\*\* => count()"
+                                                    # Count records
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\*\*\count(*) => frequencies()"
+                                                    # Check regularity of column numbers                                                    
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\\Country => frequencies()"                                                    
+                                                    # Get the frequency distribution of column contents
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\\ICAO\string-length(.) => frequencies()"
+                                                    # Get the frequency distribution of column content lengths                                                    
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\\AirportID => values-distinct()"
+                                                    # Check - column values distinct?
+fox "../data/air//openflights/airports.csv/cdoc(., 'comma', 'yes')\\(Latitude, Longitude)[not(. castable as xs:decimal)]"
+                                                    # Check - column values numeric?                                                    
 
 ### EXAMPLES - parsing HTML
 fox "../data/resources/airport-html/fra.html/hdoc()\\*\name() => frequencies()"
@@ -227,6 +245,7 @@ fox "../data/resources/airport-html/fra.html/hdoc()\\*:meta[@name eq 'descriptio
                                                     # Read specific metadata
 fox "../data/resources/airport-html/fra.html/hdoc()\\@href =>count()"
                                                     # Count links
+                                                    
                                                                                                                                                             
 ** Navigating archives
 ----------------------
