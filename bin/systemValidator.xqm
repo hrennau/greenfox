@@ -61,49 +61,16 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
  : Evaluation context: domain, domainName.
  : Processing context: _domain, _domainName, _contextPath, _evaluationContext. 
  :
- : @param gxDomain domain element
- : @param context a map representing an initial set of name-value pairs available during validation
+ : @param domainElem domain element
+ : @param externalContext a map representing an initial set of name-value pairs available during validation
  : @return validation results
  :)
-declare function f:validateDomain($gxDomain as element(gx:domain), 
+declare function f:validateDomain($domainElem as element(gx:domain), 
                                   $context as map(xs:string, item()*))
         as element()* {
-    let $dpath := $gxDomain/@path
-    let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
-    return
-        if (not($domainPath)) then
-            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $dpath))
-        else
-                
-    let $domainURI := $domainPath ! i:pathToUriCompatible(.)
-    let $domainName := $gxDomain/@name/string()
-    
-    (: Evaluation context, containing entries available as 
-       external variables to XPath and foxpath expressions;
-       initial entries: domain, domainName:)
-    let $evaluationContext :=
-        map:merge((
-            map:entry(QName((), 'domain'), $domainURI),
-            map:entry(QName((), 'domainName'), $domainName)
-        ))
-        
-    (: Processing context, containing entries available to
-       the processing code; initial entries:
-       _domain, _domainName, _contextPath,  _evaluationContext :)
-    let $context := 
-        map:merge((
-            $context,
-            map:entry('_contextPath', $domainURI),
-            map:entry('_evaluationContext', $evaluationContext),            
-            map:entry('_domain', $domainPath),
-            map:entry('_domainName', $domainName),
-            map:entry('_targetInfo', map{'contextURI': $domainURI}),
-            map:entry('_resourceRelationships', ()),
-            map:entry('_reqDocs', ())
-        ))   
-        
+    let $context := f:updateProcessingContext_domain($domainElem, $context)
     let $results :=
-        for $component in $gxDomain/*
+        for $component in $domainElem/*
         return
             typeswitch($component)
             case element(gx:folder) return f:validateFolder($component, $context)

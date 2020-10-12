@@ -89,7 +89,7 @@ declare function f:validateValuePairConstraint($constraintElem as element(),
 
 (:~
  : Validates a resource by comparing a resource value with resource values obtained
- : for the target resources of link resolution objects.
+ : for a set of link target resources.
  :
  : @param constraintElem constraint defining element
  : @param lros Linke Result objects
@@ -119,12 +119,14 @@ declare function f:validateValuesCompared($constraintElem as element(),
         return
             if ($contextItem instance of node()) then $contextItem
             else $context?_targetInfo?doc
+            
     let $targetItems :=
         if ($requiresTargetNode) then
             if (map:contains($lro, 'targetNodes')) then $lro?targetNodes
             else if (map:contains($lro, 'targetDoc')) then $lro?targetDoc
             else $lro?targetURI[i:fox-doc-available(.)] ! i:fox-doc(.)
-        else $lro?targetURI                 
+        else $lro?targetURI
+        
     return
         if ($requiresContextNode and empty($contextNode)) then
             result:validationResult_valuePair_exception($constraintElem,
@@ -133,7 +135,7 @@ declare function f:validateValuesCompared($constraintElem as element(),
             result:validationResult_valuePair_exception($constraintElem,
                 'No target resource or node available', (), $context)
         else
-            $pair/f:validateValuePair(., $contextNode, $targetItems, $targetURI, $context)            
+            $pair/f:validateValuePair(., $contextNode, $targetItems, $lro, $context)            
 };
 
 (:~
@@ -172,13 +174,15 @@ declare function f:validateValuePairs($constraintElem as element(),
 declare function f:validateValuePair($constraintElem as element(),
                                      $contextNode as node()?,
                                      $targetItems as item()*,
-                                     $targetURI as xs:string?,
+                                     $lro as map(xs:string, item()*)?,                                     
                                      $context as map(*))
         as element()* {
     let $targetInfo := $context?_targetInfo        
     let $contextURI := $targetInfo?contextURI
     let $evaluationContext := $context?_evaluationContext
-    
+
+    let $targetURI := $lro?targetURI
+
     (: Definition of an expression pair constraint :)
     let $expr1XP := $constraintElem/@expr1XP
     let $expr2XP := $constraintElem/@expr2XP      
@@ -284,7 +288,8 @@ declare function f:validateValuePair($constraintElem as element(),
            If $varName is set, $varValue is bound to variable $varName.
            If $varName and $varName2 is set, $varValue2 is bound to variable $varName2 :)
     let $getItems2 := function($contextItem, $item, $targetDoc, $targetNode) {
-        let $newEvaluationContext := i:newEvaluationContext_expr2($item, $items1TY, $targetDoc, $targetNode, $context)
+        let $linkContextItem := $lro?contextItem
+        let $newEvaluationContext := i:newEvaluationContext_expr2($items1TY, $item, $linkContextItem, $targetDoc, $targetNode, $context)
         return
             switch($expr2Lang)
             case 'xpath' return i:evaluateXPath($expr2, $contextItem, 

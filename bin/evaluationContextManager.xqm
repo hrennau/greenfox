@@ -545,8 +545,7 @@ declare function f:prepareEvaluationContext($doc as document-node()?,
             if (not($reqBindings = 'focusNode')) then () else map:entry(QName('', 'focusNode'), $doc),
             if (not($reqBindings = 'lines')) then () else map:entry(QName('', 'lines'), $lines),
             if (not($reqBindings = 'filePath')) then () else map:entry(QName('', 'filePath'), $filePath),
-            if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', '')),
-            if (not($reqBindings = 'domain')) then () else map:entry(QName('', 'domain'), $context?_domain)
+            if (not($reqBindings = 'fileName')) then () else map:entry(QName('', 'fileName'), replace($filePath, '.*[\\/]', ''))
         ),
         map{'duplicates': 'use-last'}   (: New values override old values :)
         )
@@ -616,23 +615,36 @@ declare function f:newEvaluationContext_linkContextItem($linkContextItem as item
 };
 
 (:~
- : Returns a copy of the current evaluation context augmented ready for use by $expr2*.
+ : Returns a copy of the current evaluation context augmented ready for use by $expr2*
+ : in a *Pair or *Compared constraint.
  :
- : @param linkContextItem the current link context item
+ : @param value1 the value returned by expression 1
+ : @param item1 an item from the value of expression 1; only set if @expr2Context = item
+ : @param linkContextItem the current link context item; only set when using a link def, 
+ :   that is when the constraint is <valueCompared> or <foxvalueCompared>)
+ : @param targetDoc the link target resource as a document; only set when using a link def, 
+ :    and the link target is parsed into a node tree; using a link def means that the 
+ :    constraint is <valueCompared> or <foxvalueCompared>) 
+ : @param targetNode a node from the link target; only set when using a link def, and the 
+ : link target is parsed into a node tree; can be the document node or a node returned by 
+ :    @targetXP; using a link def means that the constraint is <valueCompared> or 
+ :    <foxvalueCompared> 
  : @param context the processing context
  : @return the updated processing context
  :) 
-declare function f:newEvaluationContext_expr2($item as item()?,
-                                              $value1 as item()*,
+declare function f:newEvaluationContext_expr2($value1 as item()*,
+                                              $item1 as item()?,
+                                              $linkContextItem as item()?,                                              
                                               $targetDoc as document-node()?,
                                               $targetNode as node()?,
                                               $context as map(xs:string, item()*))
         as map(*) {
-    let $newEc := $context?_evaluationContext ! map:put(., QName((), 'value'), $value1)
+    let $newEc := $context?_evaluationContext ! map:put(., QName((), 'value'), $value1)    
     return
-        if (empty(($item, $targetDoc, $targetNode))) then $newEc else
+        if (empty(($item1, $linkContextItem, $targetDoc, $targetNode))) then $newEc else
         
-        let $newEc := if (empty($item)) then $newEc else map:put($newEc, QName((), 'item'), $item)
+        let $newEc := if (empty($item1)) then $newEc else map:put($newEc, QName((), 'item'), $item1)
+        let $newEc := if (empty($linkContextItem)) then $newEc else map:put($newEc, QName((), 'contextItem'), $linkContextItem)        
         let $newEc := if (empty($targetDoc)) then $newEc else map:put($newEc, QName((), 'targetDoc'), $targetDoc)                
         let $newEc := if (empty($targetNode)) then $newEc else map:put($newEc, QName((), 'targetNode'), $targetNode)
         return $newEc

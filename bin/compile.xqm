@@ -56,13 +56,13 @@ declare function f:compileGreenfox($gfox as element(gx:greenfox),
                                    $domain as xs:string?) 
         as map(xs:string, item()*) {
     (: Construct the initial context :)
-    let $context := f:initialContext($gfox, $params, $domain)
+    let $context := f:initialProcessingContext($gfox, $params, $domain)
     
     (: Perform variable substitution :)
     let $gfox2 := f:substituteVariablesRC($gfox, $context)
     let $gfox3 := f:compileGreenfox_addIds($gfox2)
     let $gfox4 := f:compileGreenfox_addResourceShapeIds($gfox3)    
-    let $context2 := f:updateContextResourceRelationships($context, $gfox4/gx:linkDef)
+    let $context2 := f:updateProcessingContext_resourceRelationships($context, $gfox4/gx:linkDef)
     return
         map{'schemaPrelim': $gfox2, 
             'schemaCompiled': $gfox4, 

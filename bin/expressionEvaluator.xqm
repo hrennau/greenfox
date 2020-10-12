@@ -112,7 +112,7 @@ declare function f:parseFoxpath($foxpath as xs:string)
 };
 
 (:~
- : Augments an XPath or foxpath expression by adding a prolog containing
+ : Augments an XPath or Foxpath expression by adding a prolog containing
  : (a) a namespace declaration for prefix 'gx', (b) external variable
  : bindings for the given variable names.
  :

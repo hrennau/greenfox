@@ -22,6 +22,12 @@ at "linkDefinition.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+(: ============================================================================
+ :
+ :     U p d a t e    p r o c e s s i n g    c o n t e x t
+ :
+ : ============================================================================ :)
+
 (:~
  : Updates the processing context by updating the _resourceRelationships entry.
  : New relationships are parsed from <linkDef> elements and added to the context,
@@ -31,8 +37,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param linkDefs Link Definition elements
  : @return the updated processing context
  :)
-declare function f:updateContextResourceRelationships($context as map(*),
-                                                      $linkDefs as element(gx:linkDef)*)
+declare function f:updateProcessingContext_resourceRelationships(
+                                             $context as map(*),
+                                             $linkDefs as element(gx:linkDef)*)
         as map(*) {
     let $newRelationships := link:parseLinkDefs($linkDefs, $context)
     return if (empty($newRelationships)) then $context else
@@ -51,9 +58,55 @@ declare function f:updateContextResourceRelationships($context as map(*),
                 ))
 };    
 
+(:~
+ : Updates the processing context as required in order to begin validation of the domain.
+ :
+ : @param domainElem domain element
+ : @param context the current processing context
+ : @return validation results
+ :)
+declare function f:updateProcessingContext_domain($domainElem as element(gx:domain), 
+                                                  $context as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    let $dpath := $domainElem/@path
+    let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
+    return
+        if (not($domainPath)) then
+            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $dpath))
+        else
+                
+    let $domainURI := $domainPath ! i:pathToUriCompatible(.)
+    let $domainName := $domainElem/@name/string()
+    
+    (: Evaluation context, containing entries available as 
+       external variables to XPath and foxpath expressions;
+       initial entries: domain, domainName:)
+    let $evaluationContext :=
+        map:merge((
+            map:entry(QName((), 'domain'), $domainURI),
+            map:entry(QName((), 'domainName'), $domainName)
+        ))
+        
+    (: Processing context, containing entries available to
+       the processing code; initial entries :)
+    let $context :=
+        map:merge((
+            $context,
+            map:entry('_contextPath', $domainURI),
+            map:entry('_evaluationContext', $evaluationContext),            
+            map:entry('_domain', $domainURI),
+            map:entry('_domainPath', $domainPath),            
+            map:entry('_domainName', $domainName),
+            map:entry('_targetInfo', map{'contextURI': $domainURI}),
+            map:entry('_reqDocs', ())
+        ))
+    return
+        $context    
+};
+
 (: ============================================================================
  :
- :     I n i t i a l    c o n t e x t
+ :     I n i t i a l    p r o c e s s i n g    c o n t e x t
  :
  : ============================================================================ :)
 
@@ -67,9 +120,9 @@ declare function f:updateContextResourceRelationships($context as map(*),
  : @param domain the path of the domain, as supplied by the user
  : @return the initial context
  :)
-declare function f:initialContext($gfox as element(gx:greenfox), 
-                                  $params as xs:string?,
-                                  $domain as xs:string?)
+declare function f:initialProcessingContext($gfox as element(gx:greenfox), 
+                                            $params as xs:string?,
+                                            $domain as xs:string?)
         as map(xs:string, item()*) {
         
     (: Parse the external context. It has been supplied by the user as a
@@ -82,7 +135,7 @@ declare function f:initialContext($gfox as element(gx:greenfox),
     (: Collect entries, overwriting schema values with external values :)
     let $contextElem := $gfox/gx:context
     let $domainEC := $externalContext?domain
-    let $domainFI := $contextElem/gx:field[@name eq 'domain']/@value/string()
+    let $domainIC := $contextElem/gx:field[@name eq 'domain']/@value/string()
     let $entries := (        
         if ($contextElem/gx:field[@name eq 'schemaPath']) then ()
         else $externalContext?schemaPath ! map:entry('schemaPath', .)
@@ -91,7 +144,7 @@ declare function f:initialContext($gfox as element(gx:greenfox),
         else $externalContext?domain ! map:entry('domain', .)
         ,
         if ($contextElem/gx:field[@name eq 'domainURI']) then ()
-        else ($domainEC, $domainFI)[1] ! map:entry('domainURI', .)
+        else ($domainEC, $domainIC)[1] ! map:entry('domainURI', .)
         ,
         for $field in $contextElem/gx:field
         let $name := $field/@name/string()
@@ -99,12 +152,9 @@ declare function f:initialContext($gfox as element(gx:greenfox),
         return
             map:entry($name, $value)
     )
+    (: Replace variable references :)
     let $entries2 := f:editContextEntries($entries)
-    return 
-        (: Perform variable substitution :)    
-        map:merge(
-            $entries2
-        )   
+    return map:merge($entries2)   
 };
 
 (:~
