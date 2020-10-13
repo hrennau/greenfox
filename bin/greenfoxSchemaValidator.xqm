@@ -16,7 +16,8 @@ at "tt/_request.xqm",
    "tt/_nameFilter.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions"  
-at "fileValidator.xqm",
+at "constants.xqm",
+   "fileValidator.xqm",
    "greenfoxUtil.xqm",
    "uriUtil.xqm";
     
@@ -149,8 +150,13 @@ declare function f:validateGreenfox($schema as element(gx:greenfox))
  :)
 declare function f:metaValidateSchema($gfoxSource as element(gx:greenfox))
         as element(gx:invalidSchema)? {
-    let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)        
-    let $metaGfoxSource := doc('../metaschema/gfox-gfox.xml')/*
+    let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
+    
+    let $metaGfoxPath := $i:PATH_METASCHEMA
+                         ! f:normalizeAbsolutePath(.)
+                         ! file:path-to-native(.)   (: URI turned into path :)    
+    let $metaGfoxSource := doc($metaGfoxPath)/*
+    
     let $paramGfox := i:pathToNative($gfoxSourceURI) 
     let $metaGfoxAndContext := f:compileGreenfox($metaGfoxSource, 'gfox=' || $paramGfox, ())
     let $metaGfox := $metaGfoxAndContext[. instance of element()]

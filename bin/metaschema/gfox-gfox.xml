@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/example-folder-content"
+    xmlns="http://www.greenfox.org/ns/schema" xmlns:ex="http://example.com/ns">
+
+    <!-- *** External context *** -->
+    <context>
+        <field name="gfox"/>
+    </context>
+
+    <!-- *** Constraint components *** -->
+    <constraintComponents>
+
+        <!-- Constraint component: all attributes present are allowed -->
+        <constraintComponent constraintElementName="ex:allowedAtts"
+            validatorXPath="@*/local-name(.)[not(. = tokenize($attNames))]">
+            <param name="attNames"/>
+        </constraintComponent>
+
+        <!-- Constraint component: all mandatory attributes are present -->
+        <constraintComponent constraintElementName="ex:mandatoryAtts">
+            <param name="attNames"/>
+            <validatorXPath><![CDATA[
+let $atts := @*/local-name(.) 
+return tokenize($attNames)[not(. = $atts)]
+            ]]></validatorXPath>
+        </constraintComponent>
+
+        <!-- Constraint component: exactly one attribute from a list of attribute -->
+        <constraintComponent constraintElementName="ex:xoneAtts">
+            <param name="attNames"/>
+
+            <validatorXPath><![CDATA[
+let $atts := @*/local-name(.)[. = tokenize($attNames)]
+return
+    if (count($atts) eq 1) then ()
+    else if (count($atts) lt 1) then false()
+    else $atts
+            ]]></validatorXPath>
+        </constraintComponent>
+
+        <!-- Constraint component: at least one attribute from a list -->
+        <constraintComponent constraintElementName="ex:oneOrMoreAtts"
+            validatorXPath="0 lt count(@*/local-name(.)[. = tokenize($attNames)])">
+            <param name="attNames"/>
+        </constraintComponent>
+
+        <!-- Constraint component: all elements present are allowed -->
+        <constraintComponent constraintElementName="ex:allowedElems"
+            validatorXPath="*/local-name(.)[not(. = tokenize($elemNames))]">
+            <param name="elemNames"/>
+        </constraintComponent>
+
+        <!-- Constraint component: element must be empty -->
+        <constraintComponent constraintElementName="ex:emptyElem" validatorXPath="*/local-name(.)"/>
+
+        <!-- Constraint components: element must not have attributes -->
+        <constraintComponent constraintElementName="ex:noAtts" validatorXPath="@*/local-name(.)"/>
+    </constraintComponents>
+
+
+    <domain path="${gfox}" name="schema-schemas">
+
+        <!-- greenfox schema -->
+
+        <file foxpath=".">
+            <targetSize msg="greenfox schema not found" count="1"/>
+
+            <!-- check generic attributes 
+                     ======================== -->
+            <!-- check @id -->
+            <focusNode xpath="//*[@id]">
+                <xpath description="Validates the @id attributes " expr="@id" datatype="NCName"
+                    datatypeMsg="Invalid @id - value must be an NCName"
+                    datatypeMsgOK="OK - @id attributes: no values which are not NCNames"
+                    deactivated="false"/>
+            </focusNode>
+
+            <!-- ========================================
+                    <greenfox>
+                 ======================================== -->
+
+            <focusNode xpath="*:greenfox">
+                <targetSize count="1" countMsg="No 'greenfox' root element"/>
+
+                <!-- check namespace of root element -->
+                <xpath expr="namespace-uri(.)" eq="http://www.greenfox.org/ns/schema"
+                    eqMsg="Greenfox element has incorrect namespace; should be: http://www.greenfox.org/ns/schema-examples/system-s"
+                    eqMsgOK="Greenfox element has correct namespace"/>
+
+                <!-- check child element names -->
+                <ex:allowedElems elemNames="context linkDef constraintComponents domain"
+                    msg="Unexpected elements in 'greenfox' element; expected: $elemNames"
+                    msgOK="OK - 'greenfox' element: no unexpected child elements"/>
+
+                <!-- ========================================
+                        <linkDef>
+                     ======================================== -->
+                
+                <focusNode xpath="*:linkDef">
+                    <ex:allowedAtts attNames="name connector hrefXP uriXP contextXP targetXP uriTemplate foxpath targetMediatype recursive"
+                        msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP uriTemplate 
+                             contextXP targetXP foxpath targetMediatype recursive"
+                        msgOK="OK - 'linkDef' element: no unexpected attributes"/>     
+                    
+                    <ex:allowedElems elemNames="constraints templateVar"
+                        msg="Unexpected child element in 'linkDef' element: only 'constraints' children allowed"
+                        msgOK="OK - 'linkDef' element: child element names"/>
+                    
+                    <focusNode xpath="*:constraints">
+                        <ex:allowedAtts attNames="
+                            id label 
+                            resolvable resolvableMsg resolvableMsgOK
+                        
+                            countContextNodes minCountContextNodes maxCountContextNodes
+                            countTargetResources minCountTargetResources maxCountTargetResources
+                            countTargetDocs minCountTargetDocs maxCountTargetDocs
+                            countTargetNodes minCountTargetNodes maxCountTargetNodes
+                            countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                            countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                            countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
+                        
+                            countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                            countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                            countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                            countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                            countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                            countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                            countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
+                        
+                            countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                            countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                            countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                            countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                            countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                            countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                            countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"                    
+                        msg="Unexpected attributes in 'constraints' element"
+                        msgOK="OK - 'constraints' element: no unexpected attributes"/>
+                    </focusNode>
+                </focusNode>
+                    
+                <!-- ========================================
+                        <context>
+                     ======================================== -->
+
+                <focusNode xpath="*:context">
+
+                    <!-- check attribute names and mandatory attributs -->
+                    <ex:noAtts
+                        msg="Unexpected attributes in 'context' element - no attributes allowed"
+                        msgOK="OK - 'context' element: no attributes"/>
+
+                    <!-- check child element names -->
+                    <ex:allowedElems elemNames="field"
+                        msg="Unexpected child element in 'context' element: only 'field' children allowed"
+                        msgOK="OK - 'context' element: child element names"/>
+
+                    <!-- ========================================
+                           <field>
+                         ======================================== -->
+
+                    <focusNode xpath="*:field">
+
+                        <!-- check attribute names and mandatory attributs -->
+                        <ex:allowedAtts attNames="name value"
+                            msg="Unexpected attributes in 'field' element; expected: name, value"
+                            msgOK="OK - 'field' element: no unexpected attributes"/>
+
+                        <!-- check mandatory attributes -->
+                        <ex:mandatoryAtts attNames="name" msg="Missing mandatory attribute 'name'"
+                            msgOK="OK - 'field' element: element has mandatory 'name' attribute"/>
+
+                        <!-- check @name: type must be NCName -->
+                        <xpath description="Validates the @name attribute in 'field' elements"
+                            expr="@name" datatype="NCName"
+                            datatypeMsg="Unexpected datatype of @name in 'field' element; expected type is 'NCName'"
+                            datatypeMsgOK="OK - 'field' element: no @name with type ne NCName"
+                            deactivated="false"/>
+
+                    </focusNode>
+                </focusNode>
+            </focusNode>
+
+            <!-- ========================================
+                    <constraintComponents>
+                 ======================================== -->
+
+            <focusNode xpath="*:greenfox/*:constraintComponents">
+                <targetSize maxCount="1"
+                    maxCountMsg="At most one 'constraintComponents' element allowed"/>
+                <ex:noAtts msg="Element 'constraintComponents' must not have attributes."
+                    msgOK="OK - 'constraintComponents' element: no attributes."/>
+                <ex:allowedElems elemNames="constraintComponent"
+                    msg="Unexpected child element in 'constraintComponents' element: only 'constraintComponent' children allowed"
+                    msgOK="OK - 'constraintComponents element: child element names"/>
+
+                <!-- ========================================
+                        <constraintComponent>
+                     ======================================== -->
+
+                <focusNode xpath="*:constraintComponent">
+                    <ex:mandatoryAtts attNames="constraintElementName"
+                        msg="Missing mandatory attributes in 'constraintComponent' element; expected: constraintElementName"
+                        msgOK="OK - 'constraintElement' element: with mandatory attribute 'constraintElementName'"
+                    />
+                </focusNode>
+
+            </focusNode>
+
+
+            <!-- ========================================
+                    <domain>
+                 ======================================== -->
+
+            <focusNode xpath="*:greenfox/*:domain">
+                <targetSize minCount="1" minCountMsg="No domain" minCountMsgOK="OK - domain found"/>
+
+                <!-- check attribute names, mandatory atts -->
+                <ex:allowedAtts attNames="path name"
+                    msg="Unexpected attributes in 'domain' element; expected: 'path' and 'name'"
+                    msgOK="OK - 'domain' element: no unexpected attributes"/>
+                <ex:mandatoryAtts attNames="path name"
+                    msg="Missing mandatory attributes in 'domain' element; expected: 'path' and 'name'"
+                    msgOK="OK - 'domain' element: with mandatory attributes"/>
+
+                <ex:allowedElems elemNames="folder file"
+                    msg="Unexpected content of the 'domain' element; expected: only 'folder' and 'file' elements"
+                    msgOK="OK - 'domain' element: no unexpected child elements"/>
+                
+                <xpath description="Validates the @path value" expr="@path" matches="^basex://.*|\\|\{.*\}"
+                    matchesMsg="Path value must use backslashes, reference external variables"
+                    matchesMsgOK="OK - 'domain' element: @path uses backslashes" notMatches="/"
+                    notMatchesMsg="Path value must not use slashes, only backslashes"
+                    notMatchesMsgOK="OK - 'domain' element: @path does not contain slashes"
+                    deactivated="false"> </xpath>
+            </focusNode>
+
+            <!-- ========================================
+                    <targetSize>
+                 ======================================== -->
+
+            <focusNode xpath="//*:targetSize">
+
+                <!-- attribute names -->
+                <ex:allowedAtts
+                    attNames="count minCount maxCount msg countMsg countMsgOK minCountMsg minCountMsgOK maxCountMsg maxCountMsgOK id
+                              resolvable resolvableMsg resolvableMsgOK
+                              countContextNodes minCountContextNodes maxCountContextNodes
+                              countTargetResources minCountTargetResources maxCountTargetResources
+                              countTargetDocs minCountTargetDocs maxCountTargetDocs
+                              countTargetNodes minCountTargetNodes maxCountTargetNodes
+                              countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                              countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                              countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                              countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg"
+                    msg="Unexpected attributes in 'targetSize' element; expected: $attNames"
+                    msgOK="OK - 'folder' element: no unexpected attributes"/>
+
+                <!-- mandatory attributes -->
+                <ex:oneOrMoreAtts attNames="minCount maxCount count resolvable"
+                    msg="A 'targetSize' shape must contains at least one of these attributes: $attNames"
+                    msgOK="OK - 'targetSize' element: has at least one of these attributes: $attNames"/>
+
+                <!-- check value @minCount -->
+                <xpath description="Check attribute values, 'minCount'" expr="@minCount"
+                    datatype="integer"
+                    datatypeMsg="Element 'targetSize', attributes 'minCount' must have integer values"
+                    datatypeMsgOK="OK - 'targetSize' element: no @minCount atts with non-integer type"
+                    ge="0" geMsg="Element 'targetSize', attributes 'minCount' must be ge 0"
+                    geMsgOK="OK - 'targetSize' element: no @minCount atts lt 0"/>
+
+                <!-- check values @maxCount, @count -->
+                <xpath description="Check attribute values, 'maxCount, count"
+                    expr="(@maxCount, @count)" matches="^\d+|\*$"
+                    matchesMsg="Element 'targetSize', attributes 'maxCount' and 'count' must have integer values or be '*'"
+                    matchesMsgOK="OK - 'targetSize' element: no @maxCount or @count atts with non-integer values ne '*'"/>
+
+                <!-- all child elements must be empty -->
+                <ex:emptyElem msg="Element 'targetSize' must be empty'"
+                    msgOK="OK - 'targetSize' element empty"/>
+
+            </focusNode>
+
+            <!-- ========================================
+                    <folderContent>
+                 ======================================== -->
+
+            <focusNode xpath="*:greenfox//*:folderContent">
+
+                <!-- attribute names -->
+                <ex:allowedAtts attNames="id description closed closedMsg closedMsgOK ignoredMembers"
+                    msg="Unexpected attributes in 'folderContent' element; expected: $attNames"
+                    msgOK="OK - 'folderContent' element: no unexpected attributes"/>
+
+                <!-- mandatory attributes -->
+                <ex:allowedElems
+                    elemNames="member members
+                               memberFile memberFiles 
+                               memberFolder memberFolders 
+                               excludedMember excludedMembers
+                               excludedMemberFile excludedMemberFiles 
+                               excludedMemberFolder excludedMemberFolders"
+                    msg="Unexpected elements in 'folderContent' element; expected: $elemNames"
+                    msgOK="OK - 'folderContent' element: no unexpected child elements"/>
+
+                <!-- all child elements must be empty -->
+                <focusNode xpath="*">
+                    <ex:emptyElem msg="Child elements of 'folderContent' must be empty'"
+                        msgOK="OK - child elements of 'folderContent' empty"/>
+                </focusNode>
+
+                <!-- ========================================
+                        <memberFile>, <memberFolder>
+                     ======================================== -->
+
+                <focusNode xpath="*:memberFile, *:memberFolder">
+
+                    <!-- attribute names -->
+                    <ex:allowedAtts
+                        attNames="name 
+                            count countMsg countMsgOK
+                            minCount minCountMsg minCountMsgOK
+                            maxCount maxCountMsg maxCountMsgOK
+                            md5 md5Msg msg5MsgOK
+                            sha1 sha1Msg sha1MsgOK
+                            sha256 sha256Msg sha256MsgOK"
+                        msg="Unexpected attributes in 'memberFile' or 'memberFolder' element; expected: $attNames"
+                        msgOK="OK - 'memberFile' or 'memberFolder' element: no unexpected attributes"/>
+
+                    <!-- mandatory attributes -->
+                    <ex:mandatoryAtts attNames="name"
+                        msg="Missing mandatory attribute in 'memberFile' or 'memberFolder' element: name"
+                        msgOK="OK - 'memberFile' or 'memberFolder' element: with mandatory attribute 'name'"
+                    />
+                </focusNode>
+
+                <!-- ========================================
+                        <memberFiles>, <memberFolders>
+                     ======================================== -->
+
+                <focusNode xpath="*:memberFiles, *:memberFolders">
+
+                    <!-- attribute names -->
+                    <ex:allowedAtts
+                        attNames="names 
+                            count countMsg countMsgOK
+                            minCount minCountMsg minCountMsgOK
+                            maxCount maxCountMsg maxCountMsgOK
+                            md5 md5Msg msg5MsgOK
+                            sha1 sha1Msg sha1MsgOK
+                            sha256 sha256Msg sha256MsgOK"
+                        msg="Unexpected attributes in 'memberFile' or 'memberFolder' element; expected: $attNames"
+                        msgOK="OK - 'memberFile' or 'memberFolder' element: no unexpected attributes"/>
+
+                    <!-- mandatory attributes -->
+                    <ex:mandatoryAtts attNames="names"
+                        msg="Missing mandatory attribute in 'memberFile' or 'memberFolder' element: names"
+                        msgOK="OK - 'memberFile' or 'memberFolder' element: with mandatory attribute 'names'"
+                    />
+                </focusNode>
+
+                <!-- =================================================
+                        <excludedMemberFile>, <excludedMemberFolder>
+                     ================================================= -->
+
+                <focusNode xpath="*:excludedMemberFile, *:excludedMemberFolder">
+
+                    <!-- attribute names -->
+                    <ex:allowedAtts attNames="name excludedMemberFileMsg excludedMemberFileMsgOK excludedMemberFolderMsg excludedMemberFolderMsgOK"
+                        msg="Unexpected attributes in 'excludedMemberFile' or 'excludedMemberFolder' element; expected: $attNames"
+                        msgOK="OK - 'excludedMemberFile' or 'excludedMemberFolder' element: no unexpected attributes"/>
+
+                    <!-- mandatory atts -->
+                    <ex:mandatoryAtts attNames="name"
+                        msg="Missing mandatory attribute in 'excludedMemberFile' or 'excludedMemberFolder' element: name"
+                        msgOK="OK - 'excludedMemberFile' or 'excludedMemberFolder' element: with mandatory attribute 'name'"
+                    />
+                </focusNode>
+
+                <!-- =================================================
+                        <excludedMemberFiles>, <excludedMemberFolders>
+                     ================================================= -->
+
+                <focusNode xpath="*:excludedMemberFiles, *:excludedMemberFolders">
+
+                    <!-- attribute names -->
+                    <ex:allowedAtts attNames="names excludedMemberFilesMsg excludedMemberFilesMsgOK excludedMemberFoldersMsg excludedMemberFoldersMsgOK"
+                        msg="Unexpected attributes in 'excludedMemberFiles' or 'excludedMemberFolders' element; expected: $attNames"
+                        msgOK="OK - 'excludedMemberFiles' or 'excludedMemberFolders' element: no unexpected attributes"/>
+
+                    <!-- mandatory atts -->
+                    <ex:mandatoryAtts attNames="names"
+                        msg="Missing mandatory attribute in 'excludedMemberFiles' or 'excludedMemberFolders' element: names"
+                        msgOK="OK - 'excludedMemberFiles' or 'excludedMemberFolders' element: with mandatory attribute 'names'"
+                    />
+                </focusNode>
+
+            </focusNode>
+
+            <!-- ========================================
+                       <folder>
+                 ======================================== -->
+            <focusNode xpath="//*:folder">
+
+                <!-- attribute names -->
+                <ex:allowedAtts attNames="id description deactivated foxpath path"
+                    msg="Unexpected attributes in 'folder' element; expected: foxpath, path, id"
+                    msgOK="OK - 'folder' element: no unexpected attributes"/>
+
+                <!-- mandatory attributes -->
+                <ex:xoneAtts attNames="foxpath path"
+                    msg="A 'folder' shape must exactly one of these attributes: foxpath, path"
+                    msgOK="OK - 'folder' element: has foxpath or path"/>
+
+                <!-- element names -->
+                <ex:allowedElems elemNames="targetSize file folder folderContent folderSimilar foxvalues foxvaluePairs foxvaluesCompared fileDate fileName foxpath conditional"
+                    msg="Unexpected elements in 'folder' element; expected: targetSize file folder folderContent foxpath"
+                    msgOK="OK - 'folder' element: no unexpected elements"/>
+
+                <!-- @foxpath must not start with \ -->
+                <xpath expr="@foxpath" notMatches="^\\"
+                    notMatchesMsg="A foxpath expression on 'folder' must be relative, must not start with a backslash"
+                    notMatchesMsgOK="OK - 'folder' @foxpath does not start with a backslash"/>
+
+                <!-- @path must not contain wild cards -->
+                <xpath expr="@path" notMatches="[*?]"
+                    notMatchesMsg="A path expression on 'folder' must not contain wildcards"
+                    notMatchesMsgOK="OK - 'folder' @path expression on 'folder' valid"/>
+                
+            </focusNode>
+
+            <!-- ========================================
+                       <file>
+                 ======================================== -->
+
+            <focusNode xpath="//*:file">
+                <ex:allowedAtts attNames="id description deactivated linkName path foxpath hrefXP uriXP recursive mediatype targetMediatype csv.separator csv.header"
+                    msg="Unexpected attributes in 'file' element; expected: $attNames"
+                    msgOK="OK - 'file' element: no unexpected attributes"/>
+                <!-- mandatory attributes -->
+                <ex:xoneAtts attNames="foxpath path linkName hrefXP uriXP"
+                    msg="A 'file' shape must exactly one of these attributes: foxpath, path, linkName, hrefXP, uriXP"
+                    msgOK="OK - 'file' element: has expected attribute (one of: foxpath path link hrefXP uriXP)"/>
+
+                <!-- element names -->
+                <ex:allowedElems
+                    elemNames="targetSize folder file links fileDate fileSize fileName docSimilar values foxvalues valuePairs valuesCompared foxvaluePairs foxvaluesCompared contentCorrespondence focusNode ifMediatype xsdValid mediatype grep docTree xpath foxpath conditional"
+                    msg="Unexpected elements in 'file' element; expected: $elemNames"
+                    msgOK="OK - 'file' element: no unexpected elements"/>
+
+                <!-- @path must not contain wildcards -->
+                <xpath expr="@path" notMatches="[*?]"
+                    notMatchesMsg="A path expression on 'file' must not contain wildcards"
+                    notMatchesMsgOK="OK - 'file' @path expression on 'folder' valid"/>
+                
+            </focusNode>
+
+            <!-- ========================================
+                       <docSimilar>
+                 ======================================== -->
+            <focusNode xpath="//*:docSimilar">
+                <ex:allowedAtts
+                    attNames="foxpath linkName redReport 
+                              docSimilarMsg docSimilarMsgOK
+                              count countMsg countMsgOK
+                              
+                              countContextNodes minCountContextNodes maxCountContextNodes
+                              countTargetResources minCountTargetResources maxCountTargetResources
+                              countTargetDocs minCountTargetDocs maxCountTargetDocs
+                              countTargetNodes minCountTargetNodes maxCountTargetNodes
+                              countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                              countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                              countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
+                              
+                              countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                              countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                              countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                              countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                              countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                              countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                              countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
+                              
+                              countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                              countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                              countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                              countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                              countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                              countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                              countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"
+                        />    
+                <ex:allowedElems elemNames="skipItem roundItem editItem"
+                    msg="Unexpected elements in 'docSimilar' element; expected: $elemNames"
+                    msgOK="OK - 'docSimilar' element: no unexpected child elements"/>
+                
+                    <focusNode xpath="*:skipItem">
+                        <ex:allowedAtts attNames="kind localName namespace parentLocalName parentNamespace testXP"
+                            msg="Unexpected attributes in 'skipItem' element; expected: $attNames"
+                            msgOK="OK - 'skipItem' element: no unexpected attributes"/>
+                    </focusNode>
+                />    
+            </focusNode>
+
+            <!-- ========================================
+                       <contentCorrespondence>
+                 ======================================== -->
+            <focusNode xpath="//*:contentCorrespondence">
+                <ex:allowedAtts
+                    attNames="foxpath contextXP targetXP linkName
+                    
+                    resolvable resolvableMsg resolvableMsgOK
+                    
+                    countContextNodes minCountContextNodes maxCountContextNodes
+                    countTargetResources minCountTargetResources maxCountTargetResources
+                    countTargetDocs minCountTargetDocs maxCountTargetDocs
+                    countTargetNodes minCountTargetNodes maxCountTargetNodes
+                    countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                    countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                    countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
+                    
+                    countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                    countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                    countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                    countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                    countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                    countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                    countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
+                    
+                    countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                    countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                    countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                    countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                    countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                    countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                    countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK"
+                />
+                <ex:allowedElems elemNames="valueCord"
+                    msg="Unexpected content of the 'contentCorrespondence' element; expected: only 'valuePair' allowed"
+                    msgOK="OK - 'contentCorrespondence' element: no unexpected child elements"/>
+                />  
+                
+                <focusNode xpath="*:valueCord">
+                    <ex:allowedAtts attNames="sourceXP targetXP cmp useDatatype
+                         countSource minCountSource maxCountSource
+                         countSourceMsg minCountSourceMsg maxCountSourceMsg
+                         countSourceMsgOK minCountSourceMsgOK maxCountSourceMsgOK
+                         countTarget minCountTarget maxCountTarget
+                         countTargetMsg minCountTargetMsg maxCountTargetMsg
+                         countTargetMsgOK minCountTargetMsgOK maxCountTargetMsgOK
+                         "/>
+                </focusNode>
+            </focusNode>
+            
+            <!-- ========================================
+                       <xpath>
+                 ======================================== -->
+            <focusNode xpath="//*:xpath">
+
+                <!-- attribute names -->
+                <ex:allowedAtts
+                    attNames="id description deactivated label 
+                    contextLink
+                    expr msg quant flags useDatatype
+                    empty emptyMsg emptyMsgOK
+                    exists existsMsg existsMsgOK
+                    count countMsg countMsgOK                    
+                    minCount minCountMsg minCountMsgOK
+                    maxCount maxCountMsg maxCountMsgOK
+                    itemsUnique itemsUniqueMsg itemsUniqueMsgOK
+                    datatype datatypeMsg datatypeMsgOK
+                    eq eqMsg eqMsgOK 
+                    ne neMsg neMsgOK 
+                    gt gtMsg gtMsgOK 
+                    ge geMsg geMsgOK
+                    lt ltMsg ltMsgOK 
+                    le leMsg leMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    length lengthMsg lengthMsgOK
+                    minLength minLengthMsg minLengthMsgOK
+                    maxLength maxLengthMsg maxLengthMsgOK                    
+                    eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
+                    neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
+                    ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
+                    leFoxpath leFoxpathContext leFoxpathMsg leFoxpathMsgOK
+                    gtFoxpath gtFoxpathContext gtFoxpathMsg gtFoxpathMsgOK
+                    geFoxpath geFoxpathContext geFoxpathMsg geFoxpathMsgOK
+                    inFoxpath inFoxpathContext inFoxpathMsg inFoxpathMsgOK
+                    containsFoxpath containsFoxpathContext containsFoxpathMsg containsFoxpathMsgOK
+                    eqXPath eqXPathContext eqXPathMsg eqXPathMsgOK
+                    neXPath neXPathContext neXPathMsg neXPathMsgOK
+                    ltXPath ltXPathContext ltXPathMsg ltXPathMsgOK
+                    leXPath leXPathContext leXPathMsg leXPathMsgOK
+                    gtXPath gtXPathContext gtXPathMsg gtXPathMsgOK
+                    geXPath geXPathContext geXPathMsg geXPathMsgOK
+                    inXPath inXPathContext inXPathMsg inXPathMsgOK
+                    containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
+                    inMsg inMsgOK
+                    notInMsg notInMsgOK
+                    containsMsg containsMsgOK
+                    reporterXPath"
+                    msg="Unexpected attributes in 'xpath' element"
+                    msgOK="OK - 'xpath' element: no unexpected attributes"/>
+                
+                <!-- mandatory attributes -->
+                <ex:mandatoryAtts attNames="expr" msg="An 'xpath' shape must have an expr attribute"
+                    msgOK="OK - 'xpath' element: has expr attribute"/>
+
+                <!-- element names -->
+                <ex:allowedElems elemNames="in notin contains"
+                    msg="Unexpected elements in 'xpath' element; expected: ${elemNames}"
+                    msgOK="OK - 'foxpath' element: no unexpected elements"/>
+                
+                <xpath expr="@quant" inMsg="@quant must be 'all' or 'some'">
+                    <in>
+                        <eq>all</eq>
+                        <eq>some</eq>
+                    </in>
+                </xpath>
+
+            </focusNode>
+
+            <!-- ========================================
+                       <foxpath>
+                 ======================================== -->
+            <focusNode xpath="//*:foxpath">
+
+                <!-- attribute names -->
+                <ex:allowedAtts
+                    attNames="id description deactivated label 
+                    expr msg quant flags useDatatype
+                    empty emptyMsg emptyMsgOK
+                    exists existsMsg existsMsgOK
+                    count countMsg countMsgOK
+                    minCount minCountMsg minCountMsgOK
+                    maxCount maxCountMsg maxCountMsgOK
+                    itemsUnique itemsUniqueMsg itemsUniqueMsgOK
+                    datatype datatypeMsg datatypeMsgOK
+                    eq eqMsg eqMsgOK 
+                    ne neMsg neMsgOK 
+                    gt gtMsg gtMsgOK 
+                    ge geMsg geMsgOK
+                    lt ltMsg ltMsgOK 
+                    le leMsg leMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    length lengthMsg lengthMsgOK
+                    minLength minLengthMsg minLengthMsgOK
+                    maxLength maxLengthMsg maxLengthMsgOK                    
+                    eqFoxpath eqFoxpathContext eqFoxpathMsg eqFoxpathMsgOK
+                    neFoxpath neFoxpathContext neFoxpathMsg neFoxpathMsgOK
+                    ltFoxpath ltFoxpathContext ltFoxpathMsg ltFoxpathMsgOK
+                    leFoxpath leFoxpathContext leFoxpathMsg leFoxpathMsgOK
+                    gtFoxpath gtFoxpathContext gtFoxpathMsg gtFoxpathMsgOK
+                    geFoxpath geFoxpathContext geFoxpathMsg geFoxpathMsgOK
+                    inFoxpath inFoxpathContext inFoxpathMsg inFoxpathMsgOK
+                    containsFoxpath containsFoxpathContext containsFoxpathMsg containsFoxpathMsgOK
+                    eqXPath eqXPathContext eqXPathMsg eqXPathMsgOK
+                    neXPath neXPathContext neXPathMsg neXPathMsgOK
+                    ltXPath ltXPathContext ltXPathMsg ltXPathMsgOK
+                    leXPath leXPathContext leXPathMsg leXPathMsgOK
+                    gtXPath gtXPathContext gtXPathMsg gtXPathMsgOK
+                    geXPath geXPathContext geXPathMsg geXPathMsgOK
+                    inXPath inXPathContext inXPathMsg inXPathMsgOK
+                    containsXPath containsXPathContext containsXPathMsg containsXPathMsgOK
+                    inMsg inMsgOK
+                    notInMsg notInMsgOK
+                    containsMsg containsMsgOK
+                    reporterXPath"                    
+                    msg="Unexpected attributes in 'xpath' element"
+                    msgOK="OK - 'xpath' element: no unexpected attributes"/>
+
+                <!-- mandatory attributes -->
+                <ex:mandatoryAtts attNames="expr"
+                    msg="An 'foxpath' shape must have an expr attribute"
+                    msgOK="OK - 'foxpath' element: has expr attribute"/>
+
+                <!-- element names -->
+                <ex:allowedElems elemNames="in notin contains"
+                    msg="Unexpected elements in 'foxpath' element; expected: ${elemNames}"
+                    msgOK="OK - 'foxpath' element: no unexpected elements"/>
+
+                <xpath expr="@quant" inMsg="@quant must be 'all' or 'some'">
+                    <in>
+                        <eq>all</eq>
+                        <eq>some</eq>
+                    </in>
+                </xpath>                
+                
+            </focusNode>
+
+            <!-- ========================================
+                       <links>
+                 ======================================== -->
+            <focusNode xpath="//*:links">
+                
+                <!-- attribute names -->
+                <ex:allowedAtts
+                    attNames="id description label 
+                    linkName targetMediatype recursive                     
+                    foxpath contextXP targetXP hrefXP uriXP uriTemplate
+                    
+                    exists existsMsg existsMsgOK
+                    
+                    resolvable resolvableMsg resolvableMsgOK
+                    
+                    countContextNodes minCountContextNodes maxCountContextNodes
+                    countTargetResources minCountTargetResources maxCountTargetResources
+                    countTargetDocs minCountTargetDocs maxCountTargetDocs
+                    countTargetNodes minCountTargetNodes maxCountTargetNodes
+                    countTargetResourcesPerContextPoint minCountTargetResourcesPerContextPoint maxCountTargetResourcesPerContextPoint
+                    countTargetDocsPerContextPoint minCountTargetDocsPerContextPoint maxCountTargetDocsPerContextPoint
+                    countTargetNodesPerContextPoint minCountTargetNodesPerContextPoint maxCountTargetNodesPerContextPoint
+                    
+                    countContextNodesMsg minCountContextNodesMsg maxCountContextNodesMsg
+                    countTargetResourcesMsg minCountTargetResourcesMsg maxCountTargetResourcesMsg
+                    countTargetDocsMsg minCountTargetDocsMsg maxCountTargetDocsMsg
+                    countTargetNodesMsg minCountTargetNodesMsg maxCountTargetNodesMsg
+                    countTargetResourcesPerContextPointMsg minCountTargetResourcesPerContextPointMsg maxCountTargetResourcesPerContextPointMsg
+                    countTargetDocsPerContextPointMsg minCountTargetDocsPerContextPointMsg maxCountTargetDocsPerContextPointMsg
+                    countTargetNodesPerContextPointMsg minCountTargetNodesPerContextPointMsg maxCountTargetNodesPerContextPointMsg
+                    
+                    countContextNodesMsgOK minCountContextNodesMsgOK maxCountContextNodesMsgOK
+                    countTargetResourcesMsgOK minCountTargetResourcesMsgOK maxCountTargetResourcesMsgOK
+                    countTargetDocsMsgOK minCountTargetDocsMsgOK maxCountTargetDocsMsgOK
+                    countTargetNodesMsgOK minCountTargetNodesMsgOK maxCountTargetNodesMsgOK
+                    countTargetResourcesPerContextPointMsgOK minCountTargetResourcesPerContextPointMsgOK maxCountTargetResourcesPerContextPointMsgOK
+                    countTargetDocsPerContextPointMsgOK minCountTargetDocsPerContextPointMsgOK maxCountTargetDocsPerContextPointMsgOK
+                    countTargetNodesPerContextPointMsgOK minCountTargetNodesPerContextPointMsgOK maxCountTargetNodesPerContextPointMsgOK
+                    
+                    reporterXPath"                    
+                    msg="Unexpected attributes in 'links' element"
+                    msgOK="OK - 'links' element: no unexpected attributes"/>
+                
+                <ex:allowedElems elemNames="templateVar"
+                    msg="Unexpected elements in 'links' element; expected: ${elemNames}"
+                    msgOK="OK - 'links' element: no unexpected elements"/>
+                
+                <!-- mandatory attributes -->
+                <ex:oneOrMoreAtts attNames="linkName foxpath hrefXP uriXP uriTemplate"
+                    msg="A 'links' constraint must have one of these attributes: linkName, hrefXP, uriXP, linkXP"
+                    msgOK="OK - 'links' element: has 'xpath' or 'link' attribute"/>
+
+            </focusNode>
+            
+            <!-- ========================================
+                    <fileSize>
+                 ======================================== -->
+            <focusNode xpath="//*:fileSize">
+            </focusNode>
+
+            <!-- ========================================
+                    <fileName>
+                 ======================================== -->
+            <focusNode xpath="//*:fileName">
+                <!-- allowed attributes -->
+                <ex:allowedAtts attNames="id descriptions
+                    flags case
+                    eq eqMsg eqMsgOK
+                    ne neMsg neMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK"
+                    msg="Unexpected attributes in 'xsdValid' element; expected: $attNames"
+                    msgOK="OK - 'xsdValid' element: no unexpected attributes"/>
+            </focusNode>
+            
+            <!-- ========================================
+                    <fileDate>
+                 ======================================== -->
+            
+            <focusNode xpath="*:greenfox//*:fileDate">
+                <!-- attribute names -->
+                <ex:allowedAtts 
+                    attNames="id label description
+                    eq eqMsg eqMsgOK
+                    lt ltMsg ltMsgOK
+                    le leMsg leMsgOK
+                    gt gtMsg gtMsgOK
+                    ge geMsg gtMsgOK
+                    matches matchesMsg matchesMsgOK
+                    notMatches notMatchesMsg notMatchesMsgOK
+                    like likeMsg likeMsgOK
+                    notLike notLikeMsg notLikeMsgOK
+                    flags"
+                    msg="Unexpected attributes in 'fileDate' element."
+                    msgOK="OK - 'fileDate' element: no unexpected attributes"/>
+                <ex:oneOrMoreAtts
+                    attNames="eq lt le gt ge matches notMatches like notLike"
+                    msg="One of these attributes expected: $attNames"
+                    msgOK="OK - 'fileDate' element: required attributes found"/>
+                
+            </focusNode>
+            
+            
+            <!-- ========================================
+                    <ifMediatype>
+                 ======================================== -->
+            <focusNode xpath="//*:ifMediatype">
+            </focusNode>
+
+            <!-- ========================================
+                    <xsdValid>
+                 ======================================== -->
+            <focusNode xpath="//*:xsdValid">
+
+                <!-- allowed attributes -->
+                <ex:allowedAtts attNames="xsdFOX xsdValidMsg xsdValidMsgOK"
+                    msg="Unexpected attributes in 'xsdValid' element; expected: $attNames"
+                    msgOK="OK - 'xsdValid' element: no unexpected attributes"/>
+                <!-- mandatory attributes -->                
+                <ex:mandatoryAtts attNames="xsdFOX"
+                    msg="An 'xsdValid' constraint must have an 'xsdFOX' attribute"
+                    msgOK="OK - 'xsdValid' element: has 'xsdFOX' attribute"/>
+            </focusNode>
+            
+            <!-- ========================================
+                    <mediatype>
+                 ======================================== -->
+            <focusNode xpath="//*:mediatype">
+                <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK 
+                                          csv.minColumnCount csv.maxColumnCount
+                                          csv.minRowCount csv.maxRowCount
+                                          csv.separator csv.header
+                                          csv.minColumnCountMsg csv.minColumnCountMsgOK  
+                                          csv.maxColumnCountMsg csv.maxColumnCountMsgOK
+                                          csv.minRowCountMsg csv.minRowCountMsgOK                                          
+                                          csv.maxRowCountMsg csv.maxRowCountMsgOK                                          
+                                          "
+                    msg="Unexpected attributes in 'mediatype' element; expected: $attNames"
+                    msgOK="OK - 'mediatype' element: no unexpected attributes"/>
+                <ex:xoneAtts attNames="eq in"
+                    msg="A 'mediatype' constraint must have an 'eq' or an 'in' attribute"
+                    msgOK="OK - 'mediatype' element: has 'eq' or 'in' attribute"/>
+            </focusNode>
+            
+            <focusNode xpath="//*:focusNode">
+                <ex:allowedAtts attNames="id xpath"
+                    msg="Unexpected attributes in 'focusNode' element; expected: $attNames"
+                    msgOK="OK - 'focusNode' element: no unexpected attributes"/>
+                <ex:xoneAtts attNames="xpath foxpath"
+                    msg="A 'focusNode' element must have either an xpath attribute or a foxpath attribute"
+                    msgOK="OK - 'focusNode' has xpath or foxpath attribute"/>
+                
+            </focusNode>
+            
+        </file>
+    </domain>
+</greenfox>

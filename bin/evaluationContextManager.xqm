@@ -32,7 +32,14 @@ declare function f:getPotentialBindings() as xs:string+ {
     'lines',
     'fileName',
     'filePath',    
-    'domain'    
+    'domain',
+    
+    'targetDoc',
+    'targetNode',    
+    'linkContext',
+    'item',
+    'value'
+    
 };
 
 (:~
@@ -606,7 +613,8 @@ declare function f:updateEvaluationContext_params($params as element(gx:param)*,
  : @param context the processing context
  : @return the updated processing context
  :) 
-declare function f:newEvaluationContext_linkContextItem($linkContextItem as item(), $context as map(xs:string, item()*))
+declare function f:newEvaluationContext_linkContextItem($linkContextItem as item(), 
+                                                        $context as map(xs:string, item()*))
         as map(*) {
     let $newEvaluationContext := 
         $context?_evaluationContext 
@@ -644,7 +652,7 @@ declare function f:newEvaluationContext_expr2($value1 as item()*,
         if (empty(($item1, $linkContextItem, $targetDoc, $targetNode))) then $newEc else
         
         let $newEc := if (empty($item1)) then $newEc else map:put($newEc, QName((), 'item'), $item1)
-        let $newEc := if (empty($linkContextItem)) then $newEc else map:put($newEc, QName((), 'contextItem'), $linkContextItem)        
+        let $newEc := if (empty($linkContextItem)) then $newEc else map:put($newEc, QName((), 'linkContext'), $linkContextItem)        
         let $newEc := if (empty($targetDoc)) then $newEc else map:put($newEc, QName((), 'targetDoc'), $targetDoc)                
         let $newEc := if (empty($targetNode)) then $newEc else map:put($newEc, QName((), 'targetNode'), $targetNode)
         return $newEc

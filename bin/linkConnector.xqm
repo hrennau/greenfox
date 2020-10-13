@@ -65,10 +65,7 @@ declare function f:applyLinkConnector($ldo as map(*),
         
         (: Extend evaluation context: $linkContext :)
         let $evaluationContextNext := 
-        
-            if (not($contextPoint instance of node())) then $evaluationContext else
-                map:put($context?_evaluationContext, QName('', 'linkContext'), $contextPoint)
-
+            i:newEvaluationContext_linkContextItem($contextPoint, $context)
         return
             i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContextNext, true())
             

@@ -31,7 +31,7 @@
 
             <!-- Visit: agriculture schema -->
             <file foxpath=".\\agriculture.xsd" id="agricultureFileShape">
-                <targetSize count="100" countMsg="Agriculture file missing"/>
+                <targetSize count="1" countMsg="Agriculture file missing"/>
                 
                 <!-- Visit: link targets obtained for recursive link definition "schemaImport" -->
                 <file linkName="schemaImport" id="importedFilesShape">

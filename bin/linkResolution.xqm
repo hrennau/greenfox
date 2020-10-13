@@ -427,7 +427,7 @@ declare function f:getLinkTargetNodes($connectorNodes as node()+,
  
     let $nodes :=
         let $evaluationContextNext := 
-            map:put($context?_evaluationContext, QName('', 'linkContext'), $linkContextItem)
+            i:newEvaluationContext_linkContextItem($linkContextItem, $context) 
         for $connectorNode in $connectorNodes return
             i:evaluateXPath($targetExpr, $connectorNode, $evaluationContextNext, true(), true())
     return $nodes/.            

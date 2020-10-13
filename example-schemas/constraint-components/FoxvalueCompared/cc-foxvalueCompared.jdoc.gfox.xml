@@ -19,7 +19,7 @@
                                countTargetResources="1">                
                 <foxvalueCompared expr1FOX=".\\airport-*.json\jdoc(.)//country"
                                   expr2FOX=".\\airport-*.json\jdoc(.)//country" 
-                                  cmp="sameTerms" sameTermsMsg="Folders should contain same airport countries."/>
+                                  cmp="sameTerms" cmpMsg="Folders should contain same airport countries."/>
             </foxvaluesCompared>
         </folder>
     </domain>

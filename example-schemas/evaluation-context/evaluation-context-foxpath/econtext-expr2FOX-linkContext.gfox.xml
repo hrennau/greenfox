@@ -30,7 +30,7 @@
                                contextXP="//airportsForCountry" 
                                countTargetResources="1">
                 <foxvalueCompared expr1XP="@country" count1="1"
-                                  expr2FOX="fox-child($contextItem/@country/lower-case(.))" count2="1"/>
+                                  expr2FOX="fox-child($linkContext/@country/lower-case(.))" count2="1"/>
             </foxvaluesCompared>                
                
         </file>

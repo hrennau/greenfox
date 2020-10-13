@@ -16,14 +16,14 @@
 
     <context>
         <!-- Define a domain contained by an archive -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data-archive\example-data.zip\#archive#\example-data"/>
+        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\archives\airportsArchives.zip\#archive#\airportsArchives"/>
     </context>
     
     <linkDef name="airports"
-             foxpath="ancestor~::archives\airports-copy.zip\#archive#\airports-copy"/>
+             foxpath="ancestor~::airportsArchives\airports-copy.zip\#archive#\airports-copy"/>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder foxpath="airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderSimilar linkName="airports"
                            countTargetResources="1" 

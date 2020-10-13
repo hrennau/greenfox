@@ -374,8 +374,10 @@ declare function f:validateValuePair($constraintElem as element(),
            --------------------------------------------- :)
         if ($expr2Context eq 'item') then
             f:validateValuePair_context2_iterating(
-                 $contextURI, $targetURI,
-                 $constraintElem, $constraintNode,
+                 $constraintElem, $constraintNode,            
+                 $contextURI, $contextNode,
+                 $targetURI, $targetItems[1][. instance of node()],
+                 
                  $expr2Context, $quantifier, $useDatatype, $useString,
                  $expr1Spec, $expr1Lang,
                  $expr2, $expr2Spec, $expr2Lang,
@@ -392,7 +394,10 @@ declare function f:validateValuePair($constraintElem as element(),
                 return
             
                     f:validateValuePair_context2_fixed(
-                        $constraintElem, $constraintNode, $useContextItem, (),
+                        $constraintElem, $constraintNode, 
+                        $contextURI, $contextNode,
+                        (), (),    (: $targetURI, $targetNode :)
+                        
                         $quantifier, $useDatatype, $useString, 
                         $expr1Spec, $expr1Lang, $expr2, $expr2Spec, $expr2Lang,
                         $items1, $items1TY, $results_expr1Conversion,
@@ -406,7 +411,10 @@ declare function f:validateValuePair($constraintElem as element(),
             for $targetItem in $targetItems 
             return
                 f:validateValuePair_context2_fixed(
-                    $constraintElem, $constraintNode, $targetItem, $targetURI,
+                    $constraintElem, $constraintNode,
+                    $contextURI, $contextNode,
+                    $targetURI, $targetItem[. instance of node()],
+                    
                     $quantifier, $useDatatype, $useString, 
                     $expr1Spec, $expr1Lang, $expr2, $expr2Spec, $expr2Lang,
                     $items1, $items1TY, $results_expr1Conversion,
@@ -425,8 +433,14 @@ declare function f:validateValuePair($constraintElem as element(),
  : second expression is evaluated for each item from value 1.
  :)
 declare function f:validateValuePair_context2_iterating(
-    $contextURI as xs:string, $targetURI as xs:string?,
-    $constraintElem as element(), $constraintNode as node(),
+    $constraintElem as element(), 
+    $constraintNode as node(),
+    
+    $contextURI as xs:string, 
+    $contextNode as node()?,
+    $targetURI as xs:string?,
+    $targetNode as node()?,
+    
     $expr2Context as xs:string, $quantifier as xs:string, $useDatatype as xs:QName?, $useString as xs:string*,
     $expr1Spec as item(), $expr1Lang as xs:string,
     $expr2 as xs:string, $expr2Spec as item(), $expr2Lang as xs:string,
@@ -435,15 +449,25 @@ declare function f:validateValuePair_context2_iterating(
     $context as map(xs:string, item()*))
         as element()* {
         
+    (: targetDoc and targetNode are passed to $getItems2 
+       in order to be written into th evaluation context :)
+    let $targetDoc := 
+        if ($targetNode instance of document-node()) then $targetNode 
+        else $targetNode/root()
+    let $targetNode := $targetNode[not(. instance of document-node())]
+    return
+    
     (: quantifier 'all' :)            
     if ($quantifier eq 'all') then
         for $item1 at $pos in $items1
         let $item1TY := $items1TY[$pos]
-        let $contextItem :=
-            (: Foxpath context = resource URI; actual context item bound to $item :)
-            if ($expr2Lang eq 'foxpath') then ($targetURI, $contextURI)[1] 
-            else $item1
-        let $items2 := $getItems2($contextItem, $item1, (), ())
+        
+        let $items2 := 
+            let $contextItem :=
+                if ($expr2Lang eq 'foxpath') then ($targetURI, $contextURI)[1] 
+                else $item1        
+            return $getItems2($contextItem, $item1, $targetDoc, $targetNode)
+        
         let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
         let $items2TY := 
             if (empty($useDatatype)) then $items2TYRaw
@@ -479,14 +503,16 @@ declare function f:validateValuePair_context2_iterating(
         )       
     (: quantifier: 'some' or 'someForEach' :)           
     else            
-        let $itemReports :=
+        let $itemReports :=            
             for $item1 at $pos in $items1
             let $item1TY := $items1TY[$pos]
-            let $contextItem :=
-                (: Foxpath context = resource URI :)            
-                if ($expr2Lang eq 'foxpath') then ($targetURI, $contextURI)[1] 
-                else $item1            
-            let $items2 := $getItems2($contextItem, $item1, (), ())            
+            
+            let $items2 := 
+                let $contextItem :=
+                    if ($expr2Lang eq 'foxpath') then ($targetURI, $contextURI)[1] 
+                    else $item1        
+                return $getItems2($contextItem, $item1, $targetDoc, $targetNode)
+            
             let $items2TYRaw := 
                 if (empty($useDatatype)) then $items2 else i:applyUseDatatype($items2, $useDatatype, $useString)
             let $items2TY := 
@@ -564,9 +590,17 @@ declare function f:validateValuePair_context2_iterating(
 declare function f:validateValuePair_context2_fixed(
     $constraintElem as element(),
     $constraintNode as node(),
+    
+    $contextURI as xs:string,
+    $contextNode as node()?,
+    $targetURI as xs:string?,
+    $targetNode as node()?,
+    
+    (:
     $contextItem as item(),   (: may be targetURI, targetDoc, or targetNode :)
-    $targetURI as xs:string?,    (: if expr2Lang is Foxpath: used as context item :)
-
+    $targetURI as xs:string?,    (: only set if constraint is a Compared constraint :)
+     :)
+     
     $quantifier as xs:string,
     $useDatatype as xs:QName?,
     $useString as xs:string*,
@@ -588,17 +622,21 @@ declare function f:validateValuePair_context2_fixed(
         
     (: Get value of expression 2 :)
     let $items2 :=
-        (: Foxpath and context item = node => 
-               (1) context is URI
-               (2) bind variable $targetDoc
-               (3) bind variable $targetNode (if appropriate) :)
-        if ($expr2Lang eq 'foxpath' and $contextItem instance of node()) then
-            if ($contextItem instance of document-node()) then
-                $getItems2($targetURI, (), $contextItem, ())
-            else
-                $getItems2($targetURI, (), $contextItem/root(), $contextItem)
-        (: Otherwise: use context item :)
-        else $contextItem ! $getItems2(., (), (), ())
+        let $targetDoc := 
+            if ($targetNode instance of document-node()) then $targetNode 
+            else $targetNode/root()
+        let $targetNode := $targetNode[not(. instance of document-node())]
+        return
+        
+        (: Foxpath :) 
+        if ($expr2Lang eq 'foxpath') then
+            let $contextItemURI := ($targetURI, $contextURI)[1]
+            return
+                $getItems2($contextItemURI, (), $targetDoc, $targetNode)
+        else
+            let $contextItem := ($targetNode, $targetDoc, $contextNode)[1]
+            return
+                $getItems2($contextItem, (), $targetDoc, $targetNode)
             
     let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
     let $items2TY := 
