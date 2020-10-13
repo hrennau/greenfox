@@ -77,7 +77,7 @@ declare function f:applyLinkConnector($ldo as map(*),
         return $items
         
     else if (exists($ldo?mirror)) then
-        let $items := f:resolveMirror($ldo, $contextPoint, $context)
+        let $items := f:resolveMirror($ldo, $contextURI, $context)
         return $items
     
     else ()
@@ -153,14 +153,51 @@ declare function f:resolveUriTemplateRC($uriTemplate as xs:string,
  : @return a sequence of URIss
  :)
 declare function f:resolveMirror($ldo as map(*),
-                                 $contextPoint as item(),
+                                 $contextURI as item(),
                                  $context as map(xs:string, item()*))
         as xs:string* {
     let $uri := $context?_targetInfo?contextURI        
-    let $reflector1 := $ldo?mirror?reflector1        
-    let $reflector2 := $ldo?mirror?reflector2
+    
+    let $reflector1 := 
+        let $raw := $ldo?mirror?reflector1
+        return if ($raw) then $raw else
+
+        (: Reflector 1 is resolved in the context of the link context resource :)
+        let $fox := $ldo?mirror?reflector1FOX 
+        return
+            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector1 or reflector1FOX')
+            else f:resolveReflectorExpr($fox, $contextURI, $context)
+                        
+    let $reflector2 := 
+        let $raw := $ldo?mirror?reflector2
+        return if ($raw) then $raw else
+        
+        (: Reflector 2 is resolved in the context of reflector 1 :)
+        let $fox := $ldo?mirror?reflector2FOX 
+        return
+            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector1 or reflector2FOX')
+            else f:resolveReflectorExpr($fox, $reflector1, $context)
+                        
     let $reflectedReplaceSubstring := $ldo?mirror?reflectedReplaceSubstring
     let $reflectedReplaceWith := $ldo?mirror?reflectedReplaceWith
     let $reflected := i:getImage($uri, $reflector1, $reflector2, $reflectedReplaceSubstring, $reflectedReplaceWith)
     return $reflected
+};  
+
+(:~
+ : Resolves a Foxpath expression providing a reflector URI.
+ :
+ : @param expr the expression returning the reflector URI
+ : @param contextURI the context URI, in the context of which the expression must be resolved
+ : @param context the processing context
+ : @return the reflector URI
+ :)
+declare function f:resolveReflectorExpr($expr as xs:string, 
+                                        $contextURI as xs:string,
+                                        $context as map(xs:string, item()*))
+        as xs:string?    {
+    let $evaluationContext := $context?_evaluationContext
+    return
+        i:evaluateFoxpath($expr, $contextURI, $evaluationContext, true())
 };        
+

@@ -122,6 +122,8 @@ declare function f:parseLinkDef($linkDef as element(),
     let $mirrorRef := $referenced?mirror
     let $reflector1 := $linkDef/@reflector1/string()
     let $reflector2 := $linkDef/@reflector2/string()
+    let $reflector1FOX := $linkDef/@reflector1FOX/string()
+    let $reflector2FOX := $linkDef/@reflector2FOX/string()
     let $reflectedReplaceSubstring := $linkDef/@reflectedReplaceSubstring/string()
     let $reflectedReplaceWith := $linkDef/@reflectedReplaceWith/string()
     let $recursive := ($linkDef/@recursive/string(), $referenced?recursive)[1]
@@ -152,11 +154,13 @@ declare function f:parseLinkDef($linkDef as element(),
             ))
     (: Build the map of mirror parameters :)            
     let $mirrorMap :=
-        if (empty(($reflector1, $reflector2, $reflectedReplaceSubstring, $reflectedReplaceWith))) then $mirrorRef        
+        if (empty(($reflector1, $reflector2, $reflector1FOX, $reflector2FOX, $reflectedReplaceSubstring, $reflectedReplaceWith))) then $mirrorRef        
         else if (empty($mirrorRef)) then
             map{
                 'reflector1': $reflector1,
                 'reflector2': $reflector2,
+                'reflector1FOX': $reflector1FOX,
+                'reflector2FOX': $reflector2FOX,
                 'reflectedReplaceSubstring': $reflectedReplaceSubstring,
                 'reflectedReplaceWith': $reflectedReplaceWith
             }
@@ -164,6 +168,8 @@ declare function f:parseLinkDef($linkDef as element(),
             map{
                 'reflector1': ($reflector1, $mirrorRef?reflector1)[1],
                 'reflector2': ($reflector1, $mirrorRef?reflector2)[1],
+                'reflector1FOX': ($reflector1, $mirrorRef?reflector1FOX)[1],
+                'reflector2FOX': ($reflector1, $mirrorRef?reflector2FOX)[1],
                 'reflectedReplaceSubstring': ($reflectedReplaceSubstring, $mirrorRef?reflectedReplaceSubstring)[1],
                 'reflectedReplaceWith': ($reflectedReplaceWith, $mirrorRef?reflectedReplaceWith)[1]
             }
