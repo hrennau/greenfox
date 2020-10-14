@@ -15,7 +15,7 @@
     
     <linkDef name="myJSON"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        targetMediatype="json"/>
+        mediatype="json"/>
     
     <linkDef name="hrefElems" hrefXP="//href"/>    
     

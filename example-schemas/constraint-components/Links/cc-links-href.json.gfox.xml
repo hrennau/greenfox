@@ -7,10 +7,10 @@
     node tree representation of the JSON document.
     
     Distinguish between the @mediatype attribute on the file shape <file> and
-    the @targetMediatype attribute on the link constraint <links>. The @mediatype 
+    the @mediatype attribute on the link constraint <links>. The @mediatype 
     on <file> ensures that the target resources of the file shape are treated as 
     JSON documents, which implies that links used by the shape have a link context
-    resource which is a JSON document. The @targetMediatype on <links> ensures that 
+    resource which is a JSON document. The @mediatype on <links> ensures that 
     link target resources are JSON documents.
     
     Nota bene: the mediatypes of the link context resource and the link target resource
@@ -34,7 +34,7 @@
                 
                 <!-- Check: all href references can be resolved to JSON documents -->
                 <links hrefXP="//href" 
-                       targetMediatype="json"
+                       mediatype="json"
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        minCountTargetDocs="3" minCountTargetDocsMsg="At least three country airport files expected"/>                
             </file>

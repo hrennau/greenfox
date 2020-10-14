@@ -2,7 +2,7 @@
     <!-- 
     Demonstrates the validation of links. The link is defined by a URI template and must be resolvable.        
     
-    In this example the URI template yields multiple target URIs. Due to the @targetMediatype attribute
+    In this example the URI template yields multiple target URIs. Due to the @mediatype attribute
     the target resources are parsed JSON documents.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uriTemplate.multiple"
@@ -23,7 +23,7 @@
                 
                 <!-- Check: JSON airport files exist -->
                 <links uriTemplate="ireland/airport-{iata}.json"
-                       targetMediatype="json"
+                       mediatype="json"
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        exists="true">
                     <templateVar name="iata" exprXP="//@iata"/>

@@ -22,7 +22,7 @@
                 
                 <!-- Check: all href references can be resolved to XML documents -->
                 <links hrefXP="//@href" 
-                    targetMediatype="xml"
+                    mediatype="xml"
                     resolvable="true" resolvableMsg="Link cannot be resolved"
                     minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>
                 

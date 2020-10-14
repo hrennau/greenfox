@@ -17,7 +17,7 @@
              contextXP="/csv/record[*[5] ne '\N']"
              uriXP="'${domainURI}/data/air/airports/countries/' || 
                      Country/lower-case(.) || '/json/airport-' || IATA/lower-case(.) || '.json'"
-             targetMediatype="json"/>
+             mediatype="json"/>
     
     <domain path="${domain}" name="dc2020">
         <!-- VISIT: airports folder -->

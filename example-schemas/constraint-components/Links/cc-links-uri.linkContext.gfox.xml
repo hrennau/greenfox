@@ -16,7 +16,7 @@
     <linkDef name="jsonAirports"
              contextXP="//airport[@iata]"
              uriXP="@iata/concat('ireland/airport-', ., '.json')"
-             targetMediatype="json"/>
+             mediatype="json"/>
     
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->

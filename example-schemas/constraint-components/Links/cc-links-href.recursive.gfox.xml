@@ -7,7 +7,7 @@
     resources.
     
     Note that recursive link resolving requires the link targets to be node trees. As no target mediatype 
-    has been defined by the link definition (not @targetMediatype), XML is assumed.
+    has been defined by the link definition (not @mediatype), XML is assumed.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive"
           xmlns="http://www.greenfox.org/ns/schema">

@@ -129,7 +129,7 @@ declare function f:parseLinkDef($linkDef as element(),
     let $recursive := ($linkDef/@recursive/string(), $referenced?recursive)[1]
     let $contextXP := ($linkDef/@contextXP/string(), $referenced?contextXP)[1]
     let $targetXP := ($linkDef/@targetXP/string(), $referenced?targetXP)[1]            
-    let $targetMediatype := ($linkDef/@targetMediatype/string(), $referenced?targetMediatype)[1]
+    let $mediatype := ($linkDef/@mediatype/string(), $referenced?mediatype)[1]
     let $csvSeparator := ($linkDef/@csv.separator/string(), $referenced?csv.separator)[1]
     let $csvHeader := ($linkDef/@csv.header/string(), $referenced?csv.header)[1]
     let $csvFormat := ($linkDef/@csv.format/string(), $referenced?csv.format)[1]
@@ -192,8 +192,8 @@ declare function f:parseLinkDef($linkDef as element(),
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
                     or $contextXP
-            let $targetMediatype :=
-                if ($targetMediatype) then $targetMediatype 
+            let $mediatype :=
+                if ($mediatype) then $mediatype 
                 else if ($targetXP) then 'xml' 
                 else if ($recursive and $requiresContextNode) then 'xml'
                 else () 
@@ -213,7 +213,7 @@ declare function f:parseLinkDef($linkDef as element(),
                     $hrefXP ! map:entry('hrefXP', .),
                     $uriXP ! map:entry('uriXP', .),
                     $uriTemplate ! map:entry('uriTemplate', .),                    
-                    $targetMediatype ! map:entry('targetMediatype', .),
+                    $mediatype ! map:entry('mediatype', .),
                     $recursive ! map:entry('recursive', string(.)),
                     $contextXP ! map:entry('contextXP', string(.)),
                     $targetXP ! map:entry('targetXP', string(.)),   
@@ -279,12 +279,12 @@ declare function f:linkDefObject($linkName as xs:string,
  : @param constraintElems link constraining elements
  : @return explicit or inferred mediatype, or the empty sequence
  :)
-declare function f:getLinkTargetMediatype($ldo as map(xs:string, item()*),
-                                          $lde as element()?,
-                                          $constraintElems as element()*)
+declare function f:getLinkMMediatype($ldo as map(xs:string, item()*),
+                                     $lde as element()?,
+                                     $constraintElems as element()*)
         as xs:string? {
     let $allConstraintElems := ($ldo?constraints, $constraintElems)
-    let $explicit := $ldo?targetMediatype
+    let $explicit := $ldo?mediatype
     return
         if ($explicit) then $explicit
         else if ($ldo?recursive) then 'xml'

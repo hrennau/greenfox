@@ -33,7 +33,7 @@ declare function f:getLinkHyperdoc($linkUsingElem as element(),
         
     let $ldo := link:getLinkDefObject($linkUsingElem, $context)
     let $lros := 
-        let $options := map{'targetMediatype': 'xml'}
+        let $options := map{'mediatype': 'xml'}
         return
             link:resolveLinkDef($ldo, 'lro', $contextURI, $useContextNode, $context, $options) 
             [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)

@@ -21,7 +21,7 @@
     <linkDef name="airports"
              contextXP="//airport"
              hrefXP="@href"             
-             targetMediatype="xml"/>
+             mediatype="xml"/>
         
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->

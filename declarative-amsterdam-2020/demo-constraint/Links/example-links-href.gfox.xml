@@ -2,7 +2,7 @@
     <!-- 
     Demonstrates the validation of links - uses a link definition containing a href expression.
     Note that the constraint element augments the referenced link definition (adding a
-    targetMediatype).
+    @mediatype).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Links/example-link-href"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -24,7 +24,7 @@
                 <targetSize minCount="1" minCountMsg="Missing JSON airports document"/>
                 
                 <!-- CHECK: links provided by href fields -->
-                <links linkName="hrefElems" targetMediatype="json" 
+                <links linkName="hrefElems" mediatype="json" 
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        minCountTargetResources="3" minCountTargetResourcesMsg="More link targets expected."/>
             </file>

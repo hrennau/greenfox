@@ -2,7 +2,7 @@
     <!-- 
     Demonstrates the validation of links - uses a link definition containing a href expression.
     Link resolution is applied recursively. Note that the constraint element augments the referenced 
-    link definition (adding a recursive flag and a targetMediatype).
+    link definition (adding a recursive flag and a @mediatype).
     
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Links/example-links-href-recursive"
@@ -26,7 +26,7 @@
                 
                 <!-- CHECK: links provided by href fields, resolved recursively -->
                 <links linkName="hrefElems"
-                       recursive="true" targetMediatype="json" 
+                       recursive="true" mediatype="json" 
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        minCountTargetResources="50" minCountTargetResourcesMsg="More link targets expected."/>                    
 

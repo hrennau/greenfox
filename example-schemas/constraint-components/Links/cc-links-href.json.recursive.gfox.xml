@@ -3,7 +3,7 @@
     Demonstrates the validation of links. The link is defined by a href expression and must be resolvable.
     
     This example highlights the checking of a recursive link definition (@recursive), as well as the
-    use of JSON link targets (@targetMediatype).
+    use of JSON link targets (@mediatype).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href-json.recursive"
           xmlns="http://www.greenfox.org/ns/schema">
@@ -23,7 +23,7 @@
                 <!-- Check: all href references can be recursively resolved to JSON documents -->
                 <links hrefXP="//href"
                        recursive="true"
-                       targetMediatype="json"                       
+                       mediatype="json"                       
                        resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
                        minCountTargetDocs="60" minCountTargetDocsMsg="More target docs expected"/>
                 

@@ -2,7 +2,7 @@
     <!-- 
     Demonstrates the validation of links. The link is defined by a href expression and must be resolvable.
     
-    Note the @targetMediatype attribute on the link constraint. A link target which cannot be parsed 
+    Note the @mediatype attribute on the link constraint. A link target which cannot be parsed 
     as an XML document will cause a red result.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.xml"
@@ -23,7 +23,7 @@
                 
                 <!-- Check: all href references can be resolved to XML documents -->
                 <links hrefXP="//@href" 
-                       targetMediatype="xml"
+                       mediatype="xml"
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        minCountTargetDocs="1" minCountTargetDocsMsg="At least one target document expected"/>
                 

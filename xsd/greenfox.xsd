@@ -119,7 +119,6 @@ S h a p e s
         </xs:sequence>
         <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
         <xs:attribute name="id" type="xs:NCName"/>
-        <xs:attribute name="mediatype" type="t:MediatypeListType"/>
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
     </xs:complexType>
     
@@ -978,7 +977,7 @@ Attribute groups
         <xs:attribute name="reflectedReplaceSubstring" type="xs:string"/>
         <xs:attribute name="reflectedReplaceWith" type="xs:string"/>
         <xs:attribute name="recursive" type="xs:boolean"/>        
-        <xs:attribute name="targetMediatype" type="xs:string"/>        
+        <xs:attribute name="mediatype" type="xs:string"/>        
         <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
     </xs:attributeGroup>
     

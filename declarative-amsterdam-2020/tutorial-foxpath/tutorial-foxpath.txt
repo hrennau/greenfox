@@ -197,6 +197,7 @@ Node tree navigation can be used in predicates in order to filter files
 by their structured content.
 
 ### EXAMPLES - filtering files by XML contents
+fox "..//*.gfox.xml[\\@csv.separator]"                                 # all Greenfox schemas using parameter @csv.separator
 fox "../data/air//*.xml[\*\local-name(.) ne 'airport']"                # all XML files with a root ne 'airport'
 fox "../data/air//airport-*.xml[\\altitude > 700]"                     # all XML files with //altitude > 700
 fox "../data/air//airports-*.xml[count(\\airport) > 50]"               # all airports-*.xml containing >50 <airport>s

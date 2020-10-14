@@ -14,7 +14,7 @@
     <!-- Define link: JSON airports -->
     <linkDef name="jsonAirports"
              uriTemplate="ireland/airport-{iata}.json"
-             targetMediatype="json">
+             mediatype="json">
         <templateVar name="iata" exprXP="//@iata"/>
     </linkDef>                
     

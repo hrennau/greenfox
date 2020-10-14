@@ -29,7 +29,7 @@
                 
                 <!-- CHECK: links defined by mirrored location -->
                 <links linkName="referenceAirports"
-                       targetMediatype="xml"
+                       mediatype="xml"
                        countTargetResources="1" countTargetResourcesMsg="Reference airport missing for XML airport"/>
             </file>
             <!-- VISIT: airport JSON documents -->
@@ -37,10 +37,11 @@
                 <targetSize minCount="1" minCountMsg="Missing JSON airports document"/>
                 
                 <!-- CHECK: links; references and augments link definition: 
-                            dds property: targetMediatype -->
+                            property: mediatype -->
                 <links linkName="referenceAirports"
-                    targetMediatype="json"
-                    countTargetResources="1" countTargetResourcesMsg="Reference airport missing for JSON airport"/>
+                       mediatype="json"
+                       countTargetResources="1" 
+                       countTargetResourcesMsg="Reference airport missing for JSON airport"/>
             </file>
         </folder>
     </domain>

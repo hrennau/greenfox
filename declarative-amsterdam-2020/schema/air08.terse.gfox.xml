@@ -16,17 +16,17 @@
     
     <linkDef name="myJSON"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        targetMediatype="json"/>    
+        mediatype="json"/>    
     <linkDef name="myXML"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
-        targetMediatype="xml"/>    
+        mediatype="xml"/>    
     <linkDef name="hrefElems" hrefXP="//href"/>    
     <linkDef name="hrefAtts" hrefXP="//@href"/>    
     <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>    
     <linkDef name="linkMeFromAirportsJSON"
         foxpath="fox-sibling('airports.json')" 
         targetXP="//href[ends-with(., $fileName)]"
-        targetMediatype="json"/>    
+        mediatype="json"/>    
     <linkDef name="mirror20201006"
         reflector1="${domain}" 
         reflector2="${domain}\..\air.20201006"/>
@@ -87,7 +87,7 @@
                                cmp="eq" cmpMsg="Country name in attribute and file name different"
                                useString="lc"/>
                 </valuePairs>                
-                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" mediatype="json" countTargetResources="1">
                     <!-- @country value matches "country" field in corresponding JSON file -->
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"

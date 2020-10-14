@@ -68,7 +68,7 @@ declare function f:validateValuePairConstraint($constraintElem as element(),
             (: let $_DEBUG := trace($ldo, '_LDO: ') :)
             let $lros := 
                 let $requiresXml := exists($constraintElem/*/@expr2XP)
-                let $options := if (not($requiresXml)) then () else map{'targetMediatype': 'xml'}
+                let $options := if (not($requiresXml)) then () else map{'mediatype': 'xml'}
                 return
                     link:resolveLinkDef($ldo, 'lro', $contextURI, $contextNode, $context, $options)
             let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $context)

@@ -21,12 +21,12 @@
              reflector2="${domain}\airports\countries\ireland\json"
              reflectedReplaceSubstring="-(.*)\.xml"
              reflectedReplaceWith="-$1.json"
-             targetMediatype="json"/>
+             mediatype="json"/>
 
     <!-- Maps an XML or JSON airport document to the corresponding CSV document -->
     <linkDef name="myCSV"
              foxpath="..\..\csv\*.csv"
-             targetMediatype="csv"
+             mediatype="csv"
              csv.header="yes"/>
     
     <domain path="${domain}" name="air">

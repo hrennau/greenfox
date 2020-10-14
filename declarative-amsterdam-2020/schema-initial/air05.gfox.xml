@@ -17,7 +17,7 @@
     <!-- LINK definitions -->
     <linkDef name="myJSON"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        targetMediatype="json"/>
+        mediatype="json"/>
     
     <domain path="${domain}" name="air">
         

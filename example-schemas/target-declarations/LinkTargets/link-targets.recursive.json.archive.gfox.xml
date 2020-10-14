@@ -14,7 +14,7 @@
     <linkDef name="airportsJson"
         hrefXP="//href"
         recursive="true"
-        targetMediatype="json" >
+        mediatype="json" >
         <constraints resolvable="true"
                      resolvableMsg="Target links could not be resolved"/>        
     </linkDef>

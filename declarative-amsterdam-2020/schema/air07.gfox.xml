@@ -15,11 +15,11 @@
     
     <linkDef name="myJSON"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        targetMediatype="json"/>
+        mediatype="json"/>
     
     <linkDef name="myXML"
         foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
-        targetMediatype="xml"/>
+        mediatype="xml"/>
     
     <linkDef name="hrefElems" hrefXP="//href"/>
     
@@ -28,7 +28,7 @@
     <linkDef name="linkMeFromAirportsJSON"
         foxpath="fox-sibling('airports.json')" 
         targetXP="//href[ends-with(., $fileName)]"
-        targetMediatype="json"/>
+        mediatype="json"/>
     
     <linkDef name="mirror20201006"
         reflector1="${domain}" 
@@ -92,7 +92,7 @@
                 </valuePairs>
                 
                 <!-- CHECK: @country value matches "country" field in corresponding JSON file -->
-                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" targetMediatype="json" countTargetResources="1">
+                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" mediatype="json" countTargetResources="1">
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"
                                    cmp="eq" cmpMsg="Country name in XML and JSON different"/>
