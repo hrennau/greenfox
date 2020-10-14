@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of ValuePair constraints: declares a ValuePairIncludes contraint.
+    Demonstrates the use of ValuePair constraints: declares a ValuePairContains contraint.
     
     All items of value 2 must be equal to an item from value 1. Here, the country IDs
     must include all country references.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.includes"
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.contains"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
@@ -27,7 +27,7 @@
                 <valuePairs>
                     <valuePair expr1XP="//country/@id" minCount1="231" minCount1Msg="Expected more countries."
                                expr2XP="//(* except border)/@country" minCount2="3144" minCount2Msg="Expected more country references."                                
-                               cmp="includes" cmpMsg="Country IDs must include all country references."/>
+                               cmp="contains" cmpMsg="Country IDs must include all country references."/>
                 </valuePairs>
             </file>
         </folder>

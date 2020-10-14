@@ -836,7 +836,7 @@ Enumerations
             <xs:enumeration value="ge"/>
             <xs:enumeration value="in"/>
             <xs:enumeration value="notin"/>
-            <xs:enumeration value="includes"/>
+            <xs:enumeration value="contains"/>
             <xs:enumeration value="sameTerms"/>
             <xs:enumeration value="deepEqual"/>
         </xs:restriction>

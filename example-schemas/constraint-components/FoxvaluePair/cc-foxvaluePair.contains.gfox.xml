@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FoxvaluePair constraints: declares a FoxvaluePairIncludes contraint.
+    Demonstrates the use of FoxvaluePair constraints: declares a FoxvaluePairContains contraint.
     
     All items of value 1 must be equal to an item from value 2. Here, all cities from the
     factbook document must be found in a CSV file.
@@ -20,7 +20,7 @@
                 <foxvaluePairs>
                     <foxvaluePair expr1XP="//city/name[1]"
                                   expr2FOX="..\countries\*.csv\csv-doc(.)/csv/record/*[3]"
-                                  cmp="includes"
+                                  cmp="contains"
                                   minCount1="100" minCount1Msg="Expected more factbook cities."
                                   minCount2="3000" minCount2Msg="Expected more country csv cities."/>
                 </foxvaluePairs>

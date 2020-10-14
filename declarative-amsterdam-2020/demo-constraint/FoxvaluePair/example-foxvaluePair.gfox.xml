@@ -19,7 +19,7 @@
             <foxvaluePairs>
                 <foxvaluePair expr1FOX="airports\index\airports-*.xml//airport/@id" minCount1="50"
                               expr2FOX="airports\countries\*\xml\airport-*.xml/airport/@id" minCount2="50" 
-                              cmp="includes" 
+                              cmp="contains" 
                               cmpMsg="The ID lists in index files do not contain all airport IDs found in airport files"/>
             </foxvaluePairs>
         </folder>
