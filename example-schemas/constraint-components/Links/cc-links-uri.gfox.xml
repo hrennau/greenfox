@@ -21,7 +21,7 @@
                 <targetSize minCount="1" minCountMsg="Airport files expected"/>
                 
                 <!-- Check: corresponding JSON airport file exists -->
-                <links uriXP="/airport/@iata/concat('airport-', ., '.json')" 
+                <links uriXP="/airport/@iata/lower-case(.) ! concat('airport-', ., '.json')" 
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        countTargetResources="1" countTargetResourcesMsg="Corresponding JSON airport file expected."/>                
             </file>
