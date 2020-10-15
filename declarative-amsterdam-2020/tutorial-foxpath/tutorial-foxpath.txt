@@ -255,11 +255,27 @@ archive, as if archive contents were ordinary file system contents. Use
 the pseudo-step #archive# in order to enter an archive.
 
 ### EXAMPLES
+fox ../data/air*.zip/#archive#//index/airports*.xml # list specific files
+fox "../data/air*.zip/#archive#//countries/*/xml/airport-*.xml[\\@icao eq 'EIDW']"
+                                                    # select files by content
+fox "../data/air*.zip/#archive#//countries/*/xml/airport-*.xml\\altitude => max()"
+                                                    # retrieve content data 
+fox "../data/air*.zip/#archive#//countries/*/xml/airport-*.xml\\dst =>frequencies()"
+                                                    # content data frequency distribution                                                    
 
 ** Navigating BaseX database content
 ------------------------------------
 BaseX database contents can be navigated like an ordinary file system. The
 navigation path must start with "basex:/".
+
+### EXAMPLES
+fox "basex:/air//index/*.xml"                       # list files
+fox "basex:/air//index/*.xml[\\@icao]"              # filter files by content
+fox "basex:/air//index/*.xml\\altitude => max()"    # extract data
+fox "basex:/air//index/*.xml\\city\string-length(.) => max()"
+                                                    # determine maximum item length
+fox "basex:/air/airports/countries//*.xml\\dst => frequencies()"
+                                                    # get a frequency distribution of data values                                                    
 
 ** Writing XML
 ------------------------------------
