@@ -84,47 +84,6 @@ declare function f:getImage($uri as xs:string,
     return $imagePath ! f:normalizeAbsolutePath(.)
 };
 
-(:~
- : Maps a URI to the image reflected by a mirror.
- :
- : @param uri a URI
- : @param reflector1 reflector reflecting the input URI
- : @param reflector2 reflector reflecting the output URI
- : @return the image URI, if the resource exists, an empty sequence otherwise
- :)
-(: 
-declare function f:getImage($uri as xs:string, $reflector1 as xs:string, $reflector2 as xs:string)
-        as xs:string? {
-        
-    (: Normalize URIs to make them comparable :)
-    let $uris:= f:normalizeURISet(($uri, $reflector1, $reflector2))
-    let $uri := $uris[1]
-    let $reflector1 := $uris[2]
-    let $reflector2 := $uris[3]
-    
-    let $pathReflector1ToUri :=
-        if (matches($uri, concat($reflector1, '(/.*)?$'))) then
-            substring-after($uri, concat($reflector1, '/'))
-            
-        else if (matches ($reflector1, concat($uri, '(/.*)?$'))) then
-            let $countSteps :=
-                (substring-after($reflector1, concat($uri, '/'))
-                ! tokenize(., '\s*/\s*')) => count()
-            return
-                (for $i in 1 to $countSteps return '..') => string-join('/')
-        else ()
-    return
-        (: Lefthook which is not ancestor or descendant of $uri not supported :)
-        if (empty($pathReflector1ToUri)) then () else
-        
-    let $imagePath := concat($reflector2, '/', $pathReflector1ToUri)
-    (:
-    let $exists := file:exists($imagePath)    
-    return $imagePath[$exists] ! f:normalizeAbsolutePath(.)
-    :)
-    return $imagePath ! f:normalizeAbsolutePath(.)
-};
-:)
 (: Normlizes an absolute path by removing step/.., step/step/../.. etc.
  :
  : Examples:
@@ -160,7 +119,7 @@ declare function f:normalizeAbsolutePath($path as xs:string)
  :)
 declare function f:normalizeURISet($uris as xs:string+)
         as xs:string+ {
-    let $uris2 := $uris ! lower-case(.) ! replace(., '\\', '/')       
+    let $uris2 := $uris ! replace(., '\\', '/')       
     let $drive := $uris[1] ! f:driveFromPath(.)         
     return
         if (empty($drive)) then $uris2
