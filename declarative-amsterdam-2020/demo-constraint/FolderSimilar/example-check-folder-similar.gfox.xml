@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FolderSimilar constraints.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020\data"/>
+    </context>
+    
+    <linkDef name="refAir" 
+             reflector1FOX="ancestor~::air" 
+             reflector2FOX="fox-sibling('Air.20201007')"/>
+
+    <domain path="${domain}" name="dc2020">
+        <folder foxpath="air" id="airFolderShape">
+            <targetSize count="1" countMsg="Missing air folder"/>
+            
+            <!-- All folders here must be similar to the corresponding folder there -->
+            <folder foxpath=".\\*">
+                <folderSimilar linkName="refAir">
+                    <skipFiles names="ONLINE.FLAG" where="here"/>
+                    <skipFiles names="phantastic.png" where="here"/>
+                    <skipFiles names=".ignoreme2" where="there"/>
+                </folderSimilar>
+            </folder>
+        </folder>
+    </domain>
+</greenfox>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of a Conditional constraint. If the constraint(s) in the if branch
+    are satisfied, the constraint(s) in the then branch are checked, otherwise the constraints
+    in the else branch, if there is one.    
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+
+    <context>
+        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020\data"/>
+    </context>
+    
+    <domain path="${domain}" name="dc2020">
+        <folder foxpath="air\airports\index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing index folder"/>          
+
+            <file foxpath="*">
+                <targetSize minCount="5" minCountMsg="Less files than expected."/>
+                <conditional>
+                    <if>
+                        <mediatype eq="xml"/>
+                    </if>
+                    <then>
+                        <xsdValid xsdFOX="$domain\air\resources\xsd\*.xsd"/>        
+                    </then>
+                </conditional>                
+            </file>
+        </folder>
+    </domain>
+</greenfox>
