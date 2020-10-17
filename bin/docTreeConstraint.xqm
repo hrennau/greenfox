@@ -111,17 +111,13 @@ declare function f:validateNodeContentConstraint($constraintElem as element(),
                                                  $context as map(xs:string, item()*))
         as element()* {
     let $locNP := $constraintNode/@locNP
+    (: New trail is previous trail with current @locNP appended :)
     let $trail := string-join(($contextTrail ! concat(., '(', $contextPosition, ')'), $constraintNode/@locNP), '#')
     let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
     
     (: Find nodes :)
     let $compiledNodePath := i:datapath($locNP, $constraintElem) ! $compiledNodePaths(.)
-    (:
-    let $_DEBUG := trace($locNP,'+++ LOC_NP: ')
-    let $_DEBUG := trace($compiledNodePath, '+++ COMPILED_NODE_PATH: ')
-     :)
     let $nodes := dcont:evaluateCompiledNodePath($compiledNodePath, $contextNode, $constraintNode, $options, $context)
-    (: let $_DEBUG := trace($compiledNodePaths, '+++ COMPILED_NODE_PATHS: '):)
     
     (: Check count :)
     let $results_counts := f:validateNodeContentConstraint_counts(
@@ -144,6 +140,7 @@ declare function f:validateNodeContentConstraint($constraintElem as element(),
     (: Check closed :)
     let $results_closed := f:validateNodeContentConstraint_closed(
         $constraintElem, $constraintNode, $contextNode, $nodes, $trail, $compiledNodePaths, $options, $context)
+        
     return (
         $results_counts,
         $results_counts_shortcut_atts,

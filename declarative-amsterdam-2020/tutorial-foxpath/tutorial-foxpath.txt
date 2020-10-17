@@ -1,6 +1,6 @@
 tutorial-foxpath - A terse tutorial introducing to the use of Foxpath
 
-Foxpath is a command-line tool for evaluating Foxpath expressions. Foxpath is 
+fox is a command-line tool for evaluating Foxpath expressions. Foxpath is 
 an extended version of XPath 3.0 supporting file-system navigation. 
 
 REQUIRED: the tutorial presupposes a sound knowledge of XPath.
@@ -9,9 +9,11 @@ Basic usage:
 ------------
 fox  [-b] [-f] [-p] foxpath
 
+foxpath - Foxpath expression, or a file containing a Foxpath expression
+
 -b : swap step separators: use \ in file system navigation, / in node tree navigation
 -f : the foxpath parameter is the name or path of a file containing a foxpath expression
--p: display expression tree, rather than evaluation the expression
+-p: display expression tree, rather than evaluating the expression
 For more options enter: fox ?
 
 Separators
@@ -143,7 +145,7 @@ fox "../data/air//index/(* except *.xml)"              # all resources except XM
 ** Non-navigation expressions
 ** --------------------------
 The top-level expression need not be a navigation expression - it can
-be any XPath 3.0 expression, e.g. a fubction call. 
+be any XPath 3.0 expression, e.g. a function call. 
 
 A few extension functions to note:
 - file-path()    # file path

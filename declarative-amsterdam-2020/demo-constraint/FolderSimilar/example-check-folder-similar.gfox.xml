@@ -13,7 +13,7 @@
     
     <linkDef name="refAir" 
              reflector1FOX="ancestor~::air" 
-             reflector2FOX="fox-sibling('Air.20201007')"/>
+             reflector2FOX="fox-sibling('air.20201006')"/>
 
     <domain path="${domain}" name="dc2020">
         <folder foxpath="air" id="airFolderShape">

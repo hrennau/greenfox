@@ -12,6 +12,7 @@ at "tt/_foxpath.xqm";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "docSimilarConstraintReports.xqm",
+   "documentModification.xqm",
    "greenfoxUtil.xqm",
    "resourceAccess.xqm";
 
@@ -89,7 +90,7 @@ declare function f:validateDocSimilar_similarity(
     (: Normalization options.
          Currently, the options cannot be controlled by schema parameters;
          this will be changed when the need arises :)
-    let $normOptions := map{'skipPrettyWS': true(), 'keepXmlBase': false()}        
+    let $normOptions := map{'skipPrettyWS': true(), 'skipXmlBase': true()}        
     
     let $redReport := $constraintElem/@redReport
     
@@ -156,14 +157,13 @@ declare function f:validateDocSimilar_similarity(
  : @return the normalized node
  :)
 declare function f:normalizeDocForComparison($node as node(), 
-                                             $normItems as element()*,
+                                             $modifiers as element()*,
                                              $normOptions as map(xs:string, item()*),
                                              $otherNode as node())
         as node()? {
-    let $skipPrettyWS := $normOptions?skipPrettyWS
-    let $keepXmlBase := $normOptions?keepXmlBase
-    
-    let $selectedItems := 
+    (: A function returning the items selected by the item selection attributes.
+     :)
+    let $fn_selectedItems := 
         function($tree, $modifier) as node()* {
             let $itemXP := $modifier/@itemXP
             return
@@ -187,75 +187,19 @@ declare function f:normalizeDocForComparison($node as node(),
                [empty($testXP) or boolean(f:evaluateSimpleXPath($testXP, .))]
             return $selected
         }
-    return
-    
-    copy $node_ := $node
-    modify (
-        if (not($skipPrettyWS)) then ()
-        else
-            let $delNodes := $node_//text()[not(matches(., '\S'))][../*]
-            return
-                if (empty($delNodes)) then () else delete node $delNodes
-        ,
-        (: @xml:base attributes are removed :)
-        if ($keepXmlBase) then () else
-            let $xmlBaseAtts := $node_//@xml:base
-            return
-                if (empty($xmlBaseAtts)) then ()
-                else
-                    let $delNodes := $xmlBaseAtts/(., ../@fox:base-added)
-                    return delete node $delNodes
-        ,
-        for $normItem in $normItems
+        
+    (: Sort document :)
+    let $node :=
+        let $sortDoc := $modifiers/self::gx:sortDoc
         return
-            typeswitch($normItem)
-            
-            (: Ignore items :)
-            case $skipItem as element(gx:skipItem) return
-                let $selected := $selectedItems($node_, $skipItem)            
-                return
-                    if (empty($selected)) then () else delete node $selected
-                    
-            (: Ignore item string value :)
-            case $skipItem as element(gx:ignoreValue) return
-                let $selected := $selectedItems($node_, $skipItem)            
-                return
-                    if (empty($selected)) then () else 
-                        for $sel in $selected[self::attribute() or not(*)] return
-                            replace value of node $sel with ''
-                    
-            (: Round numeric values :)
-            case $roundItem as element(gx:roundItem) return
-                let $selected := $selectedItems($node_, $roundItem)            
-                return
-                    if (empty($selected)) then () 
-                    else
-                        let $scale := $roundItem/@scale/number(.)  
-                        
-                        for $node in $selected
-                        let $value := $node/number(.)
-                        let $newValue := round($value div $scale, 0) * $scale
-                        return replace value of node $node with $newValue
-              
-            (: Edit item text (string replacement) :)
-            case $editItem as element(gx:editItem) return
-                let $selected := $selectedItems($node_, $editItem)
-                return
-                    if (empty($selected)) then ()
-                    else
-                        let $from  := $editItem/@replaceSubstring
-                        let $to := $editItem/@replaceWith
-                        let $useString := $editItem/@useString/tokenize(.)
-                        
-                        for $sel in $selected
-                        let $newValue := 
-                            if ($from and $to) then replace($sel, $from, $to) else $sel
-                        let $newValue :=
-                            if (empty($useString)) then $newValue else i:applyUseString($newValue, $useString)                            
-                        return
-                            if ($sel eq $newValue) then () else
-                                replace value of node $sel with $newValue
-            default return ()
-    )
-    return $node_
+            if (empty($sortDoc)) then $node else 
+                fold-left($sortDoc, $node, i:sortDoc#2)
+
+    let $mode := 'new'
+    let $result :=
+        if ($mode eq 'new') then 
+            f:applyDocModifiers($node, $modifiers, $normOptions, $fn_selectedItems)
+        else
+            f:applyDocModifiers_update($node, $modifiers, $normOptions, $fn_selectedItems)
+    return $result
 };
