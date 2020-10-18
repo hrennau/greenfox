@@ -66,33 +66,39 @@ declare function f:applyDocModifiers(
     let $types := ($modification?operations ! array:flatten(.) ! ?type) => distinct-values()
     let $functions := if (empty($modification)) then () else
         map:merge((
-        if (not($types = 'ignoreValue')) then () else
-            map:entry('ignoreValue',
-                function($node, $mod) {''})  
-        ,
-        if (not($types = 'roundItem')) then () else
-            map:entry('roundItem',
-                function($node, $mod) {
-                    let $scale := $mod/@scale/number(.)  
-                    let $value := $node/number(.)
-                    let $newValue := round($value div $scale, 0) * $scale
-                    return $newValue        
-                })  
-        ,
-        if (not($types = 'editItem')) then () else
-            map:entry('editItem',
-                function($node, $mod) {
-                    let $from  := $mod/@replaceSubstring
-                    let $to := $mod/@replaceWith
-                    let $useString := $mod/@useString/tokenize(.)
-                    let $r1 := if ($from and $to) then replace($node, $from, $to) else $node
-                    let $r2 := if (empty($useString)) then $r1 else i:applyUseString($r1, $useString)                            
-                    return $r2
-                })
+            map:entry('ignoreValue', f:applyDocModifiers_ignoreValue#2)[$types = 'ignoreValue'],
+            map:entry('roundItem', f:applyDocModifiers_roundItem#2) [$types = 'roundItem'],
+            map:entry('editItem',  f:applyDocModifiers_editItem#2)[$types = 'editItem']
     ))  
     return
         f:applyDocModifiersRC($doc, $modification, $functions, $options)
 };
+
+declare function f:applyDocModifiers_editItem($node as node(),
+                                              $mod as element(gx:editItem))
+        as xs:string {
+    let $from  := $mod/@replaceSubstring
+    let $to := $mod/@replaceWith
+    let $useString := $mod/@useString/tokenize(.)
+    let $r1 := if ($from and $to) then replace($node, $from, $to) else $node
+    let $r2 := if (empty($useString)) then $r1 else i:applyUseString($r1, $useString)                            
+    return $r2
+};        
+
+declare function f:applyDocModifiers_roundItem($node as node(),
+                                               $mod as element(gx:editItem))
+        as xs:string {
+    let $scale := $mod/@scale/number(.)  
+    let $value := $node/number(.)
+    let $newValue := round($value div $scale, 0) * $scale
+    return $newValue        
+};        
+
+declare function f:applyDocModifiers_ignoreValue($node as node(),
+                                                 $mod as element(gx:editItem))
+        as xs:string {
+    ''        
+};        
 
 (:~
  : Recursive helper function of 'applyDocModifiers'.

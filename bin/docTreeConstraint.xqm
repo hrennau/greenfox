@@ -111,11 +111,12 @@ declare function f:validateNodeContentConstraint($constraintElem as element(),
                                                  $context as map(xs:string, item()*))
         as element()* {
     let $locNP := $constraintNode/@locNP
-    (: New trail is previous trail with current @locNP appended :)
+    (: New context trail is previous context trail with current @locNP appended :)
     let $trail := string-join(($contextTrail ! concat(., '(', $contextPosition, ')'), $constraintNode/@locNP), '#')
+    (: Switch controling whether to consider namespaces :)
     let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
     
-    (: Find nodes :)
+    (: Find instance nodes :)
     let $compiledNodePath := i:datapath($locNP, $constraintElem) ! $compiledNodePaths(.)
     let $nodes := dcont:evaluateCompiledNodePath($compiledNodePath, $contextNode, $constraintNode, $options, $context)
     
