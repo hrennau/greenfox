@@ -329,14 +329,18 @@ C o n s t r a i n t    e l e m e n t s
     
     <xs:complexType name="DocTreeConstraintType">
         <xs:sequence>
-            <xs:element name="node" type="t:DocTreeNodeType" maxOccurs="unbounded"/>
+            <xs:element name="node" type="t:DocTreeParticleType" maxOccurs="unbounded"/>                            
         </xs:sequence>
         <xs:attribute name="withNamespaces" type="xs:boolean"/>
     </xs:complexType>
     
-    <xs:complexType name="DocTreeNodeType">
+    <xs:complexType name="DocTreeParticleType">
         <xs:sequence>
-            <xs:element name="node" type="t:DocTreeNodeType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeGroupType"/>
+                <xs:element name="oneOf" type="t:DocTreeOneOfType"/>
+            </xs:choice>                
         </xs:sequence>
         <xs:attribute name="locNP" type="xs:string" use="required"/>
         <xs:attribute name="atts" type="t:AttributeUsageListType"/>
@@ -353,7 +357,29 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="maxCountMsg" type="xs:string"/>
         <xs:attribute name="maxCountMsgOK" type="xs:string"/>
     </xs:complexType>
+    
+    <xs:complexType name="DocTreeOneOfType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeParticleType"/>
+                <xs:element name="oneOf" type="t:DocTreeParticleType"/>
+            </xs:choice>              
+        </xs:sequence>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
 
+    <xs:complexType name="DocTreeGroupType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeParticleType"/>
+                <xs:element name="oneOf" type="t:DocTreeParticleType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>        
+    </xs:complexType>
+    
     <!-- H y p e r d o c T r e e    C o n s t r a i n t s -->
     
     <xs:complexType name="HyperdocTreeConstraintType">

@@ -24,6 +24,9 @@ at "conditionalConstraint.xqm",
 import module namespace dtree="http://www.greenfox.org/ns/xquery-functions/doc-tree" 
 at "docTreeConstraint.xqm";
 
+import module namespace dtree2="http://www.greenfox.org/ns/xquery-functions/doc-tree2" 
+at "docTreeConstraint2.xqm";
+
 import module namespace expr="http://www.greenfox.org/ns/xquery-functions/value" 
 at "valueConstraint.xqm";
     
@@ -130,7 +133,11 @@ declare function f:validateFileConstraints($fileConstraints as element(),
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
-        case element(gx:docTree) return dtree:validateDocTreeConstraint($constraintElem, $context)  
+        case element(gx:docTree) return 
+            let $mode := 'old'
+            return
+                if ($mode eq 'new') then dtree2:validateDocTreeConstraint($constraintElem, $context)
+                else dtree:validateDocTreeConstraint($constraintElem, $context)  
         case element(gx:hyperdocTree) return dtree:validateDocTreeConstraint($constraintElem, $context)        
         
         case element(gx:value) return expr:validateValueConstraint($constraintElem, $context)
