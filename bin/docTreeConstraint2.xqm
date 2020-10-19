@@ -90,7 +90,7 @@ declare function f:validateDocTreeConstraint($constraintElem as element(),
         (: Extract all results :)                
         for $key in map:keys($results)
         where starts-with($key, 'results_')
-        return trace($results($key) , '+++ RESULTS: ')
+        return $results($key)
 };
 
 declare function f:validateDocTree_particle($constraintElem as element(),
@@ -101,7 +101,7 @@ declare function f:validateDocTree_particle($constraintElem as element(),
                                             $compiledNodePaths as map(xs:string, item()*),
                                             $options as map(xs:string, item()*),
                                             $context as map(xs:string, item()*))
-        as map(xs:string, item()*) {
+        as map(xs:string, item()*)* {
     typeswitch($modelParticle)
     case element(gx:node) return 
         f:validateDocTree_node($constraintElem, $modelParticle, $contextNode, $contextPosition, 
@@ -110,7 +110,7 @@ declare function f:validateDocTree_particle($constraintElem as element(),
         f:validateDocTree_oneOf($constraintElem, $modelParticle, $contextNode, $contextPosition, 
             $contextTrail, $compiledNodePaths, $options, $context)
     case element(gx:nodeGroup) return 
-        f:validateDocTree_oneOf($constraintElem, $modelParticle, $contextNode, $contextPosition, 
+        f:validateDocTree_nodeGroup($constraintElem, $modelParticle, $contextNode, $contextPosition, 
             $contextTrail, $compiledNodePaths, $options, $context)
     default return error()            
 };
@@ -127,43 +127,49 @@ declare function f:validateDocTree_oneOf($constraintElem as element(),
                                          $options as map(xs:string, item()*),
                                          $context as map(xs:string, item()*))
         as map(xs:string, item()*) {
+    let $trail := string-join(($contextTrail ! concat(., '(', $contextPosition, ')'), 'oneOf'), '#')
+    
     let $datapathParticle := i:datapath($modelParticle, $constraintElem)
     let $nodeIdParticle := generate-id($modelParticle)
     
-    (: Write an array with one member per oneOf branch :) 
-    let $branchResults := array{     
-        for $branch at $pos in $modelParticle/* 
-        return trace(
-            f:validateDocTree_particle(
-                $constraintElem, $branch, $contextNode, $contextPosition, 
-                $contextTrail, $compiledNodePaths, $options, $context)
-                , concat('+++ BRANCH RESULTS, BRANCH #', $pos, ': '))
+    (: Write an array of arrays, with one member array per oneOf branch :) 
+    let $branchResults := array{  
+            for $branch at $pos in $modelParticle/* 
+            return array{
+                f:validateDocTree_particle(
+                    $constraintElem, $branch, $contextNode, $contextPosition, 
+                    $contextTrail, $compiledNodePaths, $options, $context)
+            }
     }
     (: Indexes of "green branches", those without red count results :)
     let $indexGreenBranch :=
         for $pos in 1 to array:size($branchResults)
         let $member := $branchResults($pos)
+        let $memberMaps := array:flatten($member)
         return
-            if (empty($member?results_count/self::gx:red)) then $pos
+            if (empty($memberMaps?results_count/self::gx:red)) then $pos
             else ()
 
     (: Results from green branch :)
-    let $results_greenBranch := 
+    let $results_greenBranchRaw := 
         if (count($indexGreenBranch) eq 1) then
-            $branchResults($indexGreenBranch)
+            array:flatten($branchResults($indexGreenBranch))?*
         else ()
+    let $results_greenBranch := $results_greenBranchRaw[. instance of node()]
+    let $results_greenBranchMaps := $results_greenBranchRaw[. instance of map(*)]
     
     (: The choice result is green if exactly one branch is green :)            
-    let $results_oneOf := trace(
-        if (count($indexGreenBranch) eq 1) then 
-            let $greenBranch := $branchResults($indexGreenBranch)
-            return <gx:green constraintComp="DocTreeOneOf" constraintPath="{$datapathParticle}"/>
-        else 
-            <gx:red constraintComp="DocTreeOneOf" constraintPath="{$datapathParticle}" greenIndexes="{$indexGreenBranch}"/>
-, '+++ RESULTS_ONEOF: ')
+    let $results_oneOf :=
+        let $colour := if (count($indexGreenBranch) eq 1) then 'green' else 'red'
+        return
+            result:validationResult_docTree_oneOf(
+                $colour, $constraintElem, $modelParticle, $contextNode,
+                $indexGreenBranch, $trail, (), $context)   
 
     (: OneOfInfo: maps the oneOf node ID to the index of the green branch :)
-    let $oneOfInfo := map:entry($nodeIdParticle, $indexGreenBranch[count(.) eq 1])
+    let $oneOfInfo := map:merge((
+        map:entry($nodeIdParticle, $indexGreenBranch[count(.) eq 1]),
+        $results_greenBranchMaps))
     let $results :=
         map{'info_oneOf': $oneOfInfo,
             'results_choice': $results_oneOf,
@@ -180,22 +186,34 @@ declare function f:validateDocTree_nodeGroup($constraintElem as element(),
                                              $compiledNodePaths as map(xs:string, item()*),
                                              $options as map(xs:string, item()*),
                                              $context as map(xs:string, item()*))
-        as element()* {
-    error()        
+        as map(xs:string, item()*)* {
+
+    for $child at $pos in $modelParticle/* 
+    return
+        f:validateDocTree_particle(
+            $constraintElem, $child, $contextNode, $contextPosition, 
+            $contextTrail, $compiledNodePaths, $options, $context)
 };
 
 (:~
- : Validates resource contents against a model node.
+ : Validates resource contents against a model node. Returns a map with
+ : three fields:
+ : - results_counts - validation results obtained from count constraints
+ : - results_closed - validation results of a closed constraint
+ : - results_children - validation results obtained from the validation of 
+ :   child model nodes.
  :
- : @param constraintElem element representing the constraint group
- : @param constraintNode a node representing a particular constraint
+ : @param constraintElem element representing the DocTree constraints
+ : @param constraintNode a model node representing an instance node
  : @param contextNode ?
  : @param contextPosition ?
  : @param contextTrail ?
  : @param compiledNodePaths ?
  : @param options evaluation options
  : @param context the processing context
- : @return validation results
+ : @return a map with three fields, results_count the validation results from
+ :   count constraints, results_closed the validation results from a DocTreeClosed
+ :   constraint, results_children the validation results from child validation
  :)
 declare function f:validateDocTree_node($constraintElem as element(),
                                         $constraintNode as element(gx:node),                                                 
@@ -226,35 +244,61 @@ declare function f:validateDocTree_node($constraintElem as element(),
     let $results_counts_shortcut_atts := 
         f:validateNodeContentConstraint_shortcutAttCounts($constraintElem, $constraintNode, $nodes, $trail, $options, $context)
 
-    (: Check children :)
-    let $resultmaps_children :=
+    (: Validate all instances of the node model :)  
+    let $instance_results :=
+    
         for $node at $pos in $nodes
-        for $constraintNode in $constraintNode/* 
-        return
-            f:validateDocTree_particle(
-                $constraintElem, $constraintNode, $node, $pos, $trail, $compiledNodePaths, $options, $context)
+    
+        (: Check children :)
+        let $resultmaps_children :=
+            for $constraintNode in $constraintNode/* 
+            return
+                f:validateDocTree_particle(
+                    $constraintElem, $constraintNode, $node, $pos, $trail, $compiledNodePaths, $options, $context)
      
-     let $results_children :=
-        for $resultmap in $resultmaps_children
-        for $key in map:keys($resultmap)
-        where starts-with($key, 'results_')
-        return $resultmap($key)
+        (: Validation results obtained from validation of child model nodes :)
+        let $results_children :=
+            for $resultmap in $resultmaps_children
+            for $key in map:keys($resultmap)
+            where starts-with($key, 'results_')
+            return $resultmap($key)
         
-     let $info_oneOf := trace(
-        map:merge($resultmaps_children?info_oneOf)
-        , '+++ INFO_ONEOF: ')
-    (: Check closed :)
-    let $results_closed := f:validateNodeContentConstraint_closed(
-        $constraintElem, $constraintNode, $contextNode, $nodes, $trail, $compiledNodePaths, $info_oneOf, $options, $context)
+        (: Information about relevant OneOf branches (required for validation of DocTreeClosed) :)
+        let $info_oneOf := map:merge($resultmaps_children?info_oneOf)
+     
+        (: Flag - any OneOf error encountered when validating child model nodes? :)
+        let $withOneOfError := exists($results_children/self::gx:red[@constraintComp eq 'DocTreeOneOf'])
+     
+        (: Check closed :)
+        let $results_closed := 
+            if (not($constraintNode/@closed/xs:boolean(.))) then ()
+            else if ($withOneOfError) then
+                result:validationResult_docTree_closed_exception(
+                    $constraintElem, $constraintNode, 
+                    "DocTreeClosed check canceled because of DocTreeOneOf error in content", 
+                    (), (), $context) 
+            else
+                f:validateNodeContentConstraint_closed(
+                    $constraintElem, $constraintNode, $contextNode, $node, $trail, 
+                    $compiledNodePaths, $info_oneOf, $options, $context)
         
-    let $result :=
+        (: Complete validation results :)        
+        let $result :=
+            map{
+                'results_children': $results_children,
+                'results_closed': $results_closed
+            }
+        return
+            $result
+        
+    let $overallResult :=
         map{
             'results_count': ($results_counts, $results_counts_shortcut_atts),
-            'results_children': $results_children,
-            'results_closed': $results_closed
+            'results_children': $instance_results?results_children,
+            'results_closed': $instance_results?results_closed
         }
     return
-        $result
+        $overallResult
 };
 
 (: Returns the content model of a model node. The content model consists of two lists,
@@ -311,8 +355,10 @@ declare function f:getContentModelRC($constraintElem as element(),
         let $indexGreenBranch := $infoOneOf($nodeIdModelParticle)
         return
             if (count($indexGreenBranch) ne 1) then
+            (:
                 let $_DEBUG := trace($modelParticle, '+++ ONE_OF_GROUP: ')
                 return
+             :)                
                     error(QName((), 'SYSTEM_ERROR'), 
                         concat('Not exactly one green branch of oneOf; ',
                            'particle node id: ', $nodeIdModelParticle,
@@ -496,34 +542,6 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
         return
             result:validationResult_docTree_counts(
                 $colour, $constraintElem, $attsConstraintNode, (), string($attName), $newContextNode, count($att), $newTrail, (), $context)
-
-(:            
-        if ($withNamespaces) then
-            for $shortcutAttName in $shortcutAttNames       
-            let $attQName :=
-                if (contains($shortcutAttName, ':')) then resolve-QName($shortcutAttName, $constraintNode)
-                else QName((), $shortcutAttName)
-            for $node at $pos in $nodes
-            let $att := $node/@*[node-name(.) eq $attQName]
-            let $colour := if ($att) then 'green' else 'red'
-            let $newContextNode := $node
-            let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attLname
-            return
-                result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $attsConstraintNode, string($attQName), $newContextNode, count($att), $newTrail, (), $context)
-        else
-            for $shortcutAttName in $shortcutAttNames       
-            let $attLname := trace($shortcutAttName ! replace(., '^.+:', '') , '+++ ATT_LNAME: ')
-            for $node at $pos in $nodes
-            let $att := $node/@*[local-name(.) eq $attLname]
-            let $colour := if ($att) then 'green' else 'red'
-            let $newContextNode := $node
-            let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attLname
-            return
-                (: Note that $node is passed on as context node :)
-                result:validationResult_docTree_counts(
-                    $colour, $constraintElem, $attsConstraintNode, $attLname, $newContextNode, count($att), $newTrail, (), $context)
-:)                    
 };
 
 (:~
@@ -571,16 +589,7 @@ declare function f:validateNodeContentConstraint_closed(
     let $contentModel := f:getContentModel($constraintElem, $constraintNode, $infoOneOf, $compiledNodePaths)
     let $cnpsAttribute := $contentModel?atts            
     let $cnpsElement := $contentModel?elems
-    (:
-    let $cnpsAttributeOrChild := f:getContentModel($constraintElem, $constraintNode, $infoOneOf, $compiledNodePaths)    
-        for $locNP in $constraintNode/gx:node/@locNP 
-        let $cnp := $locNP ! i:datapath(., $constraintElem) ! $compiledNodePaths(.)
-        where count($cnp) ge 1 and ($cnp[1]/self::child or $cnp[1]/self::attribute)
-        return $cnp[1]            
-    let $cnpsAttribute := $cnpsAttributeOrChild[self::attribute]            
-    let $cnpsElement := $cnpsAttributeOrChild[self::child]
-    :)
-        
+       
     (: Unexpected elements = child elements of instance node which do not match a child path :)
     let $unexpectedElems :=$currentContextNode/*
         [not(dcont:nodeNameMatchesNodePathStep(., $cnpsElement, (), (), $withNamespaces, $constraintNode))]
@@ -603,7 +612,7 @@ declare function f:validateNodeContentConstraint_closed(
         )
     
     
-    return 
+    return
         if ($unexpectedNodes) then
             $unexpectedNodes/result:validationResult_docTree_closed('red', $constraintElem, $constraintNode, 
                 $currentContextNode, ., $trail, (), $context)

@@ -86,7 +86,7 @@ declare function f:applyDocModifiers_editItem($node as node(),
 };        
 
 declare function f:applyDocModifiers_roundItem($node as node(),
-                                               $mod as element(gx:editItem))
+                                               $mod as element(gx:roundItem))
         as xs:string {
     let $scale := $mod/@scale/number(.)  
     let $value := $node/number(.)
@@ -95,7 +95,7 @@ declare function f:applyDocModifiers_roundItem($node as node(),
 };        
 
 declare function f:applyDocModifiers_ignoreValue($node as node(),
-                                                 $mod as element(gx:editItem))
+                                                 $mod as element(gx:ignoreValue))
         as xs:string {
     ''        
 };        

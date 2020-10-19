@@ -308,6 +308,90 @@ declare function f:validationResult_docTree_closed($colour as xs:string,
         }       
 };
 
+(:~
+ : Creates a validation result expressing an exceptional condition 
+ : which prevents normal evaluation of a Value constraint.
+ : Such an exceptional condition is, for example, a failure to parse 
+ . the context resource into a node tree.
+ :
+ : @param constraintElem an element declaring Value constraints
+ : @param exception an optional message string
+ : @param addAtts additional attributes 
+ : @param context processing context
+ : @return a red validation result
+ :)
+declare function f:validationResult_docTree_closed_exception(
+                                            $constraintElem as element(),
+                                            $constraintNode as node()?,
+                                            $exception as xs:string?,                                                  
+                                            $addAtts as attribute()*,
+                                            $addElems as element()*,
+                                            $context as map(xs:string, item()*))
+        as element() {
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath      
+    let $constraintPath := i:getSchemaConstraintPath(($constraintNode, $constraintElem)[1])        
+    let $targetInfo := $context?_targetInfo  
+    let $constraintComp := 
+        let $constraintCompPrefix := $constraintElem/i:firstCharToUpperCase(local-name(.))    
+        return $constraintCompPrefix || 'Closed'
+    let $filePathAtt := $targetInfo?contextURI ! attribute filePath {.}
+    let $focusNodeAtt := $targetInfo?focusNodePath ! attribute nodePath {.}
+    let $msg := $exception
+    return
+        element {'gx:red'} {
+            attribute exception {$msg},            
+            attribute constraintComp {$constraintComp},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $filePathAtt,
+            $focusNodeAtt,            
+            $addAtts,
+            $addElems
+        }
+};
+
+declare function f:validationResult_docTree_oneOf($colour as xs:string,
+                                                  $constraintElem as element(),
+                                                  $constraintNode as node(),
+                                                  $contextNode as node(),
+                                                  $indexGreenBranch as xs:integer*,   
+                                                  $nodeTrail as xs:string,
+                                                  $additionalAtts as attribute()*,
+                                                  $context as map(xs:string, item()*))
+        as element() {
+    let $contextURI := $context?_targetInfo?contextURI
+    let $resourceShapeID := $constraintElem/@resourceShapeID
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
+    let $constraintComponent := 
+        let $constraintCompPrefix := $constraintElem/i:firstCharToUpperCase(local-name(.))    
+        return $constraintCompPrefix || 'OneOf'
+    let $nodePath := $contextNode/i:datapath(.)
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    let $reason := 
+        if ($colour ne 'red') then () else
+            if (empty($indexGreenBranch)) then 'no_branch_valid'
+            else if (count($indexGreenBranch) gt 1) then 'multiple_branches_valid'
+            else ()
+    return
+        element {f:resultElemName($colour)} {
+            $contextURI ! attribute filePath {.},
+            $msg ! attribute msg {.},
+            attribute constraintComp {$constraintComponent},            
+            $constraintPath ! attribute constraintPath {.},            
+            $resourceShapePath ! attribute resourceShapePath {.}, 
+            $resourceShapeID ! attribute resourceShapeID {.},
+            $constraintNode[self::attribute()],
+            attribute indexGreenBranch {$indexGreenBranch},
+            $reason ! attribute reason {.},
+            $nodePath ! attribute nodePath {.},
+            $nodeTrail ! attribute nodeTrail {.},
+            $additionalAtts            
+        }       
+};
+
 
 (:~
  : Creates a validation result expressing an exceptional condition 

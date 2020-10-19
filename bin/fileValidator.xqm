@@ -134,7 +134,7 @@ declare function f:validateFileConstraints($fileConstraints as element(),
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
         case element(gx:docTree) return 
-            let $mode := 'old'
+            let $mode := 'new'
             return
                 if ($mode eq 'new') then dtree2:validateDocTreeConstraint($constraintElem, $context)
                 else dtree:validateDocTreeConstraint($constraintElem, $context)  

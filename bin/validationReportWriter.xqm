@@ -176,7 +176,7 @@ declare function f:writeValidationReport_white(
                     $resourceIdentifierAtt, 
                     $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
                 }</gx:whiteGreenResource>
-            else error()
+            else error(QName((), 'SYSTEM_ERROR'), concat('Unexpected result colour: ', $result/name()))
     let $redResources := $resourceDescriptors/self::gx:redResource
     let $yellowResources := $resourceDescriptors/self::gx:yellowResource    
     let $greenResources := $resourceDescriptors/self::gx:greenResource
