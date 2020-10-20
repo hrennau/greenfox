@@ -132,7 +132,8 @@ declare function f:validateDocTree_oneOf($constraintElem as element(),
     let $datapathParticle := i:datapath($modelParticle, $constraintElem)
     let $nodeIdParticle := generate-id($modelParticle)
     
-    (: Write an array of arrays, with one member array per oneOf branch :) 
+    (: Write an array of arrays, with one member array per oneOf branch;
+       remembern that a nodeGroup returns a sequence of result maps :) 
     let $branchResults := array{  
             for $branch at $pos in $modelParticle/* 
             return array{
@@ -141,22 +142,34 @@ declare function f:validateDocTree_oneOf($constraintElem as element(),
                     $contextTrail, $compiledNodePaths, $options, $context)
             }
     }
-    (: Indexes of "green branches", those without red count results :)
+    (: Green branches are those where the member paths and their cardinalities 
+       are as expected; in other words, those without red results from either 
+       count constraints or choice constraints. 
+       
+       Note that the branch may have red results from the validation of child 
+       nodes of the branch nodes, and possibly also from other constrains (not 
+       yet supported) which concern the branch nodes themselve, but not their 
+       cardinality (like datatype checks).
+       
+       This distinction between the "name tree" and other aspects of validation
+       corresponds to the behaviour of XSD, where the detection of "unexpected
+       content" is not influenced by the validation results obtained for a
+       content member. :)
     let $indexGreenBranch :=
         for $pos in 1 to array:size($branchResults)
         let $member := $branchResults($pos)
         let $memberMaps := array:flatten($member)
         return
-            if (empty($memberMaps?results_count/self::gx:red)) then $pos
+            if (empty($memberMaps?results_count/(self::gx:red, self::gx:choice))) then $pos
             else ()
 
-    (: Results from green branch :)
-    let $results_greenBranchRaw := 
+    (: Gross results from green branch - validation results and oneOf infos :)
+    let $results_greenBranchGross := 
         if (count($indexGreenBranch) eq 1) then
             array:flatten($branchResults($indexGreenBranch))?*
         else ()
-    let $results_greenBranch := $results_greenBranchRaw[. instance of node()]
-    let $results_greenBranchMaps := $results_greenBranchRaw[. instance of map(*)]
+    let $results_greenBranch := $results_greenBranchGross[. instance of node()]
+    let $results_greenBranchMaps := $results_greenBranchGross[. instance of map(*)]
     
     (: The choice result is green if exactly one branch is green :)            
     let $results_oneOf :=
