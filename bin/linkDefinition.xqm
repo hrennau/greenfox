@@ -138,6 +138,7 @@ declare function f:parseLinkDef($linkDef as element(),
     let $csvBackslashes := ($linkDef/@csv.backslashes/string(), $referenced?csv.backslashes)[1]
     let $templateVarsDef := $linkDef/gx:templateVar
     let $templateVarsRef := $referenced?templateVars
+    let $constraintsDef := $linkDef[self::gx:linkDef]/gx:targetSize
     let $constraintsRef := $referenced?constraints
     
     (: Build the map of templates vars; key=name, value=XML element with @value :)
@@ -220,7 +221,7 @@ declare function f:parseLinkDef($linkDef as element(),
                     $csvProperties,                    
                     $templateVarsMap ! map:entry('templateVars', .),
                     $mirrorMap ! map:entry('mirror', .),
-                    $constraintsRef ! map:entry('constraints', .)                            
+                    ($constraintsDef, $constraintsRef)[1] ! map:entry('constraints', .)                            
                 )))
     return $ldo
 };    

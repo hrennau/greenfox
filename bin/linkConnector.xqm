@@ -69,10 +69,14 @@ declare function f:applyLinkConnector($ldo as map(*),
         return
             i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContextNext, true())
             
+    (: Connector: URI template 
+       ======================= :)
     else if ($ldo?uriTemplate) then
         let $items := f:resolveUriTemplate($ldo, $contextPoint, $context)
         return $items
         
+    (: Connector: mirror 
+       ================= :)
     else if (exists($ldo?mirror)) then
         let $items := f:resolveMirror($ldo, $contextURI, $context)
         return $items
@@ -101,7 +105,7 @@ declare function f:resolveUriTemplate($ldo as map(*),
             map:merge(
                 for $name in $templateVars ! map:keys(.)
                 let $templateVarElem := $templateVars($name) 
-                let $value := $templateVarElem/@exprXP/f:resolveLinkExpression(., $contextPoint, $context) ! string(.)
+                let $value := $templateVarElem/@valueXP/f:resolveLinkExpression(., $contextPoint, $context) ! string(.)
                 return map:entry($name, $value)
             )
     let $templateResolution := f:resolveUriTemplateRC($uriTemplate, $templateVarMap)
