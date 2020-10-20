@@ -17,7 +17,7 @@
              contextXP="//airport[@iata]"
              uriTemplate="ireland/airport-{iata}.json"
              mediatype="json">
-        <templateVar name="iata" exprXP="@iata"/>
+        <templateVar name="iata" valueXP="@iata"/>
     </linkDef>                
     
     <domain path="${domain}" name="greenfox-example-data">

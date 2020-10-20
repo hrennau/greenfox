@@ -19,8 +19,8 @@
     <linkDef name="schemaInclude"
              hrefXP="/xs:schema/xs:include/@schemaLocation"
              recursive="true">
-        <constraints resolvable="true"
-                     resolvableMsg="Recursive includes could not be resolved"/>
+        <targetSize resolvable="true"
+                    resolvableMsg="Recursive includes could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

@@ -14,7 +14,7 @@
     <linkDef name="airports"
              hrefXP="//@href"
              recursive="true">
-        <constraints resolvable="true"/>
+        <targetSize resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

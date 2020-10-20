@@ -13,7 +13,7 @@
     <!-- Define link: "summaryReference" -->
     <linkDef name="summaryReference"
              foxpath="fox-sibling($fileName, '\d*.xml$', '-reference.xml')">
-        <constraints countTargetResources="1"/>        
+        <targetSize countTargetResources="1"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

@@ -19,7 +19,7 @@
         foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
         contextXP="//article"
         targetXP="//article[@id eq $linkContext/articleID]">
-        <constraints countTargetDocs="1" 
+        <targetSize countTargetDocs="1" 
             minCountContextNodes="1"
             minCountTargetNodes="2" minCountTargetNodesMsg="Missing target nodes."/>
     </linkDef>

@@ -16,7 +16,7 @@
              foxpath="fox-sibling($fileName, '\.xml$', '.json')"
              mediatype="json">
         <!-- Link constraints: exactly one target resource -->
-        <constraints countTargetDocs="1"/>
+        <targetSize countTargetDocs="1"/>
     </linkDef>
     
 

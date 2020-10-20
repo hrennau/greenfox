@@ -13,7 +13,7 @@
     <!-- Define link: "countryAirports" -->
     <linkDef name="countryAirports"
              hrefXP="//@href">
-        <constraints resolvable="true"/>
+        <targetSize resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

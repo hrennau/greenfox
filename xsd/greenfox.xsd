@@ -50,7 +50,7 @@ LinkDefinition
     <xs:complexType name="LinkDefType">
         <xs:sequence>
             <xs:group ref="t:LinkDefGroup" minOccurs="0"/>
-            <xs:element name="constraints" minOccurs="0" type="t:ConstraintsType"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:NCName"/>
         <xs:attributeGroup ref="t:LinkDefAttGroup"/>
@@ -59,11 +59,11 @@ LinkDefinition
     <!-- Template var element -->
     <xs:complexType name="TemplateVarType">
         <xs:attribute name="name" type="xs:NCName" use="required"/>
-        <xs:attribute name="exprXP" type="xs:string" use="required"/>
+        <xs:attribute name="valueXP" type="xs:string" use="required"/>
     </xs:complexType>
     
-    <!-- Constraints element -->
-    <xs:complexType name="ConstraintsType">
+    <!-- Link targetSize element -->
+    <xs:complexType name="LinkTargetSizeType">
         <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
@@ -443,7 +443,7 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="parentLocalName" type="t:NCNameList"/>
         <xs:attribute name="namespace" type="t:AnyURIList"/>
         <xs:attribute name="parentNamespace" type="t:AnyURIList"/>
-        <xs:attribute name="testXP" type="xs:string"/>
+        <xs:attribute name="ifXP" type="xs:string"/>
         <xs:attribute name="itemXP" type="xs:string"/>
     </xs:attributeGroup>
     
@@ -1133,7 +1133,7 @@ Attribute groups
         
         <xs:attribute name="minCountContextNodes" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountContextNodesMsg" type="xs:string"/>
-        <xs:attribute name="mincCountContextNodesMsgOK" type="xs:string"/>
+        <xs:attribute name="minCountContextNodesMsgOK" type="xs:string"/>
         
         <xs:attribute name="maxCountContextNodes" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountContextMsg" type="xs:string"/>
@@ -1146,7 +1146,7 @@ Attribute groups
 
         <xs:attribute name="minCountTargetResources" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetResourcesMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetResourcesMsgOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetResourcesMsgOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetResources" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetResourcesMsg" type="xs:string"/>
@@ -1159,7 +1159,7 @@ Attribute groups
         
         <xs:attribute name="minCountTargetResourcesPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetResourcesPerContextPointMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetResourcesPerContextPointMsgOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetResourcesPerContextPointMsgOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetResourcesPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetResourcesPerContextPointMsg" type="xs:string"/>
@@ -1172,7 +1172,7 @@ Attribute groups
         
         <xs:attribute name="minCountTargetDocs" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetDocsMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetDocsMsgOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetDocsMsgOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetDocs" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetDocsMsg" type="xs:string"/>
@@ -1185,7 +1185,7 @@ Attribute groups
         
         <xs:attribute name="minCountTargetDocsPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetDocsPerContextPointMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetDocsMsgPerContextPointOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetDocsMsgPerContextPointOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetDocsPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetDocsPerContextPointMsg" type="xs:string"/>
@@ -1198,7 +1198,7 @@ Attribute groups
         
         <xs:attribute name="minCountTargetNodes" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetNodesMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetNodesMsgOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetNodesMsgOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetNodes" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetNodesMsg" type="xs:string"/>
@@ -1211,7 +1211,7 @@ Attribute groups
         
         <xs:attribute name="minCountTargetNodesPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="minCountTargetNodesPerContextPointMsg" type="xs:string"/>
-        <xs:attribute name="mincCountTargetNodesMsgPerContextPointOK" type="xs:string"/>
+        <xs:attribute name="minCountTargetNodesMsgPerContextPointOK" type="xs:string"/>
         
         <xs:attribute name="maxCountTargetNodesPerContextPoint" type="xs:nonNegativeInteger"/>
         <xs:attribute name="maxCountTargetNodesPerContextPointMsg" type="xs:string"/>

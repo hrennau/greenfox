@@ -20,8 +20,8 @@
     <linkDef name="schemaImport"
              hrefXP="/xs:schema/xs:import/@schemaLocation" 
              recursive="true" >
-        <constraints resolvable="true"
-                     resolvableMsg="Target links could not be resolved"/>
+        <targetSize resolvable="true"
+                    resolvableMsg="Target links could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

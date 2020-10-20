@@ -16,8 +16,8 @@
              contextXP="/csv/record[*[5] ne '\N']"
              uriTemplate="${domainURI}/data/air/airports/countries/{country}/json/airport-{iata}.json"
              mediatype="json">
-        <templateVar name="country" exprXP="Country/lower-case(.)"/>
-        <templateVar name="iata" exprXP="IATA/lower-case(.)"/>
+        <templateVar name="country" valueXP="Country/lower-case(.)"/>
+        <templateVar name="iata" valueXP="IATA/lower-case(.)"/>
     </linkDef>                
     
     <domain path="${domain}" name="dc2020">

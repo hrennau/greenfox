@@ -19,7 +19,7 @@
              contextXP="//airport"
              hrefXP="@href"             
              targetXP="/*/geo">
-        <constraints countTargetNodesPerContextPoint="1"/>
+        <targetSize countTargetNodesPerContextPoint="1"/>
     </linkDef>
 
     <domain path="${domain}" name="greenfox-example-data">

@@ -25,7 +25,7 @@
              contextXP="//airport[not(@href)]"
              foxpath="fox-parent-sibling('airports-copy')\fox-child($fileName)"
              targetXP="//airport[@icao eq $linkContext/@icao]">
-        <constraints countTargetDocs="1"/>
+        <targetSize countTargetDocs="1"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

@@ -16,8 +16,8 @@
              hrefXP="//href"
              recursive="true"
              mediatype="json" >
-        <constraints resolvable="true"
-                     resolvableMsg="Target links could not be resolved"/>        
+        <targetSize resolvable="true"
+                    resolvableMsg="Target links could not be resolved"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

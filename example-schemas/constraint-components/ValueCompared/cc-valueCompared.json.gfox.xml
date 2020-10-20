@@ -25,7 +25,7 @@
              mediatype="json">
         <!-- Link constraints: 
              per context point one target document with one <geo> element -->
-        <constraints 
+        <targetSize 
             countTargetDocsPerContextPoint="1"
             countTargetNodesPerContextPoint="1"/>
     </linkDef>

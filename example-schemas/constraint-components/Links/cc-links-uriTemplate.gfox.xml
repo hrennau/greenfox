@@ -23,7 +23,7 @@
                 <!-- Check: corresponding JSON airport file exists -->
                 <links uriTemplate="airport-{iata}.json" 
                        resolvable="true" resolvableMsg="Link cannot be resolved">
-                    <templateVar name="iata" exprXP="/airport/@iata"/>
+                    <templateVar name="iata" valueXP="/airport/@iata"/>
                 </links>                
             </file>
         </folder>

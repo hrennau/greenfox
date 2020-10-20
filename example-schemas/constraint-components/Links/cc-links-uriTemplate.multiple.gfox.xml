@@ -26,7 +26,7 @@
                        mediatype="json"
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        exists="true">
-                    <templateVar name="iata" exprXP="//@iata"/>
+                    <templateVar name="iata" valueXP="//@iata"/>
                 </links>
             </file>
         </folder>

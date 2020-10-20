@@ -19,7 +19,7 @@
 
     <linkDef name="expectations"
              foxpath="fox-parent-sibling('expectation')\expectation-articles.xml">
-        <constraints countTargetDocs="1"/>
+        <targetSize countTargetDocs="1"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">

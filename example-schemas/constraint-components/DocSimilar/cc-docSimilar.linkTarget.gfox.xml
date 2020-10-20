@@ -24,7 +24,7 @@
     <linkDef name="input2"
              foxpath="fox-sibling('executionSummary2.xml')"
              targetXP="//input">
-        <constraints countTargetDocs="1"/>
+        <targetSize countTargetDocs="1"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
