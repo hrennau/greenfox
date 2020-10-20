@@ -175,7 +175,7 @@ declare function f:normalizeDocForComparison($node as node(),
             let $namespace := $modifier/@namespace/tokenize(.)
             let $parentLocalName := $modifier/@parentLocalName/tokenize(.)
             let $parentNamespace := $modifier/@parentNamespace/tokenize(.)
-            let $testXP := $modifier/@testXP
+            let $ifXP := $modifier/@ifXP
                 
             let $candidates := if ($kind eq 'attribute') then $tree//@* else $tree//*
             let $selected :=
@@ -184,7 +184,7 @@ declare function f:normalizeDocForComparison($node as node(),
                [empty(@namespace) or namespace-uri(.) = $namespace]
                [empty($parentLocalName) or ../local-name(.) = $parentLocalName]
                [empty(@parentNamespace) or ../namespace-uri(.) = $parentNamespace]
-               [empty($testXP) or boolean(f:evaluateSimpleXPath($testXP, .))]
+               [empty($ifXP) or boolean(f:evaluateSimpleXPath($ifXP, .))]
             return $selected
         }
         
