@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links. The link is defined by a URI expression and must be resolvable.        
+    
+    Checks that for each XML airport file a corresponding JSON airport file exists.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uri"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}/../../../../example-data"/>
+    </context>
+  
+    <domain uri="${domain}" name="greenfox-example-data">
+        <!-- Visit: airports folder -->
+        <file uri="air/airports/countries/ireland/xml/airport-byt.xml" id="airportFileShape">
+            <targetSize countMsg="Missing folder: airport-byt.xml" count="1"/>
+
+            <!-- Check: corresponding JSON airport file exists -->
+            <links uri="../ONLINE.FLAG" 
+                   countTargetResources="1" countTargetResourcesMsg="Not accompanied by ONLINE.FLAG."/>                
+        </file>
+    </domain>
+
+</greenfox>

@@ -68,7 +68,7 @@ declare function f:updateProcessingContext_resourceRelationships(
 declare function f:updateProcessingContext_domain($domainElem as element(gx:domain), 
                                                   $context as map(xs:string, item()*))
         as map(xs:string, item()*) {
-    let $dpath := $domainElem/@path
+    let $dpath := $domainElem/(@uri, @path)[1]
     let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
     return
         if (not($domainPath)) then

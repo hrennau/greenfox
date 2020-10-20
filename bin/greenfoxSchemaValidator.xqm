@@ -25,7 +25,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 declare function f:validateGreenfox($schema as element(gx:greenfox)) 
         as element()* {
-    let $domain := $schema/gx:domain/@path
+    let $domain := $schema/gx:domain/(@uri, @path)[1]
     let $_CHECK_DOMAIN := f:check_domainFolderExists($schema)
 
     let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
@@ -190,7 +190,7 @@ declare function f:greenfoxLocation($node as node()) as xs:string {
  :)
 declare function f:check_domainFolderExists($gfox as element(gx:greenfox))
         as empty-sequence() {
-    let $domain := $gfox//gx:domain/@path
+    let $domain := $gfox//gx:domain/(@uri, @path)[1]
     let $domainUri := i:pathToUriCompatible($domain)
     return
         if (starts-with($domain, 'basex://')) then

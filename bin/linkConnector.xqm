@@ -69,6 +69,12 @@ declare function f:applyLinkConnector($ldo as map(*),
         return
             i:evaluateFoxpath($ldo?foxpath, $contextURI, $evaluationContextNext, true())
             
+    (: Connector: URI 
+       ============== :)
+    else if ($ldo?uri) then
+        let $items := i:existentResourceUri($ldo?uri, $context?_targetInfo?contextURI, ())
+        return $items
+        
     (: Connector: URI template 
        ======================= :)
     else if ($ldo?uriTemplate) then

@@ -7,7 +7,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\declarative-amsterdam-2020\data"/>
+        <field name="domain" value="${schemaPath}/../../../declarative-amsterdam-2020\data"/>
         <field name="ignSchemas" value="foo.gfox.xml bar.gfox.xml"/>
     </context>
     
@@ -16,10 +16,10 @@
              reflector2="${domain}\air.20201006"
              />
     
-    <domain path="${domain}" name="dc2020">
+    <domain uri="${domain}" name="dc2020">
         
         <!-- VISIT: index folder -->
-        <folder foxpath="air\airports\countries" id="indexFolderShape">
+        <folder uri="air/airports/countries" id="indexFolderShape">
             <targetSize countMsg="Missing folder: countries" count="1"/>
 
             <!-- VISIT: country airports document -->

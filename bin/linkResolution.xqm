@@ -8,19 +8,20 @@
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions/greenlink";
 
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
 
-import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" at
-    "linkConnector.xqm",
-    "linkDefinition.xqm",
-    "linkUtil.xqm";
+import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
+at "linkConnector.xqm",
+   "linkDefinition.xqm",
+   "linkUtil.xqm";
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "expressionEvaluator.xqm",
-    "greenfoxUtil.xqm",
-    "log.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "expressionEvaluator.xqm",
+   "greenfoxUtil.xqm",
+   "log.xqm",
+   "uriUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -141,7 +142,7 @@ declare function f:resolveLinkDefRC(
     let $lrosAtomicItems :=   
         for $href in $hrefs
         let $baseURI := $contextURI
-        let $targetURI := i:fox-resolve-uri($href, $baseURI)
+        let $targetURI := i:resolveUri($href, $baseURI)
         
         (: Ignore URIs already obtained 
            ---------------------------- :)

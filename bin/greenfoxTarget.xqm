@@ -86,13 +86,17 @@ declare function f:getTargetPaths($resourceShape as element(),
 declare function f:resolveTargetDeclaration($resourceShape as element(), 
                                             $context as map(xs:string, item()*))
         as map(xs:string, item()*) {
-    let $urisAndLros :=       
-        let $path := $resourceShape/@path
+    let $urisAndLros :=
+        let $uri := $resourceShape/@uri
+        let $path := $resourceShape/@path        
         let $foxpath := $resourceShape/@foxpath
         let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @uriTemplate, @linkReflectionBase)         
         return
+            (: URI :)
+            if ($uri) then 
+                map{'targetPaths': f:getTargetPaths_uri($uri, $resourceShape, $context)}
             (: Plain path :)
-            if ($path) then 
+            else if ($path) then 
                 map{'targetPaths': f:getTargetPaths_path($path, $resourceShape, $context)}
             (: Foxpath (and no link constraints :)
             else if ($foxpath and empty($resourceShape/gx:targetSize/link:getLinkConstraintAtts(.))) then 
@@ -126,9 +130,27 @@ declare function f:getTargetPaths_path($path as xs:string,
         then i:fox-resource-is-dir#1 
         else i:fox-resource-is-file#1
     return    
-        trace( concat($contextPath, '/', $path) ,  '_PATH: ')
+        concat($contextPath, '/', $path)
         [i:fox-resource-exists(.)]
         [$isExpectedResourceKind(.)]        
+};
+
+(:~
+ : Returns the target paths of a resource shape, identified by a plain path 
+ : expression. Note that the plain path may contain wildcards.
+ :
+ : @param path plain path expression
+ : @param resourceShape the resource shape 
+ : @param context the processing context
+ : @return the target paths
+ :)
+declare function f:getTargetPaths_uri($uri as xs:string, 
+                                      $resourceShape as element(),
+                                      $context as map(xs:string, item()*))
+        as xs:string* {
+    let $contextUri := $context?_targetInfo?contextURI
+    let $kind := $resourceShape/local-name(.)
+    return i:existentResourceUri($uri, $contextUri, $kind)        
 };
 
 (:~

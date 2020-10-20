@@ -29,6 +29,53 @@ declare function f:driveFromPath($path as xs:string)
 };
 
 (:~
+ : Returns the URI of an existent resource, or an empty sequence if
+ : the input data cannot be resolved to an existent resource.
+ :
+ : @param uri relative or absolute URI or path
+ : @param baseUri base URI to be used for resolving the resource
+ : @param resourceKind if specified, the expected kind of resource, value 'file' or 'folder'
+ : @return a resource URI or an empty string 
+ :) 
+declare function f:existentResourceUri($uri as xs:string, 
+                                       $baseUri as xs:string?, 
+                                       $resourceKind as xs:string?)
+        as xs:string? {
+                   
+    let $useUri := string-join(($baseUri, $uri), '/') 
+                   ! f:normalizeAbsolutePath(.)
+                   ! f:pathToUriCompatible(.)
+    return
+        $useUri
+        [f:fox-resource-exists($useUri)]
+        [not($resourceKind) or (
+         if ($resourceKind eq 'file') then f:fox-resource-is-file(.)
+         else if ($resourceKind eq 'folder') then f:fox-resource-is-dir(.)
+         else error())]
+};
+
+(:~
+ : Resolves a URI to an absolute URI. If the input URI is absolute, it is
+ : returned unchanged; otherwise it is resolved against the base URI.
+ : Initial upward steps (..) are resolved.
+ :
+ : @param uri the URI to be resolved
+ : @param baseUri base URI against which to resolve
+ : @return the resolved URI
+ :)
+declare function f:resolveUri($uri as xs:string, $baseUri as xs:string)
+        as xs:string {
+    if (matches($uri, '^(/|[a-zA-Z]:/|\i\c*:/)')) then $uri
+    else
+        let $backstep := starts-with($uri, '../')
+        let $baseUri := replace($baseUri, '/$', '') 
+                        ! replace(., '[^/]+$', '')
+        return 
+            if (not($backstep)) then concat($baseUri, $uri)
+            else f:resolveUri(substring($uri, 4), $baseUri)
+};        
+
+(:~
  : Maps a URI to the image reflected by a mirror.
  :
  : @param uri a URI

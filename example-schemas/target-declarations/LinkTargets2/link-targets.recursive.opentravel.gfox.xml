@@ -26,7 +26,7 @@
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: OpenTravel schemas folder -->
-        <folder path="OpenTravel\OpenTravel_2017B_XML" id="xsdFolderShape">
+        <folder uri="OpenTravel/OpenTravel_2017B_XML" id="xsdFolderShape">
             <targetSize countMsg="Missing folder: OpenTravel XSDs" count="1"/>
 
             <!-- Visit: XSD files -->    

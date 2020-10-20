@@ -470,7 +470,7 @@ declare function f:finalizeReportRC($n as node()) as node()? {
  :)
 declare function f:getDomainDescriptor($domain as element(gx:domain))
         as xs:string {
-    $domain/@path/replace(., '\\', '/')        
+    $domain/(@uri, @path)[1]/replace(., '\\', '/')        
 };
 
 declare function f:displayResultResults($resources as element()*)

@@ -79,7 +79,8 @@ Domain
                 <xs:element name="file" type="t:FileShapeType"/>
             </xs:choice>
         </xs:sequence>
-        <xs:attribute name="path" type="xs:string" use="required"/>
+        <xs:attribute name="uri" type="xs:string"/>
+        <xs:attribute name="path" type="xs:string"/>
         <xs:attribute name="name" type="xs:string"/>
     </xs:complexType>
 
@@ -1004,8 +1005,8 @@ Attribute groups
 -->    
     
     <xs:attributeGroup name="LinkDefAttGroup">
-        <xs:attribute name="foxpath" type="xs:string"/>        
-        <xs:attribute name="path" type="xs:string"/>
+        <xs:attribute name="foxpath" type="xs:string"/>
+        <xs:attribute name="uri" type="xs:string"/>        
         <xs:attribute name="contextXP" type="xs:string"/>
         <xs:attribute name="targetXP" type="xs:string"/>        
         <xs:attribute name="hrefXP" type="xs:string"/>

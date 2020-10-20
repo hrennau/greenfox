@@ -23,17 +23,17 @@
           xmlns="http://www.greenfox.org/ns/schema">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaPath}/../../../../example-data"/>
     </context>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder uri="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>    
             
             <!-- Visit: airports file -->
-            <file path="airports.xml" id="airportsFileShape">
+            <file uri="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
 
                 <!-- Visit: link targets selected by href references -->

@@ -101,6 +101,7 @@ declare function f:parseLinkDefs($linkDefs as element()*, $context as map(xs:str
  : - @foxpath
  : - @hrefXP
  : - @uriXP
+ : - @uri
  : - @uriTemplate
  : - @uriReflectionBase
  :
@@ -118,6 +119,7 @@ declare function f:parseLinkDef($linkDef as element(),
     let $foxpath := ($linkDef/@foxpath/string(), $referenced?foxpath)[1]
     let $hrefXP := ($linkDef/@hrefXP/string(), $referenced?hrefXP)[1]
     let $uriXP := ($linkDef/@uriXP/string(), $referenced?uriXP)[1]
+    let $uri := ($linkDef/@uri/string(), $referenced?uri)[1]    
     let $uriTemplate := ($linkDef/@uriTemplate, $referenced?uriTemplate)[1]
     let $mirrorRef := $referenced?mirror
     let $reflector1 := $linkDef/@reflector1/string()
@@ -176,7 +178,7 @@ declare function f:parseLinkDef($linkDef as element(),
             }
     return
         if (empty((
-            $foxpath, $hrefXP, $uriXP, $uriTemplate, $mirrorMap,
+            $foxpath, $hrefXP, $uriXP, $uri, $uriTemplate, $mirrorMap,
                 $recursive, $contextXP, $targetXP, $constraintsRef, $templateVarsMap))) then () 
         else
     
@@ -186,6 +188,7 @@ declare function f:parseLinkDef($linkDef as element(),
                 if ($foxpath) then 'foxpath'
                 else if ($hrefXP) then 'hrefExpr'
                 else if ($uriXP) then 'uriExpr'
+                else if ($uri) then 'uri'                
                 else if ($uriTemplate) then 'uriTemplate'
                 else if (exists($mirrorMap)) then 'mirror'
                 else error(QName((), 'INVALID_SCHEMA'), 'Cannot determine link connector')
@@ -213,6 +216,7 @@ declare function f:parseLinkDef($linkDef as element(),
                     $foxpath ! map:entry('foxpath', .),
                     $hrefXP ! map:entry('hrefXP', .),
                     $uriXP ! map:entry('uriXP', .),
+                    $uri ! map:entry('uri', .),                    
                     $uriTemplate ! map:entry('uriTemplate', .),                    
                     $mediatype ! map:entry('mediatype', .),
                     $recursive ! map:entry('recursive', string(.)),
