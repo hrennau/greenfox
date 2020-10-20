@@ -8,12 +8,12 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data"/>
+        <field name="domain" value="${schemaPath}/../../data"/>
     </context>    
-    <domain path="${domain}" name="data">
+    <domain uri="${domain}" name="data">
         
         <!-- VISIT airports.xml -->
-        <file foxpath="air\airports\index\airports.xml">
+        <file uri="air/airports/index/airports.xml">
             <targetSize count="1" countMsg="Missing file: airports.xml"/>
                 
             <!-- @href must start with https:// -->

@@ -12,12 +12,12 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data"/>
+        <field name="domain" value="${schemaPath}/../../data"/>
     </context>    
-    <domain path="${domain}" name="data">
+    <domain uri="${domain}" name="data">
         
         <!-- VISIT airports.with-headr.csv -->
-        <folder foxpath="air\resources\openflights">
+        <folder uri="air/resources/openflights">
             <targetSize count="1" countMsg="Missing folder: airports"/>
                 
             <!-- @href must start with https:// -->

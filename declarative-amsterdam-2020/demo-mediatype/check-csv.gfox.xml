@@ -7,12 +7,12 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data"/>
+        <field name="domain" value="${schemaPath}/../../data"/>
     </context>    
-    <domain path="${domain}" name="data">
+    <domain uri="${domain}" name="data">
         
         <!-- VISIT airports.with-headr.csv -->
-        <file foxpath="air\resources\openflights\airports.csv" mediatype="csv" csv.header="yes">
+        <file uri="air/resources/openflights/airports.csv" mediatype="csv" csv.header="yes">
             <targetSize count="1" countMsg="Missing file: airports.csv"/>
                 
             <!-- @href must start with https:// -->
