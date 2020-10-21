@@ -33,8 +33,8 @@
              mediatype="json"/>
     
     <linkDef name="mirror20201006"
-             reflector1="${domain}" 
-             reflector2="${domain}\..\air.20201006"/>
+             reflector1URI="${domain}" 
+             reflector2URI="${domain}/../air.20201006"/>
     
     <domain path="${domain}" name="air">
         

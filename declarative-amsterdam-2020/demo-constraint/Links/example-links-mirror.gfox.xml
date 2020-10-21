@@ -15,8 +15,8 @@
          link targets are found under folder 'air.20201006' at a location which
          corresponds to the location of the context resource under folder 'air' -->
     <linkDef name="referenceAirports" 
-             reflector1="${domain}/data/air"
-             reflector2="${domain}/data/air.20201006"/>
+             reflector1URI="${domain}/data/air"
+             reflector2URI="${domain}/data/air.20201006"/>
     
     <domain path="${domain}" name="dc2020">
         <!-- VISIT: airports folder -->

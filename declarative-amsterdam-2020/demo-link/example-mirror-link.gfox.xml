@@ -12,8 +12,8 @@
     </context>
     
     <linkDef name="refAirports"
-             reflector1="${domain}\air"
-             reflector2="${domain}\air.20201006"
+             reflector1URI="${domain}/air"
+             reflector2URI="${domain}/air.20201006"
              />
     
     <domain uri="${domain}" name="dc2020">

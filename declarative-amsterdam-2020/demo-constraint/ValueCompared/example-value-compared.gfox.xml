@@ -17,8 +17,8 @@
     
     <!-- Maps an XML airport description to the corresponding JSON description -->
     <linkDef name="myJSON"
-             reflector1="${domain}\airports\countries\ireland\xml" 
-             reflector2="${domain}\airports\countries\ireland\json"
+             reflector1URI="${domain}/airports/countries/ireland/xml" 
+             reflector2URI="${domain}/airports/countries/ireland/json"
              reflectedReplaceSubstring="-(.*)\.xml"
              reflectedReplaceWith="-$1.json"
              mediatype="json"/>
