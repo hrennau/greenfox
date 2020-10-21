@@ -1012,8 +1012,8 @@ Attribute groups
         <xs:attribute name="hrefXP" type="xs:string"/>
         <xs:attribute name="uriXP" type="xs:string"/>
         <xs:attribute name="uriTemplate" type="xs:string"/>
-        <xs:attribute name="reflector1" type="xs:string"/>
-        <xs:attribute name="reflector2" type="xs:string"/>
+        <xs:attribute name="reflector1URI" type="xs:string"/>
+        <xs:attribute name="reflector2URI" type="xs:string"/>
         <xs:attribute name="reflector1FOX" type="xs:string"/>
         <xs:attribute name="reflector2FOX" type="xs:string"/>
         <xs:attribute name="reflectedReplaceSubstring" type="xs:string"/>

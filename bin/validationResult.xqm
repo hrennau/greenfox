@@ -2010,8 +2010,8 @@ declare function f:validateResult_linkDefAtts($ldo as map(*)?,
         ($constraintElem/@uri, $ldo?uri)[1] ! normalize-space(.) ! attribute uri {.},
         ($constraintElem/@contextXP, $ldo?contextXP)[1] ! normalize-space(.) ! attribute contextXP {.},
         ($constraintElem/@targetXP, $ldo?targetXP)[1] ! normalize-space(.) ! attribute targetXP {.},
-        ($constraintElem/@reflector1, $ldo?mirror?reflector1)[1] ! normalize-space(.) ! attribute reflector1 {.},
-        ($constraintElem/@reflector2, $ldo?mirror?reflector2)[1] ! normalize-space(.) ! attribute reflector2 {.},
+        ($constraintElem/@reflector1URI, $ldo?mirror?reflector1URI)[1] ! normalize-space(.) ! attribute reflector1URI {.},
+        ($constraintElem/@reflector2URI, $ldo?mirror?reflector2URI)[1] ! normalize-space(.) ! attribute reflector2URI {.},
         ($constraintElem/@recursive, $ldo?recursive ! attribute recursive {.})[1]
     )
     return $exprAtts

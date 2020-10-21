@@ -122,8 +122,8 @@ declare function f:parseLinkDef($linkDef as element(),
     let $uri := ($linkDef/@uri/string(), $referenced?uri)[1]    
     let $uriTemplate := ($linkDef/@uriTemplate, $referenced?uriTemplate)[1]
     let $mirrorRef := $referenced?mirror
-    let $reflector1 := $linkDef/@reflector1/string()
-    let $reflector2 := $linkDef/@reflector2/string()
+    let $reflector1URI := $linkDef/@reflector1URI/string()
+    let $reflector2URI := $linkDef/@reflector2URI/string()
     let $reflector1FOX := $linkDef/@reflector1FOX/string()
     let $reflector2FOX := $linkDef/@reflector2FOX/string()
     let $reflectedReplaceSubstring := $linkDef/@reflectedReplaceSubstring/string()
@@ -157,11 +157,11 @@ declare function f:parseLinkDef($linkDef as element(),
             ))
     (: Build the map of mirror parameters :)            
     let $mirrorMap :=
-        if (empty(($reflector1, $reflector2, $reflector1FOX, $reflector2FOX, $reflectedReplaceSubstring, $reflectedReplaceWith))) then $mirrorRef        
+        if (empty(($reflector1URI, $reflector2URI, $reflector1FOX, $reflector2FOX, $reflectedReplaceSubstring, $reflectedReplaceWith))) then $mirrorRef        
         else if (empty($mirrorRef)) then
             map{
-                'reflector1': $reflector1,
-                'reflector2': $reflector2,
+                'reflector1URI': $reflector1URI,
+                'reflector2URI': $reflector2URI,
                 'reflector1FOX': $reflector1FOX,
                 'reflector2FOX': $reflector2FOX,
                 'reflectedReplaceSubstring': $reflectedReplaceSubstring,
@@ -169,10 +169,10 @@ declare function f:parseLinkDef($linkDef as element(),
             }
         else            
             map{
-                'reflector1': ($reflector1, $mirrorRef?reflector1)[1],
-                'reflector2': ($reflector1, $mirrorRef?reflector2)[1],
-                'reflector1FOX': ($reflector1, $mirrorRef?reflector1FOX)[1],
-                'reflector2FOX': ($reflector1, $mirrorRef?reflector2FOX)[1],
+                'reflector1URI': ($reflector1URI, $mirrorRef?reflector1URI)[1],
+                'reflector2URI': ($reflector2URI, $mirrorRef?reflector2URI)[1],
+                'reflector1FOX': ($reflector1FOX, $mirrorRef?reflector1FOX)[1],
+                'reflector2FOX': ($reflector2FOX, $mirrorRef?reflector2FOX)[1],
                 'reflectedReplaceSubstring': ($reflectedReplaceSubstring, $mirrorRef?reflectedReplaceSubstring)[1],
                 'reflectedReplaceWith': ($reflectedReplaceWith, $mirrorRef?reflectedReplaceWith)[1]
             }

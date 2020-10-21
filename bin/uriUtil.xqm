@@ -79,32 +79,32 @@ declare function f:resolveUri($uri as xs:string, $baseUri as xs:string)
  : Maps a URI to the image reflected by a mirror.
  :
  : @param uri a URI
- : @param reflector1 reflector reflecting the input URI
- : @param reflector2 reflector reflecting the output URI
+ : @param reflector1URI reflector reflecting the input URI
+ : @param reflector2URI reflector reflecting the output URI
  : @param reflectedReplaceSubstring resource name editing - replacement from substring 
  : @param reflectedReplaceWith resource name editing - replacement to substring 
  : @return the image URI, if the resource exists, an empty sequence otherwise
  :) 
 declare function f:getImage($uri as xs:string, 
-                            $reflector1 as xs:string, 
-                            $reflector2 as xs:string,
+                            $reflector1URI as xs:string, 
+                            $reflector2URI as xs:string,
                             $reflectedReplaceSubstring as xs:string?,
                             $reflectedReplaceWith as xs:string?)
         as xs:string? {
         
     (: Normalize URIs to make them comparable :)
-    let $uris:= f:normalizeURISet(($uri, $reflector1, $reflector2))
+    let $uris:= f:normalizeURISet(($uri, $reflector1URI, $reflector2URI))
     let $uri := $uris[1]
-    let $reflector1 := $uris[2]
-    let $reflector2 := $uris[3]
+    let $reflector1URI := $uris[2]
+    let $reflector2URI := $uris[3]
     
     let $pathReflector1ToUri :=
-        if (matches($uri, concat($reflector1, '(/.*)?$'))) then
-            substring-after($uri, concat($reflector1, '/'))
+        if (matches($uri, concat($reflector1URI, '(/.*)?$'))) then
+            substring-after($uri, concat($reflector1URI, '/'))
             
-        else if (matches ($reflector1, concat($uri, '(/.*)?$'))) then
+        else if (matches ($reflector1URI, concat($uri, '(/.*)?$'))) then
             let $countSteps :=
-                (substring-after($reflector1, concat($uri, '/'))
+                (substring-after($reflector1URI, concat($uri, '/'))
                 ! tokenize(., '\s*/\s*')) => count()
             return
                 (for $i in 1 to $countSteps return '..') => string-join('/')
@@ -123,7 +123,7 @@ declare function f:getImage($uri as xs:string,
             return
                 concat($path, $newName)
         
-    let $imagePath := concat($reflector2, '/', $pathReflector1ToUriEdited)
+    let $imagePath := concat($reflector2URI, '/', $pathReflector1ToUriEdited)
     (:
     let $exists := file:exists($imagePath)    
     return $imagePath[$exists] ! f:normalizeAbsolutePath(.)

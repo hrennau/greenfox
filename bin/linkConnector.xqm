@@ -166,23 +166,23 @@ declare function f:resolveMirror($ldo as map(*),
     let $uri := $context?_targetInfo?contextURI        
     
     let $reflector1 := 
-        let $raw := $ldo?mirror?reflector1
+        let $raw := $ldo?mirror?reflector1URI
         return if ($raw) then $raw else
 
         (: Reflector 1 is resolved in the context of the link context resource :)
         let $fox := $ldo?mirror?reflector1FOX 
         return
-            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector1 or reflector1FOX')
+            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector1URI or reflector1FOX')
             else f:resolveReflectorExpr($fox, $contextURI, $context)
                         
     let $reflector2 := 
-        let $raw := $ldo?mirror?reflector2
+        let $raw := $ldo?mirror?reflector2URI
         return if ($raw) then $raw else
         
         (: Reflector 2 is resolved in the context of reflector 1 :)
         let $fox := $ldo?mirror?reflector2FOX 
         return
-            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector1 or reflector2FOX')
+            if (not($fox)) then error(QName((), 'INVALID_SCHEMA'), 'Mirror link without reflector2URI or reflector2FOX')
             else f:resolveReflectorExpr($fox, $reflector1, $context)
                         
     let $reflectedReplaceSubstring := $ldo?mirror?reflectedReplaceSubstring
