@@ -125,8 +125,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
                                             $domain as xs:string?)
         as map(xs:string, item()*) {
         
-    (: Parse the external context. It has been supplied by the user as a
-       concatenated list of name/value pairs. :)
+    (: Parse the external context, supplied by the user as name/value pairs. :)
     let $externalContext := f:externalContext($params, $domain, $gfox)
     
     (: Check the external context :)
@@ -182,31 +181,25 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
         let $raw := f:substituteVars($value, $substitutionContext, ())
         return
             if ($name eq 'domain') then 
-                try {
-                    let $apath := i:pathToAbsoluteFoxpath($raw)
-                    let $path := $apath ! i:normalizeAbsolutePath(.)
-                    (: let $_DEBUG := trace($path, '___DOMAIN_PATH: ') :)
-                    return $path
-                }
+                try {i:pathToAbsoluteFoxpath($raw)}
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
                         concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
                         "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
-            else if ($name eq 'domainURI') then  
-                try {
-                    let $apath := i:pathToAbsoluteFoxpath($raw)
-                    let $path := $apath ! i:normalizeAbsolutePath(.)
-                    (: let $_DEBUG := trace($path, '___DOMAIN_PATH: ') :)
-                    let $uri := $path ! i:pathToUriCompatible(.)
-                    return $uri
-                }
+            else if ($name eq 'domainFOX') then 
+                try {i:pathToAbsoluteFoxpath($raw)}
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
+                        concat("### INVALID SCHEMA - context variable 'domainFOX' not a valid Foxpath, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
+            else if ($name eq 'domainURI') then  
+                try {i:pathToAbsoluteUriPath($raw)}
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
                         "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
             else $raw
     let $augmentedEntry := map:entry($name, $augmentedValue)    
-    
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
     return (
         $augmentedEntry,
@@ -225,12 +218,9 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
  : Maps the value of a parameters string to a set of name-value pairs.
  :
  : Augmentation:
- : (1) If function parameter $domain is supplied: add 'domain' name-value pair 
- :     Otherwise, if the parameters string contains a 'domain' emtry: 
- :     edit 'domain' name-value pair, making the path absolute
- : (2) Add 'schemaPath' name-value pair, where the value is the file path of the schema -
- :     unless the parameters string contains a 'schemaPath' parameter, or the 'context' element 
- :     of the schema has a 'schemaPath' field with a default value 
+ : (1) Add value pairs 'schemaURI', 'schemaFOX', 'schemaPath'. 
+ : (2) If function parameter $domain is supplied or a 'domain' name-value pair
+ :     exists: add name-value pairs 'domainURI', 'domainFOX', 'domain'. 
  :
  : @param params a parameters string containing semicolon-separated name-value pairs
  : @param domain the value of call parameter 'domain', should be the path of the domain folder
@@ -250,56 +240,38 @@ declare function f:externalContext($params as xs:string?,
                       replace(., '^.*?=\s*', ''))
         )
 
-    (: Add 'schemaPath' entry :)                
+    (: Add 'schemaPath', 'schemaURI' entries :)                
     let $prelim2 :=
-        if (map:contains($prelim, 'schemaPath')) then $prelim
-        else if ($gfoxContext/field[@name eq 'schemaPath']/@value) then $prelim
-        else 
-            let $schemaLocation := $gfox/base-uri(.)            
-            let $schemaLocationAbs := 
-                try {$schemaLocation ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
-                catch * {()} 
-            return 
-                if ($schemaLocationAbs) then
-                    map:put($prelim, 'schemaPath', $schemaLocationAbs)                
-                else
-                    error(QName((), 'INVALID_ARG'), concat('Invalid schema path: ', $schemaLocation))                    
+        let $schemaLocation := $gfox/base-uri(.)            
+        let $schemaLocationFOX := 
+            try {$schemaLocation ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
+        let $schemaLocationURI := 
+            try {$schemaLocation ! i:pathToAbsoluteUriPath(.)} catch * {()} 
+        return 
+            if (not($schemaLocationFOX)) then
+                error(QName((), 'INVALID_ARG'), concat('Invalid schema path: ', $schemaLocation))
+            else                    
+                map:put($prelim, 'schemaPath', $schemaLocationFOX)
+                ! map:put(., 'schemaFOX', $schemaLocationFOX)
+                ! map:put(., 'schemaURI', $schemaLocationURI)
 
     (: Add or edit 'domain' entry;
        normalization: absolute path, using back slashes :)
     let $prelim3 :=
-        (: domain parameter specified :)
-        if ($domain) then
-            if (map:contains($prelim2, 'domain')) then
-                error(QName((), 'INVALID_ARG'),
-                    concat("Ambiguous input - you supplied parameter 'domain' and also ",
-                           "parameter 'params' with a 'domain' entry; aborted.'"))
+        let $useDomain := ($domain, map:get($prelim2, 'domain'))[1]
+        return
+            if (not($useDomain)) then $prelim2
             else
-                (: Add 'domain' entry, value from call parameter 'domain' :)
-                let $domainAbs := 
-                    try {$domain ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
-                    catch * {()} 
+                (: Add 'domain' entries (domain, domainFOX, domainURI) :)
+                let $domainFOX := try {$useDomain ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
+                let $domainURI := try {$useDomain ! i:pathToAbsoluteUriPath(.)} catch * {()} 
                 return
-                    if ($domainAbs) then 
-                        map:put($prelim2, 'domain', $domainAbs)
-                    else 
-                        error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $domain))
-                        
-        (: Without domain parameter :)                
-        else  
-            (: If domain name-value pair: edit value (making path absolute) :)        
-            let $domainFromNvpair := map:get($prelim2, 'domain')
-            return           
-                if ($domainFromNvpair) then
-                    let $domainFromNvPairAbs := 
-                        try {$domainFromNvpair ! i:pathToAbsoluteFoxpath(.) ! i:normalizeAbsolutePath(.)} 
-                        catch * {()}
-                    return
-                        if ($domainFromNvPairAbs) then 
-                            map:put($prelim2, 'domain', $domainFromNvPairAbs)
-                        else 
-                            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $domain))
-                else $prelim2
+                    if (not($domainFOX) or not($domainURI)) then 
+                        error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $useDomain))
+                    else                        
+                        map:put($prelim2, 'domain', $domainFOX)
+                        ! map:put(., 'domainFOX', $domainFOX)
+                        ! map:put(., 'domainURI', $domainURI)                        
     return
         $prelim3
 };
@@ -317,7 +289,9 @@ declare function f:checkExternalContext($externalContext as map(*),
         as empty-sequence() {
     let $internalKeys := $contextElem/gx:field/@name/string()        
     let $externalKeys := map:keys($externalContext)
-    let $externalKeysUnknown := $externalKeys[not(. = $internalKeys)][not(. eq 'schemaPath')] => sort()
+    let $externalKeysUnknown := $externalKeys
+        [not(. = $internalKeys)]
+        [not(. = ('schemaURI', 'schemaFOX', 'schemaPath', 'domainURI', 'domainFOX', 'domain'))] => sort()
     return
         if (exists($externalKeysUnknown)) then
             let $plural := 's'[count($externalKeysUnknown) gt 1]

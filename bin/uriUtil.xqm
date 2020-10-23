@@ -55,6 +55,19 @@ declare function f:existentResourceUri($uri as xs:string,
 };
 
 (:~
+ : Resolve a path in the context of the module base.
+ :
+ : @param path the path to be resolved
+ : @return the resolved path
+ :)
+declare function f:resolveModuleBasedPath($path as xs:string)
+        as xs:string {
+    (resolve-uri('') || '/' || $path)
+    ! file:path-to-native(.)   (: URI turned into path :)
+    ! f:normalizeAbsolutePath(.)
+};        
+
+(:~
  : Resolves a URI to an absolute URI. If the input URI is absolute, it is
  : returned unchanged; otherwise it is resolved against the base URI.
  : Initial upward steps (..) are resolved.
@@ -176,10 +189,84 @@ declare function f:normalizeURISet($uris as xs:string+)
         )
 };
 
+(: 
+ : Resolves a path to an absolute Foxpath.
+ : 
+ : @param path a path
+ : @return the path resolved to an absolute Foxpath
+ :)
+declare function f:pathToAbsoluteFoxpath($path as xs:string)
+        as xs:string {
+    f:pathToAbsolutePath($path) 
+    ! replace(., '/', '\\')
+    ! f:normalizeAbsolutePath(.)
+};
+
+(:~
+ : Resolves a path to an absolute path, assuming that the context
+ : is the file system.
+ :
+ : This function is used in order to normalize path values contained
+ : by the schema, e.g. the domain path. The functionality could
+ : also be defined as 'resolve-uri' with an implicit must not
+ : be confused with 'resolve-uri', which 
+ :
+ : @param path the path
+ : @return the absolute path
+ :)
+declare function f:pathToAbsolutePath($path as xs:string)
+        as xs:string {
+    (: Remove leading 'file:/+' :)
+    let $path := f:removeFileUriSchema($path)
+    let $pathRaw :=  
+        (: Path leading to the archive which will be entered :)
+        let $archiveFilePath := replace($path, '^(.*?)[/\\]#archive#([/\\].*)?', '$1')[. ne $path]
+        return
+            (: Case 1: URI is an archive URI
+                       => deliver a Foxpath, which means: use only backslash :)
+            if ($archiveFilePath) then
+                let $archiveContentPath := 
+                    substring($path, string-length($archiveFilePath) + 1)
+                    ! replace(., '/', '\\') 
+                return
+                    (: Unclear if the replace with \\ applies to the complete URI or only the within-archive path :)
+                    f:pathToAbsolutePath($archiveFilePath) || ($archiveContentPath ! replace(., '/', '\\'))
+                    
+            else
+                let $uriSchema := replace($path, '^(\i\c+:/+).*', '$1')[. ne $path]
+                return
+                    (: Case 2: Non-file URI schema 
+                               => deliver a Foxpath, which means: use only backslash :)
+                    if ($uriSchema) then 
+                        let $uriPath := 
+                            substring($path, 1 + string-length($uriSchema)) 
+                            ! replace(., '/', '\\') (: Not file URI: deliver Foxpath, therefore: backslash :)
+                        return
+                            $uriSchema || $uriPath
+                    (: Case 3: URI is a file path => make absolute :)
+                    else
+                        $path ! f:dirSepToNative(.) ! i:normalizeAbsolutePath(.) ! file:path-to-native(.) 
+    return 
+        $pathRaw ! replace(., '[/\\]$', '')    
+}; 
+
+(: 
+ : Resolves a path to an absolute URI path.
+ : 
+ : @param path a path
+ : @return the path resolved to an absolute URI path
+ :)
+declare function f:pathToAbsoluteUriPath($path as xs:string)
+        as xs:string {
+    f:pathToAbsolutePath($path) 
+    ! f:pathToUriCompatible(.)
+    ! f:normalizeAbsolutePath(.)
+};
+
 (:~
  : Transforms a path into a representation which can be used where a URI
  : is expected. Replaces backward slash with forward slash and removes trailing
- : slash or backward slah.
+ : slash or backward slash.
  :
  : @param path the path to be edited
  : @return URI compatible copy of the path
