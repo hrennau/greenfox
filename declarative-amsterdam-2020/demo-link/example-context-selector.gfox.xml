@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links - uses a link definition containing a URI expression.
+    Defines the same links as 'example-link-uriTemplate.gfox.xml'.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Links/example-links-uri-expression"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" value="${schemaPath}/../../../declarative-amsterdam-2020/data"/>
+    </context>
+  
+    <!-- Define link: JSON airport document -->
+    <linkDef name="jsonAirports"
+             contextXP="//airport[@iata]"
+             uriXP="'../countries/ireland/json/airport-' || @iata/lower-case(.) || '.json'"
+             mediatype="json">
+        <targetSize resolvable="true"
+            minCountTargetResources="10"
+            countTargetResourcesPerContextPoint="1"/>
+    </linkDef>
+    
+    <domain uri="${domain}" name="dc2020">
+            <file uri="air/airports/index/airports-ireland.xml">
+                <targetSize minCount="1" minCountMsg="Missing file 'airports-ireland.xml'"/>
+                
+                <valuesCompared linkName="jsonAirports">
+                    <valueCompared expr1XP="@icao"
+                                   expr2XP="//icao"
+                                   cmp="eq"/>
+                </valuesCompared>
+            </file>
+    </domain>
+
+</greenfox>
