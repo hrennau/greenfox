@@ -34,7 +34,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @param callContext a second context
  : @return a copy of the string with all variable references replaced with variable values
  :)
-declare function f:substituteVars($s as xs:string?, 
+declare function f:substituteVars($s as xs:anyAtomicType?, 
                                   $context as map(xs:string, item()*), 
                                   $callContext as map(xs:string, item()*)?) 
         as xs:string? {
@@ -52,9 +52,10 @@ declare function f:substituteVars($s as xs:string?,
  : @param prefixChar character signalling a variable reference 
  : @return a copy of the string with all variable references replaced with variable values
  :) 
-declare function f:substituteVarsAux($s as xs:string?, 
+declare function f:substituteVarsAux($s as xs:anyAtomicType?, 
                                      $context as map(xs:string, item()*), 
                                      $prefixChar as xs:string) as xs:string? {
+    let $s := string($s)                                     
     let $sep := codepoints-to-string(30000)
     let $parts := replace($s, concat('^(.*?)(', $prefixChar, '\{.*?\})(.*)'), 
                               concat('$1', $sep, '$2', $sep, '$3'),

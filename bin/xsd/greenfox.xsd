@@ -39,6 +39,8 @@ Context
     <xs:complexType name="ContextFieldType">
         <xs:attribute name="name" type="xs:NCName" use="required"/>
         <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="valueXP" type="xs:string"/>
+        <xs:attribute name="valueFOX" type="xs:string"/>
     </xs:complexType>
 
     <!-- 

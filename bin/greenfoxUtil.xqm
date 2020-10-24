@@ -663,6 +663,20 @@ declare function f:applyUseString($value as item()*, $useString as xs:string*)
         else if ($useString = 'sv') then $interm ! string(.)
         else $interm
     return $interm
+};   
+
+(:~
+ : Transforms a map with string keys into a map with QName keys.
+ : The values are not changed, only the key type is changed from
+ : string to QName.
+ :
+ : @param map a map with string keys
+ : @return the transformed map
+ :)
+declare function f:mapKeysToQName($map as map(xs:string, item()*))
+        as map(xs:QName, item()*) {
+    map:merge(
+        map:keys($map) ! map:entry(QName((), .), $map(.)))
 };        
 
 

@@ -125,12 +125,12 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
                                             $domain as xs:string?)
         as map(xs:string, item()*) {
         
-    (: Parse the external context, supplied by the user as name/value pairs. :)
+    (: Parse the external context, supplied by the user as name/value pairs :)
     let $externalContext := f:externalContext($params, $domain, $gfox)
     
     (: Check the external context :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
-        
+(:        
     (: Collect entries, overwriting schema values with external values :)
     let $contextElem := $gfox/gx:context
     let $domainEC := $externalContext?domain
@@ -153,9 +153,84 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
     )
     (: Replace variable references :)
     let $entries2 := f:editContextEntries($entries)
-    return map:merge($entries2)   
+    return map:merge($entries2)
+:)
+    let $fields := $gfox/gx:context/gx:field
+    let $substitutionContext := $externalContext
+    let $entries := f:initialProcessingContextRC($fields, $substitutionContext)
+    return map:merge($entries)
 };
 
+(:~
+ : Auxiliary function of function `f:initialProcessingContext`.
+ :
+ :)
+declare function f:initialProcessingContextRC(
+                        $fields as element(gx:field)+,
+                        $substitutionContext as map(xs:string, item()*))
+        as map(xs:string, item()*)* {
+    let $head := head($fields)
+    let $tail := tail($fields)
+    return if (empty($head)) then () else
+    
+    let $name := $head/@name/string()
+    let $litValue := $head/($substitutionContext($name), @value)[1] ! f:substituteVars(., $substitutionContext, ())
+    let $valueXP := $head/@valueXP/f:substituteVars(., $substitutionContext, ())
+    let $valueFOX := $head/@valueFOX/f:substituteVars(., $substitutionContext, ())
+    
+    let $value :=
+        if (exists($litValue)) then $litValue
+        else if ($valueFOX) then
+            let $schemaURI := $substitutionContext?schemaURI
+            let $evaluationContext := i:mapKeysToQName($substitutionContext)
+            return
+                i:evaluateFoxpath($valueFOX, $schemaURI, $evaluationContext, true())
+        else if ($valueXP) then
+            let $evaluationContext := i:mapKeysToQName($substitutionContext)
+            return
+                i:evaluateXPath($valueXP, (), $evaluationContext, true(), true())                
+                
+    let $augmentedValue := 
+        let $raw := f:substituteVars($value, $substitutionContext, ())[exists($value)]
+        return
+            (: Domain specified by an expression not finding a resource :)
+            if (empty($raw) and $name = ('domain', 'domainFOX', 'domainURI')) then
+                let $expr := ($valueFOX, $valueXP)[1]
+                return
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - expression for context variable '", $name, 
+                        "' does not identify an existence resource, ",
+                        "please correct and retry;&#xA;### expression: ", $expr))
+                
+            else if ($name eq 'domain') then 
+                try {i:pathToAbsoluteFoxpath($raw)}
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
+            else if ($name eq 'domainFOX') then 
+                try {i:pathToAbsoluteFoxpath($raw)}
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domainFOX' not a valid Foxpath, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
+            else if ($name eq 'domainURI') then  
+                try {i:pathToAbsoluteUriPath($raw)}
+                catch * {
+                    error(QName((), 'INVALID_SCHEMA'), 
+                        concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
+                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
+            else $raw
+    let $augmentedEntry := map:entry($name, $augmentedValue)    
+    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
+    return (
+        $augmentedEntry,
+        if (empty($tail)) then () else
+            f:initialProcessingContextRC($tail, $newSubstitutionContext)
+    )            
+};        
+
+(:
 (:~
  : Edits context entries, replacing variable references. An entry may reference
  : earlier entries as a variable.
@@ -207,6 +282,7 @@ declare function f:editContextEntriesRC($contextEntries as map(xs:string, item()
             f:editContextEntriesRC($tail, $newSubstitutionContext)
     )            
 };        
+:)
 
  (: ============================================================================
  :
@@ -302,7 +378,7 @@ declare function f:checkExternalContext($externalContext as map(*),
         else
         
     let $missingValues :=
-        $contextElem/gx:field[not(@value)]/@name[not(map:contains($externalContext, .))]
+        $contextElem/gx:field[empty((@value, @valueXP, @valueFOX))]/@name[not(map:contains($externalContext, .))]
     return
         if (empty($missingValues)) then ()
         else
