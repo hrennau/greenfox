@@ -7,11 +7,11 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath="data\air\airports\index" id="airportsIndexFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data/air/airports/index" id="airportsIndexFolderShape">
             <targetSize minCount="1" countMsg="Missing index folder"/>          
 
             <file foxpath="*[file-size(.) eq 0]">

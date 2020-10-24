@@ -7,16 +7,17 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+        <field name="date" value="2020-10-07"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath="data" id="dataFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data" id="dataFolderShape">
             <targetSize count="1" countMsg="Missing data folder"/>          
 
             <file foxpath=".\\phantastic.png">
                 <targetSize minCount="2" minCountMsg="Not even two phantastic files."/>
-                <fileDate le="2020-10-07"/>
+                <fileDate le="${date}"/>
             </file>
         </folder>
     </domain>

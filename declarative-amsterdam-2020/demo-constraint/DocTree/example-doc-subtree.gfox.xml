@@ -12,14 +12,14 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath=".\data\resources" id="resourcesFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data/resources" id="resourcesFolderShape">
             <targetSize count="1" countMsg="Missing folder: resources"/>          
 
-            <file foxpath="factbook\factbook.xml" id="factbookFileShape">
+            <file uri="factbook/factbook.xml" id="factbookFileShape">
                 <targetSize count="1" countMsg="Missing file: factbook.xml"/>
                 <docTree>
                     <node locNP="//river" maxCount="unbounded" closed="true">

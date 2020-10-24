@@ -7,14 +7,14 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
         <field name="ignSchemas" value="foo.gfox.xml bar.gfox.xml"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
+    <domain uri="${domain}" name="dc2020">
         
         <!-- VISIT: schema folder -->
-        <folder foxpath="schema" id="schemaFolderShape">
+        <folder uri="schema" id="schemaFolderShape">
             <targetSize countMsg="Missing folder: schema-initial" count="1"/>
 
             <!-- VISIT: all schemas -->
