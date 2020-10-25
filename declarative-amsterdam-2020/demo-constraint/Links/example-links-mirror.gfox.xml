@@ -8,7 +8,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
   
     <!-- Define link: referenceAirports;
@@ -18,25 +18,25 @@
              reflector1URI="${domain}/data/air"
              reflector2URI="${domain}/data/air.20201006"/>
     
-    <domain path="${domain}" name="dc2020">
-        <!-- VISIT: airports folder -->
-        <folder foxpath="data\air\airports\countries" id="countriesFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <!-- Visit: airports folder -->
+        <folder uri="data/air/airports/countries" id="countriesFolderShape">
             <targetSize count="1" countMsg="Missing folder: countries"/>
 
-            <!-- VISIT: airport XML documents -->
-            <file foxpath=".\\airport-*.xml" id="airportXmlFileShape">
+            <!-- Visit: airport XML documents -->
+            <file navigateFOX=".\\airport-*.xml" id="airportXmlFileShape">
                 <targetSize minCount="1" minCountMsg="Missing XML airports document"/>
                 
-                <!-- CHECK: links defined by mirrored location -->
+                <!-- Check: links defined by mirrored location -->
                 <links linkName="referenceAirports"
                        mediatype="xml"
                        countTargetResources="1" countTargetResourcesMsg="Reference airport missing for XML airport"/>
             </file>
-            <!-- VISIT: airport JSON documents -->
-            <file foxpath=".\\airport-*.json" mediatype="json" id="airportXmlFileShape">
+            <!-- Visit: airport JSON documents -->
+            <file navigateFOX=".\\airport-*.json" mediatype="json" id="airportXmlFileShape">
                 <targetSize minCount="1" minCountMsg="Missing JSON airports document"/>
                 
-                <!-- CHECK: links; references and augments link definition: 
+                <!-- Check: links; references and augments link definition: 
                             property: mediatype -->
                 <links linkName="referenceAirports"
                        mediatype="json"

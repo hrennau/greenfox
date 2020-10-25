@@ -5,7 +5,6 @@
 -->    
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
         <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
         <field name="date" value="2020-10-07"/>
@@ -15,9 +14,9 @@
         <folder uri="data" id="dataFolderShape">
             <targetSize count="1" countMsg="Missing data folder"/>          
 
-            <file foxpath=".\\phantastic.png">
+            <file navigateFOX=".\\phantastic.png">
                 <targetSize minCount="2" minCountMsg="Not even two phantastic files."/>
-                <fileDate le="${date}"/>
+                <fileDate le="${date}" leMsg="Phantastic files modified on or after ${date}."/>
             </file>
         </folder>
     </domain>

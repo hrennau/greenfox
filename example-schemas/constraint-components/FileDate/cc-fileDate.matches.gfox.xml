@@ -3,34 +3,34 @@
     Demonstrates the use of FileDate constraints.
     
     Possible constraint nodes are these attributes on <FileDate>:
-        @eq, @lt, @le, @gt, @ge, @like, @notLike, @matches, @notMatches
+        @eq, @ne, @lt, @le, @gt, @ge, @like, @notLike, @matches, @notMatches
     Options:
         @flags - flags controling the evaluation of patterns and regular expressions
         
-    This example shows the use of the rare checks, @matches and @notMatches. Note also the
-    use of @flags.
+    This example shows the use of a rare check, @matches. Note also the use of @flags.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileDate.matches"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
-        <!-- VISIT: folder 'constraint-FileDate' -->
-        <folder foxpath="constraint-FileDate" id="fileDateFolderShape">
+        <!-- Visit: folder 'constraint-FileDate' -->
+        <folder uri="constraint-FileDate" id="fileDateFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileDate" count="1"/>
 
-            <!-- VISIT: all files except _hide* -->
-            <file foxpath="* except _hide*" id="contentFilesShape">
+            <!-- Visit: all files except _hide* -->
+            <file navigateFOX="* except _hide*" id="contentFilesShape">
                 <targetSize minCountMsg="Less files than expected" minCount="5"/>
                 
-                <!-- CHECK: last-modified dates -->
+                <!-- Check: file dates -->
                 <fileDate 
-                    matches="T(21|22|23)" matchesMsg="Files must be modified between 21:00 and 00:00"/>                
+                    matches="T(21|22|23)" matchesMsg="Files must be modified between 21:00 and 00:00"
+                    flags="i"/>                
             </file>
         </folder>
     </domain>

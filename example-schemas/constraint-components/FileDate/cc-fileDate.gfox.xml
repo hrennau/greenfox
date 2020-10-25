@@ -3,7 +3,7 @@
     Demonstrates the use of FileDate constraints. 
     
     Possible constraint nodes are these attributes on <fileDate>:
-        @eq, @lt, @le, @gt, @ge, @like, @notLike, @matches, @notMatches
+        @eq, @ne, @lt, @le, @gt, @ge, @like, @notLike, @matches, @notMatches
     Options:
         @flags - flags controling the evaluation of patterns and regular expressions
 -->
@@ -11,21 +11,20 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
-        <!-- VISIT: airports folder -->
-        <folder foxpath="constraint-FileDate" id="fileDateFolderShape">
+        <!-- Visit: airports folder -->
+        <folder uri="constraint-FileDate" id="fileDateFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileDate" count="1"/>
 
-            <!-- VISIT: all files in or under the folder, except a couple of specific files -->
-            <file foxpath="* except _hide*" id="anyFileShape">
+            <!-- Visit: all files in or under the folder, except a couple of specific files -->
+            <file navigateFOX="* except _hide*" id="anyFileShape">
                 <targetSize minCount="20" minCountMsg="Less files than expected"/>
                 
-                <!-- CHECK: last modified dates -->
+                <!-- Check: file dates -->
                 <fileDate 
                     le="2020-04-28" leMsg="Files must be from 2020-04-27 or older"
                     gt="2020-04-26" gtMsg="Files must be from 2020-04-06 or newer"/>                

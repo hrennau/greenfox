@@ -6,25 +6,25 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
   
     <!-- Define link: myjson;
          the target resource is a sibling resource with the same name
          and the current extension replaced with .json -->
     <linkDef name="myjson" 
-             foxpath="fox-sibling($fileName, '\.[^.]+$', '.json')"/>
+             navigateFOX="fox-sibling($fileName, '\.[^.]+$', '.json')"/>
     
-    <domain path="${domain}" name="dc2020">
-        <!-- VISIT: index folder -->
-        <folder foxpath="data\air\airports\index" id="indexFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <!-- Visit: index folder -->
+        <folder uri="data/air/airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder: index"/>
 
-            <!-- VISIT: country airports XML documents -->
-            <file foxpath=".\\airports-*.xml" id="countryAirportsXmlFileShape">
+            <!-- Visit: country airports XML documents -->
+            <file navigateFOX=".\\airports-*.xml" id="countryAirportsXmlFileShape">
                 <targetSize minCount="1" minCountMsg="Missing country Airports XML files"/>
                 
-                <!-- CHECK: links mapping the XML document to the corresponding JSON document -->
+                <!-- Check: links mapping the XML document to the corresponding JSON document -->
                 <links linkName="myjson" 
                        countTargetResources="1" 
                        countTargetResourcesMsg="Missing JSON airports for country document"/>

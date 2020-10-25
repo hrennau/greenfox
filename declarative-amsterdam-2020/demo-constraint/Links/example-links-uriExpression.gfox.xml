@@ -7,7 +7,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
   
     <!-- Define link: 
@@ -19,16 +19,16 @@
                      Country/lower-case(.) || '/json/airport-' || IATA/lower-case(.) || '.json'"
              mediatype="json"/>
     
-    <domain path="${domain}" name="dc2020">
-        <!-- VISIT: airports folder -->
-        <folder foxpath="data\air\resources\openflights" id="openflightsFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <!-- Visit: airports folder -->
+        <folder uri="data/air/resources/openflights" id="openflightsFolderShape">
             <targetSize count="1" countMsg="Missing folder: airports"/>
 
-            <!-- VISIT: CSV dictionary of airports -->
-            <file foxpath="airports-dfi.csv" id="airportsFileShape" mediatype="csv" csv.header="yes">
+            <!-- Visit: CSV dictionary of airports -->
+            <file uri="airports-dfi.csv" id="airportsFileShape" mediatype="csv" csv.header="yes">
                 <targetSize minCount="1" minCountMsg="Missing airports CSV file"/>
                 
-                <!-- CHECK: URI expression based links can be resolved -->
+                <!-- Check: URI expression based links can be resolved -->
                 <links linkName="jsonAirports" 
                        resolvable="true" resolvableMsg="Link cannot be resolved"
                        minCountTargetResources="20" minCountTargetResourcesMsg="Missing link targets"/>                       

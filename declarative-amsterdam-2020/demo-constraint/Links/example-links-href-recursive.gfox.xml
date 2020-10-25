@@ -9,19 +9,19 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
   
     <!-- Define link: href entries -->
     <linkDef name="hrefElems" hrefXP="//*:href"/>
     
-    <domain path="${domain}" name="dc2020">
-        <!-- VISIT: airports folder -->
-        <folder foxpath="data\air\airports\index" id="indexFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <!-- Visit: airports folder -->
+        <folder uri="data/air/airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder: index"/>
 
-            <!-- VISIT: airports document -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <!-- Visit: airports document -->
+            <file uri="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize minCount="1" minCountMsg="Missing JSON airports document"/>
                 
                 <!-- CHECK: links provided by href fields, resolved recursively -->

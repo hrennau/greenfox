@@ -10,18 +10,17 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
-        <!-- VISIT archive contents: constraint-FileDate folder -->
-        <folder foxpath="archives\constraint-FileDate.zip\#archive#\constraint-FileDate" id="fileDateFolderShape">
+        <!-- Visit archive contents: constraint-FileDate folder -->
+        <folder navigateFOX="archives\constraint-FileDate.zip\#archive#\constraint-FileDate" id="fileDateFolderShape">
             <targetSize countMsg="Missing folder: constraint-fileDate" count="1"/>
 
-            <!-- CHECK archive contents: file dates -->
-            <file foxpath=".\\(* except _hide*)" id="anyFileShape">
+            <!-- Check archive contents: file dates -->
+            <file navigateFOX=".\\(* except _hide*)" id="anyFileShape">
                 <targetSize minCount="20" minCountMsg="Less files than expected"/>
                 <fileDate 
                     le="2020-04-30" leMsg="Files must be older than 2020-04-30"
