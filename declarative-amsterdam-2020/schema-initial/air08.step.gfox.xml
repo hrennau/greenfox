@@ -9,7 +9,7 @@
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>  
     
     <!-- LINK definitions -->
@@ -18,13 +18,13 @@
     
     <!-- DOMAIN validation -->
      
-    <domain path="${domain}" name="air">
-        <folder foxpath="airports\index" id="indexFolderShape">
-            <file foxpath="airports.xml">
+    <domain uri="${domain}" name="air">
+        <folder uri="airports/index" id="indexFolderShape">
+            <file uri="airports.xml">
                 <targetSize count="1" countMsg="Missing index file"/>
                 
                 <!-- CHECK: XSD valid -->
-                <xsdValid xsdFOX="${domain}\resources\xsd\*.xsd"/>
+                <xsdValid xsdFOX="$domain\resources\xsd\*.xsd"/>
                 
                 <!-- CHECK: href links can be resolved, recursively -->
                 <links linkName="hrefAtts" recursive="true" resolvable="true" minCountTargetResources="60"/>

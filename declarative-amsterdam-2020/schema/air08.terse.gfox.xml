@@ -9,34 +9,34 @@
           xsi:schemaLocation="http://www.greenfox.org/ns/schema /tt/greenfox/xsd/greenfox.xsd">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
     
     <!-- LINK definitions -->
     
     <linkDef name="myJSON"
-        foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        mediatype="json"/>    
+             navigateFOX="fox-sibling($fileName, '\.[^.]+', '.json')" 
+             mediatype="json"/>    
     <linkDef name="myXML"
-        foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
-        mediatype="xml"/>    
+             navigateFOX="fox-sibling($fileName, '\.[^.]+', '.xml')" 
+             mediatype="xml"/>    
     <linkDef name="hrefElems" hrefXP="//href"/>    
     <linkDef name="hrefAtts" hrefXP="//@href"/>    
     <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>    
     <linkDef name="linkMeFromAirportsJSON"
-        foxpath="fox-sibling('airports.json')" 
-        targetXP="//href[ends-with(., $fileName)]"
-        mediatype="json"/>    
+             navigateFOX="fox-sibling('airports.json')" 
+             targetXP="//href[ends-with(., $fileName)]"
+             mediatype="json"/>    
     <linkDef name="mirror20201006"
-        reflector1URI="${domain}" 
-        reflector2URI="${domain}/../air.20201006"/>
+             reflector1URI="${domain}" 
+             reflector2URI="${domain}/../air.20201006"/>
     
     <!-- DOMAIN validation -->
     
-    <domain path="${domain}" name="air">
+    <domain uri="${domain}" name="air">
         
         <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+        <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
@@ -52,20 +52,20 @@
             </folderContent>
             
             <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
+            <file navigateFOX="*.FLAG">
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
             
             <!-- VISIT: index file (XML) -->
-            <file foxpath="airports.xml">
+            <file uri="airports.xml">
                 <targetSize count="1" countMsg="Missing index file"/>
-                <xsdValid xsdFOX="${domain}\resources\xsd\*.xsd"/>
+                <xsdValid xsdFOX="$domain\resources\xsd\*.xsd"/>
                 <links linkName="hrefAtts" recursive="true" resolvable="true" minCountTargetResources="60"/>
             </file>            
             
             <!-- VISIT: country airports files (XML) -->
-            <file foxpath="airports-*.xml">
+            <file navigateFOX="airports-*.xml">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 <values>
                     <value exprXP="//type" 
@@ -87,7 +87,7 @@
                                cmp="eq" cmpMsg="Country name in attribute and file name different"
                                useString="lc"/>
                 </valuePairs>                
-                <valuesCompared foxpath="fox-sibling($fileName, '.xml', '.json')" mediatype="json" countTargetResources="1">
+                <valuesCompared navigateFOX="fox-sibling($fileName, '.xml', '.json')" mediatype="json" countTargetResources="1">
                     <!-- @country value matches "country" field in corresponding JSON file -->
                     <valueCompared expr1XP="/*/@country" minCount1="1"
                                    expr2XP="/json/airportsForCountry/country"

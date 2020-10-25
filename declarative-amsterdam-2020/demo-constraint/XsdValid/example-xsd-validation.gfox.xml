@@ -8,16 +8,16 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020\data"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath="air\airports\countries" id="countriesFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="air/airports/countries" id="countriesFolderShape">
             <targetSize minCount="1" countMsg="Missing countries folder"/>          
 
-            <file foxpath="*\xml\airport-*.xml">
+            <file navigateFOX="*\xml\airport-*.xml">
                 <targetSize minCount="30" minCountMsg="Not even 30 airports."/>
-                <xsdValid xsdFOX="${domain}\air\resources\xsd\*.xsd"/>
+                <xsdValid xsdFOX="$domain\air\resources\xsd\*.xsd"/>
             </file>
         </folder>
     </domain>

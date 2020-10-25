@@ -16,20 +16,20 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
   
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         <!-- Visit: image folder -->
-        <folder foxpath="fileExistenceDependencies\\img" id="imageFileFolderShape">
+        <folder navigateFOX="fileExistenceDependencies\\img" id="imageFileFolderShape">
             <targetSize countMsg="Missing folder: fileExistenceDependencies\img" count="1"/>
    
             <!-- Visit: all files -->
-            <file foxpath="*" id="imageFileShape">
+            <file navigateFOX="*" id="imageFileShape">
                 
                 <!-- Check: the file is referenced by a docbook @fileref -->
-                <links foxpath="${domain}\fileExistenceDependencies\\*[/docbook:*]
-                                //@fileref[ends-with(., '/' || $fileName)]"
+                <links navigateFOX="$domain\fileExistenceDependencies\\*[/docbook:*]
+                                    //@fileref[ends-with(., '/' || $fileName)]"
                        exists="true"/>
                        
             </file>
