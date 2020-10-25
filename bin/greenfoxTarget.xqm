@@ -67,15 +67,15 @@ declare function f:getTargetPaths($resourceShape as element(),
  : an entry containing the resource paths and optional entries containing 
  : a Link Definition Object and Link Resolution Objects.
  :
- : The target is identified either by a path (@path) or by a foxpath expression 
- : (@foxpath) or by a link definition (@hrefXP, @recursive, ...).
+ : The target is identified either by a URI (@uri) or by a foxpath expression 
+ : (@navigateFOX) or by a link definition (@hrefXP, @recursive, ...).
  :
  : The path is appended to the context path. The foxpath is
  : evaluated. Link definitions are resolved.
  :
  : Whether Link Resolution Objects are returned depends on the kind 
  : of target declaration:
- : - if path: no Link Resolution Objects
+ : - if URI: no Link Resolution Objects
  : - if Foxpath and no link constraints: no Link Resolution Objects
  : - otherwise: with Link Resolution Objects
  : 
@@ -88,16 +88,12 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
         as map(xs:string, item()*) {
     let $urisAndLros :=
         let $uri := $resourceShape/@uri
-        let $path := $resourceShape/@path        
-        let $foxpath := $resourceShape/@foxpath
+        let $foxpath := $resourceShape/(@navigateFOX, @foxpath)[1]
         let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @uriTemplate, @linkReflectionBase)         
         return
             (: URI :)
             if ($uri) then 
                 map{'targetPaths': f:getTargetPaths_uri($uri, $resourceShape, $context)}
-            (: Plain path :)
-            else if ($path) then 
-                map{'targetPaths': f:getTargetPaths_path($path, $resourceShape, $context)}
             (: Foxpath (and no link constraints :)
             else if ($foxpath and empty($resourceShape/gx:targetSize/link:getLinkConstraintAtts(.))) then 
                 map{'targetPaths': f:getTargetPaths_foxpath($foxpath, $resourceShape, $context)}
@@ -120,6 +116,7 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
  : @param context the processing context
  : @return the target paths
  :)
+ (:
 declare function f:getTargetPaths_path($path as xs:string, 
                                        $resourceShape as element(),
                                        $context as map(xs:string, item()*))
@@ -134,6 +131,7 @@ declare function f:getTargetPaths_path($path as xs:string,
         [i:fox-resource-exists(.)]
         [$isExpectedResourceKind(.)]        
 };
+:)
 
 (:~
  : Returns the target paths of a resource shape, identified by a plain path 

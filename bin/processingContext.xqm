@@ -221,10 +221,26 @@ declare function f:initialProcessingContextRC(
                         concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
                         "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
             else $raw
-    let $augmentedEntry := map:entry($name, $augmentedValue)    
-    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry))
+    let $augmentedEntry := map:entry($name, $augmentedValue)
+    
+    (: Any one field from "domain", "domainFOX", "domainURI" triggers the other two :)
+    let $additionalEntries :=
+        if ($name eq 'domain') then (
+            map:entry('domainURI', $augmentedValue ! f:pathToUriCompatible(.)),
+            map:entry('domainFOX', $augmentedValue)
+        ) else if ($name eq 'domainFOX') then (
+            map:entry('domainURI', $augmentedValue ! f:pathToUriCompatible(.)),
+            map:entry('domain', $augmentedValue)
+        ) else if ($name eq 'domainURI') then
+            let $foxpath := i:pathToAbsoluteFoxpath($value)
+            return (
+                map:entry('domain', $foxpath),
+                map:entry('domainFOX', $foxpath)
+        ) else ()
+    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry, $additionalEntries))
     return (
         $augmentedEntry,
+        $additionalEntries,
         if (empty($tail)) then () else
             f:initialProcessingContextRC($tail, $newSubstitutionContext)
     )            

@@ -116,7 +116,7 @@ declare function f:parseLinkDef($linkDef as element(),
                                 $context as map(xs:string, item()*))
         as map(*)? {
     let $referenced := $linkDef/@linkName/f:linkDefObject(., $context)    
-    let $foxpath := ($linkDef/@foxpath/string(), $referenced?foxpath)[1]
+    let $foxpath := ($linkDef/(@navigateFOX, @foxpath)[1]/string(), $referenced?foxpath)[1]
     let $hrefXP := ($linkDef/@hrefXP/string(), $referenced?hrefXP)[1]
     let $uriXP := ($linkDef/@uriXP/string(), $referenced?uriXP)[1]
     let $uri := ($linkDef/@uri/string(), $referenced?uri)[1]    

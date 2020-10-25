@@ -1008,6 +1008,7 @@ Attribute groups
     
     <xs:attributeGroup name="LinkDefAttGroup">
         <xs:attribute name="foxpath" type="xs:string"/>
+        <xs:attribute name="navigateFOX" type="xs:string"/>
         <xs:attribute name="uri" type="xs:string"/>        
         <xs:attribute name="contextXP" type="xs:string"/>
         <xs:attribute name="targetXP" type="xs:string"/>        
