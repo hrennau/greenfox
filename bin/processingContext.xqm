@@ -203,7 +203,7 @@ declare function f:initialProcessingContextRC(
                         "please correct and retry;&#xA;### expression: ", $expr))
                 
             else if ($name eq 'domain') then 
-                try {i:pathToAbsoluteFoxpath($raw)}
+                try {i:pathToAbsoluteUriPath($raw)}
                 catch * {
                     error(QName((), 'INVALID_SCHEMA'), 
                         concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
@@ -225,16 +225,20 @@ declare function f:initialProcessingContextRC(
     
     (: Any one field from "domain", "domainFOX", "domainURI" triggers the other two :)
     let $additionalEntries :=
-        if ($name eq 'domain') then (
-            map:entry('domainURI', $augmentedValue ! f:pathToUriCompatible(.)),
-            map:entry('domainFOX', $augmentedValue)
-        ) else if ($name eq 'domainFOX') then (
-            map:entry('domainURI', $augmentedValue ! f:pathToUriCompatible(.)),
-            map:entry('domain', $augmentedValue)
+        if ($name eq 'domain') then
+            let $foxpath := i:pathToAbsoluteFoxpath($value)
+            return (
+                map:entry('domainURI', $augmentedValue),
+                map:entry('domainFOX', $foxpath)
+        ) else if ($name eq 'domainFOX') then
+            let $uri := i:pathToAbsoluteUriPath($value)
+            return (
+                map:entry('domainURI', $uri),
+                map:entry('domain', $uri)
         ) else if ($name eq 'domainURI') then
             let $foxpath := i:pathToAbsoluteFoxpath($value)
             return (
-                map:entry('domain', $foxpath),
+                map:entry('domain', $augmentedValue),
                 map:entry('domainFOX', $foxpath)
         ) else ()
     let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry, $additionalEntries))
@@ -361,7 +365,7 @@ declare function f:externalContext($params as xs:string?,
                     if (not($domainFOX) or not($domainURI)) then 
                         error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $useDomain))
                     else                        
-                        map:put($prelim2, 'domain', $domainFOX)
+                        map:put($prelim2, 'domain', $domainURI)
                         ! map:put(., 'domainFOX', $domainFOX)
                         ! map:put(., 'domainURI', $domainURI)                        
     return
