@@ -526,9 +526,9 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
                                                  $context as map(xs:string, item()*))                                                 
         as element()* {
     let $attsConstraintNode := $constraintNode/@atts
-    let $shortcutAttNames := $attsConstraintNode/tokenize(.)[not(ends-with(., '?'))]    
+    let $requiredAttNames := $attsConstraintNode/tokenize(.)[not(ends-with(., '?'))]    
     return
-        if (empty($shortcutAttNames)) then () else
+        if (empty($requiredAttNames)) then () else
         
         let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
         let $fn_getAttName :=
@@ -545,16 +545,19 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
             else 
                 function($parent, $attLname) {$parent/@*[local-name(.) eq $attLname]}
 
-        for $shortcutAttName in $shortcutAttNames       
-        let $attName := $fn_getAttName($shortcutAttName)
+        (: Loop over attribute names :)
+        for $attNameRaw in $requiredAttNames       
+        let $attName := $fn_getAttName($attNameRaw)
+        
+        (: Loop over instance nodes :)
         for $valueNode at $pos in $valueNodes
         let $att := $fn_getAttNode($valueNode, $attName)
         let $colour := if ($att) then 'green' else 'red'
-        let $newContextNode := $valueNode
         let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attName
         return
             result:validationResult_docTree_counts(
-                $colour, $constraintElem, $attsConstraintNode, (), string($attName), $newContextNode, count($att), $newTrail, (), $context)
+                $colour, $constraintElem, $attsConstraintNode, (), string($attName), 
+                $valueNode, count($att), $newTrail, (), $context)
 };
 
 (:~
