@@ -42,9 +42,10 @@ declare function f:existentResourceUri($uri as xs:string,
                                        $resourceKind as xs:string?)
         as xs:string? {
                    
-    let $useUri := string-join(($baseUri, $uri), '/') 
+    let $useUri := f:resolveUri($uri, $baseUri)
                    ! f:normalizeAbsolutePath(.)
                    ! f:pathToUriCompatible(.)
+    
     return
         $useUri
         [f:fox-resource-exists($useUri)]
