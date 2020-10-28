@@ -526,38 +526,42 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
                                                  $context as map(xs:string, item()*))                                                 
         as element()* {
     let $attsConstraintNode := $constraintNode/@atts
+    
+    (: Determine the names of required attributes :)
     let $requiredAttNames := $attsConstraintNode/tokenize(.)[not(ends-with(., '?'))]    
-    return
-        if (empty($requiredAttNames)) then () else
+    return if (empty($requiredAttNames)) then () else
         
-        let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
-        let $fn_getAttName :=
-            if ($withNamespaces) then
-                function($lexName) {
-                    if (contains($lexName, ':')) then resolve-QName($lexName, $constraintNode) 
-                    else QName((), $lexName)                
-                }
-            else function($lexName) {replace($lexName, '^.+:', '')}
-                
-        let $fn_getAttNode :=
-            if ($withNamespaces) then 
-                function($parent, $attQName) {$parent/@*[node-name(.) eq $attQName]}
-            else 
-                function($parent, $attLname) {$parent/@*[local-name(.) eq $attLname]}
+    let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
+    
+    (: Function mapping the attribute identifying name to the attribute node name :)
+    let $fn_getAttName :=
+        if ($withNamespaces) then
+            function($lexName) {
+                if (contains($lexName, ':')) then resolve-QName($lexName, $constraintNode) 
+                else QName((), $lexName)                
+            }
+        else 
+            function($lexName) {replace($lexName, '^.+:', '')}
+    
+    (: Function checking if a particular attribute is present :)
+    let $fn_getAttNode :=
+        if ($withNamespaces) then 
+            function($parent, $attQName) {$parent/@*[node-name(.) eq $attQName]}
+        else 
+            function($parent, $attLname) {$parent/@*[local-name(.) eq $attLname]}
 
-        (: Loop over attribute names :)
-        for $attNameRaw in $requiredAttNames       
-        let $attName := $fn_getAttName($attNameRaw)
+    (: Loop over attribute names :)
+    for $attName in $requiredAttNames ! $fn_getAttName(.)
         
-        (: Loop over instance nodes :)
-        for $valueNode at $pos in $valueNodes
-        let $att := $fn_getAttNode($valueNode, $attName)
-        let $colour := if ($att) then 'green' else 'red'
-        let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attName
-        return
-            result:validationResult_docTree_counts(
-                $colour, $constraintElem, $attsConstraintNode, (), string($attName), 
-                $valueNode, count($att), $newTrail, (), $context)
+    (: Loop over instance nodes :)
+    for $valueNode at $pos in $valueNodes
+    let $attNode := $fn_getAttNode($valueNode, $attName)
+    let $colour := if ($attNode) then 'green' else 'red'
+    let $newTrail := $trail || '(' || $pos || ')' || '#@' || $attName
+    return
+        result:validationResult_docTree_counts(
+            $colour, $constraintElem, $attsConstraintNode, (), string($attName), 
+            $valueNode, count($attNode), $newTrail, (), $context)
 };
 
 (:~
