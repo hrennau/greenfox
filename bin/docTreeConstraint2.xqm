@@ -527,13 +527,13 @@ declare function f:validateNodeContentConstraint_shortcutAttCounts(
         as element()* {
     let $attsConstraintNode := $constraintNode/@atts
     
-    (: Determine the names of required attributes :)
+    (: Determine the lexical names of required attributes :)
     let $requiredAttNames := $attsConstraintNode/tokenize(.)[not(ends-with(., '?'))]    
     return if (empty($requiredAttNames)) then () else
         
     let $withNamespaces := $constraintElem/@withNamespaces/xs:boolean(.)
     
-    (: Function mapping the attribute identifying name to the attribute node name :)
+    (: Function mapping the lexical name to the node name (when using namespaces) or local name (otherwise) :)
     let $fn_getAttName :=
         if ($withNamespaces) then
             function($lexName) {
