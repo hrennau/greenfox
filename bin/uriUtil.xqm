@@ -17,6 +17,17 @@ declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
+ : Adds to a URI a trailing slash.
+ :
+ : @param uri a URI
+ : @return a copy of the URI with a trailing slash 
+ :) 
+declare function f:addToUriTrailingSlash($uri as xs:string)
+        as xs:string {
+    if (ends-with($uri, '/')) then () else $uri || '/'        
+};
+
+(:~
  : Returns the drive prefix (e.g. "c:") of a path or URI, if it
  : contains such a prefix, the empty sequence otherwise.
  :
@@ -29,8 +40,8 @@ declare function f:driveFromPath($path as xs:string)
 };
 
 (:~
- : Returns the URI of an existent resource, or an empty sequence if
- : the input data cannot be resolved to an existent resource.
+ : Returns the absolute URI of an existent resource, or an empty sequence 
+ : if the input data cannot be resolved to an existent resource.
  :
  : @param uri relative or absolute URI or path
  : @param baseUri base URI to be used for resolving the resource
@@ -82,11 +93,13 @@ declare function f:resolveUri($uri as xs:string, $baseUri as xs:string)
     if (matches($uri, '^(/|[a-zA-Z]:/|\i\c*:/)')) then $uri
     else
         let $backstep := starts-with($uri, '../')
-        let $baseUri := replace($baseUri, '/$', '') 
-                        ! replace(., '[^/]+$', '')
-        return 
-            if (not($backstep)) then concat($baseUri, $uri)
-            else f:resolveUri(substring($uri, 4), $baseUri)
+        return
+            if (not($backstep)) then
+                let $baseUri := $baseUri ! replace(., '[^/]+$', '')
+                return concat($baseUri, $uri)
+            else
+                let $baseUri := $baseUri ! replace(., '[^/]+/[^/]*$', '')
+                return f:resolveUri(substring($uri, 4), $baseUri)
 };        
 
 (:~

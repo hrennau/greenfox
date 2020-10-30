@@ -146,7 +146,7 @@ declare function f:getTargetPaths_uri($uri as xs:string,
                                       $resourceShape as element(),
                                       $context as map(xs:string, item()*))
         as xs:string* {
-    let $contextUri := $context?_targetInfo?contextURI
+    let $contextUri := $context?_targetInfo?contextURI ! f:addToUriTrailingSlash(.)
     let $kind := $resourceShape/local-name(.)
     return i:existentResourceUri($uri, $contextUri, $kind)        
 };

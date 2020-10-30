@@ -71,8 +71,9 @@ declare function f:applyLinkConnector($ldo as map(*),
             
     (: Connector: URI 
        ============== :)
-    else if ($ldo?uri) then
-        let $items := i:existentResourceUri($ldo?uri, $context?_targetInfo?contextURI, ())
+    else if ($ldo?uri) then    
+        let $baseUri := $context?_targetInfo?contextURI || '/'
+        let $items := i:existentResourceUri($ldo?uri, $baseUri, ())
         return $items
         
     (: Connector: URI template 
