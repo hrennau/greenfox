@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Our first Greenfox schema. It visits the airports index folder and
-    checks folder contents.
+    Our first Greenfox schema. It visits the index folder and checks
+    folder contents.
     
     Folder members are described by <memberFile> and <memberFolder> elements.
     Default cardinality is 1..1. Use @minCount, @maxCount or @count to specify
@@ -11,18 +11,16 @@
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
-    </context>   
-    
-    <domain path="${domain}" name="air">
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
+    </context>    
+    <domain uri="${domain}" name="air">
         
-        <!-- VISIT index folder -->
-        <folder foxpath="airports\index">
+        <!-- Visit index folder -->
+        <folder uri="airports/index">
             <targetSize count="1" countMsg="Missing folder"/>
 
-            <!-- CHECK: folder content -->
+            <!-- Check: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -37,6 +35,5 @@
             </folderContent>
         </folder>
     </domain>
-
 </greenfox>
 

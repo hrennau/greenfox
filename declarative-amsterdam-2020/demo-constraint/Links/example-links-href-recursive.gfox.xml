@@ -24,7 +24,7 @@
             <file uri="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize minCount="1" minCountMsg="Missing JSON airports document"/>
                 
-                <!-- CHECK: links provided by href fields, resolved recursively -->
+                <!-- Check: links provided by href fields, resolved recursively -->
                 <links linkName="hrefElems"
                        recursive="true" mediatype="json" 
                        resolvable="true" resolvableMsg="Link cannot be resolved"
