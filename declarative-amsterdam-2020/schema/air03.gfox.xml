@@ -16,8 +16,8 @@
     <context>
         <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
-    <domain uri="${domain}" name="air">
-        
+    
+    <domain uri="${domain}" name="air">        
         <!-- ### Visit: index folder -->
         <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>

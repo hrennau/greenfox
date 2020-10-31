@@ -7,19 +7,16 @@
     certain kind of comparison. To give you an idea, the possible attribute 
     values are: eq, ne, lt, le, gt, ge, in, notin, contains, sameTerms, 
     deepEqual. 
-    
-    In the second case the expression references a variable $fileName - there is a
-    small number of preset variable bindings accessible in constraint
-    expressions.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air04"
-          xmlns="http://www.greenfox.org/ns/schema">
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
         <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
     
-    <domain uri="${domain}" name="air">
-        
+    <domain uri="${domain}" name="air">        
         <!-- ### Visit: index folder -->
         <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
@@ -81,6 +78,5 @@
             </file>
         </folder>
     </domain>
-
 </greenfox>
 
