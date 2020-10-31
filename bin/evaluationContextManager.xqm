@@ -26,7 +26,8 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  :
  : @return variable names
  :)
-declare function f:getPotentialBindings() as xs:string+ {
+declare function f:getPotentialBindings($context as map(xs:string, item()*)) 
+        as xs:string+ {
     'doc', 
     'focusNode',
     'lines',
@@ -38,7 +39,8 @@ declare function f:getPotentialBindings() as xs:string+ {
     'targetNode',    
     'linkContext',
     'item',
-    'value'
+    'value',
+    $context?_externalVars
     
 };
 
@@ -418,7 +420,7 @@ declare function f:getRequiredDocs($filePath as xs:string,
  declare function f:getRequiredBindings($expressionsMap as map(*),
                                         $context as map(xs:string, item()*))
         as xs:string* {     
-    let $potentialBindings := f:getPotentialBindings() 
+    let $potentialBindings := f:getPotentialBindings($context) 
     return (
         $expressionsMap?xpath ! f:determineRequiredBindingsXPath(., $potentialBindings),
         $expressionsMap?xpath2 ! f:determineRequiredBindingsXPath(., $potentialBindings),
@@ -487,30 +489,6 @@ declare function f:nodeTreeRequired($componentsMap as map(*),
         $ldos?requiresContextNode[. eq true()]
     ))        
 };
-
-(:
-declare function f:nodeTreeRequired($components as element()*, $context as map(xs:string, item()*))
-        as xs:boolean? { 
-    (: let $_DEBUG := trace($components/name() => string-join(', '), '_COMPONENT_NAMES: ') return :)        
-        
-    exists($components/(
-        self::gx:focusNode,
-        self::gx:docSimilar,
-        self::gx:docTree,
-        self::gx:value, self::gx:values,    
-        self::gx:valuePair, self::gx:valuePairs,
-        self::gx:valueCompared, self::gx:valuesCompared,
-        self::gx:foxvaluePair[.//(@expr1XP, @expr2XP)],
-        self::gx:foxvaluePairs[.//(@expr1XP, @expr2XP)],
-        self::gx:foxvalueCompared[.//@expr1XP],
-        self::gx:foxvaluesCompared[.//@expr1XP],
-        self::gx:links[not(@linkName)][link:parseLinkDef(., $context)?requiresContextNode], 
-        self::gx:file[not(@linkName)][link:parseLinkDef(., $context)?requiresContextNode],
-        self::gx:xpath, 
-        self::gx:foxpath/@*[ends-with(name(.), 'XPath')]
-    ))
-};        
-:)
 
 (:
  : -------------------------------------------------------------------------

@@ -125,7 +125,7 @@ declare function f:finalizeQuery($query as xs:string,
         as xs:string {
     let $prolog := ( 
 'declare namespace gx="http://www.greenfox.org/ns/schema";',
-for $contextName in $contextNames 
+for $contextName in $contextNames => distinct-values()
 let $varName := 
     if ($contextName instance of xs:QName) then 
         string-join((prefix-from-QName($contextName), local-name-from-QName($contextName)), ':')     

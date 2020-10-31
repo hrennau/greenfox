@@ -55,15 +55,7 @@ declare function f:validateExtensionConstraint($constraintElem as element(),
             let $attValue := $atts[local-name(.) eq $paramName]
             return $attValue ! <gx:param name="{$paramName}">{string(.)}</gx:param>
     )
-    (:
-    let $reqBindings :=
-        let $potentialBindings := i:getPotentialBindings()
-        return f:getRequiredBindings($potentialBindings, (), (), $constraintComponent, (), (), (), $context)
-
-    let $context := f:prepareEvaluationContext($context, $reqBindings, $contextURI, 
-        $reqDocs?xdoc, $reqDocs?jdoc, $reqDocs?csvdoc, $reqDocs?htmldoc, $reqDocs?lines, $useParams)  
-    :)
-    
+   
     let $context := f:updateEvaluationContext_params($useParams, $context)    
     let $xpath := $constraintComponent/(@validatorXPath, gx:validatorXPath)[1]
     let $foxpath := $constraintComponent/(@validatorFoxpath, gx:validatorFoxpath)[1]
