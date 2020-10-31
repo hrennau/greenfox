@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    We added a ValuePair constraint. Such constraints are represented by <valuePair> elements
-    with attributes specifying two expressions (usually XPath expressions - @expr1XQ, @expr2XQ)
-    and attributes and/or child elements declaring constraints. Notably, the @cmp
-    attribute specifies a certain kind of comparison. To give you an idea, the possible
-    attribute values are: eq, ne, lt, le, gt, ge, in, notin, contains, sameTerms, deepEqual. 
+    We added ValuePair constraints. Such constraints are represented by 
+    <valuePair> elements with attributes specifying two expressions (usually 
+    XPath expressions - @expr1XQ, @expr2XQ) and attributes and/or child 
+    elements declaring constraints. Notably, the @cmp attribute specifies a
+    certain kind of comparison. To give you an idea, the possible attribute 
+    values are: eq, ne, lt, le, gt, ge, in, notin, contains, sameTerms, 
+    deepEqual. 
     
     In the second case the expression references a variable $fileName - there is a
     small number of preset variable bindings accessible in constraint
@@ -12,17 +14,17 @@
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air04"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
-    <domain path="${domain}" name="air">
+    
+    <domain uri="${domain}" name="air">
         
-        <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+        <!-- ### Visit: index folder -->
+        <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
 
-            <!-- CHECK: folder content -->
+            <!-- Check: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -31,24 +33,24 @@
                 <memberFile name="*.FLAG" minCount="0"/>
                 <memberFile name="meta.txt"/>
                 <memberFile name="phantastic.png" 
-                    md5="8C9B1211E43883A14783731AEDFFA839"
-                    md5Msg="Phantastic file with wrong MD5"/>
+                            md5="8C9B1211E43883A14783731AEDFFA839"
+                            md5Msg="Phantastic file with wrong MD5"/>
                 <memberFolder name="log"/>
             </folderContent>
             
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
+            <!-- ### Visit: FLAG files -->
+            <file navigateFOX="*.FLAG">
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
-                <!-- CHECK: file empty -->
+                <!-- Check: file empty -->
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
             
-            <!-- VISIT: country airports files -->
-            <file foxpath="airports-*.xml">
+            <!-- ### Visit: country airports files -->
+            <file navigateFOX="airports-*.xml">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
-                <!-- CHECK: resource values -->
+                <!-- Check: resource values -->
                 <values>
                     <value exprXP="//type" 
                            eq="airport" eqMsg="Type not 'airport'"/>
@@ -63,18 +65,18 @@
                            distinct="true"/>                        
                 </values>
                 
-                <!-- CHECK: resource value pairs -->
+                <!-- Check: resource value pairs -->
                 <valuePairs>
                     <!-- @countAirports = number of airports -->
                     <valuePair expr1XP="/*/@countAirports" count1="1"
-                        expr2XP="count(//airport)" minCount2="1"
-                        cmp="eq" cmpMsg="Wrong number of airports"
-                        useDatatype="integer"/>
+                               expr2XP="count(//airport)" minCount2="1"
+                               cmp="eq" cmpMsg="Wrong number of airports"
+                               useDatatype="integer"/>
                     <!-- @country = country from file name -->
                     <valuePair expr1XP="/*/@country" count1="1"
-                        expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
-                        cmp="eq" cmpMsg="Country name in attribute and file name different"
-                        useString="lc"/>
+                               expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
+                               cmp="eq" cmpMsg="Country name in attribute and file name different"
+                               useString="lc"/>
                 </valuePairs>
             </file>
         </folder>

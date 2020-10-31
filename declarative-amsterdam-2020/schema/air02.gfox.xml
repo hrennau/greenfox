@@ -8,16 +8,15 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>   
     
-    <domain path="${domain}" name="air">
-        
-        <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+    <domain uri="${domain}" name="air">        
+        <!-- ### Visit: index folder -->
+        <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
 
-            <!-- CHECK: folder content -->
+            <!-- Check: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -31,15 +30,14 @@
                 <memberFolder name="log"/>
             </folderContent>
             
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
+            <!-- ### Visit: FLAG files -->
+            <file navigateFOX="*.FLAG">
                 <targetSize minCount="0"/>
                 
-                <!-- CHECK: file empty -->
+                <!-- Check: file empty -->
                 <fileSize eq="0" eqMsg="FLAG file not empty" eqMsgOK="OK - FLAG file empty"/>
             </file>
         </folder>
     </domain>
-
 </greenfox>
 
