@@ -231,10 +231,10 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:element name="member" type="t:MemberType"/>
                 <xs:element name="members" type="t:MemberType"/>
 
-                <xs:element name="excludedMemberFile" type="t:ExcludedMemberFileType"/>
-                <xs:element name="excludedMemberFiles" type="t:ExcludedMemberFilesType"/>
-                <xs:element name="excludedMemberFolder" type="t:ExcludedMemberFolderType"/>
-                <xs:element name="excludedMemberFolders" type="t:ExcludedMemberFoldersType"/>
+                <xs:element name="excludedMemberFile" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMemberFiles" type="t:ExcludedMembersType"/>
+                <xs:element name="excludedMemberFolder" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMemberFolders" type="t:ExcludedMembersType"/>
                 <xs:element name="excludedMember" type="t:ExcludedMemberType"/>
                 <xs:element name="excludedMembers" type="t:ExcludedMembersType"/>
                 
@@ -280,32 +280,8 @@ C o n s t r a i n t    e l e m e n t s
 
     <xs:complexType name="ExcludedMembersType">
         <xs:attribute name="names" type="xs:string"/>
-        <xs:attribute name="excludedMembersMsg"/>
-        <xs:attribute name="excludedMembersMsgOK"/>
-    </xs:complexType>
-
-    <xs:complexType name="ExcludedMemberFileType">
-        <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="excludedMemberFileMsg"/>
-        <xs:attribute name="excludedMemberFileMsgOK"/>
-    </xs:complexType>
-    
-    <xs:complexType name="ExcludedMemberFilesType">
-        <xs:attribute name="names" type="xs:string"/>
-        <xs:attribute name="excludedMemberFilesMsg"/>
-        <xs:attribute name="excludedMemberFilesMsgOK"/>
-    </xs:complexType>
-
-    <xs:complexType name="ExcludedMemberFolderType">
-        <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="excludedMemberFolderMsg"/>
-        <xs:attribute name="excludedMemberFolderMsgOK"/>
-    </xs:complexType>
-    
-    <xs:complexType name="ExcludedMemberFoldersType">
-        <xs:attribute name="names" type="xs:string"/>
-        <xs:attribute name="excludedMemberFoldersMsg"/>
-        <xs:attribute name="excludedMemberFoldersMsgOK"/>
+        <xs:attribute name="excludedMemberMsg"/>
+        <xs:attribute name="excludedMemberMsgOK"/>
     </xs:complexType>
     
     <!-- F o l d e r S i m i l a r    C o n s t r a i n t s -->
