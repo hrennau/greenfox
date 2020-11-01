@@ -14,11 +14,11 @@
     
     <!-- LINK definitions -->    
     <linkDef name="myJSON"
-             foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
+             navigateFOX="fox-sibling($fileName, '\.[^.]+', '.json')" 
              mediatype="json"/>
     
     <linkDef name="myXML"
-             foxpath="fox-sibling($fileName, '\.[^.]+', '.xml')" 
+             navigateFOX="fox-sibling($fileName, '\.[^.]+', '.xml')" 
              mediatype="xml"/>
     
     <linkDef name="hrefElems" hrefXP="//href"/>
@@ -26,7 +26,7 @@
     <linkDef name="href2JSON" uriXP="//href/replace(., 'json', 'xml')"/>
     
     <linkDef name="linkMeFromAirportsJSON"
-             foxpath="fox-sibling('airports.json')" 
+             navigateFOX="fox-sibling('airports.json')" 
              targetXP="//href[ends-with(., $fileName)]"
              mediatype="json"/>
     

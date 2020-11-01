@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    We added checking of country airports files (airports-*.xml). We declare several
-    VALUE CONSTRAINTS, represented by <value> elements. 
+    We added checking of country airports files (airports-*.xml). We declare 
+    several VALUE CONSTRAINTS, represented by <value> elements. 
     
-    Simple principle: the constraint specifies an expression (typically an XPath expression, @exprXP)
-    and various constraints which apply to the value of the expression. The expression
-    is evaluated in the context of the target resource, or a node from its content
-    (if the constraint has a <focusNode> ancestor, not used here).
+    Simple principle: the constraint specifies an expression (typically an
+    XPath expression, @exprXP) and various constraints which apply to the value 
+    of the expression. The expression is evaluated in the context of the target 
+    resource, or a node from its content (if the constraint has a <focusNode> 
+    ancestor, not used here).
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air03"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
-    <domain path="${domain}" name="air">
-        
-        <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+    
+    <domain uri="${domain}" name="air">        
+        <!-- ### Visit: index folder -->
+        <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
 
-            <!-- CHECK: folder content -->
+            <!-- Check: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -30,44 +31,43 @@
                 <memberFile name="*.FLAG" minCount="0"/>
                 <memberFile name="meta.txt"/>
                 <memberFile name="phantastic.png" 
-                    md5="8C9B1211E43883A14783731AEDFFA839"
-                    md5Msg="Phantastic file with wrong MD5"/>
+                            md5="8C9B1211E43883A14783731AEDFFA839"
+                            md5Msg="Phantastic file with wrong MD5"/>
                 <memberFolder name="log"/>
             </folderContent>
             
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
+            <!-- ### Visit: FLAG files -->
+            <file navigateFOX="*.FLAG">
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
-                <!-- CHECK: file empty -->
+                <!-- Check: file empty -->
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
 
-            <!-- VISIT country airports files -->
-            <file foxpath="airports-*.xml except *luxembourg*">
+            <!-- ### Visit: country airports files -->
+            <file navigateFOX="airports-*.xml except *luxembourg*">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
-                <!-- CHECK resource values: id, type, icao, altitude, latitude, longitude -->
+                <!-- Check: resource values (id, type, icao, altitude, latitude, longitude) -->
                 <values>
                     <value exprXP="//airport/@id" 
-                        minCount="1" minCountMsg="Missing data: ID"
-                        distinct="true"/>                        
+                           minCount="1" minCountMsg="Missing data: ID"
+                           distinct="true"/>                        
                     <value exprXP="//type" 
-                        minCount="1" minCountMsg="Missing data: type"
-                        eq="airport" eqMsg="Type not 'airport'"/>
+                           minCount="1" minCountMsg="Missing data: type"
+                           eq="airport" eqMsg="Type not 'airport'"/>
                     <value exprXP="//@icao" 
-                        minCount="1" minCountMsg="Missing data: ICAO code"
-                        matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
+                           minCount="1" minCountMsg="Missing data: ICAO code"
+                           matches="^[A-Z]{4}" matchesMsg="ICAO not four capital latin letters"/>
                     <value exprXP="//altitude" 
-                        minCount="1" minCountMsg="Missing data: altitude"
-                        lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
+                           minCount="1" minCountMsg="Missing data: altitude"
+                           lt="1000" useDatatype="integer" ltMsg="Airport too high"/>
                     <value exprXP="//(latitude, longitude)" 
-                        minCount="1" minCountMsg="Missing data: latitude, longitude"
-                        datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
+                           minCount="1" minCountMsg="Missing data: latitude, longitude"
+                           datatype="decimal" datatypeMsg="Latitude or longitude not decimal"/>
                 </values>
             </file>
         </folder>
     </domain>
-
 </greenfox>
 

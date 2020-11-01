@@ -8,24 +8,24 @@
     a related JSON document.
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05"
-          xmlns="http://www.greenfox.org/ns/schema">
-
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../xsd/greenfox.xsd">
     <context>
-        <field name="domain" value="${schemaPath}\..\..\data\air"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020\data\air"/>
     </context>    
     
     <!-- LINK definitions -->
     <linkDef name="myJSON"
-        foxpath="fox-sibling($fileName, '\.[^.]+', '.json')" 
-        mediatype="json"/>
+             navigateFOX="fox-sibling($fileName, '\.[^.]+', '.json')" 
+             mediatype="json"/>
     
-    <domain path="${domain}" name="air">
-        
-        <!-- VISIT index folder -->
-        <folder foxpath="airports\index" id="indexFolderShape">
+    <domain uri="${domain}" name="air">        
+        <!-- ### Visit: index folder -->
+        <folder uri="airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing folder"/>
 
-            <!-- CHECK: folder content -->
+            <!-- Check: folder content -->
             <folderContent closed="true">
                 <memberFile name="airports.xml"/>
                 <memberFile name="airports.json"/>
@@ -34,23 +34,24 @@
                 <memberFile name="*.FLAG" minCount="0"/>
                 <memberFile name="meta.txt"/>
                 <memberFile name="phantastic.png" 
-                    md5="8C9B1211E43883A14783731AEDFFA839"
-                    md5Msg="Phantastic file with wrong MD5"/>
+                            md5="8C9B1211E43883A14783731AEDFFA839"
+                            md5Msg="Phantastic file with wrong MD5"/>
                 <memberFolder name="log"/>
             </folderContent>
             
-            <!-- VISIT: FLAG files -->
-            <file foxpath="*.FLAG">
+            <!-- ### Visit: FLAG files -->
+            <file navigateFOX="*.FLAG">
                 <targetSize minCount="1" minCountMsg="Missing FLAG file"/>
                 
-                <!-- CHECK: file empty -->
+                <!-- Check: file empty -->
                 <fileSize eq="0" eqMsg="FLAG file not empty"/>
             </file>
             
-            <file foxpath="airports-*.xml">
+            <!-- ### Visit: country airports files -->
+            <file navigateFOX="airports-*.xml">
                 <targetSize minCount="2" minCountMsg="Too few country airport files"/>
                 
-                <!-- CHECK: resource values -->
+                <!-- Check: resource values -->
                 <values>
                     <value exprXP="//type" 
                            eq="airport" eqMsg="Type not 'airport'"/>
@@ -65,7 +66,7 @@
                            distinct="true"/>                        
                 </values>
                 
-                <!-- CHECK: resource value pairs -->
+                <!-- Check: resource value pairs -->
                 <valuePairs>
                     <valuePair expr1XP="/*/@country" minCount1="1"
                                expr2XP="$fileName ! replace(., '.*-(.*).xml', '$1')"
@@ -73,17 +74,16 @@
                                useString="lc"/>
                 </valuePairs>
                 
-                <!-- CHECK document pairs -->
+                <!-- Check: document pairs -->
                 <valuesCompared linkName="myJSON" countTargetResources="1">
                     <!-- XML @count matches JSON "country" -->
-                    <valueCompared expr1XP="/*/@country" minCount1="1"
-                                   expr2XP="/json/airportsForCountry/country"
+                    <valueCompared expr1XP="/airportsForCountry/@country" minCount1="1"
+                                   expr2XP="//airportsForCountry/country"
                                    cmp="eq" cmpMsg="Country name in XML and JSON different"/>
                 </valuesCompared>
                 
             </file>
         </folder>
     </domain>
-
 </greenfox>
 
