@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FileDate constraints.
-    
+    Demonstrates the use of FileDate constraints.    
 -->    
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">

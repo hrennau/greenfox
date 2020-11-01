@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FolderContent constraints.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: countries folder -->        
+        <folder uri="data/air/airports/countries" id="countriesFolderShape">
+            <targetSize count="1" countMsg="Missing countries folder"/>
+            <!-- Check: folder content -->
+            <folderContent closed="true">
+                <memberFolder name="denmark"/>
+                <memberFolder name="finland"/>                
+                <memberFolder name="ireland"/>                
+            </folderContent>
+            
+            <!-- ### Visit: country folders -->
+            <folder navigateFOX="*">
+                <targetSize minCount="1" minCountMsg="Missing country folders"/>
+                <!-- Check: folder content -->
+                <folderContent closed="true">
+                    <memberFolder name="csv"/>
+                    <memberFolder name="json"/>
+                    <memberFolder name="xml"/>                    
+                </folderContent>              
+                
+                <!-- ### Visit: csv folder -->
+                <folder uri="csv">
+                    <folderContent closed="true" ignoredMembers="csv-in* csv-out*">
+                        <memberFolder name="log" minCount="0"/>
+                        <memberFile name="airports-*.csv"/>
+                        <memberFile name="ONLINE.FLAG"/>
+                        <memberFile name="STATUS.txt"/>
+                    </folderContent>
+                </folder>
+                
+                <!-- ### Visit: json folder -->
+                <folder uri="json">
+                    <folderContent closed="true" ignoredMembers="json-in* json-out*">
+                        <excludedMemberFile name="airport-xxx.json" excludedMemberFileMsg="xxx code in production"/>
+                        <memberFolder name="log" minCount="0"/>
+                        <memberFile name="airport-*.json" maxCount="unbounded"/>                        
+                        <memberFile name="ONLINE.FLAG"/>
+                        <memberFile name="STATUS.txt"/>
+                    </folderContent>
+                </folder>
+                
+                <!-- ### Visit: xml folder -->
+                <folder uri="xml">
+                    <folderContent closed="true" ignoredMembers="xml-in* xml-out*">
+                        <excludedMemberFile name="airport-xxx.xml" excludedMemberFileMsg="xxx code in production"/>
+                        <memberFolder name="log" minCount="0"/>
+                        <memberFile name="airport-*.xml" maxCount="unbounded"/>
+                        <memberFile name="ONLINE.FLAG"/>
+                        <memberFile name="STATUS.txt"/>
+                    </folderContent>
+                </folder>
+            </folder>
+        </folder>
+    </domain>
+</greenfox>

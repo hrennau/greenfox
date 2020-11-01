@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FileSize constraints.
-    
+    Demonstrates the use of FileSize constraints.    
 -->    
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath="data" id="dataFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data" id="dataFolderShape">
             <targetSize count="1" countMsg="Missing data folder"/>          
 
-            <file foxpath=".\\phantastic.png">
+            <file navigateFOX=".\\phantastic.png">
                 <targetSize minCount="2" minCountMsg="Not even two phantastic files."/>
                 <fileSize eq="23476"/>
             </file>
