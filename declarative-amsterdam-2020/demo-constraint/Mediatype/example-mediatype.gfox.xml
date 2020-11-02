@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Checks that all files with file extension .xml and .json are well-formed XML and JSON
+    documents, respectively.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Mediatype/valid-xml-and-json"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">        
+        <!-- ### Visit: XML files -->
+        <file navigateFOX="data\\*.xml">
+            <targetSize minCount="1" minCountMsg="Missing XML files"/>
+            <mediatype eq="xml" eqMsg=".xml file not XML"/>
+        </file>
+        <!-- ### Visit: JSON files -->        
+        <file navigateFOX="data\\*.json">
+            <targetSize minCount="1" minCountMsg="Missing JSON files"/>                
+            <mediatype eq="json" eqMsg=".json file not JSON"/>
+        </file>
+    </domain>
+</greenfox>

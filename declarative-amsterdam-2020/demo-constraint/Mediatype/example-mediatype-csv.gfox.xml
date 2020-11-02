@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Checks that file cow.csv is a semicolon-separated CSV with expected numbers of
+    columns and expected number of lines.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Mediatype/valid-csv"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">        
+        <!-- ### Visit: cow.csv -->
+        <file navigateFOX="data\\cow.csv">
+            <targetSize count="1" countMsg="Missing file 'cow.csv'"/>
+            <!-- Check: CSV with expected numbers of columns and rows -->
+            <mediatype eq="csv" 
+                       csv.separator="semicolon" 
+                       csv.header="yes" 
+                       csv.columnCount="71" csv.columnCountMsg="Not the expected number of columns" 
+                       csv.rowCount="249" csv.rowCountMsg="Not the expected number of rows"/>
+            </file>
+    </domain>
+</greenfox>
