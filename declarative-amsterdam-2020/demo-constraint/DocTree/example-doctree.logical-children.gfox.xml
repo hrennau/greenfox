@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocTree constraints.
+    
+    Each node descriptor is associated with a navigation path leading from instances
+    of the parent descriptor to instances of the child descriptor. Parent-child
+    relationships between node descriptors are logical, rather than physical: the
+    navigation paths do not necessarily consist of a single step along the child axis. 
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data/air/airports/index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder: index"/>          
+
+            <file navigateFOX="airports-*.xml" id="xmlCountriesFile">
+                <targetSize minCount="1" countMsg="Missing XML country files."/>
+                <docTree>
+                    <node locNP="//geo" maxCount="unbounded">
+                        <node locNP="../@icao"/>
+                        <node locNP="latitude"/>
+                        <node locNP="longitude"/>                        
+                        <node locNP="../temporal/timezone"/>                        
+                    </node>                   
+                </docTree>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
+

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocTree constraints.
+    
+    Each <node> child of the constraint element describes a subtree of the document
+    tree. Each <node> child of a <node> element describes a set of nodes reached
+    by the node path in @locNP on its parent node. Explicit cardinality constraints
+    are specified by @count, @minCount, @maxCount. The implicit cardinality constraint -
+    when there are no explicit constraints - is "exactly one node". 
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data/air/airports/index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder: index"/>          
+
+            <file navigateFOX="airports-*.xml" id="xmlCountriesFile">
+                <targetSize minCount="1" countMsg="Missing XML country files."/>
+                <docTree>
+                    <node locNP="//temporal" maxCount="unbounded">
+                        <node locNP="timezone" closed="true"/>
+                        <node locNP="timezoneTz"/>
+                        <node locNP="dst"/>                        
+                    </node>
+                    <node locNP="//airport" maxCount="unbounded" closed="true">
+                        <node locNP="@id"/>                        
+                        <node locNP="@icao"/>
+                        <node locNP="@createdAt"/>
+                        <oneOf>
+                            <nodeGroup>                        
+                                <node locNP="@iata"/>
+                                <node locNP="@latitude"/>                        
+                                <node locNP="@longitude"/>
+                                <node locNP="@href"/>
+                                <node locNP="@comment" minCount="0"/>
+                            </nodeGroup>
+                            <nodeGroup>
+                                <node locNP="name"/>
+                                <node locNP="city"/>
+                                <node locNP="country"/>
+                                <node locNP="geo/latitude"/>
+                                <node locNP="geo/longitude"/>
+                                <node locNP="geo/altitude"/>
+                                <node locNP="temporal"/>
+                                <node locNP="type"/>
+                                <node locNP="source"/>                                
+                                <node locNP="addInfo" minCount="0"/>
+                            </nodeGroup>
+                        </oneOf>
+                    </node>                    
+                </docTree>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
