@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. In this example, option 'quant'
+    equal 'some' means that conformance requires at least one value item to
+    meet the condition, not all value items.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+    xmlns="http://www.greenfox.org/ns/schema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <file navigateFOX="data\air\airports\index\airports-*.xml">
+            <targetSize minCount="3" minCountMsg="Too few airports files."/>
+            <value exprXP="//altitude" 
+                   minCount="1" minCountMsg="Missing values: altitude"
+                   lt="10" ltMsg="Airport at altitude lt 10 expected."
+                   quant="some"
+                   useDatatype="integer"/>
+        </file>
+    </domain>
+</greenfox>

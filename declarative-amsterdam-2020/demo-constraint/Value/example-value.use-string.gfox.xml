@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Value constraints. In this example, option 'useString'
+    prevents violations because of case deviation.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+    xmlns="http://www.greenfox.org/ns/schema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <file navigateFOX="data\air\airports\countries\*\xml\airport-*.xml">
+            <targetSize minCount="10" minCountMsg="Too few airport files."/>
+            <value exprXP="//type" 
+                   count="1" countMsg="Missing value: timezoneZt"
+                   eq="AIRPORT" eqMsg="Type must be AIRPORT."
+                   useString="uc"/>
+        </file>
+    </domain>
+</greenfox>

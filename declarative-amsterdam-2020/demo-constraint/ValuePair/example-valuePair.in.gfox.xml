@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValuePair constraints - a ValuePairIn constraint.   
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+    xmlns="http://www.greenfox.org/ns/schema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <file uri="data/factbook/factbook.xml">
+            <targetSize count="1" countMsg="Missing file: factbook.xml"/>
+            <valuePair expr1XP="//(* except border)/@country" minCount1="1"
+                       expr2XP="//country/@id" minCount2="1"
+                       cmp="in" cmpMsg="Country references not a subset of country IDs"/>
+        </file>
+    </domain>
+</greenfox>
