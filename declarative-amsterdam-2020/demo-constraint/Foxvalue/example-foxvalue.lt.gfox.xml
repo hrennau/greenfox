@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of Foxvalue constraints. Checks integer values found in folder
+    contents for an upper limit.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+
+    <domain uri="${domain}" name="air">
+        <!-- ### Visit: countries folder -->
+        <folder uri="data/air/airports/countries">            
+            <foxvalue 
+                exprFOX="*\json\airport-*.json\jdoc()//altitude" minCount="10"
+                useDatatype="integer"
+                lt="1100" ltMsg="Altitude lt 1100 expected"/>                    
+        </folder>        
+    </domain>
+</greenfox>
+

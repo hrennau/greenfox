@@ -16,6 +16,7 @@
             <valuePair expr1XP="//country/@name" minCount1="1"
                        expr2XP="../name" minCount2="1"
                        expr2Context="item"
+                       quant="someForEach"
                        cmp="eq" cmpMsg="Country name attribute and child different"/>
         </file>
     </domain>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints.
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+
+    <domain uri="${domain}" name="air">
+        <!-- ### Visit: XML airport files -->
+        <file navigateFOX="data\air\airports\countries\ireland\xml\airport-*.xml">            
+            <valuesCompared 
+                    navigateFOX="..\..\json\fox-child($fileName, '.xml$', '.json')"
+                    mediatype="json"
+                    countTargetResources="1">                    
+                <valueCompared 
+                    expr1XP="//latitude" count1="1"
+                    expr2XP="//latitude" count2="1"
+                    cmp="eq" cmpMsg="Latitude different in XML and JSON airport descriptions"/>                    
+                <valueCompared 
+                    expr1XP="/*/@icao" count1="1"
+                    expr2XP="//icao" count2="1"
+                    cmp="eq" cmpMsg="ICAO codes different in XML and JSON airport descriptions"/>                    
+            </valuesCompared>            
+        </file>        
+    </domain>
+</greenfox>
+

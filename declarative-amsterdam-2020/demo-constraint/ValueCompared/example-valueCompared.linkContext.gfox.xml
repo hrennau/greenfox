@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of ValueCompared constraints. The link definition
+    uses a context selector (@contextXP) - for each link context, a pair 
+    consisting of link context and link target is checked. When evaluating
+    @expr1XP, the context item is the link context node.
+    context
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">    
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+
+    <domain uri="${domain}" name="air">
+        <!-- ### Visit: XML airport files -->
+        <file navigateFOX="data\air\airports\index\airports-*.xml">            
+            <valuesCompared contextXP="//airport" hrefXP="@href"
+                            minCountTargetResources="1">                    
+                <valueCompared 
+                    expr1XP="@latitude" count1="1"
+                    expr2XP="//geo/latitude" count2="1"
+                    cmp="eq" cmpMsg="latitudes inconsistent"/>                    
+                <valueCompared 
+                    expr1XP="@createdAt" count1="1"
+                    expr2XP="/airport/@createdAt" count2="1"
+                    cmp="eq" cmpMsg="Expected identical creation times"/>                    
+            </valuesCompared>            
+        </file>        
+    </domain>
+</greenfox>
+
