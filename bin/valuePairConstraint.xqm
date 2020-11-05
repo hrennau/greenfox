@@ -493,13 +493,16 @@ declare function f:validateValuePair_context2_iterating(
             if (empty($items2TY)) then () 
             else if (empty($cmpTrue)) then ()
             else
-                let $violation := $item1[not($cmpTrue($item1TY, $items2TY))]
-                let $colour := if (exists($violation)) then 'red' else 'green'                        
+                let $violations := (
+                    for $item2TY in $items2TY return
+                        $item1[not($cmpTrue($item1TY, $item2TY))]
+                ) => distinct-values()
+                let $colour := if (exists($violations)) then 'red' else 'green'                        
                 return
                     result:validationResult_valuePair(
                         $colour, $constraintElem, $constraintNode, 
                         $expr1Spec, $expr2Spec, $expr1Lang, $expr2Lang,
-                        $violation, (), $context)
+                        $violations, (), $context)
         )       
     (: quantifier: 'some' or 'someForEach' :)           
     else            
