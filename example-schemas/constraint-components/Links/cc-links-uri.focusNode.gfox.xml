@@ -8,20 +8,20 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
 
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder uri="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: Irish airports file -->
-            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+            <file uri="airports-ireland.xml" id="airportsFileShape">
                 <targetSize minCount="1" minCountMsg="Airports file expected"/>
 
                 <!-- Visit: airport nodes with a @iata attribute -->
-                <focusNode xpath="//airport[@iata]">
+                <focusNode selectXP="//airport[@iata]">
                     
                     <!-- Check: corresponding JSON airport files exist -->
                     <links uriXP="@iata/concat('ireland/airport-', ., '.json')"

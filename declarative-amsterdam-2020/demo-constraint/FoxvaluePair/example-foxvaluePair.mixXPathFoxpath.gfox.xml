@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FoxvaluePair constraints. Checks a file by 
+    comparing document contents (obtained using XPath) and folder 
+    contents (obtained using Foxpath).    
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: airport index file -->
+        <file uri="data/air/airports/index/airports.xml" id="airportIndexFile">
+            <targetSize count="1" countMsg="Missing airpot index file"/>          
+            <!-- Check the countries mentioned in the index file and occurring in the index folder -->
+            <foxvaluePair expr1XP="//@country" minCount1="3"
+                          expr2FOX="..\(*.xml//(@country, country), *.json\jdoc(.)//country)" minCount2="3" 
+                          cmp="sameTerms" 
+                          cmpMsg="Countries and index file and index folder must be the same"/>            
+        </file>
+    </domain>
+</greenfox>

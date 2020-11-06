@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of FoxvaluePair constraints. Checks a folder by
+    comparing aggregated values extracted from multiple content resources.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <linkDef name="refResource"
+        reflector1FOX="ancestor~::air"
+        reflector2FOX="..\air.20201006"/>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: country folders -->
+        <folder navigateFOX="data\air\airports\countries" id="countryFolders">
+            <targetSize count="1" countMsg="Missing countries folder"/>          
+            <!-- The multi set of latitudes from all contained XML and JSON resources must be equal. -->
+            <foxvaluesCompared reflector1FOX="ancestor~::air" reflector2FOX="..\air.20201006">
+                <foxvalueCompared 
+                    expr1FOX=".\\(*.xml, *.json\jdoc(.))//latitude" minCount1="100"
+                    expr2FOX=".\\(*.xml, *.json\jdoc(.))//latitude" 
+                    cmp="permutation" 
+                    cmpMsg="XML and JSON airports must contain the same latitudes"/>
+                <foxvalueCompared 
+                    expr1FOX=".\\(*.xml, *.json\jdoc(.))//longitude" minCount1="100"
+                    expr2FOX=".\\(*.xml, *.json\jdoc(.))//longitude" 
+                    cmp="permutation" 
+                    cmpMsg="XML and JSON airports must contain the same longitude"/>
+            </foxvaluesCompared>
+        </folder>
+    </domain>
+</greenfox>

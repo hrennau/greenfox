@@ -71,7 +71,7 @@
                         </in>
                     </value>
                     
-                    <focusNode xpath="/*/*">
+                    <focusNode selectXP="/*/*">
                         <targetSize minCount="1"
                                     minCountMsg="Message config file must contain at least one row"/>
                         <value exprXP="*"

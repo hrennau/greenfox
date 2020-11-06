@@ -15,30 +15,29 @@
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/doc-similar.linkTarget"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
     
     <!-- Define link: input2 -->
     <linkDef name="input2"
-             foxpath="fox-sibling('executionSummary2.xml')"
+             navigateFOX="fox-sibling('executionSummary2.xml')"
              targetXP="//input">
         <targetSize countTargetDocs="1"/>
     </linkDef>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
         <!-- Visit: docSimilar folder -->
-        <folder foxpath="docSimilar" id="docSimilarFolderShape">            
+        <folder uri="docSimilar" id="docSimilarFolderShape">            
             <targetSize countMsg="Missing folder: docSimilar" count="1"/>
 
             <!-- Visit: executionSummary1.xml -->
-            <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
+            <file uri="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
                 
                 <!-- Visit: <input> nodes -->
-                <focusNode xpath="//input">
+                <focusNode selectXP="//input">
                     <targetSize countMsg="Missing element: input" count="1"/>
                     
                     <!-- Check: node content similar? -->

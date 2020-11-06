@@ -25,7 +25,7 @@
                 <targetSize count="1"/>
                 
                     <!-- In the shape target resource, we visit each <airportsForCountry> element -->
-                    <focusNode xpath="trace(/airports, '_LINK_CONTEXT_ELEM: ')">   <!-- #TODO - correct @xpath -->
+                    <focusNode selectXP="trace(/airports, '_LINK_CONTEXT_ELEM: ')">   <!-- #TODO - correct @xpath -->
                         <!-- Check that there are at least three such elements -->
                         <targetSize minCount="3" minCountMsg="Not even three link targets!"/>
                         

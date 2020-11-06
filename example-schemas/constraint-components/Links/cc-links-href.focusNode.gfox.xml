@@ -12,31 +12,30 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
   
     <linkDef name="airports"
              hrefXP="@href"             
              mediatype="xml"/>
         
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder uri="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Visit: Finish airports document -->
-            <file foxpath="airports-finland.xml" id="airportsFileShape">
+            <file uri="airports-finland.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Finland airports file missing"/>
                 
                 <!-- Visit: airport nodes -->
-                <focusNode xpath="//airport[@href]">
+                <focusNode selectXP="//airport[@href]">
                     
                     <!-- Check: all href references can be resolved to XML documents -->
                     <links linkName="airports"
                         resolvable="true" resolvableMsg="Link cannot be resolved"
                         countTargetDocs="1" 
-                        countTargetDocsMsg="One link target expected for each airport element with @href."/>
-                    
+                        countTargetDocsMsg="One link target expected for each airport element with @href."/>                    
                 </focusNode>
             </file>
         </folder>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of XsdValid constraints. In this example, not the complete
+    resource is validated, but selected validation targets (@selectXP).
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">   
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <file navigateFOX="data\air\airports\index\airports-*.xml">
+            <targetSize minCount="3" minCountMsg="Not even 3 country airports files."/>            
+            <xsdValid xsdFOX="$domain\data\air\resources\xsd\*.xsd" 
+                      selectXP="//airport[*]"/>
+        </file>
+    </domain>
+</greenfox>

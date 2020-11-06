@@ -150,7 +150,7 @@ S h a p e s
                 <xs:element name="focusNode" type="t:FocusNodeType"/>                
             </xs:choice>
         </xs:sequence>
-        <xs:attribute name="xpath" type="xs:string"/>
+        <xs:attribute name="selectXP" type="xs:string"/>
     </xs:complexType>    
     
     <!-- 
@@ -571,6 +571,7 @@ C o n s t r a i n t    e l e m e n t s
             <xs:element name="notin" type="t:ValueComparisonsType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="contains" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="sameTerms" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="permutation" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="deepEqual" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="quant" type="t:QuantEnumType"/>        
@@ -586,6 +587,8 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="containsMsgOK" type="xs:string"/>
         <xs:attribute name="sameTermsMsg" type="xs:string"/>
         <xs:attribute name="sameTermsMsgOK" type="xs:string"/>
+        <xs:attribute name="permutationMsg" type="xs:string"/>
+        <xs:attribute name="permutationMsgOK" type="xs:string"/>
         <xs:attribute name="deepEqualMsg" type="xs:string"/>
         <xs:attribute name="deepEqualMsgOK" type="xs:string"/>        
         
@@ -615,6 +618,7 @@ C o n s t r a i n t    e l e m e n t s
     
     <xs:complexType name="XsdValidConstraintType">
         <xs:attribute name="xsdFOX" type="xs:string"/>
+        <xs:attribute name="selectXP" type="xs:string"/>
         <xs:attribute name="xsdValidMsg" type="xs:string"/>
         <xs:attribute name="xsdValidMsgOK" type="xs:string"/>
     </xs:complexType>
@@ -858,6 +862,7 @@ Enumerations
             <xs:enumeration value="notin"/>
             <xs:enumeration value="contains"/>
             <xs:enumeration value="sameTerms"/>
+            <xs:enumeration value="permutation"/>
             <xs:enumeration value="deepEqual"/>
         </xs:restriction>
     </xs:simpleType>

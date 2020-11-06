@@ -8,7 +8,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}/../../../../example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
 
     <domain uri="${domain}" name="greenfox-example-data">
@@ -21,7 +21,7 @@
                 <targetSize minCount="1" minCountMsg="Airports file expected"/>
 
                 <!-- Visit: airport nodes with a @iata attribute -->
-                <focusNode xpath="//airport[@iata]">
+                <focusNode selectXP="//airport[@iata]">
                     
                     <!-- Check: corresponding JSON airport files exist -->
                     <links uriTemplate="ireland/airport-{iata}.json"

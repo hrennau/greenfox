@@ -10,17 +10,16 @@
 -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
 
-    <domain path="${domain}" name="air">
+    <domain uri="${domain}" name="air">
         
-        <file foxpath="airports\index\airports.xml">
+        <file uri="airports/index/airports.xml">
             <targetSize count="1"/>
             
-            <focusNode xpath="//airportsForCountry">
+            <focusNode selectXP="//airportsForCountry">
             
                 <!-- Foxpath expression references $focusNode -->
                 <foxvalue exprFOX="..\..\countries\fox-child($focusNode/@country)"

@@ -8,21 +8,21 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
 
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder uri="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'projectDates.xml' -->
-            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesShape">
+            <file navigateFOX="*projectDates*.xml except _hide*" id="projectDatesShape">
                 <targetSize minCount="1" minCountMsg="Missing file: projectDates.xml"/>
                 
                 <!-- FOCUS NODE: //project -->
-                <focusNode xpath="//project">
+                <focusNode selectXP="//project">
                     <valuePairs>
                         <valuePair expr1XP="@endDate" minCount1="0" 
                                    expr2XP="@startDate" count2="1"                                    

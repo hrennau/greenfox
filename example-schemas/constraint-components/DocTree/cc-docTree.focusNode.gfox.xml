@@ -9,21 +9,21 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" valueFOX="ancestor~::greenfox\example-data"/>
     </context>
     
-    <domain path="${domain}" name="greenfox-example-data">
+    <domain uri="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder uri="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>          
 
             <!-- VISIT: country airports files -->
-            <file foxpath="airports-ireland.xml" id="countryAirportsShape">
+            <file uri="airports-ireland.xml" id="countryAirportsShape">
                 <targetSize minCount="1" minCountMsg="Expected country airports documents"/>
                 
                 <!-- Focus node: airport elements with IATA code -->
-                <focusNode xpath="//airport[@iata]">
+                <focusNode selectXP="//airport[@iata]">
                     
                     <!-- CHECK: grammar -->
                     <docTree>
@@ -38,7 +38,7 @@
                     </docTree>
                 </focusNode>
                 <!-- Focus node: airport elements without IATA code -->                
-                <focusNode xpath="//airport[not(@iata)]">
+                <focusNode selectXP="//airport[not(@iata)]">
                     
                     <!-- CHECK: grammar -->                    
                     <docTree>

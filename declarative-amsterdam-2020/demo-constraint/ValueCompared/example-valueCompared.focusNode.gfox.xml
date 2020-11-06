@@ -16,7 +16,7 @@
     <domain uri="${domain}" name="air">
         <!-- ### Visit: airports file -->
         <file uri="data/air/airports/index/airports.xml">            
-            <focusNode xpath="//airportsForCountry">                    
+            <focusNode selectXP="//airportsForCountry">                    
                 <!-- Country names in airports.xml and referenced country airports document equal -->
                 <valuesCompared 
                     linkName="countryAirports" 

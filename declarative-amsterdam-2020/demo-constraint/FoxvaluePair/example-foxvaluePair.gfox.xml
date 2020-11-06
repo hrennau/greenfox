@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    Demonstrates the use of FoxvaluePair constraints. Checks that the IDs found in
-    the country airports files in air/airports/index include all IDs from
-    air/airports/countries/*/xml/airport-*.xml.
-    
+    Demonstrates the use of FoxvaluePair constraints. Checks a folder by
+    comparing aggregated values extracted from multiple content resources.
 -->    
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath="data\air" id="airFolderShape">
-            <targetSize count="1" countMsg="Missing air folder"/>          
-
-            <foxvaluePairs>
-                <foxvaluePair expr1FOX="airports\index\airports-*.xml//airport/@id" minCount1="50"
-                              expr2FOX="airports\countries\*\xml\airport-*.xml/airport/@id" minCount2="50" 
-                              cmp="contains" 
-                              cmpMsg="The ID lists in index files do not contain all airport IDs found in airport files"/>
-            </foxvaluePairs>
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: country folders -->
+        <folder navigateFOX="data\air\airports\countries\*" id="countryFolders">
+            <targetSize minCount="3" countMsg="Missing country folders"/>          
+            <!-- Check sets of IDs - must be the same for XML and JSON documents -->
+            <foxvaluePair expr1FOX="xml\airport-*.xml/airport/@id" minCount1="5"
+                          expr2FOX="json\airport-*.json\jdoc(.)//airport/id" minCount2="5" 
+                          cmp="permutation" 
+                          cmpMsg="XML and JSON airports must contain the same set of IDs"/>            
         </folder>
     </domain>
 </greenfox>
