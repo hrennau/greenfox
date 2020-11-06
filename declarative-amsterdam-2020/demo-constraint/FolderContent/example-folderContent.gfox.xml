@@ -44,7 +44,7 @@
                 <!-- ### Visit: json folder -->
                 <folder uri="json">
                     <folderContent closed="true" ignoredMembers="json-in* json-out*">
-                        <excludedMemberFile name="airport-xxx.json" excludedMemberFileMsg="xxx code in production"/>
+                        <excludedMemberFile name="airport-xxx.json" excludedMemberMsg="xxx code in production"/>
                         <memberFolder name="log" minCount="0"/>
                         <memberFile name="airport-*.json" maxCount="unbounded"/>                        
                         <memberFile name="ONLINE.FLAG"/>
@@ -55,7 +55,7 @@
                 <!-- ### Visit: xml folder -->
                 <folder uri="xml">
                     <folderContent closed="true" ignoredMembers="xml-in* xml-out*">
-                        <excludedMemberFile name="airport-xxx.xml" excludedMemberFileMsg="xxx code in production"/>
+                        <excludedMemberFile name="airport-xxx.xml" excludedMemberMsg="xxx code in production"/>
                         <memberFolder name="log" minCount="0"/>
                         <memberFile name="airport-*.xml" maxCount="unbounded"/>
                         <memberFile name="ONLINE.FLAG"/>
