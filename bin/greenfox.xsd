@@ -150,7 +150,7 @@ S h a p e s
                 <xs:element name="focusNode" type="t:FocusNodeType"/>                
             </xs:choice>
         </xs:sequence>
-        <xs:attribute name="selectXP" type="xs:string"/>
+        <xs:attribute name="xpath" type="xs:string"/>
     </xs:complexType>    
     
     <!-- 

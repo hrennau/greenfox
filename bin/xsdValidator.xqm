@@ -22,16 +22,21 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:xsdValidate($constraintElem as element(gx:xsdValid), 
                                $context as map(*))
         as element()* {
-    let $contextURI := $context?_targetInfo?contextURI
+    let $targetInfo := $context?_targetInfo
+    let $contextURI := $targetInfo?contextURI
+    let $contextDoc := $targetInfo?doc
+    let $contextNode := $targetInfo?focusNode
+    let $useContextNode := ($contextNode, $contextDoc)[1]
     return
-    
-    if (not(i:fox-doc-available($contextURI))) then 
+
+    (: Exception - no context document :)
+    if (not($useContextNode)) then
         let $msg := "XSD validation requires XML file, but file is not XML"
         return
             result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
     else
       
-    let $doc := i:fox-doc-no-base-xml($contextURI)
+    let $doc := $useContextNode (: i:fox-doc-no-base-xml($contextURI) :)
     let $expr := $constraintElem/@xsdFOX
     let $evaluationContext := $context?_evaluationContext
     let $xsdPaths := 
@@ -66,9 +71,12 @@ declare function f:xsdValidate($constraintElem as element(gx:xsdValid),
                     result:validationResult_xsdValid_exception($constraintElem, $msg, (), $context)
         else
 
-    let $rootElem := $doc/*
-    let $namespace := $rootElem/namespace-uri(.)
-    let $lname := $rootElem/local-name(.)
+    let $rootElem := $doc/descendant-or-self::*[1]
+    let $validationTargets := $rootElem/f:selectValidationTargetNodes($constraintElem/@selectXP, ., $context)
+    
+    for $validationTarget in $validationTargets
+    let $namespace := $validationTarget/namespace-uri(.)
+    let $lname := $validationTarget/local-name(.)
 
     let $elementDecl :=
         $xsdRoots/xs:schema/xs:element[@name eq $lname]
@@ -90,33 +98,27 @@ declare function f:xsdValidate($constraintElem as element(gx:xsdValid),
         
     (: let $schema := $elementDecl/base-uri(.) :)    
     let $schema := $elementDecl/ancestor::xs:schema    
-    let $report := validate:xsd-report($doc, $schema)
+    let $report := validate:xsd-report($validationTarget, $schema)
     let $colour := if ($report//status eq 'valid') then 'green' else 'red'
     return
         result:validationResult_xsdValid($colour, $constraintElem, $report, $context)
 };
 
-(:
-declare function f:constructResult_xsdValid($colour as xs:string,
-                                            $msg as xs:string?,
-                                            $contextURI as xs:string,                                            
-                                            $constraintElem as element(),
-                                            $report as element()?)
-        as element() {
-    let $elemName := 'gx:' || $colour
-    return
-        element {$elemName}{
-            $msg ! attribute msg {.},
-            attribute filePath {$contextURI},                
-            attribute constraintComponent {"XsdValid"},
-            $constraintElem/@id/attribute constraintID {.},
-            $constraintElem/@label/attribute constraintLabel {.},            
-            $constraintElem/@resourceShapeID/attribute resourceShapeID {.},                
-            $constraintElem/@xsdFoxpath,
-            if ($colour eq 'green') then ()
-            else $report/message/<gx:xsdMessage>{@*, node()}</gx:xsdMessage>
-         }
-        
+(:~
+ : Returns the nodes to be validated.
+ :
+ : @param selectXP an XPath expression selecting the nodes
+ : @param contextItem the current congtext item
+ : @param context the processing context
+ : @return the validation target nodes
+ :) 
+declare function f:selectValidationTargetNodes($selectXP as xs:string?, 
+                                               $contextItem as item(), 
+                                               $context as map(xs:string, item()*))
+        as node()* {
+    if (not($selectXP)) then $contextItem else
+ 
+    let $nodes := i:evaluateXPath($selectXP, $contextItem, $context?_evaluationContext, true(), true())
+    return $nodes
 };        
-:)
 

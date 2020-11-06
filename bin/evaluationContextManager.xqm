@@ -484,7 +484,7 @@ declare function f:nodeTreeRequired($componentsMap as map(*),
         as xs:boolean {
     exists((
         $componentsMap?coreConstraints/
-            (self::gx:docTree, self::gx:docSimilar),
+            (self::gx:docTree, self::gx:docSimilar, self::gx:xsdValid),
         $expressionsMap?xpath,
         $ldos?requiresContextNode[. eq true()]
     ))        

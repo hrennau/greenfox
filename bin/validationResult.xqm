@@ -1211,6 +1211,7 @@ declare function f:validationResult_value($colour as xs:string,
         case element(gx:notin) return map{'constraintComp': $ccPrefix || 'Notin', 'atts': ('useDatatype')}
         case element(gx:contains) return map{'constraintComp': $ccPrefix || 'Contains', 'atts': ('useDatatype', 'quant')}
         case element(gx:sameTerms) return map{'constraintComp': $ccPrefix || 'SameTerms', 'atts': ('useDatatype', 'quant')}
+        case element(gx:permutation) return map{'constraintComp': $ccPrefix || 'Permutation', 'atts': ('useDatatype', 'quant')}
         case element(gx:deepEqual) return map{'constraintComp': $ccPrefix || 'DeepEqual', 'atts': ('useDatatype', 'quant')}        
         
         case attribute(datatype) return map{'constraintComp': $ccPrefix || 'Datatype', 'atts': ('datatype', 'useDatatype', 'quant')}

@@ -308,7 +308,7 @@ declare function f:validateValuePair($constraintElem as element(),
     (: (2.1) Function processing a single item second operand :)
     let $cmpTrue :=
         if ($constraintNode/self::element()) then ()
-        else if ($constraintNode = ('in', 'notin', 'contains', 'sameTerms', 'deepEqual')) then () else
+        else if ($constraintNode = ('in', 'notin', 'contains', 'sameTerms', 'permutation', 'deepEqual')) then () else
         switch($constraintNode)
         case 'eq' return function($op1, $op2) {$op1 = $op2}        
         case 'ne' return function($op1, $op2) {$op1 != $op2}        
@@ -320,7 +320,7 @@ declare function f:validateValuePair($constraintElem as element(),
 
     (: (2.2) Function processing multiple items second operand :)
     let $findViolations :=
-        if (not($constraintNode = ('in', 'notin', 'contains', 'sameTerms', 'deepEqual'))) then () else
+        if (not($constraintNode = ('in', 'notin', 'contains', 'sameTerms', 'permutation', 'deepEqual'))) then () else
         switch($constraintNode)
  
         case 'in' return function($items1, $items1TY, $items2, $items2TY) {
@@ -345,6 +345,15 @@ declare function f:validateValuePair($constraintElem as element(),
             for $item2TY at $pos in $items2TY
             where not($item2TY = $items1TY)
             return $items2[$pos]
+            }
+            
+        case 'permutation' return function($items1, $items1TY, $items2, $items2TY) {
+            for $item1TY in $items1TY
+            group by $item1TYValue := $item1TY
+            let $item2TY := $items2TY[. eq $item1TYValue]
+            where not(count($item1TY) eq count($item2TY))
+            return $item1TY[1],
+            distinct-values($items2TY)[not(. = $items1TY)]
             }
             
         case 'deepEqual' return function($items1, $items1TY, $items2, $items2TY) {

@@ -62,13 +62,13 @@ return
 
         <!-- greenfox schema -->
 
-        <file foxpath=".">
+        <file navigateFOX=".">
             <targetSize msg="greenfox schema not found" count="1"/>
 
             <!-- check generic attributes 
                      ======================== -->
             <!-- check @id -->
-            <focusNode xpath="//*[@id]">
+            <focusNode selectXP="//*[@id]">
                 <xpath description="Validates the @id attributes " expr="@id" datatype="NCName"
                     datatypeMsg="Invalid @id - value must be an NCName"
                     datatypeMsgOK="OK - @id attributes: no values which are not NCNames"
@@ -79,7 +79,7 @@ return
                     <greenfox>
                  ======================================== -->
 
-            <focusNode xpath="*:greenfox">
+            <focusNode selectXP="*:greenfox">
                 <targetSize count="1" countMsg="No 'greenfox' root element"/>
 
                 <!-- check namespace of root element -->
@@ -96,7 +96,7 @@ return
                         <linkDef>
                      ======================================== -->
                 
-                <focusNode xpath="*:linkDef">
+                <focusNode selectXP="*:linkDef">
                     <ex:allowedAtts attNames="name connector hrefXP uriXP contextXP targetXP uriTemplate foxpath targetMediatype recursive"
                         msg="Unexpected attributes in 'linkDef' element; expected names: name connector hrefXP uriXP uriTemplate 
                              contextXP targetXP foxpath targetMediatype recursive"
@@ -106,7 +106,7 @@ return
                         msg="Unexpected child element in 'linkDef' element: only 'constraints' children allowed"
                         msgOK="OK - 'linkDef' element: child element names"/>
                     
-                    <focusNode xpath="*:constraints">
+                    <focusNode selectXP="*:constraints">
                         <ex:allowedAtts attNames="
                             id label 
                             resolvable resolvableMsg resolvableMsgOK
@@ -143,7 +143,7 @@ return
                         <context>
                      ======================================== -->
 
-                <focusNode xpath="*:context">
+                <focusNode selectXP="*:context">
 
                     <!-- check attribute names and mandatory attributs -->
                     <ex:noAtts
@@ -159,7 +159,7 @@ return
                            <field>
                          ======================================== -->
 
-                    <focusNode xpath="*:field">
+                    <focusNode selectXP="*:field">
 
                         <!-- check attribute names and mandatory attributs -->
                         <ex:allowedAtts attNames="name value"
@@ -185,7 +185,7 @@ return
                     <constraintComponents>
                  ======================================== -->
 
-            <focusNode xpath="*:greenfox/*:constraintComponents">
+            <focusNode selectXP="*:greenfox/*:constraintComponents">
                 <targetSize maxCount="1"
                     maxCountMsg="At most one 'constraintComponents' element allowed"/>
                 <ex:noAtts msg="Element 'constraintComponents' must not have attributes."
@@ -198,7 +198,7 @@ return
                         <constraintComponent>
                      ======================================== -->
 
-                <focusNode xpath="*:constraintComponent">
+                <focusNode selectXP="*:constraintComponent">
                     <ex:mandatoryAtts attNames="constraintElementName"
                         msg="Missing mandatory attributes in 'constraintComponent' element; expected: constraintElementName"
                         msgOK="OK - 'constraintElement' element: with mandatory attribute 'constraintElementName'"
@@ -212,7 +212,7 @@ return
                     <domain>
                  ======================================== -->
 
-            <focusNode xpath="*:greenfox/*:domain">
+            <focusNode selectXP="*:greenfox/*:domain">
                 <targetSize minCount="1" minCountMsg="No domain" minCountMsgOK="OK - domain found"/>
 
                 <!-- check attribute names, mandatory atts -->
@@ -239,7 +239,7 @@ return
                     <targetSize>
                  ======================================== -->
 
-            <focusNode xpath="//*:targetSize">
+            <focusNode selectXP="//*:targetSize">
 
                 <!-- attribute names -->
                 <ex:allowedAtts
@@ -285,7 +285,7 @@ return
                     <folderContent>
                  ======================================== -->
 
-            <focusNode xpath="*:greenfox//*:folderContent">
+            <focusNode selectXP="*:greenfox//*:folderContent">
 
                 <!-- attribute names -->
                 <ex:allowedAtts attNames="id description closed closedMsg closedMsgOK ignoredMembers"
@@ -304,7 +304,7 @@ return
                     msgOK="OK - 'folderContent' element: no unexpected child elements"/>
 
                 <!-- all child elements must be empty -->
-                <focusNode xpath="*">
+                <focusNode selectXP="*">
                     <ex:emptyElem msg="Child elements of 'folderContent' must be empty'"
                         msgOK="OK - child elements of 'folderContent' empty"/>
                 </focusNode>
@@ -313,7 +313,7 @@ return
                         <memberFile>, <memberFolder>
                      ======================================== -->
 
-                <focusNode xpath="*:memberFile, *:memberFolder">
+                <focusNode selectXP="*:memberFile, *:memberFolder">
 
                     <!-- attribute names -->
                     <ex:allowedAtts
@@ -338,7 +338,7 @@ return
                         <memberFiles>, <memberFolders>
                      ======================================== -->
 
-                <focusNode xpath="*:memberFiles, *:memberFolders">
+                <focusNode selectXP="*:memberFiles, *:memberFolders">
 
                     <!-- attribute names -->
                     <ex:allowedAtts
@@ -363,7 +363,7 @@ return
                         <excludedMemberFile>, <excludedMemberFolder>
                      ================================================= -->
 
-                <focusNode xpath="*:excludedMemberFile, *:excludedMemberFolder">
+                <focusNode selectXP="*:excludedMemberFile, *:excludedMemberFolder">
 
                     <!-- attribute names -->
                     <ex:allowedAtts attNames="name excludedMemberFileMsg excludedMemberFileMsgOK excludedMemberFolderMsg excludedMemberFolderMsgOK"
@@ -381,7 +381,7 @@ return
                         <excludedMemberFiles>, <excludedMemberFolders>
                      ================================================= -->
 
-                <focusNode xpath="*:excludedMemberFiles, *:excludedMemberFolders">
+                <focusNode selectXP="*:excludedMemberFiles, *:excludedMemberFolders">
 
                     <!-- attribute names -->
                     <ex:allowedAtts attNames="names excludedMemberFilesMsg excludedMemberFilesMsgOK excludedMemberFoldersMsg excludedMemberFoldersMsgOK"
@@ -400,7 +400,7 @@ return
             <!-- ========================================
                        <folder>
                  ======================================== -->
-            <focusNode xpath="//*:folder">
+            <focusNode selectXP="//*:folder">
 
                 <!-- attribute names -->
                 <ex:allowedAtts attNames="id description deactivated foxpath path"
@@ -433,7 +433,7 @@ return
                        <file>
                  ======================================== -->
 
-            <focusNode xpath="//*:file">
+            <focusNode selectXP="//*:file">
                 <ex:allowedAtts attNames="id description deactivated linkName path foxpath hrefXP uriXP recursive mediatype targetMediatype csv.separator csv.header"
                     msg="Unexpected attributes in 'file' element; expected: $attNames"
                     msgOK="OK - 'file' element: no unexpected attributes"/>
@@ -458,7 +458,7 @@ return
             <!-- ========================================
                        <docSimilar>
                  ======================================== -->
-            <focusNode xpath="//*:docSimilar">
+            <focusNode selectXP="//*:docSimilar">
                 <ex:allowedAtts
                     attNames="foxpath linkName redReport 
                               docSimilarMsg docSimilarMsgOK
@@ -492,7 +492,7 @@ return
                     msg="Unexpected elements in 'docSimilar' element; expected: $elemNames"
                     msgOK="OK - 'docSimilar' element: no unexpected child elements"/>
                 
-                    <focusNode xpath="*:skipItem">
+                <focusNode selectXP="*:skipItem">
                         <ex:allowedAtts attNames="kind localName namespace parentLocalName parentNamespace testXP"
                             msg="Unexpected attributes in 'skipItem' element; expected: $attNames"
                             msgOK="OK - 'skipItem' element: no unexpected attributes"/>
@@ -503,7 +503,7 @@ return
             <!-- ========================================
                        <contentCorrespondence>
                  ======================================== -->
-            <focusNode xpath="//*:contentCorrespondence">
+            <focusNode selectXP="//*:contentCorrespondence">
                 <ex:allowedAtts
                     attNames="foxpath contextXP targetXP linkName
                     
@@ -538,7 +538,7 @@ return
                     msgOK="OK - 'contentCorrespondence' element: no unexpected child elements"/>
                 />  
                 
-                <focusNode xpath="*:valueCord">
+                <focusNode selectXP="*:valueCord">
                     <ex:allowedAtts attNames="sourceXP targetXP cmp useDatatype
                          countSource minCountSource maxCountSource
                          countSourceMsg minCountSourceMsg maxCountSourceMsg
@@ -553,7 +553,7 @@ return
             <!-- ========================================
                        <xpath>
                  ======================================== -->
-            <focusNode xpath="//*:xpath">
+            <focusNode selectXP="//*:xpath">
 
                 <!-- attribute names -->
                 <ex:allowedAtts
@@ -624,7 +624,7 @@ return
             <!-- ========================================
                        <foxpath>
                  ======================================== -->
-            <focusNode xpath="//*:foxpath">
+            <focusNode selectXP="//*:foxpath">
 
                 <!-- attribute names -->
                 <ex:allowedAtts
@@ -695,7 +695,7 @@ return
             <!-- ========================================
                        <links>
                  ======================================== -->
-            <focusNode xpath="//*:links">
+            <focusNode selectXP="//*:links">
                 
                 <!-- attribute names -->
                 <ex:allowedAtts
@@ -749,13 +749,13 @@ return
             <!-- ========================================
                     <fileSize>
                  ======================================== -->
-            <focusNode xpath="//*:fileSize">
+            <focusNode selectXP="//*:fileSize">
             </focusNode>
 
             <!-- ========================================
                     <fileName>
                  ======================================== -->
-            <focusNode xpath="//*:fileName">
+            <focusNode selectXP="//*:fileName">
                 <!-- allowed attributes -->
                 <ex:allowedAtts attNames="id descriptions
                     flags case
@@ -773,7 +773,7 @@ return
                     <fileDate>
                  ======================================== -->
             
-            <focusNode xpath="*:greenfox//*:fileDate">
+            <focusNode selectXP="*:greenfox//*:fileDate">
                 <!-- attribute names -->
                 <ex:allowedAtts 
                     attNames="id label description
@@ -800,13 +800,13 @@ return
             <!-- ========================================
                     <ifMediatype>
                  ======================================== -->
-            <focusNode xpath="//*:ifMediatype">
+            <focusNode selectXP="//*:ifMediatype">
             </focusNode>
 
             <!-- ========================================
                     <xsdValid>
                  ======================================== -->
-            <focusNode xpath="//*:xsdValid">
+            <focusNode selectXP="//*:xsdValid">
 
                 <!-- allowed attributes -->
                 <ex:allowedAtts attNames="xsdFOX xsdValidMsg xsdValidMsgOK"
@@ -821,7 +821,7 @@ return
             <!-- ========================================
                     <mediatype>
                  ======================================== -->
-            <focusNode xpath="//*:mediatype">
+            <focusNode selectXP="//*:mediatype">
                 <ex:allowedAtts attNames="id description label eq in eqMsg eqMsgOK 
                                           csv.minColumnCount csv.maxColumnCount
                                           csv.minRowCount csv.maxRowCount
@@ -838,13 +838,13 @@ return
                     msgOK="OK - 'mediatype' element: has 'eq' or 'in' attribute"/>
             </focusNode>
             
-            <focusNode xpath="//*:focusNode">
-                <ex:allowedAtts attNames="id xpath"
+            <focusNode selectXP="//*:focusNode">
+                <ex:allowedAtts attNames="id selectXP"
                     msg="Unexpected attributes in 'focusNode' element; expected: $attNames"
                     msgOK="OK - 'focusNode' element: no unexpected attributes"/>
-                <ex:xoneAtts attNames="xpath foxpath"
-                    msg="A 'focusNode' element must have either an xpath attribute or a foxpath attribute"
-                    msgOK="OK - 'focusNode' has xpath or foxpath attribute"/>
+                <ex:xoneAtts attNames="selectXP foxpath"
+                    msg="A 'focusNode' element must have either a selectXP attribute or a foxpath attribute"
+                    msgOK="OK - 'focusNode' has selectXP or foxpath attribute"/>
                 
             </focusNode>
             

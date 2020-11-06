@@ -7,14 +7,14 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
 
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "expressionEvaluator.xqm",
-    "extensionValidator.xqm",
-    "greenfoxUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "expressionEvaluator.xqm",
+   "extensionValidator.xqm",
+   "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -35,8 +35,8 @@ declare function f:validateFocusNodeXXX($focusNodeShape as element(),
                                      $contextDoc as document-node()?,
                                      $context as map(xs:string, item()*))
         as element()* {
-    let $xpath := $focusNodeShape/@xpath
-    let $foxpath := $focusNodeShape/@foxpath
+    let $xpath := $focusNodeShape/@selectXP
+    let $foxpath := $focusNodeShape/@selectFOX
     let $components :=
         let $children := $focusNodeShape/*[not(@deactivated eq 'true')]
         return (

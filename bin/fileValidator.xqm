@@ -183,7 +183,7 @@ declare function f:validateFileConstraints($fileConstraints as element(),
  : elements contained by the focus node element.
  :
  : The mapping of the file resource or (current) focus node to focus nodes 
- : is defined by an XPath expression (@xpath). Note that in the future 
+ : is defined by an XPath expression (@selectXP). Note that in the future 
  : also other types of mapping may be supported.
  :
  : @param focusNodeElem element representing a focus node
@@ -200,7 +200,7 @@ declare function f:validateFocusNode($focusNodeElem as element(),
     let $useContextNode := ($contextNode, $contextDoc)[1]
     return
         
-    let $xpath := $focusNodeElem/@xpath
+    let $xpath := $focusNodeElem/@selectXP
     let $exprValue :=    
         let $evaluationContext := $context?_evaluationContext
         let $contextItem := ($useContextNode, $contextURI)[1]
