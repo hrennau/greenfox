@@ -10,16 +10,15 @@
 -->    
 <greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
           xmlns="http://www.greenfox.org/ns/schema">
-
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\declarative-amsterdam-2020"/>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
     </context>
     
-    <domain path="${domain}" name="dc2020">
-        <folder foxpath=".\data\air\airports\index" id="indexFolderShape">
+    <domain uri="${domain}" name="dc2020">
+        <folder uri="data/air/airports/index" id="indexFolderShape">
             <targetSize count="1" countMsg="Missing index folder"/>          
 
-            <hyperdocTree foxpath="airports-*.xml" minCountTargetResources="3">
+            <hyperdocTree navigateFOX="airports-*.xml" minCountTargetResources="3">
                 <node locNP="/hyperdoc" closed="true">
                     <node locNP="@base"/>
                     <node locNP="airportsForCountry" minCount="3" maxCount="unbounded">

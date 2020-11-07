@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocTree constraints.
+    
+    Each <node> child of the constraint element describes a subtree of the document
+    tree. Each <node> child of a <node> element describes a set of nodes reached
+    by the node path in @locNP on its parent node. Explicit cardinality constraints
+    are specified by @count, @minCount, @maxCount. The implicit cardinality constraint -
+    when there are no explicit constraints - is "exactly one node". 
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <file navigateFOX="data\air\airports\index\airports-denmark.xml" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing country airports file"/>          
+
+            <hyperdocTree hrefXP="//@href" resolvable="true">
+                <node locNP="/hyperdoc">
+                    <node locNP="airport" minCount="10" maxCount="unbounded">
+                        <node locNP="@iata"/>
+                        <node locNP="name"/>
+                        <node locNP="city"/>
+                        <node locNP="country"/>
+                        <node locNP="geo/latitude"/>
+                        <node locNP="geo/longitude"/>
+                        <node locNP="temporal" closed="true">
+                            <node locNP="timezone"/>
+                            <node locNP="timezoneTz"/>
+                            <node locNP="dst"/>
+                        </node>
+                        <node locNP=".">
+                            <node locNP="addInfo/controlStartDate" minCount="0"/>
+                            <node locNP="addInfo/controlEndDate" minCount="0"/>
+                        </node>
+                    </node>                        
+                </node>                    
+            </hyperdocTree>
+
+        </file>
+    </domain>
+
+</greenfox>
