@@ -291,6 +291,7 @@ C o n s t r a i n t    e l e m e n t s
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="skipFiles" type="t:SkipMembersType"/>
                 <xs:element name="skipFolders" type="t:SkipMembersType"/>
+                <xs:element name="skipMembers" type="t:SkipMembersType"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="folderSimilarMsg" type="xs:string"/>

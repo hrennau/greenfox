@@ -130,11 +130,17 @@ declare function f:validateFolderSimilar_similarity(
                 if (not(map:contains($results12, 'dirs1Only'))) then () else
                     $results12?dirs1Only ! <gx:value kind="folder" where="thisFolder">{.}</gx:value>
                 ,
+                if (not(map:contains($results12, 'members1Only'))) then () else
+                    $results12?members1Only ! <gx:value kind="any" where="thisFolder">{.}</gx:value>
+                ,
                 if (not(map:contains($results21, 'files1Only'))) then () else
                     $results21?files1Only ! <gx:value kind="file" where="otherFolder">{.}</gx:value>
                 ,
-                if (not(map:contains($results21, 'dirs1Only'))) then () else
+                if (not(map:contains($results21, 'members1Only'))) then () else
                     $results21?dirs1Only ! <gx:value kind="folder" where="otherFolder">{.}</gx:value>
+                ,
+                if (not(map:contains($results21, 'dirs1Only'))) then () else
+                    $results21?members1Only ! <gx:value kind="any" where="otherFolder">{.}</gx:value>
             )
             return
                 vr:validationResult_folderSimilar('red', $constraintElem, $ldo, $targetURI, $values, $context)
@@ -160,6 +166,8 @@ declare function f:compareFolders($folder1 as xs:string,
         $config/(ignoredFiles, if ($direction eq '12') then ignoredFilesHere else ignoredFilesThere)/*
     let $ignoredFolders := 
         $config/(ignoredFolders, if ($direction eq '12') then ignoredFoldersHere else ignoredFoldersThere)/*
+    let $ignoredMembers := 
+        $config/(ignoredMembers, if ($direction eq '12') then ignoredMembersHere else ignoredMembersThere)/*
 
     let $files1 := i:resourceChildResources($folder1, ()) ! concat($folder1, '/', .)[i:fox-resource-is-file(.)]  
     let $files2 := i:resourceChildResources($folder2, ()) ! concat($folder2, '/', .)[i:fox-resource-is-file(.)]
@@ -170,10 +178,12 @@ declare function f:compareFolders($folder1 as xs:string,
     let $fileNames2 := $files2 ! i:resourceName(.)
     let $fileNames1Only := $fileNames1[not(. = $fileNames2)]
         [not(some $file in $ignoredFiles satisfies matches(., $file/@regex, 'i'))]
+        [not(some $member in $ignoredMembers satisfies matches(., $member/@regex, 'i'))]
     let $dirNames1 := $dirs1 ! i:resourceName(.)
     let $dirNames2 := $dirs2 ! i:resourceName(.)
     let $dirNames1Only := $dirNames1[not(. = $dirNames2)]
-       [not(some $folder in $ignoredFolders satisfies matches(., $folder/@regex, 'i'))]    
+       [not(some $folder in $ignoredFolders satisfies matches(., $folder/@regex, 'i'))] 
+       [not(some $member in $ignoredMembers satisfies matches(., $member/@regex, 'i'))]
     return
         map:merge((
             if (empty($fileNames1Only)) then () else map{'files1Only': $fileNames1Only},
@@ -207,6 +217,14 @@ declare function f:getFolderSimilarityConfig($constraintElem as element(gx:folde
             <ignoredFolder name="{$name}" regex="{$regex}">{
                 $elem/@where
             }</ignoredFolder>
+    let $ignoredMembers :=
+        for $elem in $constraintElem/gx:skipMembers    
+        for $name in $elem/@names/tokenize(.)
+        let $regex := $name ! i:glob2regex(.)
+        return 
+            <ignoredMember name="{$name}" regex="{$regex}">{
+                $elem/@where
+            }</ignoredMember>
             
     let $ignoredFilesAny := $ignoredFiles[not(@where)]            
     let $ignoredFilesHere := $ignoredFiles[@where eq 'here']
@@ -214,6 +232,9 @@ declare function f:getFolderSimilarityConfig($constraintElem as element(gx:folde
     let $ignoredFoldersAny := $ignoredFolders[not(@where)]            
     let $ignoredFoldersHere := $ignoredFolders[@where eq 'here']
     let $ignoredFoldersThere := $ignoredFolders[@where eq 'there']
+    let $ignoredMembersAny := $ignoredMembers[not(@where)]            
+    let $ignoredMembersHere := $ignoredMembers[@where eq 'here']
+    let $ignoredMembersThere := $ignoredMembers[@where eq 'there']
             
     return
         <config>{
@@ -222,7 +243,10 @@ declare function f:getFolderSimilarityConfig($constraintElem as element(gx:folde
             <ignoredFilesThere>{$ignoredFilesThere}</ignoredFilesThere>[$ignoredFilesThere],
             <ignoredFolders>{$ignoredFoldersAny}</ignoredFolders>[$ignoredFoldersAny],
             <ignoredFoldersHere>{$ignoredFoldersHere}</ignoredFoldersHere>[$ignoredFoldersHere],
-            <ignoredFoldersThere>{$ignoredFoldersThere}</ignoredFoldersThere>[$ignoredFoldersThere]
+            <ignoredFoldersThere>{$ignoredFoldersThere}</ignoredFoldersThere>[$ignoredFoldersThere],
+            <ignoredMembers>{$ignoredMembersAny}</ignoredMembers>[$ignoredMembersAny],
+            <ignoredMembersHere>{$ignoredMembersHere}</ignoredMembersHere>[$ignoredMembersHere],
+            <ignoredMembersThere>{$ignoredMembersThere}</ignoredMembersThere>[$ignoredMembersThere]
         }</config>
 };
 
