@@ -66,6 +66,7 @@ LinkDefinition
     
     <!-- Link targetSize element -->
     <xs:complexType name="LinkTargetSizeType">
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
         <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
@@ -92,13 +93,7 @@ TargetSize
 **********************************************************    
 -->    
     <xs:complexType name="TargetSizeType">
-        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="maxCount" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="countMsg" type="xs:string"/>
-        <xs:attribute name="minCountMsg" type="xs:string"/>
-        <xs:attribute name="maxCountMsg" type="xs:string"/>
-        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
     </xs:complexType>
 
     <!-- 
@@ -113,7 +108,7 @@ S h a p e s
     
     <xs:complexType name="FileShapeType">        
         <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:group ref="t:ResourceShapeGroup"/>
                 <xs:group ref="t:FileConstraintGroup"/>
@@ -129,7 +124,7 @@ S h a p e s
     
     <xs:complexType name="FolderShapeType">        
         <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:group ref="t:ResourceShapeGroup"/>
                 <xs:group ref="t:FolderConstraintGroup"/>                
