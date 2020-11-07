@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocSimilar constraints. Uses an 'ignoreValue' 
+    modifier - when comparing documents, the text content of selected items
+    (@localName) is ignored.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: the ireland airports file -->
+        <file uri="data/docpairs/airports-ireland.xml">
+            <targetSize count="1" countMsg="Missing document: airports-ireland.xml"/>
+            <!-- Check similarity -->
+            <docSimilar navigateFOX="fox-sibling('airports-ireland.changed-item.newvalue.xml')"
+                        countTargetDocs="1">
+                <ignoreValue localName="timezoneTz"/>
+            </docSimilar>
+        </file>
+    </domain>
+</greenfox>

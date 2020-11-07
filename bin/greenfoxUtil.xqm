@@ -7,23 +7,38 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_foxpath-uri-operations.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_foxpath-uri-operations.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "expressionEvaluator.xqm",
-    "log.xqm",
-    "uriUtil.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "expressionEvaluator.xqm",
+   "log.xqm",
+   "uriUtil.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
+
+(:~
+ : Returns for a given element the attribute or child elements with a given name.
+ : When $attOrChildName starts with '@', the name is interpreted as attribute
+ : name, otherwise as element name.
+ :
+ : @param elem an element whose attribute or children are sought
+ : @param attOrChildName an NCName, optionally preceded by '@'
+ : @return the attribute or child elements with a matching name
+ :)
+declare function f:findAttOrChild($elem as element(), $attOrChildName as xs:string)
+        as node()* {
+    if (starts-with($attOrChildName, '@')) then $elem/@*[local-name() eq substring($attOrChildName, 2)]
+    else $elem/*[local-name() eq $attOrChildName]
+};
 
 (:~
  : Returns the name of a validation result element.

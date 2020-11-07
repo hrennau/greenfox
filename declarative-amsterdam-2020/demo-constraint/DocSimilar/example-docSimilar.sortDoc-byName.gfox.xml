@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocSimilar constraints. Uses a 'sortDoc' modifier -
+    before comparing documents, the contents of selected elements (@localNames)
+    are ordered by local name. The value of @localNames is a whitespace separated
+    list of names or name patterns. If @localNames is not specified, the contents
+    of all elements is reordered. Note that in case of repeated elements, sorting
+    by name may not solve the problem and sorting by "key value" may be used
+    (@orderBy="keyValue", rather than "localName"). 
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: the ireland airports file -->
+        <file uri="data/docpairs/airports-ireland.xml">
+            <targetSize count="1" countMsg="Missing document: airports-ireland.xml"/>
+            <!-- Check similarity -->
+            <docSimilar navigateFOX="fox-sibling('airports-ireland.resorted.xml')"
+                        countTargetDocs="1">
+                <sortDoc localNames="geo temporal" orderBy="localName"/>                
+            </docSimilar>
+        </file>
+    </domain>
+</greenfox>

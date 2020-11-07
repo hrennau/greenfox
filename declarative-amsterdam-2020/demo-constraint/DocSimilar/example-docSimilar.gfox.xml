@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Demonstrates the use of DocSimilar constraints. As no modifiers are used
+    (the constraint element has no child elements), conformance requires the
+    documents to be deep-equal.
+-->    
+<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/docTree"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+    
+    <domain uri="${domain}" name="dc2020">
+        <!-- ### Visit: the ireland airports file -->
+        <file uri="data/docpairs/airports-ireland.xml">
+            <targetSize count="1" countMsg="Missing document: airports-ireland.xml"/>
+            <!-- Check similarity -->
+            <docSimilar navigateFOX="fox-sibling('airports-ireland.copy.xml')"
+                        countTargetDocs="1"/>
+        </file>
+    </domain>
+</greenfox>

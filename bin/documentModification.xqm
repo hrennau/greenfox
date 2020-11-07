@@ -40,6 +40,7 @@ declare function f:applyDocModifiers(
     (: Writes a map entry describing the modifications described by a modifier :)
     let $fn_writeOperation := function($doc, $modifier) as map(*)? {
         let $nodes := $fn_itemSelector($doc, $modifier)
+        (: let $_DEBUG := trace($nodes/name(), '_MODIFIED_NODE_NAMES: ') :)
         return
             if (not($nodes)) then () else   
                 let $atts := $nodes[self::attribute()]
@@ -169,8 +170,6 @@ declare function f:sortDoc($doc as node(), $sortDoc as element(gx:sortDoc)*)
         let $elemNames_byLocalName := 
             (($sortDoc[@orderBy eq 'localName']/@localNames => string-join(' '))[string()]) => tokenize()        
         return
-            if (empty($elemNames_byLocalName)) then $doc else
-            
             let $elemNamesRegex_byLocalName := $elemNames_byLocalName ! f:glob2regex(.)
             return f:sortDoc_localNameRC($doc, $elemNamesRegex_byLocalName)
             
@@ -183,13 +182,21 @@ declare function f:sortDoc($doc as node(), $sortDoc as element(gx:sortDoc)*)
             let $spec := $specs[1]
             let $elemNames := $spec/@localNames/tokenize(.)  
             let $elemNamesRegex := $elemNames ! f:glob2regex(.)
-            let $elemName := $spec/@elemName
+            let $sortedElemName := $spec/@sortedElemName
             let $keyItemName := $spec/@keyItemName
-            return f:sortDoc_childValueRC($doc, $elemNamesRegex, $elemName, $keyItemName)
+            return f:sortDoc_childValueRC($doc, $elemNamesRegex, $sortedElemName, $keyItemName)
             
     return $doc2            
 };
 
+(:~
+ : Implements alphabetical sorting of elements. If $sortElemsRegex is
+ : not empty, only those elements are edited which have a matching local name.
+ :
+ : @param n a node to be processed
+ : @param sortElemsRegex regular expressions describing the elements to be edited
+ : @return the edited content 
+ :)
 declare function f:sortDoc_localNameRC($n as node(), $sortElemsRegex as xs:string*)
         as node() {
     typeswitch($n)
@@ -201,7 +208,7 @@ declare function f:sortDoc_localNameRC($n as node(), $sortElemsRegex as xs:strin
                 (some $regex in $sortElemsRegex satisfies $n/matches(local-name(.), $regex))) then
                 $n/* => sort((), function($e) {$e/(local-name(.) || namespace-uri(.))})
             else $n/*
-        let $_DEBUG := trace($children/local-name(.) => string-join(', '), '_CHILD_NAMES: ')            
+        (: let $_DEBUG := trace($children/local-name(.) => string-join(', '), '_CHILD_NAMES: ') :)            
         return
             element {node-name($n)} {
                 $n/@*,
@@ -211,19 +218,33 @@ declare function f:sortDoc_localNameRC($n as node(), $sortElemsRegex as xs:strin
     default return $n            
 };        
 
+(:~
+ : Implements a sorting of elements by key value. If $sortElemsRegex is
+ : not empty, an element is not edited unless it has a local name matching
+ : one of the regulare expressions in $sortElemsRegex.
+ :
+ : An element is not edited if it does not have two or more child elements with
+ : a name matching $elemName. If it does contain such child elements, these
+ : are resorted by the value of the child or attribute with name $keyItemName.
+ :
+ : @param n a node to be processed
+ : @param sortElemsRegex regular expressions describing the elements to be edited
+ : @return the edited content 
+ :)
 declare function f:sortDoc_childValueRC($n as node(), 
                                         $sortElemsRegex as xs:string*,
-                                        $elemName as xs:string,
+                                        $sortedElemName as xs:string,
                                         $keyItemName as xs:string)
         as node() {
     typeswitch($n)
     case document-node() return 
-        document {$n/node() ! f:sortDoc_childValueRC(., $sortElemsRegex, $elemName, $keyItemName)}
+        document {$n/node() ! f:sortDoc_childValueRC(., $sortElemsRegex, $sortedElemName, $keyItemName)}
     case element() return
         let $children :=
-            if ((some $regex in $sortElemsRegex satisfies 
+            if (empty($sortElemsRegex) or
+                (some $regex in $sortElemsRegex satisfies 
                     $n/matches(local-name(.), $regex))) then
-                let $elems := $n/*[local-name(.) eq $elemName]
+                let $elems := $n/*[local-name(.) eq $sortedElemName]
                 (: let $_DEBUG := trace(count($elems), '+++ COUNT_ELEMS_TO_BE_SORTED: ') :)
                 return
                     if (count($elems) le 1) then $n/*
@@ -233,7 +254,7 @@ declare function f:sortDoc_childValueRC($n as node(),
                         let $childrenAfter := $n/*[. >> $elem1] except $elems
                         let $elemsSorted :=
                             for $elem in $elems
-                            order by $elem/*[local-name(.) eq $keyItemName]/string()
+                            order by $elem/f:findAttOrChild(., $keyItemName)/string()
                             return $elem
                         return ($childrenBefore, $elemsSorted, $childrenAfter)                            
             else $n/*
@@ -241,7 +262,7 @@ declare function f:sortDoc_childValueRC($n as node(),
             element {node-name($n)} {
                 $n/@*,
                 $n/(node() except *),
-                $children ! f:sortDoc_childValueRC(., $sortElemsRegex, $elemName, $keyItemName)
+                $children ! f:sortDoc_childValueRC(., $sortElemsRegex, $sortedElemName, $keyItemName)
             }
     default return $n            
 };        
