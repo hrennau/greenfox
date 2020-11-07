@@ -23,7 +23,7 @@
             <!-- Check similarity -->
             <docSimilar navigateFOX="fox-sibling('airports-ireland.resorted2.xml')"
                         countTargetDocs="1">
-                <sortDoc orderBy="keyValue" sortedElemName="airport" keyItemName="@id"/>                
+                <sortDoc orderBy="keyValue" keySortedLocalName="airport" keyLocalName="@id"/>                
             </docSimilar>
         </file>
     </domain>

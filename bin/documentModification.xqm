@@ -182,9 +182,9 @@ declare function f:sortDoc($doc as node(), $sortDoc as element(gx:sortDoc)*)
             let $spec := $specs[1]
             let $elemNames := $spec/@localNames/tokenize(.)  
             let $elemNamesRegex := $elemNames ! f:glob2regex(.)
-            let $sortedElemName := $spec/@sortedElemName
-            let $keyItemName := $spec/@keyItemName
-            return f:sortDoc_childValueRC($doc, $elemNamesRegex, $sortedElemName, $keyItemName)
+            let $keySortedLocalName := $spec/@keySortedLocalName
+            let $keyLocalName := $spec/@keyLocalName
+            return f:sortDoc_childValueRC($doc, $elemNamesRegex, $keySortedLocalName, $keyLocalName)
             
     return $doc2            
 };
@@ -233,19 +233,18 @@ declare function f:sortDoc_localNameRC($n as node(), $sortElemsRegex as xs:strin
  :)
 declare function f:sortDoc_childValueRC($n as node(), 
                                         $sortElemsRegex as xs:string*,
-                                        $sortedElemName as xs:string,
-                                        $keyItemName as xs:string)
+                                        $keySortedLocalName as xs:string,
+                                        $keyLocalName as xs:string)
         as node() {
     typeswitch($n)
     case document-node() return 
-        document {$n/node() ! f:sortDoc_childValueRC(., $sortElemsRegex, $sortedElemName, $keyItemName)}
+        document {$n/node() ! f:sortDoc_childValueRC(., $sortElemsRegex, $keySortedLocalName, $keyLocalName)}
     case element() return
         let $children :=
             if (empty($sortElemsRegex) or
                 (some $regex in $sortElemsRegex satisfies 
                     $n/matches(local-name(.), $regex))) then
-                let $elems := $n/*[local-name(.) eq $sortedElemName]
-                (: let $_DEBUG := trace(count($elems), '+++ COUNT_ELEMS_TO_BE_SORTED: ') :)
+                let $elems := $n/*[local-name(.) eq $keySortedLocalName]
                 return
                     if (count($elems) le 1) then $n/*
                     else
@@ -254,7 +253,7 @@ declare function f:sortDoc_childValueRC($n as node(),
                         let $childrenAfter := $n/*[. >> $elem1] except $elems
                         let $elemsSorted :=
                             for $elem in $elems
-                            order by $elem/f:findAttOrChild(., $keyItemName)/string()
+                            order by $elem/f:findAttOrChild(., $keyLocalName)/string()
                             return $elem
                         return ($childrenBefore, $elemsSorted, $childrenAfter)                            
             else $n/*
@@ -262,7 +261,7 @@ declare function f:sortDoc_childValueRC($n as node(),
             element {node-name($n)} {
                 $n/@*,
                 $n/(node() except *),
-                $children ! f:sortDoc_childValueRC(., $sortElemsRegex, $sortedElemName, $keyItemName)
+                $children ! f:sortDoc_childValueRC(., $sortElemsRegex, $keySortedLocalName, $keyLocalName)
             }
     default return $n            
 };        

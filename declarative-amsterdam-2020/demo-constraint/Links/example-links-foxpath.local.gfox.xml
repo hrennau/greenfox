@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- 
+    Demonstrates the validation of links - uses a link definition specifying a foxpath.
+    The link definition is local, provided by an attribute of <links> (@navigateFOX).
+-->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/doc-constraint/Links/example-link-foxpath"
+          xmlns="http://www.greenfox.org/ns/schema">
+
+    <context>
+        <field name="domain" valueFOX="ancestor~::declarative-amsterdam-2020"/>
+    </context>
+  
+    <domain uri="${domain}" name="dc2020">
+        <!-- Visit: index folder -->
+        <folder uri="data/air/airports/index" id="indexFolderShape">
+            <targetSize count="1" countMsg="Missing folder: index"/>
+
+            <!-- Visit: country airports XML documents -->
+            <file navigateFOX=".\\airports-*.xml" id="countryAirportsXmlFileShape">
+                <targetSize minCount="1" minCountMsg="Missing country Airports XML files"/>
+                
+                <!-- Check: links mapping the XML document to the corresponding JSON document -->
+                <links navigateFOX="fox-sibling($fileName, '\.[^.]+$', '.json')" 
+                       countTargetResources="1" 
+                       countTargetResourcesMsg="Missing JSON airports for country document"/>
+            </file>
+        </folder>
+    </domain>
+
+</greenfox>
