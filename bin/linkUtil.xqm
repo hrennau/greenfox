@@ -35,10 +35,14 @@ declare function f:resolveLinkExpression($expr as xs:string,
                                          $context as map(xs:string, item()*))
         as item()* {
     let $exprLang := 'xpath'
-    let $evaluationContext := $context?_evaluationContext    
+    let $evaluationContext := 
+        i:newEvaluationContext_linkContextItem($contextNode, $context)    
     let $exprValue :=
         switch($exprLang)
-        case 'xpath' return i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
-        default return error(QName((), 'SCHEMA_ERROR'), "'Missing attribute - <links> element must have an 'xpath' attribute")
+        case 'xpath' return 
+            i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
+        default return 
+            error(QName((), 'SCHEMA_ERROR'), 
+                "'Missing attribute - <links> element must have an 'xpath' attribute")
     return $exprValue        
 };        

@@ -38,11 +38,7 @@ declare function f:applyLinkConnector($ldo as map(*),
                                       $contextPoint as item(),                             
                                       $context as map(xs:string, item()*))
         as item()* {
-    (:
-    if ($ldo?linkXP) then
-        f:resolveLinkExpression($ldo?linkXP, $contextItem, $context) ! string(.)
-     :)
-     
+        
     (: Connector: uri expression 
        ========================= :) 
     if ($ldo?uriXP) then

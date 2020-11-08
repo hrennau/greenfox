@@ -28,7 +28,9 @@ declare function f:validateGreenfox($schema as element(gx:greenfox))
     let $domain := $schema/gx:domain/(@uri, @path)[1]
     let $_CHECK_DOMAIN := f:check_domainFolderExists($schema)
 
-    let $potentialBindings_base := ('this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 'domainName')
+    let $potentialBindings_base := (
+        'this', 'doc', 'xdoc', 'jdoc', 'csvdoc', 'fileName', 'filePath', 'domain', 
+        'linkContext', 'targetDoc', 'targetNode', 'value', 'item')
 
     let $errors := (
         (: Collect XPath expressions :)
