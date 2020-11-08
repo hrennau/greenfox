@@ -1,7 +1,0 @@
-Same validation as in air01.gfox.xml, but more compact notation, using plural
-forms; the @names attribute is a whitespace-separated list of file names or
-name patterns. 
-    
-Note that the cardinality constraints apply to each item in the names list 
-independently. In order to watch this logic, you might experiment and change 
-the @maxCount value to '3'.
