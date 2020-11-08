@@ -12,7 +12,7 @@
     </context>
   
     <!-- Define link: href entries -->
-    <linkDef name="hrefElems" hrefXP="//*:href"/>
+    <linkDef name="hrefElems" contextXP="." hrefXP="$linkContext//*:href"/>
     
     <domain uri="${domain}" name="dc2020">
         <!-- Visit: airports folder -->
