@@ -87,6 +87,8 @@ declare function f:validationResultValues($value as item()*,
             else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
         case attribute() return
             <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
+        case comment() return
+            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
         case map(xs:string, item()*) return
             let $dpath := $mapNodePath($item)
             return
@@ -525,7 +527,10 @@ declare function f:constructError_folderContentCount($colour as xs:string,
         if ($constraintCompName) then $constraintCompName else
             $constraintElem/i:firstCharToUpperCase(local-name(.)) || 
             $constraintNode/i:firstCharToUpperCase(local-name(.))
-    let $msg := i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $constraintNode/local-name(.))
+    let $msg :=
+        let $msgAttPrefix := 
+            if ($constraintNode/self::attribute()) then $constraintNode/local-name(.) else 'count'
+        return i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $msgAttPrefix)
     
     let $valueElems :=
         for $path in $paths

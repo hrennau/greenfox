@@ -355,6 +355,7 @@ declare function f:datapath($n as node()) as xs:string {
     (
     let $suppressIndex1ForOnlyChild := false()
     for $node in $n/ancestor-or-self::node()
+    let $lname := $node/(local-name(.)[string()], self::comment()/'#comment')[1]
     let $index := 
         typeswitch($node)
         case element() return
@@ -362,7 +363,7 @@ declare function f:datapath($n as node()) as xs:string {
             return 
                 if ($suppressIndex1ForOnlyChild and $raw eq 1 and count($node/../*) eq 1) then () else $raw ! concat('[', ., ']')
         default return ()            
-    return $node/concat(self::attribute()/'@', local-name(.)) || $index
+    return $node/concat(self::attribute()/'@', $lname) || $index
     ) => string-join('/')
 };
 
@@ -378,6 +379,7 @@ declare function f:datapath($n as node(), $context as node()?) as xs:string {
     (
     let $suppressIndex1ForOnlyChild := false()
     for $node in $n/ancestor-or-self::node()[not($context) or . >> $context]
+    let $lname := $node/(local-name(.)[string()], self::comment()/'#comment')[1]    
     let $index := 
         typeswitch($node)
         case element() return
@@ -385,7 +387,7 @@ declare function f:datapath($n as node(), $context as node()?) as xs:string {
             return 
                 if ($suppressIndex1ForOnlyChild and $raw eq 1 and count($node/../*) eq 1) then () else $raw ! concat('[', ., ']')
         default return ()            
-    return $node/concat(self::attribute()/'@', local-name(.)) || $index
+    return $node/concat(self::attribute()/'@', $lname) || $index
     ) => string-join('/')
 };
 
