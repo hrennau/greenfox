@@ -76,7 +76,7 @@ declare function f:validateConditionalConstraintRC(
                     if (not($then)) then error(QName((), 'INVALID_SCHEMA'), 
                         concat('Invalid schema - <', $head/local-name(.), '> not followed by <then>'))
                     else $then/$validator(., $context)
-            (: continuej with 'elseIf' or evaluate 'else' :)
+            (: continue with 'elseIf' or evaluate 'else' :)
             else
                 let $elseIf := $head/following-sibling::gx:elseIf[1]
                 return
