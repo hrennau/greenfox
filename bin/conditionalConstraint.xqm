@@ -61,7 +61,7 @@ declare function f:validateConditionalConstraintRC(
     
     typeswitch($head)
     case element(gx:else) return $head/$validator(., $context)
-    case element(gx:if) | element(gx:elseIf) return
+    case element(gx:if) | element(gx:elseif) return
         let $ifResults := $head/$validator(., $context)
         let $ifTrue := every $result in $ifResults satisfies 
                         $result/(self::gx:green, self::gx:whiteGreen, self::gx:whiteYellow, self::gx:whiteRed)
@@ -78,7 +78,7 @@ declare function f:validateConditionalConstraintRC(
                     else $then/$validator(., $context)
             (: continue with 'elseIf' or evaluate 'else' :)
             else
-                let $elseIf := $head/following-sibling::gx:elseIf[1]
+                let $elseIf := $head/following-sibling::gx:elseif[1]
                 return
                     if ($elseIf) then
                         let $nextClauses := ($elseIf, $elseIf/following-sibling::*)

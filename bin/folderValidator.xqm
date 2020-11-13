@@ -23,7 +23,8 @@ at  "expressionEvaluator.xqm",
     "folderContentValidator.xqm",
     "folderSimilarConstraint.xqm",
     "greenfoxTarget.xqm",
-    "greenfoxUtil.xqm";
+    "greenfoxUtil.xqm",
+    "linkConstraint.xqm";
     
 import module namespace value="http://www.greenfox.org/ns/xquery-functions/value" 
 at "valueConstraint.xqm";    
@@ -129,6 +130,7 @@ declare function f:validateFolderConstraints($folderConstraints as element(),
             case element(gx:folderSimilar) return f:validateFolderSimilar($constraintElem, $context)
             case element(gx:hyperdocTree) return dtree:validateDocTreeConstraint($constraintElem, $context)
             case element(gx:conditional) return i:validateConditionalConstraint($constraintElem, f:validateFolderConstraints#2, $context)
+            case element(gx:links) return i:validateLinks($constraintElem, $context)            
             case element(gx:foxpath) return i:validateExpressionValue($constraintElem, $context)            
             default return error(QName((), 'UNEXPECTED_VALUE_SHAPE'), concat('Unexpected value shape, name: ', name($constraintElem)))
         return ($resourceShapeResults, $valueShapeResults)                    

@@ -10,7 +10,7 @@ module namespace f="http://www.greenfox.org/ns/xquery-functions";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "conditionalConstraint.xqm",
-    "docSimilarConstraint.xqm",
+   "docSimilarConstraint.xqm",
    "evaluationContextManager.xqm",
    "expressionValueConstraint.xqm",
    "extensionValidator.xqm",
@@ -223,48 +223,3 @@ declare function f:validateFocusNode($focusNodeElem as element(),
     return
         ($results_target, $results_other)
 };
-
-(: 
-(:~
- : Validates a conditional constraint.
- :
- : @param constraintElem an element declaring the condition of a conditional constraint
- : @param context the processing context
- : @return validation results
- :)
-declare function f:validateConditionalConstraint($constraintElem as element(gx:conditional), 
-                                                 $context as map(*))
-        as element()* {
-    
-    let $if := $constraintElem/gx:if[1]
-    let $then := $constraintElem/gx:then[1]
-    let $elseif := $constraintElem/gx:elseIf
-    let $else := $constraintElem/gx:else[1]
-    
-    let $ifResults := $if/f:validateFileConstraints(., $context)
-    let $ifTrue := every $result in $ifResults satisfies $result/self::gx:green
-    return (
-        trace($ifResults/f:whitenResults(.), '++++++ WHITENED_RESULTS: '),
-        if ($ifTrue) then $then/f:validateFileConstraints(., $context)        
-        else $else/f:validateFileConstraints(., $context)
-    )        
-};
-
-(:~
- : Transforms results so that 'red', 'yellow' and 'green' is
- : marked as not describing validity, as they have been produced in
- : order to determine a condition.
- :)
-declare function f:whitenResults($results as element()*)
-        as element()* {
-    for $result in $results
-    return
-        typeswitch($result)
-        case element(gx:red) return element gx:whiteRed {$result/(@*, node())}
-        case element(gx:green) return element gx:whiteGreen {$result/(@*, node())}
-        case element(gx:yellow) return element gx:whiteYellow {$result/(@*, node())}
-        default return $result
-};        
- :)
-
-
