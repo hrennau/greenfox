@@ -316,6 +316,9 @@ declare function f:validateValuePair($constraintElem as element(),
         case 'le' return function($op1, $op2) {$op1 <= $op2}
         case 'gt' return function($op1, $op2) {$op1 > $op2}
         case 'ge' return function($op1, $op2) {$op1 >= $op2}
+        case 'hasSubstring' return function($op1, $op2) {contains($op1, $op2)}
+        case 'isSubstring' return function($op1, $op2) {contains($op2, $op1)}
+        case 'true' return function($op1, $op2) {boolean($op2)}
         default return error(QName((), 'INVALID_SCHEMA'), concat('Unknown comparison operator: ', $constraintNode))
 
     (: (2.2) Function processing multiple items second operand :)
@@ -649,9 +652,8 @@ declare function f:validateValuePair_context2_fixed(
             let $contextItem := ($targetNode, $targetDoc, $contextNode)[1]
             return
                 $getItems2($contextItem, (), $targetDoc, $targetNode)
-            
     let $items2TYRaw := i:applyUseDatatype($items2, $useDatatype, $useString)
-    let $items2TY := 
+    let $items2TY :=
         if (empty($useDatatype)) then $items2TYRaw
         else $items2TYRaw[not(. instance of map(*))]
     let $items2ConversionError := 
@@ -685,7 +687,6 @@ declare function f:validateValuePair_context2_fixed(
            otherwise these are value 1 items
          :) 
         let $violations :=
-    
             (: aggregate comparison :)
             if (exists($findViolations)) then
                 $findViolations($items1, $items1TY, $items2, $items2TY)

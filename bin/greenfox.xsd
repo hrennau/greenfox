@@ -66,6 +66,7 @@ LinkDefinition
     
     <!-- Link targetSize element -->
     <xs:complexType name="LinkTargetSizeType">
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
         <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
     </xs:complexType>
     
@@ -92,13 +93,7 @@ TargetSize
 **********************************************************    
 -->    
     <xs:complexType name="TargetSizeType">
-        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="maxCount" type="xs:nonNegativeInteger"/>
-        <xs:attribute name="countMsg" type="xs:string"/>
-        <xs:attribute name="minCountMsg" type="xs:string"/>
-        <xs:attribute name="maxCountMsg" type="xs:string"/>
-        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
     </xs:complexType>
 
     <!-- 
@@ -113,7 +108,7 @@ S h a p e s
     
     <xs:complexType name="FileShapeType">        
         <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:group ref="t:ResourceShapeGroup"/>
                 <xs:group ref="t:FileConstraintGroup"/>
@@ -129,7 +124,7 @@ S h a p e s
     
     <xs:complexType name="FolderShapeType">        
         <xs:sequence>
-            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:group ref="t:ResourceShapeGroup"/>
                 <xs:group ref="t:FolderConstraintGroup"/>                
@@ -150,7 +145,7 @@ S h a p e s
                 <xs:element name="focusNode" type="t:FocusNodeType"/>                
             </xs:choice>
         </xs:sequence>
-        <xs:attribute name="xpath" type="xs:string"/>
+        <xs:attribute name="selectXP" type="xs:string"/>
     </xs:complexType>    
     
     <!-- 
@@ -291,6 +286,7 @@ C o n s t r a i n t    e l e m e n t s
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="skipFiles" type="t:SkipMembersType"/>
                 <xs:element name="skipFolders" type="t:SkipMembersType"/>
+                <xs:element name="skipMembers" type="t:SkipMembersType"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="folderSimilarMsg" type="xs:string"/>
@@ -400,9 +396,9 @@ C o n s t r a i n t    e l e m e n t s
 
     <xs:complexType name="SortDocType">
         <xs:attribute name="orderBy" type="t:OrderByEnumType" use="required"/>
-        <xs:attribute name="localNames" type="xs:string"/>
-        <xs:attribute name="elemName" type="xs:NCName" use="required"/>
-        <xs:attribute name="keyItemName" type="xs:NCName"/>
+        <xs:attribute name="localName" type="t:NCNameList"/>
+        <xs:attribute name="keySortedLocalName" type="xs:NCName"/>
+        <xs:attribute name="keyLocalName" type="t:AttOrElemName"/>
     </xs:complexType>
     
     <xs:complexType name="SelectItemType">
@@ -509,13 +505,13 @@ C o n s t r a i n t    e l e m e n t s
     <xs:complexType name="FoxvaluePairType">
         <xs:complexContent>
             <xs:extension base="t:ValuePairBaseType">
+                <xs:attribute name="expr1FOX" type="xs:string"/>                
                 <xs:attribute name="expr1XP" type="xs:string"/>
-                <xs:attribute name="expr2XP" type="xs:string"/>
-                <xs:attribute name="expr1FOX" type="xs:string"/>
-                <xs:attribute name="expr2FOX" type="xs:string"/>
                 <xs:attribute name="expr1LP" type="xs:string"/>
                 <xs:attribute name="filter1LP" type="xs:string"/>
                 <xs:attribute name="map1LP" type="xs:string"/>
+                <xs:attribute name="expr2FOX" type="xs:string"/>                
+                <xs:attribute name="expr2XP" type="xs:string"/>
                 <xs:attribute name="expr2LP" type="xs:string"/>
                 <xs:attribute name="filter2LP" type="xs:string"/>
                 <xs:attribute name="map2LP" type="xs:string"/>
@@ -638,7 +634,11 @@ C o n s t r a i n t    e l e m e n t s
     </xs:complexType>
     
     <xs:complexType name="ConditionalFileConstraintClauseType">
-        <xs:group ref="t:FileConstraintGroup"/>    
+        <xs:choice>
+            <xs:group ref="t:ResourceShapeGroup"/>
+            <xs:element name="focusNode" type="t:FocusNodeType"/>
+            <xs:group ref="t:FileConstraintGroup"/>            
+        </xs:choice>    
     </xs:complexType>
 
     <!-- C o n d i t i o n a l    F o l d e r    C o n s t r a i n t s -->
@@ -656,7 +656,10 @@ C o n s t r a i n t    e l e m e n t s
     </xs:complexType>
     
     <xs:complexType name="ConditionalFolderConstraintClauseType">
-        <xs:group ref="t:FileConstraintGroup"/>    
+        <xs:choice>
+            <xs:group ref="t:ResourceShapeGroup"/>
+            <xs:group ref="t:FolderConstraintGroup"/>            
+        </xs:choice>    
     </xs:complexType>
     
     
@@ -667,6 +670,13 @@ Simple types
 -->    
     <xs:simpleType name="AnyURIList">
         <xs:list itemType="xs:anyURI"/>
+    </xs:simpleType>
+    
+    <!-- NCName, optionally preceded by @ -->
+    <xs:simpleType name="AttOrElemName">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="@?\i\c*"/>
+        </xs:restriction>
     </xs:simpleType>
     
     <xs:simpleType name="AttributeUsageListType">
@@ -859,6 +869,9 @@ Enumerations
             <xs:enumeration value="gt"/>
             <xs:enumeration value="ge"/>
             <xs:enumeration value="in"/>
+            <xs:enumeration value="hasSubstring"/>
+            <xs:enumeration value="isSubstring"/>
+            <xs:enumeration value="true"/>
             <xs:enumeration value="notin"/>
             <xs:enumeration value="contains"/>
             <xs:enumeration value="sameTerms"/>
