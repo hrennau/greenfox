@@ -68,11 +68,15 @@ declare function f:substituteVarsAux($s as xs:anyAtomicType?,
             let $varRef := $partStrings[2]
             let $postfix := $partStrings[3][string()]
             let $varName := $varRef ! substring(., 3) ! substring(., 1, string-length(.) - 1)
-            let $varValue := 
-                if (not($varName = map:keys($context))) then
-                    error(QName((), 'INVALID_SCHEMA'), concat('Variable reference cannot be resolved: ', $varName))
-                else
-                    $context($varName) ! f:substituteVarsAux(., $context, $prefixChar)           
+            let $varValue :=
+                let $items :=
+                    if (not($varName = map:keys($context))) then
+                        error(QName((), 'INVALID_SCHEMA'), concat('Variable reference cannot be resolved: ', $varName))
+                    else
+                        $context($varName) ! f:substituteVarsAux(., $context, $prefixChar)       
+                return
+                    if (count($items) gt 1) then string-join($items, ' ')
+                    else $items
             return
                 concat($prefix, ($varValue, $varRef)[1], 
                        $postfix ! f:substituteVarsAux(., $context, $prefixChar))                

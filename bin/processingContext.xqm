@@ -86,7 +86,7 @@ declare function f:initialProcessingContextRC(
                 i:evaluateXPath($valueXP, (), $evaluationContext, true(), true())                
                 
     let $augmentedValue := 
-        let $raw := f:substituteVars($value, $substitutionContext, ())[exists($value)]
+        let $raw := $value ! f:substituteVars(., $substitutionContext, ())[exists($value)]
         return
             (: Domain specified by an expression not finding a resource :)
             if (empty($raw) and $name = ('domain', 'domainFOX', 'domainURI')) then

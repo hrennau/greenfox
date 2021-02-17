@@ -7,8 +7,8 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_foxpath.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 declare namespace fox="http://www.foxpath.org/ns/annotations";
@@ -34,18 +34,23 @@ declare function f:docSimilarConstraintReports(
                     case 'localIndexedPath' return f:localIndexedPathWithData#1
                     default return error()
                 let $pathFormat := $redReport                    
-                let $pathsAndData1 := $d1//*/(., @*)/$fn_path(.) => distinct-values()
-                let $pathsAndData2 := $d2//*/(., @*)/$fn_path(.) => distinct-values()
-                let $paths1 := $pathsAndData1 ! replace(., '=.*', '')
-                let $paths2 := $pathsAndData2 ! replace(., '=.*', '')
+                let $pathsAndData1 := map:merge( 
+                    for $node in $d1//*/(., @*)
+                    let $pathAndValue := $node/$fn_path(.)
+                    return map:entry($pathAndValue[1], $pathAndValue[2]))
+                let $pathsAndData2 := map:merge(
+                    for $node in $d2//*/(., @*)
+                    let $pathAndValue := $node/$fn_path(.)
+                    return map:entry($pathAndValue[1], $pathAndValue[2]))
+                let $paths1 := map:keys($pathsAndData1)
+                let $paths2 := map:keys($pathsAndData2)
                 let $pathsOnly1 := $paths1[not(. = $paths2)]
                 let $pathsOnly2 := $paths2[not(. = $paths1)]
                 let $pathsBoth := $paths1[. = $paths2]
                 let $dataDiffs :=
-                    for $path in $pathsBoth
-                    let $path_ := $path ! replace(., '[\[\]$(){}]', '\\$0', 's')
-                    let $data1 := $pathsAndData1[matches(., $path_||'=')] ! substring-after(., '=')
-                    let $data2 := $pathsAndData2[matches(., $path_||'=')] ! substring-after(., '=')
+                    for $path at $pos in $pathsBoth
+                    let $data1 := $pathsAndData1($path)
+                    let $data2 := $pathsAndData2($path)                    
                     where $data1 ne $data2
                     return
                         <dataDiff path="{$path}">{
@@ -86,15 +91,13 @@ declare function f:localPath($node as node())
 };        
 
 (:~
- : Representation of a node consisting of a local path,
- : optionally followed by an equality sign and the node 
- : string value.
+ : Returns the data path and the text value of a node.
  :
  : @param a node
- : @return the path string
+ : @return the path and the text value
  :)
 declare function f:localPathWithData($node as node())
-        as xs:string {
+        as xs:string+ {
     let $path := f:localPath($node)
     let $data := 
         typeswitch($node)
@@ -102,7 +105,7 @@ declare function f:localPathWithData($node as node())
         case attribute() return $node/string()
         default return ()
     return
-        string-join(($path, $data), '=')
+        ($path, $data)
 };        
 
 (:~
@@ -126,13 +129,32 @@ declare function f:localIndexedPath($node as node())
 };        
 
 (:~
+ : Returns the indexed data path and the text value of a node.
+ : and ignoring indexes.
+ :
+ : @param a node
+ : @return the path and the text value
+ :)
+declare function f:localIndexedPathWithData($node as node())
+        as xs:string+ {
+    let $path := f:localIndexedPath($node)
+    let $data := 
+        typeswitch($node)
+        case element() return $node[not(*)]/string()
+        case attribute() return $node/string()
+        default return ()
+    return
+        ($path, $data)
+};        
+
+(:~
  : A simple data path representation, using local names
  : and ignoring indexes.
  :
  : @param a node
  : @return the path string
  :)
-declare function f:localIndexedPathWithData($node as node())
+declare function f:localIndexedPathWithDataXXX($node as node())
         as xs:string {
     let $path := f:localIndexedPath($node)
     let $data := 

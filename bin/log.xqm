@@ -79,9 +79,25 @@ declare function f:DEBUG_CONTEXT_RC($item as item()) as item()* {
 
 (:~
  : Return a concise description of LROs.
+ :
+ : Returns an <lros> element with <lro> children,
+ : each one describing an LRO object.
+ :
+ : @param lros a sequence of LRO objects
+ : @return a document describing the LRO objects
  :)
 declare function f:DEBUG_LROS($lros as map(*)*) 
         as element()? {
+        
+    let $fn_getItemType := function($node) {
+        typeswitch($node)
+        case element() return 'element(' || $node/name() || ')'
+        case attribute() return 'attribute(' || $node/name() || ')=' || $node
+        case document-node() return 'document-node(' || $node/*/name() || ')'
+        case text() return 'text()=' || $node
+        default return 'node()=' || $node
+    }
+    
     let $entries :=
         for $lro in $lros
         let $keys := map:keys($lro) => sort()
@@ -89,14 +105,16 @@ declare function f:DEBUG_LROS($lros as map(*)*)
             <lro>{
                 for $key in $keys
                 let $items :=
-                    for $item in $lro($key)
-                    return
-                        typeswitch($item)
-                        case element() return attribute itemType {'element(' || $item/name() || ')'}
-                        case attribute() return attribute itemType {'attribute(' || $item/name() || ')=' || $item}
-                        case document-node() return 
-                            attribute itemType {'document-node(' || $item/*/name() || ')'}
-                        default return $item
+                    let $rawItems := $lro($key)
+                    let $nodes := $rawItems[. instance of node()]
+                    let $atoms := $rawItems[. instance of xs:anyAtomicType]                    
+                    return ( 
+                        if (empty($nodes)) then ()
+                        else if (count($nodes) eq 1) then $fn_getItemType($nodes)
+                        else $nodes/<node itemType="{$fn_getItemType(.)}"/>
+                        ,
+                        $atoms
+                    )
                 where not($key eq 'type' and $items = 'linkResolutionObject')
                 return element {$key} {$items}
             }</lro>

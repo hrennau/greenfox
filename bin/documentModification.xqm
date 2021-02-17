@@ -30,17 +30,17 @@ declare namespace fox="http://www.foxpath.org/ns/annotations";
  : @return the transformed node
  :)
 declare function f:applyDocModifiers(
-                              $doc as node(),
-                              $modifiers as element()*,
-                              $options as map(xs:string, item()*),                              
-                              $fn_itemSelector as function(node(), element()) as node()*)
+                        $doc as node(),
+                        $modifiers as element()*,
+                        $options as map(xs:string, item()*),                              
+                        $fn_itemSelector as function(node(), element()) as node()*)
         as node() {
     if (empty($modifiers) and not($options?skipXmlBase) and not($options?skipPrettyWS)) then $doc else
     
-    (: Writes a map entry describing the modifications described by a modifier :)
+    (: Function $fn_writeOperation.
+       Writes a map describing the modifications defined by a modifier :)
     let $fn_writeOperation := function($doc, $modifier) as map(*)? {
         let $nodes := $fn_itemSelector($doc, $modifier)
-        (: let $_DEBUG := trace($nodes/name(), '_MODIFIED_NODE_NAMES: ') :)
         return
             if (not($nodes)) then () else   
                 let $atts := $nodes[self::attribute()]
@@ -54,8 +54,13 @@ declare function f:applyDocModifiers(
                     ))    
     }
     let $selectedModifiers := $modifiers[not(self::gx:sortDoc)]
+    
+    (: $modification - a map describing all modifications except 'sortDoc' :)
     let $modification := if (not($selectedModifiers)) then () else
+    
+        (: $operations - an array of maps describing operations :)
         let $operations := array{ $selectedModifiers/$fn_writeOperation($doc, .) }
+        
         let $atts := $operations ! array:flatten(.) ! ?atts
         let $elems := $operations ! array:flatten(.) ! ?elems
         return
@@ -64,16 +69,139 @@ declare function f:applyDocModifiers(
                 map:entry('atts', $atts),
                 map:entry('elems', $elems)
             ))
-    let $types := ($modification?operations ! array:flatten(.) ! ?type) => distinct-values()
+    
+    (: $functions - a map returning for each operation type the appropriate function :)    
     let $functions := if (empty($modification)) then () else
-        map:merge((
-            map:entry('ignoreValue', f:applyDocModifiers_ignoreValue#2)[$types = 'ignoreValue'],
-            map:entry('roundItem', f:applyDocModifiers_roundItem#2) [$types = 'roundItem'],
-            map:entry('editItem',  f:applyDocModifiers_editItem#2)[$types = 'editItem']
-    ))  
+        let $types := ($modification?operations ! array:flatten(.) ! ?type) => distinct-values()
+        return
+            map:merge((
+                map:entry('ignoreValue', f:applyDocModifiers_ignoreValue#2)[$types = 'ignoreValue'],
+                map:entry('roundItem', f:applyDocModifiers_roundItem#2) [$types = 'roundItem'],
+                map:entry('editItem',  f:applyDocModifiers_editItem#2)[$types = 'editItem'],
+                map:entry('renameItem',  f:applyDocModifiers_renameItem#2)[$types = 'renameItem'],
+                map:entry('renamespaceItem',  f:applyDocModifiers_renamespaceItem#2)[$types = 'renamespaceItem']
+        ))  
     return
         f:applyDocModifiersRC($doc, $modification, $functions, $options)
 };
+
+(:~
+ : Recursive helper function of 'applyDocModifiers'.
+ :
+ : @param n the node to be transformed
+ : @param targets a map associating modification types with data
+ : @param functions a map associating modification types with functions
+ : @return the transformed node
+ :)
+declare function f:applyDocModifiersRC($n,
+                                       $modification as map(xs:string, item()*)?,
+                                       $functions as map(xs:string, function(*))?,
+                                       $options as map(xs:string, item()*))
+        as node()* {
+    typeswitch($n)
+    case document-node() return 
+        document {$n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)}
+        
+    (: Element :)
+    
+    (: $operations - maps describing the operations which apply to this element :)
+    case element() return
+        let $operations :=
+            if (not($n intersect $modification?elems)) then ()
+            else ($modification?operations ! array:flatten(.))[?elems intersect $n]
+        return  
+            (: No operations? just copy node an continue with content :)
+            if (empty($operations)) then
+                element {node-name($n)} {
+                    $n/@* ! f:applyDocModifiersRC(., $modification, $functions, $options),
+                    $n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)
+                }
+            (: Skip item! :)
+            else if ($operations?type = 'skipItem') then ()
+            
+            (: Modify! :)
+            else
+                (: Filter segregate operations - renaming operations versus all other :)
+                let $operation_renameItem := $operations[?type eq 'renameItem']
+                let $operation_renamespaceItem := $operations[?type eq 'renamespaceItem']
+                let $operations := $operations[not(?type = ('renameItem', 'renamespaceItem'))]
+
+                (: Determine item name (possibly renamed) :)
+                let $nodeName :=
+                    if (empty(($operation_renameItem, $operation_renamespaceItem))) then $n/node-name(.)
+                    else
+                        let $localName :=
+                            if (empty($operation_renameItem)) then $n/local-name(.) 
+                            else                            
+                                $functions('renameItem')($n, $operation_renameItem?operation)
+                        let $namespace := 
+                            if (empty($operation_renamespaceItem)) then $n/namespace-uri(.) 
+                            else                            
+                                $functions('renamespaceItem')($n, $operation_renameItem?operation)                        
+                        return QName($namespace, $localName)
+                return                        
+                    element {$nodeName} {
+                        (: Possibly the only modifications have been renamings, therefore if ... :)
+                        if (empty($operations)) then (
+                            $n/@* ! f:applyDocModifiersRC(., $modification, $functions, $options),
+                            $n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)                        
+                        )
+                        else
+                            let $operation := $operations[1]
+                            return $functions($operation?type)($n, $operation?operation)
+                    }
+                
+    (: Base attribute :)                
+    case attribute(xml:base) | attribute(fox:base-added) return 
+        $n[not($options?skipXmlBase)]
+        
+    (: Attribute :)        
+    case attribute() return
+        let $operations :=
+            if (not($n intersect $modification?atts)) then ()
+            else ($modification?operations ! array:flatten(.))[?atts intersect $n]
+        return            
+            if (empty($operations)) then $n
+            else if ($operations?type = 'skipItem') then ()
+            else 
+                attribute {node-name($n)} {
+                    let $operation := $operations[1]
+                    return $functions($operation?type)($n, $operation?operation)
+                }
+                
+    (: Text :)                
+    case text() return
+        if (not($options?skipPrettyWS)) then $n 
+        else if ($n/(not(matches(., '\S')) and ../*)) then ()
+        else $n
+    
+    default return $n                            
+};
+
+declare function f:applyDocModifiers_renameItem($node as node(),
+                                                $mod as element(gx:renameItem))
+        as xs:string {
+    let $lname := $node/local-name(.)        
+    let $from  := $mod/@replaceSubstring
+    let $to := $mod/@replaceWith
+    let $useString := $mod/@useString/tokenize(.)
+    let $r1 := if ($from and $to) then replace($lname, $from, $to) else $lname
+    let $r2 := if (empty($useString)) then $r1 else i:applyUseString($r1, $useString)                            
+    return $r2
+};        
+
+declare function f:applyDocModifiers_renamespaceItem(
+                            $node as node(),
+                            $mod as element(gx:renamespaceItem))
+        as xs:string {
+    let $namespace := $node/namespace-uri(.)        
+    let $from  := $mod/@replaceSubstring
+    let $to := $mod/@replaceWith
+    let $useString := $mod/@useString/tokenize(.)
+    let $r1 := if ($from and $to) then replace($namespace, $from, $to) else $namespace
+    let $r2 := if (empty($useString)) then $r1 else i:applyUseString($r1, $useString)                            
+    return $r2
+};        
 
 declare function f:applyDocModifiers_editItem($node as node(),
                                               $mod as element(gx:editItem))
@@ -100,60 +228,6 @@ declare function f:applyDocModifiers_ignoreValue($node as node(),
         as xs:string {
     ''        
 };        
-
-(:~
- : Recursive helper function of 'applyDocModifiers'.
- :
- : @param n the node to be transformed
- : @param targets a map associating modification types with data
- : @param functions a map associating modification types with functions
- : @return the transformed node
- :)
-declare function f:applyDocModifiersRC($n,
-                                       $modification as map(xs:string, item()*)?,
-                                       $functions as map(xs:string, function(*))?,
-                                       $options as map(xs:string, item()*))
-        as node()* {
-    typeswitch($n)
-    case document-node() return 
-        document {$n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)}
-    case element() return
-        let $operations :=
-            if (not($n intersect $modification?elems)) then ()
-            else ($modification?operations ! array:flatten(.))[?elems intersect $n]
-        return            
-            if (empty($operations)) then
-                element {node-name($n)} {
-                    $n/@* ! f:applyDocModifiersRC(., $modification, $functions, $options),
-                    $n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)
-                }
-            else if ($operations?type = 'skipItem') then ()
-            else
-                element {node-name($n)} {
-                    let $operation := $operations[1]
-                    return $functions($operation?type)($n, $operation?operation)
-                }
-    case attribute(xml:base) | attribute(fox:base-added) return 
-        $n[not($options?skipXmlBase)]                
-    case attribute() return
-        let $operations :=
-            if (not($n intersect $modification?atts)) then ()
-            else ($modification?operations ! array:flatten(.))[?atts intersect $n]
-        return            
-            if (empty($operations)) then $n
-            else if ($operations?type = 'skipItem') then ()
-            else 
-                attribute {node-name($n)} {
-                    let $operation := $operations[1]
-                    return $functions($operation?type)($n, $operation?operation)
-                }
-    case text() return
-        if (not($options?skipPrettyWS)) then $n 
-        else if ($n/(not(matches(., '\S')) and ../*)) then ()
-        else $n
-    
-    default return $n                            
-};
 
 (:~
  : Modify document, sorting the contents of selected or all elements alphabetically.

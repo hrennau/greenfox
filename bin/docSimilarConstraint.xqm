@@ -35,8 +35,9 @@ declare namespace fox="http://www.foxpath.org/ns/annotations";
  : @param context the processing context
  : @return validation results, red and/or green
  :)
-declare function f:validateDocSimilar($constraintElem as element(gx:docSimilar),                                      
-                                      $context as map(xs:string, item()*))
+declare function f:validateDocSimilar(
+                            $constraintElem as element(gx:docSimilar),                                      
+                            $context as map(xs:string, item()*))
         as element()* {
 
     let $targetInfo := $context?_targetInfo
@@ -59,7 +60,7 @@ declare function f:validateDocSimilar($constraintElem as element(gx:docSimilar),
         return
             link:resolveLinkDef($ldo, 'lro', $contextURI, $useContextNode, $context, $options) 
             [not(?targetURI ! i:fox-resource-is-dir(.))]   (: ignore folders :)
-        
+    (: let $_DEBUG := trace(i:DEBUG_LROS($lros), '___LRO: ') :)    
     (: Check link constraints :)
     let $results_link := link:validateLinkConstraints($lros, $ldo, $constraintElem, $context) 
     
@@ -86,7 +87,6 @@ declare function f:validateDocSimilar_similarity(
                                       $constraintElem as element(),
                                       $context as map(xs:string, item()*))
         as element()* {
-        
     (: Normalization options.
          Currently, the options cannot be controlled by schema parameters;
          this will be changed when the need arises :)
@@ -133,6 +133,7 @@ declare function f:validateDocSimilar_similarity(
         let $d1 := f:normalizeDocForComparison($linkContextNode, $constraintElem/*, $normOptions, $targetNode)
         let $d2 := f:normalizeDocForComparison($targetNode, $constraintElem/*, $normOptions, $linkContextNode)
         let $isDocSimilar := deep-equal($d1, $d2)
+        let $_DEBUG := trace($isDocSimilar, 'docSimilar - isSimilar: ')
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
         return
@@ -177,7 +178,7 @@ declare function f:normalizeDocForComparison($node as node(),
             let $parentNamespace := $modifier/@parentNamespace/tokenize(.)
             let $ifXP := $modifier/@ifXP
                 
-            let $candidates := if ($kind eq 'attribute') then $tree//@* else $tree//*
+            let $candidates := if ($kind eq 'attribute') then $tree//@* else $tree/descendant-or-self::*
             let $selected :=
                $candidates
                [empty($localName) or local-name() = $localName]
