@@ -121,7 +121,7 @@ declare function f:applyDocModifiersRC($n,
             
             (: Modify! :)
             else
-                (: Filter segregate operations - renaming operations versus all other :)
+                (: Segregate operations - renaming operations versus all other :)
                 let $operation_renameItem := $operations[?type eq 'renameItem']
                 let $operation_renamespaceItem := $operations[?type eq 'renamespaceItem']
                 let $operations := $operations[not(?type = ('renameItem', 'renamespaceItem'))]
@@ -137,7 +137,7 @@ declare function f:applyDocModifiersRC($n,
                         let $namespace := 
                             if (empty($operation_renamespaceItem)) then $n/namespace-uri(.) 
                             else                            
-                                $functions('renamespaceItem')($n, $operation_renameItem?operation)                        
+                                $functions('renamespaceItem')($n, $operation_renamespaceItem?operation)                        
                         return QName($namespace, $localName)
                 return                        
                     element {$nodeName} {
@@ -160,14 +160,41 @@ declare function f:applyDocModifiersRC($n,
         let $operations :=
             if (not($n intersect $modification?atts)) then ()
             else ($modification?operations ! array:flatten(.))[?atts intersect $n]
-        return            
+        return 
+            (: No operations? just copy node an continue with content :)        
             if (empty($operations)) then $n
+            
+            (: Skip item! :)            
             else if ($operations?type = 'skipItem') then ()
+            
+            (: Modify! :)            
             else 
-                attribute {node-name($n)} {
-                    let $operation := $operations[1]
-                    return $functions($operation?type)($n, $operation?operation)
-                }
+                (: Segregate operations - renaming operations versus all other :)
+                let $operation_renameItem := $operations[?type eq 'renameItem']
+                let $operation_renamespaceItem := $operations[?type eq 'renamespaceItem']
+                let $operations := $operations[not(?type = ('renameItem', 'renamespaceItem'))]
+
+                (: Determine item name (possibly renamed) :)
+                let $nodeName :=
+                    if (empty(($operation_renameItem, $operation_renamespaceItem))) then $n/node-name(.)
+                    else
+                        let $localName :=
+                            if (empty($operation_renameItem)) then $n/local-name(.) 
+                            else                            
+                                $functions('renameItem')($n, $operation_renameItem?operation)
+                        let $namespace := 
+                            if (empty($operation_renamespaceItem)) then $n/namespace-uri(.) 
+                            else                            
+                                $functions('renamespaceItem')($n, $operation_renamespaceItem?operation)                        
+                        return QName($namespace, $localName)
+                return            
+                    attribute {$nodeName} {
+                        (: Possibly the only modifications have been renamings, therefore if ... :)
+                        if (empty($operations)) then $n
+                        else
+                            let $operation := $operations[1]
+                            return $functions($operation?type)($n, $operation?operation)
+                        }
                 
     (: Text :)                
     case text() return
@@ -181,6 +208,9 @@ declare function f:applyDocModifiersRC($n,
 declare function f:applyDocModifiers_renameItem($node as node(),
                                                 $mod as element(gx:renameItem))
         as xs:string {
+    let $newName := $mod/@newName 
+    return if ($newName) then $newName else
+    
     let $lname := $node/local-name(.)        
     let $from  := $mod/@replaceSubstring
     let $to := $mod/@replaceWith
@@ -193,7 +223,10 @@ declare function f:applyDocModifiers_renameItem($node as node(),
 declare function f:applyDocModifiers_renamespaceItem(
                             $node as node(),
                             $mod as element(gx:renamespaceItem))
-        as xs:string {
+        as xs:string? {
+    let $newNamespace := $mod/@newNamespace
+    return if ($newNamespace) then $newNamespace else
+    
     let $namespace := $node/namespace-uri(.)        
     let $from  := $mod/@replaceSubstring
     let $to := $mod/@replaceWith

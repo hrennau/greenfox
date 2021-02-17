@@ -385,8 +385,8 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:element name="skipItem" type="t:SelectItemType" maxOccurs="unbounded"/>
                 <xs:element name="ignoreValue" type="t:SelectItemType" maxOccurs="unbounded"/>
                 <xs:element name="editItem" type="t:EditItemType" maxOccurs="unbounded"/>
-                <xs:element name="renameItem" type="t:EditItemType" maxOccurs="unbounded"/>
-                <xs:element name="renamespaceItem" type="t:EditItemType" maxOccurs="unbounded"/>
+                <xs:element name="renameItem" type="t:RenameItemType" maxOccurs="unbounded"/>
+                <xs:element name="renamespaceItem" type="t:RenamespaceItemType" maxOccurs="unbounded"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="docSimilarMsg" type="xs:string"/>
@@ -412,6 +412,22 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attribute name="replaceWith" type="xs:string"/>
         <xs:attribute name="useString" type="t:UseStringListType"/>
         <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
+    </xs:complexType>
+
+    <xs:complexType name="RenameItemType">
+        <xs:complexContent>
+            <xs:extension base="t:EditItemType">
+                <xs:attribute name="newName" type="xs:NCName"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="RenamespaceItemType">
+        <xs:complexContent>
+            <xs:extension base="t:EditItemType">
+                <xs:attribute name="newNamespace" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
     </xs:complexType>
     
     <xs:attributeGroup name="ItemSelectorAttGroup">
