@@ -1,24 +1,39 @@
-Our first Greenfox schema. It VISITs a single resource - the airports index
+Our first Greenfox schema! It VISITs a single resource - the airports index
 folder, and it CHECKs its contents, using a FolderContent constraint. 
 
-The constraint is represented by a <folderContent> element, with child
-elements describing the folder members. Member names may use wildcards. 
-Default cardinality is 1..1. Use @minCount, @maxCount or @count to 
-specify other constraints. If @closed is used, the folder must not 
-contain members which do not match any of the name attributes.
+The constraint is represented by a <folderContent> element, with child elements
+describing the folder members. Member names may use wildcards (* and ?). 
+Default cardinality is 1..1. Use @minCount, @maxCount or @count to specify 
+other constraints. If @closed is used, the folder must not contain members   
+which do not match any of the name attributes.
 
-You can also specify the expected MD5, SHA1 oder SHA256. Use an attribute
-with the corresponding name. 
+You can also specify the expected MD5, SHA1 oder SHA256. Use an attribute with
+the corresponding name. 
     
 Launch validation with a command like this:
    gfox /path/to/air01.xml
    
-Use different options for changing the report type, e.g.:
+Use different options for changing the report type. For instance, in order
+to get details about every constraint violation, use option -r (which stands
+for "red report"):
    gfox /path/to/air01.xml -r
    
-Report type options:   
--1   summary report, only constraint statistics
--2   as before, but red resources are listed (default report type)
--3   as before, but also green resources are listed
--r   list result elements for all red resources
--w   list all result elements
+"Domain" is a fancy word for the root folder of the file system tree
+to be validated. Accordingly, a <domain> element is a container
+for all constraints to be validated.
+
+The context element contains field definitions - each field has a name (@name) 
+and a value (@value or @valueFOX). A literal value would be supplied by a 
+@value attribute. A @valueFOX attribute contains a Foxpath expression providing
+the value. Foxpath is an expression language for navigating the file system. In 
+this example, the expression prescribes upward navigation to the folder 
+"declarative-amsterdam-2020", then down along the path data/air.
+
+Context fields can be referened using the syntax ${fieldname}. Before
+validation starts, such references are replaced by the field value.
+Field values can also be supplied by the user launching validation,
+using option -p. Example:
+    gfox /path/to/air01.xml -p domain=/path/to/domain
+    
+The user-supplied value overrides the value described by the @value or
+@valueFOX attribute - what these attribute provide is just default values.

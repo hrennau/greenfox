@@ -35,7 +35,7 @@ declare function f:resolveLinkExpression($expr as xs:string,
                                          $context as map(xs:string, item()*))
         as item()* {
     let $exprLang := 'xpath'
-    let $evaluationContext := 
+    let $evaluationContext :=
         i:newEvaluationContext_linkContextItem($contextNode, $context)    
     let $exprValue :=
         switch($exprLang)

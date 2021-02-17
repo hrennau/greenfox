@@ -14,17 +14,20 @@ of the containing folder shape. The <fileSize> element constrains the
 target files of the containing file shape. 
 
 The TARGET DECLARATION is represented by attributes on the shape element. 
-Here, the target declarations are relative URIs (@uri). 
+Here, the target declarations are FOXPATH expressions. Foxpath is an 
+extended version of XPath 3.0, which supports file system navigation, 
+as well as conventional node tree navigation. Foxpath uses the backslash 
+to separate steps of file system navigation, and slashes to separate 
+steps of node tree navigation.
 
 What is the context in which to evaluate a target declaration? It is a member
 from the target of the parent shape, or of the domain, if the shape is 
 top-level. The "*.FLAG" expression thus selects all FLAG files in a folder 
 from the target set of the folder containing the file shape. The target set
-of the file shape is the union of the files obtained in the context 
+target set of the file shape is the union of the files obtained in the context 
 of each folder from the parent folder shape. Come to think of it, this is 
 exactly the principle of XPath - moving from shape to child shape in a 
-Greenfox schema is the same as moving from step to step in an XPath 
-expression.
+Greenfox schema is the same as moving from step to step in an XPath expression.
 
 The <targetSize> elements are also constraints. They constrain the result 
 of the target declaration, for example the number of selected files. The 

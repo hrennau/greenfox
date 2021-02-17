@@ -24,90 +24,6 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (: ============================================================================
  :
- :     U p d a t e    p r o c e s s i n g    c o n t e x t
- :
- : ============================================================================ :)
-
-(:~
- : Updates the processing context by updating the _resourceRelationships entry.
- : New relationships are parsed from <linkDef> elements and added to the context,
- : overwriting any existing relationship with the same name.
- :
- : @param context the current processing context
- : @param linkDefs Link Definition elements
- : @return the updated processing context
- :)
-declare function f:updateProcessingContext_resourceRelationships(
-                                             $context as map(*),
-                                             $linkDefs as element(gx:linkDef)*)
-        as map(*) {
-    let $newRelationships := link:parseLinkDefs($linkDefs, $context)
-    return if (empty($newRelationships)) then $context else
-        
-    let $newNames := $newRelationships ! map:keys(.)    
-    let $currentRelationships := $context?_resourceRelationships
-    return 
-        if (empty($currentRelationships)) then 
-            map:put($context, '_resourceRelationships', $newRelationships)
-        else
-            let $currentNames := $currentRelationships ! map:keys(.)
-            return
-                map:merge((
-                    $newRelationships,
-                    $currentNames[not(. = $newNames)] ! $currentRelationships(.)
-                ))
-};    
-
-(:~
- : Updates the processing context as required in order to begin validation of the domain.
- :
- : @param domainElem domain element
- : @param context the current processing context
- : @return validation results
- :)
-declare function f:updateProcessingContext_domain($domainElem as element(gx:domain), 
-                                                  $context as map(xs:string, item()*))
-        as map(xs:string, item()*) {
-    let $dpath := $domainElem/(@uri, @path)[1]
-    let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
-    return
-        if (not($domainPath)) then
-            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $dpath))
-        else
-                
-    let $domainURI := $domainPath ! i:pathToUriCompatible(.)
-    let $domainName := $domainElem/@name/string()
-    
-    (: Evaluation context, containing entries available as 
-       external variables to XPath and foxpath expressions;
-       initial entries: domain, domainName:)
-    let $evaluationContext :=
-        map:merge((
-            map:entry(QName((), 'domain'), $domainURI),
-            map:entry(QName((), 'domainName'), $domainName),
-            f:mapKeysToQName($context)
-        ))
-
-    (: Processing context, containing entries available to
-       the processing code; initial entries :)
-    let $context :=
-        map:merge((
-            $context,
-            map:entry('_contextPath', $domainURI),
-            map:entry('_evaluationContext', $evaluationContext),            
-            map:entry('_domain', $domainURI),
-            map:entry('_domainPath', $domainPath),            
-            map:entry('_domainName', $domainName),
-            map:entry('_targetInfo', map{'contextURI': $domainURI}),
-            map:entry('_reqDocs', ()),
-            map:entry('_externalVars', map:keys($context))
-        ))
-    return
-        $context    
-};
-
-(: ============================================================================
- :
  :     I n i t i a l    p r o c e s s i n g    c o n t e x t
  :
  : ============================================================================ :)
@@ -133,6 +49,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
     (: Check the external context :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
     
+    (: Finalize the external context :)
     let $fields := $gfox/gx:context/gx:field
     let $substitutionContext := $externalContext
     let $entries := f:initialProcessingContextRC($fields, $substitutionContext)
@@ -228,6 +145,90 @@ declare function f:initialProcessingContextRC(
     )            
 };        
 
+(: ============================================================================
+ :
+ :     U p d a t e    p r o c e s s i n g    c o n t e x t
+ :
+ : ============================================================================ :)
+
+(:~
+ : Updates the processing context by updating the _resourceRelationships entry.
+ : New relationships are parsed from <linkDef> elements and added to the context,
+ : overwriting any existing relationship with the same name.
+ :
+ : @param context the current processing context
+ : @param linkDefs Link Definition elements
+ : @return the updated processing context
+ :)
+declare function f:updateProcessingContext_resourceRelationships(
+                                             $context as map(*),
+                                             $linkDefs as element(gx:linkDef)*)
+        as map(*) {
+    let $newRelationships := link:parseLinkDefs($linkDefs, $context)
+    return if (empty($newRelationships)) then $context else
+        
+    let $newNames := $newRelationships ! map:keys(.)    
+    let $currentRelationships := $context?_resourceRelationships
+    return 
+        if (empty($currentRelationships)) then 
+            map:put($context, '_resourceRelationships', $newRelationships)
+        else
+            let $currentNames := $currentRelationships ! map:keys(.)
+            return
+                map:merge((
+                    $newRelationships,
+                    $currentNames[not(. = $newNames)] ! $currentRelationships(.)
+                ))
+};    
+
+(:~
+ : Updates the processing context as required in order to begin validation of the domain.
+ :
+ : @param domainElem domain element
+ : @param context the current processing context
+ : @return validation results
+ :)
+declare function f:updateProcessingContext_domain($domainElem as element(gx:domain), 
+                                                  $context as map(xs:string, item()*))
+        as map(xs:string, item()*) {
+    let $dpath := $domainElem/(@uri, @path)[1]
+    let $domainPath := try {$dpath ! i:pathToAbsolutePath(.)} catch * {()}
+    return
+        if (not($domainPath)) then
+            error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $dpath))
+        else
+                
+    let $domainURI := $domainPath ! i:pathToUriCompatible(.)
+    let $domainName := $domainElem/@name/string()
+    
+    (: Evaluation context, containing entries available as 
+       external variables to XPath and foxpath expressions;
+       initial entries: domain, domainName:)
+    let $evaluationContext :=
+        map:merge((
+            map:entry(QName((), 'domain'), $domainURI),
+            map:entry(QName((), 'domainName'), $domainName),
+            f:mapKeysToQName($context)
+        ))
+
+    (: Processing context, containing entries available to
+       the processing code; initial entries :)
+    let $context :=
+        map:merge((
+            $context,
+            map:entry('_contextPath', $domainURI),
+            map:entry('_evaluationContext', $evaluationContext),            
+            map:entry('_domain', $domainURI),
+            map:entry('_domainPath', $domainPath),            
+            map:entry('_domainName', $domainName),
+            map:entry('_targetInfo', map{'contextURI': $domainURI}),
+            map:entry('_reqDocs', ()),
+            map:entry('_externalVars', map:keys($context))
+        ))
+    return
+        $context    
+};
+
  (: ============================================================================
  :
  :     P a r s i n g    e x t e r n a l    c o n t e x t
@@ -238,7 +239,10 @@ declare function f:initialProcessingContextRC(
  : Maps the value of a parameters string to a set of name-value pairs.
  :
  : Augmentation:
- : (1) Add value pairs 'schemaURI', 'schemaFOX', 'schemaPath'. 
+ : (1) Add value pairs 'schemaURI', 'schemaFOX', 'schemaPath':
+ :     schemaURI - a URI, using slashes
+ :     schemaPath - a path, using backslashes
+ :     schemaFOX - same as schemaPath 
  : (2) If function parameter $domain is supplied or a 'domain' name-value pair
  :     exists: add name-value pairs 'domainURI', 'domainFOX', 'domain'. 
  :

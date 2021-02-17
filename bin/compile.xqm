@@ -4,6 +4,7 @@
  : compile.xqm - functions compiling a greenfox schema, producing an augmented copy.
  :
  : Changes:
+ : - finalization of the processing context (<context>)
  : - variable substitution (using the `context` element)
  : - add @xml:base to the root element
  : - add id attributes: @id, @valueShapeID, @resourceShapeID :

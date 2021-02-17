@@ -247,7 +247,7 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
         $ldos?hrefXP ! .,
         $ldos?uriXP ! .,
         $ldos?contextXP ! .,
-        $ldos?templateVars?* ! @exprXP,
+        $ldos?templateVars?* ! @valueXP,
         $components/(
             @xpath, 
             (@*[name() ! ends-with(., 'XP')]) except $valuePairComponentsExpr2XP
