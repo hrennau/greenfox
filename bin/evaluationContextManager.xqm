@@ -607,14 +607,13 @@ declare function f:newEvaluationContext_linkContextItem($linkContextItem as item
  : @param value1 the value returned by expression 1
  : @param item1 an item from the value of expression 1; only set if @expr2Context = item
  : @param linkContextItem the current link context item; only set when using a link def, 
- :   that is when the constraint is <valueCompared> or <foxvalueCompared>)
+ :   that is when the constraint is a *Compared constraint
  : @param targetDoc the link target resource as a document; only set when using a link def, 
  :    and the link target is parsed into a node tree; using a link def means that the 
- :    constraint is <valueCompared> or <foxvalueCompared>) 
+ :    constraint is a *Compared constraint 
  : @param targetNode a node from the link target; only set when using a link def, and the 
- : link target is parsed into a node tree; can be the document node or a node returned by 
- :    @targetXP; using a link def means that the constraint is <valueCompared> or 
- :    <foxvalueCompared> 
+ :    link target is parsed into a node tree; can be the document node or a node returned by 
+ :    @targetXP; using a link def means that the constraint is a *Compared constraint
  : @param context the processing context
  : @return the updated processing context
  :) 
@@ -633,5 +632,48 @@ declare function f:newEvaluationContext_expr2($value1 as item()*,
         let $newEc := if (empty($linkContextItem)) then $newEc else map:put($newEc, QName((), 'linkContext'), $linkContextItem)        
         let $newEc := if (empty($targetDoc)) then $newEc else map:put($newEc, QName((), 'targetDoc'), $targetDoc)                
         let $newEc := if (empty($targetNode)) then $newEc else map:put($newEc, QName((), 'targetNode'), $targetNode)
+        return $newEc
+};
+
+(:~
+ : Returns a the evaluation context, augmented by values related to a link resolution.
+ :
+ : @param lro a Link Resolution Object
+ : @param context the processing context
+ : @return the updated processing context
+ :)
+declare function f:newEvaluationContext_lro($lro as map(xs:string, item()*), 
+                                            $context as map(xs:string, item()*))
+        as map(*) {
+    let $newEvaluationContext := $context?_evaluationContext
+    return
+        $newEvaluationContext ! f:extendEvaluationContext_lro($lro, ., $context)
+};
+
+(:~
+ : Returns a copy of the current evaluation context, augmented by values related to
+ : a link resolution.
+ :
+ : @param lro a Link Resolution Object
+ : @param evaluationContext the evaluation context to be extended
+ : @param context the processing context
+ : @return the updated processing context
+ :) 
+declare function f:extendEvaluationContext_lro(
+                                   $lro as map(xs:string, item()*),
+                                   $evaluationContext as map(xs:QName, item()*),
+                                   $context as map(xs:string, item()*))
+        as map(*) {
+    let $newEc := $evaluationContext    
+    return
+        let $newEc := 
+            if (empty($lro?contextItem)) then $newEc else 
+                map:put($newEc, QName((), 'linkContext'), $lro?contextItem)        
+        let $newEc := 
+            if (empty($lro?targetDoc)) then $newEc else 
+                map:put($newEc, QName((), 'targetDoc'), $lro?targetDoc)                
+        let $newEc := 
+            if (empty($lro?targetNodes)) then $newEc else 
+                map:put($newEc, QName((), 'targetNodes'), $lro?targetNodes)
         return $newEc
 };

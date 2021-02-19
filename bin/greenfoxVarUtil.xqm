@@ -7,19 +7,19 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_foxpath-uri-operations.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_foxpath-uri-operations.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "constants.xqm",
-    "expressionEvaluator.xqm",
-    "log.xqm" ;
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "constants.xqm",
+   "expressionEvaluator.xqm",
+   "log.xqm" ;
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -29,19 +29,25 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : @{name}. References using the dollar character are resolved using $context, and references
  : using the @ character are resolved using $callContext.
  :
- : @param s a string
+ : Value items which are not atomic are returned unchanged.
+ :
+ : @param value a value
  : @param context a context which is a map associating key strings with value strings
  : @param callContext a second context
  : @return a copy of the string with all variable references replaced with variable values
  :)
-declare function f:substituteVars($s as xs:anyAtomicType?, 
+declare function f:substituteVars($value as item()*, 
                                   $context as map(xs:string, item()*), 
                                   $callContext as map(xs:string, item()*)?) 
-        as xs:string? {
-    let $s2 := f:substituteVarsAux($s, $context, '\$')
+        as item()* {
+    for $item in $value
     return
-        if (empty($callContext)) then $s2    
-        else f:substituteVarsAux($s2, $callContext, '@') 
+        if (not($item instance of xs:anyAtomicType)) then $item
+        else
+            let $s := f:substituteVarsAux($item, $context, '\$')
+            return
+                if (empty($callContext)) then $s    
+                else f:substituteVarsAux($s, $callContext, '@') 
 };
 
 (:~

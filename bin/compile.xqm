@@ -123,11 +123,11 @@ declare function f:substituteVariablesRC($n as node(), $context as map(xs:string
         }
         
     (: text node - variable substitution :)
-    case text() return text {f:substituteVars($n, $context, ())}
+    case text() return text {string($n) ! f:substituteVars(., $context, ())}
     
     (: attribute - variable substitution :)
     case attribute() return 
-    attribute {node-name($n)} {f:substituteVars($n, $context, ())}
+    attribute {node-name($n)} {string($n) ! f:substituteVars(., $context, ())}
     
     default return $n        
 };

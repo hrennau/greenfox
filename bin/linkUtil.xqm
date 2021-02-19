@@ -42,7 +42,7 @@ declare function f:resolveLinkExpression($expr as xs:string,
         case 'xpath' return 
             i:evaluateXPath($expr, $contextNode, $evaluationContext, true(), true())
         default return 
-            error(QName((), 'SCHEMA_ERROR'), 
-                "'Missing attribute - <links> element must have an 'xpath' attribute")
+            error(QName($i:URI_GXERR, 'SCHEMA_ERROR'), 
+                "'Unknown expression language: ', $exprLang")
     return $exprValue        
 };        

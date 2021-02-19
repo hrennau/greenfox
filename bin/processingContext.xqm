@@ -69,17 +69,22 @@ declare function f:initialProcessingContextRC(
     return if (empty($head)) then () else
     
     let $name := $head/@name/string()
-    let $litValue := $head/($substitutionContext($name), @value)[1] ! f:substituteVars(., $substitutionContext, ())
-    let $valueXP := $head/@valueXP/f:substituteVars(., $substitutionContext, ())
-    let $valueFOX := $head/@valueFOX/f:substituteVars(., $substitutionContext, ())
+    let $litValue := $head/($substitutionContext($name), @value/string())[1] ! f:substituteVars(., $substitutionContext, ())
+    let $valueXP := $head/@valueXP/string() ! f:substituteVars(., $substitutionContext, ())
+    let $valueFOX := $head/@valueFOX/string() ! f:substituteVars(., $substitutionContext, ())
     
     let $value :=
+        (: Literal value :)
         if (exists($litValue)) then $litValue
+        
+        (: Foxpath expression - context = schemaURI :)
         else if ($valueFOX) then
             let $schemaURI := $substitutionContext?schemaURI
             let $evaluationContext := i:mapKeysToQName($substitutionContext)
             return
                 i:evaluateFoxpath($valueFOX, $schemaURI, $evaluationContext, true())
+                
+        (: XPath expression :)                
         else if ($valueXP) then
             let $evaluationContext := i:mapKeysToQName($substitutionContext)
             return

@@ -90,7 +90,7 @@ declare function f:applyLinkConnector($ldo as map(*),
 (:~
  : Applies a URI template connector to a link context item. 
  :  
- : @param ldo Link Definition object
+ : @param ldo Link Definition Object
  : @param contextPoint link context node
  : @param context the processing context
  : @return a sequence of URIss

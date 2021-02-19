@@ -130,10 +130,12 @@ declare function f:validateDocSimilar_similarity(
         (: Perform comparison :)
         for $targetNode in $linkTargetNodes
         let $targetURI := $lro?targetURI
-        let $d1 := f:normalizeDocForComparison($linkContextNode, $constraintElem/*, $normOptions, $targetNode)
-        let $d2 := f:normalizeDocForComparison($targetNode, $constraintElem/*, $normOptions, $linkContextNode)
+        let $d1 := f:normalizeDocForComparison(
+            $linkContextNode, $constraintElem/*, $normOptions, $targetNode, $lro, $context)
+        let $d2 := f:normalizeDocForComparison(
+            $targetNode, $constraintElem/*, $normOptions, $linkContextNode, $lro, $context)
         let $isDocSimilar := deep-equal($d1, $d2)
-        let $_DEBUG := trace($isDocSimilar, 'docSimilar - isSimilar: ')
+        (: let $_DEBUG := trace($isDocSimilar, 'docSimilar - isSimilar: ') :)
         let $colour := if ($isDocSimilar) then 'green' else 'red'
         let $reports := f:docSimilarConstraintReports($constraintElem, $d1, $d2, $colour)
         return
@@ -160,10 +162,14 @@ declare function f:validateDocSimilar_similarity(
 declare function f:normalizeDocForComparison($node as node(), 
                                              $modifiers as element()*,
                                              $normOptions as map(xs:string, item()*),
-                                             $otherNode as node())
+                                             $otherNode as node(),
+                                             $lro as map(xs:string, item()*),
+                                             $context as map(xs:string, item()*))
         as node()? {
     (: A function returning the items selected by the item selection attributes.
      :)
+    let $evaluationContext := i:newEvaluationContext_lro($lro, $context)
+
     let $fn_selectedItems := 
         function($tree, $modifier) as node()* {
             let $itemXP := $modifier/@itemXP
@@ -185,8 +191,11 @@ declare function f:normalizeDocForComparison($node as node(),
                [empty(@namespace) or namespace-uri(.) = $namespace]
                [empty($parentLocalName) or ../local-name(.) = $parentLocalName]
                [empty(@parentNamespace) or ../namespace-uri(.) = $parentNamespace]
+               (:
                [empty($ifXP) or boolean(f:evaluateSimpleXPath($ifXP, .))]
-            return $selected
+               :)
+               [empty($ifXP) or boolean(i:evaluateXPath($ifXP, ., $evaluationContext, true(), true()))]  
+            return $selected               
         }
         
     (: Sort document :)
