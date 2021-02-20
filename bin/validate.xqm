@@ -49,7 +49,7 @@ declare function f:validateOp($request as element())
         
     (: Preliminary checks :)        
     let $gfoxSource := tt:getParams($request, 'gfox')/*    
-    let $_CHECK := f:check_greenfoxSchemaRoot($gfoxSource)
+    let $_CHECK := f:isItGreenfox($gfoxSource)
     
     (: Collect parameters :)
     let $gfoxSourceURI := $gfoxSource/root()/document-uri(.)
@@ -61,27 +61,25 @@ declare function f:validateOp($request as element())
     let $reportFormat := tt:getParams($request, 'format')
     let $reportOptions := map{'ccfilter': $ccfilter, 'fnfilter': $fnfilter}
 
-    (: Compile greenfox schema :)
+    (: Compile Greenfox schema :)
     let $gfoxAndContext := f:compileGreenfox($gfoxSource, $params, $domain)
     let $context := $gfoxAndContext?context
     let $gfoxVarsSubstituted := $gfoxAndContext?schemaPrelim
     let $gfoxCompiled := $gfoxAndContext?schemaCompiled
-    (:
-    let $gfox := $gfoxAndContext[. instance of element()]
-    let $context := $gfoxAndContext[. instance of map(*)]
-     :)
+    
+    (: Validate schema against XSD :)
     let $xsdInvalidSchemaReport := f:xsdValidateSchema($gfoxSource, $gfoxVarsSubstituted)
     return if ($xsdInvalidSchemaReport) then $xsdInvalidSchemaReport else
-
-    (: let $_LOG := i:DEBUG_FILE($gfoxCompiled, 0, 'GFOX.xml'):)
     
-    (: Validate greenfox schema :)
+    (: Further validation :)
     let $gfoxErrors := f:validateGreenfox($gfoxCompiled)
     return if ($gfoxErrors) then $gfoxErrors else
 
-    (: Validate greenfox schema against meta schema :)
-    let $invalidSchemaReport := () (: i:metaValidateSchema($gfoxSource) :)
+    (:
+    (: Validate greenfox schema against meta schema :)    
+    let $invalidSchemaReport := i:metaValidateSchema($gfoxSource) 
     return if ($invalidSchemaReport) then $invalidSchemaReport else
+    :)
     
     (: Validate system :)
     let $report := i:validateSystem($gfoxCompiled, $context, $reportType, $reportFormat, $reportOptions)
@@ -92,24 +90,24 @@ declare function f:validateOp($request as element())
  : Checks if the greenfox schema has the expected root element, raises
  : an error otherwise.
  :
- : @param elem root element of what should be a greenfox schema
- : @return throws an error with diagnostic message
+ : @param gfox root element of what should be a Greenfox schema
+ : @return empty sequence, or an error is thrown with diagnostic message
  :)
-declare function f:check_greenfoxSchemaRoot($gfox as element())
+declare function f:isItGreenfox($gfox as element())
         as empty-sequence() {
     if ($gfox/self::element(gx:greenfox)) then () else
         
     let $namespace := $gfox/namespace-uri(.)
-    let $lname := $gfox/local-name(.)
+    let $name := $gfox/local-name(.)
     let $msgParts := (
-        if ($lname ne 'greenfox') then
-            'the local name must be "greenfox", but is: "' || $lname || '";' else (),
-        if ($namespace ne $i:URI_GX) then
-            concat('the namespace URI must be "', $i:URI_GX, '", but is: "' || $namespace || '";') else ()
+        if ($name eq 'greenfox') then () else
+            'the local name must be "greenfox", but is: "' || $name || '";',
+        if ($namespace eq $i:URI_GX) then () else
+            'the namespace URI must be "' || $i:URI_GX || '", but is: "' || $namespace || '";'
     )
     let $errorCode := 'INVALID_ARG'
     let $msg := string-join(('Not a greenfox schema;', $msgParts, 'aborted.'), ' ')                    
-    return error(QName('', $errorCode), $msg)        
+    return error(QName($i:URI_GXERR, $errorCode), $msg)        
 };
 
 (:~

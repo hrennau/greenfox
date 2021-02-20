@@ -477,6 +477,7 @@ declare function f:displayResultResults($resources as element()*)
         as node()* {
     for $r in $resources
     let $file := $r/(@file, @folder)[1]
+    let $file := $file ! replace(., '--', '`-`-`')
     return (
         comment {concat('&#xA;&#xA;*** ', $file, '&#xA;&#xA;    ')},
         $r
