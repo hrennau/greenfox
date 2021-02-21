@@ -34,6 +34,7 @@ set value=%~1
 if        "%name%"=="-1" (set RTYPE=sum1
 ) else if "%name%"=="-2" (set RTYPE=sum2
 ) else if "%name%"=="-3" (set RTYPE=sum3
+) else if "%name%"=="-4" (set RTYPE=sum4
 ) else if "%name%"=="-r" (set RTYPE=red
 ) else if "%name%"=="-w" (set RTYPE=white
 ) else if "%name%"=="-t" (set RTYPE=!VALUE!
@@ -54,7 +55,7 @@ if        "%name%"=="-1" (set RTYPE=sum1
  ) else if "%char1%"=="-" (
    echo Unknown option: %name%
    echo Supported options:
-   echo    -1 -2 -3 -r -w                 # Select report type
+   echo    -1 -2 -3 -4 -r -w              # Select report type
    echo    -t reportType                  # Set report type to specific type
    echo    -p "name:value"                # Set schema parameter - multiple use allowed
    echo    -C "foo* *bar ~foo*bar ~*peng" # Filter constraint components - all "foo* or *bar, except foo*bar or *peng"   
@@ -67,7 +68,7 @@ if        "%name%"=="-1" (set RTYPE=sum1
     ) else if "!domain!"=="" (
         set domain=!name!
     ) else (
-        echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]
+        echo Usage: gfox schema [domain] [-1 -2 -3 -4 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]
         echo.
         echo Third argument not allowed.
         exit /b    
@@ -84,6 +85,7 @@ if        "%RTYPE%"=="white"    (rem
 ) else if "%RTYPE%"=="sum1"     (rem
 ) else if "%RTYPE%"=="sum2"     (rem
 ) else if "%RTYPE%"=="sum3"     (rem
+) else if "%RTYPE%"=="sum4"     (rem
 ) else if "%RTYPE%"=="wresults" (rem
 ) else if "%RTYPE%"=="rresults" (rem
 ) else (

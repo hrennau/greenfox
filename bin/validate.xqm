@@ -12,7 +12,7 @@
          <param name="gfox" type="docFOX" fct_minDocCount="1" fct_maxDocCount="1" sep="WS" pgroup="input"/>
          <param name="domain" type="xs:string?"/>
          <param name="params" type="xs:string?"/>
-         <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, red, white, wresults, rresults, std" default="sum2"/>
+         <param name="reportType" type="xs:string?" fct_values="sum1, sum2, sum3, sum4, red, white, wresults, rresults, std" default="sum2"/>
          <param name="ccfilter" type="nameFilter?"/>         
          <param name="fnfilter" type="nameFilter?"/>
          <param name="format" type="xs:string?" default="xml"/>

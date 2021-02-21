@@ -17,7 +17,10 @@ at "compile.xqm",
    "greenfoxEditUtil.xqm",
    "greenfoxUtil.xqm",
    "systemValidator.xqm";
-    
+
+import module namespace msg="http://www.greenfox.org/ns/xquery-functions/msg" 
+at "msgUtil.xqm";
+
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
@@ -48,7 +51,8 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
     case "red" return f:writeValidationReport_red($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum1" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum2" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
-    case "sum3" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)    
+    case "sum3" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "sum4" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)    
     case "std" return f:writeValidationReport_wresults($gfox, $domain, $context, $results, $reportType, $format, $options)    
     default return error(QName((), 'INVALID_ARG'), concat('Unexpected validation report type: ', "'", $reportType, "'",
         '; value must be one of: sum1, sum2, sum3, red, white, rresults, wresults.'))
@@ -111,7 +115,6 @@ declare function f:writeValidationReport_white(
     let $greenfoxURI := $gfox[1]/@greenfoxURI
     let $resourceDescriptors :=        
         for $result in $results  
-        (: let $_DEBUG := trace($result, '___RESULT: ') :)
         let $resourceIdentifier := $result/(@filePath, @folderPath)[1]
         let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
         group by $resourceIdentifier
@@ -246,14 +249,23 @@ declare function f:writeValidationReport_constraintCompStat(
     let $options := map{}
     let $whiteTree := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)
 
-    let $fn_listResources := function($resources) {
-        for $r in $resources
-        let $pathAtt := $r/../(@file, @folder)[1]
-        let $elemName := ($pathAtt/local-name(.), 'resource')[1]
-        order by if ($elemName eq 'folder') then 2 else 1, $pathAtt 
-        return element {$elemName}{$pathAtt/string()}
+    let $fn_listResources := function($results, $withMsgs) {
+        for $r in $results
+        let $uriAtt := $r/../(@file, @folder)[1]
+        group by $uri := string($uriAtt)
+        let $elemName := ($uriAtt[1]/local-name(.), 'resource')[1]
+        let $msgs := if (not($withMsgs)) then () else (
+            for $result in $r
+            return $r/(@msg/string(), msg:defaultMsg(.))[1]        
+            ) => distinct-values() => sort()
+        order by if ($elemName eq 'folder') then 2 else 1, $uri 
+        return 
+            element {$elemName}{
+                attribute uri {$uri},
+                $msgs ! <msg>{.}</msg>
+            }         
     }    
-    let $entries :=
+    let $constraintComps :=
         for $ccomp in $whiteTree//@constraintComp
         group by $ccname := $ccomp/string()
         let $results := $ccomp/..
@@ -263,12 +275,12 @@ declare function f:writeValidationReport_constraintCompStat(
         return
             <constraintComp name="{$ccname}" countRed="{count($red)}" countGreen="{count($green)}">{
                 if (not($red)) then () else
-                    <redResources>{$fn_listResources($red)}</redResources>,
+                    <redResources>{$fn_listResources($red, true())}</redResources>,
                 if (not($green)) then () else                    
-                    <greenResources>{$fn_listResources($green)}</greenResources>
+                    <greenResources>{$fn_listResources($green, false())}</greenResources>
             }</constraintComp>
     let $report :=
-        <constraintComps count="{$entries}">{
+        <constraintComps count="{$constraintComps}">{
             $whiteTree/@domain,
             $whiteTree/@greenfoxDocumentURI,
             $whiteTree/@greenfoxURI,
@@ -276,7 +288,7 @@ declare function f:writeValidationReport_constraintCompStat(
             $whiteTree/@countGreen,
             $whiteTree/@countRedResources,
             $whiteTree/@countGreenResources,
-            $entries
+            $constraintComps
         }</constraintComps>
     return $report
 };
@@ -296,7 +308,9 @@ declare function f:writeValidationReport_sum(
         as item() {
     let $ccfilter := $options?ccfilter
     let $fnfilter := $options?fnfilter
-    let $ccstat := f:writeValidationReport_constraintCompStat($gfox, $domain, $context, $results, 'red', 'xml', $options)
+    let $ccstat := 
+        f:writeValidationReport_constraintCompStat(
+            $gfox, $domain, $context, $results, 'red', 'xml', $options)
     let $ccomps := $ccstat/*
     
     let $countRed := $ccstat/@countRed/xs:integer(.)
@@ -304,20 +318,27 @@ declare function f:writeValidationReport_sum(
     let $countRedResources := $ccstat/@countRedResources/xs:integer(.)
     let $countGreenResources := $ccstat/@countGreenResources/xs:integer(.)
     
-    let $redResources := 
+    let $redResources :=
         for $r in $ccstat//redResources/(folder, file)
-        group by $rname := string($r)
+        group by $rname := $r/@uri
         let $kind := if ($r[1]/self::folder) then 'D' else 'F'
         let $ccomps := $r/../../@name => distinct-values() => sort()
+        let $msgs := $r/msg
         order by $kind, $rname
-        return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}"/>
+        return 
+            <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}">{
+                $msgs
+            }</resource>
     let $greenResources :=
         for $r in $ccstat//greenResources/(folder, file)
-        group by $rname := string($r)
+        group by $rname := $r/@uri
         let $kind := if ($r[1]/self::folder) then 'D' else 'F'
         let $ccomps := $r/../../@name => distinct-values() => sort()
+        let $msgs := $r/msg
         order by $kind, $rname
-        return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}"/>
+        return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}">{
+            $msgs
+        }</resource>
             
     let $ccompNameWidth := (('constraint comp', $ccomps/@name) !string-length(.)) => max()
     let $countRedWidth := (('#red', $ccomps/@countRed/string()) ! string-length(.)) => max()
@@ -366,15 +387,20 @@ declare function f:writeValidationReport_sum(
             ' ',
             if (empty($redResources)) then () else (
                 'Red resources: ',
-                $redResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
-                ' ')
+                for $resource in $redResources
+                return (
+                    $resource/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'), 
+                    if ($reportType eq 'sum2') then () else
+                    $resource/msg/string() ! concat('    ', .),
+                    ' ')                    
             ,        
-            if ($reportType eq 'sum2') then () else (
+            if ($reportType = ('sum2', 'sum3')) then () else (
                     if (empty($greenResources)) then () else (
                     'Green resources: ',
                     $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
                     ' ')
                 )
+            )
         ),
         '',
         ''
