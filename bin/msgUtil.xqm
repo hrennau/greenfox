@@ -28,7 +28,16 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 declare function f:defaultMsg($result as element())
         as xs:string {
     switch($result/@constraintComp)
+    
     case "TargetCount" return f:defaultMsg_targetCount($result)
+    case "TargetMinCount" return f:defaultMsg_targetCount($result)
+    case "TargetMaxCount" return f:defaultMsg_targetCount($result)
+    
+    case "LinkTargetDocsCount" return f:defaultMsg_linkTargetDocsCount($result)
+    case "LinkTargetDocsMinCount" return f:defaultMsg_linkTargetDocsCount($result)
+    case "LinkTargetDocsMaxCount" return f:defaultMsg_linkTargetDocsCount($result)
+    
+    case "TargetSizeLinkResolution" return f:defaultMsg_targetSizeLinkResolution($result)
     default return 
         "(under construction: default msg for "||$result/@constraintComp||" result)"
 };
@@ -53,15 +62,11 @@ declare function f:defaultMsg_targetCount($result as element())
     case element(gx:red) return
         let $countText :=
             if ($count) then 
-                if ($valueCount eq 0) then
-                    "No resource found: '"||$target||"'"
-                else
-                    $valueCount||" resources found, but expected "||$count||" : "||$target
+                if ($valueCount eq 0) then "No resource found: ["||$target||"]"
+                else $valueCount||" resources found, but expected "||$count||" : "||$target
             else if ($minCount) then                            
-                if ($valueCount eq 0) then
-                    "No resource found: '"||$target||"'"
-                else
-                    $valueCount||" resources found, but expected at least "||$minCount||" : "||$target
+                if ($valueCount eq 0) then "No resource found: ["||$target||"]"
+                else $valueCount||" resources found, but expected at least "||$minCount||" : "||$target
             else if ($maxCount) then                            
                 $valueCount||" resources found, but expected at most "||$maxCount||" : "||$target
             else 
@@ -72,6 +77,63 @@ declare function f:defaultMsg_targetCount($result as element())
         "(under construction: default msg for TargetSize constraint, green result)"
     default return
         "(under construction: default msg for TargetSize constraint, "||local-name($result)||" result)"
+};
+
+(:~
+ : Constructs a default message for a LinkTargetDocsCount constraint.
+ :
+ : @param result a validation result
+ : @return message text
+ :)
+declare function f:defaultMsg_linkTargetDocsCount($result as element())
+        as xs:string {
+    let $valueCount := $result/@valueCount/xs:integer(.)
+    let $count := $result/@countTargetDocs/xs:integer(.)
+    let $minCount := $result/@minCountTargetDocs/xs:integer(.)
+    let $maxCount := $result/@maxCountTargetDocs
+    let $targetContextPath := $result/@targetContextPath
+    let $target := f:linkDescription($result, $result/../(@file, @folder))
+    return
+    
+    typeswitch($result)
+    case element(gx:red) return
+        let $countText :=
+            if ($count) then 
+                if ($valueCount eq 0) then "No link target document: ["||$target||"]"
+                else $valueCount||" link target documents found, but expected "||$count||" : "||$target
+            else if ($minCount) then                            
+                if ($valueCount eq 0) then "No link target document: '"||$target||"'"
+                else $valueCount||" link target documents found, but expected at least "||$minCount||" : "||$target
+            else if ($maxCount) then                            
+                $valueCount||" link target documents found, but expected at most "||$maxCount||" : "||$target
+            else 
+                "(under construction: default msg for LinkTargetDocsCount constraint, constraint not a linkTargetDocCount* constraint)"
+        return
+            $countText
+    case element(gx:green) return 
+        "(under construction: default msg for LinkTargetDocsCount constraint, green result)"
+    default return
+        "(under construction: default msg for LinkTargetDocsCount constraint, "||local-name($result)||" result)"
+};
+
+(:~
+ : Constructs a default message for a TargetSizeLinkResolution constraint.
+ :
+ : @param result a validation result
+ : @return message text
+ :)
+declare function f:defaultMsg_targetSizeLinkResolution($result as element())
+        as xs:string {
+    let $target := f:linkDescription($result, $result/../(@file, @folder))
+    return
+        
+    typeswitch($result)
+    case element(gx:red) return
+        "Link could not be resolved: ["||$target||"]"
+    case element(gx:green) return 
+        "(under construction: default msg for LinkTargetDocsCount constraint, green result)"
+    default return
+        "(under construction: default msg for LinkTargetDocsCount constraint, "||local-name($result)||" result)"
 };
 
 (:~

@@ -16,16 +16,22 @@ at "linkResolution.xqm";
 
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "foxpathUtil.xqm",
-   "greenfoxUtil.xqm";
+   "greenfoxUtil.xqm",
+   "log.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 
+declare variable $f:DBG_LINK_DEFINITION_LEVEL as xs:integer := 1;
+declare variable $f:DBG_LINK_DEFINITION_LINKDEF_NAMES := 'NEVER' ! tokenize(.) ! tt:pattern2Regex(.);
+declare variable $f:DBG_LINK_DEFINITION_FILE := 'DEBUG_link_definition.txt';
+
 (:~
- : Returns the Link Definition defined or referenced by a given item.
- : The item can be the link name, given by a string or attribute; it
- : may be a Link Definition object; and it may be an element either
- : referencing a Link Definition (via @linkName) or providing a
- : local link definition.
+ : Returns the Link Definition Object defined or referenced by a given item.
+ : The item can be ...
+ : - a link name, given by a string or attribute
+ : - a Link Definition Object
+ : - an element either referencing a Link Definition (via @linkName) or providing a
+ :   local link definition.
  :
  : @param linkDef link definition providing item
  : @param context processing context
@@ -37,20 +43,24 @@ declare function f:getLinkDefObject($linkDef as item(),
         as map(*)? {
     let $ldo :=        
         typeswitch($linkDef)
+        
         (: Link name, as a string :)
         case $linkName as xs:string return
             let $lookup := link:linkDefObject($linkName, $context)
             return
                 if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
                 else $lookup
+                
         (: Link name, as an attribute :)
         case $linkName as attribute() return
             let $lookup := link:linkDefObject($linkName, $context)
             return
                 if (empty($lookup)) then error((), concat('Unknown link name: ', $linkName))
                 else $lookup
+                
         (: Link Definition Object :)
         case $linkDefObject as map(*) return $linkDefObject
+        
         (: Element referencing or providing a local link definition :)
         case $linkDefElem as element() return
             let $ldo := $linkDefElem/f:parseLinkDef(., $context)
@@ -58,20 +68,8 @@ declare function f:getLinkDefObject($linkDef as item(),
                 if (empty($ldo)) then
                     error(QName((), 'INVALID_SCHEMA'), concat('Element does not reference or ',
                         'define a valid link definition; element name: ', name($linkDefElem)))    
-                else $ldo                        
-(:            
-            let $linkName := trace($linkDefElem/(@linkName, @link)[1] , '+++ LINK_NAME: ')
-            return
-                if ($linkName) then
-                    let $try := link:linkDefObject($linkName, $context)
-                    return
-                        if (empty($try)) then error((), concat('Unknown link name: ', $linkName))
-                        else $try
-                else
-                    (: Try to parse the element into a Link Definition; if not possible,
-                       the empty sequence is returned :)
-                    link:parseLinkDef($linkDefElem, $context)
-:)                    
+                else $ldo
+                
         default return error((), 'Parameter $linkDef must be a string, an object or an element')
     return $ldo        
 };
@@ -85,7 +83,8 @@ declare function f:getLinkDefObject($linkDef as item(),
  : @param linkDefs schema elements from which to parse the relationships
  : @return a map representing the relationships parsed from the <linkDef> elements
  :)
-declare function f:parseLinkDefs($linkDefs as element()*, $context as map(xs:string, item()*))
+declare function f:parseLinkDefs($linkDefs as element()*, 
+                                 $context as map(xs:string, item()*))
         as map(*) {
     map:merge(        
         for $linkDef in $linkDefs
@@ -96,9 +95,9 @@ declare function f:parseLinkDefs($linkDefs as element()*, $context as map(xs:str
 };    
 
 (:~
- : Parses an element into a Link Definition Object. Parsing fails if none
- : of the following items is found:
- : - @foxpath
+ : Parses an element into a Link Definition Object. Parsing fails if no attribute
+ : is found which is mandatory for some connector type. These are:
+ : - @navigateFOX
  : - @hrefXP
  : - @uriXP
  : - @uri
@@ -108,14 +107,16 @@ declare function f:parseLinkDefs($linkDefs as element()*, $context as map(xs:str
  : When parsing fails, the element does not represent a Link Definition and
  : the empty sequence is returned.
  :
- : @param linkDef an element defining a link
+ : @param linkDef an element referencing or defining a link
  : @return a Link Definition Object, or the empty sequence if the element does not
  :   represent a Link Definition
  :)
 declare function f:parseLinkDef($linkDef as element(),
                                 $context as map(xs:string, item()*))
         as map(*)? {
-    let $referenced := $linkDef/@linkName/f:linkDefObject(., $context)    
+    (: A link definition referenced by the element :)
+    let $referenced := $linkDef/@linkName/f:linkDefObject(., $context)
+    
     let $foxpath := ($linkDef/(@navigateFOX, @foxpath)[1]/string(), $referenced?foxpath)[1]
     let $hrefXP := ($linkDef/@hrefXP/string(), $referenced?hrefXP)[1]
     let $uriXP := ($linkDef/@uriXP/string(), $referenced?uriXP)[1]
@@ -142,7 +143,7 @@ declare function f:parseLinkDef($linkDef as element(),
     let $templateVarsRef := $referenced?templateVars
     let $constraintsDef := $linkDef[self::gx:linkDef]/gx:targetSize
     let $constraintsRef := $referenced?constraints
-    
+                   
     (: Build the map of templates vars; key=name, value=XML element with @value :)
     let $templateVarsMap :=
         if (empty($templateVarsDef)) then $templateVarsRef
@@ -196,11 +197,14 @@ declare function f:parseLinkDef($linkDef as element(),
             let $requiresContextNode :=
                     $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
                     or $contextXP
+            (: The lines below should be deleted soon - see call of f:parseLinkDef_augmentMediatype :)
+            (:
             let $mediatype :=
                 if ($mediatype) then $mediatype 
                 else if ($targetXP) then 'xml' 
                 else if ($recursive and $requiresContextNode) then 'xml'
-                else () 
+                else ()
+             :)
             let $csvProperties := (
                 $csvSeparator ! map:entry('csv.separator', .),
                 $csvHeader ! map:entry('csv.header', .),
@@ -227,8 +231,56 @@ declare function f:parseLinkDef($linkDef as element(),
                     $mirrorMap ! map:entry('mirror', .),
                     ($constraintsDef, $constraintsRef)[1] ! map:entry('constraints', .)                            
                 )))
+    
+    (: If necessary, add a mediatype field as applied by other information :)
+    let $ldo := f:parseLinkDef_augmentMediatype($ldo, $linkDef)
+    
+    (: Debug option - write schemaObject into file :)        
+    let $_DEBUG := i:FDEBUG(
+        <parseLinkDef>{
+            <linkDef>{$linkDef}</linkDef>,
+            $referenced ! i:DEBUG_LDO(.)/<referencedLDO>{.}</referencedLDO>,
+            $ldo ! i:DEBUG_LDO(.)
+        }</parseLinkDef>,
+        'Input/output of Link Definition Parsing', 
+        $f:DBG_LINK_DEFINITION_LEVEL, 
+        $linkDef/local-name(.), 
+        $f:DBG_LINK_DEFINITION_LINKDEF_NAMES, 
+        $f:DBG_LINK_DEFINITION_FILE)
+                
     return $ldo
 };    
+
+(:~
+ : Checks and possibly augments a Link Definition Object by adding a 
+ : mediatype field if not present and a mediatyp is implied by object 
+ : contents.
+ :
+ : @param ldo a preliminary Link Definition Object
+ : @return the augmented Link Definition Object
+ :)
+declare function f:parseLinkDef_augmentMediatype(
+                        $ldo as map(xs:string, item()*),
+                        $linkDef as element())
+        as map(xs:string, item()*) {
+    if (map:contains($ldo, 'mediatype')) then $ldo else
+    
+    let $mediatype :=
+        if (map:contains($ldo, 'targetXP')) then 'xml'
+        else if (map:contains($ldo, 'recursive') and $ldo?requiresContextNode) then 'xml'
+        else if ($ldo?constraints[. instance of element(gx:targetSize)]/(
+            @countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
+            @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes)) then 'xml'
+            
+        else if ($linkDef/(
+            @countTargetDocs, @minCountTargetDocs, @maxCountTargetDocs,
+            @countTargetNodes, @minCountTargetNodes, @maxCountTargetNodes)) then 'xml'
+        
+        else ()
+    return
+        if ($mediatype) then map:put($ldo, 'mediatype', $mediatype)
+        else $ldo        
+};
 
 (:~
  : Returns the names of all Link Definitions referenced within a set of components.

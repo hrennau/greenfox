@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : validationReportEditor.xqm - Document me!
+ : validationResult.xqm - functions writing validation results
  :
  : -------------------------------------------------------------------------
  :)
@@ -9,92 +9,19 @@
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions/validation-result";
 import module namespace tt="http://www.ttools.org/xquery-functions" 
-at
-    "tt/_request.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+at "tt/_request.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
-at
-    "greenfoxUtil.xqm",
-    "greenfoxEditUtil.xqm";
+at "greenfoxUtil.xqm",
+   "greenfoxEditUtil.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
-
-(:~
- : Maps a value causing a constraint violation to a sequence of
- : 'value' or 'valueNodePath' elements.
- :
- : @param value the offending value
- : @param valueShape a shape or constraint element which may control the value representation
- : @return elements representing the offending value
- :) 
-declare function f:validationResultValues($value as item()*, 
-                                          $controller as element())
-        as element()* {
-    let $reporterXPath := $controller/@reporterXPath   
-    return
-        if ($reporterXPath) then
-            for $item in $value
-            let $rep := i:evaluateSimpleXPath($reporterXPath, $item)    
-            return
-                <gx:value>{$rep}</gx:value>
-        else
-            for $item in $value
-            return
-                typeswitch($item)
-                case xs:anyAtomicType | attribute() return string($item) ! <gx:value>{.}</gx:value>
-                case element() return
-                    (: if ($item/not((@*, *))) then string ($item) ! <gx:value>{.}</gx:value> :)
-                    if ($item/not(*)) then string ($item) ! <gx:value>{.}</gx:value>
-                    else <gx:valueNodePath>{i:datapath($item)}</gx:valueNodePath>
-                default return ()                
-};     
-
-declare function f:validationResultValues($value as item()*,
-                                          $constraintElem as element(),
-                                          $contextDoc as node()?)
-        as element()* {
-    let $nodePath := 
-        function($item) {
-            let $dpath := i:datapath($item)
-            let $prefix := 
-                if ($item/ancestor::node() intersect $contextDoc) then () 
-                    else ($item/base-uri(.) || '#')
-            return $prefix || $dpath
-        }        
-    let $mapNodePath := 
-        function($map) {
-            let $node := $map?item[. instance of node()] return
-            if (not($node)) then () else
-            let $dpath := $node/i:datapath(.)
-            let $prefix := 
-                if ($node/ancestor::node() intersect $contextDoc) then () 
-                else ($node/base-uri(.) || '#')
-             return $prefix || $dpath
-        }        
-    for $item in $value
-    return
-        typeswitch($item)
-        case xs:anyAtomicType return string($item) ! <gx:value>{.}</gx:value>
-        case element() return
-            if ($item/not(*)) then            
-                string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, string($item)}</gx:value>
-            else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
-        case attribute() return
-            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
-        case comment() return
-            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
-        case map(xs:string, item()*) return
-            let $dpath := $mapNodePath($item)
-            return
-                <gx:value>{$dpath ! attribute nodePath {.}, attribute cannotConvertTo {$item?type}, string($item?item)}</gx:value>
-        default return ()                
-};     
 
 (:~
  : ===============================================================================
@@ -106,15 +33,15 @@ declare function f:validationResultValues($value as item()*,
  :)
 
 (:~
- : Writes a validation result, for constraint components FileName*, FileSize*,
+ : Writes a validation result for constraint components FileName*, FileSize*,
  : FileDate*.
  :
  : @param colour the colour of the result
- : @param constraintElem the element containing the attributes declaring the constraint
- : @param constraint the main attribute declaring the constraint 
+ : @param constraintElem the element declaring the constraint
+ : @param constraintNode the main attribute of the constraint declaration 
  : @param actualValue the actual value of the file property
  : @param additionalAtts additional attributes to be included in the result
- : @return an element representing a 'red' or 'green' validation result
+ : @return an element representing the validation result
  :)
 declare function f:validationResult_fileProperties($colour as xs:string,
                                                    $constraintElem as element(),
@@ -778,11 +705,11 @@ declare function f:validationResult_linkCount($colour as xs:string,
         default return error()
     
     let $standardAttNames := $constraintConfig?atts
-    let $standardAtts := 
+    let $standardAtts :=
         let $explicit := $constraintElem/@*[local-name(.) = $standardAttNames]
         return
             (: make sure the constraint attribute is included, even if it is a default constraint :)
-            ($explicit, $constraintNode[not(. intersect $explicit)])
+            ($explicit, $constraintNode[not(node-name(.) = $explicit/node-name(.))])
     let $valueCountAtt := attribute valueCount {$valueCount} 
     let $contextNodeDataPath := $contextNode/i:datapath(.)
     
@@ -2042,4 +1969,76 @@ declare function f:validateResult_exprAtts($exprSpec as item(), $exprLang as xs:
     default return attribute {$exprAttName} {'?'}
     )
 };
-                                                   
+
+(:~
+ : Maps a value causing a constraint violation to a sequence of
+ : 'value' or 'valueNodePath' elements.
+ :
+ : @param value the offending value
+ : @param valueShape a shape or constraint element which may control the value representation
+ : @return elements representing the offending value
+ :) 
+declare function f:validationResultValues($value as item()*, 
+                                          $controller as element())
+        as element()* {
+    let $reporterXPath := $controller/@reporterXPath   
+    return
+        if ($reporterXPath) then
+            for $item in $value
+            let $rep := i:evaluateSimpleXPath($reporterXPath, $item)    
+            return
+                <gx:value>{$rep}</gx:value>
+        else
+            for $item in $value
+            return
+                typeswitch($item)
+                case xs:anyAtomicType | attribute() return string($item) ! <gx:value>{.}</gx:value>
+                case element() return
+                    (: if ($item/not((@*, *))) then string ($item) ! <gx:value>{.}</gx:value> :)
+                    if ($item/not(*)) then string ($item) ! <gx:value>{.}</gx:value>
+                    else <gx:valueNodePath>{i:datapath($item)}</gx:valueNodePath>
+                default return ()                
+};     
+
+declare function f:validationResultValues($value as item()*,
+                                          $constraintElem as element(),
+                                          $contextDoc as node()?)
+        as element()* {
+    let $nodePath := 
+        function($item) {
+            let $dpath := i:datapath($item)
+            let $prefix := 
+                if ($item/ancestor::node() intersect $contextDoc) then () 
+                    else ($item/base-uri(.) || '#')
+            return $prefix || $dpath
+        }        
+    let $mapNodePath := 
+        function($map) {
+            let $node := $map?item[. instance of node()] return
+            if (not($node)) then () else
+            let $dpath := $node/i:datapath(.)
+            let $prefix := 
+                if ($node/ancestor::node() intersect $contextDoc) then () 
+                else ($node/base-uri(.) || '#')
+             return $prefix || $dpath
+        }        
+    for $item in $value
+    return
+        typeswitch($item)
+        case xs:anyAtomicType return string($item) ! <gx:value>{.}</gx:value>
+        case element() return
+            if ($item/not(*)) then            
+                string ($item) ! <gx:value>{$nodePath($item) ! attribute nodePath {.}, string($item)}</gx:value>
+            else $nodePath($item) ! <gx:valueNodePath>{.}</gx:valueNodePath>
+        case attribute() return
+            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
+        case comment() return
+            <gx:value>{attribute nodePath {$nodePath($item)}, string($item)}</gx:value>
+        case map(xs:string, item()*) return
+            let $dpath := $mapNodePath($item)
+            return
+                <gx:value>{$dpath ! attribute nodePath {.}, attribute cannotConvertTo {$item?type}, string($item?item)}</gx:value>
+        default return ()                
+};     
+
+

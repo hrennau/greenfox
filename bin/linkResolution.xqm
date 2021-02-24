@@ -68,8 +68,8 @@ declare function f:resolveLinkDef($linkDef as item(),
         else
             let $mediatype := 
                 if ($options?mediatype) then $options?mediatype
-                else if ($ldo?targetXP) then 'xml'
-                else if ($resultFormat eq 'doc') then 'xml'
+                else if ($resultFormat eq 'doc') then 'xml'                
+                (: else if ($ldo?targetXP) then 'xml' :) (: obsolete - see f:parseLinkDefinition() :)
                 else ()
             return
                 if (not($mediatype)) then $ldo
@@ -345,7 +345,6 @@ declare function f:resolveLinkDefRC(
                         'href': string($href),
                         'targetURI': $targetURI,
                         'targetExists': true()}
-    
     
     (: Link Resolution Objects for connector output: node items, grouped by containing doc 
        =================================================================================== :)

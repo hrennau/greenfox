@@ -1,25 +1,25 @@
 (:
  : -------------------------------------------------------------------------
  :
- : validate.xqm - Document me!
+ : log.xqm - functions for debuging
  :
  : -------------------------------------------------------------------------
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
-    "tt/_request.xqm",
-    "tt/_reportAssistent.xqm",
-    "tt/_errorAssistent.xqm",
-    "tt/_log.xqm",
-    "tt/_nameFilter.xqm",
-    "tt/_pcollection.xqm";    
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_request.xqm",
+   "tt/_reportAssistent.xqm",
+   "tt/_errorAssistent.xqm",
+   "tt/_log.xqm",
+   "tt/_nameFilter.xqm",
+   "tt/_pcollection.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
-    "compile.xqm",
-    "constants.xqm",
-    "greenfoxSchemaValidator.xqm",
-    "systemValidator.xqm";
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at "compile.xqm",
+   "constants.xqm",
+   "greenfoxSchemaValidator.xqm",
+   "systemValidator.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
@@ -78,6 +78,52 @@ declare function f:DEBUG_CONTEXT_RC($item as item()) as item()* {
 };
 
 (:~
+ : Return an XML representation of a Link Definition Object. Intended for use
+ : when writing an LDO into a file.
+ :
+ : @param ldo a Link Definition Object
+ : @return an <ldo> element representing the LDO
+ :)
+declare function f:DEBUG_LDO($ldo as map(*)) 
+        as element()? {
+    let $keys := map:keys($ldo)[not(. eq 'constraints')] => sort()
+    return
+       <ldo>{
+        for $key in $keys
+        let $value := $ldo($key)
+        return 
+            typeswitch($value)
+            case(map(*)) return f:DEBUG_map2elem($value, $key)
+            case attribute() return element {$key} {string($value)}
+            default return element {$key} {$value},
+        $ldo?constraints ! . 
+       }</ldo>
+};
+
+(:~
+ : Transforms a map into an element.
+ :
+ : @param map a map
+ : @param name the element name to be used
+ : @return an element representing the map
+ :)
+declare function f:DEBUG_map2elem($map as map(*), $name as xs:string)
+        as element() {
+    let $content :=        
+        let $keys := map:keys($map)
+        for $key in $keys 
+        let $value := $map($key)
+        order by lower-case($key)
+        return
+            typeswitch($value)
+            case map(*) return f:DEBUG_map2elem($value, $key)
+            case attribute() return element {$key} {string($value)}
+            default return element {$key} {$value}
+    return
+        element {$name} {$content}
+};        
+
+(:~
  : Return a concise description of LROs.
  :
  : Returns an <lros> element with <lro> children,
@@ -120,5 +166,44 @@ declare function f:DEBUG_LROS($lros as map(*)*)
             }</lro>
     return
         <lros count="{count($entries)}">{$entries}</lros>
-};        
+};      
+
+(:~
+ : Returns the input value and optionally also writes it to a file. Writing is suppressed
+ : if the $debugLevel is 0, or if a $debugLabel is supplied which does not match any of
+ : the $debugFilters. A debug label can be used in order to accomplish selective debugging,
+ : for example restricted to processing elements with a particular name.
+ :
+ : @param value the value to be written
+ : @param msg a message to be written 
+ : @param debugLevel the current debug level; if 0, nothing is written
+ : @param debugLabel if set, nothing is written unless the label matches at least one filter
+ : @param debugFilters output is suppressed unless debugLabel matches one of the filters
+ : @param fileName the output file
+ : @return the value
+ :)
+declare function f:FDEBUG($value as item()*, 
+                          $msg as xs:string,
+                          $debugLevel as xs:integer,
+                          $debugLabel as xs:string,
+                          $debugFilters as xs:string*,                          
+                          $fileName as xs:string)
+        as item()* {
+    $value,
+    
+    if (not($debugLevel)) then $value        
+    else if ($debugLabel and 
+             not(some $debugFilter in $debugFilters satisfies 
+                matches($debugLabel, $debugFilter, 'i'))) then $value
+    else (
+        (: Return the input value :)
+        $value,
+        
+        (: Append to file :)
+        file:append($fileName, '### ' || $msg || '&#xA;'),
+        file:append($fileName, $value),
+        file:append($fileName, '&#xA;&#xA;')
+    )
+};
+
 
