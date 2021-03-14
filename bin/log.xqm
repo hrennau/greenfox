@@ -84,8 +84,10 @@ declare function f:DEBUG_CONTEXT_RC($item as item()) as item()* {
  : @param ldo a Link Definition Object
  : @return an <ldo> element representing the LDO
  :)
-declare function f:DEBUG_LDO($ldo as map(*)) 
+declare function f:DEBUG_LDO($ldo as map(*)?) 
         as element()? {
+    if (empty($ldo)) then () else
+    
     let $keys := map:keys($ldo)[not(. eq 'constraints')] => sort()
     return
        <ldo>{

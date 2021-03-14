@@ -21,7 +21,6 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at
     "expressionEvaluator.xqm",
     "expressionValueConstraint.xqm",
-    "fileValidator.xqm",
     "greenfoxUtil.xqm";
 
 import module namespace result="http://www.greenfox.org/ns/xquery-functions/validation-result" 

@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : greenfoxValidator.xqm - validates a greenfox schema
+ : greenfoxSchemaValidator.xqm - validates a greenfox schema
  :
  : -------------------------------------------------------------------------
  :)
@@ -17,7 +17,7 @@ at "tt/_request.xqm",
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions"  
 at "constants.xqm",
-   "fileValidator.xqm",
+   "fileShape.xqm",
    "greenfoxUtil.xqm",
    "uriUtil.xqm";
     

@@ -75,7 +75,7 @@ declare function f:validateLinkResolvable($lros as map(*)*,
     
     let $linkConstraints := $ldo?constraints
     let $constraintNode := ($constraintElem, $linkConstraints)/@resolvable[1][. eq 'true']
-    return if (not($constraintNode) and empty($lros?errorCode)) then () else   
+    return if (not($constraintNode) and empty($lros?errorCode[. ne 'no_resource'])) then () else   
     
     (: Link Resolution Objects are grouped by link context item;
        it may be a resource URI or a link context node :)

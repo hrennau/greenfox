@@ -1,10 +1,9 @@
-(:
- : -------------------------------------------------------------------------
- :
- : validationReportWriter.xqm - functions producing validation reports
- :
- : -------------------------------------------------------------------------
- :)
+ (: -------------------------------------------------------------------------
+  :
+  : validationReportWriter.xqm - functions producing validation reports
+  :
+  : -------------------------------------------------------------------------
+  :)
  
 
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
@@ -17,6 +16,9 @@ at "compile.xqm",
    "greenfoxEditUtil.xqm",
    "greenfoxUtil.xqm",
    "systemValidator.xqm";
+
+import module namespace vutil="http://www.greenfox.org/ns/xquery-functions/validation-report/util" 
+at "validationReportUtil.xqm";
 
 import module namespace msg="http://www.greenfox.org/ns/xquery-functions/msg" 
 at "msgUtil.xqm";
@@ -47,7 +49,7 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
     switch($reportType)
     case "wresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
     case "rresults" return f:writeValidationReport_wresults($reportType, $gfox, $domain, $context, $results, $format, $options)
-    case "white" return f:writeValidationReport_white($gfox, $domain, $context, $results, $reportType, $format, $options)
+    case "white" return vutil:writeValidationReport_white($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "red" return f:writeValidationReport_red($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum1" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
     case "sum2" return f:writeValidationReport_sum($gfox, $domain, $context, $results, $reportType, $format, $options)
@@ -58,6 +60,10 @@ declare function f:writeValidationReport($gfox as element(gx:greenfox)+,
         '; value must be one of: sum1, sum2, sum3, red, white, rresults, wresults.'))
 };
 
+(:~
+ : Write a validation report, type 'wresults'. It contains all validation
+ : result, without grouping by resource.
+ :)
 declare function f:writeValidationReport_wresults(
                                         $reportType as xs:string,
                                         $gfox as element(gx:greenfox)+,
@@ -76,7 +82,7 @@ declare function f:writeValidationReport_wresults(
         else if ($reportType eq 'rresults') then $results[self::gx:red, self::gx:yellow]
         else error()
     let $report :=    
-        <gx:validationReport domain="{f:getDomainDescriptor($domain)}"
+        <gx:validationReport domain="{vutil:getDomainDescriptor($domain)}"
                              countErrors="{count($results/(self::gx:red, self::gx:red))}" 
                              validationTime="{current-dateTime()}"
                              greenfoxDocumentURI="{$gfoxSourceURI}" 
@@ -97,126 +103,11 @@ declare function f:writeValidationReport_wresults(
             return $result
         }</gx:validationReport>
     return
-        $report/f:finalizeReport(.)
-};
-
-declare function f:writeValidationReport_white(
-                                        $gfox as element(gx:greenfox)+,
-                                        $domain as element(gx:domain),                                        
-                                        $context as map(xs:string, item()*),                                        
-                                        $results as element()*, 
-                                        $reportType as xs:string, 
-                                        $format as xs:string,
-                                        $options as map(*))
-        as element() {
-    let $ccfilter := $options?ccfilter 
-    let $fnfilter := $options?fnfilter
-    let $gfoxSourceURI := $gfox[1]/@xml:base
-    let $greenfoxURI := $gfox[1]/@greenfoxURI
-    let $resourceDescriptors :=        
-        for $result in $results  
-        let $resourceIdentifier := $result/(@filePath, @folderPath)[1]
-        let $resourceIdentifierType := $resourceIdentifier/local-name(.)        
-        group by $resourceIdentifier
-        let $resourceIdentifierAtt :=
-            if (not($resourceIdentifier)) then () else
-                let $attName := if (i:fox-resource-is-file($resourceIdentifier)) then 'file' else 'folder'
-                return
-                    attribute {$attName} {$resourceIdentifier}
-        let $red := $result/self::gx:red
-        let $yellow := $result/self::gx:yellow
-        let $green := $result/self::gx:green
-        let $whiteRed := $result/self::gx:whiteRed
-        let $whiteYellow := $result/self::gx:whiteYellow
-        let $whiteGreen := $result/self::gx:whiteGreen
-        let $other := ($result except ($red, $yellow, $green, $whiteRed, $whiteYellow, $whiteGreen))/.
-        let $removeAtts :=('filePath', 'folderPath')
-        return
-            if ($red) then 
-                <gx:redResource>{
-                    $resourceIdentifierAtt, 
-                    $result/self::gx:red/f:removeAtts(., $removeAtts),
-                    $result/self::gx:yellow/f:removeAtts(., $removeAtts),
-                    $result/self::gx:green/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)
-                }</gx:redResource>
-            else if ($yellow) then 
-                <gx:yellowResource>{
-                    $resourceIdentifierAtt,
-                    $result/self::gx:yellow/f:removeAtts(., $removeAtts), 
-                    $result/self::gx:green/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
-                }</gx:yellowResource> 
-            else if ($green) then 
-                <gx:greenResource>{
-                    $resourceIdentifierAtt, 
-                    $result/self::gx:green/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
-                }</gx:greenResource>
-            else if ($whiteRed) then 
-                <gx:whiteRedResource>{
-                    $resourceIdentifierAtt, 
-                    $result/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteRed/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
-                }</gx:whiteRedResource>
-            else if ($whiteYellow) then 
-                <gx:whiteYellowResource>{
-                    $resourceIdentifierAtt, 
-                    $result/f:removeAtts(., $removeAtts),
-                    $result/self::gx:whiteYellow/f:removeAtts(., $removeAtts),                    
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
-                }</gx:whiteYellowResource>
-            else if ($whiteGreen) then 
-                <gx:whiteGreenResource>{
-                    $resourceIdentifierAtt, 
-                    $result/self::gx:whiteGreen/f:removeAtts(., $removeAtts)                    
-                }</gx:whiteGreenResource>
-            else error(QName((), 'SYSTEM_ERROR'), concat('Unexpected result colour: ', $result/name()))
-    let $redResources := $resourceDescriptors/self::gx:redResource
-    let $yellowResources := $resourceDescriptors/self::gx:yellowResource    
-    let $greenResources := $resourceDescriptors/self::gx:greenResource
-    let $report :=
-        <gx:validationReport domain="{f:getDomainDescriptor($domain) ! i:uriOrPathToNormPath(.)}"
-                             countRed="{count($results/self::gx:red)}"
-                             countYellow="{count($results/self::gx:yellow)}"
-                             countGreen="{count($results/self::gx:green)}"
-                             countRedResources="{count($redResources)}"
-                             countYellowResources="{count($yellowResources)}"                             
-                             countGreenResources="{count($greenResources)}"
-                             validationTime="{current-dateTime()}"
-                             greenfoxDocumentURI="{$gfoxSourceURI ! i:uriOrPathToNormPath(.)}" 
-                             greenfoxURI="{$greenfoxURI}"
-                             reportType="{$reportType}"
-                             reportMediatype="application/xml">{
-            $ccfilter/@text/attribute constraintCompFilter {.},    
-            $fnfilter/@text/attribute fileNameFilter {.},
-            <gx:redResources>{
-                attribute count {count($redResources)},
-                f:displayResultResults($redResources)
-            }</gx:redResources>,
-            <gx:yellowResources>{
-                attribute count {count($yellowResources)},
-                f:displayResultResults($yellowResources)
-            }</gx:yellowResources>,
-            <gx:greenResources>{
-                attribute count {count($greenResources)},
-                f:displayResultResults($greenResources)
-            }</gx:greenResources>
-        }</gx:validationReport>
-    return
-        $report/f:finalizeReport(.)
+        $report/vutil:finalizeReport(.)
 };
 
 (:~
- : Writes a 'red' report.
+ : Writes a validation rerpot, type 'red'.
  :
  :)
 declare function f:writeValidationReport_red(
@@ -228,73 +119,15 @@ declare function f:writeValidationReport_red(
                                         $format as xs:string,
                                         $options as map(*))
         as element() {
-    let $white := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)        
+    let $white := 
+        vutil:writeValidationReport_white(
+            $gfox, $domain, $context, $results, 'red', 'xml', $options)        
     let $red := f:whiteToRed($white, $options)
     return $red
 };
 
 (:~
- : Writes a 'constraintCompStat' report.
- :
- :)
-declare function f:writeValidationReport_constraintCompStat(
-                                        $gfox as element(gx:greenfox)+,
-                                        $domain as element(gx:domain),                                        
-                                        $context as map(xs:string, item()*),                                        
-                                        $results as element()*, 
-                                        $reportType as xs:string, 
-                                        $format as xs:string,
-                                        $options as map(*))
-        as element() {
-    let $options := map{}
-    let $whiteTree := f:writeValidationReport_white($gfox, $domain, $context, $results, 'red', 'xml', $options)
-
-    let $fn_listResources := function($results, $withMsgs) {
-        for $r in $results
-        let $uriAtt := $r/../(@file, @folder)[1]
-        group by $uri := string($uriAtt)
-        let $elemName := ($uriAtt[1]/local-name(.), 'resource')[1]
-        let $msgs := if (not($withMsgs)) then () else (
-            for $result in $r
-            return $r/(@msg/string(), msg:defaultMsg(.))[1]        
-            ) => distinct-values() => sort()
-        order by if ($elemName eq 'folder') then 2 else 1, $uri 
-        return 
-            element {$elemName}{
-                attribute uri {$uri},
-                $msgs ! <msg>{.}</msg>
-            }         
-    }    
-    let $constraintComps :=
-        for $ccomp in $whiteTree//@constraintComp
-        group by $ccname := $ccomp/string()
-        let $results := $ccomp/..
-        let $green := $results/self::gx:green
-        let $red := $results/self::gx:red
-        order by $ccname
-        return
-            <constraintComp name="{$ccname}" countRed="{count($red)}" countGreen="{count($green)}">{
-                if (not($red)) then () else
-                    <redResources>{$fn_listResources($red, true())}</redResources>,
-                if (not($green)) then () else                    
-                    <greenResources>{$fn_listResources($green, false())}</greenResources>
-            }</constraintComp>
-    let $report :=
-        <constraintComps count="{$constraintComps}">{
-            $whiteTree/@domain,
-            $whiteTree/@greenfoxDocumentURI,
-            $whiteTree/@greenfoxURI,
-            $whiteTree/@countRed,
-            $whiteTree/@countGreen,
-            $whiteTree/@countRedResources,
-            $whiteTree/@countGreenResources,
-            $constraintComps
-        }</constraintComps>
-    return $report
-};
-
-(:~
- : Writes a 'sum*' report.
+ : Writes a validation report, type 'sum*'.
  :
  :)
 declare function f:writeValidationReport_sum(
@@ -309,8 +142,9 @@ declare function f:writeValidationReport_sum(
     let $ccfilter := $options?ccfilter
     let $fnfilter := $options?fnfilter
     let $ccstat := 
-        f:writeValidationReport_constraintCompStat(
+        vutil:writeValidationReport_constraintCompStat(
             $gfox, $domain, $context, $results, 'red', 'xml', $options)
+    let $_DEBUG := trace($ccstat, '__CCSTAT: ')            
     let $ccomps := $ccstat/*
     
     let $countRed := $ccstat/@countRed/xs:integer(.)
@@ -339,7 +173,8 @@ declare function f:writeValidationReport_sum(
         return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}">{
             $msgs
         }</resource>
-            
+    let $_DEBUG := trace($greenResources, '_GREENRESOURCES: ')  
+    let $_DEBUG := trace($reportType, '_REPORT_TYPE: ')
     let $ccompNameWidth := (('constraint comp', $ccomps/@name) !string-length(.)) => max()
     let $countRedWidth := (('#red', $ccomps/@countRed/string()) ! string-length(.)) => max()
     let $countGreenWidth := (('#green', $ccomps/@countGreen/string()) ! string-length(.)) => max()
@@ -383,7 +218,8 @@ declare function f:writeValidationReport_sum(
                    tt:lpad($countGreenRep, $countGreenWidth, ' '),
                    ' |'),
         $hsep1,
-        if ($reportType eq 'sum1') then () else (        
+        if ($reportType eq 'sum1') then () 
+        else (        
             ' ',
             if (empty($redResources)) then () else (
                 'Red resources: ',
@@ -391,15 +227,15 @@ declare function f:writeValidationReport_sum(
                 return (
                     $resource/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'), 
                     if ($reportType eq 'sum2') then () else
-                    $resource/msg/string() ! concat('    ', .),
-                    ' ')                    
-            ,        
-            if ($reportType = ('sum2', 'sum3')) then () else (
-                    if (empty($greenResources)) then () else (
+                    $resource/msg/string() ! concat('    msg: ', .),
+                    ' ')
+            ),    
+            if ($reportType = ('sum2', 'sum3')) then () 
+            else if (empty($greenResources)) then () 
+            else (
                     'Green resources: ',
                     $greenResources/concat('  ', @kind, ' ', @name, '   (', @ccomps, ')'),
-                    ' ')
-                )
+                    ' '
             )
         ),
         '',
@@ -460,56 +296,6 @@ declare function f:whiteToRedRC($n as node(), $options as map(*))
     case attribute(reportType) return attribute reportType {'red'}        
     default return $n        
 };
-
-
-declare function f:removeAtts($elem as element(),
-                             $attName as xs:string+) 
-        as element() {
-    element {node-name($elem)} {
-        $elem/@*[not(local-name(.) = $attName)],
-        $elem/node()
-    }
-};
-declare function f:finalizeReport($report as node()) as node() {
-    f:finalizeReportRC($report)
-};
-
-declare function f:finalizeReportRC($n as node()) as node()? {
-    typeswitch($n)
-    case document-node() return document {$n/node() ! f:finalizeReportRC(.)}
-    case element() return
-        let $normName := if (not($n/namespace-uri($n) eq $i:URI_GX)) then node-name($n)
-                         else QName($i:URI_GX, string-join(($i:PREFIX_GX, $n/local-name(.)), ':'))
-        return
-            element {$normName} {
-                $n/@* ! f:finalizeReportRC(.),
-                in-scope-prefixes($n)[string()] ! namespace {.} {namespace-uri-for-prefix(., $n)},
-                $n/node() ! f:finalizeReportRC(.)
-            }
-    case text() return
-        if ($n/../* and not($n/matches(., '\S'))) then () else $n
-    default return $n
-};
-
-(:~
- : Returns a string describing the domain.
- :)
-declare function f:getDomainDescriptor($domain as element(gx:domain))
-        as xs:string {
-    $domain/(@uri, @path)[1]/replace(., '\\', '/')        
-};
-
-declare function f:displayResultResults($resources as element()*)
-        as node()* {
-    for $r in $resources
-    let $file := $r/(@file, @folder)[1]
-    let $file := $file ! replace(., '--', '`-`-`')
-    return (
-        comment {concat('&#xA;&#xA;*** ', $file, '&#xA;&#xA;    ')},
-        $r
-    )
-        
-};      
 
 declare function f:displayMsg($gfox as element(gx:greenfox))
         as xs:string? {

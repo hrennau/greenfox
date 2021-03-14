@@ -96,7 +96,7 @@ if        "%RTYPE%"=="white"    (rem
 
 if "%schema%"=="?" (
     echo.
-    echo Usage: gfox schema [domain] [-1 -2 -3 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]
+    echo Usage: gfox schema [domain] [-1 -2 -3 -4 -r -w] [-t type] [-p paramBinding] [-C constraintTypes] [-R resourceNames]
     echo.
     echo Options and arguments may be mixed.
     echo.
@@ -106,6 +106,7 @@ if "%schema%"=="?" (
     echo -1      : report type = sum1
     echo -2      : report type = sum2
     echo -3      : report type = sum3
+    echo -4      : report type = sum4    
     echo -r      : report type = red
     echo -w      : report type = white
     echo -t reportType       : the report type; one of: sum1 sum2 sum3 red white wresults rresults
@@ -124,7 +125,7 @@ if "%schema%"=="?" (
     echo   MEANS: All constraints *closed* or *count*, but excluding value* and excluding target*
     echo.
     echo Example:
-    echo   -R "~.dtd"
+    echo   -R "~.*dtd"
     echo   MEANS: All resources except *.dtd
     echo.
     echo Example:

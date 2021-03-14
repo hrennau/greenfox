@@ -1,13 +1,16 @@
 (:
  : -------------------------------------------------------------------------
  :
- : greenfoxTarget.xqm - functions for determining the target of a resource shape
+ : shapeTarget.xqm - functions for determining the target of a resource shape
  :
  : -------------------------------------------------------------------------
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-    
+
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at "tt/_foxpath.xqm";    
+
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "constants.xqm",
    "greenfoxUtil.xqm",
@@ -24,6 +27,10 @@ at "linkResolution.xqm",
    "linkValidation.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
+
+declare variable $f:DBG_SHAPE_TARGET_LEVEL as xs:integer := 1;
+declare variable $f:DBG_SHAPE_TARGET_FOO_NAMES := 'NEVER' ! tokenize(.) ! tt:pattern2Regex(.);
+declare variable $f:DBG_SHAPE_TARGET_FILE := 'DEBUG_link_definition.txt';
 
 (:~ 
  : Returns the target paths of a resource shape, as well as validation results related to
@@ -42,6 +49,7 @@ declare function f:getTargetPaths($resourceShape as element(),
     let $targetPathsEtc := f:resolveTargetDeclaration($resourceShape, $context)
     let $targetPaths := $targetPathsEtc?targetPaths
     let $ldo := $targetPathsEtc?ldo
+    (: let $_DEBUG := trace(i:DEBUG_LDO($ldo), '_LDO: ') :)
     
     (: No link definition -> return target paths :)
     return if (not(($constraintElem, $ldo?constraints))) then $targetPaths else

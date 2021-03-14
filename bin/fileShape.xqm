@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : fileValidator.xqm - validates file resources against a file shape
+ : fileShape.xqm - validates file resources against a file shape
  :
  : -------------------------------------------------------------------------
  :)
@@ -14,11 +14,11 @@ at "conditionalConstraint.xqm",
    "evaluationContextManager.xqm",
    "expressionValueConstraint.xqm",
    "extensionValidator.xqm",
-   "focusNodeValidator.xqm",
-   "greenfoxTarget.xqm",
+   "focusNode.xqm",
    "linkConstraint.xqm",    
    "mediatypeConstraint.xqm",
-   "resourcePropertiesConstraint.xqm",    
+   "resourcePropertiesConstraint.xqm",
+   "shapeTarget.xqm",   
    "xsdValidator.xqm";
 
 import module namespace dtree="http://www.greenfox.org/ns/xquery-functions/doc-tree" 

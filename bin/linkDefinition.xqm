@@ -102,7 +102,8 @@ declare function f:parseLinkDefs($linkDefs as element()*,
  : - @uriXP
  : - @uri
  : - @uriTemplate
- : - @uriReflectionBase
+ : - @reflector1URI
+ : - @reflector1FOX
  :
  : When parsing fails, the element does not represent a Link Definition and
  : the empty sequence is returned.

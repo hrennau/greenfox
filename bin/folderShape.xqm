@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : folderValidator.xqm - Document me!
+ : folderShape.xqm - validates folder resources against a folder shape
  :
  : -------------------------------------------------------------------------
  :)
@@ -19,10 +19,10 @@ at  "tt/_request.xqm",
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at  "expressionEvaluator.xqm",
     "expressionValueConstraint.xqm",
-    "fileValidator.xqm",
-    "folderContentValidator.xqm",
+    "fileShape.xqm",
+    "folderContentConstraint.xqm",
     "folderSimilarConstraint.xqm",
-    "greenfoxTarget.xqm",
+    "shapeTarget.xqm",
     "greenfoxUtil.xqm",
     "linkConstraint.xqm";
     

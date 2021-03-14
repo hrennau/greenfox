@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : focusNodeValidator.xqm - validates the focus nodes selected by gx:focusNode
+ : focusNode.xqm - validates the focus nodes selected by gx:focusNode
  :
  : -------------------------------------------------------------------------
  :)
@@ -14,7 +14,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at "constants.xqm",
    "expressionEvaluator.xqm",
    "extensionValidator.xqm",
-   "fileValidator.xqm",
+   "fileShape.xqm",
    "greenfoxUtil.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
