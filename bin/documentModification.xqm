@@ -253,7 +253,7 @@ declare function f:applyDocModifiers_roundItem($node as node(),
     let $scale := $mod/@scale/number(.)  
     let $value := $node/number(.)
     let $newValue := round($value div $scale, 0) * $scale
-    return $newValue        
+    return string($newValue)        
 };        
 
 declare function f:applyDocModifiers_ignoreValue($node as node(),
