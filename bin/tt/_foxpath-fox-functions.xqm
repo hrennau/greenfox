@@ -92,6 +92,30 @@ declare function f:attNames($nodes as node()*,
         else $names
 };        
 
+(:~
+ : Writes a set of standard attributes. Can be useful when working
+ : with `xelement`.
+ :
+ : @param context the current context
+ : @param flags flags signaling which attributes are required
+ : @return the attributes
+ :)
+declare function f:atts($context as item(), $flags as xs:string)
+        as attribute()* {
+    if (contains($flags, 'b')) then
+        let $uri :=
+            if ($context instance of xs:anyAtomicType) then $context
+            else $context ! base-uri(.)
+        return
+            attribute xml:base {$uri},
+    if (contains($flags, 'j')) then
+        if (not($context instance of node())) then ()
+        else
+            let $jpath := f:namePath($context, 'jname', ())
+            return attribute jpath {$jpath}
+};
+
+
 declare function f:baseUriDirectory($item as item())
         as xs:string {
     (if ($item instance of node()) then $item else i:fox-doc($item, ()))
@@ -568,9 +592,9 @@ declare function f:frequencies($values as item()*,
 };      
 
 (:~
- : Returns selected child elements of a given sequence of nodes. Selected child elementsnodes
- : have a name matching a given name filter and not matching an optional name filter defining 
- : exclusions. 
+ : Returns selected child elements of a given sequence of nodes. Selected elements 
+ : have a name matching a given name filter and not matching an optional name filter 
+ : defining exclusions. 
  :
  : Depending on $nameKind, the local name ('lname'), the JSON name ('jname') or
  : the lexical name 'name') is considered when matching.
@@ -585,12 +609,12 @@ declare function f:frequencies($values as item()*,
  : @param namesExcluded a name filter defining exclusions
  : @return child nodes matching the name filter and not matching the name filter defining exclusions
  :)
-declare function f:node-child($contextNodes as node()*,
-                              $nameKind as xs:string?,   (: name | lname | jname :)
-                              $names as xs:string?,
-                              $namesExcluded as xs:string?,
-                              $ignoreCase as xs:boolean?
-)
+declare function f:nodeChild(
+                       $contextNodes as node()*,
+                       $nameKind as xs:string?,   (: name | lname | jname :)
+                       $names as xs:string?,
+                       $namesExcluded as xs:string?,
+                       $ignoreCase as xs:boolean?)
         as node()* {
     let $cnameFilter := $names ! util:compileNameFilter(., $ignoreCase)        
     let $cnameFilterExclude := $namesExcluded ! util:compileNameFilter(., $ignoreCase)
@@ -602,6 +626,46 @@ declare function f:node-child($contextNodes as node()*,
         default return error()
     return
         $contextNodes/*[$fn_name(.) ! 
+            util:matchesNameFilter(., $cnameFilter) and (
+                not($namesExcluded) or util:matchesNameFilter(., $cnameFilterExclude))]
+};
+
+(:~
+ : Returns selected descendant elements of a given sequence of nodes. Selected elements
+ : have a name matching a given name filter and not matching an optional name filter 
+ : defining exclusions. 
+ :
+ : Depending on $nameKind, the local name ('lname'), the JSON name ('jname') or
+ : the lexical name 'name') is considered when matching.
+ :
+ : When $ignoreCase is true, matching is performed ignoring character case.
+ :
+ : A name filter is a whitespace separated list of names or name patterns. Name
+ : patterns can use wildcards * and ?. Example: "foo bar* *foobar"
+ :
+ : @param context the context node
+ : @param names a name filter
+ : @param namesExcluded a name filter defining exclusions
+ : @return child nodes matching the name filter and not matching the name filter defining exclusions
+ :)
+declare function f:nodeDescendant(
+                       $contextNodes as node()*,
+                       $nameKind as xs:string?,   (: name | lname | jname :)
+                       $names as xs:string?,
+                       $namesExcluded as xs:string?,
+                       $ignoreCase as xs:boolean?
+)
+        as node()* {
+    let $cnameFilter := $names ! util:compileNameFilter(., $ignoreCase)        
+    let $cnameFilterExclude := $namesExcluded ! util:compileNameFilter(., $ignoreCase)
+    let $fn_name := 
+        switch($nameKind)
+        case 'lname' return function($node) {$node/local-name(.)}
+        case 'jname' return function($node) {$node/local-name(.) ! convert:decode-key(.)}
+        case 'name' return function($node) {$node/name(.)}
+        default return error()
+    return
+        $contextNodes//*[$fn_name(.) ! 
             util:matchesNameFilter(., $cnameFilter) and (
                 not($namesExcluded) or util:matchesNameFilter(., $cnameFilterExclude))]
 };
@@ -629,7 +693,7 @@ declare function f:nodesLocationReport($nodes as node()*,
         if ($withFolders) then f:baseUriDirectory(.) else (),
         f:baseUriFileName(.), 
         $fn_name(.), 
-        f:name-path(., 'jname', ()),
+        f:namePath(., 'jname', ()),
         .[self::attribute(), text()]/concat('value: ', .)
         ))
         => f:hlist(('Folder'[$withFolders], 'File', 'Name', 'Path', 'Value'), ())
@@ -650,16 +714,18 @@ declare function f:jname($nodes as node()*)
  : Returns the JSON Schema keywords found at and under a set of nodes from a 
  : JSON Schema document.
  :
- : @param values JSON values
+ : @param values JSON values (element or document nodes)
  : @param namePatterns a list of names or name patterns, whitespace separated
  : @return the resolved reference, if the value contains one, or the original value
  :)
-declare function f:jschemaKeywords($values as element()*, 
-                                   $nameFilter as xs:string?)
+declare function f:jschemaKeywords($nodes as node()*, 
+                                   $names as xs:string?,
+                                   $namesExcluded as xs:string?)
         as element()* {
-    let $cnameFilter := util:compileNameFilter($nameFilter, true())
+    let $cnameFilter := util:compileNameFilter($names, true())
+    let $cnameFilterExclude := util:compileNameFilter($namesExcluded, true())
     return
-        $values/f:jschemaKeywordsRC(., $cnameFilter)
+        $nodes/f:jschemaKeywordsRC(., $cnameFilter, $cnameFilterExclude)
 };
 
 (:~
@@ -670,7 +736,8 @@ declare function f:jschemaKeywords($values as element()*,
  : @return the keyword nodes under the input node, including it
  :)
 declare function f:jschemaKeywordsRC($n as node(),
-                                     $nameFilter as map(xs:string, item()*)?)
+                                     $nameFilter as map(xs:string, item()*)?,
+                                     $nameFilterExclude as map(xs:string, item()*)?)
         as node()* {
     let $unfiltered :=        
         typeswitch($n)
@@ -679,21 +746,21 @@ declare function f:jschemaKeywordsRC($n as node(),
         case element(example) return $n
         case element(examples) return $n
         case element(enum) return $n    
-        case element(json) return ($n[parent::*], $n/*/f:jschemaKeywordsRC(., $nameFilter))
-        case element(patternProperties) return ($n, $n/*/*/f:jschemaKeywordsRC(., $nameFilter))    
-        case element(properties) return ($n, $n/*/*/f:jschemaKeywordsRC(., $nameFilter))
-        case element(_) return $n/*/f:jschemaKeywordsRC(., $nameFilter)
+        case element(json) return ($n[parent::*], $n/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude))
+        case element(patternProperties) return ($n, $n/*/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude))    
+        case element(properties) return ($n, $n/*/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude))
+        case element(_) return $n/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude)
+        case document-node() return $n/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude)
         default return 
             if (starts-with($n/name(), 'x-')) then $n
-            else ($n, $n/*/f:jschemaKeywordsRC(., $nameFilter))
+            else ($n, $n/*/f:jschemaKeywordsRC(., $nameFilter, $nameFilterExclude))
     return
         if (empty($nameFilter)) then $unfiltered else
         for $node in $unfiltered
         let $jname := $node/local-name() ! convert:decode-key(.) ! lower-case(.)
-        where util:matchesNameFilter($jname, $nameFilter)        
+        where util:matchesPlusMinusNameFilters($jname, $nameFilter, $nameFilterExclude)
         return $node
 };        
-
 
 (:~
  : Returns the items in $value which are not distinct, that is, which
@@ -750,17 +817,20 @@ declare function f:nonDistinctFileNames($uris as item()*,
  : @return the resolved reference, if the value contains one, or the original value
  :)
 declare function f:oasKeywords($values as node()*, 
-                               $namePatterns as xs:string?)
+                               $names as xs:string?,
+                               $namesExcluded as xs:string?)
         as element()* {
+    let $cnameFilter := util:compileNameFilter($names, true())
+    let $cnameFilterExclude := util:compileNameFilter($namesExcluded, true())
+        
     let $values := $values ! root()/descendant-or-self::*[1]        
-    let $cnameFilter := util:compileNameFilter($namePatterns, true())
     for $value in $values
     let $oasVersion := $value/ancestor-or-self::*[last()]/(
         openapi/substring(., 1, 1),
         swagger/substring(., 1, 1)
         )[1]
     return        
-        $value/f:oasKeywordsRC(., $oasVersion, $cnameFilter)
+        $value/f:oasKeywordsRC(., $oasVersion, $cnameFilter, $cnameFilterExclude)
 };
 
 (:~
@@ -772,13 +842,14 @@ declare function f:oasKeywords($values as node()*,
  :)
 declare function f:oasKeywordsRC($n as node(),
                                  $version as xs:string?,
-                                 $nameFilter as map(xs:string, item()*)?)
+                                 $nameFilter as map(xs:string, item()*)?,
+                                 $nameFilterExclude as map(xs:string, item()*)?)
         as node()* {
     let $unfiltered :=        
         typeswitch($n)
         
         (: Array item - continue with children :)
-        case element(_) return $n/*/f:oasKeywordsRC(., $version, $nameFilter)
+        case element(_) return $n/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude)
         
         (: Keywords with version-dependent treatment :)
         
@@ -788,7 +859,7 @@ declare function f:oasKeywordsRC($n as node(),
         case element(examples) return (
             $n,
             if ($version ! starts-with(., '2')) then ()
-            else $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
+            else $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
             
         (: Schema-related keywords - do not continue recursion :)
         case element(schema) return $n
@@ -797,20 +868,20 @@ declare function f:oasKeywordsRC($n as node(),
         
         (: Maps with object-valued entries - use the map object and continue with the children of the map entries :)
 
-        case element(callbacks) return ($n, $n/*/*/*/f:oasKeywordsRC(., $version, $nameFilter)) (: Callback has a single member = expr :)
-        case element(content) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))   
-        case element(encoding) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
-        case element(examples) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
-        case element(headers) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
-        case element(links) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
-        case element(pathItems) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
-        case element(paths) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
-        case element(requestBodies) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
-        case element(responses) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
-        case element(securityDefinitions) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))   (: V2 :)
-        case element(securitySchemes) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
-        case element(variables) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))
-        case element(webhooks) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter))        
+        case element(callbacks) return ($n, $n/*/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude)) (: Callback has a single member = expr :)
+        case element(content) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))   
+        case element(encoding) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
+        case element(examples) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
+        case element(headers) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
+        case element(links) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
+        case element(pathItems) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
+        case element(paths) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
+        case element(requestBodies) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
+        case element(responses) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
+        case element(securityDefinitions) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))   (: V2 :)
+        case element(securitySchemes) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
+        case element(variables) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
+        case element(webhooks) return ($n, $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))        
         
         (: Keywords which MAY be a map :)
         (: ... parameters - dependent on location an array or a map:
@@ -819,8 +890,8 @@ declare function f:oasKeywordsRC($n as node(),
          :)
         case element(parameters) return (
             $n, 
-            if ($n/(parent::components, ../parent::links, parent::json)) then $n/*/*/f:oasKeywordsRC(., $version, $nameFilter)
-            else $n/*/f:oasKeywordsRC(., $version, $nameFilter)
+            if ($n/(parent::components, ../parent::links, parent::json)) then $n/*/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude)
+            else $n/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude)
         )            
         
         (: Maps string-string - do not consider children :)        
@@ -838,19 +909,19 @@ declare function f:oasKeywordsRC($n as node(),
         case element(requestBody) return (
             $n,
             if ($n/../parent::links) then () else
-            $n/*/f:oasKeywordsRC(., $version, $nameFilter)
+            $n/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude)
         )
         
         default return (
             $n, 
             if (starts-with(local-name($n), 'x-')) then () else
-                $n/*/f:oasKeywordsRC(., $version, $nameFilter))
+                $n/*/f:oasKeywordsRC(., $version, $nameFilter, $nameFilterExclude))
    
     return
         if (empty($nameFilter)) then $unfiltered else
         for $node in $unfiltered
         let $jname := $node/local-name() ! convert:decode-key(.) ! lower-case(.)
-        where util:matchesNameFilter($jname, $nameFilter)
+        where util:matchesPlusMinusNameFilters($jname, $nameFilter, $nameFilterExclude)
         return $node
 };        
 
@@ -859,19 +930,25 @@ declare function f:oasKeywordsRC($n as node(),
  : Returns the JSON Schema keywords found in OpenAPI document.
  :
  : @param oasNodes nodes from OpenAPI documents
- : @return the keywords contained by the OpenAPI documents
+ : @param names list of names or name patterns - return only matching keywords
+ : @param namesExclude list of names or name patterns - do not return matching 
+ :   keywords 
+ : @return keyword elements contained by the OpenAPI documents
  :)
 declare function f:oasJschemaKeywords($oasNodes as node()*,
-                                      $namePatterns as xs:string?)
+                                      $names as xs:string?,
+                                      $namesExcluded as xs:string?)
         as element()* {
-    let $oasNodes :=
-        $oasNodes ! (typeswitch(.) case document-node() return * default return ancestor-or-self::*[last()])
+    let $oasNodes := 
+        $oasNodes ! (
+          typeswitch(.) case document-node() return * 
+          default return ancestor-or-self::*[last()])
     return
     
-    $oasNodes/ancestor-or-self::*[last()]/(
-        definitions/*/*/f:jschemaKeywords(., $namePatterns),
-        components/schemas/*/*/f:jschemaKeywords(., $namePatterns),
-        f:oasMsgSchemas(.)/*/f:jschemaKeywords(., $namePatterns)
+    $oasNodes/(
+        definitions/*/*/f:jschemaKeywords(., $names, $namesExcluded),
+        components/schemas/*/*/f:jschemaKeywords(., $names, $namesExcluded),
+        f:oasMsgSchemas(.)/*/f:jschemaKeywords(., $names, $namesExcluded)
     )        
 };
 
@@ -897,7 +974,7 @@ declare function f:jsonEffectiveValue($value as element())
     let $reference := $value/_0024ref return
     
     if (not($reference)) then $value else
-        $reference ! f:resolveJsonRef(., .) ! f:jsonEffectiveValue(.)
+        $reference ! f:resolveJsonRef(., ., 'single') ! f:jsonEffectiveValue(.)
 };
 
 (:~
@@ -1102,7 +1179,27 @@ declare function f:write-json-docs($files as xs:string*,
  : @param atts attributes to be added
  : @return the constructed element
  :)
-declare function f:xelement($content as item()*,
+declare function f:xelement($name as xs:string, $content as item()*)
+        as element() {
+    let $atts := $content[. instance of attribute()]
+    let $nonatts := $content[not(. instance of attribute())]
+    return
+        element {$name} {
+            $atts,
+            $nonatts
+        }
+};      
+
+(:~
+ : Constructs an element with content given by $content. Each pair of items in $atts
+ : provides the name and value of an attribute to be added.
+ :
+ : @param content the element content
+ : @param name the element name
+ : @param atts attributes to be added
+ : @return the constructed element
+ :)
+declare function f:xelement_old($content as item()*,
                             $name as xs:string,
                             $atts as item()*)
         as element() {
@@ -1181,9 +1278,9 @@ declare function f:xwrap($items as item()*,
                 if (not(contains($flags, 'b'))) then () else
                     attribute xml:base {$item/base-uri(.)},
                 if (not(contains($flags, 'p'))) then () else
-                    attribute path {$item/f:name-path(., 'name', ())},
+                    attribute path {$item/f:namePath(., 'name', ())},
                 if (not(contains($flags, 'j'))) then () else
-                    attribute jpath {$item/f:name-path(., 'jname', ())}
+                    attribute jpath {$item/f:namePath(., 'jname', ())}
             )
             let $atts :=
                 if (empty($additionalAtts) or empty($item/@*)) then $item/@*
@@ -1438,8 +1535,11 @@ declare function f:descendant-names(
 };        
 
 (:~
- : Returns the parent name of a node. If $localNames is true, the local name is returned, 
- : otherwise the lexical names. 
+ : Copies a file to a target URI. The target URI may be a folder URI or a file URI.
+ :
+ : Options:
+ : overwrite ( or o) - copy overwrites existing file
+ : create (or c)     - if target folder does not exist, it is created 
  :
  : @param node a node
  : @param localName if true, the local name is returned, otherwise the lexical name
@@ -1567,6 +1667,8 @@ declare function f:leftValueOnly($leftValue as item()*,
  : in all other documents.
  :
  : @param docs a sequence of documents or document URIs
+ : @param counts a whitespace separated list of options;
+ :   count - do not display paths, only counts
  : @return a structured representation of data paths not used by all documents
  :)
 declare function f:pathCompare($items as item()*,
@@ -1586,13 +1688,13 @@ declare function f:pathCompare($items as item()*,
     
     let $pathArrays := 
         for $doc at $pos in $docs
-        let $paths := $doc/f:allDescendants(.)/f:name-path(., $nameKind, ()) => distinct-values() => sort()
+        let $paths := $doc/f:allDescendants(.)/f:namePath(., $nameKind, ()) => distinct-values() => sort()
         return array{$paths}
         
     let $commonPaths := util:atomIntersection($pathArrays)
     let $pathsMap := map:merge(
         for $doc at $pos in $docs
-        let $paths := $doc/f:allDescendants(.)/f:name-path(., $nameKind, ()) => distinct-values() => sort()
+        let $paths := $doc/f:allDescendants(.)/f:namePath(., $nameKind, ()) => distinct-values() => sort()
         return map:entry($pos, $paths)
     )
     let $deviations :=    
@@ -1699,9 +1801,9 @@ declare function f:pathContent($context as node()*,
  : @param localName if true, the local name is returned, otherwise the lexical name
  : @return the parent name
  :)
-declare function f:name-path($nodes as node()*, 
-                             $nameKind as xs:string?,   (: name | lname | jname :) 
-                             $numSteps as xs:integer?)
+declare function f:namePath($nodes as node()*, 
+                            $nameKind as xs:string?,   (: name | lname | jname :) 
+                            $numSteps as xs:integer?)
         as xs:string* {
     for $node in $nodes return
     
@@ -1861,18 +1963,41 @@ declare function f:hlistRC($level as xs:integer,
  :)
 
 (:~
- : Resolves a JSON reference to a JSON object. The reference is
+ : Resolves a JSON reference to a set of JSON objects. The reference is
  : a JSON Pointer (https://tools.ietf.org/html/rfc6901).
+ :
+ : Parameter 'mode' controls the mode of resolving:
+ : mode=recursive - the reference is resolved recursively, 
+ :                  only the final result is returned;
+ : mode=recursive-collecting' - 
+                    the reference is resolved recursively, 
+ :                  all referenced values are returned;
+ : mode=single -    the reference is resolved once, no recursive resolving 
+ :
+ : Default mode: recursive
  :
  : @param reference the reference string
  : @param doc a node from the document used as congtext
+ : @param mode mode of resolve - one of 'recursive', 'recursive-collecting', 'single' 
  : @return the referenced schema object, or the empty string if no such object is found
  :)
 declare function f:resolveJsonRef($reference as xs:string?, 
-                                  $doc as element())
-        as element()? {
+                                  $doc as element(),
+                                  $mode as xs:string?)
+        as element()* {
     if (not($reference)) then () else
-    
+
+    let $mode := ($mode, 'recursive')[1]
+    return f:resolveJsonRefRC($reference, $doc, $mode, (), ())
+};
+
+declare function f:resolveJsonRefRC(
+                          $reference as xs:string?, 
+                          $doc as element(),
+                          $mode as xs:string?,
+                          $visited as element()*,
+                          $referencing as element()?)
+        as element()* {
     let $doc := $doc/ancestor-or-self::*[last()]
     let $withFragment := contains($reference, '#')
     let $resource := 
@@ -1906,11 +2031,18 @@ declare function f:resolveJsonRef($reference as xs:string?,
     return   
         if (not($path)) then $context else
             let $steps := tokenize($path, '\s*/\s*')
-            let $target := f:resolveJsonRefRC($steps, $context)
+            let $target := f:resolveJsonRefSteps($steps, $context)
             return 
-                if ($target/_0024ref) then 
-                    $target/_0024ref/f:resolveJsonRef(., $doc)
-                else $target
+                if ($mode eq 'single') then $target
+                else if ($target intersect $visited) then 
+                    (: 'recursive' mode - return referencing object :)
+                    if ($mode eq 'recursive') then $referencing else ()                
+                else
+                    if ($target/_0024ref) then (
+                        $target[$mode eq 'recursive-collecting'], 
+                        $target/_0024ref/f:resolveJsonRefRC(., $doc, $mode, ($visited, $target), ..)
+                        )/.   (: Remove duplicates :)
+                    else $target
 };
 
 (:~
@@ -1920,8 +2052,8 @@ declare function f:resolveJsonRef($reference as xs:string?,
  : @param context the context in which to resolve the path
  : @return the targets addressed by the path
  :)
-declare function f:resolveJsonRefRC($steps as xs:string+, 
-                                    $context as element()*)
+declare function f:resolveJsonRefSteps($steps as xs:string+, 
+                                       $context as element()*)
         as element()* {
     let $head := head($steps)
     let $tail := tail($steps)
@@ -1939,7 +2071,7 @@ declare function f:resolveJsonRefRC($steps as xs:string+,
     return
         if (not($elem)) then ()
         else if (empty($tail)) then $elem
-        else f:resolveJsonRefRC($tail, $elem)
+        else f:resolveJsonRefSteps($tail, $elem)
 };
 
 (:~
@@ -1999,23 +2131,55 @@ declare function f:resolveXsdTypeRefRC($refNs as xs:string,
 };        
 
 (:~
- : Resolves a JSON Schema allOf group.
+ : Resolves a JSON Schema allOf group. Returns all subschemas, with schema
+ : references recursively resolved and allOf subschemas recursively replaced
+ : by their subschemas.
  :
- : @param reference the reference string
- : @param oad the OpenAPI documents considered
- : @return the referenced schema object, or the empty string if no such object is found
+ : @param allOf a JSON Schema allOf keyword
+ : @return the subschemas, recursively resolved
  :)
-declare function f:resolveJsonAllOf($allOf as element(), 
-                                    $doc as element(json)+)
+declare function f:resolveJsonAllOf($allOf as element())
         as element()* {
     for $subschema in $allOf/_        
     return
         if ($subschema[_0024ref]) then 
-            let $effective := f:resolveJsonRef($subschema/_0024ref, $doc)
+            let $effective := f:jsonEffectiveValue($subschema)
             return
-                if ($effective/allOf) then $effective/allOf/f:resolveJsonAllOf(., $doc)
+                if ($effective/allOf) then $effective/allOf/f:resolveJsonAllOf(.)
                 else $effective
-        else if ($subschema/_allOf) then $subschema/allOf/f:resolveJsonAllOf(., $doc)
+        else if ($subschema/_allOf) then $subschema/allOf/f:resolveJsonAllOf(.)
+        else $subschema
+};
+
+(:~
+ : Resolves a JSON Schema anyOf group. Returns all subschemas, with schema
+ : references recursively resolved and anyOf subschemas recursively replaced
+ : by their subschemas.
+ :
+ : @param allOf a JSON Schema allOf keyword
+ : @return the subschemas, recursively resolved
+ :)
+declare function f:resolveJsonAnyOf($anyOf as element())
+        as element()* {
+    for $subschema in $anyOf/_/f:jsonEffectiveValue(.)        
+    return
+        if ($subschema/_anyOf) then $subschema/anyOf/f:resolveJsonAnyOf(.)
+        else $subschema
+};
+
+(:~
+ : Resolves a JSON Schema oneOf group. Returns all subschemas, with schema
+ : references recursively resolved and oneOf subschemas recursively replaced
+ : by their subschemas.
+ :
+ : @param oneOf a JSON Schema oneOf keyword
+ : @return the subschemas, recursively resolved
+ :)
+declare function f:resolveJsonOneOf($oneOf as element())
+        as element()* {
+    for $subschema in $oneOf/_/f:jsonEffectiveValue(.)
+    return
+        if ($subschema/_oneOf) then $subschema/oneOf/f:resolveJsonOneOf(.)
         else $subschema
 };
 
