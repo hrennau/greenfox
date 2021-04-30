@@ -20,16 +20,18 @@ Group: resource retrieval
   
 :)
 module namespace f="http://www.ttools.org/xquery-functions";
-import module namespace i="http://www.ttools.org/xquery-functions" at 
-    "_foxpath-processorDependent.xqm",
+import module namespace i="http://www.ttools.org/xquery-functions" 
+at  "_foxpath-processorDependent.xqm",
     "_foxpath-uri-operations-basex.xqm",
     "_foxpath-uri-operations-github.xqm",    
     "_foxpath-uri-operations-svn.xqm",    
     "_foxpath-uri-operations-rdf.xqm",    
     "_foxpath-uri-operations-utree.xqm",    
-    "_foxpath-uri-operations-archive.xqm",    
-    "_foxpath-util.xqm";
-    
+    "_foxpath-uri-operations-archive.xqm";
+
+import module namespace util="http://www.ttools.org/xquery-functions/util" 
+at  "_foxpath-util.xqm";
+
 declare variable $f:UNAME external := 'hrennau';
 declare variable $f:githubTokenLocation external := 'github-token-location';   
    (: text file containing the location of a file containing the github token :)
@@ -56,10 +58,16 @@ declare variable $f:TOKEN external :=
 
 (:~
  : Returns the domain of an URI. This is one of these:
- :    SIMPLE_URI_TREE
- :    REDIRECTING_URI_TREE
  :    FILE_SYSTEM
- :    SVN_REPO
+ :    ARCHIVE
+ :    BASEX
+ :    HTTP
+ :    HTTPS
+ :    SVN
+ :    RDF
+ :    GITHUB
+ :    UTREE
+ :    RAW
  :
  : @param uri the URI
  : @param options options controlling the evaluation
@@ -75,7 +83,7 @@ declare function f:uriDomain($uri as xs:string, $options as map(*)?)
     'alfresco-open-mirror/alfresco/COMMUNITYTAGS/5.1.a/root/projects/3rd-party/greenmail/source/java/com/'))
     then 'RDF'
 :)    
-    if (tokenize(replace($uri, '^(//[^/]+:/+).*', ''), '/') = $f:ARCHIVE_TOKEN) 
+    if (tokenize(replace($uri, '^(//[^/]+:/+).*', ''), '/') = $util:ARCHIVE_TOKEN) 
         then 'ARCHIVE'
     else if (starts-with($uri, 'https://svn.alfresco.com/repos/')) 
         then 'RDF'
@@ -376,6 +384,8 @@ declare function f:fox-doc($uri as xs:string, $options as map(*)?)
             try {parse-xml($text)} catch * {()}
 :)            
     else if (doc-available($uri)) then doc($uri)
+    (: If not parsable as XML, try JSON :)
+    else if (unparsed-text-available($uri)) then try {json:doc($uri)} catch * {()}
     else ()
 };
 

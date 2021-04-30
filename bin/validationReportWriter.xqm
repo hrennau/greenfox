@@ -144,7 +144,7 @@ declare function f:writeValidationReport_sum(
     let $ccstat := 
         vutil:writeValidationReport_constraintCompStat(
             $gfox, $domain, $context, $results, 'red', 'xml', $options)
-    let $_DEBUG := trace($ccstat, '__CCSTAT: ')            
+    (: let $_DEBUG := trace($ccstat, '__CCSTAT: ') :)            
     let $ccomps := $ccstat/*
     
     let $countRed := $ccstat/@countRed/xs:integer(.)
@@ -173,8 +173,6 @@ declare function f:writeValidationReport_sum(
         return <resource name="{$rname}" kind="{$kind}" ccomps="{$ccomps}">{
             $msgs
         }</resource>
-    let $_DEBUG := trace($greenResources, '_GREENRESOURCES: ')  
-    let $_DEBUG := trace($reportType, '_REPORT_TYPE: ')
     let $ccompNameWidth := (('constraint comp', $ccomps/@name) !string-length(.)) => max()
     let $countRedWidth := (('#red', $ccomps/@countRed/string()) ! string-length(.)) => max()
     let $countGreenWidth := (('#green', $ccomps/@countGreen/string()) ! string-length(.)) => max()

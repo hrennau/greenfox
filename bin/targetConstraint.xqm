@@ -104,5 +104,5 @@ declare function f:validateTargetCount($resourceShape as element(),
     let $colour := if ($cmpTrue($targetCount, $cmp)) then 'green' else 'red'
     return        
         vr:validationResult_targetCount($colour, $constraintElem, $cmp, 
-            $ldo, $targetItems, $contextURI, $context)
+            $ldo, $resourceShape, $targetItems, $contextURI, $context)
 };

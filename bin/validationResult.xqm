@@ -812,12 +812,14 @@ declare function f:validationResult_linkError($ldo as map(*)?,
  : Creates a validation result for constraint components TargetCount, TargetMinCount, 
  : TargetMaxCount.
  :
- : @param constraint element defining the constraint
  : @param colour the kind of results - green or red
- : @param msg a message overriding the message read from the constraint element
- : @param constraintComp string identifying the constraint component
- : @param constraint an attribute specifying a constraint (e.g. @minCount=...)
- : @param the actual number of target instances
+ : @param constraintElem the element declaring the constraint
+ : @param constraintNode the attribute declaring the constraint
+ : @param ldo Link Definition Object
+ : @param resourceShape the resource shape - required if no Link Definition Object available
+ : @param targetItems the target URIs
+ : @param targetContextPath path of the parent shape
+ : @param context the processing context
  : @return a result element 
  :)
 declare function f:validationResult_targetCount(
@@ -825,6 +827,7 @@ declare function f:validationResult_targetCount(
                                     $constraintElem as element(gx:targetSize),
                                     $constraintNode as attribute(),
                                     $ldo as map(*)?,
+                                    $resourceShape as element(),
                                     $targetItems as item()*,
                                     $targetContextPath as xs:string,
                                     $context as map(xs:string, item()*))
@@ -839,7 +842,13 @@ declare function f:validationResult_targetCount(
     
     let $actCount := count($targetItems)
     let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
-    let $linkDefAtts := f:validateResult_linkDefAtts($ldo, $constraintElem)
+    
+    (: Attributes describing the navigation :)
+    let $linkDefAtts := 
+        let $ldoBased := f:validateResult_linkDefAtts($ldo, $constraintElem)
+        return
+            if ($ldoBased) then $ldoBased
+            else $resourceShape/(@navigateFOX, @uri)
     
     (: Values :)
     let $values :=
