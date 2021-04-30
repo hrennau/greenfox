@@ -61,7 +61,8 @@ LinkDefinition
     <!-- Template var element -->
     <xs:complexType name="TemplateVarType">
         <xs:attribute name="name" type="xs:NCName" use="required"/>
-        <xs:attribute name="valueXP" type="xs:string" use="required"/>
+        <xs:attribute name="valueXP" type="xs:string"/>
+        <xs:attribute name="valueFOX" type="xs:string"/>
     </xs:complexType>
     
     <!-- Link targetSize element -->
@@ -385,6 +386,7 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:element name="skipItem" type="t:SelectItemType" maxOccurs="unbounded"/>
                 <xs:element name="ignoreValue" type="t:SelectItemType" maxOccurs="unbounded"/>
                 <xs:element name="editItem" type="t:EditItemType" maxOccurs="unbounded"/>
+                <xs:element name="roundItem" type="t:RoundItemType" maxOccurs="unbounded"/>                
                 <xs:element name="renameItem" type="t:RenameItemType" maxOccurs="unbounded"/>
                 <xs:element name="renamespaceItem" type="t:RenamespaceItemType" maxOccurs="unbounded"/>
             </xs:choice>
@@ -414,6 +416,11 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
     </xs:complexType>
 
+    <xs:complexType name="RoundItemType">
+        <xs:attribute name="scale" type="xs:integer"/>
+        <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
+    </xs:complexType>
+    
     <xs:complexType name="RenameItemType">
         <xs:complexContent>
             <xs:extension base="t:EditItemType">

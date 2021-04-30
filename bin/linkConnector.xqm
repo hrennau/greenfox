@@ -42,12 +42,12 @@ declare function f:applyLinkConnector($ldo as map(*),
     (: Connector: uri expression 
        ========================= :) 
     if ($ldo?uriXP) then
-        f:resolveLinkExpression($ldo?uriXP, $contextPoint, $context) ! string(.)
+        f:resolveLinkExpressionXP($ldo?uriXP, $contextPoint, $context) ! string(.)
         
     (: Connector: href expression 
        ========================== :)
     else if ($ldo?hrefXP) then
-        let $items := f:resolveLinkExpression($ldo?hrefXP, $contextPoint, $context)
+        let $items := f:resolveLinkExpressionXP($ldo?hrefXP, $contextPoint, $context)
         return
             if (not(every $item in $items satisfies $item instance of node())) then
                 map{'type': 'connectorError', 
@@ -75,7 +75,7 @@ declare function f:applyLinkConnector($ldo as map(*),
     (: Connector: URI template 
        ======================= :)
     else if ($ldo?uriTemplate) then
-        let $items := f:resolveUriTemplate($ldo, $contextPoint, $context)
+        let $items := f:resolveUriTemplate($ldo, $contextURI, $contextPoint, $context)
         return $items
         
     (: Connector: mirror 
@@ -96,6 +96,7 @@ declare function f:applyLinkConnector($ldo as map(*),
  : @return a sequence of URIss
  :)
 declare function f:resolveUriTemplate($ldo as map(*),
+                                      $contextURI as xs:string,
                                       $contextPoint as item(),
                                       $context as map(xs:string, item()*))
         as xs:string* {
@@ -108,7 +109,12 @@ declare function f:resolveUriTemplate($ldo as map(*),
             map:merge(
                 for $name in $templateVars ! map:keys(.)
                 let $templateVarElem := $templateVars($name) 
-                let $value := $templateVarElem/@valueXP/f:resolveLinkExpression(., $contextPoint, $context) ! string(.)
+                let $value := $templateVarElem/(
+                    if (@valueXP) then 
+                        @valueXP/f:resolveLinkExpressionXP(., $contextPoint, $context) ! string(.)
+                    else if (@valueFOX) then
+                        @valueFOX/f:resolveLinkExpressionFOX(., $contextURI, $context) ! string(.)
+                    else @value/string())
                 return map:entry($name, $value)
             )
     let $templateResolution := f:resolveUriTemplateRC($uriTemplate, $templateVarMap)
@@ -140,13 +146,13 @@ declare function f:resolveUriTemplateRC($uriTemplate as xs:string,
     let $left :=
         if (empty($varValue)) then $prefix else
             $varValue ! concat($prefix, .)
-    let $right := 
+    let $right :=
         if (not($postfix)) then ()
         else f:resolveUriTemplateRC($postfix, $templateVarMap)
     return
-        if (empty($postfix)) then $left else
+        if (not($postfix)) then $left else
             for $item1 in $left, $item2 in $right
-            return concat($item1, $item2)
+            return concat($item1, $item2)  
 };
 
 (:~

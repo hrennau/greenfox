@@ -49,7 +49,7 @@ declare function f:resolveLinkDef($linkDef as item(),
                                   $context as map(xs:string, item()*),
                                   $options as map(*)?)
         as item()* {
-    let $ldo := link:getLinkDefObject($linkDef, $context)     
+    let $ldo := link:getLinkDefObject($linkDef, $context)
     
     (: Determine context node, if not provided, yet required :)
     let $contextNode :=
@@ -117,7 +117,7 @@ declare function f:resolveLinkDefRC(
         else if (not($contextNode)) then error((), 
             concat('Link context expression requires a context node; expression: ', 
                    $contextExpr))                       
-        else link:resolveLinkExpression($contextExpr, $contextNode, $context)
+        else link:resolveLinkExpressionXP($contextExpr, $contextNode, $context)
 
     (: Apply connector to each Link Context item
        ========================================= :)

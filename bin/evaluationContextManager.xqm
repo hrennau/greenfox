@@ -258,7 +258,8 @@ declare function f:getEvaluationContextScopeRC($filePath as xs:string,
         ) => distinct-values()
 
     let $foxpathExpressions := (
-        $ldos?foxpath ! .,         
+        $ldos?foxpath ! ., 
+        $ldos?templateVars?* ! @valueFOX,
         $components/(
             @foxpath, 
             @*[ends-with(name(), 'FOX')] except $valuePairComponentsExpr2FOX

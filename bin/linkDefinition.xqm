@@ -196,7 +196,8 @@ declare function f:parseLinkDef($linkDef as element(),
                 else error(QName((), 'INVALID_SCHEMA'), 'Cannot determine link connector')
         
             let $requiresContextNode :=
-                    $connector = ('links', 'hrefExpr', 'uriExpr', 'uriTemplate')
+                    $connector = ('links', 'hrefExpr', 'uriExpr')
+                    or ($templateVarsDef, $templateVarsRef?*)/@valueXP
                     or $contextXP
             (: The lines below should be deleted soon - see call of f:parseLinkDef_augmentMediatype :)
             (:
