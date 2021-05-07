@@ -161,6 +161,10 @@ declare function f:applyDocModifiersRC($n,
             if (not($n intersect $modification?atts)) then ()
             else ($modification?operations ! array:flatten(.))[?atts intersect $n]
         return 
+            if (empty($operations)) then $n
+            else if ($operations?type = 'skipItem') then ()
+            else f:applyDocModifiersToNode($n, $operations, $functions)
+(:            
             (: No operations? just copy node an continue with content :)        
             if (empty($operations)) then $n
             
@@ -195,7 +199,7 @@ declare function f:applyDocModifiersRC($n,
                             let $operation := $operations[1]
                             return $functions($operation?type)($n, $operation?operation)
                         }
-                
+:)                
     (: Text :)                
     case text() return
         if (not($options?skipPrettyWS)) then $n 
@@ -204,6 +208,44 @@ declare function f:applyDocModifiersRC($n,
     
     default return $n                            
 };
+
+declare function f:applyDocModifiersToNode($node as node(),
+                                           $operations as map(*)+,
+                                           $functions as map(*)?)
+        as node()* {
+        
+    let $operation := head($operations)
+    let $operationType := $operation?type
+    return
+        if ($operationType eq 'skipItem') then () else
+        
+    let $tail := tail($operations)
+    let $fn_construct := function($node, $name, $content) {
+        typeswitch($node)
+        case element() return element {$name} {$content} 
+        case attribute() return attribute {$name} {$content}
+        default return error()    
+    }
+    
+    let $newNode :=
+        if ($operationType = ('renameItem', 'renamespaceItem')) then
+            let $localName :=
+                if (not($operationType eq 'renameItem')) then $node/local-name(.) 
+                else $functions($operationType)($node, $operation?operation)
+            let $namespace := 
+                if (not($operationType eq 'renamespaceItem')) then $node/namespace-uri(.) 
+                else $functions($operationType)($node, $operation?operation)                        
+            let $qname := QName($namespace, $localName)
+            return $fn_construct($node, $qname, $node)
+            
+        else
+            let $nodeContent := $functions($operationType)($node, $operation?operation)
+            return $fn_construct($node, $node/node-name(.), $nodeContent)
+    return
+        if (empty($tail)) then $newNode
+        else f:applyDocModifiersToNode($newNode, $tail, $functions) 
+};        
+
 
 declare function f:applyDocModifiers_renameItem($node as node(),
                                                 $mod as element(gx:renameItem))
