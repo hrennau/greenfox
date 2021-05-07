@@ -113,12 +113,14 @@ declare function f:resolveUri($uri as xs:string, $baseUri as xs:string)
  : @return the image URI, if the resource exists, an empty sequence otherwise
  :) 
 declare function f:getImage($uri as xs:string, 
-                            $reflector1URI as xs:string, 
-                            $reflector2URI as xs:string,
+                            $reflector1URI as xs:string?, 
+                            $reflector2URI as xs:string?,
                             $reflectedReplaceSubstring as xs:string?,
                             $reflectedReplaceWith as xs:string?)
         as xs:string? {
         
+    if (not($reflector1URI) or not($reflector2URI)) then () else
+    
     (: Normalize URIs to make them comparable :)
     let $uris:= f:normalizeURISet(($uri, $reflector1URI, $reflector2URI))
     let $uri := $uris[1]
