@@ -401,13 +401,16 @@ declare function f:validateValuePair($constraintElem as element(),
            ------------------------------------------------------------------------------ :)
         else if (empty($targetItems)) then
             (: Context item is context URI if Foxpath; context node or context URI, if XPath :)
-            let $useContextItem := 
-                if ($constraintElem/@expr2FOX) then $contextURI else $contextNode
+            let $useContextNode:= 
+                switch($expr2Lang)
+                case 'linepath' return $context?_reqDocs?lines
+                case 'filtermap' return $context?_reqDocs?lines
+                default return $contextNode
                 return
             
                     f:validateValuePair_context2_fixed(
                         $constraintElem, $constraintNode, 
-                        $contextURI, $contextNode,
+                        $contextURI, $useContextNode,
                         (), (),    (: $targetURI, $targetNode :)
                         
                         $quantifier, $useDatatype, $useString, 

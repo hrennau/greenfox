@@ -275,6 +275,26 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 i:xquery($xpath, map{'':$xpathContextNode})
 
+        (: function `file-append-text` 
+           =========================== :)
+        else if ($fname = ('file-append-text')) then
+            let $file := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)        
+            let $data :=
+                if (count($call/*) le 1) then $context else $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $encoding := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return
+                if ($encoding) then file:append-text($file, $data, $encoding) else file:append-text($file, $data)
+                
+        (: function `file-append-text-lines` 
+           ================================= :)
+        else if ($fname = ('file-append-text-lines')) then
+            let $file := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)        
+            let $data :=
+                if (count($call/*) le 1) then $context else $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $encoding := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)                
+            return
+                if ($encoding) then file:append-text-lines($file, $data, $encoding) else file:append-text-lines($file, $data)
+                
         (: function `file-basename` 
            ======================== :)
         else if ($fname = ('file-basename', 'file-bname', 'fbname')) then
@@ -332,8 +352,11 @@ declare function f:resolveStaticFunctionCall($call as element(),
         (: function `file-copy` 
            ======================= :)
         else if ($fname = ('file-copy', 'fcopy')) then
-            let $file := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $dirname:= $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $countArgs := count($call/*)
+            let $arg1 := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)        
+            let $file := if (count($call/*) gt 1) then $arg1 else $context 
+            let $target := if ($countArgs le 1) then $arg1 else
+                $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             let $options := 
                 let $values := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options) ! tokenize(.)
                 return
@@ -344,7 +367,7 @@ declare function f:resolveStaticFunctionCall($call as element(),
                             ()
                         ))
             return
-                foxf:fileCopy($file, $dirname, $options)
+                foxf:fileCopy($file, $target, $options)
                 
         (: function `file-date` 
            ==================== :)
@@ -445,115 +468,78 @@ declare function f:resolveStaticFunctionCall($call as element(),
         (: function `fox-ancestor` 
            ====================== :)
         else if ($fname eq 'fox-ancestor') then
-            let $contextURIs :=
-                if (count($call/*) eq 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index :=
-                    if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
                 foxf:foxAncestor($context, $names, $namesExcluded)
 
         (: function `fox-ancestor-or-self` 
            =============================== :)
         else if ($fname eq 'fox-ancestor-or-self') then
-            let $name := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $fromSubstring := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $toSubstring := 
-                if (not($fromSubstring)) then () else
-                    $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                foxf:fox-ancestor-or-self($context, $name, $fromSubstring, $toSubstring)
+                foxf:foxAncestorOrSelf($context, $names, $namesExcluded)
                 
         (: function `fox-child` 
            ==================== :)
         else if ($fname = ('fox-child', 'fchild')) then
-            let $contextURIs :=
-                if (count($call/*) eq 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index :=
-                    if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
                 foxf:foxChild($context, $names, $namesExcluded)
 
         (: function `fox-descendant` 
            ========================= :)
         else if ($fname = ('fox-descendant', 'fdescendant')) then
-            let $contextURIs :=
-                if (count($call/*) eq 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index := if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                foxf:foxDescendant($contextURIs, $names, $namesExcluded)
+                foxf:foxDescendant($context, $names, $namesExcluded)
 
         (: function `fox-descendant-or-self` 
            ================================= :)
         else if ($fname = ('fox-descendant-or-self', 'fdescendant-or-self')) then
-            let $contextURIs :=
-                if (count($call/*) eq 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index := if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                foxf:foxDescendantOrSelf($contextURIs, $names, $namesExcluded)
+                foxf:foxDescendantOrSelf($context, $names, $namesExcluded)
 
         (: function `fox-parent` 
            =================== :)
         else if ($fname = ('fox-parent', 'fparent')) then
-            let $contextURIs :=
-                if (count($call/*) le 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index := if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                foxf:foxParent($contextURIs, $names, $namesExcluded)
+                foxf:foxParent($context, $names, $namesExcluded)
                 
         (: function `fox-parent-sibling` 
            ============================= :)
         else if ($fname eq 'fox-parent-sibling') then
-            let $name := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $fromSubstring := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $toSubstring := 
-                if (not($fromSubstring)) then () else
-                    $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded:= $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $from := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $to := $call/*[4]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)            
             return
-                foxf:fox-parent-sibling($context, $name, $fromSubstring, $toSubstring)
+                foxf:foxParentSibling($context, $names, $namesExcluded, $from, $to)
 
         (: function `fox-self` 
            =================== :)
         else if ($fname = ('fox-self', 'fself')) then
-            let $contextURIs :=
-                if (count($call/*) eq 1) then $context
-                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $names :=
-                let $index := if (count($call/*) eq 1) then 1 else 2
-                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
-                foxf:foxSelf($contextURIs, $names, $namesExcluded)
+                foxf:foxSelf($context, $names, $namesExcluded)
 
         (: function `fox-sibling` 
            ====================== :)
-        else if ($fname eq 'fox-sibling') then
-            let $name := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $fromSubstring := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            let $toSubstring := 
-                if (not($fromSubstring)) then () else
-                    $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+        else if ($fname = ('fox-sibling', 'fsibling')) then
+            let $names := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $namesExcluded:= $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $from := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $to := $call/*[4]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)            
             return
-                foxf:fox-sibling($context, $name, $fromSubstring, $toSubstring)
+                foxf:foxSibling($context, $names, $namesExcluded, $from, $to)
 
         (: function `frequencies` 
            ====================== :)
@@ -827,14 +813,14 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 foxf:nodeDescendant($nodes, 'jname', $names, $namesExcluded, $ignoreCase)
 
-        (: function `jnodes-location-report` 
-           ================================= :)
-        else if ($fname = ('jnodes-location-report', 'jlocations')) then
+        (: function `jnode-location` 
+           ========================= :)
+        else if ($fname = ('jnode-location', 'jlocation')) then
             let $nodes :=
                 if ($call/*) then $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
                 else $context
-            let $withFolders := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            return foxf:nodesLocationReport($nodes, 'jname', $withFolders)
+            let $numFolders := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return foxf:nodesLocationReport($nodes, 'jname', $numFolders)
 
         (: function `jpath-compare` 
            ======================= :)
@@ -990,6 +976,14 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 foxf:nodeDescendant($nodes, 'lname', $names, $namesExcluded, $ignoreCase)
 
+        (: function `lnode-location` 
+           ========================= :)
+        else if ($fname = ('lnode-location', 'llocation')) then
+            let $nodes :=
+                if ($call/*) then $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+                else $context
+            let $numFolders := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return foxf:nodesLocationReport($nodes, 'lname', $numFolders)
 
         (: function `lpad` 
            =============== :)
@@ -1060,14 +1054,14 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 foxf:nodeChild($nodes, 'name', $names, $namesExcluded, $ignoreCase)
 
-        (: function `nodes-location-report` 
-           ================================ :)
-        else if ($fname = ('nodes-location-report', 'nlocations')) then
+        (: function `node-location` 
+           ======================== :)
+        else if ($fname = ('node-location', 'nlocation')) then
             let $nodes :=
                 if ($call/*) then $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
                 else $context
-            let $withFolders := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-            return foxf:nodesLocationReport($nodes, 'name', $withFolders)
+            let $numFolders := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return foxf:nodesLocationReport($nodes, 'name', $numFolders)
 
         (: function `non-distinct-file-names` 
            ================================== :)
@@ -1088,10 +1082,12 @@ declare function f:resolveStaticFunctionCall($call as element(),
         (: function `oas-jschema-keywords` 
            ================================ :)
         else if ($fname = ('oas-jschema-keywords')) then
-            let $nodes := 
-                if ($call/*) then $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
-                else $context
-            let $names := $call/*[2]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)                 
+            let $nodes :=
+                if (count($call/*) le 1) then $context
+                else $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            let $names := 
+                let $index := if (count($call/*) le 1) then 1 else 2
+                return $call/*[$index]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             let $namesExcluded := $call/*[3]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
                 foxf:oasJschemaKeywords($nodes, $names, $namesExcluded)            
@@ -1820,6 +1816,13 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 min($arg)
                 
+        (: function `seconds-from-duration` 
+           ================================ :)
+        else if ($fname eq 'minutes-from-duration') then
+            let $arg1 := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return
+                minutes-from-duration($arg1)
+                
         (: function `month-from-date` 
            ========================== :)
         else if ($fname eq 'month-from-date') then
@@ -1960,6 +1963,13 @@ declare function f:resolveStaticFunctionCall($call as element(),
             return
                 round($arg1, $arg2)
                 
+        (: function `seconds-from-duration` 
+           ================================ :)
+        else if ($fname eq 'seconds-from-duration') then
+            let $arg1 := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return
+                seconds-from-duration($arg1)
+                
         (: function `sort` 
            ==================== :)
         else if ($fname eq 'sort') then
@@ -2038,6 +2048,13 @@ declare function f:resolveStaticFunctionCall($call as element(),
             let $arg := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
             return
                 sum($arg)
+                
+        (: function `time` 
+           ============== :)
+        else if ($fname eq 'time') then
+            let $arg := $call/*[1]/f:resolveFoxpathRC(., false(), $context, $position, $last, $vars, $options)
+            return
+                xs:time($arg)
                 
         (: function `tokenize` 
            =================== :)
