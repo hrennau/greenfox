@@ -681,6 +681,7 @@ declare function f:validationResult_linkCount($colour as xs:string,
     let $constraintConfig :=
         typeswitch($constraintNode)
         case attribute(exists)                  return map{'constraintComp': 'LinkTargetExists',         'atts': ('exists')}
+        case attribute(empty)                   return map{'constraintComp': 'LinkTargetEmpty',          'atts': ('empty')}        
         case attribute(countContextNodes)       return map{'constraintComp': 'LinkContextNodesCount',    'atts': ('countContextNodes')}
         case attribute(minCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMinCount', 'atts': ('minCountContextNodes')}
         case attribute(maxCountContextNodes)    return map{'constraintComp': 'LinkContextNodesMaxCount', 'atts': ('maxCountContextNodes')}

@@ -96,11 +96,11 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
         as map(xs:string, item()*) {
     let $urisAndLros :=
         let $uri := $resourceShape/@uri
-        let $foxpath := $resourceShape/(@navigateFOX, @foxpath)[1]
-        let $link := $resourceShape/(@linkName, @hrefXP, @uriXP, @uriTemplate, @linkReflectionBase)         
+        let $foxpath := $resourceShape/@navigateFOX
+        let $link := $resourceShape/(@navigateFOX, @uri, @linkName, @hrefXP, @uriXP, @uriTemplate, @linkReflectionBase)         
         return
             (: URI :)
-            if ($uri) then 
+            if ($uri and empty($resourceShape/gx:targetSize/link:getLinkConstraintAtts(.))) then
                 map{'targetPaths': f:getTargetPaths_uri($uri, $resourceShape, $context)}
             (: Foxpath (and no link constraints :)
             else if ($foxpath and empty($resourceShape/gx:targetSize/link:getLinkConstraintAtts(.))) then 

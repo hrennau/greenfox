@@ -67,7 +67,7 @@ declare function f:validateLinkConstraints($resourceShape as element(),
                                            $lros as map(*)*,
                                            $context as map(xs:string, item()*))
         as element()* {
-    if (empty($lros)) then () else
+    if (empty($ldo)) then () else
        
     let $constraintElem := $resourceShape/gx:targetSize
     return 

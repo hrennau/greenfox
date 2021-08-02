@@ -148,14 +148,22 @@ declare function f:validateLinkCounts($lros as map(*)*,
     let $constraintAtts := ($linkConstraints, $constraintElem)/@*
     let $constraintMap :=
     
-        (: *** exists :)
         map:merge((
-            let $constraints := $constraintAtts[name() eq 'exists'][. eq 'true']
+         (: *** exists :)        
+            let $constraints := $constraintAtts[name() eq 'exists']
             return
                 if (empty($constraints)) then () else
                 let $valueCount := ($lros[?targetExists][not(?errorCode)]?targetURI => distinct-values() => count(), 0)[1]
                 return 
                     map{'exists': map{'actCount': $valueCount, 'constraints': $constraints}},
+                    
+         (: *** empty :)        
+            let $constraints := $constraintAtts[name() eq 'empty']
+            return
+                if (empty($constraints)) then () else
+                let $valueCount := ($lros[?targetExists][not(?errorCode)]?targetURI => distinct-values() => count(), 0)[1]
+                return 
+                    map{'empty': map{'actCount': $valueCount, 'constraints': $constraints}},
                     
             (: *** countContextNodes :)
             let $constraints := $constraintAtts[matches(name(), '^(minCount|maxCount|count)ContextNodes$')]
@@ -250,7 +258,16 @@ declare function f:validateLinkCounts($lros as map(*)*,
             for $countConstraint in $constraintObject?constraints            
             let $cstName := $countConstraint/name()
             let $green :=
-                if ($cstName eq 'exists') then every $v in $vcounts satisfies $v gt 0
+                if ($cstName eq 'exists') then 
+                    let $cstValue := $countConstraint/xs:boolean(.)
+                    return
+                        if ($cstValue) then every $v in $vcounts satisfies $v gt 0
+                        else every $v in $vcounts satisfies $v eq 0
+                else if ($cstName eq 'empty') then 
+                    let $cstValue := $countConstraint/xs:boolean(.)
+                    return
+                        if ($cstValue) then every $v in $vcounts satisfies $v eq 0
+                        else every $v in $vcounts satisfies $v gt 0
                 else 
                     let $cstValue := $countConstraint/xs:integer(.) return
                     if (starts-with($cstName, 'count')) then every $v in $vcounts satisfies $v eq $cstValue
@@ -265,6 +282,7 @@ declare function f:validateLinkCounts($lros as map(*)*,
         
         let $results := (
             $constraintMap?exists ! $fn_write_results(.),
+            $constraintMap?empty ! $fn_write_results(.),
             $constraintMap?contextNodes ! $fn_write_results(.),
             $constraintMap?targetResources ! $fn_write_results(.),
             $constraintMap?targetDocs ! $fn_write_results(.),
@@ -284,7 +302,8 @@ declare function f:validateLinkCounts($lros as map(*)*,
  :)
 declare function f:getLinkConstraintAtts($constraintElem as element())
         as attribute()* {
-    $constraintElem/@*[matches(name(), 
+    $constraintElem/@*[matches(name(),
+        '^(exists|empty)$|' ||
         '^(count|minCount|maxCount)' ||
         '(ContextNodes|TargetResources|TargetDocs|TargetDocs)' ||
         '(PerContextPoint)?$', 'x')]        

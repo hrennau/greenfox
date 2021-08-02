@@ -1155,6 +1155,11 @@ Attribute groups
         <xs:attribute name="existsMsg" type="xs:string"/>
         <xs:attribute name="existsMsgOK" type="xs:string"/>
         
+        <!-- empty -->
+        <xs:attribute name="empty" type="xs:boolean"/>    
+        <xs:attribute name="emptyMsg" type="xs:string"/>
+        <xs:attribute name="emptyMsgOK" type="xs:string"/>
+        
         <!-- countContextNodes, etc. -->
         <xs:attribute name="countContextNodes" type="xs:nonNegativeInteger"/>
         <xs:attribute name="countContextNodesMsg" type="xs:string"/>
