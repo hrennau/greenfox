@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of targetSize constraint "empty" (LinkTargetEmpty).
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-empty"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../greenfox-xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="foo">
+            <targetSize empty="false" emptyMsg="Expected folder not found: 'foo'"/>
+        </folder>
+        <folder uri="fooDeprecated">
+            <targetSize empty="true" emptyMsg="Folder should not occur: 'fooDeprecated'"/>
+        </folder>
+    </domain>
+</greenfox>

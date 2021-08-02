@@ -1,0 +1,1359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:t="http://www.greenfox.org/ns/schema"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           targetNamespace="http://www.greenfox.org/ns/schema" elementFormDefault="qualified"> 
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+    
+    <xs:element name="greenfox" type="t:GreenfoxType"/>
+    
+    <!-- 
+**********************************************************        
+Root element
+**********************************************************        
+-->
+    <xs:complexType name="GreenfoxType">
+        <xs:sequence>
+            <xs:element name="context" minOccurs="0" type="t:ContextType"/>
+            <xs:element name="linkDef" minOccurs="0" maxOccurs="unbounded" type="t:LinkDefType"/>
+            <xs:element name="domain" type="t:DomainType"/>
+        </xs:sequence>
+        <xs:attribute name="greenfoxURI" type="xs:anyURI"/>
+        <xs:attribute ref="xml:base"/>
+    </xs:complexType>
+    
+    <!-- 
+**********************************************************
+Context 
+**********************************************************    
+-->
+    <!-- Context element -->
+    <xs:complexType name="ContextType">
+        <xs:sequence>
+            <xs:element name="field" minOccurs="0" maxOccurs="unbounded" type="t:ContextFieldType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Context field -->
+    <xs:complexType name="ContextFieldType">
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="valueXP" type="xs:string"/>
+        <xs:attribute name="valueFOX" type="xs:string"/>
+    </xs:complexType>
+
+    <!-- 
+**********************************************************
+LinkDefinition 
+**********************************************************    
+-->    
+    <!-- Link definition element -->
+    <xs:complexType name="LinkDefType">
+        <xs:sequence>
+            <xs:group ref="t:LinkDefGroup" minOccurs="0"/>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefAttGroup"/>
+    </xs:complexType>
+
+    <!-- Template var element -->
+    <xs:complexType name="TemplateVarType">
+        <xs:attribute name="name" type="xs:NCName" use="required"/>
+        <xs:attribute name="valueXP" type="xs:string"/>
+        <xs:attribute name="valueFOX" type="xs:string"/>
+    </xs:complexType>
+    
+    <!-- Link targetSize element -->
+    <xs:complexType name="LinkTargetSizeType">
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+    
+    <!-- 
+**********************************************************
+Domain 
+**********************************************************    
+-->    
+    <xs:complexType name="DomainType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="folder" type="t:FolderShapeType"/>
+                <xs:element name="file" type="t:FileShapeType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="uri" type="xs:string"/>
+        <xs:attribute name="path" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string"/>
+    </xs:complexType>
+
+    <!-- 
+**********************************************************
+TargetSize 
+**********************************************************    
+-->    
+    <xs:complexType name="TargetSizeType">
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
+    </xs:complexType>
+
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+S h a p e s 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+    
+    <!-- F i l e    S h a p e -->
+    
+    <xs:complexType name="FileShapeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FileConstraintGroup"/>
+                <xs:element name="focusNode" type="t:FocusNodeType"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attribute name="id" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
+    </xs:complexType>
+    
+    <!-- F o l d e r    S h a p e -->
+    
+    <xs:complexType name="FolderShapeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:LinkTargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FolderConstraintGroup"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attribute name="id" type="xs:NCName"/>
+    </xs:complexType>
+
+    <!-- F o c u s    N o d e -->    
+    
+    <xs:complexType name="FocusNodeType">        
+        <xs:sequence>
+            <xs:element name="targetSize" minOccurs="0" type="t:TargetSizeType"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="t:ResourceShapeGroup"/>
+                <xs:group ref="t:FileConstraintGroup"/>
+                <xs:element name="focusNode" type="t:FocusNodeType"/>                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="selectXP" type="xs:string"/>
+    </xs:complexType>    
+    
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+C o n s t r a i n t    e l e m e n t s 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->    
+    
+    <!-- F i l e    N a m e    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="FileNameConstraintType">
+        <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
+        <xs:attributeGroup ref="t:MatchesLikeFacetAttGroup"/>
+        <xs:attribute name="flags" type="t:FlagsType"/>
+        <xs:attribute name="case" type="xs:boolean"/>
+    </xs:complexType>
+
+    <!-- F i l e    D a t e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FileDateConstraintType">
+        <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
+        <xs:attributeGroup ref="t:GtLtStringFacetAttGroup"/>
+        <xs:attributeGroup ref="t:MatchesLikeFacetAttGroup"/>
+        <xs:attribute name="flags" type="t:FlagsType"/>
+    </xs:complexType>
+    
+    <!-- F i l e    S i z e    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="FileSizeConstraintType">
+        <xs:attributeGroup ref="t:EqNeIntegerFacetAttGroup"/>
+        <xs:attributeGroup ref="t:GtLtIntegerFacetAttGroup"/>
+    </xs:complexType>
+    
+    <!-- M e d i a t y p e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="MediatypeConstraintType">
+        <xs:attribute name="eq" type="t:MediatypeListType"/>
+        <xs:attribute name="eqMsg" type="xs:string"/>
+        <xs:attribute name="eqMsgOK" type="xs:string"/>
+        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
+        
+        <xs:attribute name="csv.columnCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.columnCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.columnCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.rowCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.rowCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.rowCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.minColumnCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.minColumnCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.minColumnCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.maxColumnCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.maxColumnCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.maxColumnCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.minRowCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.minRowCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.minRowCountMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="csv.maxRowCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="csv.maxRowCountMsg" type="xs:string"/>
+        <xs:attribute name="csv.maxRowCountMsgOK" type="xs:string"/>
+    </xs:complexType>
+    
+    <!-- F o l d e r C o n t e n t    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FolderContentConstraintType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="memberFile" type="t:MemberFileType"/>
+                <xs:element name="memberFiles" type="t:MemberFilesType"/>
+                <xs:element name="memberFolder" type="t:MemberType"/>
+                <xs:element name="memberFolders" type="t:MembersType"/>
+                <xs:element name="member" type="t:MemberType"/>
+                <xs:element name="members" type="t:MemberType"/>
+
+                <xs:element name="excludedMemberFile" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMemberFiles" type="t:ExcludedMembersType"/>
+                <xs:element name="excludedMemberFolder" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMemberFolders" type="t:ExcludedMembersType"/>
+                <xs:element name="excludedMember" type="t:ExcludedMemberType"/>
+                <xs:element name="excludedMembers" type="t:ExcludedMembersType"/>
+                
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="closed" type="xs:boolean"/>
+        <xs:attribute name="closedMsg" type="xs:string"/>
+        <xs:attribute name="closedMsgOK" type="xs:string"/>
+        <xs:attribute name="ignoredMembers" type="xs:string"/>
+    </xs:complexType>
+    
+    <xs:complexType name="MemberType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
+    </xs:complexType>
+
+    <xs:complexType name="MembersType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attributeGroup ref="t:MemberCountFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="MemberFileType">
+        <xs:complexContent>
+            <xs:extension base="t:MemberType">
+                <xs:attributeGroup ref="t:HashKeyFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>        
+    </xs:complexType>
+    
+    <xs:complexType name="MemberFilesType">
+        <xs:complexContent>
+            <xs:extension base="t:MembersType">
+                <xs:attributeGroup ref="t:HashKeyFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>        
+    </xs:complexType>
+    
+    <xs:complexType name="ExcludedMemberType">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="excludedMemberMsg"/>
+        <xs:attribute name="excludedMemberMsgOK"/>
+    </xs:complexType>
+
+    <xs:complexType name="ExcludedMembersType">
+        <xs:attribute name="names" type="xs:string"/>
+        <xs:attribute name="excludedMemberMsg"/>
+        <xs:attribute name="excludedMemberMsgOK"/>
+    </xs:complexType>
+    
+    <!-- F o l d e r S i m i l a r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FolderSimilarConstraintType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="skipFiles" type="t:SkipMembersType"/>
+                <xs:element name="skipFolders" type="t:SkipMembersType"/>
+                <xs:element name="skipMembers" type="t:SkipMembersType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="folderSimilarMsg" type="xs:string"/>
+        <xs:attribute name="folderSimilarMsgOK" type="xs:string"/>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="SkipMembersType">
+        <xs:attribute name="names" type="xs:string" use="required"/>
+        <xs:attribute name="where" type="t:HereThereEnumType"/>
+    </xs:complexType>
+    
+    <!-- D o c T r e e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="DocTreeConstraintType">
+        <xs:sequence>
+            <xs:element name="node" type="t:DocTreeParticleType" maxOccurs="unbounded"/>                            
+        </xs:sequence>
+        <xs:attribute name="withNamespaces" type="xs:boolean"/>
+    </xs:complexType>
+    
+    <xs:complexType name="DocTreeParticleType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeGroupType"/>
+                <xs:element name="oneOf" type="t:DocTreeOneOfType"/>
+            </xs:choice>                
+        </xs:sequence>
+        <xs:attribute name="locNP" type="xs:string" use="required"/>
+        <xs:attribute name="atts" type="t:AttributeUsageListType"/>
+        <xs:attribute name="closed" type="xs:boolean"/>
+        <xs:attribute name="closedMsg" type="xs:string"/>
+        <xs:attribute name="closedMsgOK" type="xs:string"/>
+        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countMsg" type="xs:string"/>
+        <xs:attribute name="countMsgOK" type="xs:string"/>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountMsg" type="xs:string"/>
+        <xs:attribute name="minCountMsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount" type="t:MaxCountType"/>
+        <xs:attribute name="maxCountMsg" type="xs:string"/>
+        <xs:attribute name="maxCountMsgOK" type="xs:string"/>
+    </xs:complexType>
+    
+    <xs:complexType name="DocTreeOneOfType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeGroupType"/>
+                <xs:element name="oneOf" type="t:DocTreeOneOfType"/>
+            </xs:choice>              
+        </xs:sequence>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+
+    <xs:complexType name="DocTreeGroupType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="node" type="t:DocTreeParticleType"/>
+                <xs:element name="nodeGroup" type="t:DocTreeGroupType"/>
+                <xs:element name="oneOf" type="t:DocTreeOneOfType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>        
+    </xs:complexType>
+    
+    <!-- H y p e r d o c T r e e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="HyperdocTreeConstraintType">
+        <xs:complexContent>
+            <xs:extension base="t:DocTreeConstraintType">
+                <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+                <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- L i n k    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="LinkConstraintType">
+        <xs:sequence>
+            <xs:group ref="t:LinkDefGroup" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+
+    <!-- D o c S i m i l a r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="DocSimilarType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="sortDoc" type="t:SortDocType" maxOccurs="unbounded"/>
+                <xs:element name="skipItem" type="t:SelectItemType" maxOccurs="unbounded"/>
+                <xs:element name="ignoreValue" type="t:SelectItemType" maxOccurs="unbounded"/>
+                <xs:element name="editItem" type="t:EditItemType" maxOccurs="unbounded"/>
+                <xs:element name="roundItem" type="t:RoundItemType" maxOccurs="unbounded"/>                
+                <xs:element name="renameItem" type="t:RenameItemType" maxOccurs="unbounded"/>
+                <xs:element name="renamespaceItem" type="t:RenamespaceItemType" maxOccurs="unbounded"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="docSimilarMsg" type="xs:string"/>
+        <xs:attribute name="docSimilarMsgOK" type="xs:string"/>
+        <xs:attribute name="redReport" type="t:RedReportEnumType"/>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>        
+    </xs:complexType>
+
+    <xs:complexType name="SortDocType">
+        <xs:attribute name="orderBy" type="t:OrderByEnumType" use="required"/>
+        <xs:attribute name="localName" type="t:NCNameList"/>
+        <xs:attribute name="keySortedLocalName" type="xs:NCName"/>
+        <xs:attribute name="keyLocalName" type="t:AttOrElemName"/>
+    </xs:complexType>
+    
+    <xs:complexType name="SelectItemType">
+        <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
+    </xs:complexType>
+
+    <xs:complexType name="EditItemType">
+        <xs:attribute name="replaceSubstring" type="xs:string"/>
+        <xs:attribute name="replaceWith" type="xs:string"/>
+        <xs:attribute name="useString" type="t:UseStringListType"/>
+        <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
+    </xs:complexType>
+
+    <xs:complexType name="RoundItemType">
+        <xs:attribute name="scale" type="xs:integer"/>
+        <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="RenameItemType">
+        <xs:complexContent>
+            <xs:extension base="t:EditItemType">
+                <xs:attribute name="newName" type="xs:NCName"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="RenamespaceItemType">
+        <xs:complexContent>
+            <xs:extension base="t:EditItemType">
+                <xs:attribute name="newNamespace" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:attributeGroup name="ItemSelectorAttGroup">
+        <xs:attribute name="kind" type="t:ItemKindEnumType"/>
+        <xs:attribute name="localName" type="t:NCNameList"/>
+        <xs:attribute name="parentLocalName" type="t:NCNameList"/>
+        <xs:attribute name="namespace" type="t:AnyURIList"/>
+        <xs:attribute name="parentNamespace" type="t:AnyURIList"/>
+        <xs:attribute name="ifXP" type="xs:string"/>
+        <xs:attribute name="itemXP" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <!-- V a l u e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ValuesConstraintType">
+        <xs:sequence>
+            <xs:element name="value" type="t:ValueConstraintType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FoxvaluesConstraintType">
+        <xs:sequence>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ValueConstraintType">
+        <xs:complexContent>
+            <xs:extension base="t:ValueBaseType">
+                <xs:attribute name="exprXP" type="xs:string"/>
+                <xs:attribute name="exprLP" type="xs:string"/>
+                <xs:attribute name="filterLP" type="xs:string"/>
+                <xs:attribute name="mapLP" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="FoxvalueConstraintType">
+        <xs:complexContent>
+            <xs:extension base="t:ValueBaseType">
+                <xs:attribute name="exprFOX" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="TermsType">
+        <xs:sequence>
+            <xs:element name="term" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ValueComparisonsType">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="eq" type="xs:string"/>
+            <xs:element name="ne" type="xs:string"/>
+            <xs:element name="matches" type="xs:string"/>
+            <xs:element name="notMatches" type="xs:string"/>
+            <xs:element name="like" type="xs:string"/>
+            <xs:element name="notlike" type="xs:string"/>
+        </xs:choice>
+    </xs:complexType>
+    
+    
+    <!-- V a l u e P a i r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ValuePairsType">
+        <xs:sequence>
+            <xs:element name="valuePair" type="t:ValuePairType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ValuePairType">
+        <xs:complexContent>
+            <xs:extension base="t:ValuePairBaseType">
+                <xs:attribute name="expr1XP" type="xs:string"/>
+                <xs:attribute name="expr1LP" type="xs:string"/>
+                <xs:attribute name="filter1LP" type="xs:string"/>
+                <xs:attribute name="map1LP" type="xs:string"/>
+                <xs:attribute name="expr2XP" type="xs:string"/>
+                <xs:attribute name="expr2LP" type="xs:string"/>
+                <xs:attribute name="filter2LP" type="xs:string"/>
+                <xs:attribute name="map2LP" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="FoxvaluePairsType">
+        <xs:sequence>
+            <xs:element name="foxvaluePair" type="t:FoxvaluePairType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="FoxvaluePairType">
+        <xs:complexContent>
+            <xs:extension base="t:ValuePairBaseType">
+                <xs:attribute name="expr1FOX" type="xs:string"/>                
+                <xs:attribute name="expr1XP" type="xs:string"/>
+                <xs:attribute name="expr1LP" type="xs:string"/>
+                <xs:attribute name="filter1LP" type="xs:string"/>
+                <xs:attribute name="map1LP" type="xs:string"/>
+                <xs:attribute name="expr2FOX" type="xs:string"/>                
+                <xs:attribute name="expr2XP" type="xs:string"/>
+                <xs:attribute name="expr2LP" type="xs:string"/>
+                <xs:attribute name="filter2LP" type="xs:string"/>
+                <xs:attribute name="map2LP" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- V a l u e C o m p a r e d    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ValuesComparedType">
+        <xs:sequence>
+            <xs:element name="valueCompared" type="t:ValueComparedType" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="ValueComparedType">
+        <xs:complexContent>
+            <xs:extension base="t:ValuePairBaseType">
+                <xs:attribute name="expr1XP" type="xs:string"/>
+                <xs:attribute name="expr2XP" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- F o x v a l u e C o m p a r e d    C o n s t r a i n t s -->
+    
+    <xs:complexType name="FoxvaluesComparedType">
+        <xs:sequence>
+            <xs:element name="foxvalueCompared" type="t:FoxvalueComparedType" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="t:LinkRefOrDefAttGroup"/>
+        <xs:attributeGroup ref="t:LinkFacetAttGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="FoxvalueComparedType">
+        <xs:complexContent>
+            <xs:extension base="t:ValuePairBaseType">
+                <xs:attribute name="expr1FOX" type="xs:string"/>                
+                <xs:attribute name="expr1XP" type="xs:string"/>
+                <xs:attribute name="expr1LP" type="xs:string"/>
+                <xs:attribute name="filter1LP" type="xs:string"/>
+                <xs:attribute name="map1LP" type="xs:string"/>
+                <xs:attribute name="expr2FOX" type="xs:string"/>                
+                <xs:attribute name="expr2XP" type="xs:string"/>
+                <xs:attribute name="expr2LP" type="xs:string"/>
+                <xs:attribute name="filter2LP" type="xs:string"/>
+                <xs:attribute name="map2LP" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- V a l u e    B a s e    T y p e -->
+    
+    <xs:complexType name="ValueBaseType">
+        <xs:sequence>
+            <xs:element name="in" type="t:ValueComparisonsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="notin" type="t:ValueComparisonsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="contains" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="sameTerms" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="permutation" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="deepEqual" type="t:TermsType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="quant" type="t:QuantEnumType"/>        
+        <xs:attribute name="flags" type="t:FlagsType"/>
+        <xs:attribute name="useDatatype" type="t:XSDDatatypeEnumType"/>
+        <xs:attribute name="useString" type="t:UseStringListType"/>
+        
+        <xs:attribute name="inMsg" type="xs:string"/>
+        <xs:attribute name="inMsgOK" type="xs:string"/>
+        <xs:attribute name="notinMsg" type="xs:string"/>
+        <xs:attribute name="notinMsgOK" type="xs:string"/>
+        <xs:attribute name="containsMsg" type="xs:string"/>
+        <xs:attribute name="containsMsgOK" type="xs:string"/>
+        <xs:attribute name="sameTermsMsg" type="xs:string"/>
+        <xs:attribute name="sameTermsMsgOK" type="xs:string"/>
+        <xs:attribute name="permutationMsg" type="xs:string"/>
+        <xs:attribute name="permutationMsgOK" type="xs:string"/>
+        <xs:attribute name="deepEqualMsg" type="xs:string"/>
+        <xs:attribute name="deepEqualMsgOK" type="xs:string"/>        
+        
+        <xs:attributeGroup ref="t:CountFacetAttGroup"/>
+        <xs:attributeGroup ref="t:EqNeStringFacetAttGroup"/>
+        <xs:attributeGroup ref="t:GtLtStringFacetAttGroup"/>
+        <xs:attributeGroup ref="t:MatchesLikeFacetAttGroup"/>
+        <xs:attributeGroup ref="t:LengthFacetAttGroup"/>
+        <xs:attributeGroup ref="t:DatatypeFacetAttGroup"/>
+        <xs:attributeGroup ref="t:DistinctFacetAttGroup"/>
+        
+    </xs:complexType>    
+    
+    <!-- V a l u e P a i r    B a s e    T y p e -->
+    
+    <xs:complexType name="ValuePairBaseType">
+        <xs:attribute name="quant" type="t:QuantExtendedEnumType"/>
+        <xs:attribute name="useDatatype" type="t:XSDDatatypeEnumType"/>
+        <xs:attribute name="useString" type="t:UseStringListType"/>
+        <xs:attribute name="expr2Context" type="t:Expr2ContextEnumType"/>
+        <xs:attributeGroup ref="t:ValuePairCmpFacetAttGroup"/>
+        <xs:attributeGroup ref="t:Count1FacetAttGroup"/>
+        <xs:attributeGroup ref="t:Count2FacetAttGroup"/>
+    </xs:complexType>
+
+    <!-- X s d V a l i d    C o n s t r a i n t s -->
+    
+    <xs:complexType name="XsdValidConstraintType">
+        <xs:attribute name="xsdFOX" type="xs:string"/>
+        <xs:attribute name="selectXP" type="xs:string"/>
+        <xs:attribute name="xsdValidMsg" type="xs:string"/>
+        <xs:attribute name="xsdValidMsgOK" type="xs:string"/>
+    </xs:complexType>
+    
+    <!-- C o n d i t i o n a l    F i l e    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ConditionalFileConstraintType">
+        <xs:sequence>
+            <xs:element name="if" type="t:ConditionalFileConstraintClauseType"/>
+            <xs:element name="then" type="t:ConditionalFileConstraintClauseType"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="elseif" type="t:ConditionalFileConstraintClauseType"/>
+                <xs:element name="then" type="t:ConditionalFileConstraintClauseType"/>                
+            </xs:sequence>
+            <xs:element name="else" type="t:ConditionalFileConstraintClauseType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ConditionalFileConstraintClauseType">
+        <xs:choice>
+            <xs:group ref="t:ResourceShapeGroup"/>
+            <xs:element name="focusNode" type="t:FocusNodeType"/>
+            <xs:group ref="t:FileConstraintGroup"/>            
+        </xs:choice>    
+    </xs:complexType>
+
+    <!-- C o n d i t i o n a l    F o l d e r    C o n s t r a i n t s -->
+    
+    <xs:complexType name="ConditionalFolderConstraintType">
+        <xs:sequence>
+            <xs:element name="if" type="t:ConditionalFolderConstraintClauseType"/>
+            <xs:element name="then" type="t:ConditionalFolderConstraintClauseType"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="elseif" type="t:ConditionalFolderConstraintClauseType"/>
+                <xs:element name="then" type="t:ConditionalFolderConstraintClauseType"/>                
+            </xs:sequence>
+            <xs:element name="else" type="t:ConditionalFolderConstraintClauseType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ConditionalFolderConstraintClauseType">
+        <xs:choice>
+            <xs:group ref="t:ResourceShapeGroup"/>
+            <xs:group ref="t:FolderConstraintGroup"/>            
+        </xs:choice>    
+    </xs:complexType>
+    
+    
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Simple types 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+-->    
+    <xs:simpleType name="AnyURIList">
+        <xs:list itemType="xs:anyURI"/>
+    </xs:simpleType>
+    
+    <!-- NCName, optionally preceded by @ -->
+    <xs:simpleType name="AttOrElemName">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="@?\i\c*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="AttributeUsageListType">
+        <xs:list itemType="t:AttributeUsageType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="AttributeUsageType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\i\c*:)?\i\c*\??"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="CsvSeparatorType">
+        <xs:union memberTypes="t:CsvSeparatorIdentifierEnumType t:SingleCharType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="FlagsType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[ix]+"/>    
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="MaxCountType">
+        <xs:union memberTypes="xs:nonNegativeInteger t:UnboundedEnumType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Md5ListType">
+        <xs:list itemType="t:Md5Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Md5Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]{32}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="MediatypeListType">
+        <xs:list itemType="t:MediatypeEnumType"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="NCNameList">
+        <xs:list itemType="xs:NCName"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha1ListType">
+        <xs:list itemType="t:Sha1Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha1Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha256ListType">
+        <xs:list itemType="t:Sha256Type"/>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Sha256Type">
+        <xs:restriction base="xs:token">
+            <xs:pattern value="[0-9A-Fa-f]"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="SingleCharType">
+        <xs:restriction base="xs:string">
+            <xs:length value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="UseStringListType">
+        <xs:list itemType="t:UseStringEnumType"/>
+    </xs:simpleType>
+    
+    
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Enumerations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+-->   
+    <xs:simpleType name="CsvFormatEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="direct"/>
+            <xs:enumeration value="attributes"/>
+        </xs:restriction>
+    </xs:simpleType>    
+    
+    <xs:simpleType name="CsvSeparatorIdentifierEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="comma"/>
+            <xs:enumeration value="semicolon"/>
+            <xs:enumeration value="colon"/>
+            <xs:enumeration value="tab"/>
+            <xs:enumeration value="space"/>
+        </xs:restriction>
+    </xs:simpleType>    
+    
+    <xs:simpleType name="UseStringEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="lc"/>    
+            <xs:enumeration value="uc"/>
+            <xs:enumeration value="ns"/>
+            <xs:enumeration value="tr"/>
+            <xs:enumeration value="sv"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Expr2ContextEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="item"/>
+            <xs:enumeration value="context1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="HereThereEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="here"/>
+            <xs:enumeration value="there"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="ItemKindEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="element"/>
+            <xs:enumeration value="attribute"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="MediatypeEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="xml"/>
+            <xs:enumeration value="json"/>
+            <xs:enumeration value="csv"/>
+            <xs:enumeration value="html"/>
+        </xs:restriction>    
+    </xs:simpleType>
+    
+    <xs:simpleType name="OrderByEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="localName"/>
+            <xs:enumeration value="keyValue"/>            
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="QuantEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="all"/>    
+            <xs:enumeration value="some"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="QuantExtendedEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="all"/>    
+            <xs:enumeration value="some"/>
+            <xs:enumeration value="someForEach"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="RedReportEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="localIndexedPath"/>
+            <xs:enumeration value="localPath"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="UnboundedEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="unbounded"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ValueCountPairCmpEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="eq"/>
+            <xs:enumeration value="ne"/>
+            <xs:enumeration value="lt"/>
+            <xs:enumeration value="le"/>
+            <xs:enumeration value="gt"/>
+            <xs:enumeration value="ge"/>
+        </xs:restriction>
+    </xs:simpleType>    
+    
+    <xs:simpleType name="ValuePairCmpEnumType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="eq"/>
+            <xs:enumeration value="ne"/>
+            <xs:enumeration value="lt"/>
+            <xs:enumeration value="le"/>
+            <xs:enumeration value="gt"/>
+            <xs:enumeration value="ge"/>
+            <xs:enumeration value="in"/>
+            <xs:enumeration value="hasSubstring"/>
+            <xs:enumeration value="isSubstring"/>
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="notin"/>
+            <xs:enumeration value="contains"/>
+            <xs:enumeration value="sameTerms"/>
+            <xs:enumeration value="permutation"/>
+            <xs:enumeration value="deepEqual"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="XSDDatatypeEnumType">
+        <xs:restriction base="xs:NCName">
+            <xs:enumeration value="anyURI"/>
+            <xs:enumeration value="base64Binary"/>
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="byte"/>
+            <xs:enumeration value="date"/>
+            <xs:enumeration value="dateTime"/>         
+            <xs:enumeration value="dayTimeDuration"/>
+            <xs:enumeration value="decimal"/>
+            <xs:enumeration value="double"/>
+            <xs:enumeration value="duration"/>
+            <xs:enumeration value="float"/>
+            <xs:enumeration value="ENTITY"/>
+            <xs:enumeration value="gDay"/>
+            <xs:enumeration value="gMonth"/>
+            <xs:enumeration value="gMonthDay"/>
+            <xs:enumeration value="gYearMonth"/>
+            <xs:enumeration value="gYear"/>
+            <xs:enumeration value="hexBinary"/>
+            <xs:enumeration value="ID"/>            
+            <xs:enumeration value="IDREF"/>
+            <xs:enumeration value="int"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="language"/>
+            <xs:enumeration value="long"/>
+            <xs:enumeration value="Name"/>
+            <xs:enumeration value="NCName"/>
+            <xs:enumeration value="NMTOKEN"/>
+            <xs:enumeration value="negativeInteger"/>
+            <xs:enumeration value="nonNegativeInteger"/>
+            <xs:enumeration value="nonPositiveInteger"/>
+            <xs:enumeration value="normalizedString"/>
+            <xs:enumeration value="positiveInteger"/>
+            <xs:enumeration value="QName"/>
+            <xs:enumeration value="short"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="time"/>            
+            <xs:enumeration value="token"/>
+            <xs:enumeration value="unsignedByte"/>
+            <xs:enumeration value="unsignedInt"/>
+            <xs:enumeration value="unsignedLong"/>
+            <xs:enumeration value="unsignedShort"/>
+            <xs:enumeration value="yearMonthDuration"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="YesNoEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="yes"/>
+            <xs:enumeration value="no"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Groups 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+-->
+    <xs:group name="LinkDefGroup">
+        <xs:choice>
+            <xs:element name="templateVar" type="t:TemplateVarType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="FolderConstraintGroup">
+        <xs:choice>
+            <xs:element name="fileName" type="t:FileNameConstraintType"/>
+            <xs:element name="fileDate" type="t:FileDateConstraintType"/>
+            <xs:element name="folderContent" type="t:FolderContentConstraintType"/>
+            <xs:element name="folderSimilar" type="t:FolderSimilarConstraintType"/>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
+            <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
+            <xs:element name="foxvaluePair" type="t:FoxvaluePairType"/>
+            <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
+            <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
+            <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
+            <xs:element name="links" type="t:LinkConstraintType"/>
+            <xs:element name="conditional" type="t:ConditionalFolderConstraintType"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="FileConstraintGroup">
+        <xs:choice>
+            <xs:element name="fileName" type="t:FileNameConstraintType"/>
+            <xs:element name="fileDate" type="t:FileDateConstraintType"/>
+            <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
+            <xs:element name="mediatype" type="t:MediatypeConstraintType"/>
+            <xs:element name="docTree" type="t:DocTreeConstraintType"/>
+            <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
+            <xs:element name="docSimilar" type="t:DocSimilarType"/>
+            <xs:element name="value" type="t:ValueConstraintType"/>
+            <xs:element name="values" type="t:ValuesConstraintType"/>
+            <xs:element name="valuePair" type="t:ValuePairType"/>
+            <xs:element name="valuePairs" type="t:ValuePairsType"/>
+            <xs:element name="valuesCompared" type="t:ValuesComparedType"/>
+            <xs:element name="foxvalue" type="t:FoxvalueConstraintType"/>
+            <xs:element name="foxvalues" type="t:FoxvaluesConstraintType"/>
+            <xs:element name="foxvaluePair" type="t:FoxvaluePairType"/>
+            <xs:element name="foxvaluePairs" type="t:FoxvaluePairsType"/>
+            <xs:element name="foxvaluesCompared" type="t:FoxvaluesComparedType"/>
+            <xs:element name="links" type="t:LinkConstraintType"/>
+            <xs:element name="xsdValid" type="t:XsdValidConstraintType"/>            
+            <xs:element name="conditional" type="t:ConditionalFileConstraintType"/>
+        </xs:choice>
+    </xs:group>
+    
+    <xs:group name="ResourceShapeGroup">
+        <xs:choice>
+            <xs:element name="file" type="t:FileShapeType"/>
+            <xs:element name="folder" type="t:FolderShapeType"/>
+        </xs:choice>
+    </xs:group>
+    
+    <!-- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Attribute groups 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+-->    
+    
+    <xs:attributeGroup name="LinkDefAttGroup">
+        <xs:attribute name="foxpath" type="xs:string"/>
+        <xs:attribute name="navigateFOX" type="xs:string"/>
+        <xs:attribute name="uri" type="xs:string"/>        
+        <xs:attribute name="contextXP" type="xs:string"/>
+        <xs:attribute name="targetXP" type="xs:string"/>        
+        <xs:attribute name="hrefXP" type="xs:string"/>
+        <xs:attribute name="uriXP" type="xs:string"/>
+        <xs:attribute name="uriTemplate" type="xs:string"/>
+        <xs:attribute name="reflector1URI" type="xs:string"/>
+        <xs:attribute name="reflector2URI" type="xs:string"/>
+        <xs:attribute name="reflector1FOX" type="xs:string"/>
+        <xs:attribute name="reflector2FOX" type="xs:string"/>
+        <xs:attribute name="reflectedReplaceSubstring" type="xs:string"/>
+        <xs:attribute name="reflectedReplaceWith" type="xs:string"/>
+        <xs:attribute name="recursive" type="xs:boolean"/>        
+        <xs:attribute name="mediatype" type="xs:string"/>        
+        <xs:attributeGroup ref="t:CsvOptionsAttGroup"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="LinkRefOrDefAttGroup">
+        <xs:attribute name="linkName" type="xs:NCName"/>
+        <xs:attributeGroup ref="t:LinkDefAttGroup"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="TargetDeclarationAttGroup">
+        <xs:attributeGroup ref="t:LinkDefAttGroup"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="HashKeyFacetAttGroup">
+        <xs:attribute name="md5" type="t:Md5ListType"/>
+        <xs:attribute name="md5Msg" type="xs:string"/>
+        <xs:attribute name="md5MsgOK" type="xs:string"/>        
+        <xs:attribute name="sha1" type="t:Sha1ListType"/>
+        <xs:attribute name="sha1Msg" type="xs:string"/>        
+        <xs:attribute name="sha1MsgOK" type="xs:string"/>        
+        <xs:attribute name="sha256" type="t:Sha256ListType"/>
+        <xs:attribute name="sha256Msg" type="xs:string"/>        
+        <xs:attribute name="sha256MsgOK" type="xs:string"/>        
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="MemberCountFacetAttGroup">
+        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countMsg" type="xs:string"/>
+        <xs:attribute name="countMsgOK" type="xs:string"/>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountMsg" type="xs:string"/>
+        <xs:attribute name="minCountMsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount" type="t:MaxCountType"/>
+        <xs:attribute name="maxCountMsg" type="xs:string"/>
+        <xs:attribute name="maxCountMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="CountFacetAttGroup">
+        <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countMsg" type="xs:string"/>
+        <xs:attribute name="countMsgOK" type="xs:string"/>
+        <xs:attribute name="minCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountMsg" type="xs:string"/>
+        <xs:attribute name="minCountMsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountMsg" type="xs:string"/>
+        <xs:attribute name="maxCountMsgOK" type="xs:string"/>
+        <xs:attribute name="exists" type="xs:boolean"/>
+        <xs:attribute name="existsMsg" type="xs:string"/>
+        <xs:attribute name="existsMsgOK" type="xs:string"/>
+        <xs:attribute name="empty" type="xs:boolean"/>
+        <xs:attribute name="emptyMsg" type="xs:string"/>
+        <xs:attribute name="emptyMsgOK" type="xs:string"/>        
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="Count1FacetAttGroup">
+        <xs:attribute name="count1" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="count1Msg" type="xs:string"/>
+        <xs:attribute name="count1MsgOK" type="xs:string"/>
+        <xs:attribute name="minCount1" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCount1Msg" type="xs:string"/>
+        <xs:attribute name="minCount1MsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount1" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCount1Msg" type="xs:string"/>
+        <xs:attribute name="maxCount1MsgOK" type="xs:string"/>
+        <xs:attribute name="exists1" type="xs:boolean"/>
+        <xs:attribute name="exists1Msg" type="xs:string"/>
+        <xs:attribute name="exists1MsgOK" type="xs:string"/>
+        <xs:attribute name="empty1" type="xs:boolean"/>
+        <xs:attribute name="empty1Msg" type="xs:string"/>
+        <xs:attribute name="empty1MsgOK" type="xs:string"/>        
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="Count2FacetAttGroup">
+        <xs:attribute name="count2" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="count2Msg" type="xs:string"/>
+        <xs:attribute name="count2MsgOK" type="xs:string"/>
+        <xs:attribute name="minCount2" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCount2Msg" type="xs:string"/>
+        <xs:attribute name="minCount2MsgOK" type="xs:string"/>
+        <xs:attribute name="maxCount2" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCount2Msg" type="xs:string"/>
+        <xs:attribute name="maxCount2MsgOK" type="xs:string"/>
+        <xs:attribute name="exists2" type="xs:boolean"/>
+        <xs:attribute name="exists2Msg" type="xs:string"/>
+        <xs:attribute name="exists2MsgOK" type="xs:string"/>
+        <xs:attribute name="empty2" type="xs:boolean"/>
+        <xs:attribute name="empty2Msg" type="xs:string"/>
+        <xs:attribute name="empty2MsgOK" type="xs:string"/>
+
+        <xs:attribute name="cmpCount" type="t:ValueCountPairCmpEnumType"/>
+        <xs:attribute name="cmpCountMsg" type="xs:string"/>
+        <xs:attribute name="cmpCountMsgOK" type="xs:string"/>
+        
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="LinkFacetAttGroup">
+        
+        <!-- resolvable -->
+        <xs:attribute name="resolvable" type="xs:boolean"/>    
+        <xs:attribute name="resolvableMsg" type="xs:string"/>
+        <xs:attribute name="resolvableMsgOK" type="xs:string"/>
+        
+        <!-- exists -->
+        <xs:attribute name="exists" type="xs:boolean"/>    
+        <xs:attribute name="existsMsg" type="xs:string"/>
+        <xs:attribute name="existsMsgOK" type="xs:string"/>
+        
+        <!-- empty -->
+        <xs:attribute name="empty" type="xs:boolean"/>    
+        <xs:attribute name="emptyMsg" type="xs:string"/>
+        <xs:attribute name="emptyMsgOK" type="xs:string"/>
+        
+        <!-- countContextNodes, etc. -->
+        <xs:attribute name="countContextNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countContextNodesMsg" type="xs:string"/>
+        <xs:attribute name="countContextMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountContextNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountContextNodesMsg" type="xs:string"/>
+        <xs:attribute name="minCountContextNodesMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountContextNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountContextMsg" type="xs:string"/>
+        <xs:attribute name="maxCountContextNodesMsgOK" type="xs:string"/>
+        
+        <!-- countTargetResources, etc. -->
+        <xs:attribute name="countTargetResources" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetResourcesMsg" type="xs:string"/>
+        <xs:attribute name="countTargetResourcesMsgOK" type="xs:string"/>
+
+        <xs:attribute name="minCountTargetResources" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetResourcesMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetResourcesMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetResources" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetResourcesMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetResourcesMsgOK" type="xs:string"/>
+        
+        <!-- countTargetResourcesPerContextPoint, etc. -->
+        <xs:attribute name="countTargetResourcesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetResourcesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="countTargetResourcesPerContextPointMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountTargetResourcesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetResourcesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetResourcesPerContextPointMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetResourcesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetResourcesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetResourcesMsgPerContextPointOK" type="xs:string"/>
+        
+        <!-- countTargetDocs, etc. -->
+        <xs:attribute name="countTargetDocs" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetDocsMsg" type="xs:string"/>
+        <xs:attribute name="countTargetDocsMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountTargetDocs" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetDocsMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetDocsMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetDocs" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetDocsMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetDocsMsgOK" type="xs:string"/>
+        
+        <!-- countTargetDocsPerContextPoint, etc. -->
+        <xs:attribute name="countTargetDocsPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetDocsPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="countTargetDocsPerContextPointMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountTargetDocsPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetDocsPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetDocsMsgPerContextPointOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetDocsPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetDocsPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetDocsPerContextPointMsgOK" type="xs:string"/>
+        
+        <!-- countTargetNodes, etc. -->
+        <xs:attribute name="countTargetNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetNodesMsg" type="xs:string"/>
+        <xs:attribute name="countTargetNodesMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountTargetNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetNodesMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetNodesMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetNodes" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetNodesMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetNodesMsgOK" type="xs:string"/>
+
+        <!-- countTargetNodesPerContextPoint, etc. -->
+        <xs:attribute name="countTargetNodesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="countTargetNodesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="countTargetNodesPerContextPointMsgOK" type="xs:string"/>
+        
+        <xs:attribute name="minCountTargetNodesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minCountTargetNodesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="minCountTargetNodesMsgPerContextPointOK" type="xs:string"/>
+        
+        <xs:attribute name="maxCountTargetNodesPerContextPoint" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxCountTargetNodesPerContextPointMsg" type="xs:string"/>
+        <xs:attribute name="maxCountTargetNodesPerContextPointMsgOK" type="xs:string"/>
+        
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="CsvOptionsAttGroup">
+        <xs:attribute name="csv.separator" type="t:CsvSeparatorType"/>
+        <xs:attribute name="csv.header" type="t:YesNoEnumType"/>        
+        <xs:attribute name="csv.format" type="t:CsvFormatEnumType"/>
+        <xs:attribute name="csv.lax" type="t:YesNoEnumType"/>
+        <xs:attribute name="csv.quotes" type="t:YesNoEnumType"/>
+        <xs:attribute name="csv.backslashes" type="t:YesNoEnumType"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="EqNeStringFacetAttGroup">
+        <xs:attribute name="eq" type="xs:string"/>
+        <xs:attribute name="eqMsg" type="xs:string"/>
+        <xs:attribute name="eqMsgOK" type="xs:string"/>
+        <xs:attribute name="ne" type="xs:string"/>
+        <xs:attribute name="neMsg" type="xs:string"/>
+        <xs:attribute name="neMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="EqNeIntegerFacetAttGroup">
+        <xs:attribute name="eq" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="eqMsg" type="xs:string"/>
+        <xs:attribute name="eqMsgOK" type="xs:string"/>
+        <xs:attribute name="ne" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="neMsg" type="xs:string"/>
+        <xs:attribute name="neMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="GtLtStringFacetAttGroup">
+        <xs:attribute name="gt" type="xs:string"/>
+        <xs:attribute name="gtMsg" type="xs:string"/>
+        <xs:attribute name="gtMsgOK" type="xs:string"/>
+        <xs:attribute name="ge" type="xs:string"/>
+        <xs:attribute name="geMsg" type="xs:string"/>
+        <xs:attribute name="geMsgOK" type="xs:string"/>
+        <xs:attribute name="lt" type="xs:string"/>
+        <xs:attribute name="ltMsg" type="xs:string"/>
+        <xs:attribute name="ltMsgOK" type="xs:string"/>
+        <xs:attribute name="le" type="xs:string"/>
+        <xs:attribute name="leMsg" type="xs:string"/>
+        <xs:attribute name="leMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="GtLtIntegerFacetAttGroup">
+        <xs:attribute name="gt" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="gtMsg" type="xs:string"/>
+        <xs:attribute name="gtMsgOK" type="xs:string"/>
+        <xs:attribute name="ge" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="geMsg" type="xs:string"/>
+        <xs:attribute name="geMsgOK" type="xs:string"/>
+        <xs:attribute name="lt" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="ltMsg" type="xs:string"/>
+        <xs:attribute name="ltMsgOK" type="xs:string"/>
+        <xs:attribute name="le" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="leMsg" type="xs:string"/>
+        <xs:attribute name="leMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="MatchesLikeFacetAttGroup">
+        <xs:attribute name="matches" type="xs:string"/>
+        <xs:attribute name="matchesMsg" type="xs:string"/>
+        <xs:attribute name="matchesMsgOK" type="xs:string"/>
+        <xs:attribute name="notMatches" type="xs:string"/>
+        <xs:attribute name="notMatchesMsg" type="xs:string"/>
+        <xs:attribute name="notMatchesMsgOK" type="xs:string"/>
+        <xs:attribute name="like" type="xs:string"/>
+        <xs:attribute name="likeMsg" type="xs:string"/>
+        <xs:attribute name="likeMsgOK" type="xs:string"/>
+        <xs:attribute name="notLike" type="xs:string"/>
+        <xs:attribute name="notLikeMsg" type="xs:string"/>
+        <xs:attribute name="notLikeMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="LengthFacetAttGroup">
+        <xs:attribute name="length" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="lengthMsg" type="xs:string"/>
+        <xs:attribute name="lengthMsgOK" type="xs:string"/>
+        <xs:attribute name="minLength" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="minLengthMsg" type="xs:string"/>
+        <xs:attribute name="minLengthMsgOK" type="xs:string"/>
+        <xs:attribute name="maxLength" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="maxLengthMsg" type="xs:string"/>
+        <xs:attribute name="maxLengthMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="DatatypeFacetAttGroup">
+        <xs:attribute name="datatype" type="t:XSDDatatypeEnumType"/>
+        <xs:attribute name="datatypeMsg" type="xs:string"/>
+        <xs:attribute name="datatypeMsgOK" type="xs:string"/>
+    </xs:attributeGroup>
+    
+    <xs:attributeGroup name="DistinctFacetAttGroup">
+        <xs:attribute name="distinct" type="xs:boolean"/>
+        <xs:attribute name="distinctMsg" type="xs:string"/>
+        <xs:attribute name="distinctMsgOK" type="xs:string"/>
+    </xs:attributeGroup>        
+
+    <xs:attributeGroup name="ValuePairCmpFacetAttGroup">
+        <xs:attribute name="cmp" type="t:ValuePairCmpEnumType"/>
+        <xs:attribute name="cmpMsg" type="xs:string"/>
+        <xs:attribute name="cmpMsgOK" type="xs:string"/>
+    </xs:attributeGroup>        
+    
+</xs:schema>
+
