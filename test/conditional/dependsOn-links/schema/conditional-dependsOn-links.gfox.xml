@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a conditional constraint, dependent on the existence of linked resources.
+    
+    Note the design pattern: <if><links linkName="..." exists="true"/>...</if>
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../greenfox-xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+    
+    <linkDef name="link1" uri="foo1"/>
+    <linkDef name="link2" uri="foo2"/>
+	
+    <domain uri="${domain}" name="data">
+        <folder navigateFOX="dir*">
+            <targetSize count="3" countMsg="Expected 3 subfolders."/>
+            
+            <!-- If folder contains foo1, it must contain two folders *1;
+                 if folder contains foo2, it must contain two folders *2;
+                 otherwise, it must contain two folders *3 -->
+            <conditional>
+                <if>
+                    <links linkName="link1" exists="true"/>
+                </if>
+                <then>
+                    <folderContent closed="true">
+                        <memberFolder name="*1" count="2"/>
+                    </folderContent>
+                </then>
+                <elseif>
+                    <links linkName="link2" exists="true"/>                
+                </elseif>
+                    <then>
+                    <folderContent closed="true">
+                        <memberFolder name="*2" count="2"/>
+                    </folderContent>                
+                </then>
+                <else>
+                    <folderContent closed="true">
+                        <memberFolder name="*3" count="2"/>
+                    </folderContent>                
+                </else>
+            </conditional>                
+        </folder>
+    </domain>
+</greenfox>
