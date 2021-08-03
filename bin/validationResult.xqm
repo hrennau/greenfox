@@ -456,7 +456,9 @@ declare function f:constructError_folderContentCount($colour as xs:string,
             $constraintNode/i:firstCharToUpperCase(local-name(.))
     let $msg :=
         let $msgAttPrefix := 
-            if ($constraintNode/self::attribute()) then $constraintNode/local-name(.) else 'count'
+            if ($constraintNode/self::attribute()) then $constraintNode/local-name(.) 
+            else if ($constraintNode/local-name(.) ! starts-with(., 'excluded')) then 'excludedMember'
+            else 'count'
         return i:getResultMsg($colour, $constraintNode/ancestor-or-self::*[1], $msgAttPrefix)
     
     let $valueElems :=
