@@ -22,3 +22,4 @@ Backup of *.doc*
 
 # Visio autosave temporary files
 *.~vsd*
+test/testcases-output
