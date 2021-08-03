@@ -124,32 +124,6 @@ declare function f:resolveTargetDeclaration($resourceShape as element(),
  : @param context the processing context
  : @return the target paths
  :)
- (:
-declare function f:getTargetPaths_path($path as xs:string, 
-                                       $resourceShape as element(),
-                                       $context as map(xs:string, item()*))
-        as xs:string* {
-    let $contextPath := $context?_targetInfo?contextURI
-    let $isExpectedResourceKind := 
-        if ($resourceShape/self::gx:folder) 
-        then i:fox-resource-is-dir#1 
-        else i:fox-resource-is-file#1
-    return    
-        concat($contextPath, '/', $path)
-        [i:fox-resource-exists(.)]
-        [$isExpectedResourceKind(.)]        
-};
-:)
-
-(:~
- : Returns the target paths of a resource shape, identified by a plain path 
- : expression. Note that the plain path may contain wildcards.
- :
- : @param path plain path expression
- : @param resourceShape the resource shape 
- : @param context the processing context
- : @return the target paths
- :)
 declare function f:getTargetPaths_uri($uri as xs:string, 
                                       $resourceShape as element(),
                                       $context as map(xs:string, item()*))

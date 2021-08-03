@@ -1,7 +1,7 @@
 (:
  : -------------------------------------------------------------------------
  :
- : linkConstraint.xqm - validates against a link constraint
+ : linkConstraint.xqm - validates the results of link resolution against constraints
  :
  : -------------------------------------------------------------------------
  :)

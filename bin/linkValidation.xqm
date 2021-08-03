@@ -295,16 +295,16 @@ declare function f:validateLinkCounts($lros as map(*)*,
 };
 
 (:~
- : Returns all constraint attributes found in an element.
+ : Returns all link constraint attributes found in an element.
  :
  : @param constraintElem an element possibly declaring link constraints
  : @return all attributees on $constraintElem declaring link constraints
  :)
 declare function f:getLinkConstraintAtts($constraintElem as element())
         as attribute()* {
-    $constraintElem/@*[matches(name(),
-        '^(exists|empty)$|' ||
-        '^(count|minCount|maxCount)' ||
-        '(ContextNodes|TargetResources|TargetDocs|TargetDocs)' ||
-        '(PerContextPoint)?$', 'x')]        
+    $constraintElem/(
+        @exists, @empty, @resolvable,
+        @*[matches(name(),
+           '^(count|minCount|maxCount)(ContextNodes|TargetResources|TargetDocs|TargetDocs)(PerContextPoint)?$', 'x')]
+    )
 };

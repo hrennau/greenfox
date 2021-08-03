@@ -75,7 +75,8 @@ declare function f:validateLinkConstraints($resourceShape as element(),
 };
 
 (:~
- : Validates the target count of a resource shape or a focus node.
+ : Validates the target count of a resource shape or a focus node. Constraints
+ : are represented by attributes @count, @minCount, @maxCount.
  :
  : @param resourceShape a file shape or a folder shape
  : @param ldo Link Definition Object used a target declaration
