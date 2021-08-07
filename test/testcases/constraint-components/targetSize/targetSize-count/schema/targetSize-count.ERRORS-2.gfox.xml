@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Checks the use of targetSize constraint "count" (TargetCount).
+    
+    Should produce 2 errors.
   -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
           xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../greenfox-xsd/greenfox.xsd">
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
     <context>
     	<field name="domain" valueFOX="..\..\data"/>
     </context>
 	
     <domain uri="${domain}" name="data">
-        <folder uri="foo">
+        <folder uri="fooXXX">
             <targetSize count="1" countMsg="Expected folder not found: 'foo'"/>
         </folder>
-        <folder uri="fooDeprecated">
+        <folder uri="foo">
             <targetSize count="0" countMsg="Folder should not occur: 'fooDeprecated'"/>
         </folder>
     </domain>
