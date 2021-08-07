@@ -15,7 +15,7 @@
         <file uri="doc.xml">
             <value exprXP="*/@version"
                    count="1" countMsg="Missing attribute: @version"                
-                   eq="2.0" eqMsg="Not expected value (2.0)"/>            
+                   eq="2.0" eqMsg="Not expected version (2.0)"/>            
         </file>
     </domain>
 </greenfox>
