@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a ValueEq constraint, combined with a ValueCount constraint.
+    
+    Should produce 1 error.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <file uri="doc.xml">
+            <value exprXP="*/@version"
+                   count="1" countMsg="Missing attribute: @version"                
+                   eq="3.0" eqMsg="Not expected version (3.0)"/>            
+        </file>
+    </domain>
+</greenfox>
