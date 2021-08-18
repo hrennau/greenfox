@@ -32,6 +32,7 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : Creates the initial processing context. Its context reflect ...
  : - schema element <context>
  : - schema elements <linkDef> which are immediate child elements of the root element
+ : - user-supplied arguments
  :
  : @param gfox a greenfox schema
  : @param params a string encoding parameter value assignments supplied by the user
@@ -249,7 +250,10 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
  :     schemaPath - a path, using backslashes
  :     schemaFOX - same as schemaPath 
  : (2) If function parameter $domain is supplied or a 'domain' name-value pair
- :     exists: add name-value pairs 'domainURI', 'domainFOX', 'domain'. 
+ :     exists: add name-value pairs ...
+ :       domainURI - a URI, using slashes
+ :       domainFOX - a path, using backslashes
+ :     and set 'domain' to the same value as 'domainURI'. 
  :
  : @param params a parameters string containing semicolon-separated name-value pairs
  : @param domain the value of call parameter 'domain', should be the path of the domain folder
@@ -307,7 +311,9 @@ declare function f:externalContext($params as xs:string?,
 
 (:~
  : Checks if the external context contains a value for each context field
- : without default value.
+ : without default value. Also checks that the external context does not
+ : contain names not declared within the context element (excepting the
+ : names of variables added by the system, e.g. schemaURI).
  :
  : @param externalContext external context map
  : @param contextElem the context element from the schema
@@ -336,13 +342,13 @@ declare function f:checkExternalContext($externalContext as map(*),
         if (empty($missingValues)) then ()
         else
             let $missingValuesString1 := string-join($missingValues, ', ')
-            let $missingValuesString2 := string-join($missingValues ! concat(., '=...')) => string-join(';')
+            let $missingValuesString2 := string-join($missingValues ! concat('-p "', ., ' =..."') => string-join(' '))
             return
                 error(QName((), 'MISSING_INPUT'),
                         concat('Missing context values for required context fields: ', 
                                $missingValuesString1,
-                               '; please supply values using call parameter "params": params="', 
-                               $missingValuesString2, '"'))
+                               '. Please supply values using option -p: ', 
+                               $missingValuesString2))
 };
 
 
