@@ -50,7 +50,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
     (: Check the external context :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
     
-    (: Finalize the external context :)
+    (: Build processing context map :)
     let $fields := $gfox/gx:context/gx:field
     let $substitutionContext := $externalContext
     let $entries := f:initialProcessingContextRC($fields, $substitutionContext)
@@ -58,22 +58,25 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 };
 
 (:~
- : Auxiliary function of function `f:initialProcessingContext`.
- :
+ : Auxiliary function supporting function `f:initialProcessingContext`. Adds for each
+ : field in $fields a map entry. If value is an expression, it is resolved.
+ : Performs variable substitutions. Normalizes 'domain', 'domainURI', 'domainFOX'.
+ : Adds variables: any variable from 'domain', 'domainURI', 'domainFOX' triggers
+ : the addition of the other two variables.
  :)
 declare function f:initialProcessingContextRC(
                         $fields as element(gx:field)+,
                         $substitutionContext as map(xs:string, item()*))
         as map(xs:string, item()*)* {
     let $head := head($fields)
+    return if (empty($head)) then () else    
     let $tail := tail($fields)
-    return if (empty($head)) then () else
-    
     let $name := $head/@name/string()
     let $litValue := $head/($substitutionContext($name), @value/string())[1] ! f:substituteVars(., $substitutionContext, ())
     let $valueXP := $head/@valueXP/string() ! f:substituteVars(., $substitutionContext, ())
     let $valueFOX := $head/@valueFOX/string() ! f:substituteVars(., $substitutionContext, ())
     
+    (: Raw value :)
     let $value :=
         (: Literal value :)
         if (exists($litValue)) then $litValue
@@ -89,67 +92,112 @@ declare function f:initialProcessingContextRC(
         else if ($valueXP) then
             let $evaluationContext := i:mapKeysToQName($substitutionContext)
             return
-                i:evaluateXPath($valueXP, (), $evaluationContext, true(), true())                
-                
-    let $augmentedValue := 
-        let $raw := $value ! f:substituteVars(., $substitutionContext, ())[exists($value)]
-        return
-            (: Domain specified by an expression not finding a resource :)
-            if (empty($raw) and $name = ('domain', 'domainFOX', 'domainURI')) then
-                let $expr := ($valueFOX, $valueXP)[1]
-                return
-                    error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - expression for context variable '", $name, 
-                        "' does not identify an existence resource, ",
-                        "please correct and retry;&#xA;### expression: ", $expr))
-                
-            else if ($name eq 'domain') then 
-                try {i:pathToAbsoluteUriPath($raw)}
-                catch * {
-                    error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
-                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
-            else if ($name eq 'domainFOX') then 
-                try {i:pathToAbsoluteFoxpath($raw)}
-                catch * {
-                    error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - context variable 'domainFOX' not a valid Foxpath, ",
-                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
-            else if ($name eq 'domainURI') then  
-                try {i:pathToAbsoluteUriPath($raw)}
-                catch * {
-                    error(QName((), 'INVALID_SCHEMA'), 
-                        concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
-                        "please correct and retry;&#xA;### value: ", $raw ! i:normalizeAbsolutePath(.)))}
-            else $raw
-    let $augmentedEntry := map:entry($name, $augmentedValue)
+                i:evaluateXPath($valueXP, (), $evaluationContext, true(), true())
     
-    (: Any one field from "domain", "domainFOX", "domainURI" triggers the other two :)
+    (: Value after substitutions :)
+    let $substitutedValue := f:substituteVars($value, $substitutionContext, ())[exists($value)]
+    
+    (: Check :)
+    let $_CHECK := f:checkProcessingContextVariable($name, $substitutedValue, $valueXP, $valueFOX)
+    
+    (: Finalized value :)
+    let $finalizedValue := f:normalizeProcessingContextVariable($name, $substitutedValue)               
+             
+    (: Map entry :)                
+    let $entry := map:entry($name, $finalizedValue)
+    
+    (: Additional entries :)
+    
+    (: Each one from 'domain', 'domainURI', 'domainFOX' triggers the other two :)
     let $additionalEntries :=
         if ($name eq 'domain') then
-            let $foxpath := i:pathToAbsoluteFoxpath($value)
-            return (
-                map:entry('domainURI', $augmentedValue),
+            let $foxpath := i:pathToAbsoluteFoxpath($finalizedValue)
+            return (                                        
+                map:entry('domainURI', $finalizedValue),
                 map:entry('domainFOX', $foxpath)
         ) else if ($name eq 'domainFOX') then
-            let $uri := i:pathToAbsoluteUriPath($value)
+            let $uri := i:pathToAbsoluteUriPath($finalizedValue)
             return (
                 map:entry('domainURI', $uri),
                 map:entry('domain', $uri)
         ) else if ($name eq 'domainURI') then
-            let $foxpath := i:pathToAbsoluteFoxpath($value)
+            let $foxpath := i:pathToAbsoluteFoxpath($finalizedValue)
             return (
-                map:entry('domain', $augmentedValue),
+                map:entry('domain', $finalizedValue),
                 map:entry('domainFOX', $foxpath)
         ) else ()
-    let $newSubstitutionContext := map:merge(($substitutionContext, $augmentedEntry, $additionalEntries))
+        
+    (: Update substitution context :)
+    let $newSubstitutionContext := map:merge(($substitutionContext, $entry, $additionalEntries))
     return (
-        $augmentedEntry,
+        $entry,
         $additionalEntries,
         if (empty($tail)) then () else
             f:initialProcessingContextRC($tail, $newSubstitutionContext)
     )            
 };        
+
+(:~
+ : Checks the normalized value of a context variable, throwing an exception
+ : in case of an invalid value.
+ :
+ : @param name the variable name
+ : @param value the variable value
+ : @return the normalized value
+ :)
+declare function f:checkProcessingContextVariable($name as xs:string, 
+                                                  $value as xs:string?,
+                                                  $valueXP as xs:string?,
+                                                  $valueFOX as xs:string?)
+        as xs:string? {
+    if ($name = ('domain', 'domainFOX', 'domainURI')) then
+        if (exists($value)) then () else
+            let $expr := ($valueFOX, $valueXP)[1]
+            return
+                error(QName((), 'INVALID_SCHEMA'), 
+                    concat("### INVALID SCHEMA - expression for context variable '", $name, 
+                    "' does not identify an existence resource, ",
+                    "please correct and retry;&#xA;### expression: ", $expr))
+    else ()        
+};
+
+(:~
+ : Returns the normalized value of a context variable.
+ :
+ : @param name the variable name
+ : @param value the variable value
+ : @return the normalized value
+ :)
+declare function f:normalizeProcessingContextVariable($name as xs:string, $value as xs:string?)
+        as xs:string? {
+              
+    (: variable 'domain' :)    
+    if ($name eq 'domain') then 
+        try {i:pathToAbsoluteUriPath($value)}
+        catch * {
+            error(QName((), 'INVALID_SCHEMA'), 
+            concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
+            "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
+            
+    (: variable 'domainFOX' :)
+    else if ($name eq 'domainFOX') then 
+        try {i:pathToAbsoluteFoxpath($value)}
+        catch * {
+            error(QName((), 'INVALID_SCHEMA'), 
+            concat("### INVALID SCHEMA - context variable 'domainFOX' not a valid Foxpath, ",
+            "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
+            
+    (: variable 'domainURI' :)
+    else if ($name eq 'domainURI') then  
+        try {i:pathToAbsoluteUriPath($value)}
+        catch * {
+        error(QName((), 'INVALID_SCHEMA'), 
+            concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
+            "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
+            
+    else $value
+};
+
 
 (: ============================================================================
  :
@@ -159,8 +207,10 @@ declare function f:initialProcessingContextRC(
 
 (:~
  : Updates the processing context by updating the _resourceRelationships entry.
- : New relationships are parsed from <linkDef> elements and added to the context,
- : overwriting any existing relationship with the same name.
+ : New link definitions are parsed from <linkDef> elements and added to the context,
+ : overwriting any existing link definitions with the same name.
+ :
+ : The function is called from function compileGreenfox(), module compile.xqm.
  :
  : @param context the current processing context
  : @param linkDefs Link Definition elements
