@@ -29,9 +29,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Creates the initial processing context. Its context reflect ...
+ : Creates the initial processing context. Its content reflect ...
  : - schema element <context>
- : - schema elements <linkDef> which are immediate child elements of the root element
+ : - schema elements <linkDef>
  : - user-supplied arguments
  :
  : @param gfox a greenfox schema
@@ -45,7 +45,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
         as map(xs:string, item()*) {
         
     (: Parse the external context, supplied by the user as name/value pairs :)
-    let $externalContext := f:externalContext($params, $domain, $gfox)
+    let $externalContext := f:parseExternalContext($params, $domain, $gfox)
     
     (: Check the external context :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
@@ -240,9 +240,24 @@ declare function f:updateProcessingContext_resourceRelationships(
 (:~
  : Updates the processing context as required in order to begin validation of the domain.
  :
+ : The processing context is extended by the following entries:
+ : _contextPath - domain URI
+ : _domain - domain URI
+ : _domainPath - domain path
+ : _domainName - domain name
+ : _evaluationContext - the evaluation context, mapping QNames to values
+ : _targetInfo - {contextURI - domainURI}
+ : _reqDocs - (empty)
+ : _externalVars - names of external variables
+ :
+ : The evaluation context is filled with the following entries:
+ : - domain - domain URI
+ : - domainName - domain name
+ : - external variables
+ :
  : @param domainElem domain element
  : @param context the current processing context
- : @return validation results
+ : @return updated processing context
  :)
 declare function f:updateProcessingContext_domain($domainElem as element(gx:domain), 
                                                   $context as map(xs:string, item()*))
@@ -294,15 +309,18 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
 (:~
  : Maps the value of a parameters string to a set of name-value pairs.
  :
+ : The string consists of semicolon-separated name=value pairs. Within
+ : parameter values, any occurrence of backslash or semicolon must be
+ : escaped by a preceding backslash.
+ :
  : Augmentation:
- : (1) Add value pairs 'schemaURI', 'schemaFOX', 'schemaPath':
- :     schemaURI - a URI, using slashes
- :     schemaPath - a path, using backslashes
- :     schemaFOX - same as schemaPath 
+ : (1) Add value pairs 'schemaURI', 'schemaFOX':
+ :     schemaURI - schema path, using slashes (no preceding file://)
+ :     schemaFOX - schema path, using backslashes
  : (2) If function parameter $domain is supplied or a 'domain' name-value pair
  :     exists: add name-value pairs ...
- :       domainURI - a URI, using slashes
- :       domainFOX - a path, using backslashes
+ :       domainURI - domain path, using slashes (no preceding file://)
+ :       domainFOX - domain path, using backslashes
  :     and set 'domain' to the same value as 'domainURI'. 
  :
  : @param params a parameters string containing semicolon-separated name-value pairs
@@ -310,9 +328,9 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
  : @param gfox the greenfox schema
  : @return a map expressing the name-value pairs
  :)
-declare function f:externalContext($params as xs:string?, 
-                                   $domain as xs:string?,
-                                   $gfox as element(gx:greenfox)) 
+declare function f:parseExternalContext($params as xs:string?, 
+                                        $domain as xs:string?,
+                                        $gfox as element(gx:greenfox)) 
         as map(xs:string, item()*) {
     let $gfoxContext := $gfox/gx:greenfox/gx:context    
     let $nvPairs := tokenize($params, '\s*;\s*')   (: _TO_DO_ unsafe parsing :)
@@ -323,23 +341,21 @@ declare function f:externalContext($params as xs:string?,
                       replace(., '^.*?=\s*', ''))
         )
 
-    (: Add 'schemaPath', 'schemaURI' entries :)                
+    (: Add 'schemaURI', 'schemaFOX' entries :)                
     let $prelim2 :=
         let $schemaLocation := $gfox/base-uri(.)            
-        let $schemaLocationFOX := 
-            try {$schemaLocation ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
-        let $schemaLocationURI := 
-            try {$schemaLocation ! i:pathToAbsoluteUriPath(.)} catch * {()} 
+        let $schemaLocationFOX := try {$schemaLocation ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
+        let $schemaLocationURI := try {$schemaLocation ! i:pathToAbsoluteUriPath(.)} catch * {()} 
         return 
             if (not($schemaLocationFOX)) then
                 error(QName((), 'INVALID_ARG'), concat('Invalid schema path: ', $schemaLocation))
             else                    
-                map:put($prelim, 'schemaPath', $schemaLocationFOX)
-                ! map:put(., 'schemaFOX', $schemaLocationFOX)
+                map:put($prelim, 'schemaFOX', $schemaLocationFOX)
                 ! map:put(., 'schemaURI', $schemaLocationURI)
 
-    (: Add or edit 'domain' entry;
-       normalization: absolute path, using back slashes :)
+    (: If entry 'domain' exists:
+       - normalize entry: absolute path, using slashes;
+       - add entries domainFOX and domainURI :)
     let $prelim3 :=
         let $useDomain := ($domain, map:get($prelim2, 'domain'))[1]
         return
@@ -347,7 +363,7 @@ declare function f:externalContext($params as xs:string?,
             else
                 (: Add 'domain' entries (domain, domainFOX, domainURI) :)
                 let $domainFOX := try {$useDomain ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
-                let $domainURI := try {$useDomain ! i:pathToAbsoluteUriPath(.)} catch * {()} 
+                let $domainURI := trace(try {$useDomain ! i:pathToAbsoluteUriPath(.)} catch * {()} , '_DOMAIN_URI: ') 
                 return
                     if (not($domainFOX) or not($domainURI)) then 
                         error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $useDomain))
@@ -376,7 +392,7 @@ declare function f:checkExternalContext($externalContext as map(*),
     let $externalKeys := map:keys($externalContext)
     let $externalKeysUnknown := $externalKeys
         [not(. = $internalKeys)]
-        [not(. = ('schemaURI', 'schemaFOX', 'schemaPath', 'domainURI', 'domainFOX', 'domain'))] => sort()
+        [not(. = ('schemaURI', 'schemaFOX', 'domainURI', 'domainFOX', 'domain'))] => sort()
     return
         if (exists($externalKeysUnknown)) then
             let $plural := 's'[count($externalKeysUnknown) gt 1]
