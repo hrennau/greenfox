@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a ValuePairLt constraint, quantifier "for some value".
+    
+    Should produce 1 error.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <file uri="doc4.xml">
+            <valuePair expr1XP="*//mileStone/@date" expr2XP="*/@reviewDate"
+                       minCount1="1" minCount1Msg="Expected milestone dates"
+                       count2="1" count2Msg="Missing attribute: @endDate"    
+                       quant="some"
+                       cmp="lt" cmpMsg="At least one milestone date must be less than review date"/>            
+        </file>
+    </domain>
+</greenfox>

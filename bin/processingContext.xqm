@@ -376,14 +376,14 @@ declare function f:parseExternalContext($params as xs:string?,
 };
 
 (:~
- : Checks if the external context contains a value for each context field
- : without default value. Also checks that the external context does not
- : contain names not declared within the context element (excepting the
- : names of variables added by the system, e.g. schemaURI).
+ : Checks if the external context contains a value for each context field without
+ : default value. Also checks that the external context contains only the names
+ : of variables declared within the context element or added by the system
+ : (schemaFOX, schemaURI, domainFOX, domainURI).
  :
  : @param externalContext external context map
- : @param contextElem the context element from the schema
- : @return empty sequence, if check ok, or throws an error otherwise
+ : @param contextElem the context element of the schema
+ : @return empty sequence, if check ok, otherwise an exception is thrown
  :)
 declare function f:checkExternalContext($externalContext as map(*), 
                                         $contextElem as element(gx:context))
@@ -391,8 +391,9 @@ declare function f:checkExternalContext($externalContext as map(*),
     let $internalKeys := $contextElem/gx:field/@name/string()        
     let $externalKeys := map:keys($externalContext)
     let $externalKeysUnknown := $externalKeys
-        [not(. = $internalKeys)]
-        [not(. = ('schemaURI', 'schemaFOX', 'domainURI', 'domainFOX', 'domain'))] => sort()
+        [not(. = ($internalKeys, 'schemaURI', 'schemaFOX', 'domainURI', 'domainFOX', 'domain'))] => sort()
+        
+    (: Issue #1: unknown variable names :)
     return
         if (exists($externalKeysUnknown)) then
             let $plural := 's'[count($externalKeysUnknown) gt 1]
@@ -401,7 +402,8 @@ declare function f:checkExternalContext($externalContext as map(*),
                     concat('Unknown parameter', $plural, ': ', 
                         string-join($externalKeysUnknown, ', '))) 
         else
-        
+
+    (: Issue #2: missing mandatory values :)
     let $missingValues :=
         $contextElem/gx:field[empty((@value, @valueXP, @valueFOX))]/@name[not(map:contains($externalContext, .))]
     return
