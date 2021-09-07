@@ -59,7 +59,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 
 (:~
  : Auxiliary function supporting function `f:initialProcessingContext`. Adds for each
- : field in $fields a map entry. If value is an expression, it is resolved.
+ : field in $fields a map entry. If the value is an expression, it is resolved.
  : Performs variable substitutions. Normalizes 'domain', 'domainURI', 'domainFOX'.
  : Adds variables: any variable from 'domain', 'domainURI', 'domainFOX' triggers
  : the addition of the other two variables.
@@ -302,7 +302,7 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
 
  (: ============================================================================
  :
- :     P a r s i n g    e x t e r n a l    c o n t e x t
+ :     P a r s i n g / c h e c k i n g    c o n t e x t
  :
  : ============================================================================ :)
 
