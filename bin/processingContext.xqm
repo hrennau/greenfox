@@ -83,16 +83,17 @@ declare function f:initialProcessingContextRC(
         
         (: Foxpath expression - context = schemaURI :)
         else if ($valueFOX) then
-            let $schemaURI := $substitutionContext?schemaURI
+            let $contextItem := $substitutionContext?schemaURI
             let $evaluationContext := i:mapKeysToQName($substitutionContext)
             return
-                i:evaluateFoxpath($valueFOX, $schemaURI, $evaluationContext, true())
+                i:evaluateFoxpath($valueFOX, $contextItem, $evaluationContext, true())
                 
         (: XPath expression :)                
         else if ($valueXP) then
+            let $contextItem := ()
             let $evaluationContext := i:mapKeysToQName($substitutionContext)
             return
-                i:evaluateXPath($valueXP, (), $evaluationContext, true(), true())
+                i:evaluateXPath($valueXP, $contextItem, $evaluationContext, true(), true())
     
     (: Value after substitutions :)
     let $substitutedValue := f:substituteVars($value, $substitutionContext, ())[exists($value)]

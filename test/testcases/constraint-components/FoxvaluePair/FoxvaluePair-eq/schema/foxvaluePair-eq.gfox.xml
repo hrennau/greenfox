@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a FoxvaluePairEq constraint.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="airports-de">
+            <foxvaluePair expr1FOX="airport-*.xml//country" expr2FOX="file-name(.) ! substring-after(., '-')"
+                          minCount1="1" count1Msg="Expected airport documents: airport-*.xml"
+                          cmp="eq" cmpMsg="Folder name suffix must match all 'country' values"/>            
+        </folder>
+    </domain>
+</greenfox>
