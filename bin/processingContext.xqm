@@ -60,7 +60,9 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 (:~
  : Auxiliary function supporting function `f:initialProcessingContext`. Adds for each
  : field in $fields a map entry. If the value is an expression, it is resolved.
- : Performs variable substitutions. Normalizes 'domain', 'domainURI', 'domainFOX'.
+ : Performs variable substitutions *before* resolving expressikons. 
+ '
+ : Normalizes 'domain', 'domainURI', 'domainFOX'.
  : Adds variables: any variable from 'domain', 'domainURI', 'domainFOX' triggers
  : the addition of the other two variables.
  :)
@@ -95,14 +97,11 @@ declare function f:initialProcessingContextRC(
             return
                 i:evaluateXPath($valueXP, $contextItem, $evaluationContext, true(), true())
     
-    (: Value after substitutions :)
-    let $substitutedValue := f:substituteVars($value, $substitutionContext, ())[exists($value)]
-    
     (: Check :)
-    let $_CHECK := f:checkProcessingContextVariable($name, $substitutedValue, $valueXP, $valueFOX)
+    let $_CHECK := f:checkProcessingContextVariable($name, $value, $valueXP, $valueFOX)
     
     (: Finalized value :)
-    let $finalizedValue := f:normalizeProcessingContextVariable($name, $substitutedValue)               
+    let $finalizedValue := f:normalizeProcessingContextVariable($name, $value)               
              
     (: Map entry :)                
     let $entry := map:entry($name, $finalizedValue)
