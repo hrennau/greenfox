@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a ValueComparedEq constraint.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="reports">
+            <file uri="airport-detail.xml">
+                
+                <valuesCompared navigateFOX="fox-sibling((), (), 'detail', 'summary')" 
+                                countTargetDocs="1"
+                                countTargetDocsMsg="Missing document: airport-summary.xml">
+                    <valueCompared 
+                               expr1XP="//iataCode" expr2XP="/*/@iataCode"
+                               count1="1" count1Msg="Missing IATA code"
+                               count2="1" count2Msg="Missing IATA code"
+                               cmp="eq" cmpMsg="IATA code of matching detail and summary document must be equal"/>
+                </valuesCompared>                               
+            </file>
+        </folder>
+    </domain>
+</greenfox>
