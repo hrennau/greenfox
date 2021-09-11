@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Checks the use of a LinkResolvable constraint.
+    
+    Should produce 1 error.
   -->
 <greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
           xmlns="http://www.greenfox.org/ns/schema"
