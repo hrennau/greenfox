@@ -1,0 +1,7 @@
+<airports>
+  <airportsForCountry country="Denmark" href="airports-denmark.xml"/>
+  <airportsForCountry country="Finland" href="airports-finland.xml"/>
+  <airportsForCountry country="Ireland" href="airports-ireland.xml"/>
+  <airportsForCountry country="Spain" href="airports-spain.xml"/>
+  <airportsForCountry country="Portugal" href="airports-portugal.xml"/>
+</airports>

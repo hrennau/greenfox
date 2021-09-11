@@ -1,0 +1,5 @@
+<airports country="Denmark" count="3">
+  <airport id="628" iata="AAL" icao="EKYT" latitude="57.0927589138" longitude="9.84924316406" href="denmark/airport-aal.xml"/>  
+  <airport id="607" iata="AAR" icao="EKAH" latitude="56.2999992371" longitude="10.619000434899998" href="denmark/airport-aar.xml"/>
+  <airport id="608" iata="BLL" icao="EKBI" latitude="55.7402992249" longitude="9.15178012848" href="denmark/airport-bll.xml"/>
+</airports>

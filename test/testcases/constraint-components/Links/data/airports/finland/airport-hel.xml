@@ -1,0 +1,17 @@
+<airport id="421" iata="HEL" icao="EFHK">
+  <name>Helsinki Vantaa Airport</name>
+  <city>Helsinki</city>
+  <country>Finland</country>
+  <geo>
+    <latitude>60.317199707031</latitude>
+    <longitude>24.963300704956</longitude>
+    <altitude>179</altitude>
+  </geo>
+  <temporal>
+    <timezone>2</timezone>
+    <tzTimezone>Europe/Helsinki</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>

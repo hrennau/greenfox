@@ -1,0 +1,5 @@
+<airports country="Finland" count="51">
+  <airport id="417" iata="ENF" icao="EFET" latitude="68.362602233887" longitude="23.424299240112" href="finland/airport-enf.xml"/>
+  <airport id="421" iata="HEL" icao="EFHK" latitude="60.317199707031" longitude="24.963300704956" href="finland/airport-hel.xml"/>
+  <airport id="420" iata="HEM" icao="EFHF" latitude="60.254600524902344" longitude="25.042800903320312" href="finland/airport-hem.xml"/>
+</airports>

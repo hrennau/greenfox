@@ -1,0 +1,5 @@
+<airports country="Ireland" count="17">
+  <airport id="8698" iata="BYT" icao="EIBN" latitude="51.66859817504883" longitude="-9.484169960021973" href="ireland/airport-byt.xml"/>
+  <airport id="5577" iata="CFN" icao="EIDL" latitude="55.0442008972168" longitude="-8.340999603271484" href="ireland/airport-cfn.xml"/>
+  <airport id="599" iata="DUB" icao="EIDW" latitude="53.421299" longitude="-6.27007" href="ireland/airport-dub.xml"/>  
+</airports>
