@@ -60,7 +60,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 (:~
  : Auxiliary function supporting function `f:initialProcessingContext`. Adds for each
  : field in $fields a map entry. If the value is an expression, it is resolved.
- : Performs variable substitutions *before* resolving expressikons. 
+ : Performs variable substitutions *before* resolving expressions. 
  '
  : Normalizes 'domain', 'domainURI', 'domainFOX'.
  : Adds variables: any variable from 'domain', 'domainURI', 'domainFOX' triggers
@@ -164,6 +164,9 @@ declare function f:checkProcessingContextVariable($name as xs:string,
 (:~
  : Returns the normalized value of a context variable.
  :
+ : If the name is 'domain' or 'domainURI', the value is replaced by the absolute URI path.
+ : If the name if 'domainFOX', the value is replaced by a Foxpath expression.
+ :
  : @param name the variable name
  : @param value the variable value
  : @return the normalized value
@@ -172,7 +175,7 @@ declare function f:normalizeProcessingContextVariable($name as xs:string, $value
         as xs:string? {
               
     (: variable 'domain' :)    
-    if ($name eq 'domain') then 
+    if ($name = ('domain', 'domainURI')) then 
         try {i:pathToAbsoluteUriPath($value)}
         catch * {
             error(QName((), 'INVALID_SCHEMA'), 
@@ -185,14 +188,6 @@ declare function f:normalizeProcessingContextVariable($name as xs:string, $value
         catch * {
             error(QName((), 'INVALID_SCHEMA'), 
             concat("### INVALID SCHEMA - context variable 'domainFOX' not a valid Foxpath, ",
-            "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
-            
-    (: variable 'domainURI' :)
-    else if ($name eq 'domainURI') then  
-        try {i:pathToAbsoluteUriPath($value)}
-        catch * {
-        error(QName((), 'INVALID_SCHEMA'), 
-            concat("### INVALID SCHEMA - context variable 'domainURI' not a valid path, ",
             "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
             
     else $value

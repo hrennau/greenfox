@@ -1,0 +1,17 @@
+<airport id="607" iata="AAR" icao="EKAH">
+  <name>Aarhus Airport</name>
+  <city>Aarhus</city>
+  <country>Denmark</country>
+  <geo>
+    <latitude>56.2999992371</latitude>
+    <longitude>10.619000434899997</longitude>
+    <altitude>82</altitude>
+  </geo>
+  <temporal>
+    <timezone>1</timezone>
+    <tzTimezone>Europe/Copenhagen</tzTimezone>
+    <dst>E</dst>
+  </temporal>
+  <type>airport</type>
+  <source1>OurAirports</source1>
+</airport>
