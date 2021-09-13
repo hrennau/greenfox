@@ -94,7 +94,7 @@ declare function f:validateFileSize($constraintElem as element(gx:fileSize),
     let $actValue := i:resourceFileSize($contextURI)
     
     let $results := 
-        for $facet in ($lt, $gt, $le, $ge, $eq)
+        for $facet in ($eq, $ne, $lt, $gt, $le, $ge)
         let $violation :=
             switch($facet/local-name(.))
             case 'eq' return $actValue != $facet
