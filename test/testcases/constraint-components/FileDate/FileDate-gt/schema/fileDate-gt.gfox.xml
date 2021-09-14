@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a FileDateGt constraint.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="d20210914">
+            <targetSize count="1"/>
+            <file navigateFOX="doc-20210914.xml">
+                <targetSize minCount="1"/>
+                <fileDate gt="2021-09-14" gtMsg="File must not be older than from 2021-09-14"/>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
