@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a FileNameMatches constraint.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="dir1">
+            <targetSize count="1"/>
+            <file navigateFOX="*[file-size(.) eq 0]">
+                <targetSize minCount="2"/>
+                <fileName matches="FLAG-\d\d\d.txt" matchesMsg="Empty files must match name pattern FLAG-\d\d\d.txt"/>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
