@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a MediatypeEq constraint. Checks for mediatype "csv".
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="dir1">
+            <targetSize count="1"/>
+            <file navigateFOX="airports.csv">
+                <targetSize minCount="1"/>
+                <mediatype eq="csv" eqMsg="Expected mediatype is csv."
+                           csv.columnCount="6" csv.columnCountMsg="Expected 6 columns"
+                           csv.minRowCount="2" csv.minRowCountMsg="Expected at least 2 rows"
+                           csv.separator="semicolon" csv.header="yes"/>
+            </file>
+        </folder>
+    </domain>
+</greenfox>
