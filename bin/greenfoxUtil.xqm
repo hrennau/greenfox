@@ -696,6 +696,33 @@ declare function f:mapKeysToQName($map as map(xs:string, item()*))
         map:keys($map) ! map:entry(QName((), .), $map(.)))
 };        
 
+(:
+ : Normalizes a JSON document by sorting object
+ : fields alphabetically.
+ :)
+declare function f:normalizeJsonDoc($json as node())
+        as node() {
+    f:normalizeJsonDocRC($json)
+};
 
-
-
+(:~
+ : Recursive helper function supporting `normalizeJsonDoc`.
+ :)
+declare function f:normalizeJsonDocRC($n as node())
+        as node() {
+    typeswitch($n)
+    case document-node() return document {$n/node() ! f:normalizeJsonDocRC(.)}    
+    case element() return
+        if ($n/@type eq 'object') then
+            element {node-name($n)} {
+                $n/@*,
+                let $children := $n/* => sort((), function($item) {$item/name()})
+                return $children ! f:normalizeJsonDocRC(.)
+            }
+        else
+            element {node-name($n)} {
+                $n/@*,
+                $n/node() ! f:normalizeJsonDocRC(.)
+            }    
+    default return $n        
+};        

@@ -78,6 +78,7 @@ declare function f:applyDocModifiers(
                 map:entry('ignoreValue', f:applyDocModifiers_ignoreValue#2)[$types = 'ignoreValue'],
                 map:entry('roundItem', f:applyDocModifiers_roundItem#2) [$types = 'roundItem'],
                 map:entry('editItem',  f:applyDocModifiers_editItem#2)[$types = 'editItem'],
+                map:entry('normalizeJsonItem',  f:applyDocModifiers_normalizeJsonItem#2)[$types = 'normalizeJsonItem'],
                 map:entry('renameItem',  f:applyDocModifiers_renameItem#2)[$types = 'renameItem'],
                 map:entry('renamespaceItem',  f:applyDocModifiers_renamespaceItem#2)[$types = 'renamespaceItem']
         ))  
@@ -297,6 +298,19 @@ declare function f:applyDocModifiers_roundItem($node as node(),
     let $newValue := round($value div $scale, 0) * $scale
     return string($newValue)        
 };        
+
+declare function f:applyDocModifiers_normalizeJsonItem(
+                                              $node as node(),
+                                              $mod as element(gx:normalizeJsonItem))
+        as xs:string {
+    if (not(matches($node, '^\s*(\{.*\}|\[.*\])\s*$', 's'))) then string($node) else
+    
+    let $json := 
+        let $raw := $node ! json:parse(.) 
+        return if ($mod/@sort eq 'false') then $raw else i:normalizeJsonDoc($raw)
+    return serialize($json, map{'method': 'json'})
+};        
+
 
 declare function f:applyDocModifiers_ignoreValue($node as node(),
                                                  $mod as element(gx:ignoreValue))

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doc>
+    <foo>1</foo>
+    <bar>{ "b": 1, "a": {"x": 2, "y": "kkk"} }</bar>
+</doc>
+

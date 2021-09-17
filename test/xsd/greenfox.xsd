@@ -389,6 +389,7 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:element name="roundItem" type="t:RoundItemType" maxOccurs="unbounded"/>                
                 <xs:element name="renameItem" type="t:RenameItemType" maxOccurs="unbounded"/>
                 <xs:element name="renamespaceItem" type="t:RenamespaceItemType" maxOccurs="unbounded"/>
+                <xs:element name="normalizeJsonItem" type="t:NormalizeJsonItemType" maxOccurs="unbounded"/>
             </xs:choice>
         </xs:sequence>
         <xs:attribute name="docSimilarMsg" type="xs:string"/>
@@ -435,6 +436,11 @@ C o n s t r a i n t    e l e m e n t s
                 <xs:attribute name="newNamespace" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="NormalizeJsonItemType">
+        <xs:attribute name="sort" type="xs:boolean"/>
+        <xs:attributeGroup ref="t:ItemSelectorAttGroup"/>
     </xs:complexType>
     
     <xs:attributeGroup name="ItemSelectorAttGroup">
