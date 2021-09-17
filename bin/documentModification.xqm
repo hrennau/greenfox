@@ -305,10 +305,12 @@ declare function f:applyDocModifiers_normalizeJsonItem(
         as xs:string {
     if (not(matches($node, '^\s*(\{.*\}|\[.*\])\s*$', 's'))) then string($node) else
     
-    let $json := 
-        let $raw := $node ! json:parse(.) 
-        return if ($mod/@sort eq 'false') then $raw else i:normalizeJsonDoc($raw)
-    return serialize($json, map{'method': 'json'})
+    let $json := try {$node ! json:parse(.)} catch * {()}
+    return
+        if (not($json)) then string($node) (: Parse error :)
+        else 
+            let $json := if ($mod/@sort eq 'false') then $json else i:normalizeJsonDoc($json)
+            return serialize($json, map{'method': 'json'})
 };        
 
 
