@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of an XsdValid constraint.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <file uri="dir1/abc2.xml">
+            <xsdValid xsdFOX="$domain\xsd\abc.xsd" xsdValidMsg="Document abc2.xml not XSD valid"/> 
+        </file>
+    </domain>
+</greenfox>

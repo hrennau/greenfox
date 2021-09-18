@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a DocSimilar constraint, using the normalizer editItem/@useString.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <file uri="dir1/doc1.xml">
+            <docSimilar uri="../doc2.xml"
+                        docSimilarMsg="Documents doc1 and doc2 should have same content1"
+                        countTargetDocs="1" countTargetDocsMsg="Missing document: doc2.xml">
+                <!-- Attributes are whitespace-normalized -->
+                <editItem kind="attribute" useString="ns"/>                                                                    
+            </docSimilar>            
+        </file>
+    </domain>
+</greenfox>
