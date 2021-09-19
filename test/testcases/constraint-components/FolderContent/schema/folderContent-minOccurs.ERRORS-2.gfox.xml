@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of an FolderContentMinOccurs constraint.
+    
+    Should produce 2 errors.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="dir2">
+            <targetSize count="1"/>
+            <folderContent>
+                <memberFile name="foo*.xml" 
+                    minCount="1" minCountMsg="At least one file foo*.xml expected."/>                
+                <memberFile name="bar*.xml"
+                    maxCount="unbounded"
+                    minCount="2" minCountMsg="At least two files bar*.xml expected."/>
+            </folderContent>
+        </folder>
+    </domain>
+</greenfox>
