@@ -141,6 +141,9 @@ declare function f:initialProcessingContextRC(
  : Checks the normalized value of a context variable, throwing an exception
  : in case of an invalid value.
  :
+ : In particular: variables 'domain', 'domainURI', 'domainFOX': if specified
+ : by an expression, the expression value must not be empty.. 
+ :
  : @param name the variable name
  : @param value the variable value
  : @return the normalized value
@@ -151,9 +154,11 @@ declare function f:checkProcessingContextVariable($name as xs:string,
                                                   $valueFOX as xs:string?)
         as xs:string? {
     if ($name = ('domain', 'domainFOX', 'domainURI')) then
-        if (exists($value)) then () else
-            let $expr := ($valueFOX, $valueXP)[1]
-            return
+        if (exists($value)) then () 
+        else if (empty(($valueXP, $valueFOX))) then ()
+        (: Error - a domain expression MUST have a value :)        
+        else
+            let $expr := ($valueFOX, $valueXP)[1] return
                 error(QName((), 'INVALID_SCHEMA'), 
                     concat("### INVALID SCHEMA - expression for context variable '", $name, 
                     "' does not identify an existence resource, ",
