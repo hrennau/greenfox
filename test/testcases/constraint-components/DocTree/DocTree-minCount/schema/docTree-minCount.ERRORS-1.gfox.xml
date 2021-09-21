@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a DocTreeMinCount constraint.
+    
+    Should produce 1 error, as the document has no <country>.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/targetSize-exists"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="dir1">
+            <targetSize count="1"/>
+            <file navigateFOX="airport-*.xml">
+                <targetSize minCount="1"/>
+                <docTree>                    
+                    <node locNP="/airport" closed="true">
+                        <node locNP="@id"/>
+                        <node locNP="@iata"/>
+                        <node locNP="@icao"/>
+                        <node locNP="name"/>
+                        <node locNP="city"/>
+                        <node locNP="country"/>
+                        <node locNP="geo" closed="true">
+                            <node locNP="latitude"/>
+                            <node locNP="longitude"/>
+                            <node locNP="altitude"/>
+                        </node>
+                    </node>                    
+                </docTree>
+                
+            </file>
+        </folder>
+    </domain>
+</greenfox>
