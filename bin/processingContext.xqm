@@ -141,8 +141,8 @@ declare function f:initialProcessingContextRC(
  : Checks the normalized value of a context variable, throwing an exception
  : in case of an invalid value.
  :
- : In particular: variables 'domain', 'domainURI', 'domainFOX': if specified
- : by an expression, the expression value must not be empty.. 
+ : Currently, checking is limited to variables 'domain', 'domainURI', 'domainFOX'.
+ : Check: if specified by an expression, the expression value must not be empty. 
  :
  : @param name the variable name
  : @param value the variable value

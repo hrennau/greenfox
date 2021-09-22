@@ -180,7 +180,15 @@ declare function f:validationResult_docTree_counts($colour as xs:string,
             $constraintNode/i:firstCharToUpperCase(local-name(.))
     let $nodePath := $contextNode/i:datapath(.)
     let $implicitCount := 1[not($constraintNode/self::attribute()) or $constraintNode/self::attribute(atts)]
-    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    let $msgAttPrefix :=
+        if ($constraintNode/self::attribute()) then $constraintNode/local-name(.) 
+        else if (ends-with($constraintComponent, 'MinCount')) then 'minCount'
+        else if (ends-with($constraintComponent, 'MaxCount')) then 'maxCount'
+        else 'count'
+    let $msgAttParent := 
+        if ($constraintNode/self::attribute()) then $constraintNode/.. 
+        else $constraintNode
+    let $msg := i:getResultMsg($colour, $msgAttParent, $msgAttPrefix)
     return
         element {f:resultElemName($colour)} {
             $contextURI ! attribute filePath {.},
