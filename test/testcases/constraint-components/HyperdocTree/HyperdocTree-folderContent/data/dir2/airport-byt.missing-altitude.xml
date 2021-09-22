@@ -1,0 +1,10 @@
+<airport id="8698" iata="BYT" icao="EIBN">
+  <name>Bantry Aerodrome</name>
+  <city>Bantry</city>
+  <country>Ireland</country>
+  <geo>
+    <latitude>51.66859817504883</latitude>
+    <longitude>-9.484169960021973</longitude>
+    <!-- <altitude>7</altitude> -->
+  </geo>
+</airport>
