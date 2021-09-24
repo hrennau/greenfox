@@ -7,21 +7,21 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: docSimilar folder -->
-        <folder foxpath="archives\docSimilar.zip\#archive#\docSimilar" id="docSimilarFolderShape">
+        <folder navigateFOX="archives\docSimilar.zip\#archive#\docSimilar" id="docSimilarFolderShape">
             <targetSize countMsg="Missing folder: DocSimilar" count="1"/>
 
             <!-- Visit archive contents: executionSummary1.xml -->
-            <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
+            <file navigateFOX="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
                 
                 <!-- Check archive congtents: doc similar? -->
-                <docSimilar foxpath="..\executionSummary-reference.xml" redReport="localIndexedPath"
+                <docSimilar navigateFOX="..\executionSummary-reference.xml" redReport="localIndexedPath"
                     countTargetResources="1" countTargetResourcesMsg="Reference document missing">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>

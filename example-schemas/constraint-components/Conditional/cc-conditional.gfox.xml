@@ -10,17 +10,17 @@
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-Conditional' -->
-        <folder foxpath="constraint-Conditional" id="conditionalFolderShape">
+        <folder navigateFOX="constraint-Conditional" id="conditionalFolderShape">
             <targetSize countMsg="Missing folder: constraint-Conditional" count="1"/>
 
             <!-- VISIT: file 'projectDates.xml' -->
-            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesFileShape">
+            <file navigateFOX="*projectDates*.xml except _hide*" id="projectDatesFileShape">
                 <targetSize minCount="2" minCountMsg="Missing file: projectDates.xml"/>
 
                 <conditional>

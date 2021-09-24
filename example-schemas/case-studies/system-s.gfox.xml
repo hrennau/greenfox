@@ -5,26 +5,26 @@
     <!-- *** External context *** -->
     <context>
         <field name="lastModified" value="2019-12-01"/>
-        <field name="domain" value="${schemaPath}\..\..\..\example-data\system-s"/>
+        <field name="domain" value="${schemaURI}/../../../example-data\system-s"/>
     </context>
 
     <!-- *** System file tree *** -->
     <domain path="${domain}" name="system-s">
 
         <!-- *** System root folder shape *** -->
-        <folder foxpath="." id="systemRootFolderShape">
+        <folder navigateFOX="." id="systemRootFolderShape">
             <!-- *** XSD folder shape *** -->
-            <folder foxpath=".\\resources\xsd" id="xsdFolderShape">
+            <folder navigateFOX=".\\resources\xsd" id="xsdFolderShape">
                 <targetSize count="1" 
                             countMsg="No XSD folder found"/>
-                <file foxpath="*.xsd" id="xsdFileShape">
+                <file navigateFOX="*.xsd" id="xsdFileShape">
                     <targetSize minCount="1" 
                                 minCountMsg="No XSDs found" />
                 </file>
             </folder>
 
             <!-- *** Codelist folder shape *** -->
-            <folder foxpath=".\\resources\codelists" id="codelistFolderShape">
+            <folder navigateFOX=".\\resources\codelists" id="codelistFolderShape">
                 <targetSize count="1" 
                             countMsg="No codelist folder found"/>
 
@@ -35,14 +35,14 @@
                     minCountMsg="Codelist folder without codelists"
                     distinct="true"
                     distinctMsg="Codelist names must be unique"/>
-                <file foxpath="*[is-xml(.)]" id="codelistFileShape">
+                <file navigateFOX="*[is-xml(.)]" id="codelistFileShape">
                     <targetSize minCount="1" 
                                 minCountMsg="No codelist files found"/>
                 </file>
             </folder>
 
             <!-- *** Testcase folder shape *** -->
-            <folder foxpath=".\\test-*[input][output][config]" id="testcaseFolderShape">
+            <folder navigateFOX=".\\test-*[input][output][config]" id="testcaseFolderShape">
                 <targetSize minCount="1"
                             minCountMsg="No testcase folders found"/>
                 
@@ -55,7 +55,7 @@
                 </folderContent>
 
                 <!-- *** msg config shape *** -->
-                <file foxpath="config\msg-config.csv" id="msgConfigFileShape"
+                <file navigateFOX="config\msg-config.csv" id="msgConfigFileShape"
                       mediatype="csv" csv.separator="," csv.header="yes">
                     <targetSize count="1" countMsg="Config file missing"/>
 
@@ -81,17 +81,17 @@
                 </file>
 
                 <!-- *** Request file shape *** -->
-                <file foxpath="input\(*.xml, *.json)" id="requestFileShape">
+                <file navigateFOX="input\(*.xml, *.json)" id="requestFileShape">
                     <targetSize minCountMsg="Input folder without request msgs" minCount="1"/>
 
                         <!-- # Check - request with response? -->
-                    <links foxpath="..\..\output\fox-child($fileName, 'RQ(.*)$', 'RS$1')" 
+                    <links navigateFOX="..\..\output\fox-child($fileName, 'RQ(.*)$', 'RS$1')" 
                            countTargetResources="1" 
                            countTargetResourcesMsg="Request withou response"/>
                 </file>
 
                 <!-- *** Response file shape *** -->
-                <file foxpath="output\(*.xml, *.json)" id="responseFileShape"
+                <file navigateFOX="output\(*.xml, *.json)" id="responseFileShape"
                       mediatype="xml json">
                     <targetSize minCountMsg="Output folder without request msgs" minCount="1"/>
 

@@ -7,27 +7,27 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <!-- Define link: "summaryReference" -->
     <linkDef name="summaryReference"
-             foxpath="fox-sibling($fileName, '\d*.xml$', '-reference.xml')">
+             navigateFOX="fox-sibling($fileName, (), '\d*.xml$', '-reference.xml')">
         <targetSize countTargetResources="1"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: docSimilar folder -->
-        <folder foxpath="docSimilar" id="docSimilarFolderShape">
+        <folder navigateFOX="docSimilar" id="docSimilarFolderShape">
             <targetSize countMsg="Missing folder: docSimilar" count="1"/>
 
             <!-- Visit: executionSummary1.xml -->
-            <file foxpath="executionSummary1.xml" id="executionSummary1FileShape">
+            <file navigateFOX="executionSummary1.xml" id="executionSummary1FileShape">
                 <targetSize countMsg="Missing file: executionSummary1.xml" count="1"/>
                 
                 <!-- Check: doc similar? -->
-                <docSimilar linkName="summaryReference">
+                <docSimilar linkName="summaryReference" exists="true">
                     <skipItem kind="element" localName="articleNumber"/>
                     <skipItem kind="element" localName="timestamp"/>
                     <skipItem kind="attribute" localName="fileSize" parentLocalName="articleBook"/>

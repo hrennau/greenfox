@@ -178,14 +178,9 @@ declare function f:checkProcessingContextVariable($name as xs:string,
  :)
 declare function f:normalizeProcessingContextVariable($name as xs:string, $value as xs:string?)
         as xs:string? {
-              
+     
     (: variable 'domain' :)    
-    if ($name = ('domain', 'domainURI')) then 
-        try {i:pathToAbsoluteUriPath($value)}
-        catch * {
-            error(QName((), 'INVALID_SCHEMA'), 
-            concat("### INVALID SCHEMA - context variable 'domain' not a valid path, ",
-            "please correct and retry;&#xA;### value: ", $value ! i:normalizeAbsolutePath(.)))}
+    if ($name = ('domain', 'domainURI')) then i:resolveUri_new($value, ())
             
     (: variable 'domainFOX' :)
     else if ($name eq 'domainFOX') then 

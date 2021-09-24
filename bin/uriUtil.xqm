@@ -307,3 +307,68 @@ declare function f:removeFileUriSchema($uri as xs:string)
     return $path    
 };
 
+(: =================================================================
+    A new set of URI tools, intended to replace the current tools 
+   =================================================================
+ :)
+
+(:~
+ : Resolves a URI to an absolute URI. If the input URI is absolute, it is
+ : returned unchanged; otherwise it is resolved against the base URI.
+ : Initial upward steps (..) are resolved.
+ :
+ : @param uri the URI to be resolved
+ : @param baseUri base URI against which to resolve
+ : @return the resolved URI
+ :)
+declare function f:resolveUri_new($uri as xs:string, $baseUri as xs:string?)
+        as xs:string {
+            
+    if (f:isUriAbsolute_new($uri)) then $uri
+    else
+        let $baseUri := if ($baseUri) then $baseUri else f:defaultBaseUri()
+        let $backstep := starts-with($uri, '../')
+        return
+            if (not($backstep)) then
+                let $baseUri := $baseUri ! replace(., '[^/]+$', '')
+                return concat($baseUri, $uri)
+            else
+                let $baseUri := $baseUri ! replace(., '[^/]+/[^/]*$', '')
+                return f:resolveUri_new(substring($uri, 4), $baseUri)
+};   
+
+declare function f:defaultBaseUri()
+        as xs:string {
+    file:current-dir() ! replace(., '\\', '/') ! replace(., '/$', '')        
+};
+
+declare function f:isUriResolvable_new($uri as xs:string) 
+        as xs:boolean {
+    let $pathToArchive := replace($uri, '(^.*?)/#archive#/.*', '$1')
+    return
+        let $exists := 
+            try {if (file:resolve-path($pathToArchive)) then true() else false()} 
+            catch * {false()}
+        return
+            if ($exists and $pathToArchive ne $uri) then 
+                let $pathWithinArchive := replace($uri, '.*?/#archive#/(.*)', '$1')
+                return
+                    f:doesArchivePathExist_new($pathWithinArchive, $pathToArchive)
+            else $exists
+};        
+
+(:~
+ : Returns true if a given path point to a resource within a given archive.
+ :)
+declare function f:doesArchivePathExist_new($pathToArchive as xs:string, $pathWithinArchive as xs:string)
+        as xs:boolean {
+    true() (: _TO_DO_ :)        
+};
+
+(:~
+ : Returns true if a given URI is absolute, false otherwise.
+ :)
+declare function f:isUriAbsolute_new($uri as xs:string) as xs:boolean {
+    matches($uri, '^( / | [a-zA-Z]:/ | \i\c*:/ )', 'x')
+};
+
