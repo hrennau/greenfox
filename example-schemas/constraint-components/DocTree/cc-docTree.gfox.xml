@@ -12,14 +12,14 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>          
 
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 <docTree xmlns:geo="http://example.org/geo">
                     <node locNP="/airports" closed="true">
                         <node locNP="airportsForCountry" count="4"/>                        
@@ -27,7 +27,7 @@
                 </docTree>
             </file>
 
-            <file foxpath="denmark\airport-*.xml[1]" id="airportFileShape">
+            <file navigateFOX="denmark\airport-*.xml[1]" id="airportFileShape">
                 <targetSize minCountMsg="More airport files expected" minCount="0"/>
                 <docTree>
                     
