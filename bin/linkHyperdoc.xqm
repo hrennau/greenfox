@@ -19,7 +19,7 @@ at "constants.xqm",
    "expressionEvaluator.xqm",
    "greenfoxUtil.xqm",
    "log.xqm",
-   "uriUtil.xqm";
+   "uriUtil0.xqm";
 
 declare namespace gx="http://www.greenfox.org/ns/schema";
 

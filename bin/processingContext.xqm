@@ -15,7 +15,10 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at "constants.xqm",
    "foxpathUtil.xqm",
    "greenfoxUtil.xqm",
-   "uriUtil.xqm";
+   "uriUtil0.xqm";
+
+import module namespace uri="http://www.greenfox.org/ns/xquery-functions/uri-util" 
+at "uriUtil.xqm";
 
 import module namespace link="http://www.greenfox.org/ns/xquery-functions/greenlink" 
 at "linkDefinition.xqm";
@@ -180,7 +183,7 @@ declare function f:normalizeProcessingContextVariable($name as xs:string, $value
         as xs:string? {
      
     (: variable 'domain' :)    
-    if ($name = ('domain', 'domainURI')) then i:resolveUri_new($value, ())
+    if ($name = ('domain', 'domainURI')) then uri:resolveUri($value, ())
             
     (: variable 'domainFOX' :)
     else if ($name eq 'domainFOX') then 

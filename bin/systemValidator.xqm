@@ -14,7 +14,7 @@ import module namespace i="http://www.greenfox.org/ns/xquery-functions"
 at "constants.xqm",
    "fileShape.xqm",
    "folderShape.xqm",
-   "uriUtil.xqm";
+   "uriUtil0.xqm";
     
 declare namespace gx="http://www.greenfox.org/ns/schema";
 

@@ -32,7 +32,7 @@ at "constants.xqm",
    "log.xqm",
    "greenfoxEditUtil.xqm",
    "systemValidator.xqm",
-   "uriUtil.xqm",
+   "uriUtil0.xqm",
    "validationReportWriter.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";

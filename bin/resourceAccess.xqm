@@ -12,7 +12,7 @@ at "tt/_foxpath-uri-operations.xqm";
     
 import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
 at "resourceAccess.xqm",
-   "uriUtil.xqm";
+   "uriUtil0.xqm";
     
 declare namespace z="http://www.ttools.org/gfox/ns/structure";
 declare namespace gx="http://www.greenfox.org/ns/schema";
