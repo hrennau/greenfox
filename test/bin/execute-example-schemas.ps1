@@ -1,5 +1,5 @@
 Param(
-    $rootSchemaDir = "../../example-schemas/constraint-components/DocTree",
+    $rootSchemaDir = "../../example-schemas/constraint-components/FileName",
     [Parameter(Mandatory=$true)]$odir,
     $pathFilter = $null
 )

@@ -9,17 +9,17 @@
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-FileName' -->
-        <folder foxpath="constraint-FileName" id="fileNameFolderShape">
+        <folder navigateFOX="constraint-FileName" id="fileNameFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileName" count="1"/>   
             
             <!-- VISIT: camel files -->
-            <file foxpath="*camel* " id="camelFileShape">
+            <file navigateFOX="*camel* " id="camelFileShape">
                 <targetSize minCountMsg="Expected a camel" minCount="1"/>
                 
                 <!-- CHECK: file name -->

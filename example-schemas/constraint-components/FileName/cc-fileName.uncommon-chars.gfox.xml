@@ -9,17 +9,17 @@
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-FileName' -->
-        <folder foxpath="constraint-FileName" id="fileNameFolderShape">
+        <folder navigateFOX="constraint-FileName" id="fileNameFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileName" count="1"/>   
             
             <!-- VISIT: whitespace files -->
-            <file foxpath="*whitespace*" id="xyzFileShape">
+            <file navigateFOX="*whitespace*" id="xyzFileShape">
                 <targetSize minCountMsg="Expected a file with name *whitespace*" minCount="1"/>
                 
                 <!-- CHECK: file names -->
@@ -27,7 +27,7 @@
     
             </file>
             <!-- VISIT: parentheses files -->
-            <file foxpath="*parentheses*" id="xyzFileShape">
+            <file navigateFOX="*parentheses*" id="xyzFileShape">
                 <targetSize minCountMsg="Expected a file with name *parentheses*" minCount="1"/>
                 
                 <!-- CHECK: file names -->

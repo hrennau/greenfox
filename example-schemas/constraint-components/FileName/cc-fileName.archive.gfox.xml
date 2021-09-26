@@ -11,17 +11,17 @@
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT archive contents: folder 'constraint-FileName' -->
-        <folder foxpath="archives\constraint-FileName.zip\#archive#\constraint-FileName" id="fileNameFolderShape">
+        <folder navigateFOX="archives\constraint-FileName.zip\#archive#\constraint-FileName" id="fileNameFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileName.zip" count="1"/>            
             
             <!-- VISIT archive contents: JSON files -->
-            <file foxpath=".\\*.json[not(self~::_hide*)]" id="jsonFileShape">
+            <file navigateFOX=".\\*.json[not(self~::_hide*)]" id="jsonFileShape">
                 <targetSize minCountMsg="Expected more JSON files" minCount="6"/>
                 
                 <!-- CHECK archive contents: file names -->                
