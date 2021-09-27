@@ -1,5 +1,5 @@
 Param(
-    $rootSchemaDir = "../../example-schemas/constraint-components/FileName",
+    $rootSchemaDir = "../../../../projects/greenfox/work/example-schemas",
     [Parameter(Mandatory=$true)]$odir,
     $pathFilter = $null
 )
