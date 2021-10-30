@@ -42,7 +42,7 @@ declare function f:resolveUri($uri as xs:string, $baseUri as xs:string?)
                 let $baseUri := $baseUri ! replace(., '[^/]+$', '')
                 return concat($baseUri, $uri)
             else
-                let $baseUri := $baseUri ! replace(., '[^/]+/[^/]*$', '')
+                let $baseUri := $baseUri ! replace(., '[^/]+$', '')
                 return f:resolveUri(substring($uri, 4), $baseUri)
 };   
 

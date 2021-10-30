@@ -1,5 +1,5 @@
 Param(
-    $rootSchemaDir = "../../../../projects/greenfox/work/example-schemas",
+    $rootSchemaDir = "../../../../projects/greenfox/work/greenfox/example-schemas",
     [Parameter(Mandatory=$true)]$odir,
     $pathFilter = $null
 )
@@ -17,6 +17,7 @@ Function filename_fox {
     $name_fox
 }
 
+Write-Host "PSScriptRoot: $PSScriptRoot"
 $rootDir = Join-Path $PSScriptRoot $rootSchemaDir | Resolve-Path
 $binDir = Join-Path $PSScriptRoot ../../bin | Resolve-Path
 $odir = Resolve-Path $odir

@@ -23,3 +23,4 @@ Backup of *.doc*
 # Visio autosave temporary files
 *.~vsd*
 test/testcases-output
+test/example-schemas-output
