@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Checks the use of a FoxvaluePairCmpCount constraint.
+    
+    Should produce 1 error.    
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/foxvaluePair-compCount"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="">
+        <foxvaluePair expr1FOX="items-set1\*.xml//item" 
+                      expr2FOX="items-set3\*.xml//item"
+                      minCount1="1" minCount2="1"
+                      cmpCount="eq" cmpCountMsg="items-set1 and items-set3 should contain the same number of items."/>
+        </folder>            
+    </domain>
+</greenfox>
