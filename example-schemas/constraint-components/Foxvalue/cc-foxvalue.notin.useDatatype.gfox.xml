@@ -8,25 +8,26 @@
     <notin> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 
     and <notMatches> elements.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notIn.useDatatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notIn.useDatatype">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'ireland' -->        
-        <folder foxpath="airports\ireland" id="airportsFolderShape">            
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">            
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: folder does not contain data using particular latitudes -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
-                          useDatatype="decimal"
-                          minCount="1" minCountMsg="At least one latitude expected."
-                          notinMsg="Latitude blacklisted.">
+                      useDatatype="decimal"
+                      minCount="1"
+                      minCountMsg="At least one latitude expected."
+                      notinMsg="Latitude blacklisted.">
                     <notin>
                         <eq>53.421299999</eq>
                         <eq>53.300201416015625999</eq>

@@ -5,21 +5,23 @@
     item to be equal to the value provided by @eq. By contrast, the default quantifier 
     'all' requires all value items to match.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq.some"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq.some">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//city"
-                          quant="some"
-                          minCount="1" minCountMsg="At least one city expected."
-                          eq="Dublin" eqMsg="Cities must contain city 'Dublin'."/>
+                      quant="some"
+                      minCount="1"
+                      minCountMsg="At least one city expected."
+                      eq="Dublin"
+                      eqMsg="Cities must contain city 'Dublin'."/>
             </foxvalues>            
         </folder>
     </domain>

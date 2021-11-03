@@ -6,48 +6,55 @@
     Note that there is no difference compared with checking normal file system resources - 
     dealing with archive contents is just a detail of the navigation providing the resources.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype.archive">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT archive contents: folder 'constraint-Mediatype' -->
-        <folder foxpath="archives\constraint-Mediatype.zip\#archive#\constraint-Mediatype" id="mediatypeFolderShape">
+        <folder navigateFOX="archives\constraint-Mediatype.zip\#archive#\constraint-Mediatype"
+              id="mediatypeFolderShape">
             <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
             
             <!-- VISIT archive contents: JSON files -->
-            <file foxpath=".\\*.json" id="jsonFileShape">
+            <file navigateFOX=".\\*.json" id="jsonFileShape">
                 <mediatype eq="json"/>
             </file>
             
             <!-- VISIT archive contents: XML files -->
-            <file foxpath=".\\*.xml" id="xmlFileShape">
+            <file navigateFOX=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>
             </file>
             
             <!-- VISIT archive contents: CSV files (separator: comma) -->
-            <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+            <file navigateFOX="csv.headline.comma.csv" id="csvCommaFileShape">
                 
                 <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
-                    csv.separator="comma" csv.header="yes"
-                    csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"/>                
+                       csv.separator="comma"
+                       csv.header="yes"
+                       csv.minColumnCount="4"
+                       csv.maxColumnCount="4"
+                       csv.minRowCount="2"
+                       csv.maxRowCount="30"/>                
             </file>
             
             <!-- VISIT archive contents: CSV files (separator: semicolon) -->            
-            <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+            <file navigateFOX="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
                 
                 <!-- CHECK - file is CSV -->                
                 <mediatype eq="csv"
-                    csv.separator="semicolon" csv.header="yes"
-                    csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"/>
+                       csv.separator="semicolon"
+                       csv.header="yes"
+                       csv.minColumnCount="4"
+                       csv.maxColumnCount="4"
+                       csv.minRowCount="2"
+                       csv.maxRowCount="30"/>
             </file>
         </folder>
     </domain>

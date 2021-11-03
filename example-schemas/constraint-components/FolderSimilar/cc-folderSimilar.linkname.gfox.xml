@@ -3,28 +3,27 @@
     Demonstrates the use of FolderSimilar constraints. In this example the folders with
     with to compare are identified by a Link Definition referenced by name.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar.linkname"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar.linkname">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
-    <linkDef name="copyFolder"
-             foxpath="fox-sibling($fileName || '-copy')"/>
+    <linkDef name="copyFolder" navigateFOX="fox-sibling($fileName || '-copy')"/>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: docSimilar folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- CHECK: folder 'airports-copy' is similar -->
             <folderSimilar linkName="copyFolder"
-                           folderSimilarMsg="Copy folder not similar"
-                           countTargetResources="1" 
-                           countTargetResourcesMsg="Missing folder, airports-copy">
+                        folderSimilarMsg="Copy folder not similar"
+                        countTargetResources="1"
+                        countTargetResourcesMsg="Missing folder, airports-copy">
                 <skipFiles names="*.sav.*"/>
                 <skipFiles names="airports-ireland.xml" where="here"/>
                 <skipFiles names="airports-ireland.updated.xml" where="there"/>

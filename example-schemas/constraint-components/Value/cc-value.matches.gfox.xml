@@ -2,22 +2,24 @@
 <!-- 
     Demonstrates the use of Value constraints. Declares a ValueMatches and a ValueMinCount constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.matches"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.matches">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="/projects/@department" 
-                           count="1" countMsg="The department must be specified."  
-                           matches="[A-Z]{2}\d{2}[A-Z]-[A-Z]" matchesMsg="Department name has an unexpected structure."/>
+                    <value exprXP="/projects/@department"
+                      count="1"
+                      countMsg="The department must be specified."
+                      matches="[A-Z]{2}\d{2}[A-Z]-[A-Z]"
+                      matchesMsg="Department name has an unexpected structure."/>
                 </values>
             </file>
         </folder>

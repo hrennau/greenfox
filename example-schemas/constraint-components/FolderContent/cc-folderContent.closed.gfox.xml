@@ -5,23 +5,24 @@
     This examples shows how the FolderContentClosed constraint can be used as a simple check 
     against unexpected folder contents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">        
         
         <!-- VISIT: folder 'constraint-FolderContent' -->
-        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+        <folder navigateFOX="constraint-FolderContent" id="folderContentFolderShape">
             <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
 
             <!-- CHECK: folder contents -->
             <folderContent closed="true" ignoredMembers="*.FLAG">
                 <memberFolders names="ireland luxembourg"/>
-                <memberFiles names="airports.xml airports-*.xml airports.json airports-*.json" maxCount="1000"/>
+                <memberFiles names="airports.xml airports-*.xml airports.json airports-*.json"
+                         maxCount="1000"/>
             </folderContent>  
 
         </folder>

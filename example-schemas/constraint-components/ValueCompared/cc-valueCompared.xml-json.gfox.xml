@@ -5,34 +5,39 @@
     This examples checks that for each XML document from a set of XML documents a corresponding 
     JSON document contains a matching value.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.xml-json"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.xml-json">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <linkDef name="jsonVariant"
-             foxpath="fox-sibling($fileName, '\.xml$', '.json')"
-             mediatype="json">
+            navigateFOX="fox-sibling($fileName, '\.xml$', '.json')"
+            mediatype="json">
         <!-- Link constraints: exactly one target resource -->
         <targetSize countTargetDocs="1"/>
     </linkDef>
     
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>     
-            <file foxpath=".\\airport-*.xml"> 
+            <file navigateFOX=".\\airport-*.xml"> 
                 <targetSize minCount="50"/>
-                <valuesCompared linkName="jsonVariant" 
-                                countTargetResources="1">                
-                    <valueCompared expr1XP="//@iata" count1="1"
-                                   expr2XP="//iata" count2="1"
-                                   cmp="eq" cmpMsg="XML and JSON version must have the same IATA code."/>
-                    <valueCompared expr1XP="//@id" count1="1"
-                                   expr2XP="//id" count2="1"
-                                   cmp="eq" cmpMsg="XML and JSON version must have the same ID value."/>
+                <valuesCompared linkName="jsonVariant" countTargetResources="1">                
+                    <valueCompared expr1XP="//@iata"
+                              count1="1"
+                              expr2XP="//iata"
+                              count2="1"
+                              cmp="eq"
+                              cmpMsg="XML and JSON version must have the same IATA code."/>
+                    <valueCompared expr1XP="//@id"
+                              count1="1"
+                              expr2XP="//id"
+                              count2="1"
+                              cmp="eq"
+                              cmpMsg="XML and JSON version must have the same ID value."/>
                 </valuesCompared>
             </file>
         </folder>

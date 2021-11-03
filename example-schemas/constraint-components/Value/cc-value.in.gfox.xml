@@ -2,28 +2,29 @@
 <!-- 
     Demonstrates the use of Value constraints. Declares a ValueIn and a ValueMinCount constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.in"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.in">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'projectDates' -->
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>
 
             <!-- VISIT: file 'projectDates.xml' -->
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 
                 <!-- CHECK: project names found in whitelist -->
                 <values>
-                    <value exprXP="/projects/project/@name" 
-                           minCount="1" minCountMsg="At least one project expected."  
-                           inMsg="Project name not whitelisted.">
+                    <value exprXP="/projects/project/@name"
+                      minCount="1"
+                      minCountMsg="At least one project expected."
+                      inMsg="Project name not whitelisted.">
                         <in>
                             <eq>P1</eq>
                             <eq>P2</eq>

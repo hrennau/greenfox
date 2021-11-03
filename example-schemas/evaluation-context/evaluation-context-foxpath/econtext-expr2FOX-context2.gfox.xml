@@ -12,27 +12,28 @@
     @expr2Context = 'item', which means that @expr2* is evaluated once for each
     item in the value of @expr1*.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
-          xmlns="http://www.greenfox.org/ns/schema"
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data/air"/>
     </context>
 
     <domain path="${domain}" name="air">
         
-        <file foxpath="airports\index\airports.xml">
+        <file navigateFOX="airports\index\airports.xml">
             <targetSize count="1"/>
            
             <!-- Foxpath expression references $item, the current item from the value of expression 1. -->
-            <foxvaluePair expr1XP="//airportsForCountry/@country" minCount1="3"
-                          expr2FOX="..\..\countries\fox-child($item)" count2="1"
-                          expr2Context="item"/>
+            <foxvaluePair expr1XP="//airportsForCountry/@country"
+                       minCount1="3"
+                       expr2FOX="..\..\countries\fox-child($item)"
+                       count2="1"
+                       expr2Context="item"/>
                
         </file>
     </domain>
 
 </greenfox>
-

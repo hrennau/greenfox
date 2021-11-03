@@ -1,36 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!-- 
+<!-- 
     Demonstrates the validation of links. The link is defined by a URI template and must be resolvable.        
     
     In this example the link definition is referenced by name.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uriTemplate.linkName"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uriTemplate.linkName">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <!-- Define link: JSON airports -->
     <linkDef name="jsonAirports"
-             uriTemplate="ireland/airport-{iata}.json"
-             mediatype="json">
+            uriTemplate="ireland/airport-{iata}.json"
+            mediatype="json">
         <templateVar name="iata" valueXP="//@iata"/>
     </linkDef>                
     
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: Irish airports file -->
-            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+            <file navigateFOX="airports-ireland.xml" id="airportsFileShape">
                 <targetSize minCount="1" minCountMsg="Airports file expected"/>
                 
                 <!-- Check: corresponding JSON airport files exist -->
                 <links linkName="jsonAirports"
-                       resolvable="true" resolvableMsg="Link cannot be resolved"
-                       exists="true"/>
+                   resolvable="true"
+                   resolvableMsg="Link cannot be resolved"
+                   exists="true"/>
                
             </file>
         </folder>

@@ -17,24 +17,24 @@
     In this example, any files *.sav.* are ignored, and any *.sav folders are ignored if occurring 
     in the target folder.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- CHECK: folder 'airports-copy' is similar -->
-            <folderSimilar foxpath="..\airports-copy"
-                folderSimilarMsg="Copy folder not similar"
-                countTargetResources="1" 
-                countTargetResourcesMsg="Missing folder, airports-copy">
+            <folderSimilar navigateFOX="..\airports-copy"
+                        folderSimilarMsg="Copy folder not similar"
+                        countTargetResources="1"
+                        countTargetResourcesMsg="Missing folder, airports-copy">
                 <skipFiles names="*.sav.*"/>
                 <skipFiles names="airports-ireland.xml" where="here"/>
                 <skipFiles names="airports-ireland.updated.xml" where="there"/>

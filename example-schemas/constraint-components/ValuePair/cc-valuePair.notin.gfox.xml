@@ -5,29 +5,34 @@
     The items of value 1 must not be equal to an item from value 2. Here, city IDs must
     not be used also as country IDs.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.notin"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.notin">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
             
             <!-- VISIT: file 'factbook.xml' -->
-            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+            <file navigateFOX="*factbook*.xml except _hide*" id="factbookFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
                 
                 <!-- CHECK: city IDs and country IDs do not have common values -->
                 <valuePairs>
-                    <valuePair expr1XP="//city/@id" minCount1="3144" minCount1Msg="Expected more cities."
-                               expr2XP="//country/@id" minCount2="231" minCount2Msg="Expected more countries." 
-                               cmp="notin" cmpMsg="City IDs must not be used also as country IDs."/>
+                    <valuePair expr1XP="//city/@id"
+                          minCount1="3144"
+                          minCount1Msg="Expected more cities."
+                          expr2XP="//country/@id"
+                          minCount2="231"
+                          minCount2Msg="Expected more countries."
+                          cmp="notin"
+                          cmpMsg="City IDs must not be used also as country IDs."/>
                 </valuePairs>
             </file>
         </folder>

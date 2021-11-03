@@ -5,29 +5,34 @@
     All items of value 1 must be equal to an item from value 2. Here, invalid references
     are detected: all @country references in <city> elements must be an @id value in <country>.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.in"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.in">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'factbook.xml' -->
-            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+            <file navigateFOX="*factbook*.xml except _hide*" id="factbookFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
                 
                 <!-- CHECK: all country references in city elements correspond to a country ID -->
                 <valuePairs>
-                    <valuePair expr1XP="//city/@country" minCount1="3144" minCount1Msg="Expected more cities."
-                               expr2XP="//country/@id" minCount2="231" minCount2Msg="Expected more countries." 
-                               cmp="in" cmpMsg="City contains invalid country reference - value not a country ID."/>
+                    <valuePair expr1XP="//city/@country"
+                          minCount1="3144"
+                          minCount1Msg="Expected more cities."
+                          expr2XP="//country/@id"
+                          minCount2="231"
+                          minCount2Msg="Expected more countries."
+                          cmp="in"
+                          cmpMsg="City contains invalid country reference - value not a country ID."/>
                 </valuePairs>
             </file>
         </folder>

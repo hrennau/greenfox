@@ -5,30 +5,35 @@
     As the @useString option 'ns' is used, the comparison is applied to whitespace-normalized
     copies of the values.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-ns"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-ns">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'countryNames.xml' -->
-            <file foxpath="*country-names*.xml except _hide*" id="countryNamesShape">
+            <file navigateFOX="*country-names*.xml except _hide*" id="countryNamesShape">
                 <targetSize minCount="1" minCountMsg="Missing file: countryNames.xml"/>
 
                 <!-- CHECK: the @defaultCountry2 is found in the country list (whitespace-normalized) -->
                 <valuePairs>
-                    <valuePair expr1XP="/countries/@defaultCountry2" count1="1" count1Msg="Missing attribute - @defaultCountry2."
-                               expr2XP="//country" minCount2="100" minCount2Msg="Less countries than expected."
-                               useString="ns"
-                               cmp="in" cmpMsg="Default country must be found in the country list."/>
+                    <valuePair expr1XP="/countries/@defaultCountry2"
+                          count1="1"
+                          count1Msg="Missing attribute - @defaultCountry2."
+                          expr2XP="//country"
+                          minCount2="100"
+                          minCount2Msg="Less countries than expected."
+                          useString="ns"
+                          cmp="in"
+                          cmpMsg="Default country must be found in the country list."/>
                 </valuePairs>
                 
             </file>

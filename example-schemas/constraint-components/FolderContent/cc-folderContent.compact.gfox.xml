@@ -8,18 +8,18 @@
     <memberFiles names="foo*.xml bar*.xml" count="4"/> means that exactly four matches of foo* and four matches
     of bar* are expected.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.compact"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.compact">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-FolderContent' -->
-        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+        <folder navigateFOX="constraint-FolderContent" id="folderContentFolderShape">
             <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
 
             <!-- CHECK: folder contents -->
@@ -33,12 +33,14 @@
             </folderContent>  
 
             <!-- VISIT: folder 'ireland' -->
-            <folder foxpath="ireland">
+            <folder navigateFOX="ireland">
                 <targetSize countMsg="Missing folder: ireland" count="1"/>
                 
                 <!-- CHECK: folder contents -->
                 <folderContent closed="true">
-                    <memberFiles names="airport-???.xml airport-???.json" minCount="14" maxCount="unbounded"/>
+                    <memberFiles names="airport-???.xml airport-???.json"
+                            minCount="14"
+                            maxCount="unbounded"/>
                 </folderContent>
             </folder>
         </folder>

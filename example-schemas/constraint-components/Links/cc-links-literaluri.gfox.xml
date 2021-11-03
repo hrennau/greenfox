@@ -8,7 +8,7 @@
           xmlns="http://www.greenfox.org/ns/schema">
 
     <context>
-        <field name="domain" value="${schemaPath}/../../../../example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain uri="${domain}" name="greenfox-example-data">

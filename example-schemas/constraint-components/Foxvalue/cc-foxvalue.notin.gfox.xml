@@ -6,25 +6,26 @@
     <notin> element. Term comparisons can be <eq>, <ne>, <like>, <notLike>, <matches> 
     and <notMatches> elements.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notin"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notin">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'ireland' -->
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: folder does not contain data about blacklisted city -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//city"
-                          minCount="1" minCountMsg="At least one city value expected."
-                          notinMsg="City blacklisted.">
+                      minCount="1"
+                      minCountMsg="At least one city value expected."
+                      notinMsg="City blacklisted.">
                     <notin>
                         <eq>Bantry2</eq>
                         <eq>Cork2</eq>

@@ -7,23 +7,21 @@
     
     Here, the variable is part of the context of foxvalue/@exprFOX.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data/air"/>
     </context>
 
     <domain path="${domain}" name="air">
         
-        <file foxpath="airports\index\airports.xml">
+        <file navigateFOX="airports\index\airports.xml">
             <targetSize count="1"/>
             
             <!-- Foxpath expression references $doc -->
-            <foxvalue exprFOX="..\..\countries\fox-child($doc//@country)"
-                      count="3"/>
+            <foxvalue exprFOX="..\..\countries\fox-child($doc//@country)" count="3"/>
         </file>
     </domain>
 
 </greenfox>
-

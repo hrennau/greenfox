@@ -4,20 +4,22 @@
     
     The value items must have the length provided by @length.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.length"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.length">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//dst"
-                          minCount="1" minCountMsg="At least one dst expected."
-                          length="1" lengthMsg="dst must be a single character."/>
+                      minCount="1"
+                      minCountMsg="At least one dst expected."
+                      length="1"
+                      lengthMsg="dst must be a single character."/>
             </foxvalues>            
         </folder>
     </domain>

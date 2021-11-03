@@ -4,20 +4,22 @@
     
     The value items must be different from the value provided by @ne.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ne"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.ne">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//source1"
-                          minCount="1" minCountMsg="At least one source1 value expected."
-                          ne="#unknown" neMsg="Source1 value '#unknown' not allowed."/>
+                      minCount="1"
+                      minCountMsg="At least one source1 value expected."
+                      ne="#unknown"
+                      neMsg="Source1 value '#unknown' not allowed."/>
             </foxvalues>            
         </folder>
     </domain>

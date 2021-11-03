@@ -7,8 +7,8 @@
     sure that all imports and includes in a set of XSDs can be recursively
     resolved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.niem"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.niem">
 
     <context>
         <field name="domain"/>
@@ -16,20 +16,21 @@
     
     <!-- Define link: recursive XSD import and include -->
     <linkDef name="xsdImportInclude"
-             hrefXP="//(xs:import, xs:include)/@schemaLocation"/>
+            hrefXP="//(xs:import, xs:include)/@schemaLocation"/>
     
     <domain path="${domain}" name="niem">
         <!-- Visit: NIEM folder -->
-        <folder foxpath="niem-4.2\niem" id="niemFolderShape">
+        <folder navigateFOX="niem-4.2\niem" id="niemFolderShape">
             <targetSize countMsg="Missing folder: niem" count="1"/>
 
             <!-- Visit: all XSDs contained -->
-            <file foxpath=".\\*.xsd" id="niemDomainXsdFileShape">
+            <file navigateFOX=".\\*.xsd" id="niemDomainXsdFileShape">
                 
                 <!-- Check: recursive import/include -->
                 <links linkName="xsdImportInclude"
-                       recursive="true"
-                       resolvable="true" resolvableMsg="Some recursive import/include cannot be resolved."/>
+                   recursive="true"
+                   resolvable="true"
+                   resolvableMsg="Some recursive import/include cannot be resolved."/>
             </file>
         </folder>
     </domain>

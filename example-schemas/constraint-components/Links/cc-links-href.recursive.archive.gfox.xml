@@ -6,26 +6,29 @@
     This example checks resources contained by an archive file. Link resolution
     is recursive (@recursive).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive.archive">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: folder within archive -->        
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="archives\airports.zip\#archive#\airports"
+              id="airportsFolderShape">
             <targetSize count="1" countMsg="Missing folder: airports"/>  
             
             <!-- Visit: the airports document -->            
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 
                 <!-- Check: all href references can be resolved to XML documents -->
                 <links hrefXP="//@href"
-                       recursive="true"
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="60" minCountTargetDocsMsg="Less target docs than expected"/>
+                   recursive="true"
+                   resolvable="true"
+                   resolvableMsg="Some recursive links cannot be resolved."
+                   minCountTargetDocs="60"
+                   minCountTargetDocsMsg="Less target docs than expected"/>
             </file>
         </folder>
     </domain>

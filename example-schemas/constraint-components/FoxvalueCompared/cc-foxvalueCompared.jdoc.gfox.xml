@@ -5,21 +5,21 @@
     This examples uses Foxpath expressions containing a call of jdoc(.), navigating into
     JSON documents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.json"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired.json">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <foxvaluesCompared foxpath="fox-sibling('airports-copy')" 
-                               countTargetResources="1">                
+            <foxvaluesCompared navigateFOX="fox-sibling('airports-copy')" countTargetResources="1">                
                 <foxvalueCompared expr1FOX=".\\airport-*.json\jdoc(.)//country"
-                                  expr2FOX=".\\airport-*.json\jdoc(.)//country" 
-                                  cmp="sameTerms" cmpMsg="Folders should contain same airport countries."/>
+                              expr2FOX=".\\airport-*.json\jdoc(.)//country"
+                              cmp="sameTerms"
+                              cmpMsg="Folders should contain same airport countries."/>
             </foxvaluesCompared>
         </folder>
     </domain>

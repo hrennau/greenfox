@@ -3,22 +3,24 @@
     Demonstrates the use of Foxvalue constraints: declares a FoxvalueLt contraint. As the 
     'useDatatype' option is used, values are compared as numbers, rather than strings.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.lt.useDatatype"
-          xmlns="http://www.greenfox.org/ns/schema"
-          xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.lt.useDatatype">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//altitude"
-                          useDatatype="integer"
-                          minCount="1" minCountMsg="At least one altitude expected."
-                          lt="700" ltMsg="Altitude must be less than 700."/>
+                      useDatatype="integer"
+                      minCount="1"
+                      minCountMsg="At least one altitude expected."
+                      lt="700"
+                      ltMsg="Altitude must be less than 700."/>
             </foxvalues>            
         </folder>
     </domain>

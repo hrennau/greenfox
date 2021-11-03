@@ -8,40 +8,43 @@
     link context node a set of target nodes. The constraint is re-evaluated for each 
     combination of a link context node and one of its target nodes.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.linkcontext-linktarget"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.linkcontext-linktarget">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <linkDef name="expectations"
-        foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
-        contextXP="//article"
-        targetXP="//article[@id eq $linkContext/articleID]">
-        <targetSize countTargetDocs="1" 
-            minCountContextNodes="1"
-            minCountTargetNodes="2" minCountTargetNodesMsg="Missing target nodes."/>
+            navigateFOX="fox-parent-sibling('expectation')\expectation-articles.xml"
+            contextXP="//article"
+            targetXP="//article[@id eq $linkContext/articleID]">
+        <targetSize countTargetDocs="1"
+                  minCountContextNodes="1"
+                  minCountTargetNodes="2"
+                  minCountTargetNodesMsg="Missing target nodes."/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="msgs1\response" id="responseFolderShape">
+        <folder navigateFOX="msgs1\response" id="responseFolderShape">
             <targetSize countMsg="Missing folder: msgs1\response" count="1"/>            
-            <file foxpath="*.xml" id="responseFileShape">
+            <file navigateFOX="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
                 <valuesCompared linkName="expectations">
-                    <valueCompared expr1XP="articleName" 
-                                   expr2XP="@name" 
-                                   count1="1" 
-                                   count2="1" 
-                                   cmp="eq" cmpMsg="Unexpected article name"/>
-                    <valueCompared expr1XP="articlePrice" 
-                                   expr2XP="@price" 
-                                   useDatatype="decimal" 
-                                   count1="1" 
-                                   count2="1" 
-                                   cmp="eq" cmpMsg="Unexpected price"/>
+                    <valueCompared expr1XP="articleName"
+                              expr2XP="@name"
+                              count1="1"
+                              count2="1"
+                              cmp="eq"
+                              cmpMsg="Unexpected article name"/>
+                    <valueCompared expr1XP="articlePrice"
+                              expr2XP="@price"
+                              useDatatype="decimal"
+                              count1="1"
+                              count2="1"
+                              cmp="eq"
+                              cmpMsg="Unexpected price"/>
                 </valuesCompared>
             </file>
         </folder>

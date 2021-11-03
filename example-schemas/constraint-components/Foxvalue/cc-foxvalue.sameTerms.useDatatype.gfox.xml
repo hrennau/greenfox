@@ -9,26 +9,27 @@
     The value may, for example, contain for each term from the term list any number of 
     repetitions. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eqeq.useDatatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eqeq.useDatatype">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'ireland' -->
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: all latitudes found in a list -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
-                          minCount="1" minCountMsg="At least one latitude expected."
-                          useDatatype="decimal"
-                          sameTermsMsg="Not expected latitudes.">
+                      minCount="1"
+                      minCountMsg="At least one latitude expected."
+                      useDatatype="decimal"
+                      sameTermsMsg="Not expected latitudes.">
                     <sameTerms>
                         <term>51.668598175048830</term>
                         <term>51.66859817504883</term>

@@ -5,21 +5,21 @@
     The expression value must contain each term from the term list in contains/term.
     Note that the expression value may also contain other terms.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.contains"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.contains">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="/projects/project/@name" 
-                           containsMsg="Expected projects missing.">
+                    <value exprXP="/projects/project/@name"
+                      containsMsg="Expected projects missing.">
                         <contains>
                             <term>P1</term>
                             <term>P2</term>

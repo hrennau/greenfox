@@ -8,8 +8,8 @@
           
           Example call: gfox .../link-targets.recursive.niem.gfox.xml /projects/xsdbase
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem"
-    xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem">
     
     <context>
         <field name="domain"/>
@@ -17,20 +17,20 @@
     
     <!-- Define link: "schemaImport" -->    
     <linkDef name="schemaImport"
-             hrefXP="/xs:schema/xs:import/@schemaLocation" 
-             recursive="true" >
+            hrefXP="/xs:schema/xs:import/@schemaLocation"
+            recursive="true">
         <targetSize resolvable="true"
-                    resolvableMsg="Recursive imports could not be resolved"/>
+                  resolvableMsg="Recursive imports could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: NIEM domains folder -->
-        <folder foxpath="niem-4.2\niem\domains" id="niemCoreFolderShape">
+        <folder navigateFOX="niem-4.2\niem\domains" id="niemCoreFolderShape">
             <targetSize countMsg="Missing folder: domains" count="1"/>
 
             <!-- Visit: agriculture schema -->
-            <file foxpath=".\\agriculture.xsd" id="agricultureFileShape">
+            <file navigateFOX=".\\agriculture.xsd" id="agricultureFileShape">
                 <targetSize count="1" countMsg="Agriculture file missing"/>
                 
                 <!-- Visit: link targets obtained for recursive link definition "schemaImport" -->
@@ -39,7 +39,9 @@
                     
                     <!-- Check: all link targets have a target namespace -->
                     <values>
-                        <value exprXP="/xs:schema/@targetNamespace" exists="true" existsMsg="Missing tns"/>
+                        <value exprXP="/xs:schema/@targetNamespace"
+                         exists="true"
+                         existsMsg="Missing tns"/>
                     </values>
                 </file>
             </file>

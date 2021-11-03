@@ -4,20 +4,22 @@
     
     The value items must match the pattern provided by @like.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.like"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.like">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//tzTimezone"
-                          minCount="1" minCountMsg="At least one timezone expected."
-                          like="Europe/*" likeMsg="Timezoe must match pattern 'Europe/*'."/>
+                      minCount="1"
+                      minCountMsg="At least one timezone expected."
+                      like="Europe/*"
+                      likeMsg="Timezoe must match pattern 'Europe/*'."/>
             </foxvalues>            
         </folder>
     </domain>

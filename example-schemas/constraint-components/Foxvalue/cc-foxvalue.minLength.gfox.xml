@@ -5,20 +5,22 @@
     
     The value items must have a length greater than or equal to the length provided by @minLength.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.minLength"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.minLength">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//*[not(*)]"
-                          minCount="1" minCountMsg="At least one data member expected."
-                          minLength="1" minLengthMsg="Data members must not be empty."/>
+                      minCount="1"
+                      minCountMsg="At least one data member expected."
+                      minLength="1"
+                      minLengthMsg="Data members must not be empty."/>
             </foxvalues>            
         </folder>
     </domain>

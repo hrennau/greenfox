@@ -6,31 +6,37 @@
     
     The value items must be distinct, that is, there must not be two equal items.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.distinct"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.distinct">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'ireland' -->
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: latitude and longitude values in the folder are distinct -->
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//latitude"
-                          minCount="1" minCountMsg="At least one latitude expected."
-                          distinct="true" distinctMsg="Data error - latitudes must be unique."
-                          datatype="decimal" datatypeMsg="Latitude must be a decimal value">
+                      minCount="1"
+                      minCountMsg="At least one latitude expected."
+                      distinct="true"
+                      distinctMsg="Data error - latitudes must be unique."
+                      datatype="decimal"
+                      datatypeMsg="Latitude must be a decimal value">
                 </foxvalue>
                 <foxvalue exprFOX=".\\airport-*.xml//longitude"
-                          minCount="1" minCountMsg="At least one longitude expected."
-                          distinct="true" distinctMsg="Data error - longitude must be unique."
-                          datatype="decimal" datatypeMsg="Longitude must be a decimal value">
+                      minCount="1"
+                      minCountMsg="At least one longitude expected."
+                      distinct="true"
+                      distinctMsg="Data error - longitude must be unique."
+                      datatype="decimal"
+                      datatypeMsg="Longitude must be a decimal value">
                 </foxvalue>
             </foxvalues>            
         </folder>

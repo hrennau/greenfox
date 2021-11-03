@@ -7,30 +7,35 @@
     All items of value 1 must be >= the items of value 2. Here, all project start 
     dates (value 1) must be >= a minimum date (value 2).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useDatatype-date"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useDatatype-date">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'projectDates.xml' -->
-            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesShape">
+            <file navigateFOX="*projectDates*.xml except _hide*" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 
                 <!-- CHECK: startDate ge minDate -->
                 <valuePairs>
-                    <valuePair expr1XP="//project/@startDate" minCount1="1" minCount1Msg="At least one start date expected."
-                               expr2XP="/projects/@minDate" count2="1" count2Msg="minDate missing."
-                               useDatatype="date"
-                               cmp="ge" cmpMsg="Project start date must be greater or equal minDate"/>
+                    <valuePair expr1XP="//project/@startDate"
+                          minCount1="1"
+                          minCount1Msg="At least one start date expected."
+                          expr2XP="/projects/@minDate"
+                          count2="1"
+                          count2Msg="minDate missing."
+                          useDatatype="date"
+                          cmp="ge"
+                          cmpMsg="Project start date must be greater or equal minDate"/>
                 </valuePairs>
             </file>
         </folder>

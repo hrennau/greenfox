@@ -6,11 +6,11 @@
     Both expressions of the valueCompared constraints are thus evaluated in the context JSON
     node tree.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.json"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.json">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <!-- Link definition:
@@ -19,30 +19,39 @@
            - link end nodes - the <geo> element in the target doc
       -->
     <linkDef name="airportGeoDetails"
-             contextXP="//airport/_"
-             hrefXP="href"             
-             targetXP="/json/airport/geo"
-             mediatype="json">
+            contextXP="//airport/_"
+            hrefXP="href"
+            targetXP="/json/airport/geo"
+            mediatype="json">
         <!-- Link constraints: 
              per context point one target document with one <geo> element -->
-        <targetSize 
-            countTargetDocsPerContextPoint="1"
-            countTargetNodesPerContextPoint="1"/>
+        <targetSize countTargetDocsPerContextPoint="1" countTargetNodesPerContextPoint="1"/>
     </linkDef>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports-ireland.json" mediatype="json" id="countryFileShape">
-                <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
+            <file navigateFOX="airports-ireland.json"
+               mediatype="json"
+               id="countryFileShape">
+                <targetSize minCount="1"
+                        minCountMsg="Airports folder without expected country file"/>
                 
                 <!-- The constraint is checked for each combination
                      of a link context point and a link target node -->
                 <valuesCompared linkName="airportGeoDetails"
-                               minCountContextNodes="14" 
-                               minCountTargetDocs="14">
-                    <valueCompared expr1XP="latitude" expr2XP="latitude" cmp="eq" maxCount1="1" count2="1"/>
-                    <valueCompared expr1XP="longitude" expr2XP="longitude" cmp="eq" maxCount1="1" count2="1"/>
+                            minCountContextNodes="14"
+                            minCountTargetDocs="14">
+                    <valueCompared expr1XP="latitude"
+                              expr2XP="latitude"
+                              cmp="eq"
+                              maxCount1="1"
+                              count2="1"/>
+                    <valueCompared expr1XP="longitude"
+                              expr2XP="longitude"
+                              cmp="eq"
+                              maxCount1="1"
+                              count2="1"/>
                 </valuesCompared>
                 
             </file>

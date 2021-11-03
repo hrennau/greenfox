@@ -4,30 +4,31 @@
     
     The expression value must be deep-equal to the terms contained by the <deepEqual> list.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.deepEqual.useDatatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.deepEqual.useDatatype">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'projectDates' -->
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>
 
             <!-- VISIT: file 'projectDates.xml' -->
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 
                 <!-- CHECK: project start dates deep-equal expected dates -->
                 <values>
-                    <value exprXP="/projects/project/@startDate => sort()" 
-                           minCount="1" minCountMsg="At least one project expected."  
-                           useDatatype="date"
-                           deepEqualMsg="Not the expected list of start dates">
+                    <value exprXP="/projects/project/@startDate =&gt; sort()"
+                      minCount="1"
+                      minCountMsg="At least one project expected."
+                      useDatatype="date"
+                      deepEqualMsg="Not the expected list of start dates">
                         <deepEqual>
                             <term>2018-01-01</term>
                             <term>2020-01-01</term>                            

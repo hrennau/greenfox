@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!-- 
+<!-- 
     Demonstrates the validation of links. The link is defined by a href expression and 
     must be resolvable.
     
@@ -16,27 +16,29 @@
     Nota bene: the mediatypes of the link context resource and the link target resource
     are independent. For example, a XML document may be linked to a JSON document.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.json"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.json">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Visit: JSON airports document -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <file navigateFOX="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize count="1" countMsg="Airports file missing"/>
                 
                 <!-- Check: all href references can be resolved to JSON documents -->
-                <links hrefXP="//href" 
-                       mediatype="json"
-                       resolvable="true" resolvableMsg="Link cannot be resolved"
-                       minCountTargetDocs="3" minCountTargetDocsMsg="At least three country airport files expected"/>                
+                <links hrefXP="//href"
+                   mediatype="json"
+                   resolvable="true"
+                   resolvableMsg="Link cannot be resolved"
+                   minCountTargetDocs="3"
+                   minCountTargetDocsMsg="At least three country airport files expected"/>                
             </file>
         </folder>
     </domain>

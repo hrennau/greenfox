@@ -5,24 +5,26 @@
     All items of value 1 must be equal to an item from value 2. Here, all cities from the
     factbook document must be found in a CSV file.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue-includes"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue-includes">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="factbook" id="factbookFolderShape">
+        <folder navigateFOX="factbook" id="factbookFolderShape">
             <targetSize countMsg="Missing folder: factbook" count="1"/>            
-            <file foxpath="factbook2.xml" id="factbookFileShape">
+            <file navigateFOX="factbook2.xml" id="factbookFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
                 <foxvaluePairs>
                     <foxvaluePair expr1XP="//city/name[1]"
-                                  expr2FOX="..\countries\*.csv\csv-doc(.)/csv/record/*[3]"
-                                  cmp="contains"
-                                  minCount1="100" minCount1Msg="Expected more factbook cities."
-                                  minCount2="3000" minCount2Msg="Expected more country csv cities."/>
+                             expr2FOX="..\countries\*.csv\csv-doc(.)/csv/record/*[3]"
+                             cmp="contains"
+                             minCount1="100"
+                             minCount1Msg="Expected more factbook cities."
+                             minCount2="3000"
+                             minCount2Msg="Expected more country csv cities."/>
                 </foxvaluePairs>
             </file>
         </folder>

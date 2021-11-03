@@ -7,23 +7,24 @@
     dealing with archive contents is just a detail of navigation used to provide the 
     resources involved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar.archive">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: airports folder -->
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="archives\airports.zip\#archive#\airports"
+              id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Check archive contents: folder 'airports-copy' is similar -->
-            <folderSimilar foxpath="ancestor~::archives\airports-copy.zip\#archive#\airports-copy"
-                           countTargetResources="1" 
-                           countTargetResourcesMsg="Missing folder, airports-copy">
+            <folderSimilar navigateFOX="ancestor~::archives\airports-copy.zip\#archive#\airports-copy"
+                        countTargetResources="1"
+                        countTargetResourcesMsg="Missing folder, airports-copy">
                 <skipFiles names="*.sav.*"/>
                 <skipFolders names="*.sav" where="there"/>
             </folderSimilar>

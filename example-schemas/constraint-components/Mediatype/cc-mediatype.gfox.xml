@@ -10,51 +10,57 @@
     When checking the row count, the option @csv.header can be used and decrements the 
     actual row count by one.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/mediatype">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-Mediatype' -->
-        <folder foxpath="constraint-Mediatype" id="mediatypeFolderShape">
+        <folder navigateFOX="constraint-Mediatype" id="mediatypeFolderShape">
             <targetSize countMsg="Missing folder: constraint-Mediatype" count="1"/>   
             
             <!-- VISIT files: JSON files -->
-            <file foxpath=".\\*.json" id="jsonFileShape">
+            <file navigateFOX=".\\*.json" id="jsonFileShape">
                 <mediatype eq="json"/>
             </file>
             
             <!-- VISIT files: XML files -->
-            <file foxpath=".\\*.xml" id="xmlFileShape">
+            <file navigateFOX=".\\*.xml" id="xmlFileShape">
                 <mediatype eq="xml"/>
             </file>
             
             <!-- VISIT files: CSV files (separator: comma) -->
-            <file foxpath="csv.headline.comma.csv" id="csvCommaFileShape">
+            <file navigateFOX="csv.headline.comma.csv" id="csvCommaFileShape">
                 
                 <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
-                    csv.separator="comma" csv.header="yes"
-                    csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"
-                    csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
-                    csv.minRowCountMsg="Expected at least 2 rows"/>                
+                       csv.separator="comma"
+                       csv.header="yes"
+                       csv.minColumnCount="4"
+                       csv.maxColumnCount="4"
+                       csv.minRowCount="2"
+                       csv.maxRowCount="30"
+                       csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
+                       csv.minRowCountMsg="Expected at least 2 rows"/>                
             </file>
             
             <!-- VISIT files: CSV files (separator: semicolon) -->            
-            <file foxpath="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
+            <file navigateFOX="csv.headline.semicolon.csv" id="csvSemicolonFileShape">
                 
                 <!-- CHECK - file is CSV -->
                 <mediatype eq="csv"
-                    csv.separator="semicolon" csv.header="yes"
-                    csv.minColumnCount="4" csv.maxColumnCount="4" 
-                    csv.minRowCount="2" csv.maxRowCount="30"
-                    csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
-                    csv.minRowCountMsg="Expected at least 2 rows"/>
+                       csv.separator="semicolon"
+                       csv.header="yes"
+                       csv.minColumnCount="4"
+                       csv.maxColumnCount="4"
+                       csv.minRowCount="2"
+                       csv.maxRowCount="30"
+                       csv.minColumnCountMsg="Expected at least 2 columns - wrong separator?"
+                       csv.minRowCountMsg="Expected at least 2 rows"/>
             </file>
         </folder>
     </domain>

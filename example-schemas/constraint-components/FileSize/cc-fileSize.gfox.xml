@@ -7,30 +7,31 @@
     Error messages can be specified by attributes @gtMsg, @geMsg, @ltMsg, etc. 
     Success messages can be specified by attributes @gtMsgOK, @geMsgOK, ...
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-FileSize' -->
-        <folder foxpath="constraint-FileSize" id="fileSizeFolderShape">
+        <folder navigateFOX="constraint-FileSize" id="fileSizeFolderShape">
             <targetSize countMsg="Missing folder: constraint-FileSize" count="1"/>
 
             <!-- VISIT: all files except _hide* -->
-            <file foxpath="* except _hide*" id="contentFilesShape">
+            <file navigateFOX="* except _hide*" id="contentFilesShape">
                 <targetSize minCountMsg="Less files than expected" minCount="3"/>
                 
                 <!-- CHECK: file size -->
-                <fileSize gt="0" gtMsg="Empty files not allowed"
-                          le="1000000" leMsg="Files larger 1MB not allowed"/>
+                <fileSize gt="0"
+                      gtMsg="Empty files not allowed"
+                      le="1000000"
+                      leMsg="Files larger 1MB not allowed"/>
             </file>
         </folder>
     </domain>
 
 </greenfox>
-

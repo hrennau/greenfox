@@ -11,27 +11,30 @@
     Note the principal separation between the link definition identifying pairs of related documents 
     and the definition of constraints applying to those pairs.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompaired"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompaired">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="msgs1\response" id="responseFolderShape">
+        <folder navigateFOX="msgs1\response" id="responseFolderShape">
             <targetSize countMsg="Missing folder: msgs1\response" count="1"/>            
-            <file foxpath="*.xml" id="responseFileShape">
+            <file navigateFOX="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <valuesCompared foxpath="fox-parent-sibling('expectation')\expectation-articles.xml" 
-                                countTargetDocs="1">
-                    <valueCompared expr1XP="//articleName" 
-                                   expr2XP="//article/@name" 
-                                   cmp="in" cmpMsg="Article name not expected."/>
-                    <valueCompared expr1XP="//articlePrice" 
-                                   expr2XP="//article/@price" 
-                                   useDatatype="decimal" cmp="in" cmpMsg="Price not expected"/>
+                <valuesCompared navigateFOX="fox-parent-sibling('expectation')\expectation-articles.xml"
+                            countTargetDocs="1">
+                    <valueCompared expr1XP="//articleName"
+                              expr2XP="//article/@name"
+                              cmp="in"
+                              cmpMsg="Article name not expected."/>
+                    <valueCompared expr1XP="//articlePrice"
+                              expr2XP="//article/@price"
+                              useDatatype="decimal"
+                              cmp="in"
+                              cmpMsg="Price not expected"/>
                 </valuesCompared>
             </file>
         </folder>

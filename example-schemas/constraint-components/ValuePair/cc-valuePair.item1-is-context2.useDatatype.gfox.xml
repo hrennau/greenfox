@@ -9,48 +9,54 @@
     - milestone dates must be greater or equal the project start date 
     - milestone dates must be less or equal the project end date.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.item1-is-context2.useDatatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.item1-is-context2.useDatatype">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">        
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
             
             <!-- VISIT: file 'projectDates.xml'" -->
-            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesShape">
+            <file navigateFOX="*projectDates*.xml except _hide*" id="projectDatesShape">
                 <targetSize minCount="1" minCountMsg="Missing file: projectDates.xml"/>
 
         
                 
                 <!-- CHECK: end dates >= start dates, milestone dates >= start dates, milestone dates <= end dates -->
                 <valuePairs>
-                    <valuePair expr1XP="//project/@endDate" minCount1="0" 
-                               expr2XP="../@startDate" count2="1"                                    
-                               expr2Context="item"
-                               useDatatype="date"
-                               cmp="ge" cmpMsg="Project end date must be greater or equal project start date"
-                               />
+                    <valuePair expr1XP="//project/@endDate"
+                          minCount1="0"
+                          expr2XP="../@startDate"
+                          count2="1"
+                          expr2Context="item"
+                          useDatatype="date"
+                          cmp="ge"
+                          cmpMsg="Project end date must be greater or equal project start date"/>
 
-                    <valuePair expr1XP="//milestone/@date" minCount1="0" 
-                               expr2XP="../../@startDate" count2="1" 
-                               expr2Context="item"
-                               useDatatype="date"
-                               cmp="ge" cmpMsg="Milestone date must be greater or equal project start date"
-                               />
+                    <valuePair expr1XP="//milestone/@date"
+                          minCount1="0"
+                          expr2XP="../../@startDate"
+                          count2="1"
+                          expr2Context="item"
+                          useDatatype="date"
+                          cmp="ge"
+                          cmpMsg="Milestone date must be greater or equal project start date"/>
                     
-                    <valuePair expr1XP="//milestone/@date" minCount1="0" 
-                               expr2XP="../../@endDate" minCount2="0" 
-                               expr2Context="item"
-                               useDatatype="date"
-                               cmp="le" cmpMsg="Milestone date must be less or equal project end date"
-                               />
+                    <valuePair expr1XP="//milestone/@date"
+                          minCount1="0"
+                          expr2XP="../../@endDate"
+                          minCount2="0"
+                          expr2Context="item"
+                          useDatatype="date"
+                          cmp="le"
+                          cmpMsg="Milestone date must be less or equal project end date"/>
                 </valuePairs>
             </file>
         </folder>

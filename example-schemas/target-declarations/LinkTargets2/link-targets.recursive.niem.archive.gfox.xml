@@ -8,9 +8,8 @@
           
           Example call: gfox .../link-targets.recursive.niem.archive.gfox.xml /projects/xsdbase
 -->
-
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem.archive"
-    xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/link-targets.recursive.niem.archive">
     
     <context>
         <field name="domain"/>
@@ -18,20 +17,20 @@
     
     <!-- Define link: "schemaImport" -->    
     <linkDef name="schemaImport"
-             hrefXP="/xs:schema/xs:import/@schemaLocation" 
-             recursive="true" >
-        <targetSize resolvable="true"
-                    resolvableMsg="Target links could not be resolved"/>
+            hrefXP="/xs:schema/xs:import/@schemaLocation"
+            recursive="true">
+        <targetSize resolvable="true" resolvableMsg="Target links could not be resolved"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: NIEM domains folder -->
-        <folder foxpath="archives\niem-4.2.zip\#archive#\niem-4.2\niem\domains" id="niemCoreFolderShape">
+        <folder navigateFOX="archives\niem-4.2.zip\#archive#\niem-4.2\niem\domains"
+              id="niemCoreFolderShape">
             <targetSize countMsg="Missing folder: domains" count="1"/>
 
             <!-- Visit archive contents: agriculture schema -->
-            <file foxpath=".\\agriculture.xsd" id="agricultureFileShape">
+            <file navigateFOX=".\\agriculture.xsd" id="agricultureFileShape">
                 <targetSize count="1" countMsg="Agriculture file missing"/>
                 
                 <!-- Visit folder contents: 
@@ -41,7 +40,9 @@
                     
                     <!-- Check: all link targets have a target namespace -->
                     <values>
-                        <value exprXP="/xs:schema/@targetNamespace" exists="true" existsMsg="Missing tns"/>
+                        <value exprXP="/xs:schema/@targetNamespace"
+                         exists="true"
+                         existsMsg="Missing tns"/>
                     </values>
                 </file>
             </file>

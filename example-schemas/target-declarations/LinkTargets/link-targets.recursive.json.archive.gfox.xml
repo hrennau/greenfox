@@ -3,30 +3,30 @@
     Demonstrates a target declaration using a Link Definition. This example checks JSON
     resources contained by an archive file, discovered by recursive link resolution.    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.json.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.json.archive">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <!-- Define link: "airportsJson" -->
     <linkDef name="airportsJson"
-        hrefXP="//href"
-        recursive="true"
-        mediatype="json" >
-        <targetSize resolvable="true"
-                    resolvableMsg="Target links could not be resolved"/>        
+            hrefXP="//href"
+            recursive="true"
+            mediatype="json">
+        <targetSize resolvable="true" resolvableMsg="Target links could not be resolved"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: airports folder -->
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="archives\airports.zip\#archive#\airports"
+              id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit archive contents: JSON airports file -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <file navigateFOX="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize count="1" countMsg="Missing file 'airports.json'."/>
                 
                 <!-- Visit archive contents: 
@@ -37,8 +37,8 @@
                     <!-- Check archive contents: 'airport' elements -->
                     <values>
                         <value exprXP="//airport"
-                            exists="true"
-                            existsMsg="Airport element missing."/>
+                         exists="true"
+                         existsMsg="Airport element missing."/>
                     </values>
                 </file>
             </file>

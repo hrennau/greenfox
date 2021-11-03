@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!-- 
+<!-- 
     Demonstrates the validation of links. The link is defined by a URI expression and must be resolvable.        
     
     In this example the URI expression yields multiple target URIs. Due to the @mediatype attribute
     the target resources are parsed JSON documents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uri.multiple"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-uri.multiple">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: Irish airports file -->
-            <file foxpath="airports-ireland.xml" id="airportsFileShape">
+            <file navigateFOX="airports-ireland.xml" id="airportsFileShape">
                 <targetSize minCount="1" minCountMsg="Airports file expected"/>
                 
                 <!-- Check: JSON airport files exist -->
                 <links uriXP="//@iata ! concat('ireland/airport-', ., '.json')"
-                       mediatype="json"
-                       resolvable="true" resolvableMsg="Link cannot be resolved"
-                       exists="true"/>
+                   mediatype="json"
+                   resolvable="true"
+                   resolvableMsg="Link cannot be resolved"
+                   exists="true"/>
             </file>
         </folder>
     </domain>

@@ -4,30 +4,29 @@
     Link Definition, which is referenced by name (@linkName). The Link Definition is applied
     to JSON documents, and the link targets are treated as JSON documents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.json"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.json">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <!-- Define link: "airportsJson" -->    
     <linkDef name="airportsJson"
-             hrefXP="//href"
-             recursive="true"
-             mediatype="json" >
-        <targetSize resolvable="true"
-                    resolvableMsg="Target links could not be resolved"/>        
+            hrefXP="//href"
+            recursive="true"
+            mediatype="json">
+        <targetSize resolvable="true" resolvableMsg="Target links could not be resolved"/>        
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: JSON airports file -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <file navigateFOX="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize count="1" countMsg="Missing file 'airports.json'."/> 
                 
                 <!-- Visit: link targets obtained for link definition "airportsJson";
@@ -38,8 +37,8 @@
                     <!-- Check: 'airport' elements -->
                     <values>
                         <value exprXP="//airport"
-                            exists="true"
-                            existsMsg="Airport element missing."/>
+                         exists="true"
+                         existsMsg="Airport element missing."/>
                     </values>
                     
                 </file>

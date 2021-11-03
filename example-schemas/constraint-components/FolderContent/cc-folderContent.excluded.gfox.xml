@@ -10,24 +10,25 @@
       excludedMemberFile, excludedMemberFiles,
       excludedMemberFolder, excludedMemberFolders.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.excluded"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent.excluded">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">        
         
         <!-- VISIT: folder 'constraint-FolderContent' -->
-        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+        <folder navigateFOX="constraint-FolderContent" id="folderContentFolderShape">
             <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
 
             <!-- CHECK: folder does NOT contain particular files -->
             <folderContent>
                 <memberFile name="ONLINE.FLAG"/>                
                 <excludedMemberFile name="OFFLINE.FLAG" excludedMemberFileMsg="OFFLINE flag not allowed"/>
-                <excludedMemberFiles names="*test* *sav*" excludedMemberFilesMsg="*test* and *sav* not allowed"/>
+                <excludedMemberFiles names="*test* *sav*"
+                                 excludedMemberFilesMsg="*test* and *sav* not allowed"/>
             </folderContent>  
         </folder>
     </domain>

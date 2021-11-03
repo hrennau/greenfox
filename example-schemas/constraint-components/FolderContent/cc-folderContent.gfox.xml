@@ -11,17 +11,17 @@
     Note the use of @ignoredMembers - when checking the Closed constraint, members
     with names matching @ignoredMembers are ignored.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folderContent">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">        
         
         <!-- VISIT: folder 'constraint-FolderContent' -->
-        <folder foxpath="constraint-FolderContent" id="folderContentFolderShape">
+        <folder navigateFOX="constraint-FolderContent" id="folderContentFolderShape">
             <targetSize countMsg="Missing folder: constraint-FolderContent" count="1"/>
 
             <!-- CHECK: folder contents -->
@@ -37,16 +37,22 @@
             </folderContent>  
 
             <!-- VISIT: folder 'ireland' -->
-            <folder foxpath="ireland">
+            <folder navigateFOX="ireland">
                 <targetSize countMsg="Missing folder: ireland" count="1"/>
                 <folderContent closed="true">
-                    <memberFile name="airport-???.xml" maxCount="unbounded" minCount="14" minCountMsg="Not the expected number of Lux XML airport files"/>
-                    <memberFile name="airport-???.json" maxCount="unbounded" minCount="14" minCountMsg="Not the expected number of Lux JSON airport files"/>
+                    <memberFile name="airport-???.xml"
+                           maxCount="unbounded"
+                           minCount="14"
+                           minCountMsg="Not the expected number of Lux XML airport files"/>
+                    <memberFile name="airport-???.json"
+                           maxCount="unbounded"
+                           minCount="14"
+                           minCountMsg="Not the expected number of Lux JSON airport files"/>
                 </folderContent>
             </folder>
             
             <!-- VISIT: folder 'luxembourg' -->
-            <folder foxpath="luxembourg">
+            <folder navigateFOX="luxembourg">
                 <targetSize countMsg="Missing folder: luxembourg" count="1"/>
                 <folderContent closed="true">
                     <memberFile name="airport-???.xml" minCount="1" maxCount="2"/>

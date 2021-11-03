@@ -5,30 +5,35 @@
     All items of value 1 must be less than the items of value 2. Here, all project end 
     dates (value 1) must be less than a maximum date (value 2).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.lt"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.lt">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
             
             <!-- VISIT: file 'projectDates.xml'" -->
-            <file foxpath="*projectDates*.xml except _hide*" id="projectDatesShape">
+            <file navigateFOX="*projectDates*.xml except _hide*" id="projectDatesShape">
                 <targetSize minCount="1" minCountMsg="Missing file: projectDates.xml"/>
                 
                 <!-- CHECK: minDate < maxDate -->
                 <valuePairs>
-                    <valuePair expr1XP="//project/@endDate" minCount1="1" minCount1Msg="At least one end date expected."
-                               expr2XP="/projects/@maxDate" count2="1" count2Msg="maxDate missing."
-                               useDatatype="date"
-                               cmp="lt" cmpMsg="Project end date must be less than maxDate"/>
+                    <valuePair expr1XP="//project/@endDate"
+                          minCount1="1"
+                          minCount1Msg="At least one end date expected."
+                          expr2XP="/projects/@maxDate"
+                          count2="1"
+                          count2Msg="maxDate missing."
+                          useDatatype="date"
+                          cmp="lt"
+                          cmpMsg="Project end date must be less than maxDate"/>
                 </valuePairs>
             </file>
         </folder>

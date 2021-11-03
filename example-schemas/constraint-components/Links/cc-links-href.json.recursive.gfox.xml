@@ -5,27 +5,29 @@
     This example highlights the checking of a recursive link definition (@recursive), as well as the
     use of JSON link targets (@mediatype).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href-json.recursive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links.href-json.recursive">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Visit: JSON airports document -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <file navigateFOX="airports.json" id="airportsFileShape" mediatype="json">
                 
                 <!-- Check: all href references can be recursively resolved to JSON documents -->
                 <links hrefXP="//href"
-                       recursive="true"
-                       mediatype="json"                       
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="60" minCountTargetDocsMsg="More target docs expected"/>
+                   recursive="true"
+                   mediatype="json"
+                   resolvable="true"
+                   resolvableMsg="Some recursive links cannot be resolved."
+                   minCountTargetDocs="60"
+                   minCountTargetDocsMsg="More target docs expected"/>
                 
             </file>
         </folder>

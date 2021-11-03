@@ -2,22 +2,24 @@
 <!-- 
     Demonstrates the use of Value constraints. Declares a ValueDatatype and a ValueMinCount constraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.datatype"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.datatype">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="//project/(@startDate, @endDate, milestone/@date)" 
-                           minCount="1" countMsg="At least one start date expected."  
-                           datatype="date" datatypeMsg="Date attributes must contain data values"/>
+                    <value exprXP="//project/(@startDate, @endDate, milestone/@date)"
+                      minCount="1"
+                      countMsg="At least one start date expected."
+                      datatype="date"
+                      datatypeMsg="Date attributes must contain data values"/>
                 </values>
             </file>
         </folder>

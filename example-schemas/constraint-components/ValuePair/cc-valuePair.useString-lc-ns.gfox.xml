@@ -5,30 +5,36 @@
     As the @useString option 'lc ns' is used, the comparison is applied to lower-case 
     and whitespace-normalized copies of the values.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-lc-ns"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.useString-lc-ns">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'country-names.xml' -->
-            <file foxpath="*country-names*.xml except _hide*" id="countryNamesFileShape">
+            <file navigateFOX="*country-names*.xml except _hide*"
+               id="countryNamesFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: country-names.xml"/>
 
                 <!-- CHECK: the default countries are found in the country list (case- and whitespace-noralized) -->
                 <valuePairs>
-                    <valuePair expr1XP="/countries/(@* except @countItems)" minCount1="2" minCount1Msg="Expected at least two attributes."
-                               expr2XP="//country" minCount2="100" minCount2Msg="Expected at least 100 countries."                                                                   
-                               useString="lc ns"
-                               cmp="in" cmpMsg="Country names must include the names in the root attributes."/>
+                    <valuePair expr1XP="/countries/(@* except @countItems)"
+                          minCount1="2"
+                          minCount1Msg="Expected at least two attributes."
+                          expr2XP="//country"
+                          minCount2="100"
+                          minCount2Msg="Expected at least 100 countries."
+                          useString="lc ns"
+                          cmp="in"
+                          cmpMsg="Country names must include the names in the root attributes."/>
                 </valuePairs>
                 
             </file>

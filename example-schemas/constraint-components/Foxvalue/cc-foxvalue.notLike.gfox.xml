@@ -4,20 +4,22 @@
     
     The value items must not match the pattern provided by @notLike.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notLike"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.notLike">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//source1"
-                          minCount="1" minCountMsg="At least one source1 expected."
-                          notLike="#*" notLikeMsg="Source1 must not start with a #."/>
+                      minCount="1"
+                      minCountMsg="At least one source1 expected."
+                      notLike="#*"
+                      notLikeMsg="Source1 must not start with a #."/>
             </foxvalues>            
         </folder>
     </domain>

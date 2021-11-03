@@ -5,24 +5,26 @@
     Checks @fileref references can be resolved. The target declaration of the containing file shape
     selects any docbook documents in the parent target folder.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/links-href"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/links-href">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: folder 'fileExistenceDependencies'-->
-        <folder foxpath="fileExistenceDependencies" id="fileExistenceDependenciesFolderShape">
+        <folder navigateFOX="fileExistenceDependencies"
+              id="fileExistenceDependenciesFolderShape">
             <targetSize countMsg="Missing folder: fileExistenceDependencies" count="1"/>
 
             <!-- Visit: all files with docbook content -->
-            <file foxpath=".\\*.xml[/docbook:*]" id="docbookFileShape">
+            <file navigateFOX=".\\*.xml[/docbook:*]" id="docbookFileShape">
                 
                 <!-- Check: 'fileref' links can be resolved -->
                 <links hrefXP="//@fileref"
-                       resolvable="true" resolvableMsg="A 'fileref' link which cannot be resolved."/>
+                   resolvable="true"
+                   resolvableMsg="A 'fileref' link which cannot be resolved."/>
             </file>
         </folder>
     </domain>

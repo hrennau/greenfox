@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!-- 
+<!-- 
     Demonstrates the validation of links. The link is defined by a href expression 
     and must be resolvable.
     
@@ -11,34 +11,35 @@
     is one result per link context node (<airport> element) and that
     there are all in all 33 target resources identified by the link.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.linkContext"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.linkContext">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <linkDef name="airports"
-             contextXP="//airport"
-             hrefXP="@href"             
-             mediatype="xml"/>
+            contextXP="//airport"
+            hrefXP="@href"
+            mediatype="xml"/>
         
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Visit: Finish airports document -->
-            <file foxpath="airports-finland.xml" id="airportsFileShape">
+            <file navigateFOX="airports-finland.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Finland airports file missing"/>
                 
                 <!-- Check: all href references can be resolved to XML documents -->
                 <links linkName="airports"
-                       resolvable="true" resolvableMsg="Link cannot be resolved"
-                       countTargetDocs="33" 
-                       countTargetDocsMsg="Expected 33 target documents"
-                       countTargetDocsPerContextPoint="1" 
-                       countTargetDocsPerContextPointMsg="Expected one target doc per context point"/>                
+                   resolvable="true"
+                   resolvableMsg="Link cannot be resolved"
+                   countTargetDocs="33"
+                   countTargetDocsMsg="Expected 33 target documents"
+                   countTargetDocsPerContextPoint="1"
+                   countTargetDocsPerContextPointMsg="Expected one target doc per context point"/>                
             </file>
         </folder>
     </domain>

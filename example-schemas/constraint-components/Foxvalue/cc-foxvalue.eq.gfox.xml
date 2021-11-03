@@ -4,20 +4,22 @@
     
     All value items must be equal to the value provided by @eq.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.eq">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//country"
-                          minCount="1" minCountMsg="At least one country value expected."
-                          eq="Ireland" eqMsg="Airports in the ireland folder must have country 'Ireland'."/>
+                      minCount="1"
+                      minCountMsg="At least one country value expected."
+                      eq="Ireland"
+                      eqMsg="Airports in the ireland folder must have country 'Ireland'."/>
             </foxvalues>            
         </folder>
     </domain>

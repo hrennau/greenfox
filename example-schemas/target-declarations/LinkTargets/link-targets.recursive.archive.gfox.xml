@@ -3,34 +3,37 @@
     Demonstrates a target declaration using a Link Definition. This example checks resources
     contained by an archive file, discovered by recursive link resolution.    
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.archive">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: airports folder -->
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="archives\airports.zip\#archive#\airports"
+              id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             
             <!-- Visit archive contents: airports file -->
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
                 
                 <!-- Visit archive contents: 
                          link targets selected by recursive href references -->                
                 <file hrefXP="//@href" recursive="true" id="linkTargetsFileShape">
-                    <targetSize minCount="9" minCountMsg="Not expected number of link targets"
-                                resolvable="true" resolvableMsg="Target links could not be resolved"/>
+                    <targetSize minCount="9"
+                           minCountMsg="Not expected number of link targets"
+                           resolvable="true"
+                           resolvableMsg="Target links could not be resolved"/>
                     
                     <!-- Check archive contents: 'airport' elements -->
                     <values>
                         <value exprXP="//airport"
-                            exists="true"
-                            existsMsg="Airport element missing."/>
+                         exists="true"
+                         existsMsg="Airport element missing."/>
                     </values>
                 </file>
             </file>

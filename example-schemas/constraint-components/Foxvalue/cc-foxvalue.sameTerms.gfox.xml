@@ -8,25 +8,26 @@
     The value may, for example, contain for each term from the term list any number of 
     repetitions. 
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.sameTerms"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.sameTerms">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'ireland' -->
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: city names correspond to a list of expected city names --> 
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//city"
-                          minCount="1" minCountMsg="At least one city value expected."
-                          sameTermsMsg="City list not perfect.">
+                      minCount="1"
+                      minCountMsg="At least one city value expected."
+                      sameTermsMsg="City list not perfect.">
                     <sameTerms>
                         <term>Bantry</term>
                         <term>Dongloe</term>

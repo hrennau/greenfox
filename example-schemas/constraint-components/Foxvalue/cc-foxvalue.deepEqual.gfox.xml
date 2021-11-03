@@ -4,24 +4,24 @@
     The expression value must be deep-equal to the sequence of string values from the
     term list in <deepEqual>.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.deepEqual"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.deepEqual">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'airports' -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             
             <!-- CHECK: expected combinations of folder name and airport count -->
             <foxvalues>
-                <foxvalue exprFOX="*[is-dir()]\concat(file-name(.), ': ', count(airport-*.xml)) => sort()"
-                          deepEqualMsg="Not expected country name / count combinations">
+                <foxvalue exprFOX="*[is-dir()]\concat(file-name(.), ': ', count(airport-*.xml)) =&gt; sort()"
+                      deepEqualMsg="Not expected country name / count combinations">
                     <deepEqual>
                         <term>denmark: 17</term>
                         <term>finland: 33</term>

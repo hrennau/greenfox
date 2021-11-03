@@ -8,31 +8,43 @@
     a context expression (@contextXP) and a target node expression (@targetXP). The constraint 
     is re-evaluated for each combination of link context node and each one of its target nodes.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.archive">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <linkDef name="airportGeoDetails"
-             contextXP="//airport"
-             hrefXP="@href"             
-             targetXP="/*/geo">
+            contextXP="//airport"
+            hrefXP="@href"
+            targetXP="/*/geo">
         <targetSize countTargetNodesPerContextPoint="1"/>
     </linkDef>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="archives\airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="archives\airports.zip\#archive#\airports"
+              id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>            
-            <file foxpath="airports-ireland.xml" id="contryFileShape">
-                <targetSize minCount="1" minCountMsg="Airports folder without expected country file"/>
+            <file navigateFOX="airports-ireland.xml" id="contryFileShape">
+                <targetSize minCount="1"
+                        minCountMsg="Airports folder without expected country file"/>
                 
                 <valuesCompared linkName="airportGeoDetails"
-                                minCountContextNodes="14" minCountContextNodesMsg="Less airport elements than expected."
-                                minCountTargetNodes="14" minCountTargetNodesMsg="Less target geo elements than expected.">
-                    <valueCompared expr1XP="@latitude" expr2XP="latitude" cmp="eq" maxCount1="1" count2="1"/>
-                    <valueCompared expr1XP="@longitude" expr2XP="longitude" cmp="eq" maxCount1="1" count2="1"/>
+                            minCountContextNodes="14"
+                            minCountContextNodesMsg="Less airport elements than expected."
+                            minCountTargetNodes="14"
+                            minCountTargetNodesMsg="Less target geo elements than expected.">
+                    <valueCompared expr1XP="@latitude"
+                              expr2XP="latitude"
+                              cmp="eq"
+                              maxCount1="1"
+                              count2="1"/>
+                    <valueCompared expr1XP="@longitude"
+                              expr2XP="longitude"
+                              cmp="eq"
+                              maxCount1="1"
+                              count2="1"/>
                 </valuesCompared>
                 
             </file>

@@ -6,33 +6,35 @@
     
     The Links constraint references a Link definition.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.linkname"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.linkname">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <!-- Define link: 'airportDetails' -->
     <linkDef name="airportDetails"
-             contextXP="//airportsForCountry"
-             hrefXP="@href"
-             mediatype="xml"/>
+            contextXP="//airportsForCountry"
+            hrefXP="@href"
+            mediatype="xml"/>
     
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: the airports document -->
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing document, 'airports.xml'."/>
                 
                 <!-- Check: the links defined by link definition 'airportDetails'
                             (href references on 'airportsForCountry' can be resolved to XML documents) -->
                 <links linkName="airportDetails"
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="4" minCountTargetDocsMsg="At least 4 target documents expected"/>                
+                   resolvable="true"
+                   resolvableMsg="Some recursive links cannot be resolved."
+                   minCountTargetDocs="4"
+                   minCountTargetDocsMsg="At least 4 target documents expected"/>                
             </file>
         </folder>
     </domain>

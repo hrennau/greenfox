@@ -6,30 +6,32 @@
     Note that there is no difference compared with checking normal file system resources - 
     dealing with archive contents is just a detail of the navigation providing the resources.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize.archive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/fileSize.archive">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit archive contents: folder 'constraint-FileSize' -->
-        <folder foxpath="archives\constraint-FileSize.zip\#archive#\constraint-FileSize" id="fileSizeFolderShape">
+        <folder navigateFOX="archives\constraint-FileSize.zip\#archive#\constraint-FileSize"
+              id="fileSizeFolderShape">
             <targetSize countMsg="Missing folder: consgtraint-FileSize" count="1"/>
 
             <!-- Visit archive contents: all files except _hide* -->
-            <file foxpath="* except _hide*" id="contentFilesShape">
+            <file navigateFOX="* except _hide*" id="contentFilesShape">
                 <targetSize minCountMsg="Less files than expected" minCount="3"/>
                 
                 <!-- Check: file size -->
-                <fileSize gt="0" gtMsg="Empty files not allowed"
-                          le="1000000" leMsg="Files larger 1MB not allowed"/>
+                <fileSize gt="0"
+                      gtMsg="Empty files not allowed"
+                      le="1000000"
+                      leMsg="Files larger 1MB not allowed"/>
             </file>
         </folder>
     </domain>
 
 </greenfox>
-

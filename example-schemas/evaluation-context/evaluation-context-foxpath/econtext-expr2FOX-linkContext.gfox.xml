@@ -11,30 +11,31 @@
     returned by @contextXP, or the document root node if there is  no 
     @contextXP.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
-          xmlns="http://www.greenfox.org/ns/schema"
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
           xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../bin/xsd/greenfox.xsd">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\air"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data/air"/>
     </context>
 
     <domain path="${domain}" name="air">
         
-        <file foxpath="airports\index\airports.xml">
+        <file navigateFOX="airports\index\airports.xml">
             <targetSize count="1"/>
            
             <!-- Foxpath expression references $contextItem, the current link context item. -->
-            <foxvaluesCompared foxpath="$domain\\countries" 
-                               contextXP="//airportsForCountry" 
-                               countTargetResources="1">
-                <foxvalueCompared expr1XP="@country" count1="1"
-                                  expr2FOX="fox-child($linkContext/@country/lower-case(.))" count2="1"/>
+            <foxvaluesCompared navigateFOX="$domain\\countries"
+                            contextXP="//airportsForCountry"
+                            countTargetResources="1">
+                <foxvalueCompared expr1XP="@country"
+                              count1="1"
+                              expr2FOX="fox-child($linkContext/@country/lower-case(.))"
+                              count2="1"/>
             </foxvaluesCompared>                
                
         </file>
     </domain>
 
 </greenfox>
-

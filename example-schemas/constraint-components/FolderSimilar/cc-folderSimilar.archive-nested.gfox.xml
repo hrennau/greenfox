@@ -11,23 +11,24 @@
     dealing with archive contents is just a detail of navigation used to provide the 
     resources involved.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar/archive-nested"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/folder-similar/archive-nested">
 
     <context>
         <!-- Define a domain contained by an archive -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data\archives\airportsArchives.zip\#archive#\airportsArchives"/>
+        <field name="domain"
+             value="${schemaURI}/../../../../example-data/archives/airportsArchives.zip/#archive#/airportsArchives"/>
     </context>
     
     <linkDef name="airports"
-             foxpath="ancestor~::airportsArchives\airports-copy.zip\#archive#\airports-copy"/>
+            navigateFOX="ancestor~::airportsArchives\airports-copy.zip\#archive#\airports-copy"/>
     
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports.zip\#archive#\airports" id="airportsFolderShape">
+        <folder navigateFOX="airports.zip\#archive#\airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
             <folderSimilar linkName="airports"
-                           countTargetResources="1" 
-                           countTargetResourcesMsg="Missing folder, airports-copy">                
+                        countTargetResources="1"
+                        countTargetResourcesMsg="Missing folder, airports-copy">                
                 <skipFiles names="airport-max.*" where="here"/>
                 <skipFolders names="user-extensions*" where="there"/>
             </folderSimilar>

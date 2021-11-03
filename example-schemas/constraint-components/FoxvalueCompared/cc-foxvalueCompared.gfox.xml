@@ -6,25 +6,25 @@
     equal to an item from value 1. Note that this "mutual inclusion" is not equivalent to
     deep equality. The items may have different orders and different cardinalities.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalueCompaired">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- CHECK: contents compared with contents of copy folder -->
-            <foxvaluesCompared foxpath="fox-sibling('airports-copy')" 
-                               countTargetResources="1">                
-                <foxvalueCompared expr1FOX=".\\airport-*.xml//country" 
-                                  expr2FOX=".\\airport-*.xml//country" 
-                                  cmp="sameTerms" cmpMsg="Folders should contain same airport countries."/>
+            <foxvaluesCompared navigateFOX="fox-sibling('airports-copy')" countTargetResources="1">                
+                <foxvalueCompared expr1FOX=".\\airport-*.xml//country"
+                              expr2FOX=".\\airport-*.xml//country"
+                              cmp="sameTerms"
+                              cmpMsg="Folders should contain same airport countries."/>
             </foxvaluesCompared>
         </folder>
     </domain>

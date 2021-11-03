@@ -6,33 +6,40 @@
     expression provides link context nodes within the link context document; the constraint 
     is re-evaluated for each link context node.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.linkcontext"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/valueCompared.linkcontext">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="msgs1\response" id="responseFolderShape">
+        <folder navigateFOX="msgs1\response" id="responseFolderShape">
             <targetSize countMsg="Missing folder: msgs1\response" count="1"/>            
-            <file foxpath="*.xml" id="responseFileShape">
+            <file navigateFOX="*.xml" id="responseFileShape">
                 <targetSize minCount="1" minCountMsg="Response folder without response files"/>
                 
-                <valuesCompared foxpath="fox-parent-sibling('expectation')\expectation-articles.xml"
-                                contextXP="//article"
-                                minCountContextNodes="1" minCountContextNodesMsg="Expected article elements">
-                    <valueCompared expr1XP="articleName" 
-                                   expr2XP="//article/@name" 
-                                   cmp="in" cmpMsg="Article name not expected."
-                                   count1="1" count1Msg="Article context without articleName."
-                                   minCount2="3" minCount2Msg="Less than 3 expected article names."/>
-                    <valueCompared expr1XP="articlePrice" 
-                                   expr2XP="//article/@price" 
-                                   useDatatype="decimal" 
-                                   cmp="in" cmpMsg="Price not expected"
-                                   count1="1" count1Msg="Article context without articlePrice."
-                                   minCount2="3" minCount2Msg="Less than 3 expected article prices."/>                    
+                <valuesCompared navigateFOX="fox-parent-sibling('expectation')\expectation-articles.xml"
+                            contextXP="//article"
+                            minCountContextNodes="1"
+                            minCountContextNodesMsg="Expected article elements">
+                    <valueCompared expr1XP="articleName"
+                              expr2XP="//article/@name"
+                              cmp="in"
+                              cmpMsg="Article name not expected."
+                              count1="1"
+                              count1Msg="Article context without articleName."
+                              minCount2="3"
+                              minCount2Msg="Less than 3 expected article names."/>
+                    <valueCompared expr1XP="articlePrice"
+                              expr2XP="//article/@price"
+                              useDatatype="decimal"
+                              cmp="in"
+                              cmpMsg="Price not expected"
+                              count1="1"
+                              count1Msg="Article context without articlePrice."
+                              minCount2="3"
+                              minCount2Msg="Less than 3 expected article prices."/>                    
                 </valuesCompared>
             </file>
         </folder>

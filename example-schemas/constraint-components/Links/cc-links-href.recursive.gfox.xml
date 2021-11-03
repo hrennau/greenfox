@@ -9,26 +9,28 @@
     Note that recursive link resolving requires the link targets to be node trees. As no target mediatype 
     has been defined by the link definition (not @mediatype), XML is assumed.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/constraint-components/links-href.recursive">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
   
     <domain path="${domain}" name="greenfox-example-data">
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: airports document -->
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 
                 <!-- Check: all href references can be recursively resoved -->
                 <links hrefXP="//@href"
-                       recursive="true"
-                       resolvable="true" resolvableMsg="Some recursive links cannot be resolved."
-                       minCountTargetDocs="60" minCountTargetDocsMsg="More target docs expected"/>
+                   recursive="true"
+                   resolvable="true"
+                   resolvableMsg="Some recursive links cannot be resolved."
+                   minCountTargetDocs="60"
+                   minCountTargetDocsMsg="More target docs expected"/>
                 
             </file>
         </folder>

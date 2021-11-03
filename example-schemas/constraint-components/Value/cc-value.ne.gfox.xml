@@ -2,22 +2,24 @@
 <!-- 
     Demonstrates the use of Value constraints. Declares a ValueNe and a ValueCount contraint.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.ne"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value.ne">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="projectDates" id="projectDatesFolderShape">
+        <folder navigateFOX="projectDates" id="projectDatesFolderShape">
             <targetSize countMsg="Missing folder: projectDates" count="1"/>            
-            <file foxpath="projectDates.xml" id="projectDatesShape">
+            <file navigateFOX="projectDates.xml" id="projectDatesShape">
                 <targetSize count="1" countMsg="Missing file: projectDates.xml"/>
                 <values>
-                    <value exprXP="/projects/project/@name" 
-                           minCount="1" minCountMsg="At least one project expected."  
-                           ne="YY0" neMsg="Project YY0 excluded."/>
+                    <value exprXP="/projects/project/@name"
+                      minCount="1"
+                      minCountMsg="At least one project expected."
+                      ne="YY0"
+                      neMsg="Project YY0 excluded."/>
                 </values>
             </file>
         </folder>

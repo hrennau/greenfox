@@ -6,21 +6,23 @@
     
     In this example, an altitude of 3000 would pass the check!
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.lt"
-          xmlns="http://www.greenfox.org/ns/schema"
-          xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/foxvalue.lt">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
-        <folder foxpath="airports\ireland" id="airportsFolderShape">
+        <folder navigateFOX="airports\ireland" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports/ireland" count="1"/>
             <foxvalues>
                 <foxvalue exprFOX=".\\airport-*.xml//altitude"
-                          minCount="1" minCountMsg="At least one altitude expected."
-                          lt="999" ltMsg="Altitude must be less than 999."/>
+                      minCount="1"
+                      minCountMsg="At least one altitude expected."
+                      lt="999"
+                      ltMsg="Altitude must be less than 999."/>
             </foxvalues>            
         </folder>
     </domain>

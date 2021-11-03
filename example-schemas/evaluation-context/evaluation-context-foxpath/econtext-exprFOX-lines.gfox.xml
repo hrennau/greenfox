@@ -8,24 +8,23 @@
     
     Here, the variable is part of the context of foxvalue/@exprFOX.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/dc2020/air05-step">
 
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="air">
         
-        <file foxpath="textfiles\countries.txt">
+        <file navigateFOX="textfiles\countries.txt">
             <targetSize count="1"/>
             
             <!-- Foxpath expression references $lines -->
             <foxvalue exprFOX="$domain\air\\countries\fox-child($lines//line/lower-case(.))"
-                      count="3"/>
+                   count="3"/>
                
         </file>
     </domain>
 
 </greenfox>
-

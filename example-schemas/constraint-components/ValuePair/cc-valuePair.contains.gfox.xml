@@ -5,29 +5,34 @@
     All items of value 2 must be equal to an item from value 1. Here, the country IDs
     must include all country references.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.contains"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/demo-constraint-component/value-pair.contains">
 
     <context>
         <!-- Default domain -->
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
 
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- VISIT: folder 'constraint-ValuePair' -->
-        <folder foxpath="constraint-ValuePair" id="valuePairFolderShape">
+        <folder navigateFOX="constraint-ValuePair" id="valuePairFolderShape">
             <targetSize countMsg="Missing folder: constraint-ValuePair" count="1"/>
 
             <!-- VISIT: file 'factbook.xml' -->
-            <file foxpath="*factbook*.xml except _hide*" id="factbookFileShape">
+            <file navigateFOX="*factbook*.xml except _hide*" id="factbookFileShape">
                 <targetSize minCount="1" minCountMsg="Missing file: factbook.xml"/>
                 
                 <!-- CHECK: country IDs include all country references -->
                 <valuePairs>
-                    <valuePair expr1XP="//country/@id" minCount1="231" minCount1Msg="Expected more countries."
-                               expr2XP="//(* except border)/@country" minCount2="3144" minCount2Msg="Expected more country references."                                
-                               cmp="contains" cmpMsg="Country IDs must include all country references."/>
+                    <valuePair expr1XP="//country/@id"
+                          minCount1="231"
+                          minCount1Msg="Expected more countries."
+                          expr2XP="//(* except border)/@country"
+                          minCount2="3144"
+                          minCount2Msg="Expected more country references."
+                          cmp="contains"
+                          cmpMsg="Country IDs must include all country references."/>
                 </valuePairs>
             </file>
         </folder>

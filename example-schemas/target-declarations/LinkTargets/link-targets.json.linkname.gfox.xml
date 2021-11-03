@@ -5,40 +5,40 @@
     JSON, the link targets are treated as JSON documents. As the parent shape also has @mediatype 
     set to JSON, the Link Definition is applied to JSON documents.
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json.linkname"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.json.linkname">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <!-- Define link: "countryAirports" -->
-    <linkDef name="countryAirports"
-             hrefXP="//href">
+    <linkDef name="countryAirports" hrefXP="//href">
         <targetSize resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: airports file -->
-            <file foxpath="airports.json" id="airportsFileShape" mediatype="json">
+            <file navigateFOX="airports.json" id="airportsFileShape" mediatype="json">
                 <targetSize count="1" countMsg="Missing file 'airports.json'."/>
                 
                 <!-- Visit: link targets obtained for link definition "countryAirports" and 
                             treated as JSON documents -->                
                 <file linkName="countryAirports" id="linkTargetsFileShape">
-                    <targetSize minCount="4" minCountMsg="Not expected number of link targets"
-                                resolvableMsg="Target links could not be resolved"/>
+                    <targetSize minCount="4"
+                           minCountMsg="Not expected number of link targets"
+                           resolvableMsg="Target links could not be resolved"/>
                     
                     <!-- Check: 'airport' elements -->
                     <values>
                         <value exprXP="/json/airports/airport"
-                               exists="true"
-                               existsMsg="Country airports document without airports"/>
+                         exists="true"
+                         existsMsg="Country airports document without airports"/>
                     </values>
                 </file>
             </file>

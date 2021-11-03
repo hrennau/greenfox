@@ -3,41 +3,40 @@
     Demonstrates a target declaration using a Link Definition. This example uses a recursive 
     Link Definition, which is referenced by name (@linkName).
 -->
-<greenfox greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.linkname"
-          xmlns="http://www.greenfox.org/ns/schema">
+<greenfox xmlns="http://www.greenfox.org/ns/schema"
+          greenfoxURI="http://www.greenfox.org/ns/schema-examples/target-declarations/link-targets.recursive.linkname">
     
     <context>
-        <field name="domain" value="${schemaPath}\..\..\..\..\example-data"/>
+        <field name="domain" value="${schemaURI}/../../../../example-data"/>
     </context>
     
     <!-- Define link: "airports" -->
-    <linkDef name="airports"
-             hrefXP="//@href"
-             recursive="true">
+    <linkDef name="airports" hrefXP="//@href" recursive="true">
         <targetSize resolvable="true"/>
     </linkDef>
     
     <domain path="${domain}" name="greenfox-example-data">
         
         <!-- Visit: airports folder -->
-        <folder foxpath="airports" id="airportsFolderShape">
+        <folder navigateFOX="airports" id="airportsFolderShape">
             <targetSize countMsg="Missing folder: airports" count="1"/>
 
             <!-- Visit: airports file -->
-            <file foxpath="airports.xml" id="airportsFileShape">
+            <file navigateFOX="airports.xml" id="airportsFileShape">
                 <targetSize count="1" countMsg="Missing file 'airports.xml'."/>
 
                 <!-- Visit: link targets obtained for link definition "airports";
                             note that the link definition is recursive -->                
                 <file linkName="airports" id="linkTargetsFileShape">
-                    <targetSize minCount="69" minCountMsg="Not expected number of link targets"
-                                resolvableMsg="Target links could not be resolved"/>
+                    <targetSize minCount="69"
+                           minCountMsg="Not expected number of link targets"
+                           resolvableMsg="Target links could not be resolved"/>
                     
                     <!-- Check: 'airport' elements -->
                     <values>
                         <value exprXP="//airport"
-                            exists="true"
-                            existsMsg="Airport element missing."/>
+                         exists="true"
+                         existsMsg="Airport element missing."/>
                     </values>
                 </file>
             </file>
