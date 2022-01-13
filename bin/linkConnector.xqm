@@ -168,7 +168,7 @@ declare function f:resolveMirror($ldo as map(*),
         as xs:string* {
     let $uri := $context?_targetInfo?contextURI        
     
-    let $reflector1 := 
+    let $reflector1 :=
         let $raw := $ldo?mirror?reflector1URI
         return if ($raw) then $raw else
 

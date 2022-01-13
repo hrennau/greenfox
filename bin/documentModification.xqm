@@ -99,6 +99,8 @@ declare function f:applyDocModifiersRC($n,
                                        $functions as map(xs:string, function(*))?,
                                        $options as map(xs:string, item()*))
         as node()* {
+    let $textOperations := ('editItem', 'roundItem', 'normalizeJsonItem') return
+    
     typeswitch($n)
     case document-node() return 
         document {$n/node() ! f:applyDocModifiersRC(., $modification, $functions, $options)}
@@ -110,6 +112,8 @@ declare function f:applyDocModifiersRC($n,
         let $operations :=
             if (not($n intersect $modification?elems)) then ()
             else ($modification?operations ! array:flatten(.))[?elems intersect $n]
+        (: Text manipulations are suppressed if node has child elements :)
+        let $operations := $operations[not($n/* and ?type = $textOperations)]
         return  
             (: No operations? just copy node an continue with content :)
             if (empty($operations)) then
@@ -125,7 +129,7 @@ declare function f:applyDocModifiersRC($n,
                 (: Segregate operations - renaming operations versus all other :)
                 let $operation_renameItem := $operations[?type eq 'renameItem']
                 let $operation_renamespaceItem := $operations[?type eq 'renamespaceItem']
-                let $operations := $operations[not(?type = ('renameItem', 'renamespaceItem'))]
+                let $operations := $operations[not(?type = ('renameItem', 'renamespaceItem'))]                                              
 
                 (: Determine item name (possibly renamed) :)
                 let $nodeName :=

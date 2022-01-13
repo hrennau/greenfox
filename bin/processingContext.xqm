@@ -32,13 +32,14 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
  : ============================================================================ :)
 
 (:~
- : Creates the initial processing context. Its content reflect ...
+ : Creates the initial processing context. Its content reflects ...
  : - schema element <context>
  : - schema elements <linkDef>
  : - user-supplied arguments
  :
  : @param gfox a greenfox schema
- : @param params a string encoding parameter value assignments supplied by the user
+ : @param params a string encoding parameter value assignments supplied by the 
+ :   user
  : @param domain the path of the domain, as supplied by the user
  : @return the initial context
  :)
@@ -61,23 +62,33 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 };
 
 (:~
- : Auxiliary function supporting function `f:initialProcessingContext`. Adds for each
- : field in $fields a map entry. If the value is an expression, it is resolved.
- : Performs variable substitutions *before* resolving expressions. 
- '
+ : Auxiliary function supporting function `f:initialProcessingContext`. Returns 
+ : for each field in $fields a map entry. If the value is an expression, it 
+ : is resolved. Performs variable substitutions *before* resolving 
+ : expressions. 
+ :
+ : Each new map entry is added to the substitution context before processing 
+ : the remaining fields. The value of a field may therefore reference the
+ : values of all preceding fields. 
+ :
  : Normalizes 'domain', 'domainURI', 'domainFOX'.
  : Adds variables: any variable from 'domain', 'domainURI', 'domainFOX' triggers
  : the addition of the other two variables.
+ :
+ : @param fields <field> child elements of the <context> element
+ : @param substitutionContext a mapping of variable names to values
  :)
 declare function f:initialProcessingContextRC(
                         $fields as element(gx:field)+,
                         $substitutionContext as map(xs:string, item()*))
         as map(xs:string, item()*)* {
     let $head := head($fields)
-    return if (empty($head)) then () else    
+    return if (empty($head)) then () else   
+    
     let $tail := tail($fields)
     let $name := $head/@name/string()
-    let $litValue := $head/($substitutionContext($name), @value/string())[1] ! f:substituteVars(., $substitutionContext, ())
+    let $litValue := $head/($substitutionContext($name), @value/string())[1] 
+                     ! f:substituteVars(., $substitutionContext, ())
     let $valueXP := $head/@valueXP/string() ! f:substituteVars(., $substitutionContext, ())
     let $valueFOX := $head/@valueFOX/string() ! f:substituteVars(., $substitutionContext, ())
     
@@ -148,7 +159,9 @@ declare function f:initialProcessingContextRC(
  : Check: if specified by an expression, the expression value must not be empty. 
  :
  : @param name the variable name
- : @param value the variable value
+ : @param value the variable value, resolved if specified as an expression
+ : @param valueXP XPath expression specifying the variable value
+ : @param valueFOX Foxpath expression specifying the variable value
  : @return the normalized value
  :)
 declare function f:checkProcessingContextVariable($name as xs:string, 
@@ -164,7 +177,7 @@ declare function f:checkProcessingContextVariable($name as xs:string,
             let $expr := ($valueFOX, $valueXP)[1] return
                 error(QName((), 'INVALID_SCHEMA'), 
                     concat("### INVALID SCHEMA - expression for context variable '", $name, 
-                    "' does not identify an existence resource, ",
+                    "' does not identify an existing resource, ",
                     "please correct and retry;&#xA;### expression: ", $expr))
     else ()        
 };
@@ -236,9 +249,11 @@ declare function f:updateProcessingContext_resourceRelationships(
 };    
 
 (:~
- : Updates the processing context as required in order to begin validation of the domain.
+ : Updates the processing context as required in order to begin validation of 
+ : the domain.
  :
- : The processing context is extended by the following entries:
+ : Evaluates the `domain` element and extends the processing context by the 
+ : following entries:
  : _contextPath - domain URI
  : _domain - domain URI
  : _domainPath - domain path
@@ -252,6 +267,9 @@ declare function f:updateProcessingContext_resourceRelationships(
  : - domain - domain URI
  : - domainName - domain name
  : - external variables
+ :
+ : Possible exceptions:
+ : - Domain element without @uri
  :
  : @param domainElem domain element
  : @param context the current processing context
@@ -271,7 +289,7 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
     let $domainName := $domainElem/@name/string()
     
     (: Evaluation context, containing entries available as 
-       external variables to XPath and foxpath expressions;
+       external variables to XPath and Foxpath expressions;
        initial entries: domain, domainName:)
     let $evaluationContext :=
         map:merge((
