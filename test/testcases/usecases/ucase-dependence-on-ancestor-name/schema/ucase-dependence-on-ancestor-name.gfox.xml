@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Usecase - expected file content depends on the name of an ancestor folder.
+    
+    Descendants of top-level folder *1 must have @version=1, descendants of 
+    top-level folder *2 must have @version=2. 
+    
+    Note - a top-level folder is an ancestor-or-self folder with a parent 
+    equal to the domain.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/ucase-dependence-on-ancestor-name"
+          xmlns="http://www.greenfox.org/ns/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"          
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <file navigateFOX=".\\bar.xml">
+            <conditional>
+                <if>
+                    <foxvalue exprFOX="ancestor~::[parent~::* eq $domain]\file-name(.)" like="*1"/>                    
+                </if>
+                <then>
+                    <value exprXP="/*/@version" eq="1" eqMsg="Descendants of folder *1 must have version 1"/>
+                </then>
+                <elseif>
+                    <foxvalue exprFOX="ancestor~::*[parent~::* eq $domain]\file-name(.)" like="*2"/>                    
+                </elseif>
+                <then>
+                    <value exprXP="/*/@version" eq="2" eqMsg="Descendants of folder *2 must have version 2"/>
+                </then>
+            </conditional>            
+        </file>
+    </domain>
+</greenfox>

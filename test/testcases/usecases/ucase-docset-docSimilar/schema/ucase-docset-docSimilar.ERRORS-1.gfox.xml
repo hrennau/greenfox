@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Usecase - all files in a set of files must have equal content.
+    
+    Pattern: use file shape targeting the first file as a target, containing a
+    docSimilar constraint which compares with all other members.
+    
+    Should produce one error - file file1-different.xml has different content.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/ucase-docset-docSimilar-ERRORS-1"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+    
+    <domain uri="${domain}" name="data">
+        <file navigateFOX="$domain\descendant~::file1*.xml[1]">
+            <targetSize count="1" countMsg="Missing file 'file1.xml'."/>
+            <docSimilar 
+               navigateFOX="$domain\descendant~::file1*.xml[position() gt 1]"
+               docSimilarMsg="file1.xml documents must have identical content"
+               minCountTargetDocs="2" 
+               minCountTargetDocsMsg="At least two further file1.xml documents expected."/>
+        </file>
+    </domain>
+</greenfox>

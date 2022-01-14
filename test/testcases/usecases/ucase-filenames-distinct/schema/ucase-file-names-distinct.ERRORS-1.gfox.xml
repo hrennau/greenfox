@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+    Usecase - check that all file names are distinct.
+    
+    Should produce 3 error.
+  -->
+<greenfox greenfoxURI="http://www.greenfox.org/ns/testcases/ucase-file-names-distinct.ERRORS-3"
+          xmlns="http://www.greenfox.org/ns/schema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+          xsi:schemaLocation="http://www.greenfox.org/ns/schema ../../../../xsd/greenfox.xsd">
+    <context>
+    	<field name="domain" valueFOX="..\..\data"/>
+    </context>
+	
+    <domain uri="${domain}" name="data">
+        <folder uri="foo">
+            <foxvalue exprFOX=".\\*[is-file()]\file-name(.)" 
+                      minCount="9" minCountMsg="At least 9 files expected"
+                      distinct="true" distinctMsg="File names must be distinct"/>
+        </folder>
+    </domain>
+</greenfox>
