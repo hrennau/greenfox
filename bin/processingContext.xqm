@@ -34,8 +34,11 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 (:~
  : Creates the initial processing context. Its content reflects ...
  : - schema element <context>
- : - schema elements <linkDef>
  : - user-supplied arguments
+ :
+ : The context is returned as a map.
+ :
+ : Called by: f:compileGreenfox()@compile.xqm
  :
  : @param gfox a greenfox schema
  : @param params a string encoding parameter value assignments supplied by the 
@@ -48,10 +51,11 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
                                             $domain as xs:string?)
         as map(xs:string, item()*) {
         
-    (: Parse the external context, supplied by the user as name/value pairs :)
+    (: Parse the external context, supplied as concatenated name/value pairs, into a map :)
     let $externalContext := f:parseExternalContext($params, $domain, $gfox)
     
-    (: Check the external context :)
+    (: Check the external context 
+       (no unknown names, all mandatory variables supplied :)
     let $_CHECK := f:checkExternalContext($externalContext, $gfox/gx:context)
     
     (: Build processing context map :)
@@ -63,9 +67,11 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
 
 (:~
  : Auxiliary function supporting function `f:initialProcessingContext`. Returns 
- : for each field in $fields a map entry. If the value is an expression, it 
- : is resolved. Performs variable substitutions *before* resolving 
- : expressions. 
+ : for each field in $fields a map entry, providing name and value of a context
+ : field. If the value is specified by an expression, the expression is resolved. 
+ : Variable substitutions are performed *before* resolving expressions. Substitution
+ : is based on a substitution context, which is the collection of all accessible
+ : variables. 
  :
  : Each new map entry is added to the substitution context before processing 
  : the remaining fields. The value of a field may therefore reference the
@@ -77,6 +83,7 @@ declare function f:initialProcessingContext($gfox as element(gx:greenfox),
  :
  : @param fields <field> child elements of the <context> element
  : @param substitutionContext a mapping of variable names to values
+ : @return a map representing field child elements of the context element
  :)
 declare function f:initialProcessingContextRC(
                         $fields as element(gx:field)+,
@@ -186,7 +193,7 @@ declare function f:checkProcessingContextVariable($name as xs:string,
  : Returns the normalized value of a context variable.
  :
  : If the name is 'domain' or 'domainURI', the value is replaced by the absolute URI path.
- : If the name if 'domainFOX', the value is replaced by a Foxpath expression.
+ : If the name is 'domainFOX', the value is replaced by a Foxpath expression.
  :
  : @param name the variable name
  : @param value the variable value
@@ -252,21 +259,29 @@ declare function f:updateProcessingContext_resourceRelationships(
  : Updates the processing context as required in order to begin validation of 
  : the domain.
  :
- : Evaluates the `domain` element and extends the processing context by the 
- : following entries:
- : _contextPath - domain URI
+ : The function is called from function validateDomain(), module systemValidator.xqm.
+ :
+ : (a) Domain-related parameters
  : _domain - domain URI
  : _domainPath - domain path
  : _domainName - domain name
- : _evaluationContext - the evaluation context, mapping QNames to values
- : _targetInfo - {contextURI - domainURI}
- : _reqDocs - (empty)
- : _externalVars - names of external variables
+ : 
+ : (b) Update of the current target
+ : _contextPath - domain URI
+ : _targetInfo - {contextURI: domainURI} 
  :
- : The evaluation context is filled with the following entries:
- : - domain - domain URI
- : - domainName - domain name
- : - external variables
+ : (c) Initialization
+ : _reqDocs - (empty)
+ :
+ : (d) Evaluation context
+ : _evaluationContext - the evaluation context, mapping QNames to values
+ :   The evaluation context is filled with the following entries:
+ :   - domain - domain URI
+ :   - domainName - domain name
+ :   - external variables
+ :
+ : (e) External variable names
+ : _externalVars - names of external variables
  :
  : Possible exceptions:
  : - Domain element without @uri
@@ -290,7 +305,7 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
     
     (: Evaluation context, containing entries available as 
        external variables to XPath and Foxpath expressions;
-       initial entries: domain, domainName:)
+       initial entries: domain, domainName, input context variables :)
     let $evaluationContext :=
         map:merge((
             map:entry(QName((), 'domain'), $domainURI),
@@ -303,12 +318,12 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
     let $context :=
         map:merge((
             $context,
-            map:entry('_contextPath', $domainURI),
-            map:entry('_evaluationContext', $evaluationContext),            
             map:entry('_domain', $domainURI),
             map:entry('_domainPath', $domainPath),            
             map:entry('_domainName', $domainName),
-            map:entry('_targetInfo', map{'contextURI': $domainURI}),
+            map:entry('_contextPath', $domainURI),
+            map:entry('_targetInfo', map{'contextURI': $domainURI}),            
+            map:entry('_evaluationContext', $evaluationContext),
             map:entry('_reqDocs', ()),
             map:entry('_externalVars', map:keys($context))
         ))
@@ -323,19 +338,20 @@ declare function f:updateProcessingContext_domain($domainElem as element(gx:doma
  : ============================================================================ :)
 
 (:~
- : Maps the value of a parameters string to a set of name-value pairs.
+ : Maps the value of a parameters string to a map with entries
+ : representing name and value of a parameter.
  :
  : The string consists of semicolon-separated name=value pairs. Within
- : parameter values, any occurrence of backslash or semicolon must be
- : escaped by a preceding backslash.
+ : parameter values, any occurrence of backslash, semicolon or comma
+ : must be escaped by a preceding backslash.
  :
  : Augmentation:
  : (1) Add value pairs 'schemaURI', 'schemaFOX':
- :     schemaURI - schema path, using slashes (no preceding file://)
+ :     schemaURI - schema path, using slashes (no preceding 'file://')
  :     schemaFOX - schema path, using backslashes
  : (2) If function parameter $domain is supplied or a 'domain' name-value pair
  :     exists: add name-value pairs ...
- :       domainURI - domain path, using slashes (no preceding file://)
+ :       domainURI - domain path, using slashes (no preceding 'file://')
  :       domainFOX - domain path, using backslashes
  :     and set 'domain' to the same value as 'domainURI'. 
  :
@@ -366,8 +382,9 @@ declare function f:parseExternalContext($params as xs:string?,
             if (not($schemaLocationFOX)) then
                 error(QName((), 'INVALID_ARG'), concat('Invalid schema path: ', $schemaLocation))
             else                    
-                map:put($prelim, 'schemaFOX', $schemaLocationFOX)
-                ! map:put(., 'schemaURI', $schemaLocationURI)
+                $prelim !
+                map:put(., 'schemaFOX', $schemaLocationFOX) !
+                map:put(., 'schemaURI', $schemaLocationURI)
 
     (: If entry 'domain' exists:
        - normalize entry: absolute path, using slashes;
@@ -384,9 +401,9 @@ declare function f:parseExternalContext($params as xs:string?,
                     if (not($domainFOX) or not($domainURI)) then 
                         error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $useDomain))
                     else                        
-                        map:put($prelim2, 'domain', $domainURI)
-                        ! map:put(., 'domainFOX', $domainFOX)
-                        ! map:put(., 'domainURI', $domainURI)                        
+                        map:put($prelim2, 'domain', $domainURI) !
+                        map:put(., 'domainFOX', $domainFOX) !
+                        map:put(., 'domainURI', $domainURI)                        
     return
         $prelim3
 };
@@ -412,10 +429,10 @@ declare function f:checkExternalContext($externalContext as map(*),
     (: Issue #1: unknown variable names :)
     return
         if (exists($externalKeysUnknown)) then
-            let $plural := 's'[count($externalKeysUnknown) gt 1]
+            let $wordParameter := 'parameter'||'s'[count($externalKeysUnknown) gt 1]
             return
                 error(QName((), 'INVALID_ARG'), 
-                    concat('Unknown parameter', $plural, ': ', 
+                    concat('Unknown ', $wordParameter, ': ', 
                         string-join($externalKeysUnknown, ', '))) 
         else
 

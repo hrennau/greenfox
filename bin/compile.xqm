@@ -12,14 +12,16 @@
  :)
  
 module namespace f="http://www.greenfox.org/ns/xquery-functions";
-import module namespace tt="http://www.ttools.org/xquery-functions" at 
+import module namespace tt="http://www.ttools.org/xquery-functions" 
+at 
     "tt/_request.xqm",
     "tt/_reportAssistent.xqm",
     "tt/_errorAssistent.xqm",
     "tt/_log.xqm",
     "tt/_nameFilter.xqm";    
     
-import module namespace i="http://www.greenfox.org/ns/xquery-functions" at
+import module namespace i="http://www.greenfox.org/ns/xquery-functions" 
+at
     "constants.xqm",
     "greenfoxUtil.xqm",
     "greenfoxVarUtil.xqm",

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doc>
+    <poo>1</poo>
+    <foo x="ign">
+        <zoo>1</zoo>
+    </foo>
+    <bar x="ign">
+        <zoo>1</zoo>
+    </bar>
+</doc>
+
