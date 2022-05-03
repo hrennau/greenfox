@@ -268,7 +268,7 @@ declare function f:updateProcessingContext_resourceRelationships(
  : 
  : (b) Update of the current target
  : _contextPath - domain URI
- : _targetInfo - {contextURI: domainURI} 
+ : _targetInfo/contextURI - domainURI 
  :
  : (c) Initialization
  : _reqDocs - (empty)
@@ -396,7 +396,7 @@ declare function f:parseExternalContext($params as xs:string?,
             else
                 (: Add 'domain' entries (domain, domainFOX, domainURI) :)
                 let $domainFOX := try {$useDomain ! i:pathToAbsoluteFoxpath(.)} catch * {()} 
-                let $domainURI := trace(try {$useDomain ! i:pathToAbsoluteUriPath(.)} catch * {()} , '_DOMAIN_URI: ') 
+                let $domainURI := try {$useDomain ! i:pathToAbsoluteUriPath(.)} catch * {()} 
                 return
                     if (not($domainFOX) or not($domainURI)) then 
                         error(QName((), 'INVALID_ARG'), concat('Domain not found: ', $useDomain))

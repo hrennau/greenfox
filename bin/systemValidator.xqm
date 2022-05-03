@@ -20,6 +20,9 @@ declare namespace gx="http://www.greenfox.org/ns/schema";
 
 (:~
  : Validates a file system tree against a greenfox schema.
+ : The processing is delegated to function validateDomain().
+ :
+ : Preconditions: the schema must contain only one domain.
  :
  : @param gfox a compiled greenfox schema
  : @param context a set of name-value pairs providing an environment for validation
@@ -57,7 +60,7 @@ declare function f:validateSystem($gfox as element(gx:greenfox),
 (:~
  : Validates a domain. Initializes the evaluation context (providing expression 
  : variables) and reinitializes the processing context (accessible to processing 
- : code). 
+ : code). Validates top-level folders and files.
  :
  : Evaluation context: domain, domainName.
  : Processing context: _domain, _domainName, _contextPath, _evaluationContext. 
