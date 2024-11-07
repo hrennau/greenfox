@@ -154,6 +154,49 @@ declare function f:validationResult_mediatype($colour as xs:string,
  : ===============================================================================
  :
  :     V a l i d a t i o n    r e s u l t s :   
+ :         f i l e    b o m    c o n s t r a i n t s
+ :
+ : ===============================================================================
+ :)
+
+(:~
+ : Writes a validation result for a file bom constraint.
+ :
+ : @param colour indicates success or error
+ : @param constraintElem the element representing the constraint
+ : @param constraintNode an attribute representing the constraint facet
+ : @param context the processing context
+ : @param additionalAtts additional attributes to be included in the validation result
+ :) 
+declare function f:validationResult_fileBom($colour as xs:string,
+                                            $constraintElem as element(gx:fileBom),
+                                            $constraintNode as attribute(),
+                                            $context as map(xs:string, item()*),
+                                            $additionalAtts as attribute()*)
+        as element() {
+    let $resourceShapeId := $constraintElem/@resourceShapeID        
+    let $resourceShapePath := $constraintElem/@resourceShapePath    
+    let $constraintPath := i:getSchemaConstraintPath($constraintNode)        
+    let $contextURI := $context?_targetInfo?contextURI        
+    let $constraintComponent := $constraintElem/local-name(.)
+    let $msg := i:getResultMsg($colour, $constraintElem, $constraintNode/local-name(.))
+    return
+        element {f:resultElemName($colour)}{
+            $contextURI ! attribute filePath {.},        
+            $msg ! attribute msg {$msg},
+            attribute constraintComp {$constraintComponent},
+            $constraintPath ! attribute constraintPath {.},
+            $resourceShapePath ! attribute resourceShapePath {.},
+            $resourceShapeId ! attribute resourceShapeID {.},            
+            $constraintNode,
+            $additionalAtts
+        }        
+};
+
+(:~
+ : ===============================================================================
+ :
+ :     V a l i d a t i o n    r e s u l t s :   
  :         d o c    c o n t e n t    c o n s t r a i n t s
  :
  : ===============================================================================

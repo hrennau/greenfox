@@ -155,3 +155,38 @@ declare function f:validateFileName($constraintElem as element(gx:fileName),
     return $results                        
 };
 
+(:~
+ : Validates the BOM use of a resource.
+ :
+ : @param constraintElem the element defining the constraint
+ : @param context the processing context
+ : @return validation results
+ :)
+declare function f:validateFileBom($constraintElem as element(gx:fileBom), 
+                                   $context as map(*))
+        as element()* {
+    let $contextURI := $context?_targetInfo?contextURI        
+    let $constraintId := $constraintElem/@id
+    let $constraintLabel := $constraintElem/@label
+
+    let $eq := $constraintElem/@eq
+    let $encoding := $constraintElem/@encoding
+    
+    let $bomInfo := i:fileBom($contextURI)
+    let $bomExists := exists($bomInfo)
+    let $bomExistsYN := if ($bomExists) then 'yes' else 'no'
+    let $actEncoding := $bomInfo?encoding   
+    let $_DEBUG := trace('_BOM_ENCODING: '||$actEncoding||' - expected: '||$encoding)    
+    let $results := 
+        let $color :=
+            if ($eq ne $bomExistsYN and not(
+                 $eq eq 'no' and 
+                 $bomExistsYN eq 'yes' and 
+                 $encoding ne $actEncoding)) then 'red'
+            else 'green'
+        return   
+            result:validationResult_fileBom(
+                $color, $constraintElem, $eq, $context, ())
+    return $results                        
+};
+

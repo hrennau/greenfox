@@ -132,6 +132,7 @@ declare function f:validateFileConstraints($fileConstraints as element(),
         case element(gx:fileDate) return i:validateFileDate($constraintElem, $context)                
         case element(gx:fileSize) return i:validateFileSize($constraintElem, $context)
         case element(gx:fileName) return i:validateFileName($constraintElem, $context)            
+        case element(gx:fileBom) return i:validateFileBom($constraintElem, $context)
         case element(gx:mediatype) return i:validateMediatype($constraintElem, $context)     
         case element(gx:docTree) return 
             let $mode := 'new'

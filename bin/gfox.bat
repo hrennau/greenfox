@@ -144,4 +144,4 @@ if not "%FNFILTER%"=="" (set FNFILTER_PARAM=,fnfilter=%FNFILTER%)
 
 set DOMAIN_PARAM=
 if not "%DOMAIN%"=="" (set DOMAIN_PARAM=,domain=%DOMAIN%)
-basex -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%%CCFILTER_PARAM%%FNFILTER_PARAM%" %HERE%/greenfox.xq
+basex -s indent=yes -b "request=val?gfox=%schema%%RTYPE_PARAM%%DOMAIN_PARAM%%PARAMS_PARAM%%CCFILTER_PARAM%%FNFILTER_PARAM%" %HERE%/greenfox.xq

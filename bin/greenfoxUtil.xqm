@@ -581,11 +581,47 @@ declare function f:hashKey($path as xs:string, $keyKind as xs:string)
     let $fileContent := f:resourceReadBinary($path)
     let $rawHash :=
         switch($keyKind)
-        case 'md5' return hash:md5($fileContent)
-        case 'sha1' return hash:sha1($fileContent)
-        case 'sha256' return hash:sha256($fileContent)
+        case 'md5' return hash($fileContent, {'algorithm': 'MD5'})
+        case 'sha1' return hash($fileContent, {'algorithm': 'SHA-1'})
+        case 'sha256' return hash($fileContent, {'algorithm': 'SHA-256'})
         default return error()
-    return xs:hexBinary($rawHash) ! xs:string(.)
+    return $rawHash ! xs:string(.)
+};
+
+(:~
+ : Returns the information about the file BOM, if one is found, the empty 
+ : sequence otherwise. The information is given as a map with entries
+ : 'bom' containing the byte array and 'encoding' containing the name
+ : of the encoding.
+ :
+ : @param path file path or URI
+ : @return an optional map containing BOM bytes and the name of the encoding
+ :)
+declare function f:fileBom($path as xs:string)
+        as map(xs:string, item()*)? {
+    let $bytes := array { $path => file:read-binary(0, 4) => bin:to-octets() }
+    let $boms := (
+    (: UTF-8 :)        [0xef, 0xbb, 0xbf],
+    (: UTF-16LE :)     [0xfe, 0xff],
+    (: UTF-16BE :)     [0xff, 0xfe],
+    (: UTF-32BE BOM :) [0x00, 0x00, 0xfe, 0xff],
+    (: UTF-32LE BOM :) [0xff, 0xfe, 0x00, 0x00]
+    )
+    return
+    let $bom := 
+        $boms[
+           array:size($bytes) >= array:size(.) 
+           and deep-equal(., array:subarray($bytes, 1, array:size(.)))][1]
+    where exists($bom)            
+    let $encoding := 
+        switch(array:size($bom))
+        case 3 return 'utf8' 
+        case 2 return 'utf16'
+        case 4 return 'utf32'
+        default return '?'
+    return 
+        map{'bom': $bom, 'encoding': $encoding}
+    
 };
 
 (:~

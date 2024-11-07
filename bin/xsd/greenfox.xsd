@@ -182,6 +182,14 @@ C o n s t r a i n t    e l e m e n t s
         <xs:attributeGroup ref="t:GtLtIntegerFacetAttGroup"/>
     </xs:complexType>
     
+    <!-- F i l e    B o m    C o n s t r a i n t s -->    
+    
+    <xs:complexType name="FileBomConstraintType">
+        <xs:attribute name="eq" type="t:YesNoEnumType"/>
+        <xs:attribute name="eqMsg" type="xs:string"/>
+        <xs:attribute name="encoding" type="t:UtfEncodingsEnumType"/>
+    </xs:complexType>
+    
     <!-- M e d i a t y p e    C o n s t r a i n t s -->
     
     <xs:complexType name="MediatypeConstraintType">
@@ -963,6 +971,14 @@ Enumerations
             <xs:enumeration value="yearMonthDuration"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:simpleType name="UtfEncodingsEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="utf8"/>
+            <xs:enumeration value="utf16"/>
+            <xs:enumeration value="utf32"/>
+        </xs:restriction>
+    </xs:simpleType>
     
     <xs:simpleType name="YesNoEnumType">
         <xs:restriction base="xs:string">
@@ -1004,6 +1020,7 @@ Groups
             <xs:element name="fileName" type="t:FileNameConstraintType"/>
             <xs:element name="fileDate" type="t:FileDateConstraintType"/>
             <xs:element name="fileSize" type="t:FileSizeConstraintType"/>
+            <xs:element name="fileBom" type="t:FileBomConstraintType"/>
             <xs:element name="mediatype" type="t:MediatypeConstraintType"/>
             <xs:element name="docTree" type="t:DocTreeConstraintType"/>
             <xs:element name="hyperdocTree" type="t:HyperdocTreeConstraintType"/>            
